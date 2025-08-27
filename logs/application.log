@@ -1,0 +1,1092 @@
+2025-08-27T11:37:58.929-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : Starting AuthServiceTest using Java 17.0.10 with PID 56336 (started by Pedro Henrique in C:\GitProjetos\Fabiano\Pfc_umc)
+2025-08-27T11:37:58.935-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : No active profile set, falling back to 1 default profile: "default"
+2025-08-27T11:38:05.569-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : Started AuthServiceTest in 7.486 seconds (process running for 9.269)
+2025-08-27T11:38:06.164-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : SETUP: Assegurando que o usuário 'testeuser' esteja limpo para o teste.
+2025-08-27T11:38:06.395-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:06.405-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:06.437-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:06.438-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:06.563-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (account_locked, failed_attempts, password_hash, username) 
+    values
+        (?, ?, ?, ?)
+2025-08-27T11:38:06.581-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:06.581-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [0]
+2025-08-27T11:38:06.582-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$oEdlPIEJauOzKmTeteQpBOCPThxNzui8M3eZQTIdocKqh.oxoiubS]
+2025-08-27T11:38:06.582-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:06.587-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-08-27T11:38:06.704-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Novo usuário registrado com sucesso: testeuser
+2025-08-27T11:38:06.708-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : Iniciando teste: Bloqueio de conta após 5 tentativas falhas.
+2025-08-27T11:38:06.709-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:06.710-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:06.798-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login falha para usuário: testeuser. Tentativas falhas: 1
+2025-08-27T11:38:06.808-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:06.809-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:06.820-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    update
+        users 
+    set
+        account_locked=?,
+        failed_attempts=?,
+        password_hash=?,
+        username=? 
+    where
+        id=?
+2025-08-27T11:38:06.821-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:06.822-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [1]
+2025-08-27T11:38:06.822-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$oEdlPIEJauOzKmTeteQpBOCPThxNzui8M3eZQTIdocKqh.oxoiubS]
+2025-08-27T11:38:06.822-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:06.823-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BIGINT) <- [5]
+2025-08-27T11:38:06.932-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:06.932-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:07.017-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login falha para usuário: testeuser. Tentativas falhas: 2
+2025-08-27T11:38:07.018-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:07.019-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:07.021-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    update
+        users 
+    set
+        account_locked=?,
+        failed_attempts=?,
+        password_hash=?,
+        username=? 
+    where
+        id=?
+2025-08-27T11:38:07.022-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:07.023-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [2]
+2025-08-27T11:38:07.023-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$oEdlPIEJauOzKmTeteQpBOCPThxNzui8M3eZQTIdocKqh.oxoiubS]
+2025-08-27T11:38:07.023-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:07.023-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BIGINT) <- [5]
+2025-08-27T11:38:07.138-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:07.139-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:07.236-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login falha para usuário: testeuser. Tentativas falhas: 3
+2025-08-27T11:38:07.237-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:07.238-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:07.240-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    update
+        users 
+    set
+        account_locked=?,
+        failed_attempts=?,
+        password_hash=?,
+        username=? 
+    where
+        id=?
+2025-08-27T11:38:07.241-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:07.242-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [3]
+2025-08-27T11:38:07.242-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$oEdlPIEJauOzKmTeteQpBOCPThxNzui8M3eZQTIdocKqh.oxoiubS]
+2025-08-27T11:38:07.242-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:07.242-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BIGINT) <- [5]
+2025-08-27T11:38:07.341-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:07.342-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:07.427-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login falha para usuário: testeuser. Tentativas falhas: 4
+2025-08-27T11:38:07.429-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:07.431-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:07.433-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    update
+        users 
+    set
+        account_locked=?,
+        failed_attempts=?,
+        password_hash=?,
+        username=? 
+    where
+        id=?
+2025-08-27T11:38:07.434-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:07.435-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [4]
+2025-08-27T11:38:07.436-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$oEdlPIEJauOzKmTeteQpBOCPThxNzui8M3eZQTIdocKqh.oxoiubS]
+2025-08-27T11:38:07.437-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:07.438-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BIGINT) <- [5]
+2025-08-27T11:38:07.535-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:07.536-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:07.631-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login falha para usuário: testeuser. Tentativas falhas: 5
+2025-08-27T11:38:07.632-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:07.633-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:07.636-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    update
+        users 
+    set
+        account_locked=?,
+        failed_attempts=?,
+        password_hash=?,
+        username=? 
+    where
+        id=?
+2025-08-27T11:38:07.636-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [true]
+2025-08-27T11:38:07.637-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [5]
+2025-08-27T11:38:07.637-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$oEdlPIEJauOzKmTeteQpBOCPThxNzui8M3eZQTIdocKqh.oxoiubS]
+2025-08-27T11:38:07.637-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:07.638-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BIGINT) <- [5]
+2025-08-27T11:38:07.738-03:00 ERROR 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Usuário testeuser bloqueado após 5 tentativas falhas.
+2025-08-27T11:38:07.740-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:07.740-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:07.741-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login para usuário bloqueado: testeuser
+2025-08-27T11:38:07.752-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : CLEANUP: Removendo o usuário 'testeuser' após o teste.
+2025-08-27T11:38:07.754-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:07.755-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:07.759-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:07.760-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:07.768-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    delete 
+    from
+        users 
+    where
+        id=?
+2025-08-27T11:38:07.769-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:07.906-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : SETUP: Assegurando que o usuário 'testeuser' esteja limpo para o teste.
+2025-08-27T11:38:07.908-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:07.909-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:07.913-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:07.914-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:08.002-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (account_locked, failed_attempts, password_hash, username) 
+    values
+        (?, ?, ?, ?)
+2025-08-27T11:38:08.003-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:08.004-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [0]
+2025-08-27T11:38:08.004-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$qzU07ca4E0j8AWr0BhhwHOY/35YXtU8SJH9D1PZAc8JHJZ0to68KW]
+2025-08-27T11:38:08.004-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:08.008-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-08-27T11:38:08.102-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Novo usuário registrado com sucesso: testeuser
+2025-08-27T11:38:08.103-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : Iniciando teste: Login falha em conta bloqueada.
+2025-08-27T11:38:08.105-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:08.105-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:08.194-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login falha para usuário: testeuser. Tentativas falhas: 1
+2025-08-27T11:38:08.196-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:08.197-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:08.199-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    update
+        users 
+    set
+        account_locked=?,
+        failed_attempts=?,
+        password_hash=?,
+        username=? 
+    where
+        id=?
+2025-08-27T11:38:08.199-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:08.200-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [1]
+2025-08-27T11:38:08.200-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$qzU07ca4E0j8AWr0BhhwHOY/35YXtU8SJH9D1PZAc8JHJZ0to68KW]
+2025-08-27T11:38:08.200-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:08.200-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BIGINT) <- [5]
+2025-08-27T11:38:08.297-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:08.297-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:08.380-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login falha para usuário: testeuser. Tentativas falhas: 2
+2025-08-27T11:38:08.381-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:08.382-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:08.383-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    update
+        users 
+    set
+        account_locked=?,
+        failed_attempts=?,
+        password_hash=?,
+        username=? 
+    where
+        id=?
+2025-08-27T11:38:08.383-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:08.384-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [2]
+2025-08-27T11:38:08.384-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$qzU07ca4E0j8AWr0BhhwHOY/35YXtU8SJH9D1PZAc8JHJZ0to68KW]
+2025-08-27T11:38:08.384-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:08.384-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BIGINT) <- [5]
+2025-08-27T11:38:08.480-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:08.480-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:08.563-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login falha para usuário: testeuser. Tentativas falhas: 3
+2025-08-27T11:38:08.565-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:08.565-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:08.567-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    update
+        users 
+    set
+        account_locked=?,
+        failed_attempts=?,
+        password_hash=?,
+        username=? 
+    where
+        id=?
+2025-08-27T11:38:08.568-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:08.569-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [3]
+2025-08-27T11:38:08.570-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$qzU07ca4E0j8AWr0BhhwHOY/35YXtU8SJH9D1PZAc8JHJZ0to68KW]
+2025-08-27T11:38:08.570-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:08.570-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BIGINT) <- [5]
+2025-08-27T11:38:08.672-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:08.673-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:08.758-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login falha para usuário: testeuser. Tentativas falhas: 4
+2025-08-27T11:38:08.760-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:08.760-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:08.762-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    update
+        users 
+    set
+        account_locked=?,
+        failed_attempts=?,
+        password_hash=?,
+        username=? 
+    where
+        id=?
+2025-08-27T11:38:08.763-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:08.763-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [4]
+2025-08-27T11:38:08.764-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$qzU07ca4E0j8AWr0BhhwHOY/35YXtU8SJH9D1PZAc8JHJZ0to68KW]
+2025-08-27T11:38:08.764-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:08.764-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BIGINT) <- [5]
+2025-08-27T11:38:08.866-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:08.866-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:08.951-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login falha para usuário: testeuser. Tentativas falhas: 5
+2025-08-27T11:38:08.952-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:08.953-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:08.954-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    update
+        users 
+    set
+        account_locked=?,
+        failed_attempts=?,
+        password_hash=?,
+        username=? 
+    where
+        id=?
+2025-08-27T11:38:08.955-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [true]
+2025-08-27T11:38:08.956-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [5]
+2025-08-27T11:38:08.956-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$qzU07ca4E0j8AWr0BhhwHOY/35YXtU8SJH9D1PZAc8JHJZ0to68KW]
+2025-08-27T11:38:08.956-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:08.956-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BIGINT) <- [5]
+2025-08-27T11:38:09.045-03:00 ERROR 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Usuário testeuser bloqueado após 5 tentativas falhas.
+2025-08-27T11:38:09.047-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:09.047-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:09.048-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login para usuário bloqueado: testeuser
+2025-08-27T11:38:09.050-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:09.051-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:09.052-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login para usuário bloqueado: testeuser
+2025-08-27T11:38:09.054-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : CLEANUP: Removendo o usuário 'testeuser' após o teste.
+2025-08-27T11:38:09.056-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:09.056-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:09.058-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:09.059-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:09.061-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    delete 
+    from
+        users 
+    where
+        id=?
+2025-08-27T11:38:09.062-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:09.179-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : SETUP: Assegurando que o usuário 'testeuser' esteja limpo para o teste.
+2025-08-27T11:38:09.181-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:09.181-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:09.184-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:09.184-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:09.270-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (account_locked, failed_attempts, password_hash, username) 
+    values
+        (?, ?, ?, ?)
+2025-08-27T11:38:09.271-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:09.271-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [0]
+2025-08-27T11:38:09.271-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$AUTSZX/QGnJL7ypOEhzlMugPwOhaJoNE5Pzg/Aa2dm31Zsg8K7jte]
+2025-08-27T11:38:09.271-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:09.274-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-08-27T11:38:09.377-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Novo usuário registrado com sucesso: testeuser
+2025-08-27T11:38:09.378-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : Iniciando teste: Login bem-sucedido reseta o contador de tentativas.
+2025-08-27T11:38:09.380-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:09.381-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:09.472-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login falha para usuário: testeuser. Tentativas falhas: 1
+2025-08-27T11:38:09.475-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:09.476-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:09.478-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    update
+        users 
+    set
+        account_locked=?,
+        failed_attempts=?,
+        password_hash=?,
+        username=? 
+    where
+        id=?
+2025-08-27T11:38:09.479-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:09.479-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [1]
+2025-08-27T11:38:09.480-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$AUTSZX/QGnJL7ypOEhzlMugPwOhaJoNE5Pzg/Aa2dm31Zsg8K7jte]
+2025-08-27T11:38:09.480-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:09.480-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BIGINT) <- [5]
+2025-08-27T11:38:09.572-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:09.573-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:09.662-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login falha para usuário: testeuser. Tentativas falhas: 2
+2025-08-27T11:38:09.664-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:09.665-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:09.667-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    update
+        users 
+    set
+        account_locked=?,
+        failed_attempts=?,
+        password_hash=?,
+        username=? 
+    where
+        id=?
+2025-08-27T11:38:09.667-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:09.668-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [2]
+2025-08-27T11:38:09.668-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$AUTSZX/QGnJL7ypOEhzlMugPwOhaJoNE5Pzg/Aa2dm31Zsg8K7jte]
+2025-08-27T11:38:09.668-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:09.669-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BIGINT) <- [5]
+2025-08-27T11:38:09.765-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:09.765-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:09.856-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:09.856-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:09.858-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    update
+        users 
+    set
+        account_locked=?,
+        failed_attempts=?,
+        password_hash=?,
+        username=? 
+    where
+        id=?
+2025-08-27T11:38:09.859-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:09.859-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [0]
+2025-08-27T11:38:09.859-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$AUTSZX/QGnJL7ypOEhzlMugPwOhaJoNE5Pzg/Aa2dm31Zsg8K7jte]
+2025-08-27T11:38:09.860-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:09.860-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BIGINT) <- [5]
+2025-08-27T11:38:09.969-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Usuário logado com sucesso: testeuser
+2025-08-27T11:38:09.970-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:09.971-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:09.974-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : CLEANUP: Removendo o usuário 'testeuser' após o teste.
+2025-08-27T11:38:09.976-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:09.977-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:09.979-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:09.980-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:09.982-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    delete 
+    from
+        users 
+    where
+        id=?
+2025-08-27T11:38:09.983-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:10.091-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : SETUP: Assegurando que o usuário 'testeuser' esteja limpo para o teste.
+2025-08-27T11:38:10.093-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:10.093-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:10.097-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:10.097-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:10.192-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (account_locked, failed_attempts, password_hash, username) 
+    values
+        (?, ?, ?, ?)
+2025-08-27T11:38:10.193-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:10.193-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [0]
+2025-08-27T11:38:10.193-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$G6nAGlQ8mOQESqJpxh70Hem4XlJRViKO90je7EnC8Jy9yScCOo69y]
+2025-08-27T11:38:10.193-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:10.196-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-08-27T11:38:10.300-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Novo usuário registrado com sucesso: testeuser
+2025-08-27T11:38:10.301-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : Iniciando teste: Login com usuário inexistente.
+2025-08-27T11:38:10.303-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:10.303-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [usuarioInexistente]
+2025-08-27T11:38:10.304-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login falha para usuário inexistente: usuarioInexistente
+2025-08-27T11:38:10.305-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : CLEANUP: Removendo o usuário 'testeuser' após o teste.
+2025-08-27T11:38:10.308-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:10.309-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:10.311-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:10.312-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:10.315-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    delete 
+    from
+        users 
+    where
+        id=?
+2025-08-27T11:38:10.316-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:10.435-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : SETUP: Assegurando que o usuário 'testeuser' esteja limpo para o teste.
+2025-08-27T11:38:10.437-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:10.438-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:10.456-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:10.456-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:10.548-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (account_locked, failed_attempts, password_hash, username) 
+    values
+        (?, ?, ?, ?)
+2025-08-27T11:38:10.549-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:10.549-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [0]
+2025-08-27T11:38:10.549-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$BYnfI7BwXThOhYh0F0hbO.gDEIj7dzTfanbEBS1eZ6gsX0R.DNfCG]
+2025-08-27T11:38:10.550-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:10.552-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-08-27T11:38:10.642-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Novo usuário registrado com sucesso: testeuser
+2025-08-27T11:38:10.643-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : Iniciando teste: Tentativa de registro de usuário existente.
+2025-08-27T11:38:10.645-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:10.647-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:10.649-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de registro de usuário duplicado: testeuser
+2025-08-27T11:38:10.650-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : CLEANUP: Removendo o usuário 'testeuser' após o teste.
+2025-08-27T11:38:10.652-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:10.652-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:10.655-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:10.656-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:10.658-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    delete 
+    from
+        users 
+    where
+        id=?
+2025-08-27T11:38:10.658-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:10.754-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : SETUP: Assegurando que o usuário 'testeuser' esteja limpo para o teste.
+2025-08-27T11:38:10.756-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:10.757-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:10.760-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:10.760-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:10.903-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (account_locked, failed_attempts, password_hash, username) 
+    values
+        (?, ?, ?, ?)
+2025-08-27T11:38:10.903-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:10.903-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [0]
+2025-08-27T11:38:10.903-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$Z2w9H7/H17vW/6uQnrGKkODOTz8b/n7SwpOf8GIuzOE.3srokHW/K]
+2025-08-27T11:38:10.903-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:10.906-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-08-27T11:38:11.018-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Novo usuário registrado com sucesso: testeuser
+2025-08-27T11:38:11.018-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : Iniciando teste: Login com senha incorreta incrementa o contador.
+2025-08-27T11:38:11.020-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:11.021-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:11.112-03:00  WARN 56336 --- [Projeto_CFC] [main] umc.cfc.service.AuthService              : Tentativa de login falha para usuário: testeuser. Tentativas falhas: 1
+2025-08-27T11:38:11.117-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:11.124-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:11.129-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    update
+        users 
+    set
+        account_locked=?,
+        failed_attempts=?,
+        password_hash=?,
+        username=? 
+    where
+        id=?
+2025-08-27T11:38:11.129-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-08-27T11:38:11.129-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:INTEGER) <- [1]
+2025-08-27T11:38:11.130-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [$2a$10$Z2w9H7/H17vW/6uQnrGKkODOTz8b/n7SwpOf8GIuzOE.3srokHW/K]
+2025-08-27T11:38:11.131-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [testeuser]
+2025-08-27T11:38:11.131-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BIGINT) <- [5]
+2025-08-27T11:38:11.274-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:11.278-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:11.282-03:00  INFO 56336 --- [Projeto_CFC] [main] umc.cfc.AuthServiceTest                  : CLEANUP: Removendo o usuário 'testeuser' após o teste.
+2025-08-27T11:38:11.286-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-08-27T11:38:11.286-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [testeuser]
+2025-08-27T11:38:11.289-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_locked,
+        u1_0.failed_attempts,
+        u1_0.password_hash,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+2025-08-27T11:38:11.291-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
+2025-08-27T11:38:11.296-03:00 DEBUG 56336 --- [Projeto_CFC] [main] org.hibernate.SQL                        : 
+    delete 
+    from
+        users 
+    where
+        id=?
+2025-08-27T11:38:11.296-03:00 TRACE 56336 --- [Projeto_CFC] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [5]
