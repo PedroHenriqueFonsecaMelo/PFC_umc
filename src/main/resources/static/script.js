@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             const formData = new URLSearchParams(new FormData(signUpForm));
 
-            fetch("/auth/register", {
+            fetch("/auth/cadastro", {
                 method: "POST",
                 body: formData,
                 headers: {
