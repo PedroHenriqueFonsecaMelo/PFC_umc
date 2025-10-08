@@ -4,8 +4,9 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import umc.exs.model.User;
+import umc.exs.model.Cliente;
 
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByNome(String nome);
+public interface UserRepository extends JpaRepository<Cliente, Long> {
+    
+    Optional<Cliente> findByNome(String nome);
 }

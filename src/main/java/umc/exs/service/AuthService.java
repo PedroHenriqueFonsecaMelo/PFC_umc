@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import umc.exs.log.SecurityLogger;
-import umc.exs.model.User;
+import umc.exs.model.Cliente;
 import umc.exs.repository.UserRepository;
 
 @Service
@@ -17,7 +17,7 @@ public class AuthService {
     @Autowired
     private SecurityLogger securityLogger;
 
-    User user = new User();
+    Cliente user = new Cliente();
 
     public AuthService() {
     }
