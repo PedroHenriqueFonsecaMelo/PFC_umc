@@ -5,7 +5,6 @@ import java.util.regex.Pattern;
 
 public class FieldValidation {
   
-    // Validação genérica de campos (exemplo)
     public static boolean validarCampos(Object obj) {
         for (Field field : obj.getClass().getDeclaredFields()) {
             field.setAccessible(true);
@@ -20,7 +19,6 @@ public class FieldValidation {
         return true;
     }
 
-    // Prevenção simples de SQL Injection (exemplo)
     public static boolean isSafe(String input) {
         if (input == null) return true;
         // Proíbe comandos SQL comuns

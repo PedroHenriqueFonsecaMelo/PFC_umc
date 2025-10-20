@@ -1,211 +1,1687 @@
-2025-10-08T16:15:36.943-03:00  INFO 30680 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : Starting Main using Java 17.0.10 with PID 30680 (C:\GitProjetos\Fabiano\Pfc_umc\target\classes started by Pedro Henrique in c:\GitProjetos\Fabiano\Pfc_umc)
-2025-10-08T16:15:37.014-03:00  INFO 30680 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : No active profile set, falling back to 1 default profile: "default"
-2025-10-08T16:15:57.955-03:00 DEBUG 30680 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] org.hibernate.SQL                        : 
-    create table cupom (
+2025-10-20T14:35:19.611-03:00  INFO 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Starting CompraFluxoIntegrationTest using Java 17.0.10 with PID 24208 (started by Pedro Henrique in C:\GitProjetos\Fabiano\Pfc_umc)
+2025-10-20T14:35:19.709-03:00  INFO 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
+2025-10-20T14:35:28.770-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HT_produto(id bigint not null, hib_sess_id char(36) not null, primary key (id, hib_sess_id))
+2025-10-20T14:35:29.206-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_produto(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T14:35:29.613-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_livro(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T14:35:30.254-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table admins (
         id integer,
-        codigo varchar(255),
-        valor float not null,
+        email varchar(255),
+        nome varchar(255),
+        password varchar(255),
         primary key (id)
     )
-2025-10-08T16:15:58.521-03:00 DEBUG 30680 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] org.hibernate.SQL                        : 
-    create table livro (
+2025-10-20T14:35:30.487-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table cartao (
         id integer,
-        precificacao float not null,
-        titulo varchar(255) not null,
+        bandeira varchar(255),
+        cvv varchar(255),
+        nome_titular varchar(255),
+        numero varchar(255),
+        preferencial boolean,
+        validade varchar(255),
+        primary key (id)
+    )
+2025-10-20T14:35:30.857-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table cliente_cartao (
+        cliente_id bigint not null,
+        cartao_id bigint not null,
+        primary key (cliente_id, cartao_id)
+    )
+2025-10-20T14:35:31.501-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table cliente_endereco (
+        cliente_id bigint not null,
+        endereco_id bigint not null,
+        primary key (cliente_id, endereco_id)
+    )
+2025-10-20T14:35:31.793-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table cupom (
+        id integer,
+        cliente_id bigint,
+        codigo varchar(255) not null unique,
+        expiracao timestamp,
+        usado boolean,
+        valor float,
+        primary key (id)
+    )
+2025-10-20T14:35:32.085-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table endereco (
+        id integer,
+        bairro varchar(255),
+        cep varchar(255),
+        cidade varchar(255),
+        complemento varchar(255),
+        estado varchar(255),
+        numero varchar(255),
+        pais varchar(255),
+        rua varchar(255),
+        tipo_residencia varchar(255),
+        primary key (id)
+    )
+2025-10-20T14:35:32.425-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table livro (
         altura float not null,
         ano integer not null,
         autor varchar(255),
-        barras varchar(255),
+        codigo_barras varchar(255),
         categorias varchar(255),
         edicao integer not null,
         editora varchar(255),
-        isbn varchar(255),
+        isbn varchar(255) unique,
         largura float not null,
-        npaginas integer not null,
+        numero_paginas integer,
         peso float not null,
         profundidade float not null,
         quant integer not null,
-        sinopse varchar(255),
+        sinopse TEXT,
+        id bigint not null,
         primary key (id)
     )
-2025-10-08T16:15:59.692-03:00 ERROR 30680 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] o.s.boot.SpringApplication               : Application run failed
-
-org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'cartController': Unsatisfied dependency expressed through field 'carrinhoService': Error creating bean with name 'carrinhoService': Unsatisfied dependency expressed through field 'enderecoRepository': Error creating bean with name 'enderecoRepository' defined in umc.exs.repository.EnderecoRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Not a managed type: class umc.exs.model.Endereco
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:788) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:768) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:146) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessProperties(AutowiredAnnotationBeanPostProcessor.java:509) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1459) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:606) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1222) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1188) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1123) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987) ~[spring-context-6.2.10.jar:6.2.10]
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627) ~[spring-context-6.2.10.jar:6.2.10]
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.5.5.jar:3.5.5]
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752) ~[spring-boot-3.5.5.jar:3.5.5]
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439) ~[spring-boot-3.5.5.jar:3.5.5]
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318) ~[spring-boot-3.5.5.jar:3.5.5]
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361) ~[spring-boot-3.5.5.jar:3.5.5]
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350) ~[spring-boot-3.5.5.jar:3.5.5]
-	at umc.exs.Main.main(Main.java:11) ~[classes/:na]
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
-	at java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]
-	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50) ~[spring-boot-devtools-3.5.5.jar:3.5.5]
-Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'carrinhoService': Unsatisfied dependency expressed through field 'enderecoRepository': Error creating bean with name 'enderecoRepository' defined in umc.exs.repository.EnderecoRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Not a managed type: class umc.exs.model.Endereco
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:788) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:768) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:146) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessProperties(AutowiredAnnotationBeanPostProcessor.java:509) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1459) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:606) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1690) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1635) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:785) ~[spring-beans-6.2.10.jar:6.2.10]
-	... 27 common frames omitted
-Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'enderecoRepository' defined in umc.exs.repository.EnderecoRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Not a managed type: class umc.exs.model.Endereco
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1826) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1690) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1635) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:785) ~[spring-beans-6.2.10.jar:6.2.10]
-	... 40 common frames omitted
-Caused by: java.lang.IllegalArgumentException: Not a managed type: class umc.exs.model.Endereco
-	at org.hibernate.metamodel.model.domain.internal.JpaMetamodelImpl.managedType(JpaMetamodelImpl.java:223) ~[hibernate-core-6.6.26.Final.jar:6.6.26.Final]
-	at org.hibernate.metamodel.model.domain.internal.MappingMetamodelImpl.managedType(MappingMetamodelImpl.java:470) ~[hibernate-core-6.6.26.Final.jar:6.6.26.Final]
-	at org.hibernate.metamodel.model.domain.internal.MappingMetamodelImpl.managedType(MappingMetamodelImpl.java:100) ~[hibernate-core-6.6.26.Final.jar:6.6.26.Final]
-	at org.springframework.data.jpa.repository.support.JpaMetamodelEntityInformation.<init>(JpaMetamodelEntityInformation.java:82) ~[spring-data-jpa-3.5.3.jar:3.5.3]
-	at org.springframework.data.jpa.repository.support.JpaEntityInformationSupport.getEntityInformation(JpaEntityInformationSupport.java:69) ~[spring-data-jpa-3.5.3.jar:3.5.3]
-	at org.springframework.data.jpa.repository.support.JpaRepositoryFactory.getEntityInformation(JpaRepositoryFactory.java:251) ~[spring-data-jpa-3.5.3.jar:3.5.3]
-	at org.springframework.data.jpa.repository.support.JpaRepositoryFactory.getTargetRepository(JpaRepositoryFactory.java:215) ~[spring-data-jpa-3.5.3.jar:3.5.3]
-	at org.springframework.data.jpa.repository.support.JpaRepositoryFactory.getTargetRepository(JpaRepositoryFactory.java:198) ~[spring-data-jpa-3.5.3.jar:3.5.3]
-	at org.springframework.data.jpa.repository.support.JpaRepositoryFactory.getTargetRepository(JpaRepositoryFactory.java:1) ~[spring-data-jpa-3.5.3.jar:3.5.3]
-	at org.springframework.data.repository.core.support.RepositoryFactorySupport.getRepository(RepositoryFactorySupport.java:380) ~[spring-data-commons-3.5.3.jar:3.5.3]
-	at org.springframework.data.repository.core.support.RepositoryFactoryBeanSupport.lambda$afterPropertiesSet$4(RepositoryFactoryBeanSupport.java:350) ~[spring-data-commons-3.5.3.jar:3.5.3]
-	at org.springframework.data.util.Lazy.getNullable(Lazy.java:135) ~[spring-data-commons-3.5.3.jar:3.5.3]
-	at org.springframework.data.util.Lazy.get(Lazy.java:113) ~[spring-data-commons-3.5.3.jar:3.5.3]
-	at org.springframework.data.repository.core.support.RepositoryFactoryBeanSupport.afterPropertiesSet(RepositoryFactoryBeanSupport.java:356) ~[spring-data-commons-3.5.3.jar:3.5.3]
-	at org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean.afterPropertiesSet(JpaRepositoryFactoryBean.java:132) ~[spring-data-jpa-3.5.3.jar:3.5.3]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1873) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1822) ~[spring-beans-6.2.10.jar:6.2.10]
-	... 49 common frames omitted
-
-2025-10-08T16:42:19.397-03:00  INFO 25680 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : Starting Main using Java 17.0.10 with PID 25680 (C:\GitProjetos\Fabiano\Pfc_umc\target\classes started by Pedro Henrique in c:\GitProjetos\Fabiano\Pfc_umc)
-2025-10-08T16:42:19.405-03:00  INFO 25680 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : No active profile set, falling back to 1 default profile: "default"
-2025-10-08T16:42:26.323-03:00 ERROR 25680 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] o.s.boot.SpringApplication               : Application run failed
-
-org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'cartController': Unsatisfied dependency expressed through field 'carrinhoService': Error creating bean with name 'carrinhoService': Unsatisfied dependency expressed through field 'enderecoRepository': Error creating bean with name 'enderecoRepository' defined in umc.exs.repository.EnderecoRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Not a managed type: class umc.exs.model.Endereco
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:788) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:768) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:146) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessProperties(AutowiredAnnotationBeanPostProcessor.java:509) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1459) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:606) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1222) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1188) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1123) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987) ~[spring-context-6.2.10.jar:6.2.10]
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627) ~[spring-context-6.2.10.jar:6.2.10]
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.5.5.jar:3.5.5]
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752) ~[spring-boot-3.5.5.jar:3.5.5]
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439) ~[spring-boot-3.5.5.jar:3.5.5]
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318) ~[spring-boot-3.5.5.jar:3.5.5]
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361) ~[spring-boot-3.5.5.jar:3.5.5]
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350) ~[spring-boot-3.5.5.jar:3.5.5]
-	at umc.exs.Main.main(Main.java:11) ~[classes/:na]
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
-	at java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]
-	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50) ~[spring-boot-devtools-3.5.5.jar:3.5.5]
-Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'carrinhoService': Unsatisfied dependency expressed through field 'enderecoRepository': Error creating bean with name 'enderecoRepository' defined in umc.exs.repository.EnderecoRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Not a managed type: class umc.exs.model.Endereco
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:788) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:768) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:146) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessProperties(AutowiredAnnotationBeanPostProcessor.java:509) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1459) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:606) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1690) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1635) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:785) ~[spring-beans-6.2.10.jar:6.2.10]
-	... 27 common frames omitted
-Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'enderecoRepository' defined in umc.exs.repository.EnderecoRepository defined in @EnableJpaRepositories declared on JpaRepositoriesRegistrar.EnableJpaRepositoriesConfiguration: Not a managed type: class umc.exs.model.Endereco
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1826) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1690) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1635) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:785) ~[spring-beans-6.2.10.jar:6.2.10]
-	... 40 common frames omitted
-Caused by: java.lang.IllegalArgumentException: Not a managed type: class umc.exs.model.Endereco
-	at org.hibernate.metamodel.model.domain.internal.JpaMetamodelImpl.managedType(JpaMetamodelImpl.java:223) ~[hibernate-core-6.6.26.Final.jar:6.6.26.Final]
-	at org.hibernate.metamodel.model.domain.internal.MappingMetamodelImpl.managedType(MappingMetamodelImpl.java:470) ~[hibernate-core-6.6.26.Final.jar:6.6.26.Final]
-	at org.hibernate.metamodel.model.domain.internal.MappingMetamodelImpl.managedType(MappingMetamodelImpl.java:100) ~[hibernate-core-6.6.26.Final.jar:6.6.26.Final]
-	at org.springframework.data.jpa.repository.support.JpaMetamodelEntityInformation.<init>(JpaMetamodelEntityInformation.java:82) ~[spring-data-jpa-3.5.3.jar:3.5.3]
-	at org.springframework.data.jpa.repository.support.JpaEntityInformationSupport.getEntityInformation(JpaEntityInformationSupport.java:69) ~[spring-data-jpa-3.5.3.jar:3.5.3]
-	at org.springframework.data.jpa.repository.support.JpaRepositoryFactory.getEntityInformation(JpaRepositoryFactory.java:251) ~[spring-data-jpa-3.5.3.jar:3.5.3]
-	at org.springframework.data.jpa.repository.support.JpaRepositoryFactory.getTargetRepository(JpaRepositoryFactory.java:215) ~[spring-data-jpa-3.5.3.jar:3.5.3]
-	at org.springframework.data.jpa.repository.support.JpaRepositoryFactory.getTargetRepository(JpaRepositoryFactory.java:198) ~[spring-data-jpa-3.5.3.jar:3.5.3]
-	at org.springframework.data.jpa.repository.support.JpaRepositoryFactory.getTargetRepository(JpaRepositoryFactory.java:1) ~[spring-data-jpa-3.5.3.jar:3.5.3]
-	at org.springframework.data.repository.core.support.RepositoryFactorySupport.getRepository(RepositoryFactorySupport.java:380) ~[spring-data-commons-3.5.3.jar:3.5.3]
-	at org.springframework.data.repository.core.support.RepositoryFactoryBeanSupport.lambda$afterPropertiesSet$4(RepositoryFactoryBeanSupport.java:350) ~[spring-data-commons-3.5.3.jar:3.5.3]
-	at org.springframework.data.util.Lazy.getNullable(Lazy.java:135) ~[spring-data-commons-3.5.3.jar:3.5.3]
-	at org.springframework.data.util.Lazy.get(Lazy.java:113) ~[spring-data-commons-3.5.3.jar:3.5.3]
-	at org.springframework.data.repository.core.support.RepositoryFactoryBeanSupport.afterPropertiesSet(RepositoryFactoryBeanSupport.java:356) ~[spring-data-commons-3.5.3.jar:3.5.3]
-	at org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean.afterPropertiesSet(JpaRepositoryFactoryBean.java:132) ~[spring-data-jpa-3.5.3.jar:3.5.3]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1873) ~[spring-beans-6.2.10.jar:6.2.10]
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1822) ~[spring-beans-6.2.10.jar:6.2.10]
-	... 49 common frames omitted
-
-2025-10-08T16:48:17.901-03:00  INFO 11828 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : Starting Main using Java 17.0.10 with PID 11828 (C:\GitProjetos\Fabiano\Pfc_umc\target\classes started by Pedro Henrique in c:\GitProjetos\Fabiano\Pfc_umc)
-2025-10-08T16:48:17.906-03:00  INFO 11828 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : No active profile set, falling back to 1 default profile: "default"
-2025-10-08T16:49:01.786-03:00 DEBUG 11828 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] org.hibernate.SQL                        : 
-    create table enderecos (
+2025-10-20T14:35:32.690-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table pedido (
         id integer,
+        cliente_id bigint,
+        data timestamp,
+        endereco_id bigint,
+        status varchar(255),
+        total float,
+        primary key (id)
+    )
+2025-10-20T14:35:32.955-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table pedido_item (
+        id integer,
+        preco_unitario float,
+        produto_id bigint,
+        produto_titulo varchar(255),
+        quantidade integer,
+        pedido_id bigint,
+        primary key (id)
+    )
+2025-10-20T14:35:33.268-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table produto (
+        id integer,
+        precificacao float not null,
+        titulo varchar(255) not null,
+        primary key (id)
+    )
+2025-10-20T14:35:33.505-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table troca (
+        id integer,
+        cliente_id bigint,
+        created_at timestamp,
+        decisao_por varchar(255),
+        decision_at timestamp,
+        motivo_rejeicao varchar(255),
+        pedido_id bigint,
+        status varchar(255),
+        valor float,
+        primary key (id)
+    )
+2025-10-20T14:35:33.802-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table users (
+        id integer,
+        bloqueada boolean not null,
+        datanasc varchar(255) not null,
+        email varchar(255) not null unique,
+        gen varchar(255) not null,
+        nome varchar(255) not null,
+        senha varchar(255) not null,
+        tentativas integer not null,
+        primary key (id)
+    )
+2025-10-20T14:35:33.915-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    alter table cupom 
+       drop constraint UK3kcmt1d0xxfdloitavaeescse
+2025-10-20T14:35:33.939-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    alter table livro 
+       drop constraint UKk8si93wtslp275pv65gity1gg
+2025-10-20T14:35:33.940-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    alter table users 
+       drop constraint UK6dotkott2kjsp8vw4d0m25fb7
+2025-10-20T14:35:38.916-03:00  INFO 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Started CompraFluxoIntegrationTest in 20.435 seconds (process running for 26.532)
+2025-10-20T14:35:40.047-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (bloqueada, datanasc, email, gen, nome, senha, tentativas) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2025-10-20T14:35:40.060-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-10-20T14:35:40.060-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [1990-01-01]
+2025-10-20T14:35:40.060-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [teste@exemplo.com]
+2025-10-20T14:35:40.060-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [M]
+2025-10-20T14:35:40.060-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [Teste Usuario]
+2025-10-20T14:35:40.061-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [senha]
+2025-10-20T14:35:40.061-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:INTEGER) <- [0]
+2025-10-20T14:35:40.070-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T14:35:40.131-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        endereco
+        (bairro, cep, cidade, complemento, estado, numero, pais, rua, tipo_residencia) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+2025-10-20T14:35:40.131-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Centro]
+2025-10-20T14:35:40.132-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [01234-567]
+2025-10-20T14:35:40.132-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [São Paulo]
+2025-10-20T14:35:40.132-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [Apto 1]
+2025-10-20T14:35:40.133-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [SP]
+2025-10-20T14:35:40.136-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [100]
+2025-10-20T14:35:40.136-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:VARCHAR) <- [Brasil]
+2025-10-20T14:35:40.137-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (8:VARCHAR) <- [Rua Teste]
+2025-10-20T14:35:40.138-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (9:VARCHAR) <- [Apartamento]
+2025-10-20T14:35:40.138-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T14:35:40.141-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T14:35:40.142-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [VISA]
+2025-10-20T14:35:40.142-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [123]
+2025-10-20T14:35:40.143-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T14:35:40.144-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [1111222233334444]
+2025-10-20T14:35:40.145-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [true]
+2025-10-20T14:35:40.145-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [12/30]
+2025-10-20T14:35:40.146-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T14:35:40.149-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T14:35:40.149-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Mastercard]
+2025-10-20T14:35:40.150-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [321]
+2025-10-20T14:35:40.150-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T14:35:40.150-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [5555666677778888]
+2025-10-20T14:35:40.151-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [false]
+2025-10-20T14:35:40.151-03:00 TRACE 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [10/29]
+2025-10-20T14:35:40.151-03:00 DEBUG 24208 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:02:12.802-03:00  INFO 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Starting CompraFluxoIntegrationTest using Java 17.0.10 with PID 15256 (started by Pedro Henrique in C:\GitProjetos\Fabiano\Pfc_umc)
+2025-10-20T15:02:12.809-03:00  INFO 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
+2025-10-20T15:02:20.753-03:00 DEBUG 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HT_produto(id bigint not null, hib_sess_id char(36) not null, primary key (id, hib_sess_id))
+2025-10-20T15:02:20.767-03:00 DEBUG 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_produto(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:02:20.776-03:00 DEBUG 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_livro(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:02:24.603-03:00  INFO 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Started CompraFluxoIntegrationTest in 12.704 seconds (process running for 15.735)
+2025-10-20T15:02:25.526-03:00 DEBUG 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (bloqueada, datanasc, email, gen, nome, senha, tentativas) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:02:25.538-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-10-20T15:02:25.539-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [1990-01-01]
+2025-10-20T15:02:25.539-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [teste@exemplo.com]
+2025-10-20T15:02:25.540-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [M]
+2025-10-20T15:02:25.541-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:02:25.541-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [senha]
+2025-10-20T15:02:25.542-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:INTEGER) <- [0]
+2025-10-20T15:02:25.554-03:00 DEBUG 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:02:25.619-03:00 DEBUG 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        endereco
+        (bairro, cep, cidade, complemento, estado, numero, pais, rua, tipo_residencia) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:02:25.621-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Centro]
+2025-10-20T15:02:25.622-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [01234-567]
+2025-10-20T15:02:25.623-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [São Paulo]
+2025-10-20T15:02:25.623-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [Apto 1]
+2025-10-20T15:02:25.624-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [SP]
+2025-10-20T15:02:25.624-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [100]
+2025-10-20T15:02:25.624-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:VARCHAR) <- [Brasil]
+2025-10-20T15:02:25.625-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (8:VARCHAR) <- [Rua Teste]
+2025-10-20T15:02:25.625-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (9:VARCHAR) <- [Apartamento]
+2025-10-20T15:02:25.626-03:00 DEBUG 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:02:25.629-03:00 DEBUG 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:02:25.630-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [VISA]
+2025-10-20T15:02:25.630-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [123]
+2025-10-20T15:02:25.630-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:02:25.631-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [1111222233334444]
+2025-10-20T15:02:25.631-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [true]
+2025-10-20T15:02:25.631-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [12/30]
+2025-10-20T15:02:25.632-03:00 DEBUG 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:02:25.635-03:00 DEBUG 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:02:25.637-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Mastercard]
+2025-10-20T15:02:25.638-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [321]
+2025-10-20T15:02:25.639-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:02:25.639-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [5555666677778888]
+2025-10-20T15:02:25.640-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [false]
+2025-10-20T15:02:25.640-03:00 TRACE 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [10/29]
+2025-10-20T15:02:25.641-03:00 DEBUG 15256 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:04:35.588-03:00  INFO 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Starting CompraFluxoIntegrationTest using Java 17.0.10 with PID 11916 (started by Pedro Henrique in C:\GitProjetos\Fabiano\Pfc_umc)
+2025-10-20T15:04:35.593-03:00  INFO 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
+2025-10-20T15:04:44.501-03:00 DEBUG 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HT_produto(id bigint not null, hib_sess_id char(36) not null, primary key (id, hib_sess_id))
+2025-10-20T15:04:44.519-03:00 DEBUG 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_produto(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:04:44.531-03:00 DEBUG 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_livro(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:04:47.880-03:00  INFO 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Started CompraFluxoIntegrationTest in 13.205 seconds (process running for 15.643)
+2025-10-20T15:04:48.786-03:00 DEBUG 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (bloqueada, datanasc, email, gen, nome, senha, tentativas) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:04:48.797-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-10-20T15:04:48.798-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [1990-01-01]
+2025-10-20T15:04:48.799-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [teste@exemplo.com]
+2025-10-20T15:04:48.799-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [M]
+2025-10-20T15:04:48.800-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:04:48.801-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [senha]
+2025-10-20T15:04:48.801-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:INTEGER) <- [0]
+2025-10-20T15:04:49.305-03:00 DEBUG 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:04:49.363-03:00 DEBUG 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        endereco
+        (bairro, cep, cidade, complemento, estado, numero, pais, rua, tipo_residencia) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:04:49.365-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Centro]
+2025-10-20T15:04:49.366-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [01234-567]
+2025-10-20T15:04:49.368-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [São Paulo]
+2025-10-20T15:04:49.369-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [Apto 1]
+2025-10-20T15:04:49.370-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [SP]
+2025-10-20T15:04:49.371-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [100]
+2025-10-20T15:04:49.372-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:VARCHAR) <- [Brasil]
+2025-10-20T15:04:49.373-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (8:VARCHAR) <- [Rua Teste]
+2025-10-20T15:04:49.374-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (9:VARCHAR) <- [Apartamento]
+2025-10-20T15:04:49.376-03:00 DEBUG 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:04:49.380-03:00 DEBUG 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:04:49.382-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [VISA]
+2025-10-20T15:04:49.384-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [123]
+2025-10-20T15:04:49.385-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:04:49.386-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [1111222233334444]
+2025-10-20T15:04:49.387-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [true]
+2025-10-20T15:04:49.389-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [12/30]
+2025-10-20T15:04:49.390-03:00 DEBUG 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:04:49.392-03:00 DEBUG 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:04:49.393-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Mastercard]
+2025-10-20T15:04:49.393-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [321]
+2025-10-20T15:04:49.394-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:04:49.394-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [5555666677778888]
+2025-10-20T15:04:49.395-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [false]
+2025-10-20T15:04:49.395-03:00 TRACE 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [10/29]
+2025-10-20T15:04:49.397-03:00 DEBUG 11916 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:06:45.556-03:00  INFO 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Starting CompraFluxoIntegrationTest using Java 17.0.10 with PID 5968 (started by Pedro Henrique in C:\GitProjetos\Fabiano\Pfc_umc)
+2025-10-20T15:06:45.560-03:00  INFO 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
+2025-10-20T15:06:53.538-03:00 DEBUG 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HT_produto(id bigint not null, hib_sess_id char(36) not null, primary key (id, hib_sess_id))
+2025-10-20T15:06:53.553-03:00 DEBUG 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_produto(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:06:53.563-03:00 DEBUG 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_livro(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:06:56.660-03:00  INFO 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Started CompraFluxoIntegrationTest in 12.225 seconds (process running for 15.057)
+2025-10-20T15:06:57.630-03:00 DEBUG 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (bloqueada, datanasc, email, gen, nome, senha, tentativas) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:06:57.641-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-10-20T15:06:57.642-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [1990-01-01]
+2025-10-20T15:06:57.642-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [teste@exemplo.com]
+2025-10-20T15:06:57.642-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [M]
+2025-10-20T15:06:57.643-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:06:57.644-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [senha]
+2025-10-20T15:06:57.644-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:INTEGER) <- [0]
+2025-10-20T15:06:57.653-03:00 DEBUG 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:06:57.699-03:00 DEBUG 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        endereco
+        (bairro, cep, cidade, complemento, estado, numero, pais, rua, tipo_residencia) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:06:57.700-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Centro]
+2025-10-20T15:06:57.701-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [01234-567]
+2025-10-20T15:06:57.702-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [São Paulo]
+2025-10-20T15:06:57.703-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [Apto 1]
+2025-10-20T15:06:57.704-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [SP]
+2025-10-20T15:06:57.704-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [100]
+2025-10-20T15:06:57.705-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:VARCHAR) <- [Brasil]
+2025-10-20T15:06:57.705-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (8:VARCHAR) <- [Rua Teste]
+2025-10-20T15:06:57.705-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (9:VARCHAR) <- [Apartamento]
+2025-10-20T15:06:57.706-03:00 DEBUG 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:06:57.709-03:00 DEBUG 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:06:57.713-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [VISA]
+2025-10-20T15:06:57.713-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [123]
+2025-10-20T15:06:57.714-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:06:57.714-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [1111222233334444]
+2025-10-20T15:06:57.715-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [true]
+2025-10-20T15:06:57.715-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [12/30]
+2025-10-20T15:06:57.716-03:00 DEBUG 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:06:57.718-03:00 DEBUG 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:06:57.718-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Mastercard]
+2025-10-20T15:06:57.719-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [321]
+2025-10-20T15:06:57.719-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:06:57.719-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [5555666677778888]
+2025-10-20T15:06:57.719-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [false]
+2025-10-20T15:06:57.720-03:00 TRACE 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [10/29]
+2025-10-20T15:06:57.720-03:00 DEBUG 5968 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:07:39.806-03:00  INFO 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Starting CompraFluxoIntegrationTest using Java 17.0.10 with PID 4300 (started by Pedro Henrique in C:\GitProjetos\Fabiano\Pfc_umc)
+2025-10-20T15:07:39.811-03:00  INFO 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
+2025-10-20T15:07:48.923-03:00 DEBUG 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HT_produto(id bigint not null, hib_sess_id char(36) not null, primary key (id, hib_sess_id))
+2025-10-20T15:07:48.932-03:00 DEBUG 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_produto(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:07:48.943-03:00 DEBUG 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_livro(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:07:52.015-03:00  INFO 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Started CompraFluxoIntegrationTest in 13.466 seconds (process running for 15.931)
+2025-10-20T15:07:52.740-03:00 DEBUG 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (bloqueada, datanasc, email, gen, nome, senha, tentativas) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:07:52.751-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-10-20T15:07:52.751-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [1990-01-01]
+2025-10-20T15:07:52.752-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [teste@exemplo.com]
+2025-10-20T15:07:52.752-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [M]
+2025-10-20T15:07:52.752-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:07:52.753-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [senha]
+2025-10-20T15:07:52.754-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:INTEGER) <- [0]
+2025-10-20T15:07:52.846-03:00 DEBUG 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:07:52.895-03:00 DEBUG 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        endereco
+        (bairro, cep, cidade, complemento, estado, numero, pais, rua, tipo_residencia) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:07:52.896-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Centro]
+2025-10-20T15:07:52.896-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [01234-567]
+2025-10-20T15:07:52.898-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [São Paulo]
+2025-10-20T15:07:52.899-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [Apto 1]
+2025-10-20T15:07:52.900-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [SP]
+2025-10-20T15:07:52.901-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [100]
+2025-10-20T15:07:52.902-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:VARCHAR) <- [Brasil]
+2025-10-20T15:07:52.903-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (8:VARCHAR) <- [Rua Teste]
+2025-10-20T15:07:52.904-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (9:VARCHAR) <- [Apartamento]
+2025-10-20T15:07:52.905-03:00 DEBUG 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:07:52.912-03:00 DEBUG 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:07:52.914-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [VISA]
+2025-10-20T15:07:52.915-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [123]
+2025-10-20T15:07:52.926-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:07:52.927-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [1111222233334444]
+2025-10-20T15:07:52.931-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [true]
+2025-10-20T15:07:52.935-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [12/30]
+2025-10-20T15:07:52.938-03:00 DEBUG 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:07:52.945-03:00 DEBUG 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:07:52.950-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Mastercard]
+2025-10-20T15:07:52.955-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [321]
+2025-10-20T15:07:52.957-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:07:52.957-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [5555666677778888]
+2025-10-20T15:07:52.958-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [false]
+2025-10-20T15:07:52.959-03:00 TRACE 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [10/29]
+2025-10-20T15:07:52.961-03:00 DEBUG 4300 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:08:12.887-03:00  INFO 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Starting CompraFluxoIntegrationTest using Java 17.0.10 with PID 21840 (started by Pedro Henrique in C:\GitProjetos\Fabiano\Pfc_umc)
+2025-10-20T15:08:13.460-03:00  INFO 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
+2025-10-20T15:08:21.512-03:00 DEBUG 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HT_produto(id bigint not null, hib_sess_id char(36) not null, primary key (id, hib_sess_id))
+2025-10-20T15:08:21.529-03:00 DEBUG 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_produto(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:08:21.542-03:00 DEBUG 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_livro(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:08:25.009-03:00  INFO 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Started CompraFluxoIntegrationTest in 13.365 seconds (process running for 16.708)
+2025-10-20T15:08:25.917-03:00 DEBUG 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (bloqueada, datanasc, email, gen, nome, senha, tentativas) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:08:25.942-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-10-20T15:08:25.942-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [1990-01-01]
+2025-10-20T15:08:25.943-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [teste@exemplo.com]
+2025-10-20T15:08:25.944-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [M]
+2025-10-20T15:08:25.945-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:08:25.947-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [senha]
+2025-10-20T15:08:25.948-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:INTEGER) <- [0]
+2025-10-20T15:08:25.960-03:00 DEBUG 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:08:26.034-03:00 DEBUG 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        endereco
+        (bairro, cep, cidade, complemento, estado, numero, pais, rua, tipo_residencia) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:08:26.035-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Centro]
+2025-10-20T15:08:26.038-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [01234-567]
+2025-10-20T15:08:26.042-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [São Paulo]
+2025-10-20T15:08:26.045-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [Apto 1]
+2025-10-20T15:08:26.047-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [SP]
+2025-10-20T15:08:26.047-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [100]
+2025-10-20T15:08:26.048-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:VARCHAR) <- [Brasil]
+2025-10-20T15:08:26.048-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (8:VARCHAR) <- [Rua Teste]
+2025-10-20T15:08:26.050-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (9:VARCHAR) <- [Apartamento]
+2025-10-20T15:08:26.052-03:00 DEBUG 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:08:26.056-03:00 DEBUG 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:08:26.057-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [VISA]
+2025-10-20T15:08:26.058-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [123]
+2025-10-20T15:08:26.059-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:08:26.060-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [1111222233334444]
+2025-10-20T15:08:26.060-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [true]
+2025-10-20T15:08:26.060-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [12/30]
+2025-10-20T15:08:26.061-03:00 DEBUG 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:08:26.064-03:00 DEBUG 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:08:26.065-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Mastercard]
+2025-10-20T15:08:26.065-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [321]
+2025-10-20T15:08:26.066-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:08:26.067-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [5555666677778888]
+2025-10-20T15:08:26.068-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [false]
+2025-10-20T15:08:26.070-03:00 TRACE 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [10/29]
+2025-10-20T15:08:26.071-03:00 DEBUG 21840 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:12:00.912-03:00  INFO 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Starting CompraFluxoIntegrationTest using Java 17.0.10 with PID 45700 (started by Pedro Henrique in C:\GitProjetos\Fabiano\Pfc_umc)
+2025-10-20T15:12:00.917-03:00  INFO 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
+2025-10-20T15:12:09.064-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HT_produto(id bigint not null, hib_sess_id char(36) not null, primary key (id, hib_sess_id))
+2025-10-20T15:12:09.077-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_produto(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:12:09.087-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_livro(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:12:12.650-03:00  INFO 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Started CompraFluxoIntegrationTest in 12.739 seconds (process running for 15.352)
+2025-10-20T15:12:13.608-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (bloqueada, datanasc, email, gen, nome, senha, tentativas) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:12:13.623-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-10-20T15:12:13.624-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [1990-01-01]
+2025-10-20T15:12:13.624-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [teste@exemplo.com]
+2025-10-20T15:12:13.625-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [M]
+2025-10-20T15:12:13.626-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:12:13.627-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [senha]
+2025-10-20T15:12:13.628-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:INTEGER) <- [0]
+2025-10-20T15:12:13.637-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:12:13.696-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        endereco
+        (bairro, cep, cidade, complemento, estado, numero, pais, rua, tipo_residencia) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:12:13.698-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Centro]
+2025-10-20T15:12:13.700-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [01234-567]
+2025-10-20T15:12:13.702-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [São Paulo]
+2025-10-20T15:12:13.703-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [Apto 1]
+2025-10-20T15:12:13.703-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [SP]
+2025-10-20T15:12:13.704-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [100]
+2025-10-20T15:12:13.705-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:VARCHAR) <- [Brasil]
+2025-10-20T15:12:13.705-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (8:VARCHAR) <- [Rua Teste]
+2025-10-20T15:12:13.706-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (9:VARCHAR) <- [Apartamento]
+2025-10-20T15:12:13.706-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:12:13.709-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:12:13.710-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [VISA]
+2025-10-20T15:12:13.710-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [123]
+2025-10-20T15:12:13.711-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:12:13.711-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [1111222233334444]
+2025-10-20T15:12:13.711-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [true]
+2025-10-20T15:12:13.712-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [12/30]
+2025-10-20T15:12:13.713-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:12:13.715-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:12:13.715-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Mastercard]
+2025-10-20T15:12:13.716-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [321]
+2025-10-20T15:12:13.716-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:12:13.716-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [5555666677778888]
+2025-10-20T15:12:13.717-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [false]
+2025-10-20T15:12:13.717-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [10/29]
+2025-10-20T15:12:13.717-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:12:13.732-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        produto
+        (precificacao, titulo) 
+    values
+        (?, ?)
+2025-10-20T15:12:13.733-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:FLOAT) <- [100.0]
+2025-10-20T15:12:13.734-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [Produto Teste]
+2025-10-20T15:12:13.735-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:12:14.462-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cliente_cartao
+        (cliente_id, cartao_id) 
+    values
+        (?, ?)
+2025-10-20T15:12:14.463-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:12:14.463-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:BIGINT) <- [1]
+2025-10-20T15:12:14.464-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cliente_cartao
+        (cliente_id, cartao_id) 
+    values
+        (?, ?)
+2025-10-20T15:12:14.465-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:12:14.465-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:BIGINT) <- [2]
+2025-10-20T15:12:14.468-03:00 DEBUG 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cliente_endereco
+        (cliente_id, endereco_id) 
+    values
+        (?, ?)
+2025-10-20T15:12:14.469-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:12:14.470-03:00 TRACE 45700 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:BIGINT) <- [1]
+2025-10-20T15:15:20.627-03:00  INFO 25580 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Starting CompraFluxoIntegrationTest using Java 17.0.10 with PID 25580 (started by Pedro Henrique in C:\GitProjetos\Fabiano\Pfc_umc)
+2025-10-20T15:15:20.630-03:00  INFO 25580 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
+2025-10-20T15:15:29.198-03:00 DEBUG 25580 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HT_produto(id bigint not null, hib_sess_id char(36) not null, primary key (id, hib_sess_id))
+2025-10-20T15:15:29.212-03:00 DEBUG 25580 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_produto(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:15:29.221-03:00 DEBUG 25580 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_livro(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:15:32.255-03:00  INFO 25580 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Started CompraFluxoIntegrationTest in 12.996 seconds (process running for 15.754)
+2025-10-20T15:15:33.466-03:00 DEBUG 25580 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (bloqueada, datanasc, email, gen, nome, senha, tentativas) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:15:33.475-03:00 TRACE 25580 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-10-20T15:15:33.475-03:00 TRACE 25580 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [1990-01-01]
+2025-10-20T15:15:33.476-03:00 TRACE 25580 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [teste@exemplo.com]
+2025-10-20T15:15:33.476-03:00 TRACE 25580 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [M]
+2025-10-20T15:15:33.477-03:00 TRACE 25580 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:15:33.477-03:00 TRACE 25580 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [senha]
+2025-10-20T15:15:33.477-03:00 TRACE 25580 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:INTEGER) <- [0]
+2025-10-20T15:15:33.482-03:00 ERROR 25580 --- [Salt_PedroHenriqueFonsecaMelo] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : [SQLITE_CONSTRAINT_UNIQUE] A UNIQUE constraint failed (UNIQUE constraint failed: users.email)
+2025-10-20T15:15:47.149-03:00  INFO 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Starting CompraFluxoIntegrationTest using Java 17.0.10 with PID 39444 (started by Pedro Henrique in C:\GitProjetos\Fabiano\Pfc_umc)
+2025-10-20T15:15:47.734-03:00  INFO 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
+2025-10-20T15:15:54.190-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HT_produto(id bigint not null, hib_sess_id char(36) not null, primary key (id, hib_sess_id))
+2025-10-20T15:15:55.685-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_produto(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:15:55.767-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_livro(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:15:56.325-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table admins (
+        id integer,
+        email varchar(255),
+        nome varchar(255),
+        password varchar(255),
+        primary key (id)
+    )
+2025-10-20T15:15:56.533-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table cartao (
+        id integer,
+        bandeira varchar(255),
+        cvv varchar(255),
+        nome_titular varchar(255),
+        numero varchar(255),
+        preferencial boolean,
+        validade varchar(255),
+        primary key (id)
+    )
+2025-10-20T15:15:56.642-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table cliente_cartao (
+        cliente_id bigint not null,
+        cartao_id bigint not null,
+        primary key (cliente_id, cartao_id)
+    )
+2025-10-20T15:15:56.697-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table cliente_endereco (
+        cliente_id bigint not null,
+        endereco_id bigint not null,
+        primary key (cliente_id, endereco_id)
+    )
+2025-10-20T15:15:56.825-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table cupom (
+        id integer,
+        cliente_id bigint,
+        codigo varchar(255) not null unique,
+        expiracao timestamp,
+        usado boolean,
+        valor float,
+        primary key (id)
+    )
+2025-10-20T15:15:56.929-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table endereco (
+        id integer,
+        bairro varchar(255),
         cep varchar(255),
         cidade varchar(255),
+        complemento varchar(255),
         estado varchar(255),
+        numero varchar(255),
+        pais varchar(255),
         rua varchar(255),
+        tipo_residencia varchar(255),
         primary key (id)
     )
-2025-10-08T16:52:31.584-03:00  INFO 11828 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : Started Main in 252.875 seconds (process running for 254.992)
-2025-10-08T16:55:29.640-03:00  INFO 23724 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : Starting Main using Java 17.0.10 with PID 23724 (C:\GitProjetos\Fabiano\Pfc_umc\target\classes started by Pedro Henrique in c:\GitProjetos\Fabiano\Pfc_umc)
-2025-10-08T16:55:29.652-03:00  INFO 23724 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : No active profile set, falling back to 1 default profile: "default"
-2025-10-08T16:55:38.152-03:00  INFO 23724 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : Started Main in 9.852 seconds (process running for 10.726)
-2025-10-08T17:02:19.855-03:00  INFO 23724 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : Starting Main using Java 17.0.10 with PID 23724 (C:\GitProjetos\Fabiano\Pfc_umc\target\classes started by Pedro Henrique in c:\GitProjetos\Fabiano\Pfc_umc)
-2025-10-08T17:02:19.856-03:00  INFO 23724 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : No active profile set, falling back to 1 default profile: "default"
-2025-10-08T17:02:30.634-03:00  INFO 23724 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : Started Main in 10.821 seconds (process running for 423.208)
-2025-10-08T17:22:06.365-03:00  INFO 27416 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : Starting Main using Java 17.0.10 with PID 27416 (C:\GitProjetos\Fabiano\Pfc_umc\target\classes started by Pedro Henrique in c:\GitProjetos\Fabiano\Pfc_umc)
-2025-10-08T17:22:06.370-03:00  INFO 27416 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : No active profile set, falling back to 1 default profile: "default"
-2025-10-08T17:22:16.096-03:00  INFO 27416 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : Started Main in 10.484 seconds (process running for 11.052)
+2025-10-20T15:15:57.018-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table livro (
+        altura float not null,
+        ano integer not null,
+        autor varchar(255),
+        codigo_barras varchar(255),
+        categorias varchar(255),
+        edicao integer not null,
+        editora varchar(255),
+        isbn varchar(255) unique,
+        largura float not null,
+        numero_paginas integer,
+        peso float not null,
+        profundidade float not null,
+        quant integer not null,
+        sinopse TEXT,
+        id bigint not null,
+        primary key (id)
+    )
+2025-10-20T15:15:57.130-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table pedido (
+        id integer,
+        cliente_id bigint,
+        data timestamp,
+        endereco_id bigint,
+        status varchar(255),
+        total float,
+        primary key (id)
+    )
+2025-10-20T15:15:57.249-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table pedido_item (
+        id integer,
+        preco_unitario float,
+        produto_id bigint,
+        produto_titulo varchar(255),
+        quantidade integer,
+        pedido_id bigint,
+        primary key (id)
+    )
+2025-10-20T15:15:57.390-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table produto (
+        id integer,
+        precificacao float not null,
+        titulo varchar(255) not null,
+        primary key (id)
+    )
+2025-10-20T15:15:57.490-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table troca (
+        id integer,
+        cliente_id bigint,
+        created_at timestamp,
+        decisao_por varchar(255),
+        decision_at timestamp,
+        motivo_rejeicao varchar(255),
+        pedido_id bigint,
+        status varchar(255),
+        valor float,
+        primary key (id)
+    )
+2025-10-20T15:15:57.653-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table users (
+        id integer,
+        bloqueada boolean not null,
+        datanasc varchar(255) not null,
+        email varchar(255) not null unique,
+        gen varchar(255) not null,
+        nome varchar(255) not null,
+        senha varchar(255) not null,
+        tentativas integer not null,
+        primary key (id)
+    )
+2025-10-20T15:15:57.766-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    alter table cupom 
+       drop constraint UK3kcmt1d0xxfdloitavaeescse
+2025-10-20T15:15:57.769-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    alter table livro 
+       drop constraint UKk8si93wtslp275pv65gity1gg
+2025-10-20T15:15:57.770-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    alter table users 
+       drop constraint UK6dotkott2kjsp8vw4d0m25fb7
+2025-10-20T15:16:00.933-03:00  INFO 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Started CompraFluxoIntegrationTest in 14.598 seconds (process running for 16.791)
+2025-10-20T15:16:01.639-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (bloqueada, datanasc, email, gen, nome, senha, tentativas) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:16:01.652-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-10-20T15:16:01.653-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [1990-01-01]
+2025-10-20T15:16:01.654-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [teste@exemplo.com]
+2025-10-20T15:16:01.655-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [M]
+2025-10-20T15:16:01.656-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:16:01.657-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [senha]
+2025-10-20T15:16:01.658-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:INTEGER) <- [0]
+2025-10-20T15:16:01.669-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:16:01.728-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        endereco
+        (bairro, cep, cidade, complemento, estado, numero, pais, rua, tipo_residencia) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:16:01.729-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Centro]
+2025-10-20T15:16:01.729-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [01234-567]
+2025-10-20T15:16:01.729-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [São Paulo]
+2025-10-20T15:16:01.729-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [Apto 1]
+2025-10-20T15:16:01.730-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [SP]
+2025-10-20T15:16:01.730-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [100]
+2025-10-20T15:16:01.731-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:VARCHAR) <- [Brasil]
+2025-10-20T15:16:01.732-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (8:VARCHAR) <- [Rua Teste]
+2025-10-20T15:16:01.732-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (9:VARCHAR) <- [Apartamento]
+2025-10-20T15:16:01.733-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:16:01.736-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:16:01.738-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [VISA]
+2025-10-20T15:16:01.738-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [123]
+2025-10-20T15:16:01.739-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:16:01.740-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [1111222233334444]
+2025-10-20T15:16:01.740-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [true]
+2025-10-20T15:16:01.740-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [12/30]
+2025-10-20T15:16:01.741-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:16:01.748-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:16:01.751-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Mastercard]
+2025-10-20T15:16:01.752-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [321]
+2025-10-20T15:16:01.753-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:16:01.754-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [5555666677778888]
+2025-10-20T15:16:01.754-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [false]
+2025-10-20T15:16:01.755-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [10/29]
+2025-10-20T15:16:01.756-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:16:01.777-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        produto
+        (precificacao, titulo) 
+    values
+        (?, ?)
+2025-10-20T15:16:01.778-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:FLOAT) <- [100.0]
+2025-10-20T15:16:01.778-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [Produto Teste]
+2025-10-20T15:16:01.779-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:16:01.837-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cliente_cartao
+        (cliente_id, cartao_id) 
+    values
+        (?, ?)
+2025-10-20T15:16:01.837-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:16:01.837-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:BIGINT) <- [1]
+2025-10-20T15:16:01.838-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cliente_cartao
+        (cliente_id, cartao_id) 
+    values
+        (?, ?)
+2025-10-20T15:16:01.840-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:16:01.841-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:BIGINT) <- [2]
+2025-10-20T15:16:01.844-03:00 DEBUG 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cliente_endereco
+        (cliente_id, endereco_id) 
+    values
+        (?, ?)
+2025-10-20T15:16:01.845-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:16:01.845-03:00 TRACE 39444 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:BIGINT) <- [1]
+2025-10-20T15:19:12.730-03:00  INFO 7380 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Starting CompraFluxoIntegrationTest using Java 17.0.10 with PID 7380 (started by Pedro Henrique in C:\GitProjetos\Fabiano\Pfc_umc)
+2025-10-20T15:19:12.736-03:00  INFO 7380 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
+2025-10-20T15:19:19.569-03:00 DEBUG 7380 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HT_produto(id bigint not null, hib_sess_id char(36) not null, primary key (id, hib_sess_id))
+2025-10-20T15:19:19.583-03:00 DEBUG 7380 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_produto(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:19:19.597-03:00 DEBUG 7380 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_livro(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:19:22.704-03:00  INFO 7380 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Started CompraFluxoIntegrationTest in 11.122 seconds (process running for 13.738)
+2025-10-20T15:19:23.476-03:00 DEBUG 7380 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (bloqueada, datanasc, email, gen, nome, senha, tentativas) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:19:23.487-03:00 TRACE 7380 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-10-20T15:19:23.488-03:00 TRACE 7380 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [1990-01-01]
+2025-10-20T15:19:23.489-03:00 TRACE 7380 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [teste@exemplo.com]
+2025-10-20T15:19:23.489-03:00 TRACE 7380 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [M]
+2025-10-20T15:19:23.489-03:00 TRACE 7380 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:19:23.490-03:00 TRACE 7380 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [senha]
+2025-10-20T15:19:23.490-03:00 TRACE 7380 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:INTEGER) <- [0]
+2025-10-20T15:19:23.495-03:00 ERROR 7380 --- [Salt_PedroHenriqueFonsecaMelo] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : [SQLITE_CONSTRAINT_UNIQUE] A UNIQUE constraint failed (UNIQUE constraint failed: users.email)
+2025-10-20T15:19:45.899-03:00  INFO 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Starting CompraFluxoIntegrationTest using Java 17.0.10 with PID 24120 (started by Pedro Henrique in C:\GitProjetos\Fabiano\Pfc_umc)
+2025-10-20T15:19:45.904-03:00  INFO 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
+2025-10-20T15:19:54.808-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HT_produto(id bigint not null, hib_sess_id char(36) not null, primary key (id, hib_sess_id))
+2025-10-20T15:19:54.950-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_produto(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:19:55.062-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_livro(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:19:55.770-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table admins (
+        id integer,
+        email varchar(255),
+        nome varchar(255),
+        password varchar(255),
+        primary key (id)
+    )
+2025-10-20T15:19:55.858-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table cartao (
+        id integer,
+        bandeira varchar(255),
+        cvv varchar(255),
+        nome_titular varchar(255),
+        numero varchar(255),
+        preferencial boolean,
+        validade varchar(255),
+        primary key (id)
+    )
+2025-10-20T15:19:55.973-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table cliente_cartao (
+        cliente_id bigint not null,
+        cartao_id bigint not null,
+        primary key (cliente_id, cartao_id)
+    )
+2025-10-20T15:19:56.079-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table cliente_endereco (
+        cliente_id bigint not null,
+        endereco_id bigint not null,
+        primary key (cliente_id, endereco_id)
+    )
+2025-10-20T15:19:56.151-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table cupom (
+        id integer,
+        cliente_id bigint,
+        codigo varchar(255) not null unique,
+        expiracao timestamp,
+        usado boolean,
+        valor float,
+        primary key (id)
+    )
+2025-10-20T15:19:56.232-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table endereco (
+        id integer,
+        bairro varchar(255),
+        cep varchar(255),
+        cidade varchar(255),
+        complemento varchar(255),
+        estado varchar(255),
+        numero varchar(255),
+        pais varchar(255),
+        rua varchar(255),
+        tipo_residencia varchar(255),
+        primary key (id)
+    )
+2025-10-20T15:19:56.304-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table livro (
+        altura float not null,
+        ano integer not null,
+        autor varchar(255),
+        codigo_barras varchar(255),
+        categorias varchar(255),
+        edicao integer not null,
+        editora varchar(255),
+        isbn varchar(255) unique,
+        largura float not null,
+        numero_paginas integer,
+        peso float not null,
+        profundidade float not null,
+        quant integer not null,
+        sinopse TEXT,
+        id bigint not null,
+        primary key (id)
+    )
+2025-10-20T15:19:56.702-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table pedido (
+        id integer,
+        cliente_id bigint,
+        data timestamp,
+        endereco_id bigint,
+        status varchar(255),
+        total float,
+        primary key (id)
+    )
+2025-10-20T15:19:56.814-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table pedido_item (
+        id integer,
+        preco_unitario float,
+        produto_id bigint,
+        produto_titulo varchar(255),
+        quantidade integer,
+        pedido_id bigint,
+        primary key (id)
+    )
+2025-10-20T15:19:56.903-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table produto (
+        id integer,
+        precificacao float not null,
+        titulo varchar(255) not null,
+        primary key (id)
+    )
+2025-10-20T15:19:56.985-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table troca (
+        id integer,
+        cliente_id bigint,
+        created_at timestamp,
+        decisao_por varchar(255),
+        decision_at timestamp,
+        motivo_rejeicao varchar(255),
+        pedido_id bigint,
+        status varchar(255),
+        valor float,
+        primary key (id)
+    )
+2025-10-20T15:19:57.107-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table users (
+        id integer,
+        bloqueada boolean not null,
+        datanasc varchar(255) not null,
+        email varchar(255) not null unique,
+        gen varchar(255) not null,
+        nome varchar(255) not null,
+        senha varchar(255) not null,
+        tentativas integer not null,
+        primary key (id)
+    )
+2025-10-20T15:19:57.190-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    alter table cupom 
+       drop constraint UK3kcmt1d0xxfdloitavaeescse
+2025-10-20T15:19:57.193-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    alter table livro 
+       drop constraint UKk8si93wtslp275pv65gity1gg
+2025-10-20T15:19:57.194-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    alter table users 
+       drop constraint UK6dotkott2kjsp8vw4d0m25fb7
+2025-10-20T15:20:00.622-03:00  INFO 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Started CompraFluxoIntegrationTest in 15.838 seconds (process running for 18.51)
+2025-10-20T15:20:01.849-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (bloqueada, datanasc, email, gen, nome, senha, tentativas) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:20:01.866-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-10-20T15:20:01.867-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [1990-01-01]
+2025-10-20T15:20:01.868-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [teste@exemplo.com]
+2025-10-20T15:20:01.868-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [M]
+2025-10-20T15:20:01.869-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:20:01.869-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [senha]
+2025-10-20T15:20:01.870-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:INTEGER) <- [0]
+2025-10-20T15:20:01.881-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:20:01.946-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        endereco
+        (bairro, cep, cidade, complemento, estado, numero, pais, rua, tipo_residencia) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:20:01.947-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Centro]
+2025-10-20T15:20:01.948-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [01234-567]
+2025-10-20T15:20:01.949-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [São Paulo]
+2025-10-20T15:20:01.949-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [Apto 1]
+2025-10-20T15:20:01.950-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [SP]
+2025-10-20T15:20:01.951-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [100]
+2025-10-20T15:20:01.952-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:VARCHAR) <- [Brasil]
+2025-10-20T15:20:01.952-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (8:VARCHAR) <- [Rua Teste]
+2025-10-20T15:20:01.953-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (9:VARCHAR) <- [Apartamento]
+2025-10-20T15:20:01.954-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:20:01.956-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:20:01.957-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [VISA]
+2025-10-20T15:20:01.957-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [123]
+2025-10-20T15:20:01.958-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:20:01.958-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [1111222233334444]
+2025-10-20T15:20:01.961-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [true]
+2025-10-20T15:20:01.962-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [12/30]
+2025-10-20T15:20:01.963-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:20:01.966-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:20:01.966-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Mastercard]
+2025-10-20T15:20:01.967-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [321]
+2025-10-20T15:20:01.967-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:20:01.968-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [5555666677778888]
+2025-10-20T15:20:01.969-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [false]
+2025-10-20T15:20:01.970-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [10/29]
+2025-10-20T15:20:01.972-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:20:01.987-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        produto
+        (precificacao, titulo) 
+    values
+        (?, ?)
+2025-10-20T15:20:01.988-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:FLOAT) <- [100.0]
+2025-10-20T15:20:01.988-03:00 TRACE 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [Produto Teste]
+2025-10-20T15:20:01.989-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:20:02.231-03:00 DEBUG 24120 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        p1_0.id,
+        p1_0.cliente_id,
+        p1_0.data,
+        p1_0.endereco_id,
+        p1_0.status,
+        p1_0.total 
+    from
+        pedido p1_0
+2025-10-20T15:30:14.482-03:00  INFO 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Starting CompraFluxoIntegrationTest using Java 17.0.10 with PID 21224 (started by Pedro Henrique in C:\GitProjetos\Fabiano\Pfc_umc)
+2025-10-20T15:30:14.488-03:00  INFO 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
+2025-10-20T15:30:20.697-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HT_produto(id bigint not null, hib_sess_id char(36) not null, primary key (id, hib_sess_id))
+2025-10-20T15:30:20.708-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_produto(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:30:20.717-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_livro(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:30:23.765-03:00  INFO 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Started CompraFluxoIntegrationTest in 10.34 seconds (process running for 12.833)
+2025-10-20T15:30:24.496-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (bloqueada, datanasc, email, gen, nome, senha, tentativas) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:30:24.520-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-10-20T15:30:24.521-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [1990-01-01]
+2025-10-20T15:30:24.521-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [teste@exemplo.com]
+2025-10-20T15:30:24.522-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [M]
+2025-10-20T15:30:24.522-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:30:24.523-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [senha]
+2025-10-20T15:30:24.523-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:INTEGER) <- [0]
+2025-10-20T15:30:24.535-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:30:24.591-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        endereco
+        (bairro, cep, cidade, complemento, estado, numero, pais, rua, tipo_residencia) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:30:24.592-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Centro]
+2025-10-20T15:30:24.593-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [01234-567]
+2025-10-20T15:30:24.596-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [São Paulo]
+2025-10-20T15:30:24.596-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [Apto 1]
+2025-10-20T15:30:24.596-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [SP]
+2025-10-20T15:30:24.596-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [100]
+2025-10-20T15:30:24.597-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:VARCHAR) <- [Brasil]
+2025-10-20T15:30:24.598-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (8:VARCHAR) <- [Rua Teste]
+2025-10-20T15:30:24.599-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (9:VARCHAR) <- [Apartamento]
+2025-10-20T15:30:24.600-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:30:24.602-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:30:24.603-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [VISA]
+2025-10-20T15:30:24.603-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [123]
+2025-10-20T15:30:24.603-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:30:24.604-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [1111222233334444]
+2025-10-20T15:30:24.604-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [true]
+2025-10-20T15:30:24.605-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [12/30]
+2025-10-20T15:30:24.607-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:30:24.609-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:30:24.610-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Mastercard]
+2025-10-20T15:30:24.611-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [321]
+2025-10-20T15:30:24.612-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:30:24.613-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [5555666677778888]
+2025-10-20T15:30:24.614-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [false]
+2025-10-20T15:30:24.615-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [10/29]
+2025-10-20T15:30:24.616-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:30:24.640-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        produto
+        (precificacao, titulo) 
+    values
+        (?, ?)
+2025-10-20T15:30:24.641-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:FLOAT) <- [100.0]
+2025-10-20T15:30:24.642-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [Produto Teste]
+2025-10-20T15:30:24.645-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:30:24.676-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        pedido
+        (cliente_id, data, endereco_id, status, total) 
+    values
+        (?, ?, ?, ?, ?)
+2025-10-20T15:30:24.677-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:30:24.678-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:TIMESTAMP) <- [2025-10-20T15:30:24.672990300]
+2025-10-20T15:30:24.680-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:BIGINT) <- [1]
+2025-10-20T15:30:24.680-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [PENDENTE]
+2025-10-20T15:30:24.680-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:DOUBLE) <- [108.48677062988281]
+2025-10-20T15:30:24.681-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:30:24.686-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        pedido_item
+        (pedido_id, preco_unitario, produto_id, produto_titulo, quantidade) 
+    values
+        (?, ?, ?, ?, ?)
+2025-10-20T15:30:24.689-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:30:24.691-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:DOUBLE) <- [100.0]
+2025-10-20T15:30:24.694-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:BIGINT) <- [1]
+2025-10-20T15:30:24.694-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [null]
+2025-10-20T15:30:24.695-03:00 TRACE 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:INTEGER) <- [1]
+2025-10-20T15:30:24.697-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:30:24.863-03:00 DEBUG 21224 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        p1_0.id,
+        p1_0.cliente_id,
+        p1_0.data,
+        p1_0.endereco_id,
+        p1_0.status,
+        p1_0.total 
+    from
+        pedido p1_0
+2025-10-20T15:33:03.783-03:00  INFO 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Starting CompraFluxoIntegrationTest using Java 17.0.10 with PID 33724 (started by Pedro Henrique in C:\GitProjetos\Fabiano\Pfc_umc)
+2025-10-20T15:33:03.789-03:00  INFO 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
+2025-10-20T15:33:10.604-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HT_produto(id bigint not null, hib_sess_id char(36) not null, primary key (id, hib_sess_id))
+2025-10-20T15:33:10.617-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_produto(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:33:10.627-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    create table HTE_livro(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:33:13.489-03:00  INFO 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Started CompraFluxoIntegrationTest in 10.592 seconds (process running for 13.283)
+2025-10-20T15:33:15.172-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        users
+        (bloqueada, datanasc, email, gen, nome, senha, tentativas) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:33:15.397-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-10-20T15:33:15.397-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [1990-01-01]
+2025-10-20T15:33:15.399-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [teste@exemplo.com]
+2025-10-20T15:33:15.401-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [M]
+2025-10-20T15:33:15.402-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:33:15.403-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [senha]
+2025-10-20T15:33:15.404-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:INTEGER) <- [0]
+2025-10-20T15:33:15.416-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:33:15.454-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        endereco
+        (bairro, cep, cidade, complemento, estado, numero, pais, rua, tipo_residencia) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:33:15.455-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Centro]
+2025-10-20T15:33:15.456-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [01234-567]
+2025-10-20T15:33:15.457-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [São Paulo]
+2025-10-20T15:33:15.458-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [Apto 1]
+2025-10-20T15:33:15.459-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [SP]
+2025-10-20T15:33:15.459-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [100]
+2025-10-20T15:33:15.460-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:VARCHAR) <- [Brasil]
+2025-10-20T15:33:15.461-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (8:VARCHAR) <- [Rua Teste]
+2025-10-20T15:33:15.461-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (9:VARCHAR) <- [Apartamento]
+2025-10-20T15:33:15.462-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:33:15.465-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:33:15.467-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [VISA]
+2025-10-20T15:33:15.469-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [123]
+2025-10-20T15:33:15.470-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:33:15.470-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [1111222233334444]
+2025-10-20T15:33:15.471-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [true]
+2025-10-20T15:33:15.471-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [12/30]
+2025-10-20T15:33:15.473-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:33:15.476-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cartao
+        (bandeira, cvv, nome_titular, numero, preferencial, validade) 
+    values
+        (?, ?, ?, ?, ?, ?)
+2025-10-20T15:33:15.477-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Mastercard]
+2025-10-20T15:33:15.477-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [321]
+2025-10-20T15:33:15.478-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:33:15.478-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [5555666677778888]
+2025-10-20T15:33:15.478-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [false]
+2025-10-20T15:33:15.479-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [10/29]
+2025-10-20T15:33:15.479-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:33:15.492-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        produto
+        (precificacao, titulo) 
+    values
+        (?, ?)
+2025-10-20T15:33:15.493-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:FLOAT) <- [100.0]
+2025-10-20T15:33:15.494-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [Produto Teste]
+2025-10-20T15:33:15.495-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:33:15.528-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        pedido
+        (cliente_id, data, endereco_id, status, total) 
+    values
+        (?, ?, ?, ?, ?)
+2025-10-20T15:33:15.529-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:33:15.531-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:TIMESTAMP) <- [2025-10-20T15:33:15.520892700]
+2025-10-20T15:33:15.535-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:BIGINT) <- [1]
+2025-10-20T15:33:15.535-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [PENDENTE]
+2025-10-20T15:33:15.536-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:DOUBLE) <- [121.68133544921875]
+2025-10-20T15:33:15.537-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:33:15.540-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        pedido_item
+        (pedido_id, preco_unitario, produto_id, produto_titulo, quantidade) 
+    values
+        (?, ?, ?, ?, ?)
+2025-10-20T15:33:15.541-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:33:15.542-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:DOUBLE) <- [100.0]
+2025-10-20T15:33:15.542-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:BIGINT) <- [1]
+2025-10-20T15:33:15.542-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [null]
+2025-10-20T15:33:15.543-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:INTEGER) <- [1]
+2025-10-20T15:33:15.544-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:33:15.726-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        p1_0.id,
+        p1_0.cliente_id,
+        p1_0.data,
+        p1_0.endereco_id,
+        p1_0.status,
+        p1_0.total 
+    from
+        pedido p1_0
+2025-10-20T15:33:15.743-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        pedido
+        (cliente_id, data, endereco_id, status, total) 
+    values
+        (?, ?, ?, ?, ?)
+2025-10-20T15:33:15.744-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:33:15.746-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:TIMESTAMP) <- [2025-10-20T15:33:15.742887300]
+2025-10-20T15:33:15.747-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:BIGINT) <- [1]
+2025-10-20T15:33:15.747-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [PENDENTE]
+2025-10-20T15:33:15.748-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:DOUBLE) <- [223.8399658203125]
+2025-10-20T15:33:15.748-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:33:15.750-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        pedido_item
+        (pedido_id, preco_unitario, produto_id, produto_titulo, quantidade) 
+    values
+        (?, ?, ?, ?, ?)
+2025-10-20T15:33:15.751-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [2]
+2025-10-20T15:33:15.752-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:DOUBLE) <- [100.0]
+2025-10-20T15:33:15.754-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:BIGINT) <- [1]
+2025-10-20T15:33:15.755-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [null]
+2025-10-20T15:33:15.755-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:INTEGER) <- [2]
+2025-10-20T15:33:15.756-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:33:15.760-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        p1_0.id,
+        p1_0.cliente_id,
+        p1_0.data,
+        p1_0.endereco_id,
+        p1_0.status,
+        p1_0.total 
+    from
+        pedido p1_0
+2025-10-20T15:33:15.763-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        troca
+        (cliente_id, created_at, decisao_por, decision_at, motivo_rejeicao, pedido_id, status, valor) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?)
+2025-10-20T15:33:15.764-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:33:15.764-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:TIMESTAMP) <- [2025-10-20T15:33:15.762892300]
+2025-10-20T15:33:15.764-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [null]
+2025-10-20T15:33:15.764-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:TIMESTAMP) <- [null]
+2025-10-20T15:33:15.765-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [null]
+2025-10-20T15:33:15.765-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:BIGINT) <- [1]
+2025-10-20T15:33:15.765-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:VARCHAR) <- [REQUESTED]
+2025-10-20T15:33:15.765-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (8:DOUBLE) <- [0.0]
+2025-10-20T15:33:15.766-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:33:15.770-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    insert 
+    into
+        cupom
+        (cliente_id, codigo, expiracao, usado, valor) 
+    values
+        (?, ?, ?, ?, ?)
+2025-10-20T15:33:15.772-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:33:15.772-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [CPN-F94FE36F]
+2025-10-20T15:33:15.773-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:TIMESTAMP) <- [2026-01-20T15:33:15.769890]
+2025-10-20T15:33:15.773-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:BOOLEAN) <- [false]
+2025-10-20T15:33:15.773-03:00 TRACE 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:FLOAT) <- [121.681335]
+2025-10-20T15:33:15.774-03:00 DEBUG 33724 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : 
+    select
+        last_insert_rowid()
+2025-10-20T15:35:05.445-03:00  INFO 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Starting CompraFluxoIntegrationTest using Java 17.0.10 with PID 43472 (started by Pedro Henrique in C:\GitProjetos\Fabiano\Pfc_umc)
+2025-10-20T15:35:05.448-03:00  INFO 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : No active profile set, falling back to 1 default profile: "default"
+2025-10-20T15:35:11.887-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : create table HT_produto(id bigint not null, hib_sess_id char(36) not null, primary key (id, hib_sess_id))
+2025-10-20T15:35:11.900-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : create table HTE_produto(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:35:11.912-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : create table HTE_livro(altura float, ano integer, edicao integer, largura float, numero_paginas integer, peso float, precificacao float, profundidade float, quant integer, HTE_IDENTITY integer, id bigint, hib_sess_id char(36) not null, autor varchar(255), categorias varchar(255), codigo_barras varchar(255), editora varchar(255), isbn varchar(255), sinopse TEXT, titulo varchar(255), primary key (HTE_IDENTITY, hib_sess_id))
+2025-10-20T15:35:14.644-03:00  INFO 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] umc.exs.CompraFluxoIntegrationTest       : Started CompraFluxoIntegrationTest in 10.119 seconds (process running for 12.38)
+2025-10-20T15:35:15.438-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : insert into users (bloqueada,datanasc,email,gen,nome,senha,tentativas) values (?,?,?,?,?,?,?)
+2025-10-20T15:35:15.453-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BOOLEAN) <- [false]
+2025-10-20T15:35:15.454-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [1990-01-01]
+2025-10-20T15:35:15.455-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [teste@exemplo.com]
+2025-10-20T15:35:15.456-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [M]
+2025-10-20T15:35:15.457-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:35:15.457-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [senha]
+2025-10-20T15:35:15.457-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:INTEGER) <- [0]
+2025-10-20T15:35:15.469-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select last_insert_rowid()
+2025-10-20T15:35:15.542-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : insert into endereco (bairro,cep,cidade,complemento,estado,numero,pais,rua,tipo_residencia) values (?,?,?,?,?,?,?,?,?)
+2025-10-20T15:35:15.543-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Centro]
+2025-10-20T15:35:15.543-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [01234-567]
+2025-10-20T15:35:15.544-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [São Paulo]
+2025-10-20T15:35:15.545-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [Apto 1]
+2025-10-20T15:35:15.546-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [SP]
+2025-10-20T15:35:15.546-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [100]
+2025-10-20T15:35:15.546-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:VARCHAR) <- [Brasil]
+2025-10-20T15:35:15.547-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (8:VARCHAR) <- [Rua Teste]
+2025-10-20T15:35:15.547-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (9:VARCHAR) <- [Apartamento]
+2025-10-20T15:35:15.548-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select last_insert_rowid()
+2025-10-20T15:35:15.551-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : insert into cartao (bandeira,cvv,nome_titular,numero,preferencial,validade) values (?,?,?,?,?,?)
+2025-10-20T15:35:15.552-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [VISA]
+2025-10-20T15:35:15.553-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [123]
+2025-10-20T15:35:15.553-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:35:15.553-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [1111222233334444]
+2025-10-20T15:35:15.553-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [true]
+2025-10-20T15:35:15.553-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [12/30]
+2025-10-20T15:35:15.554-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select last_insert_rowid()
+2025-10-20T15:35:15.556-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : insert into cartao (bandeira,cvv,nome_titular,numero,preferencial,validade) values (?,?,?,?,?,?)
+2025-10-20T15:35:15.557-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [Mastercard]
+2025-10-20T15:35:15.557-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [321]
+2025-10-20T15:35:15.558-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [Teste Usuario]
+2025-10-20T15:35:15.558-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [5555666677778888]
+2025-10-20T15:35:15.558-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:BOOLEAN) <- [false]
+2025-10-20T15:35:15.558-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:VARCHAR) <- [10/29]
+2025-10-20T15:35:15.559-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select last_insert_rowid()
+2025-10-20T15:35:15.576-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : insert into produto (precificacao,titulo) values (?,?)
+2025-10-20T15:35:15.577-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:FLOAT) <- [100.0]
+2025-10-20T15:35:15.578-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [Produto Teste]
+2025-10-20T15:35:15.579-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select last_insert_rowid()
+2025-10-20T15:35:15.616-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : insert into pedido (cliente_id,data,endereco_id,status,total) values (?,?,?,?,?)
+2025-10-20T15:35:15.616-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:35:15.617-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:TIMESTAMP) <- [2025-10-20T15:35:15.606647]
+2025-10-20T15:35:15.619-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:BIGINT) <- [1]
+2025-10-20T15:35:15.620-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [PENDENTE]
+2025-10-20T15:35:15.621-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:DOUBLE) <- [107.45079803466797]
+2025-10-20T15:35:15.622-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select last_insert_rowid()
+2025-10-20T15:35:15.631-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : insert into pedido_item (pedido_id,preco_unitario,produto_id,produto_titulo,quantidade) values (?,?,?,?,?)
+2025-10-20T15:35:15.632-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:35:15.635-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:DOUBLE) <- [100.0]
+2025-10-20T15:35:15.635-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:BIGINT) <- [1]
+2025-10-20T15:35:15.636-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [null]
+2025-10-20T15:35:15.637-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:INTEGER) <- [1]
+2025-10-20T15:35:15.638-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select last_insert_rowid()
+2025-10-20T15:35:15.861-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select p1_0.id,p1_0.cliente_id,p1_0.data,p1_0.endereco_id,p1_0.status,p1_0.total from pedido p1_0
+2025-10-20T15:35:15.880-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : insert into pedido (cliente_id,data,endereco_id,status,total) values (?,?,?,?,?)
+2025-10-20T15:35:15.880-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:35:15.881-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:TIMESTAMP) <- [2025-10-20T15:35:15.879645400]
+2025-10-20T15:35:15.881-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:BIGINT) <- [1]
+2025-10-20T15:35:15.882-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [PENDENTE]
+2025-10-20T15:35:15.882-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:DOUBLE) <- [208.6625213623047]
+2025-10-20T15:35:15.883-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select last_insert_rowid()
+2025-10-20T15:35:15.884-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : insert into pedido_item (pedido_id,preco_unitario,produto_id,produto_titulo,quantidade) values (?,?,?,?,?)
+2025-10-20T15:35:15.885-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [2]
+2025-10-20T15:35:15.885-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:DOUBLE) <- [100.0]
+2025-10-20T15:35:15.885-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:BIGINT) <- [1]
+2025-10-20T15:35:15.885-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [null]
+2025-10-20T15:35:15.886-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:INTEGER) <- [2]
+2025-10-20T15:35:15.886-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select last_insert_rowid()
+2025-10-20T15:35:15.890-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select p1_0.id,p1_0.cliente_id,p1_0.data,p1_0.endereco_id,p1_0.status,p1_0.total from pedido p1_0
+2025-10-20T15:35:15.892-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : insert into troca (cliente_id,created_at,decisao_por,decision_at,motivo_rejeicao,pedido_id,status,valor) values (?,?,?,?,?,?,?,?)
+2025-10-20T15:35:15.893-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:35:15.893-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:TIMESTAMP) <- [2025-10-20T15:35:15.891646200]
+2025-10-20T15:35:15.894-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:VARCHAR) <- [null]
+2025-10-20T15:35:15.895-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:TIMESTAMP) <- [null]
+2025-10-20T15:35:15.896-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:VARCHAR) <- [null]
+2025-10-20T15:35:15.897-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (6:BIGINT) <- [1]
+2025-10-20T15:35:15.897-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (7:VARCHAR) <- [REQUESTED]
+2025-10-20T15:35:15.898-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (8:DOUBLE) <- [0.0]
+2025-10-20T15:35:15.899-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select last_insert_rowid()
+2025-10-20T15:35:15.905-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : insert into cupom (cliente_id,codigo,expiracao,usado,valor) values (?,?,?,?,?)
+2025-10-20T15:35:15.905-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:35:15.905-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:VARCHAR) <- [CPN-F77BAD70]
+2025-10-20T15:35:15.906-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:TIMESTAMP) <- [2026-01-20T15:35:15.903644700]
+2025-10-20T15:35:15.907-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:BOOLEAN) <- [false]
+2025-10-20T15:35:15.908-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:FLOAT) <- [107.4508]
+2025-10-20T15:35:15.909-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select last_insert_rowid()
+2025-10-20T15:35:15.926-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select c1_0.id,c1_0.cliente_id,c1_0.codigo,c1_0.expiracao,c1_0.usado,c1_0.valor from cupom c1_0
+2025-10-20T15:35:16.716-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select c1_0.id,c1_0.cliente_id,c1_0.codigo,c1_0.expiracao,c1_0.usado,c1_0.valor from cupom c1_0 where c1_0.codigo=?
+2025-10-20T15:35:16.716-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:VARCHAR) <- [CPN-F77BAD70]
+2025-10-20T15:35:16.721-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : insert into pedido (cliente_id,data,endereco_id,status,total) values (?,?,?,?,?)
+2025-10-20T15:35:16.721-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [1]
+2025-10-20T15:35:16.722-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:TIMESTAMP) <- [2025-10-20T15:35:16.720189700]
+2025-10-20T15:35:16.723-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:BIGINT) <- [1]
+2025-10-20T15:35:16.724-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [PENDENTE]
+2025-10-20T15:35:16.725-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:DOUBLE) <- [6.051153182983398]
+2025-10-20T15:35:16.727-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select last_insert_rowid()
+2025-10-20T15:35:16.729-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : insert into pedido_item (pedido_id,preco_unitario,produto_id,produto_titulo,quantidade) values (?,?,?,?,?)
+2025-10-20T15:35:16.730-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (1:BIGINT) <- [3]
+2025-10-20T15:35:16.730-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (2:DOUBLE) <- [100.0]
+2025-10-20T15:35:16.730-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (3:BIGINT) <- [1]
+2025-10-20T15:35:16.730-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (4:VARCHAR) <- [null]
+2025-10-20T15:35:16.731-03:00 TRACE 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.orm.jdbc.bind              : binding parameter (5:INTEGER) <- [1]
+2025-10-20T15:35:16.731-03:00 DEBUG 43472 --- [Salt_PedroHenriqueFonsecaMelo] [main] org.hibernate.SQL                        : select last_insert_rowid()
