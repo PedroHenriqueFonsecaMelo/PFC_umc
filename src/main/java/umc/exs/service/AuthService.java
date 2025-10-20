@@ -6,14 +6,14 @@ import org.springframework.stereotype.Service;
 
 import umc.exs.log.SecurityLogger;
 import umc.exs.model.Cliente;
-import umc.exs.repository.UserRepository;
+import umc.exs.repository.ClienteRepository;
 
 @Service
 public class AuthService {
 
 
     @Autowired
-    private UserRepository userRepository;
+    private ClienteRepository userRepository;
     @Autowired
     private SecurityLogger securityLogger;
 

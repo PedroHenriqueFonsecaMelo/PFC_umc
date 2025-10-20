@@ -1,7 +1,17 @@
 package umc.exs.model;
 
-import jakarta.persistence.*;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
@@ -11,10 +21,19 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String senha;
+
+    @Column(nullable = false)
     private String nome;
+
+    @Column(nullable = false)
     private String datanasc;
+    
+    @Column(nullable = false)
     private String gen;
+
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)

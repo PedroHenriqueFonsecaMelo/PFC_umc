@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import umc.exs.model.Cliente;
 
-public interface UserRepository extends JpaRepository<Cliente, Long> {
+public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     
     Optional<Cliente> findByNome(String nome);
 }

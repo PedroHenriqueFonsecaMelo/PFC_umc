@@ -1,21 +1,28 @@
 package umc.exs.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import umc.exs.model.Endereco;
+import umc.exs.model.Cliente;
 import umc.exs.model.DTO.PagamentoDTO;
+import umc.exs.model.Endereco;
 import umc.exs.model.compras.Carrinho;
 import umc.exs.model.compras.Cupom;
 import umc.exs.model.compras.ItemCarrinho;
+import umc.exs.model.compras.Pedido;
+import umc.exs.model.compras.PedidoItem;
 import umc.exs.model.foundation.Produto;
-import umc.exs.repository.*;
+import umc.exs.repository.CupomRepository;
+import umc.exs.repository.EnderecoRepository;
+import umc.exs.repository.PedidoRepository;
+import umc.exs.repository.ProdutoRepository;
 
 @Service
 public class CarrinhoService {
-     private Carrinho carrinho = new Carrinho();
+    private Carrinho carrinho = new Carrinho();
 
     @Autowired
     private ProdutoRepository produtoRepository;
@@ -23,11 +30,14 @@ public class CarrinhoService {
     private CupomRepository cupomRepository;
     @Autowired
     private EnderecoRepository enderecoRepository;
+    @Autowired
+    private PedidoRepository pedidoRepository;
 
     public Carrinho addProduto(Long produtoId, int quantidade) {
-        // Buscar produto no banco (exemplo genérico)
+        
         Produto produto = buscarProduto(produtoId);
-        if (produto == null) throw new RuntimeException("Produto não encontrado");
+        if (produto == null)
+            throw new RuntimeException("Produto não encontrado");
         carrinho.getItens().add(new ItemCarrinho(produto, quantidade));
         recalcularTotal();
         return carrinho;
@@ -62,10 +72,39 @@ public class CarrinhoService {
         return carrinho;
     }
 
-    public boolean finalizarCompra() {
-        // Persistir compra, itens, pagamentos, etc.
-        // Limpar carrinho
+    public boolean finalizarCompra(Cliente cliente) {
+        if (carrinho.getItens().isEmpty()) {
+            throw new RuntimeException("Carrinho vazio");
+        }
+        if (carrinho.getPagamentos() == null || carrinho.getPagamentos().isEmpty()) {
+            throw new RuntimeException("Nenhum pagamento definido");
+        }
+        if (carrinho.getEndereco() == null) {
+            throw new RuntimeException("Endereço não definido");
+        }
+
+        Pedido pedido = new Pedido();
+        pedido.setClienteId(cliente.getId());
+        pedido.setEnderecoId(carrinho.getEndereco().getId());
+        pedido.setTotal((double) carrinho.getTotal());
+        pedido.setStatus("PENDENTE");
+
+        // Criar itens do pedido
+        List<PedidoItem> itensPedido = new ArrayList<>();
+        for (ItemCarrinho itemCarrinho : carrinho.getItens()) {
+            PedidoItem itemPedido = new PedidoItem();
+            itemPedido.setProdutoId(itemCarrinho.getProduto().getId());
+            itemPedido.setQuantidade(itemCarrinho.getQuantidade());
+            itemPedido.setPrecoUnitario((double) itemCarrinho.getProduto().getPrecificacao());
+            itemPedido.setPedido(pedido);
+            itensPedido.add(itemPedido);
+        }
+        pedido.setItens(itensPedido);
+
+        pedidoRepository.save(pedido);
+
         carrinho = new Carrinho();
+
         return true;
     }
 
@@ -78,8 +117,9 @@ public class CarrinhoService {
         for (ItemCarrinho item : carrinho.getItens()) {
             total += item.getProduto().getPrecificacao() * item.getQuantidade();
         }
-        float frete = (float) (Math.random() * 20 + 5); // frete aleatório
-        if (carrinho.getCupom() != null) total -= carrinho.getCupom().getValor();
+        float frete = (float) (Math.random() * 20 + 5);
+        if (carrinho.getCupom() != null)
+            total -= carrinho.getCupom().getValor();
         carrinho.setFrete(frete);
         carrinho.setTotal(total + frete);
     }
@@ -96,4 +136,3 @@ public class CarrinhoService {
         return enderecoRepository.findById(id).orElse(null);
     }
 }
-

@@ -61,4 +61,14 @@ public class Carrinho {
     public void setTotal(float total) {
         this.total = total;
     }
+
+    @Override
+    public String toString() {
+        return "Carrinho [itens=" + itens + ", pagamentos=" + pagamentos + ", cupom=" + cupom + ", endereco=" + endereco
+                + ", frete=" + frete + ", total=" + total + ", getItens()=" + getItens() + ", getPagamentos()="
+                + getPagamentos() + ", getCupom()=" + getCupom() + ", getEndereco()=" + getEndereco() + ", getFrete()="
+                + getFrete() + ", getTotal()=" + getTotal() + "]";
+    }
+
+    
 }
