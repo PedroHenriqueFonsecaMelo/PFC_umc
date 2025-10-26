@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import umc.exs.model.Cartao;
-import umc.exs.model.Cliente;
-import umc.exs.model.Endereco;
+import umc.exs.model.entidades.Cartao;
+import umc.exs.model.entidades.Cliente;
+import umc.exs.model.entidades.Endereco;
 import umc.exs.repository.CartaoRepository;
 import umc.exs.repository.ClienteRepository;
 import umc.exs.repository.EnderecoRepository;

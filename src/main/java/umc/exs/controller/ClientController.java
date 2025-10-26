@@ -5,9 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import umc.exs.model.Cliente;
-import umc.exs.model.Endereco;
-import umc.exs.model.Cartao;
+import umc.exs.model.entidades.Cartao;
+import umc.exs.model.entidades.Cliente;
+import umc.exs.model.entidades.Endereco;
 import umc.exs.service.ClientService;
 
 import java.util.Optional;

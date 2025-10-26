@@ -1,4 +1,4 @@
-package umc.exs.model;
+package umc.exs.model.entidades;
 
 import java.util.HashSet;
 import java.util.Set;

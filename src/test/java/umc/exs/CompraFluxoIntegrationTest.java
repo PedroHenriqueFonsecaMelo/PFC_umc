@@ -15,14 +15,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 import umc.exs.controller.AdminController;
-import umc.exs.model.Cartao;
-import umc.exs.model.Cliente;
 import umc.exs.model.DTO.PagamentoDTO;
-import umc.exs.model.Endereco;
 import umc.exs.model.compras.Carrinho;
 import umc.exs.model.compras.Cupom;
 import umc.exs.model.compras.Pedido;
 import umc.exs.model.compras.Troca;
+import umc.exs.model.entidades.Cartao;
+import umc.exs.model.entidades.Cliente;
+import umc.exs.model.entidades.Endereco;
 import umc.exs.model.foundation.Produto;
 import umc.exs.repository.CartaoRepository;
 import umc.exs.repository.ClienteRepository;
@@ -135,7 +135,7 @@ public class CompraFluxoIntegrationTest {
 
         PagamentoDTO pagamento1 = new PagamentoDTO();
         pagamento1.setCartaoId(cartao1.getId());
-        pagamento1.setValor(carrinho1.getTotal()); // <-- aqui, usar o total real
+        pagamento1.setValor(carrinho1.getTotal()); // usar o total real do carrinho
 
         System.out.println("Somando pagamentos: " + pagamento1.getValor());
         carrinho1 = carrinhoService.setPagamentos(List.of(pagamento1));
@@ -156,20 +156,29 @@ public class CompraFluxoIntegrationTest {
         float total = carrinho2.getTotal();
         System.out.println("Total do carrinho antes do pagamento: " + total);
 
+        float valorCartao1 = total * 0.7f; // 70% no cartão 1
+        float valorCartao2 = total - valorCartao1; // o resto no cartão 2
+
+        System.out.println(
+                "Usuário escolheu pagar R$" + valorCartao1 + " no cartão 1 e R$" + valorCartao2 + " no cartão 2.");
+
+        // Cria os DTOs com os valores definidos
         PagamentoDTO pagamento2_1 = new PagamentoDTO();
         pagamento2_1.setCartaoId(cartao1.getId());
-        pagamento2_1.setValor(total * 0.6f);
+        pagamento2_1.setValor(valorCartao1);
 
         PagamentoDTO pagamento2_2 = new PagamentoDTO();
         pagamento2_2.setCartaoId(cartao2.getId());
-        pagamento2_2.setValor(total * 0.4f);
+        pagamento2_2.setValor(valorCartao2);
 
         carrinho2 = carrinhoService.setPagamentos(List.of(pagamento2_1, pagamento2_2));
 
-        boolean finalizada2 = carrinhoService.finalizarCompra(cliente);
-        assertTrue(finalizada2, "Compra 2 (multiplos cartões) deve finalizar com sucesso");
+        float somaPagamentos = pagamento2_1.getValor() + pagamento2_2.getValor();
+        assertEquals(total, somaPagamentos, 0.01, "Soma dos pagamentos deve ser igual ao total do carrinho");
 
-        // Buscar o pedido da compra 2
+        boolean finalizada2 = carrinhoService.finalizarCompra(cliente);
+        assertTrue(finalizada2, "Compra 2 (múltiplos cartões) deve finalizar com sucesso");
+
         List<Pedido> pedidosAtualizados = pedidoRepository.findAll();
         assertTrue(pedidosAtualizados.size() >= 2, "Devem existir ao menos dois pedidos");
         Pedido pedido2 = pedidosAtualizados.get(pedidosAtualizados.size() - 1);
@@ -239,5 +248,7 @@ public class CompraFluxoIntegrationTest {
         System.out.println(carrinho2.toString());
         System.out.println(carrinho3.toString());
 
+
     }
+
 }

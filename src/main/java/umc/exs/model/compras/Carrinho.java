@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import umc.exs.model.DTO.PagamentoDTO;
-import umc.exs.model.Endereco;
+import umc.exs.model.entidades.Endereco;
 
 public class Carrinho {
     private List<ItemCarrinho> itens = new ArrayList<>();

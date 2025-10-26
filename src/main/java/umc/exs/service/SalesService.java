@@ -25,10 +25,12 @@ public class SalesService {
         LocalDateTime start = null;
         LocalDateTime end = null;
         try {
-            if (since != null && !since.isBlank()) start = LocalDateTime.parse(since);
-            if (until != null && !until.isBlank()) end = LocalDateTime.parse(until);
+            if (since != null && !since.isBlank())
+                start = LocalDateTime.parse(since);
+            if (until != null && !until.isBlank())
+                end = LocalDateTime.parse(until);
         } catch (DateTimeParseException e) {
-            // ignore invalid parse, treat as null (full range)
+            throw new IllegalArgumentException("Invalid date format. Use ISO_LOCAL_DATE_TIME format.");
         }
 
         List<Pedido> pedidos;
@@ -40,8 +42,6 @@ public class SalesService {
 
         int totalOrders = pedidos.size();
 
-        // compute revenue: prefer pedido.total when available, otherwise sum items
-        double totalRevenue = 0.0;
         List<Long> pedidoIds = pedidos.stream()
                 .map(Pedido::getId)
                 .filter(Objects::nonNull)
@@ -51,7 +51,6 @@ public class SalesService {
                 ? Collections.emptyList()
                 : pedidoItemRepository.findByPedidoIdIn(pedidoIds);
 
-        // sum revenue using pedido.total when present
         double pedidoTotals = pedidos.stream()
                 .filter(p -> p.getTotal() != null)
                 .mapToDouble(Pedido::getTotal)
@@ -60,22 +59,29 @@ public class SalesService {
         items = items.stream().filter(it -> Objects.nonNull(it.getPrecoUnitario()))
                 .filter(it -> Objects.nonNull(it.getQuantidade())).toList();
 
-        // sum remaining via items for pedidos without total or to be safe sum items too
         double itemsSum = items.stream()
-                .mapToDouble(it -> (it.getPrecoUnitario() == null ? 0.0 : it.getPrecoUnitario()) * (it.getQuantidade() == null ? 0 : it.getQuantidade()))
+                .mapToDouble(it -> {
+                    double preco = Optional.ofNullable(it.getPrecoUnitario()).orElse(0.0);
+                    int qtd = Optional.ofNullable(it.getQuantidade()).orElse(0);
+                    return preco * qtd;
+                })
                 .sum();
 
-        // prefer the sum of item values as canonical revenue (safer)
-        totalRevenue = Math.max(pedidoTotals, itemsSum);
+        double totalRevenue = Math.max(pedidoTotals, itemsSum);
 
-        // aggregate products sold
         Map<Long, ProductStats> map = new HashMap<>();
         for (PedidoItem it : items) {
             Long pid = it.getProdutoId();
-            if (pid == null) continue;
+            if (pid == null)
+                continue;
             ProductStats ps = map.computeIfAbsent(pid, k -> new ProductStats(pid, it.getProdutoTitulo(), 0L, 0.0));
-            long qty = it.getQuantidade() == null ? 0L : it.getQuantidade();
-            double rev = (it.getPrecoUnitario() == null ? 0.0 : it.getPrecoUnitario()) * qty;
+            Integer qtdObj = it.getQuantidade();
+            Double precoObj = it.getPrecoUnitario();
+
+            long qty = (qtdObj != null) ? qtdObj.longValue() : 0L;
+            double preco = (precoObj != null) ? precoObj : 0.0;
+            double rev = preco * qty;
+
             ps.qty += qty;
             ps.revenue += rev;
         }
@@ -95,7 +101,6 @@ public class SalesService {
         result.put("totalOrders", totalOrders);
         result.put("totalRevenue", totalRevenue);
         result.put("productsSold", productsSold);
-        // privacy: do not include customer identifiers or personal data
 
         return result;
     }
