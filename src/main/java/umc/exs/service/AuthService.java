@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import umc.exs.log.SecurityLogger;
-import umc.exs.model.Cliente;
+import umc.exs.model.entidades.Cliente;
 import umc.exs.repository.ClienteRepository;
 
 @Service

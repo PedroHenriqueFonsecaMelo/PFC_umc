@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import umc.exs.model.Cliente;
 import umc.exs.model.DTO.PagamentoDTO;
 import umc.exs.model.compras.Carrinho;
+import umc.exs.model.entidades.Cliente;
 import umc.exs.repository.ClienteRepository;
 import umc.exs.service.CarrinhoService;
 
@@ -56,10 +56,14 @@ public class CartController {
     }
 
     // Define cartões e valores para pagamento
-    @PostMapping("/pagamento")
-    public ResponseEntity<Carrinho> setPagamentos(@RequestBody List<PagamentoDTO> pagamentos) {
-        Carrinho carrinho = carrinhoService.setPagamentos(pagamentos);
-        return ResponseEntity.ok(carrinho);
+   @PostMapping("/pagamento")
+    public ResponseEntity<?> setPagamentos(@RequestBody List<PagamentoDTO> pagamentos) {
+        try {
+            Carrinho carrinho = carrinhoService.setPagamentos(pagamentos);
+            return ResponseEntity.ok(carrinho);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // Finaliza compra
