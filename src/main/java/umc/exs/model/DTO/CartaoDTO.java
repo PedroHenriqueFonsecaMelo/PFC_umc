@@ -1,38 +1,46 @@
-package umc.exs.model;
+package umc.exs.model.DTO;
 
-import java.util.HashSet;
-import java.util.Set;
+import umc.exs.model.entidades.Cartao;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-
-@Entity
-public class Cartao {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class CartaoDTO {
     private Long id;
-@Column
     private String numero;
-    @Column
     private String bandeira;
-    @Column
     private String nomeTitular;
-    @Column
     private String validade;
-    @Column
     private String cvv;
-    @Column
     private boolean preferencial;
 
-    @ManyToMany(mappedBy = "cartoes")
-    private Set<Cliente> clientes = new HashSet<>();
+    public CartaoDTO() {
+    }
 
-    // Getters e setters
+    public static CartaoDTO fromEntity(Cartao c) {
+        if (c == null)
+            return null;
+        CartaoDTO dto = new CartaoDTO();
+        dto.id = c.getId();
+        dto.numero = c.getNumero();
+        dto.bandeira = c.getBandeira();
+        dto.nomeTitular = c.getNomeTitular();
+        dto.validade = c.getValidade();
+        dto.cvv = c.getCvv();
+        dto.preferencial = c.isPreferencial();
+        return dto;
+    }
+
+    public Cartao toEntity() {
+        Cartao c = new Cartao();
+        c.setId(this.id);
+        c.setNumero(this.numero);
+        c.setBandeira(this.bandeira);
+        c.setNomeTitular(this.nomeTitular);
+        c.setValidade(this.validade);
+        c.setCvv(this.cvv);
+        c.setPreferencial(this.preferencial);
+        return c;
+    }
+
+    // getters/setters
     public Long getId() {
         return id;
     }
@@ -87,13 +95,5 @@ public class Cartao {
 
     public void setPreferencial(boolean preferencial) {
         this.preferencial = preferencial;
-    }
-
-    public Set<Cliente> getClientes() {
-        return clientes;
-    }
-
-    public void setClientes(Set<Cliente> clientes) {
-        this.clientes = clientes;
     }
 }

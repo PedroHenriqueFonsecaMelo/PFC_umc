@@ -1,36 +1,28 @@
 package umc.exs.controller;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import umc.exs.model.DTO.AdminDTO;
+import umc.exs.model.DTO.ProdutoDTO;
+import umc.exs.model.DTO.TrocaDTO;
+import umc.exs.mapper.AdminMapper;
+import umc.exs.mapper.CupomMapper;
+import umc.exs.mapper.ProdutoMapper;
+import umc.exs.mapper.TrocaMapper;
 import umc.exs.model.compras.Cupom;
-import umc.exs.model.compras.Pedido;
-import umc.exs.model.compras.PedidoItem;
 import umc.exs.model.compras.Troca;
-import umc.exs.model.foundation.Admin;
+import umc.exs.model.foundation.Administrador;
 import umc.exs.model.foundation.Produto;
 import umc.exs.repository.AdminRepository;
 import umc.exs.repository.CupomRepository;
-import umc.exs.repository.PedidoItemRepository;
-import umc.exs.repository.PedidoRepository;
 import umc.exs.repository.ProdutoRepository;
 import umc.exs.repository.TrocaRepository;
 import umc.exs.service.SalesService;
+
+import java.time.LocalDateTime;
+import java.util.*;
 
 @RestController
 @RequestMapping("/admin")
@@ -49,41 +41,40 @@ public class AdminController {
     private CupomRepository cupomRepository;
 
     @Autowired
-    private PedidoRepository pedidoRepository;
-
-    @Autowired
-    private PedidoItemRepository pedidoItemRepository;
-
-    @Autowired
     private SalesService salesService;
 
-    // ---------- Admin CRUD ----------
+    // Admin CRUD usando DTOs
     @PostMapping("/admins")
-    public ResponseEntity<Admin> createAdmin(@RequestBody Admin admin) {
-        Admin saved = adminRepository.save(admin);
-        return ResponseEntity.ok(saved);
+    public ResponseEntity<AdminDTO> createAdmin(@RequestBody AdminDTO adminDto) {
+        Administrador admin = AdminMapper.toEntity(adminDto);
+        Administrador saved = adminRepository.save(admin);
+        return ResponseEntity.ok(AdminMapper.fromEntity(saved));
     }
 
     @GetMapping("/admins")
-    public ResponseEntity<List<Admin>> listAdmins() {
-        return ResponseEntity.ok(adminRepository.findAll());
+    public ResponseEntity<List<AdminDTO>> listAdmins() {
+        List<AdminDTO> dtos = adminRepository.findAll().stream().map(AdminMapper::fromEntity).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/admins/{id}")
-    public ResponseEntity<Admin> getAdmin(@PathVariable Long id) {
-        return adminRepository.findById(id)
-                .map(ResponseEntity::ok)
+    public ResponseEntity<AdminDTO> getAdmin(@PathVariable Long id) {
+        return adminRepository.findById(id).map(AdminMapper::fromEntity).map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/admins/{id}")
-    public ResponseEntity<Admin> updateAdmin(@PathVariable Long id, @RequestBody Admin admin) {
+    public ResponseEntity<AdminDTO> updateAdmin(@PathVariable Long id, @RequestBody AdminDTO adminDto) {
         return adminRepository.findById(id).map(existing -> {
-            existing.setNome(admin.getNome());
-            existing.setEmail(admin.getEmail());
-            // atualizar outros campos necessários (não sobrescrever senha sem hash)
-            adminRepository.save(existing);
-            return ResponseEntity.ok(existing);
+            existing.setNome(adminDto.getNome());
+            existing.setEmail(adminDto.getEmail());
+
+            if (adminDto.getPassword() != null && !adminDto.getPassword().isBlank()) {
+                existing.setPassword(adminDto.getPassword());
+            }
+
+            Administrador updated = adminRepository.save(existing);
+            return ResponseEntity.ok(AdminDTO.fromEntity(updated));
         }).orElse(ResponseEntity.notFound().build());
     }
 
@@ -95,11 +86,12 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
-    // ---------- Produtos (admins podem criar/excluir) ----------
+    // Produtos com DTOs
     @PostMapping("/products")
-    public ResponseEntity<Produto> createProduct(@RequestBody Produto produto) {
+    public ResponseEntity<ProdutoDTO> createProduct(@RequestBody ProdutoDTO produtoDto) {
+        Produto produto = ProdutoMapper.toEntity(produtoDto);
         Produto saved = produtoRepository.save(produto);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(ProdutoMapper.fromEntity(saved));
     }
 
     @DeleteMapping("/products/{id}")
@@ -110,25 +102,24 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
-    // ---------- Troca/Devolução (aprovar / reprovar) ----------
+    // Aprovar / rejeitar troca - retorna DTOs
     @PostMapping("/exchanges/{id}/approve")
-    public ResponseEntity<?> approveExchange(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> approveExchange(@PathVariable Long id) {
         Optional<Troca> trocaOpt = trocaRepository.findById(id);
         if (trocaOpt.isEmpty())
             return ResponseEntity.notFound().build();
 
         Troca troca = trocaOpt.get();
         if ("APPROVED".equalsIgnoreCase(troca.getStatus())) {
-            return ResponseEntity.badRequest().body("Troca já aprovada");
+            return ResponseEntity.badRequest().body(Map.of("error", "Troca já aprovada"));
         }
 
-        // marcar como aprovado
         troca.setStatus("APPROVED");
         troca.setDecisaoPor("admin");
         troca.setDecisionAt(LocalDateTime.now());
         trocaRepository.save(troca);
 
-        double valor = troca.getValor() <= 0 ? computeOrderTotalForTroca(troca) : troca.getValor();
+        double valor = Optional.ofNullable(troca.getValor()).orElse(0.0);
         Cupom cupom = new Cupom();
         cupom.setCodigo("CPN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         cupom.setValor((float) valor);
@@ -136,11 +127,15 @@ public class AdminController {
         cupom.setExpiracao(LocalDateTime.now().plusMonths(3));
         cupomRepository.save(cupom);
 
-        return ResponseEntity.ok(Map.of("troca", troca.getId(), "cupom", cupom.getCodigo(), "valor", cupom.getValor()));
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("troca", TrocaMapper.fromEntity(troca));
+        resp.put("cupom", CupomMapper.fromEntity(cupom));
+        return ResponseEntity.ok(resp);
     }
 
     @PostMapping("/exchanges/{id}/reject")
-    public ResponseEntity<?> rejectExchange(@PathVariable Long id, @RequestParam(required = false) String motivo) {
+    public ResponseEntity<TrocaDTO> rejectExchange(@PathVariable Long id,
+            @RequestParam(required = false) String motivo) {
         Optional<Troca> trocaOpt = trocaRepository.findById(id);
         if (trocaOpt.isEmpty())
             return ResponseEntity.notFound().build();
@@ -152,29 +147,14 @@ public class AdminController {
         troca.setDecisionAt(LocalDateTime.now());
         trocaRepository.save(troca);
 
-        return ResponseEntity.ok(Map.of("troca", troca.getId(), "status", troca.getStatus()));
+        return ResponseEntity.ok(TrocaMapper.fromEntity(troca));
     }
 
-    private double computeOrderTotalForTroca(Troca troca) {
-        if (troca.getPedidoId() == null)
-            return 0.0;
-        Optional<Pedido> pedidoOpt = pedidoRepository.findById(troca.getPedidoId());
-        if (pedidoOpt.isEmpty())
-            return 0.0;
-        Pedido pedido = pedidoOpt.get();
-        // se Pedido possui total:
-        if (pedido.getTotal() != null)
-            return pedido.getTotal();
-        // caso contrário soma itens
-        List<PedidoItem> items = pedidoItemRepository.findByPedidoId(pedido.getId());
-        return items.stream().mapToDouble(it -> it.getQuantidade() * it.getPrecoUnitario()).sum();
-    }
-
+    // Estatísticas de vendas (mantém privacidade) - delega service
     @GetMapping("/sales/stats")
     public ResponseEntity<Map<String, Object>> salesStats(
             @RequestParam(required = false) String since,
             @RequestParam(required = false) String until) {
-
         Map<String, Object> stats = salesService.computeSalesStats(since, until);
         return ResponseEntity.ok(stats);
     }

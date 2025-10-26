@@ -6,9 +6,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import umc.exs.model.Cartao;
-import umc.exs.model.Cliente;
-import umc.exs.model.Endereco;
+import umc.exs.model.entidades.Cartao;
+import umc.exs.model.entidades.Cliente;
+import umc.exs.model.entidades.Endereco;
 import umc.exs.repository.CartaoRepository;
 import umc.exs.repository.EnderecoRepository;
 import umc.exs.repository.ClienteRepository;
