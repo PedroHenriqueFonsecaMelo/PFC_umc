@@ -1,16 +1,32 @@
 package umc.exs.controller;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import umc.exs.backstage.service.SalesService;
+import umc.exs.model.DAO.AdminMapper;
+import umc.exs.model.DAO.ProdutoMapper;
+import umc.exs.model.DAO.TrocaMapper;
 import umc.exs.model.DTO.AdminDTO;
 import umc.exs.model.DTO.ProdutoDTO;
 import umc.exs.model.DTO.TrocaDTO;
-import umc.exs.mapper.AdminMapper;
-import umc.exs.mapper.CupomMapper;
-import umc.exs.mapper.ProdutoMapper;
-import umc.exs.mapper.TrocaMapper;
 import umc.exs.model.compras.Cupom;
 import umc.exs.model.compras.Troca;
 import umc.exs.model.foundation.Administrador;
@@ -19,13 +35,10 @@ import umc.exs.repository.AdminRepository;
 import umc.exs.repository.CupomRepository;
 import umc.exs.repository.ProdutoRepository;
 import umc.exs.repository.TrocaRepository;
-import umc.exs.service.SalesService;
-
-import java.time.LocalDateTime;
-import java.util.*;
 
 @RestController
 @RequestMapping("/admin")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     @Autowired
@@ -106,8 +119,7 @@ public class AdminController {
     @PostMapping("/exchanges/{id}/approve")
     public ResponseEntity<Map<String, Object>> approveExchange(@PathVariable Long id) {
         Optional<Troca> trocaOpt = trocaRepository.findById(id);
-        if (trocaOpt.isEmpty())
-            return ResponseEntity.notFound().build();
+        if (trocaOpt.isEmpty()) return ResponseEntity.notFound().build();
 
         Troca troca = trocaOpt.get();
         if ("APPROVED".equalsIgnoreCase(troca.getStatus())) {
@@ -119,7 +131,11 @@ public class AdminController {
         troca.setDecisionAt(LocalDateTime.now());
         trocaRepository.save(troca);
 
-        double valor = Optional.ofNullable(troca.getValor()).orElse(0.0);
+        if (troca.getValor() == null || troca.getValor() <= 0) {
+            troca.setValor(0.0);
+        }
+
+        double valor = troca.getValor() != null && troca.getValor() > 0 ? troca.getValor() : 0.0;
         Cupom cupom = new Cupom();
         cupom.setCodigo("CPN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         cupom.setValor((float) valor);
@@ -129,7 +145,8 @@ public class AdminController {
 
         Map<String, Object> resp = new HashMap<>();
         resp.put("troca", TrocaMapper.fromEntity(troca));
-        resp.put("cupom", CupomMapper.fromEntity(cupom));
+        // retornar apenas o código do cupom (String) para compatibilidade com o teste
+        resp.put("cupom", cupom.getCodigo());
         return ResponseEntity.ok(resp);
     }
 
