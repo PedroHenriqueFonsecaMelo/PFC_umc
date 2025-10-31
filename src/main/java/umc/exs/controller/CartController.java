@@ -15,7 +15,7 @@ import umc.exs.model.DTO.PagamentoDTO;
 import umc.exs.model.compras.Carrinho;
 import umc.exs.model.entidades.Cliente;
 import umc.exs.repository.ClienteRepository;
-import umc.exs.service.CarrinhoService;
+import umc.exs.backstage.service.CarrinhoService;
 
 @RestController
 @RequestMapping("/cart")

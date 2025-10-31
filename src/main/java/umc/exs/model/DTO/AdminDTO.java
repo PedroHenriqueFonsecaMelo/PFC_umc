@@ -6,7 +6,7 @@ public class AdminDTO {
     private Long id;
     private String nome;
     private String email;
-    private String password; // <-- adicionamos este campo
+    private String password;
 
     public AdminDTO() {
     }
