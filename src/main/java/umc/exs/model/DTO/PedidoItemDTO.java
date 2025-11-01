@@ -12,6 +12,7 @@ public class PedidoItemDTO {
     public PedidoItemDTO() {
     }
 
+    // Converte uma entidade PedidoItem em um PedidoItemDTO
     public static PedidoItemDTO fromEntity(PedidoItem it) {
         if (it == null)
             return null;
@@ -24,6 +25,7 @@ public class PedidoItemDTO {
         return dto;
     }
 
+    // Converte um PedidoItemDTO de volta para a entidade PedidoItem
     public PedidoItem toEntity() {
         PedidoItem it = new PedidoItem();
         it.setId(this.id);
@@ -34,7 +36,7 @@ public class PedidoItemDTO {
         return it;
     }
 
-    // getters/setters
+    // Getters e Setters
     public Long getId() {
         return id;
     }

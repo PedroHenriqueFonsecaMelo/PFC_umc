@@ -46,7 +46,7 @@ public class CompraFluxoIntegrationTest {
         cliente.setNome("Cliente Teste");
         cliente.setEmail("cliente+" + System.currentTimeMillis() + "@example.com");
         cliente.setSenha("senha-plain");
-        cliente.setGen("M");
+        
         cliente.setDatanasc(LocalDate.of(1990, 1, 1).toString());
         Cliente savedCliente = clienteRepository.save(cliente);
         assertThat(savedCliente.getId()).isNotNull();
