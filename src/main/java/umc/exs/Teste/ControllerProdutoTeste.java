@@ -19,7 +19,8 @@ public class ControllerProdutoTeste {
     public ResponseEntity<Produto> cadastrarProduto() {
         Produto produto = new Produto();
         produto.setTitulo("Fone de Ouvido Bluetooth");
-        produto.setPrecificacao(199.90f);
+        produto.setPrecificacao(new java.math.BigDecimal("199.99"));
+        produto.setDescricaoDoProduto("Fone de ouvido sem fio com alta qualidade de som e cancelamento de ruído.");
 
         Produto saved = produtoRepository.save(produto);
         return ResponseEntity.ok(saved);
