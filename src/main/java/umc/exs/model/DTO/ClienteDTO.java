@@ -8,16 +8,18 @@ public class ClienteDTO {
     private String email;
     private String datanasc;
     private String gen;
+    private String senha;
 
     public ClienteDTO() {
     }
 
-    public ClienteDTO(Long id, String nome, String email, String datanasc, String gen) {
+    public ClienteDTO(Long id, String nome, String email, String senha, String datanasc, String gen) {
         this.id = id;
         this.nome = nome;
         this.email = email;
         this.datanasc = datanasc;
         this.gen = gen;
+        this.senha = senha;
     }
 
     public static ClienteDTO fromEntity(Cliente c) {
@@ -29,6 +31,7 @@ public class ClienteDTO {
         dto.email = c.getEmail();
         dto.datanasc = c.getDatanasc();
         dto.gen = c.getGen();
+        dto.senha = c.getSenha();
         return dto;
     }
 
@@ -39,6 +42,7 @@ public class ClienteDTO {
         c.setEmail(this.email);
         c.setDatanasc(this.datanasc);
         c.setGen(this.gen);
+        c.setSenha(this.senha);
         return c;
     }
 
@@ -81,5 +85,11 @@ public class ClienteDTO {
 
     public void setGen(String gen) {
         this.gen = gen;
+    }
+    public String getSenha() {
+        return senha;
+    }
+    public void setSenha(String senha) {
+        this.senha = senha;
     }
 }

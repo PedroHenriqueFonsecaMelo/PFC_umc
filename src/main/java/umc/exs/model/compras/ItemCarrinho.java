@@ -1,5 +1,7 @@
 package umc.exs.model.compras;
 
+import java.math.BigDecimal;
+
 import umc.exs.model.foundation.Produto;
 
 public class ItemCarrinho {
@@ -28,5 +30,10 @@ public class ItemCarrinho {
 
     public void setQuantidade(int quantidade) {
         this.quantidade = quantidade;
+    }
+
+    public BigDecimal calcularSubtotal() {
+
+        return this.getProduto().getPrecificacao().multiply(new BigDecimal(this.getQuantidade()));
     }
 }

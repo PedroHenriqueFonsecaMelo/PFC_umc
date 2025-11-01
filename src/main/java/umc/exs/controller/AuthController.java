@@ -49,7 +49,11 @@ public class AuthController {
         String nome = FieldValidation.sanitize(dto.getNome());
 
         if (email == null || nome == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "invalid input"));
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid input"));
+        }
+
+        if (!FieldValidation.isValidEmail(email)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid email format"));
         }
 
         if (dto.getTermsAccepted() == null || !dto.getTermsAccepted()
@@ -64,10 +68,9 @@ public class AuthController {
         }
 
         Cliente c = ClienteMapper.toEntityFromSignup(dto);
-        c.setSenha(passwordEncoder.encode(dto.getPassword()));
+        c.setSenha(passwordEncoder.encode(dto.getSenha()));
         clienteRepository.save(c);
 
-        // ✅ Retorna CREATED (201) conforme esperado no teste
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Map.of("message", "Client created successfully"));
     }
@@ -83,7 +86,11 @@ public class AuthController {
             String password = FieldValidation.sanitize(loginDto.getPassword());
 
             if (email == null || password == null) {
-                return ResponseEntity.badRequest().body(Map.of("error", "invalid input"));
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid input"));
+            }
+
+            if (!FieldValidation.isValidEmail(email)) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid email format"));
             }
 
             authManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
@@ -92,7 +99,7 @@ public class AuthController {
             return ResponseEntity.ok(Map.of("token", token));
         } catch (AuthenticationException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "invalid credentials"));
+                    .body(Map.of("error", "Invalid credentials"));
         }
     }
 

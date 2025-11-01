@@ -7,10 +7,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import java.math.BigDecimal;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Produto {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,8 +21,12 @@ public class Produto {
     private String titulo;
 
     @Column(nullable = false)
-    private float precificacao;
+    private BigDecimal precificacao;  // Usando BigDecimal para maior precisão
 
+    @Column(nullable = false, length = 2000)
+    private String descricaoDoProduto;  // Nome em camelCase
+
+    // Getters e setters
     public Long getId() {
         return id;
     }
@@ -37,11 +43,23 @@ public class Produto {
         this.titulo = titulo;
     }
 
-    public float getPrecificacao() {
+    public BigDecimal getPrecificacao() {
         return precificacao;
     }
 
-    public void setPrecificacao(float precificacao) {
+    public void setPrecificacao(BigDecimal precificacao) {
         this.precificacao = precificacao;
+    }
+
+    public String getDescricaoDoProduto() {
+        return descricaoDoProduto;
+    }
+
+    public void setDescricaoDoProduto(String descricaoDoProduto) {
+        this.descricaoDoProduto = descricaoDoProduto;
+    }
+
+    public void setPrecificacao(float f) {
+        this.precificacao = BigDecimal.valueOf(f);
     }
 }

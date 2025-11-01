@@ -1,21 +1,19 @@
 package umc.exs.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import umc.exs.model.DTO.PagamentoDTO;
+
 import umc.exs.model.compras.Carrinho;
-import umc.exs.model.entidades.Cliente;
 import umc.exs.repository.ClienteRepository;
 import umc.exs.backstage.service.CarrinhoService;
+
+import java.util.List;
+
+import umc.exs.model.DTO.CarrinhoDTO;
+import umc.exs.model.entidades.Cliente;
 
 @RestController
 @RequestMapping("/cart")
@@ -30,36 +28,36 @@ public class CartController {
     // Adiciona produto ao carrinho
     @PostMapping("/add")
     public ResponseEntity<Carrinho> addProduto(@RequestParam Long produtoId, @RequestParam int quantidade) {
-        Carrinho carrinho = carrinhoService.addProduto(produtoId, quantidade);
-        return ResponseEntity.ok(carrinho);
+        CarrinhoDTO carrinho = carrinhoService.addProduto(produtoId, quantidade);
+        return ResponseEntity.ok(carrinho.toEntity());
     }
 
     // Remove produto do carrinho
     @PostMapping("/remove")
     public ResponseEntity<Carrinho> removeProduto(@RequestParam Long produtoId) {
-        Carrinho carrinho = carrinhoService.removeProduto(produtoId);
-        return ResponseEntity.ok(carrinho);
+        CarrinhoDTO carrinho = carrinhoService.removeProduto(produtoId);
+        return ResponseEntity.ok(carrinho.toEntity());
     }
 
     // Aplica cupom
     @PostMapping("/cupom")
     public ResponseEntity<Carrinho> aplicarCupom(@RequestParam String codigo) {
-        Carrinho carrinho = carrinhoService.aplicarCupom(codigo);
-        return ResponseEntity.ok(carrinho);
+        CarrinhoDTO carrinho = carrinhoService.aplicarCupom(codigo);
+        return ResponseEntity.ok(carrinho.toEntity());
     }
 
     // Define endereço de entrega
     @PostMapping("/endereco")
     public ResponseEntity<Carrinho> setEndereco(@RequestParam Long enderecoId) {
-        Carrinho carrinho = carrinhoService.setEndereco(enderecoId);
-        return ResponseEntity.ok(carrinho);
+        CarrinhoDTO carrinho = carrinhoService.setEndereco(enderecoId);
+        return ResponseEntity.ok(carrinho.toEntity());
     }
 
     // Define cartões e valores para pagamento
-   @PostMapping("/pagamento")
+    @PostMapping("/pagamento")
     public ResponseEntity<?> setPagamentos(@RequestBody List<PagamentoDTO> pagamentos) {
         try {
-            Carrinho carrinho = carrinhoService.setPagamentos(pagamentos);
+            CarrinhoDTO carrinho = carrinhoService.setPagamentos(pagamentos);
             return ResponseEntity.ok(carrinho);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -81,6 +79,6 @@ public class CartController {
     // Consulta carrinho
     @GetMapping
     public ResponseEntity<Carrinho> getCarrinho() {
-        return ResponseEntity.ok(carrinhoService.getCarrinho());
+        return ResponseEntity.ok(carrinhoService.getCarrinho().toEntity());
     }
 }

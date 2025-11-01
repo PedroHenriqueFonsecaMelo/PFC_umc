@@ -1,5 +1,6 @@
 package umc.exs.backstage.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import umc.exs.model.DTO.PagamentoDTO;
+import umc.exs.model.DTO.CarrinhoDTO;
 import umc.exs.model.compras.Carrinho;
 import umc.exs.model.compras.Cupom;
 import umc.exs.model.compras.ItemCarrinho;
@@ -21,6 +23,7 @@ import umc.exs.repository.ProdutoRepository;
 
 @Service
 public class CarrinhoService {
+
     private Carrinho carrinho = new Carrinho();
 
     @Autowired
@@ -30,75 +33,77 @@ public class CarrinhoService {
     @Autowired
     private EnderecoRepository enderecoRepository;
 
-    
-
-    public Carrinho addProduto(Long produtoId, int quantidade) {
-
+    // Adiciona produto ao carrinho
+    public CarrinhoDTO addProduto(Long produtoId, int quantidade) {
         Produto produto = buscarProduto(produtoId);
         if (produto == null)
             throw new RuntimeException("Produto não encontrado");
         carrinho.getItens().add(new ItemCarrinho(produto, quantidade));
         recalcularTotal();
-        return carrinho;
+        return CarrinhoDTO.fromEntity(carrinho);
     }
 
-    public Carrinho removeProduto(Long produtoId) {
+    // Remove produto do carrinho
+    public CarrinhoDTO removeProduto(Long produtoId) {
         carrinho.getItens().removeIf(i -> i.getProduto().getId().equals(produtoId));
         recalcularTotal();
-        return carrinho;
+        return CarrinhoDTO.fromEntity(carrinho);
     }
 
-    public Carrinho aplicarCupom(String codigo) {
-        // Buscar cupom no banco
+    // Aplica um cupom ao carrinho
+    public CarrinhoDTO aplicarCupom(String codigo) {
         Cupom cupom = buscarCupom(codigo);
         carrinho.setCupom(cupom);
         recalcularTotal();
-        return carrinho;
+        return CarrinhoDTO.fromEntity(carrinho);
     }
 
-    public Carrinho setEndereco(Long enderecoId) {
-        // Buscar endereço no banco
+    // Define o endereço de entrega para o carrinho
+    public CarrinhoDTO setEndereco(Long enderecoId) {
         Endereco endereco = buscarEndereco(enderecoId);
         carrinho.setEndereco(endereco);
-        return carrinho;
+        return CarrinhoDTO.fromEntity(carrinho);
     }
 
-    public Carrinho setPagamentos(List<PagamentoDTO> pagamentos) {
+    // Define os pagamentos para o carrinho
+    public CarrinhoDTO setPagamentos(List<PagamentoDTO> pagamentos) {
         if (pagamentos == null || pagamentos.isEmpty()) {
             throw new RuntimeException("É necessário informar pelo menos um pagamento.");
         }
 
-        float soma = 0f;
+        BigDecimal soma = BigDecimal.ZERO;
         for (PagamentoDTO p : pagamentos) {
             if (p.getCartaoId() == null) {
                 throw new RuntimeException("Cartão não informado em um dos pagamentos.");
             }
 
-            if (p.getValor() <= 0f) {
+            if (p.getValor().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new RuntimeException("Valor inválido para o cartão " + p.getCartaoId());
             }
-            soma += p.getValor();
+            soma = soma.add(p.getValor()); // Usa BigDecimal para somar valores
         }
 
-        float totalCarrinho = carrinho.getTotal();
-        if (Math.abs(soma - totalCarrinho) > 0.01f) {
+        BigDecimal totalCarrinho = new BigDecimal(carrinho.getTotal());
+        if (soma.compareTo(totalCarrinho) != 0) { // Usa compareTo para comparar BigDecimal
             throw new RuntimeException("A soma dos pagamentos (" + soma +
                     ") é diferente do total do carrinho (" + totalCarrinho + ").");
         }
 
         carrinho.setPagamentos(pagamentos);
-        return carrinho;
+        return CarrinhoDTO.fromEntity(carrinho);
     }
 
     /**
      * Finaliza a compra para o cliente fornecido.
-     * Garante que um endereço válido seja usado (tenta obter do cliente, senão do repository).
+     * Garante que um endereço válido seja usado (tenta obter do cliente, senão do
+     * repository).
      */
     @Transactional
     public boolean finalizarCompra(Cliente cliente) {
-        if (cliente == null) throw new IllegalArgumentException("cliente is required");
+        if (cliente == null)
+            throw new IllegalArgumentException("cliente is required");
 
-        Carrinho carrinho = this.getCarrinhoAtual(); 
+        carrinho = this.getCarrinhoAtual();
 
         Endereco endereco = null;
         Set<Endereco> enderecosCliente = cliente.getEnderecos();
@@ -118,36 +123,47 @@ public class CarrinhoService {
                         }
                     })
                     .findFirst();
-            if (found.isPresent()) endereco = found.get();
+            if (found.isPresent())
+                endereco = found.get();
         }
 
         if (carrinho.getEndereco() == null && endereco != null) {
             carrinho.setEndereco(endereco);
         }
 
-        // se ainda não houver endereço, lançar exceção com mensagem clara (preserva semântica)
         if (carrinho.getEndereco() == null) {
             throw new RuntimeException("Endereço não definido");
         }
-        // ---------------------------------------------------------------
 
+        // Compra finalizada com sucesso
         return true;
     }
 
-    public Carrinho getCarrinho() {
-        return carrinho;
+    // Retorna o carrinho atual
+    public CarrinhoDTO getCarrinho() {
+        return CarrinhoDTO.fromEntity(carrinho);
     }
 
     private void recalcularTotal() {
-        float total = 0;
+
+        BigDecimal total = BigDecimal.ZERO;
+        BigDecimal frete = new BigDecimal(Math.random() * 20 + 5);
+
         for (ItemCarrinho item : carrinho.getItens()) {
-            total += item.getProduto().getPrecificacao() * item.getQuantidade();
+            BigDecimal precoUnitario = item.getProduto().getPrecificacao();
+            BigDecimal quantidade = new BigDecimal(item.getQuantidade());
+            total = total.add(precoUnitario.multiply(quantidade)); // Multiplica usando BigDecimal
         }
-        float frete = (float) (Math.random() * 20 + 5);
-        if (carrinho.getCupom() != null)
-            total -= carrinho.getCupom().getValor();
-        carrinho.setFrete(frete);
-        carrinho.setTotal(total + frete);
+
+        if (carrinho.getCupom() != null) {
+            total = total.subtract(new BigDecimal(carrinho.getCupom().getValor())); // Subtrai o cupom
+        }
+
+        // Somar o valor do frete
+        total = total.add(frete);
+
+        carrinho.setFrete(frete.floatValue()); // Convertendo o BigDecimal de volta para float para o carrinho
+        carrinho.setTotal(total.floatValue()); // Faz o mesmo para o total final
     }
 
     private Produto buscarProduto(Long id) {
@@ -163,7 +179,6 @@ public class CarrinhoService {
     }
 
     private Carrinho getCarrinhoAtual() {
-
-        return this.carrinho; 
+        return this.carrinho;
     }
 }

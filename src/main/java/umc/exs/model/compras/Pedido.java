@@ -30,7 +30,7 @@ public class Pedido {
     private Long enderecoId;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PedidoItem> itens = new ArrayList<>();
+    private final List<PedidoItem> itens = new ArrayList<>();
 
     public Pedido() {}
 

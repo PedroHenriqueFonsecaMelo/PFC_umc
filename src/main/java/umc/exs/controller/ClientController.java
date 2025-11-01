@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
 import umc.exs.backstage.service.FieldValidation;
 import umc.exs.model.DAO.CartaoMapper;
 import umc.exs.model.DAO.ClienteMapper;
@@ -55,6 +56,9 @@ public class ClientController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private HttpServletRequest request;
+
     /**
      * Criar cliente (compatível com testes existentes).
      * Aceita JSON com chaves em português (ex: "senha") e retorna token JWT +
@@ -62,10 +66,9 @@ public class ClientController {
      */
     @PostMapping
     public ResponseEntity<?> criarCliente(@RequestBody Map<String, Object> signup) {
-        // ler/sanitizar campos esperados pelo teste
         String email = FieldValidation.sanitizeEmail((String) signup.get("email"));
         String nome = FieldValidation.sanitize((String) signup.get("nome"));
-        String senha = FieldValidation.sanitize((String) signup.get("senha")); // teste usa "senha"
+        String senha = FieldValidation.sanitize((String) signup.get("senha"));
         String datanasc = FieldValidation.sanitize((String) signup.get("datanasc"));
         String gen = FieldValidation.sanitize((String) signup.get("gen"));
 
@@ -73,12 +76,12 @@ public class ClientController {
             return ResponseEntity.badRequest().body(Map.of("error", "invalid input"));
         }
 
-        // duplicate email check
+        // Verificar email duplicado
         if (clienteRepository.findByEmail(email).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "email already registered"));
         }
 
-        // cria entidade e salva
+        // Criar entidade e salvar
         Cliente c = new Cliente();
         c.setEmail(email);
         c.setNome(nome);
@@ -87,9 +90,10 @@ public class ClientController {
         c.setSenha(passwordEncoder.encode(senha));
         Cliente saved = clienteRepository.save(c);
 
-        // gerar token JWT (para compatibilidade com antigos testes)
+        // Gerar token JWT
         String token = jwtUtil.generateToken(saved.getEmail());
 
+        // Usar Map explícito com tipo seguro
         Map<String, Object> resp = new HashMap<>();
         resp.put("token", token);
         resp.put("cliente", ClienteMapper.fromEntity(saved));
@@ -145,53 +149,97 @@ public class ClientController {
      * Apenas administradores têm permissão para essa operação.
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id") // Verifica se é o próprio cliente ou admin
     public ResponseEntity<Void> deletarCliente(@PathVariable Long id) {
         Optional<Cliente> clienteOpt = clienteRepository.findById(id);
         if (clienteOpt.isPresent()) {
             Cliente cli = clienteOpt.get();
-            // anonymize fields explicitly using entity setters
-            cli.setNome("ANON-" + UUID.randomUUID().toString().substring(0, 8));
-            cli.setEmail("anon+" + UUID.randomUUID().toString().substring(0, 8) + "@example.invalid");
-            cli.setDatanasc(null);
-            cli.setGen(null);
-            try {
-                cli.getClass().getMethod("setCpf", String.class).invoke(cli, (Object) null);
-            } catch (IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException ignored) {
+
+            // Se o cliente autenticado não for o próprio cliente ou um admin, negar a
+            // operação
+            if (!isClienteAutenticado(id)) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN); // Retorna Forbidden se não for o mesmo cliente
             }
 
-            // anonymize related addresses and cards (use entity API)
-            Set<Endereco> enderecos = cli.getEnderecos();
-            if (enderecos != null) {
-                for (Endereco e : enderecos) {
-                    e.setRua(null);
-                    e.setCidade(null);
-                    e.setBairro(null);
-                    e.setComplemento(null);
-                    try {
-                        e.setNumero("0");
-                    } catch (Exception ignored) {
-                    }
-                    enderecoRepository.save(e);
-                }
-            }
-            Set<Cartao> cartoes = cli.getCartoes();
-            if (cartoes != null) {
-                for (Cartao cc : cartoes) {
-                    cc.setNumero("0");
-                    cc.setCvv("0");
-                    cc.setNomeTitular("ANON");
-                    cartaoRepository.save(cc);
-                }
-            }
+            // Anonimizar os dados sensíveis do cliente
+            anonymizeClientData(cli);
+
+            // Anonimizar os dados relacionados
+            anonymizeRelatedData(cli);
+
+            // Salvar as alterações no banco
             clienteRepository.save(cli);
+
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    // Relationship endpoints
+    private void anonymizeClientData(Cliente cli) {
+        // Anonimizar campos sensíveis do cliente
+        cli.setNome("ANON-" + UUID.randomUUID().toString().substring(0, 8));
+        cli.setEmail("anon+" + UUID.randomUUID().toString().substring(0, 8) + "@example.invalid");
+        cli.setDatanasc(null);
+        cli.setGen(null);
+
+        // Se houver um CPF, anonimize também (se o CPF for armazenado)
+        try {
+            cli.getClass().getMethod("setCpf", String.class).invoke(cli, (Object) null);
+        } catch (IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException ignored) {
+        }
+    }
+
+    private void anonymizeRelatedData(Cliente cli) {
+        // Anonimizar endereços relacionados
+        Set<Endereco> enderecos = cli.getEnderecos();
+        if (enderecos != null) {
+            for (Endereco e : enderecos) {
+                // Não remover o histórico, mas anonimizar os dados
+                e.setRua(null);
+                e.setCidade(null);
+                e.setBairro(null);
+                e.setComplemento(null);
+                e.setNumero("0");
+                enderecoRepository.save(e); // Atualiza no banco sem os dados sensíveis
+            }
+        }
+
+        // Anonimizar cartões relacionados
+        Set<Cartao> cartoes = cli.getCartoes();
+        if (cartoes != null) {
+            for (Cartao cc : cartoes) {
+                // Não remover o histórico, mas anonimizar os dados sensíveis
+                cc.setNumero("0"); // Cartão fictício
+                cc.setCvv("0"); // CVV fictício
+                cc.setNomeTitular("ANON");
+                cartaoRepository.save(cc); // Atualiza no banco
+            }
+        }
+    }
+
+    private boolean isClienteAutenticado(Long clienteId) {
+        // Obter o token JWT do cabeçalho Authorization
+        String token = obterTokenDaRequisicao(); // Implemente este método para pegar o token da requisição
+        if (token == null) {
+            return false; // Ou algum comportamento desejado se o token não for encontrado
+        }
+
+        // Agora passa o token para o método getUserIdFromToken
+        String clienteAutenticadoId = jwtUtil.getUserIdFromToken(token);
+        return clienteAutenticadoId != null && clienteAutenticadoId.equals(clienteId.toString());
+    }
+
+    // Exemplo de método que extrai o token da requisição
+    private String obterTokenDaRequisicao() {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7); // Retorna o token sem o prefixo "Bearer "
+        }
+        return null;
+    }
+
+    // Relacionamento com Endereços e Cartões
     /**
      * Adiciona um novo endereço ao cliente especificado.
      * Requer autenticação como USER ou ADMIN.
@@ -203,10 +251,11 @@ public class ClientController {
         if (clienteOpt.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         Endereco e = EnderecoMapper.toEntity(enderecoDto);
-        // set explicit cliente-association field if exists
+        // Associar explicitamente o cliente ao endereço
         try {
             e.getClass().getMethod("setClienteId", Long.class).invoke(e, clienteId);
-        } catch (IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException ignored) {
+        } catch (IllegalAccessException | NoSuchMethodException | SecurityException
+                | InvocationTargetException ignored) {
         }
         Endereco salvo = enderecoRepository.save(e);
         Cliente c = clienteOpt.get();
@@ -240,7 +289,8 @@ public class ClientController {
         Cartao cartao = CartaoMapper.toEntity(cartaoDto);
         try {
             cartao.getClass().getMethod("setClienteId", Long.class).invoke(cartao, clienteId);
-        } catch (IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException ignored) {
+        } catch (IllegalAccessException | NoSuchMethodException | SecurityException
+                | InvocationTargetException ignored) {
         }
         Cartao salvo = cartaoRepository.save(cartao);
         Cliente c = clienteOpt.get();

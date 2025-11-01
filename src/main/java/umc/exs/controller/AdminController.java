@@ -119,7 +119,8 @@ public class AdminController {
     @PostMapping("/exchanges/{id}/approve")
     public ResponseEntity<Map<String, Object>> approveExchange(@PathVariable Long id) {
         Optional<Troca> trocaOpt = trocaRepository.findById(id);
-        if (trocaOpt.isEmpty()) return ResponseEntity.notFound().build();
+        if (trocaOpt.isEmpty())
+            return ResponseEntity.notFound().build();
 
         Troca troca = trocaOpt.get();
         if ("APPROVED".equalsIgnoreCase(troca.getStatus())) {
@@ -135,14 +136,17 @@ public class AdminController {
             troca.setValor(0.0);
         }
 
-        double valor = troca.getValor() != null && troca.getValor() > 0 ? troca.getValor() : 0.0;
+        Double valorTroca = troca.getValor();
+
+        Double valor = valorTroca != null && valorTroca > 0 ? valorTroca : 0.0;
+
+        // O restante do código permanece o mesmo
         Cupom cupom = new Cupom();
         cupom.setCodigo("CPN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
-        cupom.setValor((float) valor);
+        cupom.setValor(valor.floatValue());
         cupom.setClienteId(troca.getClienteId());
         cupom.setExpiracao(LocalDateTime.now().plusMonths(3));
         cupomRepository.save(cupom);
-
         Map<String, Object> resp = new HashMap<>();
         resp.put("troca", TrocaMapper.fromEntity(troca));
         // retornar apenas o código do cupom (String) para compatibilidade com o teste
