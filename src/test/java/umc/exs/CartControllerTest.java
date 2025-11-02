@@ -16,7 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 
-import umc.exs.model.DTO.PagamentoDTO;
+import umc.exs.model.DTO.purchase.PagamentoDTO;
 import umc.exs.model.compras.Carrinho;
 import umc.exs.model.entidades.Cliente;
 import umc.exs.model.entidades.Endereco;

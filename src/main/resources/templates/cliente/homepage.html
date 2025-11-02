@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Minha Conta</title>
+</head>
+<body>
+<h1>Minha Conta</h1>
+
+<div th:if="${cliente != null}">
+    <p><strong th:text="${cliente.nome}">Nome</strong></p>
+    <p><span th:text="${cliente.email}">email@example.com</span></p>
+    <p>Data de nascimento: <span th:text="${cliente.datanasc}">1990-01-01</span></p>
+    <p>Gênero: <span th:text="${cliente.gen}">M</span></p>
+
+    <p><a th:href="@{|/clientes/${cliente.id}/remover|}">Remover conta</a></p>
+</div>
+
+<div th:if="${cliente == null}">
+    <p>Cliente não encontrado.</p>
+    <a th:href="@{/clientes/cadastro}">Criar conta</a>
+</div>
+
+</body>
+</html>

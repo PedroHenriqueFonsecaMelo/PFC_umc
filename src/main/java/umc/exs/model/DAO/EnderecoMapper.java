@@ -1,6 +1,6 @@
 package umc.exs.model.DAO;
 
-import umc.exs.model.DTO.EnderecoDTO;
+import umc.exs.model.DTO.user.EnderecoDTO;
 import umc.exs.model.entidades.Endereco;
 
 public class EnderecoMapper {

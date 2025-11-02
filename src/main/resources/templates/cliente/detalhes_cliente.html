@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes do Cliente</title>
+</head>
+<body>
+    <h1>Detalhes do Cliente</h1>
+
+    <div th:if="${cliente == null}">
+        <p>Cliente não encontrado.</p>
+        <a th:href="@{/}">Voltar</a>
+    </div>
+
+    <div th:if="${cliente != null}">
+        <p><strong>ID:</strong> <span th:text="${cliente.id}">1</span></p>
+        <p><strong>Nome:</strong> <span th:text="${cliente.nome}">Teste Usuario</span></p>
+        <p><strong>Email:</strong> <span th:text="${cliente.email}">teste+user@example.com</span></p>
+        <p><strong>Data de Nascimento:</strong> <span th:text="${cliente.datanasc}">1990-01-01</span></p>
+        <p><strong>Gênero:</strong> <span th:text="${cliente.gen}">M</span></p>
+
+        <a th:href="@{|/clientes/${cliente.id}/atualizar|}">Atualizar</a> |
+        <a th:href="@{|/clientes/${cliente.id}/remover|}">Remover</a> |
+        <a th:href="@{/}">Ir para Início</a>
+    </div>
+</body>
+</html>

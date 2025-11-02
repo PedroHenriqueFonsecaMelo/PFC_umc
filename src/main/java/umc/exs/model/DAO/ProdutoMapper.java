@@ -1,6 +1,6 @@
 package umc.exs.model.DAO;
 
-import umc.exs.model.DTO.ProdutoDTO;
+import umc.exs.model.DTO.admin.ProdutoDTO;
 import umc.exs.model.foundation.Produto;
 
 public class ProdutoMapper {
