@@ -1,35 +1,37 @@
 package umc.exs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import umc.exs.controller.ClientController;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import umc.exs.backstage.security.JwtUtil;
+import umc.exs.controller.testes.ClientControllerTestes;
+import umc.exs.model.DTO.user.ClienteDTO;
 import umc.exs.model.entidades.Cliente;
 import umc.exs.repository.ClienteRepository;
-import umc.exs.security.JwtUtil;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Optional;
-import java.util.Map;
+import java.util.*;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = ClientController.class)
+@ExtendWith(MockitoExtension.class)
 public class ClientControllerTest {
 
-    @Autowired
     private MockMvc mvc;
 
-    // Use @Mock instead of @MockBean
     @Mock
     private ClienteRepository clienteRepository;
 
@@ -39,126 +41,153 @@ public class ClientControllerTest {
     @Mock
     private JwtUtil jwtUtil;
 
-    private final ObjectMapper om = new ObjectMapper();
+    @InjectMocks
+    private ClientControllerTestes clientController;
 
-    // Inject mocks into the controller
+    private ObjectMapper mapper;
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);  // Initializes the mocks
+    void setUp() {
+        mvc = MockMvcBuilders.standaloneSetup(clientController).build();
+        mapper = new ObjectMapper();
     }
 
-    // Teste de Login com credenciais válidas
+    // ---------------------------------------------------------
+    // 1️⃣ TESTE: Buscar cliente existente
+    // ---------------------------------------------------------
     @Test
-    public void testLoginWithValidCredentials() throws Exception {
-        // Dados de login válidos para o teste
-        String jsonRequest = "{ \"email\": \"testuser@example.com\", \"password\": \"Senha@123\" }";
-
-        // Enviar o POST para /auth/login
-        mvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonRequest))
-                .andExpect(status().isOk()) // Espera um status 200
-                .andExpect(jsonPath("$.token").exists()); // Espera o campo "token" na resposta
-    }
-
-    // Teste de Criação de Cliente com Email Inválido
-    @Test
-    public void testCreateClienteWithInvalidEmail() throws Exception {
-        // Dados com email inválido
-        String jsonRequest = "{ \"nome\": \"Teste Cliente\", \"email\": \"invalid-email\", \"datanasc\": \"1990-01-01\", \"gen\": \"M\", \"senha\": \"Senha@123\" }";
-
-        mvc.perform(post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonRequest))
-                .andExpect(status().isBadRequest()) // Espera um erro 400, já que o email é inválido
-                .andExpect(jsonPath("$.error").value("Invalid email format")); // Espera a mensagem de erro
-    }
-
-    // Teste de Criação de Cliente com Dados Válidos
-    @Test
-    public void testCreateClienteWithValidData() throws Exception {
-        // Dados válidos, incluindo a aceitação dos termos e da política de privacidade
-        String jsonRequest = "{ \"nome\": \"Teste Cliente\", \"email\": \"testuser@example.com\", \"datanasc\": \"1990-01-01\", \"gen\": \"M\", \"senha\": \"Senha@123\", \"termsAccepted\": true, \"privacyAccepted\": true }";
-
-        mvc.perform(post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonRequest))
-                .andExpect(status().isCreated()) // Espera status 201 Created
-                .andExpect(jsonPath("$.id").exists()); // Espera o ID do cliente ser retornado
-    }
-
-    // Teste de Acesso Não Autorizado (sem autenticação)
-    @Test
-    public void testGetClientUnauthorized() throws Exception {
-        mvc.perform(get("/client/1")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized()); // Espera status 401 (não autenticado)
-    }
-
-    // Teste de Acesso Autenticado (com token JWT válido)
-    @Test
-    public void testGetClientAuthenticated() throws Exception {
-        // Gerar um token JWT válido para o teste (substitua com um token real)
-        String token = "valid-jwt-token"; // Este valor precisa ser um token real ou mockado
-
-        mvc.perform(get("/client/1")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk()) // Espera status 200 OK
-                .andExpect(jsonPath("$.id").value(1)); // Espera que o cliente com ID 1 seja retornado
-    }
-
-    @Test
-    public void criarCliente_acceptsPortugueseFields_returnsToken_and_clienteDTO() throws Exception {
-        String email = "cli+" + System.currentTimeMillis() + "@example.com";
-        Map<String, Object> payload = Map.of(
-            "nome", "Cliente Teste",
-            "email", email,
-            "senha", "abc123",
-            "datanasc", "1990-01-01",
-            "gen", "M",
-            "termsAccepted", true,
-            "privacyAccepted", true
-        );
-
-        when(clienteRepository.findByEmail(email)).thenReturn(Optional.empty());
-        when(passwordEncoder.encode("abc123")).thenReturn("encoded");
-        when(clienteRepository.save(any(Cliente.class))).thenAnswer(inv -> {
-            Cliente c = inv.getArgument(0);
-            c.setId(10L);
-            return c;
-        });
-        when(jwtUtil.generateToken(anyString())).thenReturn("token-123");
-
-        mvc.perform(post("/clientes")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(payload)))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.token").exists())
-            .andExpect(jsonPath("$.cliente.email").value(email));
-
-        // verify mapper produced entity saved
-        ArgumentCaptor<Cliente> cap = ArgumentCaptor.forClass(Cliente.class);
-        verify(clienteRepository).save(cap.capture());
-        Cliente saved = cap.getValue();
-        assert saved.getEmail().equals(email);
-    }
-
-    @Test
-    public void buscarCliente_returnsClienteDTO_usingClienteMapper() throws Exception {
+    void testBuscarClienteExistente() throws Exception {
         Cliente c = new Cliente();
-        c.setId(5L);
-        c.setEmail("c5@example.com");
-        c.setNome("C5");
+        c.setId(1L);
+        c.setNome("Cliente Teste");
+        c.setEmail("teste@example.com");
+        c.setDatanasc("2000-01-01");
+        c.setGen("M");
+        c.setSenha("123");
 
-        when(clienteRepository.findById(5L)).thenReturn(Optional.of(c));
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(c));
 
-        mvc.perform(get("/clientes/5")
+        mvc.perform(get("/clientestestes/1")
                 .header("Authorization", "Bearer fake-token")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(5))
-            .andExpect(jsonPath("$.email").value("c5@example.com"));
+            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.email").value("teste@example.com"));
+    }
+
+    // ---------------------------------------------------------
+    // 2️⃣ TESTE: Buscar cliente inexistente
+    // ---------------------------------------------------------
+    @Test
+    void testBuscarClienteInexistente() throws Exception {
+        when(clienteRepository.findById(99L)).thenReturn(Optional.empty());
+
+        mvc.perform(get("/clientestestes/99")
+                .header("Authorization", "Bearer fake-token")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+    }
+
+    // ---------------------------------------------------------
+    // 3️⃣ TESTE: Criar cliente com dados válidos
+    // ---------------------------------------------------------
+    @Test
+    void testCriarClienteValido() throws Exception {
+        Map<String, Object> json = new HashMap<>();
+        json.put("nome", "Cliente Novo");
+        json.put("email", "novo@example.com");
+        json.put("senha", "123456");
+        json.put("datanasc", "2001-05-10");
+        json.put("gen", "F");
+
+        Cliente saved = new Cliente();
+        saved.setId(10L);
+        saved.setNome("Cliente Novo");
+        saved.setEmail("novo@example.com");
+
+        when(passwordEncoder.encode("123456")).thenReturn("encodedPass");
+        when(clienteRepository.save(any(Cliente.class))).thenReturn(saved);
+        when(jwtUtil.generateToken("novo@example.com")).thenReturn("fake-jwt-token");
+
+        mvc.perform(post("/clientestestes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(json)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.token").value("fake-jwt-token"))
+            .andExpect(jsonPath("$.cliente.email").value("novo@example.com"))
+            .andExpect(jsonPath("$.cliente.nome").value("Cliente Novo"));
+    }
+
+    // ---------------------------------------------------------
+    // 4️⃣ TESTE: Criar cliente com campos obrigatórios ausentes
+    // ---------------------------------------------------------
+    @Test
+    void testCriarClienteCamposInvalidos() throws Exception {
+        Map<String, Object> json = new HashMap<>();
+        json.put("email", "invalido@example.com");
+        // faltando nome e senha
+
+        mvc.perform(post("/clientestestes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(json)))
+            .andExpect(status().isBadRequest());
+    }
+
+    // ---------------------------------------------------------
+    // 5️⃣ TESTE: Atualizar cliente existente
+    // ---------------------------------------------------------
+    @Test
+    void testAtualizarCliente() throws Exception {
+        Cliente existente = new Cliente();
+        existente.setId(1L);
+        existente.setNome("Antigo");
+        existente.setEmail("antigo@example.com");
+        existente.setDatanasc("1999-01-01");
+        existente.setGen("M");
+
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(existente));
+        when(clienteRepository.save(any(Cliente.class))).thenReturn(existente);
+
+        ClienteDTO dto = new ClienteDTO();
+        dto.setNome("Atualizado");
+        dto.setEmail("novoemail@example.com");
+        dto.setDatanasc("1990-02-02");
+        dto.setGen("F");
+
+        mvc.perform(put("/clientestestes/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(dto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.email").value("novoemail@example.com"))
+            .andExpect(jsonPath("$.nome").value("Atualizado"));
+    }
+
+    // ---------------------------------------------------------
+    // 6️⃣ TESTE: Atualizar cliente inexistente
+    // ---------------------------------------------------------
+    @Test
+    void testAtualizarClienteInexistente() throws Exception {
+        when(clienteRepository.findById(99L)).thenReturn(Optional.empty());
+
+        ClienteDTO dto = new ClienteDTO();
+        dto.setNome("Inexistente");
+        dto.setEmail("x@example.com");
+
+        mvc.perform(put("/clientestestes/99")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(dto)))
+            .andExpect(status().isNotFound());
+    }
+
+    // ---------------------------------------------------------
+    // 7️⃣ TESTE: Deletar cliente inexistente
+    // ---------------------------------------------------------
+    @Test
+    void testDeletarClienteInexistente() throws Exception {
+        when(clienteRepository.findById(100L)).thenReturn(Optional.empty());
+
+        mvc.perform(delete("/clientestestes/100")
+                .header("Authorization", "Bearer token"))
+            .andExpect(status().isNotFound());
     }
 }

@@ -9,12 +9,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import umc.exs.backstage.security.JwtUserDetailsService;
+import umc.exs.backstage.security.JwtUtil;
 import umc.exs.model.DAO.ClienteMapper;
-import umc.exs.model.DTO.SignupDTO;
+import umc.exs.model.DTO.auth.SignupDTO;
 import umc.exs.model.entidades.Cliente;
 import umc.exs.repository.ClienteRepository;
-import umc.exs.security.JwtUserDetailsService;
-import umc.exs.security.JwtUtil;
 
 @SpringBootTest
 public class JwtSignupIntegrationTest {

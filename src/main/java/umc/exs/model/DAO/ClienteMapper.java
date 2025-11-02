@@ -1,7 +1,7 @@
 package umc.exs.model.DAO;
 
-import umc.exs.model.DTO.ClienteDTO;
-import umc.exs.model.DTO.SignupDTO;
+import umc.exs.model.DTO.auth.SignupDTO;
+import umc.exs.model.DTO.user.ClienteDTO;
 import umc.exs.model.entidades.Cliente;
 
 public class ClienteMapper {
@@ -37,7 +37,7 @@ public class ClienteMapper {
         c.setNome(signup.getNome());
         c.setDatanasc(signup.getDatanasc());
         c.setGen(signup.getGen());
-        // senha deve ser setada por quem chama (e codificada com PasswordEncoder)
+        c.setSenha(signup.getSenha());
         return c;
     }
 }

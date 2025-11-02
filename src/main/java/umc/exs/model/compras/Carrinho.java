@@ -3,7 +3,7 @@ package umc.exs.model.compras;
 import java.util.ArrayList;
 import java.util.List;
 
-import umc.exs.model.DTO.PagamentoDTO;
+import umc.exs.model.DTO.purchase.PagamentoDTO;
 import umc.exs.model.entidades.Endereco;
 
 public class Carrinho {

@@ -1,6 +1,6 @@
 package umc.exs.model.DAO;
 
-import umc.exs.model.DTO.CartaoDTO;
+import umc.exs.model.DTO.user.CartaoDTO;
 import umc.exs.model.entidades.Cartao;
 
 public class CartaoMapper {

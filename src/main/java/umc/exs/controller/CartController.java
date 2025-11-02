@@ -4,15 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import umc.exs.model.DTO.PagamentoDTO;
-
+import umc.exs.model.DTO.purchase.CarrinhoDTO;
+import umc.exs.model.DTO.purchase.PagamentoDTO;
 import umc.exs.model.compras.Carrinho;
 import umc.exs.repository.ClienteRepository;
 import umc.exs.backstage.service.CarrinhoService;
 
 import java.util.List;
 
-import umc.exs.model.DTO.CarrinhoDTO;
 import umc.exs.model.entidades.Cliente;
 
 @RestController

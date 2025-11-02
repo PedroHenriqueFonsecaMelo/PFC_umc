@@ -1,6 +1,6 @@
 package umc.exs.model.DAO;
 
-import umc.exs.model.DTO.AdminDTO;
+import umc.exs.model.DTO.admin.AdminDTO;
 import umc.exs.model.foundation.Administrador;
 
 public class AdminMapper {

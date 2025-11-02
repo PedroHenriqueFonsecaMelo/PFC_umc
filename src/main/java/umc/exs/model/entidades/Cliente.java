@@ -34,7 +34,7 @@ public class Cliente {
     @Column(nullable = false)
     private String gen;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     @Column(nullable = false)

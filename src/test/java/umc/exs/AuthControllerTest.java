@@ -15,10 +15,12 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
+
+import umc.exs.backstage.security.JwtUtil;
 import umc.exs.controller.AuthController;
 import umc.exs.model.entidades.Cliente;
 import umc.exs.repository.ClienteRepository;
-import umc.exs.security.JwtUtil;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Map;

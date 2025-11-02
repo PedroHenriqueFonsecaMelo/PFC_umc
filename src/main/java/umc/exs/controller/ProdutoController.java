@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import umc.exs.model.DTO.ProdutoDTO;
+import umc.exs.model.DTO.admin.ProdutoDTO;
 import umc.exs.model.foundation.Produto;
 import umc.exs.repository.ProdutoRepository;
 

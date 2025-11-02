@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Cliente</title>
+</head>
+<body>
+    <h1>Cadastro de Cliente</h1>
+
+    <div style="color:red;">
+        <p th:text="${erro}"></p>
+    </div>
+
+    <form th:action="@{/clientes/cadastro}" method="post">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" required
+               th:value="${cliente != null && cliente.nome != null ? cliente.nome : 'Teste Usuario'}"/><br/><br/>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required
+               th:value="${cliente != null && cliente.email != null ? cliente.email : 'teste+user@example.com'}"/><br/><br/>
+
+        <label for="datanasc">Data de Nascimento:</label>
+        <input type="date" id="datanasc" name="datanasc"
+               th:value="${cliente != null && cliente.datanasc != null ? cliente.datanasc : '1990-01-01'}"/><br/><br/>
+
+        <label for="gen">Gênero:</label>
+        <input type="text" id="gen" name="gen"
+               th:value="${cliente != null && cliente.gen != null ? cliente.gen : 'M'}"/><br/><br/>
+
+        <label>
+            <input type="checkbox" name="termsAccepted" value="true" checked> Aceito os Termos de Serviço
+        </label><br/>
+
+        <label>
+            <input type="checkbox" name="privacyAccepted" value="true" checked> Aceito a Política de Privacidade
+        </label><br/><br/>
+
+        <label for="senha">Senha:</label>
+        <input type="password" id="senha" name="senha" required value="Senha@123"><br/><br/>
+
+        <button type="submit">Cadastrar</button>
+    </form>
+</body>
+</html>

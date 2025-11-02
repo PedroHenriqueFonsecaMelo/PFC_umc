@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cliente Atualizado</title>
+</head>
+<body>
+    <h1>Cliente Atualizado</h1>
+
+    <div>
+        <p>Os dados do cliente foram atualizados com sucesso.</p>
+        <p><strong>Nome:</strong> <span th:text="${cliente.nome}">Teste Usuario</span></p>
+        <p><strong>Email:</strong> <span th:text="${cliente.email}">teste+user@example.com</span></p>
+        <a th:href="@{|/clientes/${cliente.id}|}">Ver detalhes</a> |
+        <a th:href="@{/}">Voltar ao início</a>
+    </div>
+</body>
+</html>

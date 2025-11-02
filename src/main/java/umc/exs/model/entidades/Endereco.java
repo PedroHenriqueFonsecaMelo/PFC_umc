@@ -126,4 +126,9 @@ public class Endereco {
     public void setClientes(Set<Cliente> clientes) {
         this.clientes = clientes;
     }
+
+    public void addCliente(Cliente cliente) {
+        this.clientes.add(cliente);
+        cliente.getEnderecos().add(this);
+    }
 }
