@@ -18,9 +18,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 
 import umc.exs.controller.AdminController;
-import umc.exs.model.DTO.AdminDTO;
-import umc.exs.model.DTO.ProdutoDTO;
-import umc.exs.model.DTO.TrocaDTO;
+import umc.exs.model.DTO.admin.AdminDTO;
+import umc.exs.model.DTO.admin.ProdutoDTO;
+import umc.exs.model.DTO.admin.TrocaDTO;
 import umc.exs.model.compras.Troca;
 import umc.exs.model.foundation.Administrador;
 import umc.exs.model.foundation.Produto;

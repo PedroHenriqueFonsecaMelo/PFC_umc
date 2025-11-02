@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import umc.exs.backstage.security.JwtUtil;
 import umc.exs.backstage.service.FieldValidation;
 import umc.exs.model.DAO.ClienteMapper;
-import umc.exs.model.DTO.LoginDTO;
-import umc.exs.model.DTO.SignupDTO;
+import umc.exs.model.DTO.auth.LoginDTO;
+import umc.exs.model.DTO.auth.SignupDTO;
 import umc.exs.model.entidades.Cliente;
 import umc.exs.repository.ClienteRepository;
-import umc.exs.security.JwtUtil;
 
 @RestController
 @RequestMapping("/auth")

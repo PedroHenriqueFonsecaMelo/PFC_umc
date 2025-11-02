@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import umc.exs.model.DTO.PagamentoDTO;
+import umc.exs.model.DTO.purchase.PagamentoDTO;
 import umc.exs.model.compras.Carrinho;
 import umc.exs.model.compras.ItemCarrinho;
 import umc.exs.model.entidades.Cartao;

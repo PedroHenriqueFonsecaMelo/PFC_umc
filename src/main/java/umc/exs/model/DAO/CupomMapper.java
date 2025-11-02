@@ -1,6 +1,6 @@
 package umc.exs.model.DAO;
 
-import umc.exs.model.DTO.CupomDTO;
+import umc.exs.model.DTO.admin.CupomDTO;
 import umc.exs.model.compras.Cupom;
 
 public class CupomMapper {
