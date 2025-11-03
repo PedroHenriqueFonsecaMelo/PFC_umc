@@ -10,7 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -20,7 +22,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -56,12 +57,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             return;
         }
 
+        final String requestTokenHeader = request.getHeader("Authorization");
         String token = null;
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
-            logger.debug("Found Bearer token in Authorization header");
-        } else {
+
+        // Tenta pegar o token do header Authorization
+        if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
+            token = requestTokenHeader.substring(7);
+            logger.debug("JWT Token found in Authorization header");
+        }
+        
+        // Se não achou no header, tenta pegar do cookie
+        if (token == null) {
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 logger.debug("Cookies present: {}", Arrays.stream(cookies).map(Cookie::getName).collect(Collectors.joining(",")));
@@ -77,30 +83,28 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
         }
 
-        if (token != null && !token.isBlank()) {
-            String username = null;
+        // Valida e configura autenticação
+        if (token != null) {
             try {
-                username = jwtUtil.extractUsername(token);
+                String username = jwtUtil.extractUsername(token);
                 logger.debug("Token subject: {}", username);
-            } catch (Exception e) {
-                logger.warn("Failed extracting username from token: {}", e.getMessage());
-            }
-
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                try {
+                
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                    boolean valid = jwtUtil.validateToken(token, userDetails);
-                    logger.debug("Token valid: {}", valid);
-                    if (valid) {
-                        UsernamePasswordAuthenticationToken authToken =
-                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    
+                    if (jwtUtil.validateToken(token, userDetails)) {
+                        UsernamePasswordAuthenticationToken authToken = 
+                            new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+                        
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
-                        logger.debug("SecurityContext populated for {}", username);
+                        
+                        logger.debug("Authentication successful for user: {}", username);
                     }
-                } catch (Exception e) {
-                    logger.warn("Error validating token or loading user: {}", e.getMessage());
                 }
+            } catch (UsernameNotFoundException e) {
+                logger.error("Unable to validate token: {}", e.getMessage());
             }
         } else {
             logger.debug("No token provided for request {}", path);
