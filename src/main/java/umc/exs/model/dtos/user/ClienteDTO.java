@@ -1,6 +1,9 @@
 package umc.exs.model.dtos.user;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import umc.exs.model.dtos.interfaces.ClienteConvertible;
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.entidades.usuario.Endereco;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,8 +26,8 @@ public class ClienteDTO implements ClienteConvertible {
     private String senha;
     private String cpf;
 
-    private List<EnderecoDTO> enderecos;
-    private List<CartaoDTO> cartoes;
+    private List<EnderecoDTO> enderecos = new ArrayList<>();
+    private List<CartaoDTO> cartoes = new ArrayList<>();
 
     // getters e setters
 
@@ -41,12 +45,12 @@ public class ClienteDTO implements ClienteConvertible {
         if (this.enderecos != null && !this.enderecos.isEmpty()) {
             c.setEnderecos(this.enderecos.stream()
                     .map(EnderecoDTO::toEntity)
-                    .collect(java.util.stream.Collectors.toSet()));
+                    .collect(Collectors.toSet()));
         }
         if (this.cartoes != null && !this.cartoes.isEmpty()) {
             c.setCartoes(this.cartoes.stream()
                     .map(CartaoDTO::toEntity)
-                    .collect(java.util.stream.Collectors.toSet()));
+                    .collect(Collectors.toSet()));
         }
 
         return c;
@@ -64,25 +68,61 @@ public class ClienteDTO implements ClienteConvertible {
         dto.cpf = c.getCpf();
         dto.senha = c.getSenha();
 
+        // Mapeia de Set (Entity) para List (DTO)
         if (c.getEnderecos() != null && !c.getEnderecos().isEmpty()) {
             dto.enderecos = c.getEnderecos().stream()
                     .map(EnderecoDTO::fromEntity)
-                    .collect(java.util.stream.Collectors.toList());
+                    .collect(Collectors.toList()); // Coleta como LIST para o Formulário/Homepage
         }
         if (c.getCartoes() != null && !c.getCartoes().isEmpty()) {
             dto.cartoes = c.getCartoes().stream()
                     .map(CartaoDTO::fromEntity)
-                    .collect(java.util.stream.Collectors.toList());
+                    .collect(Collectors.toList()); // Coleta como LIST
         }
         return dto;
     }
 
     public void addEndereco(EnderecoDTO enderecoDTO) {
+        if (this.enderecos == null) {
+            this.enderecos = new ArrayList<>();
+        }
         this.enderecos.add(enderecoDTO);
     }
 
     public void addCartao(CartaoDTO cartaoDTO) {
+        if (this.cartoes == null) {
+            this.cartoes = new ArrayList<>();
+        }
         this.cartoes.add(cartaoDTO);
+    }
+
+    public void mergeEnderecos(Cliente clienteExistente, List<EnderecoDTO> novosEnderecos) {
+        if (novosEnderecos == null)
+            return;
+
+        for (EnderecoDTO dto : novosEnderecos) {
+            Endereco novo = dto.toEntity();
+            boolean existe = clienteExistente.getEnderecos().stream()
+                    .anyMatch(e -> e.getId() != null && e.getId().equals(novo.getId()));
+
+            if (!existe) {
+                clienteExistente.getEnderecos().add(novo);
+            }
+        }
+    }
+
+    public void mergeCartoes(Cliente clienteExistente, List<CartaoDTO> novosCartoes) {
+        if (novosCartoes == null)
+            return;
+        for (CartaoDTO dto : novosCartoes) {
+            umc.exs.model.entidades.usuario.Cartao novo = dto.toEntity();
+            boolean existe = clienteExistente.getCartoes().stream()
+                    .anyMatch(c -> c.getId() != null && c.getId().equals(novo.getId()));
+
+            if (!existe) {
+                clienteExistente.getCartoes().add(novo);
+            }
+        }
     }
 
     @Override
