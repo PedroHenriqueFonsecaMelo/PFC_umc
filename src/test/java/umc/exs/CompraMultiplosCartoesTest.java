@@ -9,17 +9,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import umc.exs.model.DTO.purchase.PagamentoDTO;
-import umc.exs.model.compras.Carrinho;
-import umc.exs.model.compras.ItemCarrinho;
-import umc.exs.model.entidades.Cartao;
-import umc.exs.model.entidades.Cliente;
-import umc.exs.model.entidades.Endereco;
-import umc.exs.model.foundation.Produto;
-import umc.exs.repository.CartaoRepository;
-import umc.exs.repository.ClienteRepository;
-import umc.exs.repository.EnderecoRepository;
-import umc.exs.repository.ProdutoRepository;
+import umc.exs.model.daos.repository.CartaoRepository;
+import umc.exs.model.daos.repository.ClienteRepository;
+import umc.exs.model.daos.repository.EnderecoRepository;
+import umc.exs.model.daos.repository.ProdutoRepository;
+import umc.exs.model.dtos.purchase.PagamentoDTO;
+import umc.exs.model.entidades.compras.Carrinho;
+import umc.exs.model.entidades.compras.ItemCarrinho;
+import umc.exs.model.entidades.foundation.Produto;
+import umc.exs.model.entidades.usuario.Cartao;
+import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.backstage.service.CarrinhoService;
 
 @SpringBootTest

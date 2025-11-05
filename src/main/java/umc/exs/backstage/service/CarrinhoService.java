@@ -9,17 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import umc.exs.model.DTO.purchase.CarrinhoDTO;
-import umc.exs.model.DTO.purchase.PagamentoDTO;
-import umc.exs.model.compras.Carrinho;
-import umc.exs.model.compras.Cupom;
-import umc.exs.model.compras.ItemCarrinho;
-import umc.exs.model.entidades.Cliente;
-import umc.exs.model.entidades.Endereco;
-import umc.exs.model.foundation.Produto;
-import umc.exs.repository.CupomRepository;
-import umc.exs.repository.EnderecoRepository;
-import umc.exs.repository.ProdutoRepository;
+import umc.exs.model.daos.repository.CupomRepository;
+import umc.exs.model.daos.repository.EnderecoRepository;
+import umc.exs.model.daos.repository.ProdutoRepository;
+import umc.exs.model.dtos.purchase.CarrinhoDTO;
+import umc.exs.model.dtos.purchase.PagamentoDTO;
+import umc.exs.model.entidades.compras.Carrinho;
+import umc.exs.model.entidades.compras.Cupom;
+import umc.exs.model.entidades.compras.ItemCarrinho;
+import umc.exs.model.entidades.foundation.Produto;
+import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.entidades.usuario.Endereco;
 
 @Service
 public class CarrinhoService {

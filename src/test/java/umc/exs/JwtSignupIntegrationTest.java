@@ -11,10 +11,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import umc.exs.backstage.security.JwtUserDetailsService;
 import umc.exs.backstage.security.JwtUtil;
-import umc.exs.model.DAO.ClienteMapper;
-import umc.exs.model.DTO.auth.SignupDTO;
-import umc.exs.model.entidades.Cliente;
-import umc.exs.repository.ClienteRepository;
+import umc.exs.model.daos.mappers.ClienteMapper;
+import umc.exs.model.daos.repository.ClienteRepository;
+import umc.exs.model.dtos.auth.SignupDTO;
+import umc.exs.model.entidades.usuario.Cliente;
 
 @SpringBootTest
 public class JwtSignupIntegrationTest {
@@ -62,7 +62,7 @@ public class JwtSignupIntegrationTest {
         }
 
         // Map to entity via mapper and persist
-        Cliente cliente = ClienteMapper.toEntityFromSignup(signup);
+        Cliente cliente = ClienteMapper.toEntity(signup);
         // set password encoded — detect raw password from DTO
         String rawPwd = null;
         try {

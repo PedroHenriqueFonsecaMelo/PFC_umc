@@ -1,0 +1,74 @@
+package umc.exs.model.entidades.compras;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import umc.exs.model.dtos.purchase.PagamentoDTO;
+import umc.exs.model.entidades.usuario.Endereco;
+
+public class Carrinho {
+    private List<ItemCarrinho> itens = new ArrayList<>();
+    private List<PagamentoDTO> pagamentos = new ArrayList<>();
+    private Cupom cupom;
+    private Endereco endereco;
+    private float frete;
+    private float total;
+
+    public List<ItemCarrinho> getItens() {
+        return itens;
+    }
+
+    public void setItens(List<ItemCarrinho> itens) {
+        this.itens = itens;
+    }
+
+    public List<PagamentoDTO> getPagamentos() {
+        return pagamentos;
+    }
+
+    public void setPagamentos(List<PagamentoDTO> pagamentos) {
+        this.pagamentos = pagamentos;
+    }
+
+    public Cupom getCupom() {
+        return cupom;
+    }
+
+    public void setCupom(Cupom cupom) {
+        this.cupom = cupom;
+    }
+
+    public Endereco getEndereco() {
+        return endereco;
+    }
+
+    public void setEndereco(Endereco endereco) {
+        this.endereco = endereco;
+    }
+
+    public float getFrete() {
+        return frete;
+    }
+
+    public void setFrete(float frete) {
+        this.frete = frete;
+    }
+
+    public float getTotal() {
+        return total;
+    }
+
+    public void setTotal(float total) {
+        this.total = total;
+    }
+
+    @Override
+    public String toString() {
+        return "Carrinho [itens=" + itens + ", pagamentos=" + pagamentos + ", cupom=" + cupom + ", endereco=" + endereco
+                + ", frete=" + frete + ", total=" + total + ", getItens()=" + getItens() + ", getPagamentos()="
+                + getPagamentos() + ", getCupom()=" + getCupom() + ", getEndereco()=" + getEndereco() + ", getFrete()="
+                + getFrete() + ", getTotal()=" + getTotal() + "]";
+    }
+
+    
+}

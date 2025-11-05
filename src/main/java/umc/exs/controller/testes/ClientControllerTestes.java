@@ -15,18 +15,18 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import umc.exs.backstage.security.JwtUtil;
 import umc.exs.backstage.service.FieldValidation;
-import umc.exs.model.DAO.CartaoMapper;
-import umc.exs.model.DAO.ClienteMapper;
-import umc.exs.model.DAO.EnderecoMapper;
-import umc.exs.model.DTO.user.CartaoDTO;
-import umc.exs.model.DTO.user.ClienteDTO;
-import umc.exs.model.DTO.user.EnderecoDTO;
-import umc.exs.model.entidades.Cartao;
-import umc.exs.model.entidades.Cliente;
-import umc.exs.model.entidades.Endereco;
-import umc.exs.repository.CartaoRepository;
-import umc.exs.repository.ClienteRepository;
-import umc.exs.repository.EnderecoRepository;
+import umc.exs.model.daos.mappers.CartaoMapper;
+import umc.exs.model.daos.mappers.ClienteMapper;
+import umc.exs.model.daos.mappers.EnderecoMapper;
+import umc.exs.model.daos.repository.CartaoRepository;
+import umc.exs.model.daos.repository.ClienteRepository;
+import umc.exs.model.daos.repository.EnderecoRepository;
+import umc.exs.model.dtos.user.CartaoDTO;
+import umc.exs.model.dtos.user.ClienteDTO;
+import umc.exs.model.dtos.user.EnderecoDTO;
+import umc.exs.model.entidades.usuario.Cartao;
+import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.entidades.usuario.Endereco;
 
 @RestController
 @RequestMapping("/clientestestes")
@@ -62,6 +62,7 @@ public class ClientControllerTestes {
         String senha = FieldValidation.sanitize((String) signup.get("senha"));
         String datanasc = FieldValidation.sanitize((String) signup.get("datanasc"));
         String gen = FieldValidation.sanitize((String) signup.get("gen"));
+        String cpf = FieldValidation.sanitize((String) signup.get("cpf"));
 
         if (email == null || nome == null || senha == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "invalid input"));
@@ -74,6 +75,7 @@ public class ClientControllerTestes {
         clienteDTO.setDatanasc(datanasc);
         clienteDTO.setGen(gen);
         clienteDTO.setSenha(passwordEncoder.encode(senha));
+        clienteDTO.setCpf(cpf);
 
         Cliente clienteEntity = ClienteMapper.toEntity(clienteDTO);
         Cliente savedCliente = clienteRepository.save(clienteEntity);
@@ -189,8 +191,8 @@ public class ClientControllerTestes {
         if (token == null) {
             return false;
         }
-        String clienteAutenticadoId = jwtUtil.getUserIdFromToken(token);
-        return clienteAutenticadoId != null && clienteAutenticadoId.equals(clienteId.toString());
+        String clienteAutenticadoId = jwtUtil.extractId(token).toString();
+        return clienteAutenticadoId.equals(clienteId.toString());
     }
 
     private String obterTokenDaRequisicao() {

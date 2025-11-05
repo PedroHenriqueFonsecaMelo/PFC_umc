@@ -2,10 +2,11 @@ package umc.exs.backstage.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import umc.exs.model.compras.Pedido;
-import umc.exs.model.compras.PedidoItem;
-import umc.exs.repository.PedidoItemRepository;
-import umc.exs.repository.PedidoRepository;
+
+import umc.exs.model.daos.repository.PedidoItemRepository;
+import umc.exs.model.daos.repository.PedidoRepository;
+import umc.exs.model.entidades.compras.Pedido;
+import umc.exs.model.entidades.compras.PedidoItem;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;

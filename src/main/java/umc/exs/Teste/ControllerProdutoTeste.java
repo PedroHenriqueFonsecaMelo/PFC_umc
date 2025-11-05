@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import umc.exs.model.foundation.Produto;
-import umc.exs.repository.ProdutoRepository;
+import umc.exs.model.daos.repository.ProdutoRepository;
+import umc.exs.model.entidades.foundation.Produto;
 
 @RestController
 @RequestMapping("/test/produto")

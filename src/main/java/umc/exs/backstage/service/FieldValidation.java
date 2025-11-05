@@ -70,4 +70,32 @@ public final class FieldValidation {
         return Pattern.compile(emailRegex).matcher(email).matches();
     }
 
+    public static boolean isValidCPF(String cpf) {
+        if (cpf == null || !cpf.matches("\\d{11}")) {
+            return false;
+        }
+
+        int[] weights1 = {10, 9, 8, 7, 6, 5, 4, 3, 2};
+        int[] weights2 = {11, 10, 9, 8, 7, 6, 5, 4, 3, 2};
+
+        try {
+            int sum1 = 0;
+            for (int i = 0; i < 9; i++) {
+                sum1 += Character.getNumericValue(cpf.charAt(i)) * weights1[i];
+            }
+            int checkDigit1 = sum1 % 11 < 2 ? 0 : 11 - (sum1 % 11);
+
+            int sum2 = 0;
+            for (int i = 0; i < 10; i++) {
+                sum2 += Character.getNumericValue(cpf.charAt(i)) * weights2[i];
+            }
+            int checkDigit2 = sum2 % 11 < 2 ? 0 : 11 - (sum2 % 11);
+
+            return checkDigit1 == Character.getNumericValue(cpf.charAt(9)) &&
+                   checkDigit2 == Character.getNumericValue(cpf.charAt(10));
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
 }

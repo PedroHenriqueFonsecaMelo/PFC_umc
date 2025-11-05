@@ -16,14 +16,14 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 
-import umc.exs.model.DTO.purchase.PagamentoDTO;
-import umc.exs.model.compras.Carrinho;
-import umc.exs.model.entidades.Cliente;
-import umc.exs.model.entidades.Endereco;
-import umc.exs.model.foundation.Produto;
-import umc.exs.repository.ClienteRepository;
-import umc.exs.repository.EnderecoRepository;
-import umc.exs.repository.ProdutoRepository;
+import umc.exs.model.daos.repository.ClienteRepository;
+import umc.exs.model.daos.repository.EnderecoRepository;
+import umc.exs.model.daos.repository.ProdutoRepository;
+import umc.exs.model.dtos.purchase.PagamentoDTO;
+import umc.exs.model.entidades.compras.Carrinho;
+import umc.exs.model.entidades.foundation.Produto;
+import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.entidades.usuario.Endereco;
 
 @SpringBootTest
 @AutoConfigureMockMvc
