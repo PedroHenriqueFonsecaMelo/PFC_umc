@@ -57,4 +57,11 @@ public class EnderecoDTO implements EnderecoConvertible {
         return e;
     }
 
+    @Override
+    public String toString() {
+        return "EnderecoDTO [id=" + id + ", pais=" + pais + ", cep=" + cep + ", estado=" + estado + ", cidade="
+                + cidade + ", rua=" + rua + ", bairro=" + bairro + ", numero=" + numero + ", complemento="
+                + complemento + ", tipoResidencia=" + tipoResidencia + "]";
+    }
+
 }

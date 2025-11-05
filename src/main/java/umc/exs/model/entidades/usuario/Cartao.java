@@ -1,6 +1,7 @@
 package umc.exs.model.entidades.usuario;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -31,7 +32,7 @@ public class Cartao {
 
     @Column
     private String cvv;
-    
+
     @Column
     private boolean preferencial;
 
@@ -106,5 +107,20 @@ public class Cartao {
     public void addCliente(Cliente cliente) {
         this.clientes.add(cliente);
         cliente.getCartoes().add(this);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        Cartao other = (Cartao) obj;
+        return Objects.equals(id, other.id);
     }
 }

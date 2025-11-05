@@ -1,164 +1,198 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
-    <head>
-        <meta charset="UTF-8" />
-        <title>Minha Conta</title>
+<head>
+    <meta charset="UTF-8">
+    <title>Minha Conta</title>
+    <style>
+        /* Estilos básicos para clareza */
+        fieldset { margin-bottom: 1em; padding: 15px; border: 1px solid #ccc; border-radius: 4px; }
+        legend { font-weight: bold; padding: 0 10px; font-size: 1.1em; }
+        .novo-endereco { border: 1px dashed #007bff; }
+        label { display: inline-block; width: 180px; margin-top: 5px; font-weight: 500; }
+        input[type="text"], input[type="email"], input[type="date"] { width: 300px; padding: 6px; margin-bottom: 5px; border: 1px solid #ddd; border-radius: 3px; }
+        button { margin-top: 1em; padding: 8px 12px; cursor: pointer; border-radius: 4px; border: none; background-color: #007bff; color: white; }
+        button:hover { background-color: #0056b3; }
+        .mensagem { padding: 10px; margin-bottom: 15px; border-radius: 4px; font-weight: bold; }
+        .sucesso { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .erro { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        a { text-decoration: none; color: #007bff; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Minha Conta</h1>
 
-        <script>
-        // Função para adicionar um novo endereço
+    <div th:if="${sucesso}" class="mensagem sucesso" th:text="${sucesso}">Mensagem de Sucesso</div>
+    <div th:if="${erro}" class="mensagem erro" th:text="${erro}">Mensagem de Erro</div>
+
+    <div th:if="${cliente != null}">
+        <p>Bem-vindo, <strong th:text="${cliente.nome}">Cliente</strong>!</p>
+
+        <form th:action="@{/clientes/atualizar}" method="post" th:object="${cliente}">
+            <input type="hidden" th:field="*{id}" />
+
+            <fieldset>
+                <legend>Dados Pessoais</legend>
+                <label>Nome:</label>
+                <input type="text" th:field="*{nome}" required /><br>
+                <label>Email:</label>
+                <input type="email" th:field="*{email}" required /><br>
+                <label>CPF:</label>
+                <input type="text" th:field="*{cpf}" readonly /><br>
+                <label>Data de Nascimento:</label>
+                <input type="date" th:field="*{datanasc}" required /><br>
+                <label>Gênero:</label>
+                <input type="text" th:field="*{gen}" /><br>
+                <label>Nova Senha</label>
+                <input type="password" th:field="*{senha}" placeholder="Deixe em branco para manter a senha atual" /><br>
+            </fieldset>
+
+            <hr />
+
+            <h2>Endereços Cadastrados</h2>
+            
+            <div id="enderecos-list-container">
+                <div th:each="endereco, iStat : *{enderecos}" class="endereco-item">
+                    <fieldset>
+                        <legend th:text="'Endereço ' + (${iStat.index} + 1)"></legend>
+
+                        <input type="hidden" th:field="*{enderecos[__${iStat.index}__].id}" />
+
+                        <label>Rua:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].rua}" /><br>
+                        <label>Número:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].numero}" /><br>
+                        <label>Bairro:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].bairro}" /><br>
+                        <label>Cidade:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].cidade}" /><br>
+                        <label>Estado:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].estado}" /><br>
+                        <label>CEP:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].cep}" /><br>
+                        <label>País:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].pais}" /><br>
+                        <label>Complemento:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].complemento}" /><br>
+                        <label>Tipo de residência:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].tipoResidencia}" /><br>
+
+                        <a th:href="@{/clientes/removerEndereco/{id}(id=${endereco.id})}"
+                            style="color:red; text-decoration:none;">🗑️ Remover este endereço</a>
+                    </fieldset>
+                </div>
+            </div>
+
+            <button type="button" onclick="adicionarEndereco()">➕ Adicionar Novo Endereço</button>
+
+            <hr />
+
+            <h2>Cartões Cadastrados</h2>
+            <div id="cartoes-list-container">
+                <div th:each="cartao, iStat : *{cartoes}" class="cartao-item">
+                    <fieldset>
+                        <legend th:text="'Cartão ' + (${iStat.index} + 1)"></legend>
+
+                        <input type="hidden" th:field="*{cartoes[__${iStat.index}__].id}" />
+
+                        <label>Número do Cartão:</label>
+                        <input type="text" th:field="*{cartoes[__${iStat.index}__].numero}" required /><br>
+                        <label>Nome no Cartão:</label>
+                        <input type="text" th:field="*{cartoes[__${iStat.index}__].nomeTitular}" required /><br>
+                        <label>Validade:</label>
+                        <input type="text" th:field="*{cartoes[__${iStat.index}__].validade}" placeholder="MM/AAAA" /><br>
+                        <label>Bandeira:</label>
+                        <input type="text" th:field="*{cartoes[__${iStat.index}__].bandeira}" /><br>
+                        <label>CVV (Não editável):</label>
+                        <input type="text" value="***" readonly /><br>
+                        
+                        <a th:href="@{/clientes/removerCartao/{id}(id=${cartao.id})}"
+                            style="color:red; text-decoration:none;">💳 Remover este Cartão</a>
+                    </fieldset>
+                </div>
+            </div>
+
+            <button type="button" onclick="adicionarCartao()">➕ Adicionar Novo Cartão</button>
+            <br><br>
+
+            <button type="submit">💾 Atualizar Informações</button>
+        </form>
+
+        <hr />
+        <p><a th:href="@{/clientes/logout}">Sair</a></p>
+        <p><a th:href="@{|/clientes/${cliente.id}/remover|}">Remover conta</a></p>
+    </div>
+
+    <script th:inline="javascript">
+        // === INDICES ===
+        // CORREÇÃO: Usamos o operador ternário completo do Thymeleaf para evitar erros de sintaxe JS.
+        let enderecoIndex = [[${#lists.isEmpty(cliente.enderecos)} ? 0 : ${#lists.size(cliente.enderecos)}]];
+        let cartaoIndex = [[${#lists.isEmpty(cliente.cartoes)} ? 0 : ${#lists.size(cliente.cartoes)}]];
+
+        // === FUNÇÃO ENDEREÇO ===
         function adicionarEndereco() {
-            const container = document.getElementById('enderecos-container');
-            const index = container.children.length;
+            const container = document.getElementById("enderecos-list-container");
+            const idx = enderecoIndex++;
 
-            const fieldset = document.createElement('fieldset');
-            fieldset.classList.add('endereco-bloco');
-            fieldset.innerHTML = `
-                <legend>Novo Endereço</legend>
-                <label>Rua:</label>
-                <input type="text" name="enderecos[${index}].rua" placeholder="Rua" required><br>
-                <label>Número:</label>
-                <input type="text" name="enderecos[${index}].numero" placeholder="Número"><br>
-                <label>Bairro:</label>
-                <input type="text" name="enderecos[${index}].bairro" placeholder="Bairro"><br>
-                <label>Cidade:</label>
-                <input type="text" name="enderecos[${index}].cidade" placeholder="Cidade"><br>
-                <label>Estado:</label>
-                <input type="text" name="enderecos[${index}].estado" placeholder="Estado"><br>
-                <label>CEP:</label>
-                <input type="text" name="enderecos[${index}].cep" placeholder="CEP"><br>
-                <label>País:</label>
-                <input type="text" name="enderecos[${index}].pais" placeholder="País"><br>
-                <label>Complemento:</label>
-                <input type="text" name="enderecos[${index}].complemento" placeholder="Complemento"><br>
-                <label>Tipo de Residência:</label>
-                <input type="text" name="enderecos[${index}].tipoResidencia" placeholder="Casa, Apartamento, etc."><br>
-                <button type="button" onclick="removerEndereco(this)">Remover Endereço</button>
-                <hr>
+            const html = `
+            <div class="endereco-item novo-endereco">
+                <fieldset>
+                    <legend>Novo Endereço (adicionado)</legend>
+                    <input type="hidden" name="enderecos[${idx}].id" value="" /> 
+
+                    <label>Rua:</label>
+                    <input type="text" name="enderecos[${idx}].rua" required><br>
+                    <label>Número:</label>
+                    <input type="text" name="enderecos[${idx}].numero" required><br>
+                    <label>Bairro:</label>
+                    <input type="text" name="enderecos[${idx}].bairro"><br>
+                    <label>Cidade:</label>
+                    <input type="text" name="enderecos[${idx}].cidade"><br>
+                    <label>Estado:</label>
+                    <input type="text" name="enderecos[${idx}].estado"><br>
+                    <label>CEP:</label>
+                    <input type="text" name="enderecos[${idx}].cep"><br>
+                    <label>País:</label>
+                    <input type="text" name="enderecos[${idx}].pais"><br>
+                    <label>Complemento:</label>
+                    <input type="text" name="enderecos[${idx}].complemento"><br>
+                    <label>Tipo de residência:</label>
+                    <input type="text" name="enderecos[${idx}].tipoResidencia"><br>
+                    
+                    <button type="button" onclick="this.closest('.endereco-item').remove()">🗑️ Remover</button>
+                </fieldset>
+            </div>
             `;
-            container.appendChild(fieldset);
+            container.insertAdjacentHTML('beforeend', html);
         }
 
-        // Função para remover um endereço
-        function removerEndereco(botao) {
-            const fieldset = botao.closest('fieldset');
-            fieldset.remove();
+        // === FUNÇÃO CARTÃO ===
+        function adicionarCartao() {
+            const container = document.getElementById("cartoes-list-container");
+            const idx = cartaoIndex++;
 
-            // Atualiza os índices para manter a lista correta
-            atualizarIndices();
-        }
+            const html = `
+            <div class="cartao-item novo-endereco">
+                <fieldset>
+                    <legend>Novo Cartão (adicionado)</legend>
+                    <input type="hidden" name="cartoes[${idx}].id" value="" /> 
 
-        // Função para reindexar os endereços após adição/remoção
-        function atualizarIndices() {
-            const blocos = document.querySelectorAll('.endereco-bloco');
-            blocos.forEach((bloco, index) => {
-                const inputs = bloco.querySelectorAll('input[name]');
-                inputs.forEach(input => {
-                    const nomeCampo = input.name.substring(input.name.indexOf('.') + 1);
-                    input.name = `enderecos[${index}].${nomeCampo}`;
-                });
-            });
+                    <label>Número do Cartão:</label>
+                    <input type="text" name="cartoes[${idx}].numero" required><br>
+                    <label>Nome no Cartão:</label>
+                    <input type="text" name="cartoes[${idx}].nomeImpresso" required><br>
+                    <label>Validade:</label>
+                    <input type="text" name="cartoes[${idx}].validade" placeholder="MM/AAAA"><br>
+                    <label>Bandeira:</label>
+                    <input type="text" name="cartoes[${idx}].bandeira"><br>
+                    <label>CVV (Opcional):</label>
+                    <input type="text" name="cartoes[${idx}].cvv" maxlength="4"><br>
+                    
+                    <button type="button" onclick="this.closest('.cartao-item').remove()">🗑️ Remover</button>
+                </fieldset>
+            </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
         }
     </script>
-    </head>
-    <body>
-        <h1>Minha Conta</h1>
-
-        <div th:if="${cliente != null}">
-            <p>Bem-vindo, <span th:text="${cliente.nome}">Nome do
-                    Cliente</span>!</p>
-
-            <form th:action="@{/clientes/atualizar}" th:object="${cliente}"
-                method="post">
-                <div>
-                    <label for="nome">Nome:</label>
-                    <input type="text" th:field="*{nome}" id="nome" required />
-                </div>
-
-                <div>
-                    <label for="email">Email:</label>
-                    <input type="email" th:field="*{email}" id="email"
-                        required />
-                </div>
-
-                <h3>Endereços</h3>
-                <div id="enderecos-container">
-                    <div th:each="endereco, stat : *{enderecos}"
-                        class="endereco-bloco">
-                        <fieldset>
-                            <legend
-                                th:text="'Endereço ' + ${stat.index + 1}"></legend>
-                            <input type="hidden"
-                                th:field="*{enderecos[__${stat.index}__].id}" />
-
-                            <label>Rua:</label>
-                            <input type="text"
-                                th:field="*{enderecos[__${stat.index}__].rua}"
-                                placeholder="Rua" required /><br>
-
-                            <label>Número:</label>
-                            <input type="text"
-                                th:field="*{enderecos[__${stat.index}__].numero}"
-                                placeholder="Número" /><br>
-
-                            <label>Bairro:</label>
-                            <input type="text"
-                                th:field="*{enderecos[__${stat.index}__].bairro}"
-                                placeholder="Bairro" /><br>
-
-                            <label>Cidade:</label>
-                            <input type="text"
-                                th:field="*{enderecos[__${stat.index}__].cidade}"
-                                placeholder="Cidade" /><br>
-
-                            <label>Estado:</label>
-                            <input type="text"
-                                th:field="*{enderecos[__${stat.index}__].estado}"
-                                placeholder="Estado" /><br>
-
-                            <label>CEP:</label>
-                            <input type="text"
-                                th:field="*{enderecos[__${stat.index}__].cep}"
-                                placeholder="CEP" /><br>
-
-                            <label>País:</label>
-                            <input type="text"
-                                th:field="*{enderecos[__${stat.index}__].pais}"
-                                placeholder="País" /><br>
-
-                            <label>Complemento:</label>
-                            <input type="text"
-                                th:field="*{enderecos[__${stat.index}__].complemento}"
-                                placeholder="Complemento" /><br>
-
-                            <label>Tipo de Residência:</label>
-                            <input type="text"
-                                th:field="*{enderecos[__${stat.index}__].tipoResidencia}"
-                                placeholder="Casa, Apto, etc." /><br>
-
-                            <button type="button"
-                                onclick="removerEndereco(this)">Remover
-                                Endereço</button>
-                            <hr>
-                        </fieldset>
-                    </div>
-                </div>
-
-                <button type="button" onclick="adicionarEndereco()">Adicionar
-                    Novo Endereço</button>
-
-                <div style="margin-top: 20px;">
-                    <button type="submit">Atualizar Informações</button>
-                </div>
-            </form>
-
-            <p><a th:href="@{|/clientes/remover|}">Remover
-                    conta</a></p>
-        </div>
-
-        <div th:if="${cliente == null}">
-            <p>Cliente não encontrado.</p>
-            <a th:href="@{/clientes/cadastro}">Criar conta</a>
-        </div>
-
-    </body>
+</body>
 </html>

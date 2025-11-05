@@ -1,6 +1,7 @@
 package umc.exs.model.entidades.usuario;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -131,4 +132,20 @@ public class Endereco {
         this.clientes.add(cliente);
         cliente.getEnderecos().add(this);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        Endereco other = (Endereco) obj;
+        return Objects.equals(id, other.id);
+    }
+
 }
