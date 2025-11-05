@@ -3,12 +3,12 @@ package umc.exs.backstage.security;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +27,10 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtRequestFilter.class);
+
+    public static Logger getLogger() {
+        return logger;
+    }
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -47,69 +51,53 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         return false;
     }
 
+    @SuppressWarnings("null")
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
+
         String path = request.getServletPath();
-        if (isPublic(path)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        logger.debug("Incoming request [{}] Cookies: {}", path,
+                request.getCookies() == null ? "none" : Arrays.stream(request.getCookies()).map(Cookie::getName).collect(Collectors.joining(",")));
 
-        final String requestTokenHeader = request.getHeader("Authorization");
         String token = null;
-
-        // Tenta pegar o token do header Authorization
-        if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-            token = requestTokenHeader.substring(7);
-            logger.debug("JWT Token found in Authorization header");
-        }
-        
-        // Se não achou no header, tenta pegar do cookie
-        if (token == null) {
-            Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-                logger.debug("Cookies present: {}", Arrays.stream(cookies).map(Cookie::getName).collect(Collectors.joining(",")));
-                Optional<Cookie> cookie = Arrays.stream(cookies).filter(c -> "token".equals(c.getName())).findFirst();
-                if (cookie.isPresent()) {
-                    token = cookie.get().getValue();
-                    logger.debug("Found token in cookie");
-                } else {
-                    logger.debug("token cookie not found among cookies");
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+            logger.debug("Found Bearer token in Authorization header");
+        } else if (request.getCookies() != null) {
+            for (Cookie c : request.getCookies()) {
+                if ("token".equals(c.getName()) && c.getValue() != null && !c.getValue().isBlank()) {
+                    token = c.getValue();
+                    logger.debug("Found token cookie (len={})", token.length());
+                    break;
                 }
-            } else {
-                logger.debug("No cookies present");
             }
+        } else {
+            logger.debug("No cookies present");
         }
 
-        // Valida e configura autenticação
         if (token != null) {
             try {
                 String username = jwtUtil.extractUsername(token);
                 logger.debug("Token subject: {}", username);
-                
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                    
-                    if (jwtUtil.validateToken(token, userDetails)) {
-                        UsernamePasswordAuthenticationToken authToken = 
-                            new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
-                        
-                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
-                        
-                        logger.debug("Authentication successful for user: {}", username);
+                    UserDetails ud = userDetailsService.loadUserByUsername(username);
+                    if (jwtUtil.validateToken(token, ud)) {
+                        UsernamePasswordAuthenticationToken auth =
+                                new UsernamePasswordAuthenticationToken(ud, null, ud.getAuthorities());
+                        auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                        logger.debug("SecurityContext populated for {}", username);
+                    } else {
+                        logger.debug("JWT validation failed");
                     }
                 }
-            } catch (UsernameNotFoundException e) {
-                logger.error("Unable to validate token: {}", e.getMessage());
+            } catch (UsernameNotFoundException ex) {
+                logger.warn("JWT processing failed: {}", ex.getMessage());
             }
-        } else {
-            logger.debug("No token provided for request {}", path);
         }
 
-        filterChain.doFilter(request, response);
+        chain.doFilter(request, response);
     }
 }

@@ -9,8 +9,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
-import umc.exs.model.compras.Troca;
-import umc.exs.repository.CupomRepository;
+import umc.exs.model.daos.repository.CupomRepository;
+import umc.exs.model.entidades.compras.Troca;
+
 import com.jayway.jsonpath.JsonPath;
 import static org.junit.jupiter.api.Assertions.*;
 

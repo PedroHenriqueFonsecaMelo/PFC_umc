@@ -17,16 +17,16 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 
-import umc.exs.controller.AdminController;
-import umc.exs.model.DTO.admin.AdminDTO;
-import umc.exs.model.DTO.admin.ProdutoDTO;
-import umc.exs.model.DTO.admin.TrocaDTO;
-import umc.exs.model.compras.Troca;
-import umc.exs.model.foundation.Administrador;
-import umc.exs.model.foundation.Produto;
-import umc.exs.repository.AdminRepository;
-import umc.exs.repository.ProdutoRepository;
-import umc.exs.repository.TrocaRepository;
+import umc.exs.controller.prod.AdminController;
+import umc.exs.model.daos.repository.AdminRepository;
+import umc.exs.model.daos.repository.ProdutoRepository;
+import umc.exs.model.daos.repository.TrocaRepository;
+import umc.exs.model.dtos.admin.AdminDTO;
+import umc.exs.model.dtos.admin.ProdutoDTO;
+import umc.exs.model.dtos.admin.TrocaDTO;
+import umc.exs.model.entidades.compras.Troca;
+import umc.exs.model.entidades.foundation.Administrador;
+import umc.exs.model.entidades.foundation.Produto;
 
 public class AdminControllerTest {
 

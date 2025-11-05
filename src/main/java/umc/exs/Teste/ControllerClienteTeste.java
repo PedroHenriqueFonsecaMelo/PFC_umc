@@ -6,12 +6,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import umc.exs.model.entidades.Cartao;
-import umc.exs.model.entidades.Cliente;
-import umc.exs.model.entidades.Endereco;
-import umc.exs.repository.CartaoRepository;
-import umc.exs.repository.ClienteRepository;
-import umc.exs.repository.EnderecoRepository;
+import umc.exs.model.daos.repository.CartaoRepository;
+import umc.exs.model.daos.repository.ClienteRepository;
+import umc.exs.model.daos.repository.EnderecoRepository;
+import umc.exs.model.entidades.usuario.Cartao;
+import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.entidades.usuario.Endereco;
 
 @RestController
 @RequestMapping("/test/cliente")

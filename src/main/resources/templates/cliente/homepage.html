@@ -1,25 +1,164 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
-<head>
-    <meta charset="UTF-8"/>
-    <title>Minha Conta</title>
-</head>
-<body>
-<h1>Minha Conta</h1>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Minha Conta</title>
 
-<div th:if="${cliente != null}">
-    <p><strong th:text="${cliente.nome}">Nome</strong></p>
-    <p><span th:text="${cliente.email}">email@example.com</span></p>
-    <p>Data de nascimento: <span th:text="${cliente.datanasc}">1990-01-01</span></p>
-    <p>Gênero: <span th:text="${cliente.gen}">M</span></p>
+        <script>
+        // Função para adicionar um novo endereço
+        function adicionarEndereco() {
+            const container = document.getElementById('enderecos-container');
+            const index = container.children.length;
 
-    <p><a th:href="@{|/clientes/${cliente.id}/remover|}">Remover conta</a></p>
-</div>
+            const fieldset = document.createElement('fieldset');
+            fieldset.classList.add('endereco-bloco');
+            fieldset.innerHTML = `
+                <legend>Novo Endereço</legend>
+                <label>Rua:</label>
+                <input type="text" name="enderecos[${index}].rua" placeholder="Rua" required><br>
+                <label>Número:</label>
+                <input type="text" name="enderecos[${index}].numero" placeholder="Número"><br>
+                <label>Bairro:</label>
+                <input type="text" name="enderecos[${index}].bairro" placeholder="Bairro"><br>
+                <label>Cidade:</label>
+                <input type="text" name="enderecos[${index}].cidade" placeholder="Cidade"><br>
+                <label>Estado:</label>
+                <input type="text" name="enderecos[${index}].estado" placeholder="Estado"><br>
+                <label>CEP:</label>
+                <input type="text" name="enderecos[${index}].cep" placeholder="CEP"><br>
+                <label>País:</label>
+                <input type="text" name="enderecos[${index}].pais" placeholder="País"><br>
+                <label>Complemento:</label>
+                <input type="text" name="enderecos[${index}].complemento" placeholder="Complemento"><br>
+                <label>Tipo de Residência:</label>
+                <input type="text" name="enderecos[${index}].tipoResidencia" placeholder="Casa, Apartamento, etc."><br>
+                <button type="button" onclick="removerEndereco(this)">Remover Endereço</button>
+                <hr>
+            `;
+            container.appendChild(fieldset);
+        }
 
-<div th:if="${cliente == null}">
-    <p>Cliente não encontrado.</p>
-    <a th:href="@{/clientes/cadastro}">Criar conta</a>
-</div>
+        // Função para remover um endereço
+        function removerEndereco(botao) {
+            const fieldset = botao.closest('fieldset');
+            fieldset.remove();
 
-</body>
+            // Atualiza os índices para manter a lista correta
+            atualizarIndices();
+        }
+
+        // Função para reindexar os endereços após adição/remoção
+        function atualizarIndices() {
+            const blocos = document.querySelectorAll('.endereco-bloco');
+            blocos.forEach((bloco, index) => {
+                const inputs = bloco.querySelectorAll('input[name]');
+                inputs.forEach(input => {
+                    const nomeCampo = input.name.substring(input.name.indexOf('.') + 1);
+                    input.name = `enderecos[${index}].${nomeCampo}`;
+                });
+            });
+        }
+    </script>
+    </head>
+    <body>
+        <h1>Minha Conta</h1>
+
+        <div th:if="${cliente != null}">
+            <p>Bem-vindo, <span th:text="${cliente.nome}">Nome do
+                    Cliente</span>!</p>
+
+            <form th:action="@{/clientes/atualizar}" th:object="${cliente}"
+                method="post">
+                <div>
+                    <label for="nome">Nome:</label>
+                    <input type="text" th:field="*{nome}" id="nome" required />
+                </div>
+
+                <div>
+                    <label for="email">Email:</label>
+                    <input type="email" th:field="*{email}" id="email"
+                        required />
+                </div>
+
+                <h3>Endereços</h3>
+                <div id="enderecos-container">
+                    <div th:each="endereco, stat : *{enderecos}"
+                        class="endereco-bloco">
+                        <fieldset>
+                            <legend
+                                th:text="'Endereço ' + ${stat.index + 1}"></legend>
+                            <input type="hidden"
+                                th:field="*{enderecos[__${stat.index}__].id}" />
+
+                            <label>Rua:</label>
+                            <input type="text"
+                                th:field="*{enderecos[__${stat.index}__].rua}"
+                                placeholder="Rua" required /><br>
+
+                            <label>Número:</label>
+                            <input type="text"
+                                th:field="*{enderecos[__${stat.index}__].numero}"
+                                placeholder="Número" /><br>
+
+                            <label>Bairro:</label>
+                            <input type="text"
+                                th:field="*{enderecos[__${stat.index}__].bairro}"
+                                placeholder="Bairro" /><br>
+
+                            <label>Cidade:</label>
+                            <input type="text"
+                                th:field="*{enderecos[__${stat.index}__].cidade}"
+                                placeholder="Cidade" /><br>
+
+                            <label>Estado:</label>
+                            <input type="text"
+                                th:field="*{enderecos[__${stat.index}__].estado}"
+                                placeholder="Estado" /><br>
+
+                            <label>CEP:</label>
+                            <input type="text"
+                                th:field="*{enderecos[__${stat.index}__].cep}"
+                                placeholder="CEP" /><br>
+
+                            <label>País:</label>
+                            <input type="text"
+                                th:field="*{enderecos[__${stat.index}__].pais}"
+                                placeholder="País" /><br>
+
+                            <label>Complemento:</label>
+                            <input type="text"
+                                th:field="*{enderecos[__${stat.index}__].complemento}"
+                                placeholder="Complemento" /><br>
+
+                            <label>Tipo de Residência:</label>
+                            <input type="text"
+                                th:field="*{enderecos[__${stat.index}__].tipoResidencia}"
+                                placeholder="Casa, Apto, etc." /><br>
+
+                            <button type="button"
+                                onclick="removerEndereco(this)">Remover
+                                Endereço</button>
+                            <hr>
+                        </fieldset>
+                    </div>
+                </div>
+
+                <button type="button" onclick="adicionarEndereco()">Adicionar
+                    Novo Endereço</button>
+
+                <div style="margin-top: 20px;">
+                    <button type="submit">Atualizar Informações</button>
+                </div>
+            </form>
+
+            <p><a th:href="@{|/clientes/remover|}">Remover
+                    conta</a></p>
+        </div>
+
+        <div th:if="${cliente == null}">
+            <p>Cliente não encontrado.</p>
+            <a th:href="@{/clientes/cadastro}">Criar conta</a>
+        </div>
+
+    </body>
 </html>

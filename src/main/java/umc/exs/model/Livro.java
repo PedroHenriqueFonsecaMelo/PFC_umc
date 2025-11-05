@@ -1,7 +1,7 @@
 package umc.exs.model;
 
 import jakarta.persistence.*;
-import umc.exs.model.foundation.Produto;
+import umc.exs.model.entidades.foundation.Produto;
 
 @Entity
 @Table(name = "livro")
