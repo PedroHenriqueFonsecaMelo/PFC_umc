@@ -1,107 +1,112 @@
 package umc.exs.backstage.service;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import umc.exs.model.DTO.auth.SignupDTO;
-import umc.exs.model.DTO.user.ClienteDTO;
-import umc.exs.model.entidades.Cartao;
-import umc.exs.model.entidades.Cliente;
-import umc.exs.model.entidades.Endereco;
-import umc.exs.repository.CartaoRepository;
-import umc.exs.repository.ClienteRepository;
-import umc.exs.repository.EnderecoRepository;
+import umc.exs.model.daos.repository.ClienteRepository;
+import umc.exs.model.dtos.auth.SignupDTO;
+import umc.exs.model.dtos.interfaces.ClienteConvertible;
+import umc.exs.model.dtos.user.CartaoDTO;
+import umc.exs.model.dtos.user.ClienteDTO;
+import umc.exs.model.dtos.user.EnderecoDTO;
+import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.daos.mappers.CartaoMapper;
+import umc.exs.model.daos.mappers.ClienteMapper;
+import umc.exs.model.daos.mappers.EnderecoMapper;
+import umc.exs.model.entidades.usuario.Endereco;
 
 @Service
 public class ClienteService {
 
     @Autowired
     private ClienteRepository clienteRepository;
-    
-    @Autowired
-    private EnderecoRepository enderecoRepository;
-    
-    @Autowired
-    private CartaoRepository cartaoRepository;
 
-    // -----------------------
-    // CRUD de Cliente
-    // -----------------------
-
-    public ClienteDTO salvarCliente(ClienteDTO clienteDTO) {
-        Cliente cliente = clienteDTO.toEntity();
+    public ClienteDTO salvarCliente(ClienteConvertible dto) {
+        Cliente cliente = ClienteMapper.toEntity(dto);
         Cliente salvo = clienteRepository.save(cliente);
-        return ClienteDTO.fromEntity(salvo);
+        return ClienteMapper.fromEntity(salvo);
+    }
+
+    public Optional<ClienteDTO> buscarClientePorEmail(String email) {
+        return clienteRepository.findByEmail(email)
+                .map(ClienteMapper::fromEntity);
     }
 
     public Optional<ClienteDTO> buscarClientePorId(Long id) {
         return clienteRepository.findById(id)
-                .map(ClienteDTO::fromEntity);
+                .map(ClienteMapper::fromEntity);
     }
 
     public List<ClienteDTO> listarTodos() {
         return clienteRepository.findAll()
                 .stream()
-                .map(ClienteDTO::fromEntity)
+                .map(ClienteMapper::fromEntity)
                 .collect(Collectors.toList());
     }
 
-    public void deletarCliente(Long id) {
-        clienteRepository.deleteById(id);
+    public ClienteDTO salvarClienteCompleto(SignupDTO signupDTO, EnderecoDTO enderecoDTO, CartaoDTO cartaoDTO) {
+
+        Cliente cliente = ClienteMapper.toEntity(signupDTO);
+        cliente.getEnderecos().add(EnderecoMapper.toEntity(enderecoDTO));
+        cliente.getCartoes().add(CartaoMapper.toEntity(cartaoDTO));
+
+        Cliente salvo = clienteRepository.save(cliente);
+        return ClienteMapper.fromEntity(salvo);
+
     }
 
-    // -----------------------
-    // CRUD de Endereço
-    // -----------------------
-
-    public Endereco salvarEndereco(Long clienteId, Endereco endereco) {
-        Cliente cliente = clienteRepository.findById(clienteId)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
-
-        // Adiciona a relação
-        endereco.getClientes().add(cliente);
-        Endereco salvo = enderecoRepository.save(endereco);
-
-        // Atualiza cliente apenas uma vez
-        cliente.getEnderecos().add(salvo);
-        clienteRepository.save(cliente);
-
-        return salvo;
+    public void deletarEnderecoDoCliente(Long clienteId, Long enderecoId) {
+        clienteRepository.findById(clienteId).ifPresent(cliente -> {
+            cliente.getEnderecos().removeIf(endereco -> endereco.getId().equals(enderecoId));
+            clienteRepository.save(cliente);
+        });
     }
 
-    public List<Endereco> buscarEnderecosPorCliente(Long clienteId) {
-        Cliente cliente = clienteRepository.findById(clienteId)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
-        return List.copyOf(cliente.getEnderecos());
+    public void deletarCartaoDoCliente(Long clienteId, Long cartaoId) {
+        clienteRepository.findById(clienteId).ifPresent(cliente -> {
+            cliente.getCartoes().removeIf(cartao -> cartao.getId().equals(cartaoId));
+            clienteRepository.save(cliente);
+        });
     }
 
-    // -----------------------
-    // CRUD de Cartão
-    // -----------------------
+    public static void copyNonNullProperties(ClienteDTO src, ClienteDTO target) {
+        System.out.println("Copiando propriedades de " + src + " para " + target);
+        System.out.println("Fonte: " + src.toString());
+        System.out.println("Destino: " + target.toString());
 
-    public Cartao salvarCartao(Long clienteId, Cartao cartao) {
-        Cliente cliente = clienteRepository.findById(clienteId)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
+        if (src == null || target == null) {
+            throw new IllegalArgumentException("Fonte e destino não podem ser nulos.");
+        }
 
-        Cartao salvo = cartaoRepository.save(cartao);
-        cliente.getCartoes().add(salvo);
-        clienteRepository.save(cliente);
+        String[] nullOrEmptyPropertyNames = Arrays.stream(src.getClass().getDeclaredFields())
+                .filter(field -> {
+                    field.setAccessible(true);
+                    try {
+                        Object value = field.get(src);
 
-        return salvo;
+                        // Ignora propriedades nulas ou vazias
+                        if (value == null) {
+                            return true;
+                        }
+
+                        return value instanceof String str && str.trim().isEmpty();
+
+                    } catch (IllegalAccessException e) {
+                        return false;
+                    }
+                })
+                .map(Field::getName)
+                .toArray(String[]::new);
+
+        // Copia apenas os campos válidos
+        BeanUtils.copyProperties(src, target, nullOrEmptyPropertyNames);
     }
 
-    public ClienteDTO salvarCliente(SignupDTO signupDTO) {
-        Cliente c = new Cliente();
-        c.setNome(signupDTO.getNome());
-        c.setEmail(signupDTO.getEmail());
-        c.setSenha(signupDTO.getSenha());
-        c.setDatanasc(signupDTO.getDatanasc());
-        c.setGen(signupDTO.getGen());
-        Cliente salvo = clienteRepository.save(c);
-        return ClienteDTO.fromEntity(salvo);
-    }
 }

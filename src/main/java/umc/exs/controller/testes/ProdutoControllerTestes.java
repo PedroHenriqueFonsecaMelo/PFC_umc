@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import umc.exs.model.DTO.admin.ProdutoDTO;
-import umc.exs.model.foundation.Produto;
-import umc.exs.repository.ProdutoRepository;
+import umc.exs.model.daos.repository.ProdutoRepository;
+import umc.exs.model.dtos.admin.ProdutoDTO;
+import umc.exs.model.entidades.foundation.Produto;
 
 import java.util.List;
 import java.util.stream.Collectors;

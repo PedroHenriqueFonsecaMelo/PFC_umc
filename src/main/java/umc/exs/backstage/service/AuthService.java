@@ -4,10 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import umc.exs.model.DTO.auth.LoginDTO;
-import umc.exs.model.DTO.auth.SignupDTO;
-import umc.exs.model.entidades.Cliente;
-import umc.exs.repository.ClienteRepository;
+import umc.exs.model.daos.repository.ClienteRepository;
+import umc.exs.model.dtos.auth.LoginDTO;
+import umc.exs.model.dtos.auth.SignupDTO;
+import umc.exs.model.entidades.usuario.Cliente;
 
 @Service
 public class AuthService {
@@ -37,7 +37,7 @@ public class AuthService {
         Cliente cliente = clienteRepository.findByEmail(loginDTO.getEmail())
                 .orElseThrow(() -> new RuntimeException("Email não encontrado."));
 
-        if (!passwordEncoder.matches(loginDTO.getPassword(), cliente.getSenha())) {
+        if (!passwordEncoder.matches(loginDTO.getSenha(), cliente.getSenha())) {
             throw new RuntimeException("Senha incorreta.");
         }
 

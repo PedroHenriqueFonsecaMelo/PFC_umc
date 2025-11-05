@@ -14,9 +14,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import umc.exs.backstage.security.JwtUtil;
 import umc.exs.controller.testes.ClientControllerTestes;
-import umc.exs.model.DTO.user.ClienteDTO;
-import umc.exs.model.entidades.Cliente;
-import umc.exs.repository.ClienteRepository;
+import umc.exs.model.daos.repository.ClienteRepository;
+import umc.exs.model.dtos.user.ClienteDTO;
+import umc.exs.model.entidades.usuario.Cliente;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 

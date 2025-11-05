@@ -27,6 +27,10 @@
         <label for="gen">Gênero:</label>
         <input type="text" id="gen" name="gen"
                th:value="${cliente != null && cliente.gen != null ? cliente.gen : 'M'}"/><br/><br/>
+        
+        <label for="cpf">CPF:</label>
+        <input type="text" id="cpf" name="cpf" required
+               th:value="${cliente != null && cliente.cpf != null ? cliente.cpf : '123.456.789-00'}"/><br/><br/>
 
         <label>
             <input type="checkbox" name="termsAccepted" value="true" checked> Aceito os Termos de Serviço

@@ -21,20 +21,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import umc.exs.backstage.service.SalesService;
-import umc.exs.model.DAO.AdminMapper;
-import umc.exs.model.DAO.ProdutoMapper;
-import umc.exs.model.DAO.TrocaMapper;
-import umc.exs.model.DTO.admin.AdminDTO;
-import umc.exs.model.DTO.admin.ProdutoDTO;
-import umc.exs.model.DTO.admin.TrocaDTO;
-import umc.exs.model.compras.Cupom;
-import umc.exs.model.compras.Troca;
-import umc.exs.model.foundation.Administrador;
-import umc.exs.model.foundation.Produto;
-import umc.exs.repository.AdminRepository;
-import umc.exs.repository.CupomRepository;
-import umc.exs.repository.ProdutoRepository;
-import umc.exs.repository.TrocaRepository;
+import umc.exs.model.daos.mappers.AdminMapper;
+import umc.exs.model.daos.mappers.ProdutoMapper;
+import umc.exs.model.daos.mappers.TrocaMapper;
+import umc.exs.model.daos.repository.AdminRepository;
+import umc.exs.model.daos.repository.CupomRepository;
+import umc.exs.model.daos.repository.ProdutoRepository;
+import umc.exs.model.daos.repository.TrocaRepository;
+import umc.exs.model.dtos.admin.AdminDTO;
+import umc.exs.model.dtos.admin.ProdutoDTO;
+import umc.exs.model.dtos.admin.TrocaDTO;
+import umc.exs.model.entidades.compras.Cupom;
+import umc.exs.model.entidades.compras.Troca;
+import umc.exs.model.entidades.foundation.Administrador;
+import umc.exs.model.entidades.foundation.Produto;
 
 @RestController
 @RequestMapping("/admintestes")
