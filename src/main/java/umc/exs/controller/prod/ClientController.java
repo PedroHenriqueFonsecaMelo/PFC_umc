@@ -259,7 +259,8 @@ public class ClientController {
                     .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
 
             // Chama o método unificado do Service para atualizar campos simples e coleções.
-            clienteService.atualizarClienteEAssociacoes(clienteId, clienteAtualizadoDTO);
+            
+            clienteService.atualizarClienteEAssociacoes(clienteId, clienteAtualizadoDTO, passwordEncoder);
 
             redirectAttributes.addFlashAttribute("sucesso", "Suas informações foram atualizadas com sucesso!");
 

@@ -32,7 +32,6 @@ public class ClienteService {
     private final ClienteRepository clienteRepository;
     private final EnderecoRepository enderecoRepository;
     private final CartaoRepository cartaoRepository;
-    private PasswordEncoder passwordEncoder;
 
     // Construtor para Injeção de Dependência
     public ClienteService(ClienteRepository clienteRepository,
@@ -94,42 +93,58 @@ public class ClienteService {
     // 📢 ATUALIZAÇÃO UNIFICADA (Simples + Coleções) - NOVO MÉTODO
     // ==========================================================
     @Transactional
-    public ClienteDTO atualizarClienteEAssociacoes(Long clienteId, ClienteDTO clienteAtualizadoDTO) {
+    public ClienteDTO atualizarClienteEAssociacoes(Long clienteId, ClienteDTO clienteAtualizadoDTO, PasswordEncoder passwordEncoder) {
         Cliente cliente = clienteRepository.findById(clienteId)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
         // 1. ATUALIZAÇÃO DOS CAMPOS SIMPLES
-        // Copia campos simples (nome, cpf, etc.) do DTO para a Entity, ignorando ID,
-        // SENHA e as coleções.
-        if (clienteAtualizadoDTO.getSenha() != null && !clienteAtualizadoDTO.getSenha().isBlank()) {
 
+        // Passo 1a: Armazenar a senha original em hash
+        String senhaOriginal = cliente.getSenha();
+
+        // Passo 1b: Criptografar a nova senha, SE FORNECEU
+        if (clienteAtualizadoDTO.getSenha() != null && !clienteAtualizadoDTO.getSenha().isBlank()) {
+            // A senha foi fornecida e é válida, criptografa e coloca no DTO.
             clienteAtualizadoDTO.setSenha(passwordEncoder.encode(clienteAtualizadoDTO.getSenha()));
-            BeanUtils.copyProperties(clienteAtualizadoDTO, cliente, "id", "enderecos", "cartoes");
         } else {
-            
-            BeanUtils.copyProperties(clienteAtualizadoDTO, cliente, "id", "senha", "enderecos", "cartoes");
+            // A senha não foi fornecida, garantimos que o DTO não tenha valor.
+            clienteAtualizadoDTO.setSenha(null);
+        }
+
+        // Passo 1c: Copiar campos simples, IGNORANDO a senha POR ENQUANTO.
+        // Usamos 'senha' na lista de ignorados para que a senha NULA ou a SENHA HASHED
+        // (se fornecida)
+        // do DTO não sobrescreva a senha original se não precisarmos.
+        // Vamos tratar a senha manualmente para evitar perdas.
+        BeanUtils.copyProperties(clienteAtualizadoDTO, cliente, "id", "senha", "enderecos", "cartoes");
+
+        // Passo 1d: Tratar a senha:
+        // Se o DTO tem uma nova senha (hashed), usamos ela.
+        if (clienteAtualizadoDTO.getSenha() != null) {
+            // O DTO.getSenha() já está em hash devido ao passo 1b.
+            cliente.setSenha(clienteAtualizadoDTO.getSenha());
+        } else {
+            // Se o DTO.getSenha() é null (não forneceu nova senha), restauramos a hash
+            // original.
+            cliente.setSenha(senhaOriginal);
         }
 
         // 2. CONVERSÃO E ATUALIZAÇÃO DAS COLEÇÕES
-        // Converte a List<DTO> (amigável ao formulário) de volta para Set<DTO>
-        // (necessário para a lógica de merge).
+        // ... (restante da lógica de endereços e cartões, que está correta) ...
+
         Set<EnderecoDTO> novosEnderecosSet = clienteAtualizadoDTO.getEnderecos() != null
                 ? clienteAtualizadoDTO.getEnderecos().stream().collect(Collectors.toSet())
-                : Collections.emptySet(); // Garante Set vazio se for null
+                : Collections.emptySet();
 
         Set<CartaoDTO> novosCartoesSet = clienteAtualizadoDTO.getCartoes() != null
                 ? clienteAtualizadoDTO.getCartoes().stream().collect(Collectors.toSet())
-                : Collections.emptySet(); // Garante Set vazio se for null
+                : Collections.emptySet();
 
-        // Chamamos o método existente (otimizado) que lida com o merge, update e delete
-        // das coleções.
         atualizarEnderecosECartoes(
                 clienteId,
                 novosEnderecosSet,
                 novosCartoesSet);
 
-        // O método acima já salvou a Entity 'cliente', mas retornamos a versão mais
-        // atualizada.
         return ClienteMapper.fromEntity(cliente);
     }
 
