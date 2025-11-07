@@ -58,10 +58,10 @@ public class ClientController {
     private void addTokenCookie(HttpServletResponse response, String token) {
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
                 .maxAge(7 * 24 * 3600)
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());
     }
@@ -69,10 +69,10 @@ public class ClientController {
     private void clearJwtCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from("token", "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());
     }
