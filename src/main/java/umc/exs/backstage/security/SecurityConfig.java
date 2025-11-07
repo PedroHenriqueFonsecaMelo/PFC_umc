@@ -22,10 +22,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
-        cfg.setAllowedOrigins(List.of("http://localhost:8080")); // ajuste se necessário
+        cfg.setAllowedOrigins(List.of("http://localhost:8443")); // ajuste se necessário
         cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
         cfg.setAllowCredentials(true);
+        
         cfg.setMaxAge(3600L);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cfg);
@@ -39,7 +40,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/debug", "/clientes/cadastro", "/clientes/cadastro/**", "/login", "/css/**", "/js/**", "/error").permitAll()
+                .requestMatchers("/auth/**", "/debug", "/clientes/cadastro", "/clientes/cadastro/**", "/clientes/login" ,"/login", "/css/**", "/js/**", "/error").permitAll()
                 .anyRequest().authenticated()
             );
 
