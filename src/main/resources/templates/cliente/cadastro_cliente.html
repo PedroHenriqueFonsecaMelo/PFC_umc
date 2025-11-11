@@ -3,34 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <title>Cadastro de Cliente</title>
+    <style>
+        /* Estilos básicos para clareza */
+        body { font-family: Arial, sans-serif; }
+        .error-message { color: red; font-weight: bold; margin-bottom: 15px; border: 1px solid red; padding: 10px; border-radius: 4px; }
+        label { display: inline-block; width: 160px; margin-top: 5px; font-weight: 500; }
+        input[type="text"], input[type="email"], input[type="date"], input[type="password"], select { 
+            width: 250px; padding: 8px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; 
+        }
+        button { padding: 10px 15px; cursor: pointer; border-radius: 4px; border: none; background-color: #007bff; color: white; font-weight: bold; }
+        button:hover { background-color: #0056b3; }
+    </style>
 </head>
 <body>
     <h1>Cadastro de Cliente</h1>
 
-    <div style="color:red;">
-        <p th:text="${erro}"></p>
-    </div>
+    <div th:if="${erro}" class="error-message" th:text="${erro}">Mensagem de Erro</div>
 
     <form th:action="@{/clientes/cadastro}" method="post">
+        
         <label for="nome">Nome:</label>
         <input type="text" id="nome" name="nome" required
-               th:value="${cliente != null && cliente.nome != null ? cliente.nome : 'Teste Usuario'}"/><br/><br/>
+               th:value="${cliente != null && cliente.nome != null ? cliente.nome : 'Teste Usuario'}"/><br/>
 
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required
-               th:value="${cliente != null && cliente.email != null ? cliente.email : 'teste+user@example.com'}"/><br/><br/>
+               th:value="${cliente != null && cliente.email != null ? cliente.email : 'teste+user@example.com'}"/><br/>
 
         <label for="datanasc">Data de Nascimento:</label>
-        <input type="date" id="datanasc" name="datanasc"
-               th:value="${cliente != null && cliente.datanasc != null ? cliente.datanasc : '1990-01-01'}"/><br/><br/>
+        <input type="date" id="datanasc" name="datanasc" required
+               th:value="${cliente != null && cliente.datanasc != null ? cliente.datanasc : '1990-01-01'}"/><br/>
 
         <label for="gen">Gênero:</label>
-        <input type="text" id="gen" name="gen"
-               th:value="${cliente != null && cliente.gen != null ? cliente.gen : 'M'}"/><br/><br/>
+        <select id="gen" name="gen" required>
+            <option value="M" th:selected="${cliente != null and cliente.gen == 'M'}">M - Masculino</option>
+            <option value="F" th:selected="${cliente != null and cliente.gen == 'F'}">F - Feminino</option>
+            <option value="OUTRO" th:selected="${cliente != null and cliente.gen == 'OUTRO'}">Outro</option>
+            <option value="M" th:if="${cliente == null or cliente.gen == null}" selected hidden></option> 
+        </select><br/>
         
         <label for="cpf">CPF:</label>
         <input type="text" id="cpf" name="cpf" required
-               th:value="${cliente != null && cliente.cpf != null ? cliente.cpf : '123.456.789-00'}"/><br/><br/>
+               th:value="${cliente != null && cliente.cpf != null ? cliente.cpf : '43210987650'}"
+               placeholder="Apenas números, 11 dígitos"/><br/>
+
+        <hr style="border-top: 1px dashed #ccc; margin: 15px 0;" />
 
         <label>
             <input type="checkbox" name="termsAccepted" value="true" checked> Aceito os Termos de Serviço
@@ -41,7 +58,9 @@
         </label><br/><br/>
 
         <label for="senha">Senha:</label>
-        <input type="password" id="senha" name="senha" required value="Senha@123"><br/><br/>
+        <input type="password" id="senha" name="senha" required 
+               placeholder="Mínimo 8 caracteres, Maiúsculas, Minúsculas, Números e Símbolos"
+               value="Senha@123"><br/><br/>
 
         <button type="submit">Cadastrar</button>
     </form>

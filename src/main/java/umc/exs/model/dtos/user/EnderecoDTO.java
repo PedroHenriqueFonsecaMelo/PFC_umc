@@ -6,62 +6,32 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import umc.exs.model.dtos.interfaces.EnderecoConvertible;
 import umc.exs.model.entidades.usuario.Endereco;
+import umc.exs.model.daos.mappers.EnderecoMapper; // Importado para delegação
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 public class EnderecoDTO implements EnderecoConvertible {
+    
     private Long id;
-    private String pais;
-    private String cep;
-    private String estado;
-    private String cidade;
     private String rua;
-    private String bairro;
     private String numero;
+    private String bairro;
+    private String cidade;
+    private String estado;
+    private String cep;
+    private String pais;
     private String complemento;
     private String tipoResidencia;
 
-    public static EnderecoDTO fromEntity(Endereco e) {
-        if (e == null)
-            return null;
-        EnderecoDTO dto = new EnderecoDTO();
-        dto.id = e.getId();
-        dto.pais = e.getPais();
-        dto.cep = e.getCep();
-        dto.estado = e.getEstado();
-        dto.cidade = e.getCidade();
-        dto.rua = e.getRua();
-        dto.bairro = e.getBairro();
-        dto.numero = String.valueOf(e.getNumero());
-        dto.complemento = e.getComplemento();
-        dto.tipoResidencia = e.getTipoResidencia();
-        return dto;
-    }
-
+    // O DTO delega a conversão ao Mapper
     @Override
     public Endereco toEntity() {
-        Endereco e = new Endereco();
-        e.setId(this.id);
-        e.setPais(this.pais);
-        e.setCep(this.cep);
-        e.setEstado(this.estado);
-        e.setCidade(this.cidade);
-        e.setRua(this.rua);
-        e.setBairro(this.bairro);
-        if (this.numero != null)
-            e.setNumero(this.numero);
-        e.setComplemento(this.complemento);
-        e.setTipoResidencia(this.tipoResidencia);
-        return e;
+        return EnderecoMapper.toEntity(this);
     }
-
     @Override
-    public String toString() {
-        return "EnderecoDTO [id=" + id + ", pais=" + pais + ", cep=" + cep + ", estado=" + estado + ", cidade="
-                + cidade + ", rua=" + rua + ", bairro=" + bairro + ", numero=" + numero + ", complemento="
-                + complemento + ", tipoResidencia=" + tipoResidencia + "]";
+    public EnderecoDTO fromEntity (Endereco endereco){
+        return EnderecoMapper.fromEntity(endereco);
     }
-
 }

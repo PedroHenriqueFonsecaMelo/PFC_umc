@@ -192,3 +192,7 @@
 2025-11-07T08:29:58.023-03:00 DEBUG 9432 --- [Salt_PedroHenriqueFonsecaMelo] [https-jsse-nio-8443-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /error
 2025-11-07T08:29:58.030-03:00 DEBUG 9432 --- [Salt_PedroHenriqueFonsecaMelo] [https-jsse-nio-8443-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /error
 2025-11-07T08:29:58.061-03:00 DEBUG 9432 --- [Salt_PedroHenriqueFonsecaMelo] [https-jsse-nio-8443-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-11-07T23:14:13.754-03:00  INFO 27828 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : Starting Main using Java 17.0.10 with PID 27828 (C:\GitProjetos\Fabiano\Pfc_umc\target\classes started by Pedro Henrique in c:\GitProjetos\Fabiano\Pfc_umc)
+2025-11-07T23:14:13.770-03:00  INFO 27828 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : No active profile set, falling back to 1 default profile: "default"
+2025-11-07T23:14:14.007-03:00  INFO 8032 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : Starting Main using Java 17.0.10 with PID 8032 (C:\GitProjetos\Fabiano\Pfc_umc\target\classes started by Pedro Henrique in c:\GitProjetos\Fabiano\Pfc_umc)
+2025-11-07T23:14:14.041-03:00  INFO 8032 --- [Salt_PedroHenriqueFonsecaMelo] [restartedMain] umc.exs.Main                             : No active profile set, falling back to 1 default profile: "default"

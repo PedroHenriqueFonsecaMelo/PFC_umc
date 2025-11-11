@@ -43,6 +43,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         "/css/", "/js/", "/images/", "/webjars/", "/error", "/login"
     );
 
+    @SuppressWarnings("unused")
     private boolean isPublic(String path) {
         if (path == null) return false;
         for (String p : PUBLIC_PREFIXES) {
