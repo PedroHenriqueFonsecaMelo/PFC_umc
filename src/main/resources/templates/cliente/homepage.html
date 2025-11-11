@@ -2,87 +2,113 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Minha Conta</title>
+    <title>Minha Conta - Atualização de Dados</title>
     <style>
         /* Estilos básicos para clareza */
-        fieldset { margin-bottom: 1em; padding: 15px; border: 1px solid #ccc; border-radius: 4px; }
-        legend { font-weight: bold; padding: 0 10px; font-size: 1.1em; }
-        .novo-endereco { border: 1px dashed #007bff; }
-        label { display: inline-block; width: 180px; margin-top: 5px; font-weight: 500; }
-        input[type="text"], input[type="email"], input[type="date"] { width: 300px; padding: 6px; margin-bottom: 5px; border: 1px solid #ddd; border-radius: 3px; }
-        button { margin-top: 1em; padding: 8px 12px; cursor: pointer; border-radius: 4px; border: none; background-color: #007bff; color: white; }
-        button:hover { background-color: #0056b3; }
-        .mensagem { padding: 10px; margin-bottom: 15px; border-radius: 4px; font-weight: bold; }
+        body { font-family: Arial, sans-serif; }
+        fieldset { margin-bottom: 1.5em; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        legend { font-weight: bold; padding: 0 10px; font-size: 1.2em; color: #007bff; }
+        .novo-item { border: 2px dashed #ffc107; background-color: #fffde7; }
+        label { display: inline-block; width: 180px; margin-top: 8px; font-weight: 500; }
+        input[type="text"], input[type="email"], input[type="date"], input[type="password"], select { 
+            width: 300px; padding: 8px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; 
+        }
+        .action-button { margin-top: 1em; padding: 10px 15px; cursor: pointer; border-radius: 4px; border: none; font-weight: bold; }
+        .btn-principal { background-color: #007bff; color: white; }
+        .btn-principal:hover { background-color: #0056b3; }
+        .btn-remover { background-color: #dc3545; color: white; margin-left: 20px; }
+        .btn-remover:hover { background-color: #c82333; }
+        .mensagem { padding: 12px; margin-bottom: 20px; border-radius: 4px; font-weight: bold; }
         .sucesso { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .erro { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        a { text-decoration: none; color: #007bff; margin-left: 10px; }
+        .link-acao { text-decoration: none; color: #007bff; margin-left: 10px; }
+        .link-acao-perigosa { color: #dc3545; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>Minha Conta</h1>
+    <h1>Minha Conta - Detalhes</h1>
 
     <div th:if="${sucesso}" class="mensagem sucesso" th:text="${sucesso}">Mensagem de Sucesso</div>
     <div th:if="${erro}" class="mensagem erro" th:text="${erro}">Mensagem de Erro</div>
 
     <div th:if="${cliente != null}">
-        <p>Bem-vindo, <strong th:text="${cliente.nome}">Cliente</strong>!</p>
+        <p>Bem-vindo(a), <strong th:text="${cliente.nome}">Cliente</strong>! Aqui você pode atualizar suas informações e associações.</p>
 
         <form th:action="@{/clientes/atualizar}" method="post" th:object="${cliente}">
             <input type="hidden" th:field="*{id}" />
 
             <fieldset>
                 <legend>Dados Pessoais</legend>
-                <label>Nome:</label>
-                <input type="text" th:field="*{nome}" required /><br>
-                <label>Email:</label>
-                <input type="email" th:field="*{email}" required /><br>
-                <label>CPF:</label>
-                <input type="text" th:field="*{cpf}" readonly /><br>
-                <label>Data de Nascimento:</label>
-                <input type="date" th:field="*{datanasc}" required /><br>
-                <label>Gênero:</label>
-                <input type="text" th:field="*{gen}" /><br>
-                <label>Nova Senha</label>
-                <input type="password" th:field="*{senha}" placeholder="Deixe em branco para manter a senha atual" /><br>
+                
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome" th:field="*{nome}" required /><br>
+                
+                <label for="email">Email:</label>
+                <input type="email" id="email" th:field="*{email}" readonly style="background-color: #eee;" title="Email não pode ser alterado diretamente." /><br>
+                
+                <label for="cpf">CPF:</label>
+                <input type="text" id="cpf" th:field="*{cpf}" readonly style="background-color: #eee;" /><br>
+                
+                <label for="datanasc">Data de Nascimento:</label>
+                <input type="date" id="datanasc" th:field="*{datanasc}" required /><br>
+                
+                <label for="gen">Gênero:</label>
+                <select id="gen" th:field="*{gen}">
+                    <option value="">Selecione</option>
+                    <option value="M">M - Masculino</option>
+                    <option value="F">F - Feminino</option>
+                    <option value="OUTRO">Outro</option>
+                </select><br>
+
+                <label for="senha">Nova Senha:</label>
+                <input type="password" id="senha" th:field="*{senha}" placeholder="Deixe em branco para manter a senha atual" autocomplete="new-password" /><br>
             </fieldset>
 
             <hr />
 
             <h2>Endereços Cadastrados</h2>
-            
             <div id="enderecos-list-container">
                 <div th:each="endereco, iStat : *{enderecos}" class="endereco-item">
                     <fieldset>
-                        <legend th:text="'Endereço ' + (${iStat.index} + 1)"></legend>
+                        <legend th:text="'Endereço ' + (${iStat.index} + 1) + ' (ID: ' + ${endereco.id} + ')'"></legend>
 
                         <input type="hidden" th:field="*{enderecos[__${iStat.index}__].id}" />
 
-                        <label>Rua:</label>
-                        <input type="text" th:field="*{enderecos[__${iStat.index}__].rua}" /><br>
-                        <label>Número:</label>
-                        <input type="text" th:field="*{enderecos[__${iStat.index}__].numero}" /><br>
-                        <label>Bairro:</label>
-                        <input type="text" th:field="*{enderecos[__${iStat.index}__].bairro}" /><br>
-                        <label>Cidade:</label>
-                        <input type="text" th:field="*{enderecos[__${iStat.index}__].cidade}" /><br>
-                        <label>Estado:</label>
-                        <input type="text" th:field="*{enderecos[__${iStat.index}__].estado}" /><br>
                         <label>CEP:</label>
-                        <input type="text" th:field="*{enderecos[__${iStat.index}__].cep}" /><br>
-                        <label>País:</label>
-                        <input type="text" th:field="*{enderecos[__${iStat.index}__].pais}" /><br>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].cep}" required /><br>
+                        
+                        <label>Rua:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].rua}" required /><br>
+                        
+                        <label>Número:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].numero}" required /><br>
+                        
                         <label>Complemento:</label>
                         <input type="text" th:field="*{enderecos[__${iStat.index}__].complemento}" /><br>
-                        <label>Tipo de residência:</label>
-                        <input type="text" th:field="*{enderecos[__${iStat.index}__].tipoResidencia}" /><br>
 
-                        <a th:href="@{/clientes/removerEndereco/{id}(id=${endereco.id})}"
-                            style="color:red; text-decoration:none;">🗑️ Remover este endereço</a>
+                        <label>Bairro:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].bairro}" required /><br>
+                        
+                        <label>Cidade:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].cidade}" required /><br>
+                        
+                        <label>Estado:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].estado}" required /><br>
+                        
+                        <label>País:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].pais}" required /><br>
+
+                        <label>Tipo de residência:</label>
+                        <input type="text" th:field="*{enderecos[__${iStat.index}__].tipoResidencia}" required /><br>
+                        
+                        <a th:href="@{/clientes/removerEndereco(enderecoId=${endereco.id})}"
+                            class="link-acao-perigosa"
+                            onclick="return confirm('Tem certeza que deseja remover este endereço? Esta ação é imediata.');">🗑️ Remover este endereço</a>
                     </fieldset>
                 </div>
             </div>
 
-            <button type="button" onclick="adicionarEndereco()">➕ Adicionar Novo Endereço</button>
+            <button type="button" onclick="adicionarEndereco()" class="action-button btn-principal">➕ Adicionar Novo Endereço</button>
 
             <hr />
 
@@ -90,41 +116,61 @@
             <div id="cartoes-list-container">
                 <div th:each="cartao, iStat : *{cartoes}" class="cartao-item">
                     <fieldset>
-                        <legend th:text="'Cartão ' + (${iStat.index} + 1)"></legend>
+                        <legend th:text="'Cartão ' + (${iStat.index} + 1) + ' (ID: ' + ${cartao.id} + ')'"></legend>
 
                         <input type="hidden" th:field="*{cartoes[__${iStat.index}__].id}" />
-
+                        
                         <label>Número do Cartão:</label>
-                        <input type="text" th:field="*{cartoes[__${iStat.index}__].numero}" required /><br>
+                        <input type="text" th:field="*{cartoes[__${iStat.index}__].numero}" readonly style="font-weight: bold; background-color: #eee;" /><br>
+                        
                         <label>Nome no Cartão:</label>
                         <input type="text" th:field="*{cartoes[__${iStat.index}__].nomeTitular}" required /><br>
-                        <label>Validade:</label>
-                        <input type="text" th:field="*{cartoes[__${iStat.index}__].validade}" placeholder="MM/AAAA" /><br>
-                        <label>Bandeira:</label>
-                        <input type="text" th:field="*{cartoes[__${iStat.index}__].bandeira}" /><br>
-                        <label>CVV (Não editável):</label>
-                        <input type="text" value="***" readonly /><br>
                         
-                        <a th:href="@{/clientes/removerCartao/{id}(id=${cartao.id})}"
-                            style="color:red; text-decoration:none;">💳 Remover este Cartão</a>
+                        <label>Validade:</label>
+                        <input type="text" th:field="*{cartoes[__${iStat.index}__].validade}" placeholder="MM/AAAA" readonly style="background-color: #eee;" /><br>
+                        
+                        <label>CPF do Titular:</label>
+                        <input type="text" th:field="*{cartoes[__${iStat.index}__].cpfTitular}" readonly style="background-color: #eee;" /><br>
+
+                        <label>Bandeira:</label>
+                        <input type="text" th:field="*{cartoes[__${iStat.index}__].bandeira}" readonly style="background-color: #eee;" /><br>
+
+                        <form th:action="@{/clientes/removerCartao}" method="post" style="display:inline;">
+                             <input type="hidden" name="cartaoId" th:value="${cartao.id}" />
+                             <button type="submit" 
+                                class="action-button btn-remover"
+                                onclick="return confirm('Tem certeza que deseja remover este cartão? Esta ação é imediata.');">
+                                💳 Remover este Cartão
+                             </button>
+                        </form>
                     </fieldset>
                 </div>
             </div>
 
-            <button type="button" onclick="adicionarCartao()">➕ Adicionar Novo Cartão</button>
+            <button type="button" onclick="adicionarCartao()" class="action-button btn-principal">➕ Adicionar Novo Cartão</button>
             <br><br>
 
-            <button type="submit">💾 Atualizar Informações</button>
+            <button type="submit" class="action-button btn-principal">💾 Atualizar Informações</button>
         </form>
 
         <hr />
-        <p><a th:href="@{/clientes/logout}">Sair</a></p>
-        <p><a th:href="@{|/clientes/${cliente.id}/remover|}">Remover conta</a></p>
+        <p>
+            <a th:href="@{/clientes/logout}" class="link-acao">Sair da Conta</a>
+        </p>
+        
+        <form th:action="@{/clientes/deletar}" method="post" style="display:inline-block; margin-top: 10px;">
+            <button type="submit" 
+                    class="action-button btn-remover"
+                    onclick="return confirm('AVISO CRÍTICO: Você está prestes a DELETAR PERMANENTEMENTE sua conta. Tem certeza absoluta?');">
+                    ⛔ Deletar Minha Conta
+            </button>
+        </form>
+
     </div>
 
     <script th:inline="javascript">
         // === INDICES ===
-        // CORREÇÃO: Usamos o operador ternário completo do Thymeleaf para evitar erros de sintaxe JS.
+        // Usamos #lists.size para garantir que a contagem comece após o último item existente
         let enderecoIndex = [[${#lists.isEmpty(cliente.enderecos)} ? 0 : ${#lists.size(cliente.enderecos)}]];
         let cartaoIndex = [[${#lists.isEmpty(cliente.cartoes)} ? 0 : ${#lists.size(cliente.cartoes)}]];
 
@@ -134,31 +180,39 @@
             const idx = enderecoIndex++;
 
             const html = `
-            <div class="endereco-item novo-endereco">
+            <div class="endereco-item novo-item">
                 <fieldset>
-                    <legend>Novo Endereço (adicionado)</legend>
+                    <legend>Novo Endereço (ID temporário)</legend>
                     <input type="hidden" name="enderecos[${idx}].id" value="" /> 
+
+                    <label>CEP:</label>
+                    <input type="text" name="enderecos[${idx}].cep" required><br>
 
                     <label>Rua:</label>
                     <input type="text" name="enderecos[${idx}].rua" required><br>
+                    
                     <label>Número:</label>
                     <input type="text" name="enderecos[${idx}].numero" required><br>
-                    <label>Bairro:</label>
-                    <input type="text" name="enderecos[${idx}].bairro"><br>
-                    <label>Cidade:</label>
-                    <input type="text" name="enderecos[${idx}].cidade"><br>
-                    <label>Estado:</label>
-                    <input type="text" name="enderecos[${idx}].estado"><br>
-                    <label>CEP:</label>
-                    <input type="text" name="enderecos[${idx}].cep"><br>
-                    <label>País:</label>
-                    <input type="text" name="enderecos[${idx}].pais"><br>
+
                     <label>Complemento:</label>
                     <input type="text" name="enderecos[${idx}].complemento"><br>
-                    <label>Tipo de residência:</label>
-                    <input type="text" name="enderecos[${idx}].tipoResidencia"><br>
+
+                    <label>Bairro:</label>
+                    <input type="text" name="enderecos[${idx}].bairro" required><br>
                     
-                    <button type="button" onclick="this.closest('.endereco-item').remove()">🗑️ Remover</button>
+                    <label>Cidade:</label>
+                    <input type="text" name="enderecos[${idx}].cidade" required><br>
+                    
+                    <label>Estado:</label>
+                    <input type="text" name="enderecos[${idx}].estado" required><br>
+                    
+                    <label>País:</label>
+                    <input type="text" name="enderecos[${idx}].pais" required><br>
+
+                    <label>Tipo de residência:</label>
+                    <input type="text" name="enderecos[${idx}].tipoResidencia" required><br>
+                    
+                    <button type="button" onclick="this.closest('.endereco-item').remove()" class="action-button btn-remover">🗑️ Remover</button>
                 </fieldset>
             </div>
             `;
@@ -171,23 +225,27 @@
             const idx = cartaoIndex++;
 
             const html = `
-            <div class="cartao-item novo-endereco">
+            <div class="cartao-item novo-item">
                 <fieldset>
-                    <legend>Novo Cartão (adicionado)</legend>
+                    <legend>Novo Cartão (ID temporário)</legend>
                     <input type="hidden" name="cartoes[${idx}].id" value="" /> 
-
-                    <label>Número do Cartão:</label>
-                    <input type="text" name="cartoes[${idx}].numero" required><br>
-                    <label>Nome no Cartão:</label>
-                    <input type="text" name="cartoes[${idx}].nomeImpresso" required><br>
-                    <label>Validade:</label>
-                    <input type="text" name="cartoes[${idx}].validade" placeholder="MM/AAAA"><br>
-                    <label>Bandeira:</label>
-                    <input type="text" name="cartoes[${idx}].bandeira"><br>
-                    <label>CVV (Opcional):</label>
-                    <input type="text" name="cartoes[${idx}].cvv" maxlength="4"><br>
                     
-                    <button type="button" onclick="this.closest('.cartao-item').remove()">🗑️ Remover</button>
+                    <label>Número do Cartão:</label>
+                    <input type="text" name="cartoes[${idx}].numero" required placeholder="Apenas números, sem espaços"><br>
+                    
+                    <label>Nome no Cartão:</label>
+                    <input type="text" name="cartoes[${idx}].nomeTitular" required><br>
+                    
+                    <label>CPF do Titular:</label>
+                    <input type="text" name="cartoes[${idx}].cpfTitular" required><br>
+                    
+                    <label>Validade:</label>
+                    <input type="text" name="cartoes[${idx}].validade" placeholder="MM/AAAA" required><br>
+                    
+                    <label>Bandeira:</label>
+                    <input type="text" name="cartoes[${idx}].bandeira" placeholder="Ex: VISA, MASTER" required><br>
+                    
+                    <button type="button" onclick="this.closest('.cartao-item').remove()" class="action-button btn-remover">🗑️ Remover</button>
                 </fieldset>
             </div>
             `;

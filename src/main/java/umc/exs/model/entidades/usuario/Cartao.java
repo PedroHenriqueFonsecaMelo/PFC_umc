@@ -10,92 +10,45 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class Cartao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String numero;
 
     @Column
     private String bandeira;
 
-    @Column
+    @Column(nullable = false)
     private String nomeTitular;
 
     @Column
-    private String validade;
+    private String validade; 
+    // REMOVIDO: CVV NÃO DEVE SER PERSISTIDO por razões de segurança (PCI DSS).
+    // private String cvv; 
 
-    @Column
-    private String cvv;
-
-    @Column
-    private boolean preferencial;
+    @Column(nullable = false)
+    private String cpfTitular; // NOVO: Campo de CPF do titular adicionado
 
     @ManyToMany(mappedBy = "cartoes")
     private Set<Cliente> clientes = new HashSet<>();
 
-    // Getters e setters
-    public Long getId() {
-        return id;
-    }
+    // --- Métodos de Relacionamento e Utility ---
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNumero() {
-        return numero;
-    }
-
-    public void setNumero(String numero) {
-        this.numero = numero;
-    }
-
-    public String getBandeira() {
-        return bandeira;
-    }
-
-    public void setBandeira(String bandeira) {
-        this.bandeira = bandeira;
-    }
-
-    public String getNomeTitular() {
-        return nomeTitular;
-    }
-
-    public void setNomeTitular(String nomeTitular) {
-        this.nomeTitular = nomeTitular;
-    }
-
-    public String getValidade() {
-        return validade;
-    }
-
-    public void setValidade(String validade) {
-        this.validade = validade;
-    }
-
-    public String getCvv() {
-        return cvv;
-    }
-
-    public void setCvv(String cvv) {
-        this.cvv = cvv;
-    }
-
-    public boolean isPreferencial() {
-        return preferencial;
-    }
-
-    public void setPreferencial(boolean preferencial) {
-        this.preferencial = preferencial;
-    }
-
+    // Getters e setters para clientes (garantidos pelo Lombok, mas mantidos para b-directional helper se necessário)
     public Set<Cliente> getClientes() {
         return clientes;
     }
@@ -104,6 +57,7 @@ public class Cartao {
         this.clientes = clientes;
     }
 
+    // Método helper para adicionar a relação bi-direcional
     public void addCliente(Cliente cliente) {
         this.clientes.add(cliente);
         cliente.getCartoes().add(this);
@@ -111,7 +65,7 @@ public class Cartao {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hash(id);
     }
 
     @Override
@@ -121,6 +75,9 @@ public class Cartao {
         if (obj == null || getClass() != obj.getClass())
             return false;
         Cartao other = (Cartao) obj;
-        return Objects.equals(id, other.id);
+        
+        // Compara por ID, que é a chave primária
+        return id != null && Objects.equals(id, other.id);
     }
+
 }

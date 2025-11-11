@@ -1,7 +1,10 @@
 package umc.exs.model.entidades.usuario;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -18,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import umc.exs.model.entidades.foundation.enums.Genero;
 
 @Entity
 @Table(name = "users")
@@ -41,7 +45,7 @@ public class Cliente {
     private String datanasc;
 
     @Column(nullable = false)
-    private String gen;
+    private Genero gen;
 
     @Column(nullable = false, unique = true)
     private String cpf;
@@ -54,6 +58,11 @@ public class Cliente {
 
     @Column(nullable = false)
     private boolean bloqueada = false;
+
+    // --- CAMPO ADICIONADO PARA DATA DE CRIAÇÃO ---
+    @CreationTimestamp // 1. Garante que o valor seja setado na criação
+    @Column(nullable = false, updatable = false) // 2. Garante que o valor não possa ser alterado (imutável)
+    private LocalDateTime dataCriacao;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "cliente_cartao", joinColumns = @JoinColumn(name = "cliente_id"), inverseJoinColumns = @JoinColumn(name = "cartao_id"))

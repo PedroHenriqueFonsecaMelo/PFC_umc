@@ -1,4 +1,4 @@
-package umc.exs.backstage.security;
+package umc.exs.backstage.config;
 
 import java.util.List;
 
@@ -15,6 +15,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import umc.exs.backstage.security.JwtRequestFilter;
 
 @Configuration
 public class SecurityConfig {

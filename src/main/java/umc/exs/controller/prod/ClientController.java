@@ -1,11 +1,11 @@
 package umc.exs.controller.prod;
 
 import jakarta.servlet.http.HttpServletResponse;
-import umc.exs.backstage.security.JwtUserDetailsService;
+import umc.exs.backstage.log.LogAuditoriaService;
 import umc.exs.backstage.security.JwtUtil;
+import umc.exs.backstage.service.AuthHelper;
 import umc.exs.backstage.service.ClienteService;
-import umc.exs.backstage.service.FieldValidation;
-import umc.exs.model.daos.repository.ClienteRepository;
+import umc.exs.model.dtos.auth.LoginDTO;
 import umc.exs.model.dtos.auth.SignupDTO;
 import umc.exs.model.dtos.user.CartaoDTO;
 import umc.exs.model.dtos.user.ClienteDTO;
@@ -15,18 +15,11 @@ import java.security.Principal;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseCookie;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,54 +30,25 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ClientController {
 
     @Autowired
-    private ClienteRepository clienteRepository;
-
-    @Autowired
     private ClienteService clienteService;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private LogAuditoriaService logAuditoriaService;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private AuthHelper authHelper; 
 
     @Autowired
-    private JwtUserDetailsService userDetailsService;
+    private JwtUtil jwtCookieHelper;
 
     // ============================================================
-    // 🔧 COOKIES
-    // ============================================================
-
-    private void addTokenCookie(HttpServletResponse response, String token) {
-        ResponseCookie cookie = ResponseCookie.from("token", token)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(7 * 24 * 3600)
-                .sameSite("None")
-                .build();
-        response.addHeader("Set-Cookie", cookie.toString());
-    }
-
-    private void clearJwtCookie(HttpServletResponse response) {
-        ResponseCookie cookie = ResponseCookie.from("token", "")
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(0)
-                .sameSite("None")
-                .build();
-        response.addHeader("Set-Cookie", cookie.toString());
-    }
-
-    // ============================================================
-    // 🔹 CADASTRO
+    // 🔹 CADASTRO (Removido try-catch - Exceções tratadas globalmente)
     // ============================================================
 
     @GetMapping("/cadastro")
     public String mostrarCadastro(Model model) {
         if (!model.containsAttribute("cliente"))
-            model.addAttribute("cliente", new ClienteDTO());
+            model.addAttribute("cliente", new SignupDTO()); 
         return "cliente/cadastro_cliente";
     }
 
@@ -93,34 +57,32 @@ public class ClientController {
             @ModelAttribute SignupDTO signupDTO,
             @RequestParam(value = "termsAccepted", required = false) Boolean termsAccepted,
             @RequestParam(value = "privacyAccepted", required = false) Boolean privacyAccepted,
+            @RequestParam(value = "confirmPassword", required = false) String confirmPassword,
             Model model,
             HttpServletResponse response) {
 
         if (Boolean.FALSE.equals(termsAccepted) || Boolean.FALSE.equals(privacyAccepted)) {
+            // Este é um erro específico de UI, tratado localmente.
             model.addAttribute("erro", "É necessário aceitar os termos e a política de privacidade.");
             model.addAttribute("cliente", signupDTO);
             return "cliente/cadastro_cliente";
         }
 
-        if (signupDTO == null || !FieldValidation.validarCampos(signupDTO) ||
-                !FieldValidation.isValidEmail(signupDTO.getEmail())) {
-            model.addAttribute("erro", "Dados inválidos.");
-            model.addAttribute("cliente", signupDTO);
-            return "cliente/cadastro_cliente";
-        }
-
-        signupDTO.setEmail(FieldValidation.sanitizeEmail(signupDTO.getEmail()));
-        signupDTO.setSenha(passwordEncoder.encode(signupDTO.getSenha()));
-
-        ClienteDTO salvo = clienteService.salvarCliente(signupDTO);
+        String rawEmail = signupDTO.getEmail();
+        
+        // Chamada ao Service. Se houver erro de validação (Email, Senha, CPF, etc.),
+        // o Service lança uma IllegalArgumentException, capturada pelo GlobalExceptionHandler.
+        ClienteDTO salvo = clienteService.salvarCliente(signupDTO); 
+        
+        // Se a validação passou, mas houve erro interno de persistência
         if (salvo == null || salvo.getId() == null) {
-            model.addAttribute("erro", "Erro ao cadastrar cliente.");
-            model.addAttribute("cliente", signupDTO);
-            return "cliente/cadastro_cliente";
+            logAuditoriaService.registrarLog("CADASTRO_FALHA", 0L, rawEmail, "Erro interno ao persistir cliente.");
+            // Lança uma exceção para que o GlobalExceptionHandler trate o redirecionamento
+            throw new RuntimeException("Erro interno ao concluir o cadastro. Tente novamente.");
         }
 
-        // Autenticar e criar cookie
-        autenticarEAdicionarCookie(salvo.getEmail(), response);
+        // Lógica de Autenticação, Cookie e Log centralizada no AuthHelper
+        authHelper.authenticateAndSetCookie(salvo.getEmail(), salvo.getId(), response, "CADASTRO_SUCESSO");
 
         return "redirect:/clientes/homepage";
     }
@@ -141,106 +103,91 @@ public class ClientController {
             return "cliente/cadastro_cliente";
         }
 
-        if (signupDTO == null || !FieldValidation.validarCampos(signupDTO) ||
-                !FieldValidation.isValidEmail(signupDTO.getEmail())) {
-            model.addAttribute("erro", "Dados inválidos.");
-            model.addAttribute("cliente", signupDTO);
-            return "cliente/cadastro_cliente";
-        }
+        String rawEmail = signupDTO.getEmail();
 
-        signupDTO.setEmail(FieldValidation.sanitizeEmail(signupDTO.getEmail()));
-        signupDTO.setSenha(passwordEncoder.encode(signupDTO.getSenha()));
-
+        // O Service trata todas as validações de signup, endereco e cartao
         ClienteDTO salvo = clienteService.salvarClienteCompleto(signupDTO, enderecoDTO, cartaoDTO);
+        
         if (salvo == null || salvo.getId() == null) {
-            model.addAttribute("erro", "Erro ao cadastrar cliente.");
-            model.addAttribute("cliente", signupDTO);
-            return "cliente/cadastro_cliente";
+            logAuditoriaService.registrarLog("CADASTRO_COMPLETO_FALHA", 0L, rawEmail, "Erro interno ao persistir cliente e associações.");
+            throw new RuntimeException("Erro interno ao concluir o cadastro completo. Tente novamente.");
         }
 
-        autenticarEAdicionarCookie(salvo.getEmail(), response);
+        authHelper.authenticateAndSetCookie(salvo.getEmail(), salvo.getId(), response, "CADASTRO_COMPLETO_SUCESSO");
 
         return "redirect:/clientes/homepage";
     }
 
     // ==========================================================================
-    // 🔹 LOGIN
+    // 🔹 LOGIN (Mantido tratamento local para Credenciais Inválidas)
     // ==========================================================================
 
     @GetMapping("/login")
     public String mostrarLogin(Model model) {
-        if (!model.containsAttribute("cliente"))
-            model.addAttribute("cliente", new ClienteDTO());
+        if (!model.containsAttribute("loginData"))
+            model.addAttribute("loginData", new LoginDTO()); 
         return "cliente/login_cliente";
     }
 
     @PostMapping("/login")
-    public String loginCliente(@ModelAttribute("cliente") ClienteDTO clienteDTO,
+    public String loginCliente(@ModelAttribute("loginData") LoginDTO loginDTO,
             Model model, HttpServletResponse response) {
 
-        if (clienteDTO == null || clienteDTO.getEmail() == null || clienteDTO.getSenha() == null) {
+        if (loginDTO == null || loginDTO.getEmail() == null || loginDTO.getSenha() == null) {
             model.addAttribute("erro", "Dados inválidos.");
-        
+            logAuditoriaService.registrarLog("LOGIN_FALHA", 0L, loginDTO != null ? loginDTO.getEmail() : "NULL_EMAIL", "Tentativa de login com dados nulos/vazios.");
             return "cliente/login_cliente";
         }
-
-        Optional<ClienteDTO> clienteOpt = clienteService.buscarClientePorEmail(clienteDTO.getEmail());
-        System.out.println("Tentativa de login para o email: " + clienteDTO.getEmail());
+        
+        String email = loginDTO.getEmail();
+        
+        // Autentica o cliente. Se as credenciais estiverem erradas, retorna Optional.empty.
+        // Se houver um erro de validação de email no service, ele lançará IllegalArgumentException
+        // que será pego pelo GlobalExceptionHandler.
+        Optional<ClienteDTO> clienteOpt = clienteService.autenticarCliente(email, loginDTO.getSenha());
 
         if (clienteOpt.isEmpty()) {
-            model.addAttribute("erro", "Cliente não encontrado.");
+            // Tratamento de falha de credencial (Email ou senha incorretos)
+            model.addAttribute("erro", "Email ou senha incorretos."); 
             return "cliente/login_cliente";
         }
 
         ClienteDTO cliente = clienteOpt.get();
-        System.out.println("Cliente encontrado: " + cliente);
-        System.out.println("Senha fornecida: " + clienteDTO.getSenha() + " Senha em hash: " + passwordEncoder.encode(clienteDTO.getSenha()));
-        System.out.println("Senha armazenada (hash): " + cliente.getSenha());
-
-        if (!passwordEncoder.matches(clienteDTO.getSenha(), cliente.getSenha())) {
-            model.addAttribute("erro", "Senha incorreta.");
-            return "cliente/login_cliente";
-        }
-
-        autenticarEAdicionarCookie(cliente.getEmail(), response);
+        
+        authHelper.authenticateAndSetCookie(cliente.getEmail(), cliente.getId(), response, "LOGIN_SUCESSO");
 
         return "redirect:/clientes/homepage";
     }
 
     @PostMapping("/logout")
-    public String logoutCliente(HttpServletResponse response) {
-        clearJwtCookie(response);
+    public String logoutCliente(HttpServletResponse response, Principal principal) {
+        String email = principal != null ? principal.getName() : "DESCONHECIDO";
+        Optional<ClienteDTO> clienteOpt = clienteService.buscarClientePorEmail(email);
+        Long clienteId = clienteOpt.map(ClienteDTO::getId).orElse(0L);
+
+        logAuditoriaService.registrarLog("LOGOUT_SUCESSO", clienteId, email, "Usuário deslogou do sistema.");
+        
+        jwtCookieHelper.clearJwtCookie(response);
         SecurityContextHolder.clearContext();
         return "redirect:/";
     }
 
     // ==========================================================
     // 🏠 HOMEPAGE / CARREGAMENTO DO CLIENTE (GET)
-    // URL: /clientes/homepage
-    // Objetivo: Carregar o ClienteDTO (com a List<EnderecoDTO> inicializada)
     // ==========================================================
     @GetMapping("/homepage")
     public String getHomepage(Principal principal, Model model) {
-        // 1. Obter o identificador do usuário logado (usando o email como exemplo)
         String emailDoClienteLogado = principal.getName();
-
-        // 2. Buscar o ClienteDTO completo
+        // Assume que este método lança exceção se o cliente não for encontrado
         ClienteDTO clienteDTO = clienteService.buscarClientePorEmail(emailDoClienteLogado)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado. Por favor, faça login novamente."));
 
-        System.out.println("Cliente carregado para homepage: " + clienteDTO);
-
-        // 3. Adicionar o ClienteDTO ao modelo para renderização na view
         model.addAttribute("cliente", clienteDTO);
-
-        return "cliente/homepage"; 
+        return "cliente/homepage";
     }
 
     // ==========================================================
-    // 💾 ATUALIZAR CLIENTE (POST)
-    // URL: /clientes/atualizar
-    // Objetivo: Receber o ClienteDTO atualizado e iniciar o processo de
-    // persistência
+    // 💾 ATUALIZAR CLIENTE (Removido try-catch - Exceções tratadas globalmente)
     // ==========================================================
     @PostMapping("/atualizar")
     public String atualizarCliente(
@@ -248,67 +195,93 @@ public class ClientController {
             Principal principal,
             RedirectAttributes redirectAttributes) {
 
-                System.out.println("Dados recebidos para atualização: " + clienteAtualizadoDTO.getSenha());
+        String emailDoClienteLogado = principal.getName();
+        Long clienteId = clienteService.buscarClientePorEmail(emailDoClienteLogado)
+                .map(ClienteDTO::getId)
+                .orElse(0L); // ClienteId pode ser 0L se a busca falhar
 
         try {
-            String emailDoClienteLogado = principal.getName();
-            // Buscar o ID (alternativamente, você pode usar o ID do DTO, mas a busca pelo
-            // email é mais segura)
-            Long clienteId = clienteService.buscarClientePorEmail(emailDoClienteLogado)
-                    .map(ClienteDTO::getId)
-                    .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
+            // Chamada do Service para atualização. Lança IllegalArgumentException ou RuntimeException.
+            clienteService.atualizarClienteEAssociacoes(clienteId, clienteAtualizadoDTO); 
 
-            // Chama o método unificado do Service para atualizar campos simples e coleções.
-            
-            clienteService.atualizarClienteEAssociacoes(clienteId, clienteAtualizadoDTO, passwordEncoder);
-
+            logAuditoriaService.registrarLog("CLIENTE_ATUALIZACAO", clienteId, emailDoClienteLogado, "Dados básicos e associações atualizadas com sucesso.");
             redirectAttributes.addFlashAttribute("sucesso", "Suas informações foram atualizadas com sucesso!");
 
         } catch (Exception e) {
-            // Em caso de erro (ex: validação, erro no DB)
-            // É comum adicionar o erro ao RedirectAttributes e logar
-            redirectAttributes.addFlashAttribute("erro", "Erro ao atualizar informações: " + e.getMessage());
-            // Log do erro
-            System.err.println("Erro ao processar atualização do cliente: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        return "redirect:/clientes/homepage"; // Redireciona de volta à homepage
-    }
-
-    // ==========================================================
-    // 🗑️ DELEÇÃO DE ENDEREÇO
-    // URL: /clientes/removerEndereco/{id}
-    // Objetivo: Lidar com a exclusão de um endereço existente
-    // ==========================================================
-    @GetMapping("/removerEndereco/{id}")
-    public String removerEndereco(@PathVariable("id") Long enderecoId, Principal principal,
-            RedirectAttributes redirectAttributes) {
-        try {
-            String emailDoClienteLogado = principal.getName();
-            Long clienteId = clienteService.buscarClientePorEmail(emailDoClienteLogado)
-                    .map(ClienteDTO::getId)
-                    .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
-
-            clienteService.deletarEnderecoDoCliente(clienteId, enderecoId);
-
-            redirectAttributes.addFlashAttribute("sucesso", "Endereço removido com sucesso!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("erro", "Erro ao remover endereço: " + e.getMessage());
+            // Mantendo o log de falha no Controller. A exceção será relançada para o Handler
+            logAuditoriaService.registrarLog("CLIENTE_ATUALIZACAO_FALHA", clienteId, emailDoClienteLogado, "Erro ao atualizar informações: " + e.getMessage());
+            // Relança a exceção para que o GlobalExceptionHandler a capture e use o Referer
+            throw e; 
         }
 
         return "redirect:/clientes/homepage";
     }
 
-    private void autenticarEAdicionarCookie(String email, HttpServletResponse response) {
-        try {
-            UserDetails ud = userDetailsService.loadUserByUsername(email);
-            String token = jwtUtil.generateToken(email);
-            addTokenCookie(response, token);
 
-            Authentication auth = new UsernamePasswordAuthenticationToken(ud, null, ud.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(auth);
-        } catch (UsernameNotFoundException ignored) {
+    // ==========================================================
+    // 🗑️ DELEÇÃO DE ENDEREÇO/CARTÃO/CONTA (Removido try-catch)
+    // ==========================================================
+    @GetMapping("/removerEndereco")
+    public String removerEndereco(@RequestParam("enderecoId") Long enderecoId, Principal principal,
+            RedirectAttributes redirectAttributes) {
+
+        String emailDoClienteLogado = principal.getName();
+        Long clienteId = clienteService.buscarClientePorEmail(emailDoClienteLogado)
+            .map(ClienteDTO::getId).orElse(0L);
+
+        try {
+            clienteService.deletarEnderecoDoCliente(clienteId, enderecoId);
+            logAuditoriaService.registrarLog("ENDERECO_DELECAO_SUCESSO", clienteId, emailDoClienteLogado, "Endereço ID " + enderecoId + " removido.");
+            redirectAttributes.addFlashAttribute("sucesso", "Endereço removido com sucesso!");
+        } catch (Exception e) {
+            logAuditoriaService.registrarLog("ENDERECO_DELECAO_FALHA", clienteId, emailDoClienteLogado, "Erro ao remover endereço ID " + enderecoId + ": " + e.getMessage());
+            throw e;
+        }
+
+        return "redirect:/clientes/homepage";
+    }
+
+    @PostMapping("/removerCartao")
+    public String removerCartao(@RequestParam("cartaoId") Long cartaoId, Principal principal,
+            RedirectAttributes redirectAttributes) {
+
+        String emailDoClienteLogado = principal.getName();
+        Long clienteId = clienteService.buscarClientePorEmail(emailDoClienteLogado)
+            .map(ClienteDTO::getId).orElse(0L);
+
+        try {
+            clienteService.deletarCartaoDoCliente(clienteId, cartaoId);
+            logAuditoriaService.registrarLog("CARTAO_DELECAO_SUCESSO", clienteId, emailDoClienteLogado, "Cartão ID " + cartaoId + " removido.");
+            redirectAttributes.addFlashAttribute("sucesso", "Cartão removido com sucesso!");
+        } catch (Exception e) {
+            logAuditoriaService.registrarLog("CARTAO_DELECAO_FALHA", clienteId, emailDoClienteLogado, "Erro ao remover cartão ID " + cartaoId + ": " + e.getMessage());
+            throw e;
+        }
+
+        return "redirect:/clientes/homepage";
+    }
+
+    @PostMapping("/deletar")
+    public String deletarCliente(Principal principal, HttpServletResponse response,
+            RedirectAttributes redirectAttributes) {
+
+        String emailDoClienteLogado = principal.getName();
+        Long clienteId = clienteService.buscarClientePorEmail(emailDoClienteLogado)
+            .map(ClienteDTO::getId).orElse(0L);
+        
+        try {
+            clienteService.deletarClientePorId(clienteId);
+
+            logAuditoriaService.registrarLog("CONTA_DELECAO_SUCESSO", clienteId, emailDoClienteLogado, "Conta do cliente deletada com sucesso.");
+
+            jwtCookieHelper.clearJwtCookie(response);
+            SecurityContextHolder.clearContext();
+
+            redirectAttributes.addFlashAttribute("sucesso", "Conta deletada com sucesso!");
+            return "redirect:/";
+        } catch (Exception e) {
+            logAuditoriaService.registrarLog("CONTA_DELECAO_FALHA", clienteId, emailDoClienteLogado, "Erro ao deletar conta: " + e.getMessage());
+            throw e; // Lançar para o GlobalExceptionHandler
         }
     }
 }
