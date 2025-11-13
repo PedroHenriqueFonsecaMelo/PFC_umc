@@ -1,7 +1,6 @@
 package umc.exs.model.entidades.usuario;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -11,15 +10,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
+@Data // Inclui @Getter, @Setter, @ToString, @RequiredArgsConstructor
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
+@EqualsAndHashCode(of = "id") // Usa apenas o ID para comparação
 public class Cartao {
 
     @Id
@@ -36,48 +35,13 @@ public class Cartao {
     private String nomeTitular;
 
     @Column
-    private String validade; 
-    // REMOVIDO: CVV NÃO DEVE SER PERSISTIDO por razões de segurança (PCI DSS).
-    // private String cvv; 
+    private String validade;
 
     @Column(nullable = false)
-    private String cpfTitular; // NOVO: Campo de CPF do titular adicionado
+    private String cpfTitular;
 
+    // MappedBy indica que a relação é gerenciada pelo campo 'cartoes' na classe Cliente
     @ManyToMany(mappedBy = "cartoes")
     private Set<Cliente> clientes = new HashSet<>();
-
-    // --- Métodos de Relacionamento e Utility ---
-
-    // Getters e setters para clientes (garantidos pelo Lombok, mas mantidos para b-directional helper se necessário)
-    public Set<Cliente> getClientes() {
-        return clientes;
-    }
-
-    public void setClientes(Set<Cliente> clientes) {
-        this.clientes = clientes;
-    }
-
-    // Método helper para adicionar a relação bi-direcional
-    public void addCliente(Cliente cliente) {
-        this.clientes.add(cliente);
-        cliente.getCartoes().add(this);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null || getClass() != obj.getClass())
-            return false;
-        Cartao other = (Cartao) obj;
-        
-        // Compara por ID, que é a chave primária
-        return id != null && Objects.equals(id, other.id);
-    }
 
 }
