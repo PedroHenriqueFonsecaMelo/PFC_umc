@@ -6,12 +6,14 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import lombok.NonNull;
+
 @Configuration
 @EnableWebSocketMessageBroker // Habilita o processamento de mensagens STOMP sobre WebSockets
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry config) {
+    public void configureMessageBroker(@SuppressWarnings("null") @NonNull MessageBrokerRegistry config) {
         // Define o prefixo para tópicos de destino (onde a aplicação envia mensagens)
         // Por exemplo, /topic/auditoria para enviar logs em tempo real
         config.enableSimpleBroker("/topic", "/queue"); 
@@ -22,7 +24,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
+    public void registerStompEndpoints(@SuppressWarnings("null") @NonNull StompEndpointRegistry registry) {
         // Registra o endpoint que os clientes usarão para se conectar ao WebSocket.
         // O withSockJS permite fallback para navegadores que não suportam WebSocket nativamente.
         registry.addEndpoint("/ws-auditoria").withSockJS(); 

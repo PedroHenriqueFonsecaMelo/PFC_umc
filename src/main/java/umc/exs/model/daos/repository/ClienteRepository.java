@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-
 import umc.exs.model.entidades.usuario.Cliente;
 
 @Repository
@@ -26,4 +25,10 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     // Query personalizada para buscar por email + id
     @Query("SELECT c FROM Cliente c WHERE c.email = :email AND c.id = :id")
     Optional<Cliente> findByEmailAndId(@Param("email") String email, @Param("id") Long id);
+
+    @Query("SELECT c FROM Cliente c LEFT JOIN FETCH c.cartoes WHERE c.id = :id")
+    Optional<Cliente> findByIdWithCartoes(@Param("id") Long id);
+
+    @Query("SELECT c FROM Cliente c LEFT JOIN FETCH c.enderecos WHERE c.id = :id")
+    Optional<Cliente> findByIdWithEnderecos(@Param("id") Long id);
 }

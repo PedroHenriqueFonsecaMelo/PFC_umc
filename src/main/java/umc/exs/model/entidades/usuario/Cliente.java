@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,17 +17,18 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import umc.exs.model.entidades.foundation.enums.Genero;
 
 @Entity
 @Table(name = "users")
-@Getter
-@Setter
+@Data // Inclui @Getter, @Setter, @ToString, @EqualsAndHashCode e
+      // @RequiredArgsConstructor
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(of = "id") // Garante que a comparação seja feita apenas pelo ID
 public class Cliente {
 
     @Id
@@ -42,7 +42,7 @@ public class Cliente {
     private String nome;
 
     @Column(nullable = false)
-    private String datanasc;
+    private String datanasc; // Considere usar LocalDate
 
     @Column(nullable = false)
     private Genero gen;
@@ -60,19 +60,29 @@ public class Cliente {
     private boolean bloqueada = false;
 
     // --- CAMPO ADICIONADO PARA DATA DE CRIAÇÃO ---
-    @CreationTimestamp // 1. Garante que o valor seja setado na criação
-    @Column(nullable = false, updatable = false) // 2. Garante que o valor não possa ser alterado (imutável)
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private LocalDateTime dataCriacao;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    // Relacionamento ManyToMany - Removido CascadeType.ALL para evitar deleção
+    // acidental
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {
+            jakarta.persistence.CascadeType.PERSIST, // Para novos cartões
+            jakarta.persistence.CascadeType.MERGE // Para gerenciar remoção/adição na tabela de junção
+    })
     @JoinTable(name = "cliente_cartao", joinColumns = @JoinColumn(name = "cliente_id"), inverseJoinColumns = @JoinColumn(name = "cartao_id"))
     private Set<Cartao> cartoes = new HashSet<>();
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    // Relacionamento ManyToMany - Removido CascadeType.ALL para evitar deleção
+    // acidental
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {
+            jakarta.persistence.CascadeType.PERSIST, // Para novos cartões
+            jakarta.persistence.CascadeType.MERGE // Para gerenciar remoção/adição na tabela de junção
+    })
     @JoinTable(name = "cliente_endereco", joinColumns = @JoinColumn(name = "cliente_id"), inverseJoinColumns = @JoinColumn(name = "endereco_id"))
     private Set<Endereco> enderecos = new HashSet<>();
 
-    // Getters e setters
+    // --- Métodos de Negócio ---
 
     public void setFalhas() {
         if (this.tentativas >= 5) {
@@ -87,8 +97,7 @@ public class Cliente {
         this.bloqueada = false;
     }
 
-    public boolean ContaBloqueada() {
+    public boolean isContaBloqueada() {
         return bloqueada;
     }
-
 }
