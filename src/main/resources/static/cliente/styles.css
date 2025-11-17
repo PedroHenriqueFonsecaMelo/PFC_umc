@@ -1,0 +1,378 @@
+/* === VARIÁVEIS DE COR E GLOBAIS === */
+:root {
+  --cor-fundo: #222222;
+  --cor-container: #ffffff;
+  --cor-preto: #222222;
+  --cor-cinza-escuro: #555555ff;
+  --cor-cinza-escuro-arrumado: #ffffff; /* <- Você mudou isso para branco */
+  --cor-cinza-medio: #aaaaaa;
+  --cor-cinza-claro: #eeeeee;
+  --raio-borda: 8px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--cor-fundo);
+  color: var(--cor-cinza-escuro);
+  line-height: 1.6;
+}
+
+/* === CONTAINER PRINCIPAL (CARD) === */
+.container {
+  max-width: 900px;
+  width: 95%;
+  margin: 30px auto;
+  padding: 30px 40px;
+  background-color: var(--cor-container);
+  border-radius: var(--raio-borda);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* === TIPOGRAFIA E TÍTULOS === */
+h1 {
+  color: var(--cor-preto);
+  font-weight: 700;
+}
+
+h2 {
+  color: var(--cor-preto);
+  font-weight: 600;
+  border-bottom: 1px solid var(--cor-cinza-claro);
+  padding-bottom: 10px;
+  margin-top: 20px;
+  margin-bottom: 25px;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+.page-header p {
+  font-size: 1.1rem;
+  color: var(--cor-cinza-escuro);
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  background-color: var(--cor-cinza-claro);
+  margin: 40px 0;
+}
+
+/* === MENSAGENS (SUCESSO/ERRO) === */
+.mensagem {
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  border-radius: var(--raio-borda);
+  font-weight: 600;
+  border: 1px solid;
+}
+.mensagem.sucesso {
+  background-color: #f0f0f0;
+  border-color: var(--cor-cinza-medio);
+  color: var(--cor-cinza-escuro);
+}
+.mensagem.erro {
+  background-color: var(--cor-preto);
+  border-color: var(--cor-preto);
+  color: var(--cor-container);
+}
+
+/* === ESTRUTURA DO FORMULÁRIO === */
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+legend {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--cor-preto);
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+/* GRUPO DE FORMULÁRIO (LABEL + INPUT) */
+.form-group {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column; /* Label em cima, input embaixo */
+}
+
+
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: var(--cor-cinza-escuro-arrumado); /* <- Cor branca que você definiu */
+}
+
+
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="date"],
+.form-group input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border: 1px solid var(--cor-cinza-medio);
+  border-radius: 5px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--cor-preto);
+  box-shadow: 0 0 5px rgba(247, 236, 236, 0.1);
+}
+
+/* Você tem duas regras .form-group input[readonly], a última prevalece */
+.form-group input[readonly] {
+  background-color: var(--cor-fundo); /* Deixa o fundo cinza-claro */
+  cursor: not-allowed;
+}
+.form-group input[readonly] {
+  background-color: var(--cor-container); /* Esta está sobrescrevendo a de cima */
+  cursor: not-allowed;
+}
+
+
+/* Você duplicou todo o .form-group como .form-group-2,
+   recomendo usar só .form-group, mas mantive por via das dúvidas */
+.form-group-2 {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column; /* Label em cima, input embaixo */
+}
+.form-group-2 label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: var(--cor-cinza-escuro);
+}
+.form-group-2 input[type="text"],
+.form-group-2 input[type="email"],
+.form-group-2 input[type="date"],
+.form-group-2 input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border: 1px solid var(--cor-cinza-medio);
+  border-radius: 5px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-group-2 input[readonly] {
+  background-color: var(--cor-fundo); /* Deixa o fundo cinza-claro */
+  cursor: not-allowed;
+}
+.form-group-2 input:focus {
+  outline: none;
+  border-color: var(--cor-preto);
+  box-shadow: 0 0 5px rgba(247, 236, 236, 0.1);
+}
+.form-group-2 input[readonly] {
+  background-color: var(--cor-container);
+  cursor: not-allowed;
+}
+/* Fim da duplicação */
+
+
+/* GRID DO FORMULÁRIO */
+.form-grid {
+  display: grid;
+  /* Cria colunas responsivas: tenta 2, mas se não couber (min 250px), fica 1 */
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+/* "CARDS" INTERNOS PARA ENDEREÇOS/CARTÕES */
+.item-card {
+  background: var(--cor-fundo);
+  border: 1px solid var(--cor-cinza-claro);
+  padding: 20px;
+  border-radius: var(--raio-borda);
+  margin-bottom: 20px;
+}
+.item-card fieldset {
+  border: none;
+}
+.item-card legend {
+  font-size: 1.1rem;
+}
+.novo-item {
+  /* Destaque para itens adicionados via JS */
+  border-color: var(--cor-preto);
+}
+
+
+/* === BOTÕES E AÇÕES === */
+.btn {
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 5px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* Botão Primário (Preto) */
+.btn-primary {
+  background-color: var(--cor-preto);
+  color: var(--cor-container);
+  border-color: var(--cor-preto);
+}
+.btn-primary:hover {
+  background-color: #444;
+  border-color: #444;
+}
+
+/* Botão Secundário (Branco) */
+.btn-secondary {
+  background-color: var(--cor-container);
+  color: var(--cor-preto);
+  border-color: var(--cor-cinza-medio);
+}
+.btn-secondary:hover {
+  background-color: var(--cor-fundo);
+  border-color: var(--cor-cinza-escuro);
+  color: var(--cor-container)
+}
+
+/* Link de Perigo (Remover) */
+.btn-link-danger {
+  font-weight: 600;
+  color: var(--cor-cinza-escuro-arrumado);
+  text-decoration: none;
+  font-size: 0.9rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.btn-link-danger:hover {
+  color: var(--cor-cinza-escuro);
+  text-decoration: underline;
+}
+
+/* Link de Perigo (Remover) */
+.btn-link-danger-2 {
+  font-weight: 600;
+  color: var(--cor-cinza-escuro);
+  text-decoration: none;
+  font-size: 0.9rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.btn-link-danger-2:hover {
+  color: var(--cor-preto);
+  text-decoration: underline;
+}
+
+.btn-link-secondary {
+    font-weight: 600;
+    color: var(--cor-cinza-escuro);
+    text-decoration: none;
+}
+.btn-link-secondary:hover {
+    color: var(--cor-preto);
+}
+
+/* GRUPOS DE AÇÕES */
+.form-actions-top {
+  margin: 10px 0 20px 0;
+}
+.form-actions-bottom {
+  margin-top: 20px;
+}
+.form-actions-main {
+  text-align: center;
+  margin: 20px 0;
+}
+.btn-primary {
+  min-width: 250px; /* Faz o botão principal ter um bom tamanho */
+}
+.account-links {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    border-radius: 0;
+  }
+
+  .form-grid {
+    /* Força uma coluna única em telas pequenas */
+    grid-template-columns: 1fr;
+  }
+
+  .btn-primary {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+/* === [NOVO] ESTILO PARA PÁGINAS SIMPLES (Acesso Negado, etc.) === */
+/* Este bloco é a única coisa nova que adicionei ao seu CSS */
+
+.content-card-simple {
+  text-align: center; /* Centraliza tudo */
+  padding: 40px 20px; /* Adiciona um respiro interno */
+}
+
+.content-card-simple h1 {
+  margin-bottom: 15px;
+}
+
+.content-card-simple p {
+  font-size: 1.1rem;
+  color: var(--cor-cinza-escuro);
+  margin-bottom: 30px; /* Espaço antes dos links */
+}
+
+.content-card-simple .account-links {
+  gap: 30px; /* Aumenta o espaço entre os links */
+}
+
+/* [NOVO] Estilo para os detalhes na página de sucesso */
+.update-details {
+  background-color: var(--cor-fundo); /* Fundo cinza escuro */
+  border: 1px solid var(--cor-cinza-claro);
+  border-radius: var(--raio-borda);
+  padding: 15px 20px;
+  margin: 25px auto;
+  max-width: 400px;
+  text-align: left; /* Alinha o texto à esquerda dentro da caixa */
+}
+
+.update-details p {
+  font-size: 1rem;
+  color: var(--cor-cinza-escuro-arrumado); /* Cor branca (que você definiu) */
+  margin-bottom: 10px;
+}
+
+.update-details p:last-child {
+  margin-bottom: 0;
+}
+
+.update-details p strong {
+  color: var(--cor-cinza-medio); /* Cinza claro para o "Nome:" e "Email:" */
+}

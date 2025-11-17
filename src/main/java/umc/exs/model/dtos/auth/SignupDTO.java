@@ -33,8 +33,19 @@ public class SignupDTO { // Não implementa mais ClienteConvertible
 
     @Override
     public String toString() {
-        // Mantido o toString simplificado
-        return "SignupDTO [cpf=" + cpf + ", email=" + email + ", nome=" + nome + ", datanasc=" + datanasc + ", gen="
-                + gen + ", termsAccepted=" + termsAccepted + ", privacyAccepted=" + privacyAccepted + "]";
+        StringBuilder sb = new StringBuilder();
+        sb.append("SignupDTO{");
+        sb.append("cpf=").append(cpf);
+        sb.append(", email=").append(email);
+        sb.append(", senha=").append(senha);
+        sb.append(", nome=").append(nome);
+        sb.append(", datanasc=").append(datanasc);
+        sb.append(", gen=").append(gen);
+        sb.append(", termsAccepted=").append(termsAccepted);
+        sb.append(", privacyAccepted=").append(privacyAccepted);
+        sb.append('}');
+        return sb.toString();
     }
+
+   
 }

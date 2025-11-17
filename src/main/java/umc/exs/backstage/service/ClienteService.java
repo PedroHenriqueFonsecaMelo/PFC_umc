@@ -349,6 +349,7 @@ public class ClienteService {
             throw new IllegalArgumentException("Data de nascimento inválida ou menor de 18 anos.");
         }
 
+        System.out.println("Senha: " + dto.toString());
         // 4. Senha
         if (!FieldValidation.isValidPassword(dto.getSenha())) {
             throw new IllegalArgumentException(

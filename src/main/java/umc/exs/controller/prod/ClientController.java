@@ -1,6 +1,7 @@
 package umc.exs.controller.prod;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,11 @@ public class ClientController {
 
         if (Boolean.FALSE.equals(termsAccepted) || Boolean.FALSE.equals(privacyAccepted)) {
             model.addAttribute("erro", "É necessário aceitar os termos e a política de privacidade.");
+            model.addAttribute("cliente", signupDTO);
+            return "cliente/cadastro_cliente";
+        }
+        if ((signupDTO.getSenha() == null ? confirmPassword != null : !signupDTO.getSenha().equals(confirmPassword))){
+            model.addAttribute("erro", "As senhas devem ser iguais");
             model.addAttribute("cliente", signupDTO);
             return "cliente/cadastro_cliente";
         }
@@ -154,7 +160,7 @@ public class ClientController {
         return "redirect:/clientes/homepage";
     }
 
-    @PostMapping("/logout")
+    @GetMapping("/logout")
     public String logoutCliente(HttpServletResponse response, Principal principal) {
         String email = principal != null ? principal.getName() : "DESCONHECIDO";
         Optional<ClienteDTO> clienteOpt = clienteService.buscarClientePorEmail(email);
@@ -176,8 +182,14 @@ public class ClientController {
 
         ClienteDTO clienteDTO = clienteService.buscarClientePorEmail(emailDoClienteLogado)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado. Por favor, faça login novamente."));
-        System.out.println("Cliente: " + clienteDTO.getCartoes());
 
+        if (clienteDTO.getEnderecos() == null) {
+            clienteDTO.setEnderecos(new ArrayList<>());
+        }
+
+        if (clienteDTO.getCartoes() == null) {
+            clienteDTO.setCartoes(new ArrayList<>());
+        }
         model.addAttribute("cliente", clienteDTO);
         return "cliente/homepage";
     }
@@ -222,6 +234,8 @@ public class ClientController {
     @PostMapping("/removerEndereco")
     public String removerEndereco(@RequestParam("enderecoId") Long enderecoId, Principal principal,
             RedirectAttributes redirectAttributes) {
+                
+        System.out.println("ID recebido = " + enderecoId);
 
         String emailDoClienteLogado = principal.getName();
         Long clienteId = clienteService.buscarClientePorEmail(emailDoClienteLogado)
