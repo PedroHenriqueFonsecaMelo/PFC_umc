@@ -32,7 +32,7 @@
         <java.version>17</java.version>
     </properties>
 
-    
+
     <dependencies>
         <!-- 🌱 SPRING BOOT CORE DEPENDENCIES -->
         <dependency>
@@ -59,11 +59,17 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-websocket</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-messaging</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
 
         <!-- 🗃 DATABASE: SQLite + Hibernate Dialects -->
         <dependency>
@@ -131,6 +137,11 @@
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.github.cdimascio</groupId>
+            <artifactId>dotenv-java</artifactId>
+            <version>3.0.0</version>
         </dependency>
 
         <!-- 🧪 TESTING -->

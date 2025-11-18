@@ -4,23 +4,26 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.transaction.Transactional;
 import umc.exs.model.daos.mappers.CartaoMapper;
 import umc.exs.model.daos.mappers.ClienteMapper;
 import umc.exs.model.daos.mappers.EnderecoMapper;
 import umc.exs.model.daos.repository.CartaoRepository;
 import umc.exs.model.daos.repository.ClienteRepository;
 import umc.exs.model.daos.repository.EnderecoRepository;
+import umc.exs.model.daos.repository.RecuperacaoSenhaRepository;
 import umc.exs.model.dtos.auth.SignupDTO;
 import umc.exs.model.dtos.user.CartaoDTO;
 import umc.exs.model.dtos.user.ClienteDTO;
 import umc.exs.model.dtos.user.EnderecoDTO;
+import umc.exs.model.entidades.foundation.RecuperacaoSenha;
 import umc.exs.model.entidades.foundation.enums.Genero;
 import umc.exs.model.entidades.usuario.Cartao;
 import umc.exs.model.entidades.usuario.Cliente;
@@ -40,6 +43,12 @@ public class ClienteService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+   @Autowired
+    private RecuperacaoSenhaRepository recuperacaoSenhaRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     // ==========================================================
     // 🔹 SALVAR (CADASTRO)
@@ -100,14 +109,11 @@ public class ClienteService {
         // 1. Validação e Sanitização dos Dados Básicos
         validarDadosAtualizacao(clienteAtualizadoDTO);
 
-        // 2. Atualiza Dados Básicos (Nome, DataNasc, Gênero)
+        // 2. Atualiza Dados Básicos
         clienteExistente.setNome(FieldValidation.sanitize(clienteAtualizadoDTO.getNome()));
         clienteExistente.setDatanasc(clienteAtualizadoDTO.getDatanasc());
 
-        // ** GARANTIA DE IMUTABILIDADE **
-        // CPF e Email do cliente NUNCA podem ser alterados após o cadastro.
-        // O clienteExistente.setCpf() e setEmail() NÃO DEVEM ser chamados aqui.
-
+        // Atualiza Gênero
         String generoStr = clienteAtualizadoDTO.getGen();
         if (generoStr != null && !generoStr.trim().isEmpty()) {
             try {
@@ -126,15 +132,14 @@ public class ClienteService {
             clienteExistente.setSenha(passwordEncoder.encode(clienteAtualizadoDTO.getSenha()));
         }
 
-        // 3. Atualiza Associações (Endereços) - PERMITIDO ATUALIZAR/ADICIONAR/DELETAR
+        // --- 3. Atualiza Associações (Endereços) ---
 
-        // Conjunto de IDs de endereços existentes que VÊM no DTO
+        // 3.1. Identifica e Deleta Endereços Removidos
         Set<Long> idsRecebidos = clienteAtualizadoDTO.getEnderecos().stream()
                 .map(EnderecoDTO::getId)
                 .filter(id -> id != null && id != 0)
                 .collect(Collectors.toSet());
 
-        // Identifica e deleta endereços que existiam, mas foram removidos no formulário
         Set<Endereco> enderecosParaRemover = clienteExistente.getEnderecos().stream()
                 .filter(e -> !idsRecebidos.contains(e.getId()))
                 .collect(Collectors.toSet());
@@ -142,8 +147,9 @@ public class ClienteService {
         // Deleta (remove o relacionamento e a entidade se não tiver mais clientes)
         enderecosParaRemover.forEach(e -> deletarEnderecoDoCliente(clienteId, e.getId()));
 
-        // Atualiza/Cria os endereços restantes
+        // 3.2. Atualiza/Cria/Reutiliza Endereços Recebidos
         Set<Endereco> enderecosAtualizados = new HashSet<>();
+
         for (EnderecoDTO dto : clienteAtualizadoDTO.getEnderecos()) {
             this.validarDadosEndereco(dto);
             Endereco endereco;
@@ -154,45 +160,106 @@ public class ClienteService {
                         .orElseThrow(
                                 () -> new IllegalArgumentException("Endereço ID " + dto.getId() + " não encontrado."));
 
+                // Assumindo que EnderecoMapper.updateEntityFromDto existe
                 endereco = EnderecoMapper.updateEntityFromDto(endereco, dto);
                 endereco = enderecoRepository.save(endereco); // Persiste a atualização
 
             } else {
-                // Endereço NOVO: cria e persiste individualmente
-                endereco = EnderecoMapper.toEntity(dto);
-                endereco = enderecoRepository.save(endereco); // CORREÇÃO CRÍTICA: Persiste o novo objeto
+                // Endereço NOVO (ID nulo/0): Busca por reutilização ou Cria
 
-                endereco.getClientes().add(clienteExistente); // Adiciona relacionamento
+                // 🔑 Tenta encontrar um endereço idêntico no banco
+                Optional<Endereco> enderecoReutilizado = enderecoRepository.findByValueFields(
+                        dto.getCep(),
+                        dto.getRua(),
+                        dto.getNumero(),
+                        dto.getComplemento(),
+                        dto.getBairro(),
+                        dto.getCidade(),
+                        dto.getEstado());
+
+                if (enderecoReutilizado.isPresent()) {
+                    // Endereço idêntico encontrado: REUTILIZA
+                    endereco = enderecoReutilizado.get();
+                } else {
+                    // Endereço não encontrado: CRIA NOVO
+                    endereco = EnderecoMapper.toEntity(dto);
+                    endereco = enderecoRepository.save(endereco); // Persiste o novo objeto para ter um ID
+                }
+
+                // Adiciona o relacionamento (afeta apenas a tabela de junção se já não existir)
+                endereco.getClientes().add(clienteExistente);
             }
             enderecosAtualizados.add(endereco);
         }
-        // É importante setar a coleção para garantir que o Hibernate a gerencie
-        // corretamente
+
+        // Define a nova coleção (essencial para persistir o relacionamento na tabela de
+        // junção)
         clienteExistente.setEnderecos(enderecosAtualizados);
 
-        // 4. Atualiza Associações (Cartões) - APENAS ADICIONA NOVOS, NÃO PERMITE EDIÇÃO
-        // DE EXISTENTES
+        // --- 4. Atualiza Associações (Cartões) - LÓGICA REFATORADA ---
 
-        Set<Cartao> cartoesExistentes = clienteExistente.getCartoes();
+        // 4.1. Identifica e Deleta Cartões Removidos (Omitidos no DTO)
+        Set<Long> cartoesIdsRecebidos = clienteAtualizadoDTO.getCartoes().stream()
+                .map(CartaoDTO::getId)
+                .filter(id -> id != null && id != 0)
+                .collect(Collectors.toSet());
+
+        Set<Cartao> cartoesParaRemover = clienteExistente.getCartoes().stream()
+                .filter(c -> !cartoesIdsRecebidos.contains(c.getId()))
+                .collect(Collectors.toSet());
+
+        // Deleta (remove o relacionamento e a entidade se não tiver mais clientes)
+        cartoesParaRemover.forEach(c -> deletarCartaoDoCliente(clienteId, c.getId()));
+
+        // 4.2. Atualiza/Cria/Reutiliza Cartões Recebidos (Simétrico ao Endereço)
+        Set<Cartao> cartoesAtualizados = new HashSet<>();
 
         for (CartaoDTO dto : clienteAtualizadoDTO.getCartoes()) {
+            this.validarDadosCartao(dto);
+            Cartao cartao;
 
-            // Se o ID é nulo/0, é um novo cartão que precisa ser persistido
-            if (dto.getId() == null || dto.getId() == 0) {
+            if (dto.getId() != null && dto.getId() != 0) {
+                // Cartão existente: carrega (geralmente não se edita, mas precisa carregar)
+                cartao = cartaoRepository.findById(dto.getId())
+                        .orElseThrow(
+                                () -> new IllegalArgumentException("Cartão ID " + dto.getId() + " não encontrado."));
 
-                this.validarDadosCartao(dto);
-                Cartao novoCartao = CartaoMapper.toEntity(dto);
+                // Aqui seria o ponto para CartaoMapper.updateEntityFromDto se edição fosse
+                // permitida/necessária.
+            } else {
+                // Cartão NOVO (ID nulo/0): Busca por reutilização ou Cria
 
-                // CORREÇÃO CRÍTICA: Salva o novo cartão primeiro para obter um ID persistente
-                novoCartao = cartaoRepository.save(novoCartao);
+                // ASSUMIR MÉTODO EXISTENTE: Tenta encontrar um cartão idêntico no banco
+                Optional<Cartao> cartaoReutilizado = cartaoRepository.findByValueFields(
+                        dto.getNumero(),
+                        dto.getNomeTitular(),
+                        dto.getValidade(),
+                        dto.getBandeira(),
+                        dto.getCpfTitular());
 
-                novoCartao.getClientes().add(clienteExistente);
-                cartoesExistentes.add(novoCartao);
+                if (cartaoReutilizado.isPresent()) {
+                    // Cartão idêntico encontrado: REUTILIZA
+                    cartao = cartaoReutilizado.get();
+                } else {
+                    // Cartão não encontrado: CRIA NOVO
+                    cartao = CartaoMapper.toEntity(dto);
+                    cartao = cartaoRepository.save(cartao); // Persiste o novo objeto
+                }
+
+                // Adiciona o relacionamento (afeta apenas a tabela de junção se já não existir)
+                cartao.getClientes().add(clienteExistente);
             }
-            // Se o ID existe, o cartão não é editado, apenas mantido na coleção.
+            cartoesAtualizados.add(cartao);
         }
 
+        // Define a nova coleção
+        clienteExistente.setCartoes(cartoesAtualizados);
+
+        // 5. Salva o Cliente
+        // Persiste todas as mudanças feitas na entidade 'clienteExistente', incluindo
+        // as atualizações na tabela de junção (Join Table) dos Endereços e Cartões.
         Cliente salvo = clienteRepository.save(clienteExistente);
+
         return ClienteMapper.fromEntity(salvo);
     }
 
@@ -200,7 +267,7 @@ public class ClienteService {
     // 🗑️ MÉTODOS DE DELEÇÃO (M2M)
     // ==========================================================
 
-    @Transactional
+@Transactional
     public void deletarEnderecoDoCliente(Long clienteId, Long enderecoId) {
         // ⚠️ MUDANÇA AQUI: Usa a query customizada para carregar a lista de endereços
         Cliente cliente = clienteRepository.findByIdWithEnderecos(clienteId)
@@ -225,8 +292,6 @@ public class ClienteService {
             enderecoRepository.delete(endereco);
         }
     }
-
-    
 
     @Transactional
     public void deletarCartaoDoCliente(Long clienteId, Long cartaoId) {
@@ -349,7 +414,6 @@ public class ClienteService {
             throw new IllegalArgumentException("Data de nascimento inválida ou menor de 18 anos.");
         }
 
-        System.out.println("Senha: " + dto.toString());
         // 4. Senha
         if (!FieldValidation.isValidPassword(dto.getSenha())) {
             throw new IllegalArgumentException(
@@ -427,5 +491,77 @@ public class ClienteService {
 
         // Sanitização de Nome e CPF
         dto.setNomeTitular(FieldValidation.sanitize(dto.getNomeTitular()));
+    }
+
+    @Transactional
+    public void iniciarRecuperacaoSenha(String email) throws IllegalArgumentException {
+        // 1. Busca o cliente pelo email
+        Optional<Cliente> clienteOpt = clienteRepository.findByEmail(email);
+        
+        // Se o cliente não existir, lançamos uma exceção para o Controller
+        // (que pode retornar uma mensagem genérica para o usuário final).
+        Cliente cliente = clienteOpt.orElseThrow(() -> new IllegalArgumentException("Cliente com email " + email + " não encontrado."));
+
+        // 2. Limpa tokens antigos para este cliente (garante apenas um token ativo)
+        recuperacaoSenhaRepository.deleteByCliente(cliente);
+
+        // 3. Gera o token único
+        String token = UUID.randomUUID().toString();
+        
+        // 4. Salva o novo token no BD
+        RecuperacaoSenha resetToken = new RecuperacaoSenha(token, cliente);
+        recuperacaoSenhaRepository.save(resetToken);
+
+        // 5. Envia o email (simulado) com o link de reset
+        emailService.enviarEmailRecuperacaoSenha(email, token);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean validarTokenRecuperacao(String token) {
+        if (token == null || token.isEmpty()) {
+            return false;
+        }
+
+        Optional<RecuperacaoSenha> resetTokenOpt = recuperacaoSenhaRepository.findByToken(token);
+        
+        if (resetTokenOpt.isEmpty()) {
+            return false;
+        }
+
+        RecuperacaoSenha resetToken = resetTokenOpt.get();
+        
+        // Verifica se o token expirou
+        return !resetToken.isExpirado();
+    }
+
+    
+    @Transactional
+    public String alterarSenhaComToken(String token, String novaSenha) throws IllegalArgumentException {
+        // 1. Busca o token
+        Optional<RecuperacaoSenha> resetTokenOpt = recuperacaoSenhaRepository.findByToken(token);
+        
+        if (resetTokenOpt.isEmpty()) {
+            throw new IllegalArgumentException("Token inválido ou não encontrado.");
+        }
+
+        RecuperacaoSenha resetToken = resetTokenOpt.get();
+
+        // 2. Valida a expiração
+        if (resetToken.isExpirado()) {
+            // Se expirado, o deletamos e lançamos a exceção
+            recuperacaoSenhaRepository.delete(resetToken);
+            throw new IllegalArgumentException("Token expirado. Por favor, solicite a recuperação novamente.");
+        }
+
+        // 3. Atualiza a senha do cliente
+        Cliente cliente = resetToken.getCliente();
+        
+        String senhaCriptografada = passwordEncoder.encode(novaSenha);
+        cliente.setSenha(senhaCriptografada);
+        clienteRepository.save(cliente);
+
+        recuperacaoSenhaRepository.delete(resetToken);
+
+        return cliente.getEmail();
     }
 }

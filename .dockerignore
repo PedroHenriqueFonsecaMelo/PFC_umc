@@ -1,0 +1,10 @@
+target/
+.build/
+out/
+.idea/
+*.iml
+.git
+.gitignore
+Dockerfile*
+README.md
+*.log

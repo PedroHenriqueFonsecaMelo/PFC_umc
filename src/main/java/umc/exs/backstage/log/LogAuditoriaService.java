@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import umc.exs.model.daos.repository.LogAuditoriaRepository;
 import umc.exs.model.dtos.auth.LogDTO;
+import umc.exs.model.entidades.foundation.LogAuditoria;
 
 @Service
 public class LogAuditoriaService {
@@ -19,37 +21,55 @@ public class LogAuditoriaService {
     // Injeção do template de mensageria (para WebSockets)
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+    
+    // NOVO: Injeção do repositório para persistência no banco de dados
+    @Autowired
+    private LogAuditoriaRepository logAuditoriaRepository;
 
     /**
-     * Registra o log no arquivo/console e envia para os canais de notificação
-     * WebSocket.
-     * 
-     * @param acao         Ação realizada (ex: "LOGIN_SUCESSO",
-     *                     "ADICIONAR_ENDERECO")
-     * @param idUsuario    ID do cliente envolvido (o alvo da ação)
+     * Registra o log no arquivo/console, SALVA NO BANCO DE DADOS e envia para os
+     * canais de notificação WebSocket.
+     * * @param acao      Ação realizada (ex: "LOGIN_SUCESSO")
+     * @param idUsuario ID do cliente envolvido (o alvo da ação)
      * @param emailUsuario Email do cliente (para detalhes no log)
-     * @param detalhes     Mensagem detalhada
+     * @param detalhes  Mensagem detalhada
      */
     public void registrarLog(String acao, Long idUsuario, String emailUsuario, String detalhes) {
-
-        String timestamp = LocalDateTime.now().format(FORMATTER);
+        
+        LocalDateTime now = LocalDateTime.now();
+        String timestampFormatado = now.format(FORMATTER);
 
         // Mensagem completa para registro em arquivo/console
         String logMessage = String.format(
                 "[%s] [%s] Usuário %d (Email: %s): %s",
-                timestamp, acao, idUsuario, emailUsuario, detalhes);
+                timestampFormatado, acao, idUsuario, emailUsuario, detalhes);
 
         // 1. Grava no arquivo/console
         logger.info(logMessage);
 
-        // 2. Cria o objeto DTO para transmissão WebSocket
-        LogDTO logDTO = new LogDTO(acao, idUsuario, detalhes, timestamp);
+        // 2. SALVA NO BANCO DE DADOS (NOVA FUNCIONALIDADE)
+        try {
+            LogAuditoria logEntidade = new LogAuditoria(
+                idUsuario, 
+                emailUsuario, 
+                acao, 
+                detalhes, 
+                now
+            );
+            logAuditoriaRepository.save(logEntidade);
+        } catch (Exception e) {
+            // É crucial logar a falha do banco, mas não impedir o resto do log (WebSockets)
+            logger.error("Falha ao salvar log de auditoria no banco de dados para a ação '{}'.", acao, e);
+        }
 
-        // 3. Notificação para o Administrador (Dashboard de Logs)
+        // 3. Cria o objeto DTO para transmissão WebSocket (usando timestamp formatado)
+        LogDTO logDTO = new LogDTO(acao, idUsuario, detalhes, timestampFormatado);
+
+        // 4. Notificação para o Administrador (Dashboard de Logs)
         // Admin subscreve o tópico /topic/admin/logs
         messagingTemplate.convertAndSend("/topic/admin/logs", logDTO);
 
-        // 4. Notificação Específica para o Cliente (Pop-up/Alerta)
+        // 5. Notificação Específica para o Cliente (Pop-up/Alerta)
         if (acao.equals("LOGIN_SUCESSO") || acao.contains("FALHA") || acao.contains("SENHA")) {
             // Cliente subscreve um destino privado. ID do usuário é usado para roteamento.
             messagingTemplate.convertAndSendToUser(
