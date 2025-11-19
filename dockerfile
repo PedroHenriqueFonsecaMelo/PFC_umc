@@ -3,7 +3,7 @@ FROM maven:3.9.6-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
-# Copia o pom.xml e baixa dependências (cache)
+# Copia o pom.xml e baixa dependências
 COPY pom.xml .
 RUN mvn -q dependency:go-offline
 
@@ -19,10 +19,11 @@ FROM eclipse-temurin:17-jdk
 
 WORKDIR /app
 
-# Copia o war gerado no estágio anterior
+# Copia o war gerado
 COPY --from=build /app/target/*.war app.war
 
-EXPOSE 8443
+# O Render ignora EXPOSE, mas deixe 8080 por padrão
+EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.war"]
-
+# O Render definirá a variável PORT automaticamente
+ENTRYPOINT ["sh", "-c", "java -jar app.war --server.port=${PORT}"]
