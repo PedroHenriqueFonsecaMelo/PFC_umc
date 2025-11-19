@@ -22,7 +22,7 @@ WORKDIR /app
 # Copia o war gerado no estágio anterior
 COPY --from=build /app/target/*.war app.war
 
-EXPOSE 8080
+EXPOSE 8443
 
 ENTRYPOINT ["java", "-jar", "app.war"]
 
