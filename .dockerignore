@@ -1,10 +1,10 @@
 target/
-.build/
-out/
-.idea/
-*.iml
+!target/*.jar
+!target/*.war
 .git
 .gitignore
-Dockerfile*
-README.md
+*.md
 *.log
+*.iml
+.idea/
+.vscode/
