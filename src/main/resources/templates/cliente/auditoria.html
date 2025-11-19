@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Auditoria - Suas Atividades</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #003366;
+            padding: 15px;
+            color: white;
+            text-align: center;
+            font-size: 22px;
+        }
+
+        .container {
+            width: 85%;
+            margin: auto;
+            margin-top: 25px;
+            margin-bottom: 40px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #003366;
+            font-size: 26px;
+            font-weight: normal;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        table thead {
+            background-color: #e1e1e1;
+        }
+
+        table th, table td {
+            padding: 12px;
+            border: 1px solid #bbb;
+            text-align: left;
+            font-size: 15px;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .empty-message {
+            font-size: 17px;
+            padding: 15px;
+            text-align: center;
+            color: #555;
+        }
+
+        .voltar {
+            margin-top: 25px;
+            display: inline-block;
+            padding: 10px 18px;
+            background-color: #003366;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .voltar:hover {
+            background-color: #002244;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<header>
+    Histórico de Auditoria
+</header>
+
+<div class="container">
+
+    <h2>Registros de suas atividades</h2>
+
+    <p>Aqui você encontra as ações registradas pelo sistema relacionadas à sua conta.</p>
+
+    <!-- Caso não exista nenhum log -->
+    <div th:if="${#lists.isEmpty(logs)}" class="empty-message">
+        Nenhuma atividade registrada até o momento.
+    </div>
+
+    <!-- Tabela dos logs -->
+    <table th:if="${!#lists.isEmpty(logs)}">
+        <thead>
+            <tr>
+                <th>Ação</th>
+                <th>Detalhes</th>
+                <th>Data e Hora</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr th:each="log : ${logs}">
+                <td th:text="${log.acao}">AÇÃO</td>
+                <td th:text="${log.detalhes}">DETALHES</td>
+                <td th:text="${log.dataHora}">DATA</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="/clientes/homepage" class="voltar">Voltar</a>
+</div>
+
+</body>
+</html>

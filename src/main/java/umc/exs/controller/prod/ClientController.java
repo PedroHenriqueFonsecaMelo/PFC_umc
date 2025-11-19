@@ -157,7 +157,6 @@ public class ClientController {
         ClienteDTO cliente = clienteOpt.get();
 
         authHelper.authenticateAndSetCookie(cliente.getEmail(), cliente.getId(), response, "LOGIN_SUCESSO");
-
         return "redirect:/clientes/homepage";
     }
 

@@ -2,6 +2,7 @@ package umc.exs.backstage.log;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,5 +78,8 @@ public class LogAuditoriaService {
                     "/queue/notificacoes",
                     logDTO);
         }
+    }
+    public List<LogAuditoria> buscarLogsDoCliente(Long idUsuario){
+        return logAuditoriaRepository.findByIdUsuarioOrderByDataHoraDesc(idUsuario);
     }
 }
