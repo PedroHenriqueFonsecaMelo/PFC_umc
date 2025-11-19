@@ -3,3 +3,4 @@
 /logs
 /logs/application.log
 /logs/*
+/docker-compose.yml
