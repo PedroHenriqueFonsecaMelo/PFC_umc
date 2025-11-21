@@ -63,6 +63,10 @@ public final class FieldValidation {
         return !sqlPattern.matcher(input).find() && !xssPattern.matcher(input).find();
     }
 
+    /** 
+     * @param input
+     * @return String
+     */
     // SANITIZAÇÃO GERAL: Remove apenas caracteres perigosos, mas mantém a maioria
     // dos caracteres para nomes, endereços, etc.
     public static String sanitize(String input) {
@@ -113,6 +117,10 @@ public final class FieldValidation {
         return Pattern.compile(emailRegex).matcher(email).matches();
     }
 
+    /** 
+     * @param cpf
+     * @return boolean
+     */
     // ==========================================================
     // 💳 CARTÃO / CPF / SENHA / GÊNERO / CEP
     // ==========================================================
@@ -142,6 +150,11 @@ public final class FieldValidation {
         }
     }
     
+    /** 
+     * @param cpf
+     * @param weightStart
+     * @return int
+     */
     private static int calculateDV(String cpf, int weightStart) {
         int sum = 0;
         int weight = weightStart;
@@ -153,12 +166,20 @@ public final class FieldValidation {
         return (remainder < 2) ? 0 : (11 - remainder);
     }
 
+    /** 
+     * @param expiryDate
+     * @return boolean
+     */
     public static boolean isValidCardExpiry(YearMonth expiryDate) {
         if (expiryDate == null)
             return false;
         return expiryDate.compareTo(YearMonth.now()) >= 0;
     }
 
+    /** 
+     * @param password
+     * @return boolean
+     */
     public static boolean isValidPassword(String password) {
         if (password == null || password.length() < 8)
             return false;
@@ -167,6 +188,10 @@ public final class FieldValidation {
         return Pattern.compile(passwordRegex).matcher(password).matches();
     }
 
+    /** 
+     * @param cep
+     * @return boolean
+     */
     public static boolean isValidCEP(String cep) {
         if (cep == null)
             return false;
@@ -174,6 +199,10 @@ public final class FieldValidation {
         return Pattern.compile(cepRegex).matcher(cep).matches();
     }
 
+    /** 
+     * @param gen
+     * @return boolean
+     */
     public static boolean isValidGenero(String gen) {
         if (gen == null)
             return false;
@@ -185,6 +214,10 @@ public final class FieldValidation {
                 normalizedGen.equals("OUTRO");
     }
 
+    /** 
+     * @param dateStr
+     * @return LocalDate
+     */
     // ==========================================================
     // 📅 DATAS
     // ==========================================================
@@ -233,6 +266,10 @@ public final class FieldValidation {
         return null;
     }
 
+    /** 
+     * @param birthDate
+     * @return boolean
+     */
     public static boolean isOver18(LocalDate birthDate) {
         if (birthDate == null)
             return false;

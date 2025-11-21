@@ -27,16 +27,26 @@ public class CartaoDTO implements CartaoConvertible {
     private YearMonth validade; // Tipo YearMonth para tratamento Java
     private String cpfTitular; 
     
+    /** 
+     * @return Cartao
+     */
     @Override
     public Cartao toEntity() {
         return CartaoMapper.toEntity(this);
     }
 
+    /** 
+     * @param cartao
+     * @return CartaoDTO
+     */
     @Override
     public CartaoDTO fromEntity (Cartao cartao){
         return CartaoMapper.fromEntity(cartao);
     }
 
+    /** 
+     * @return String
+     */
     @Override
     public String toString() {
         return "CartaoDTO [id=" + id + ", numero=" + numero + ", bandeira=" + bandeira + ", nomeTitular=" + nomeTitular

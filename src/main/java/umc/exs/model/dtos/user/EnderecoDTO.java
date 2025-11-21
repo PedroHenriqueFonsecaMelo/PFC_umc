@@ -26,10 +26,17 @@ public class EnderecoDTO implements EnderecoConvertible {
     private String tipoResidencia;
 
     // O DTO delega a conversão ao Mapper
+    /** 
+     * @return Endereco
+     */
     @Override
     public Endereco toEntity() {
         return EnderecoMapper.toEntity(this);
     }
+    /** 
+     * @param endereco
+     * @return EnderecoDTO
+     */
     @Override
     public EnderecoDTO fromEntity (Endereco endereco){
         return EnderecoMapper.fromEntity(endereco);

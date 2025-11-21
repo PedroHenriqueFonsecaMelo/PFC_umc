@@ -13,6 +13,12 @@ import jakarta.servlet.http.HttpServletRequest;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    /** 
+     * @param ex
+     * @param request
+     * @param redirectAttributes
+     * @return String
+     */
     // Trata especificamente a exceção de validação (IllegalArgumentException)
     // que é lançada no seu ClienteService
     @ExceptionHandler(IllegalArgumentException.class)
@@ -43,6 +49,11 @@ public class GlobalExceptionHandler {
         return "redirect:/clientes/homepage"; 
     }
 
+    /** 
+     * @param req
+     * @param ex
+     * @return ModelAndView
+     */
     @ExceptionHandler(Exception.class)
     public ModelAndView handleAllExceptions(HttpServletRequest req, Exception ex) {
         

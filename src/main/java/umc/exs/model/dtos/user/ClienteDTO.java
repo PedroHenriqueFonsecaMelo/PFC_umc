@@ -30,6 +30,10 @@ public class ClienteDTO implements ClienteConvertible {
     private List<EnderecoDTO> enderecos = new ArrayList<>();
     private List<CartaoDTO> cartoes = new ArrayList<>();
 
+    /** 
+     * @param cliente
+     * @return ClienteDTO
+     */
     // --- MÉTODOS DE CONVERSÃO DELEGADOS ---
 
     // 1. fromEntity (Entidade -> DTO): Usado em Mappers/Services para criar um DTO
@@ -38,6 +42,9 @@ public class ClienteDTO implements ClienteConvertible {
         return ClienteMapper.fromEntity(cliente);
     }
 
+    /** 
+     * @return Cliente
+     */
     // 2. toEntity (DTO -> Entidade): Usado para satisfazer a interface
     // ClienteConvertible
     @Override

@@ -97,6 +97,9 @@ public class Cliente {
         this.bloqueada = false;
     }
 
+    /** 
+     * @return boolean
+     */
     public boolean isContaBloqueada() {
         return bloqueada;
     }

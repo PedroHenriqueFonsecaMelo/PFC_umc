@@ -28,6 +28,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtRequestFilter.class);
 
+    /** 
+     * @return Logger
+     */
     public static Logger getLogger() {
         return logger;
     }
@@ -43,6 +46,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         "/css/", "/js/", "/images/", "/webjars/", "/error", "/login"
     );
 
+    /** 
+     * @param path
+     * @return boolean
+     */
     @SuppressWarnings("unused")
     private boolean isPublic(String path) {
         if (path == null) return false;
@@ -52,6 +59,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         return false;
     }
 
+    /** 
+     * @param request
+     * @param response
+     * @param chain
+     * @throws ServletException
+     * @throws IOException
+     */
     @SuppressWarnings("null")
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)

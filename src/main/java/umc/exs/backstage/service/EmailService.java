@@ -17,6 +17,11 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
+    /** 
+     * @param destino
+     * @param assunto
+     * @param texto
+     */
     public void enviar(String destino, String assunto, String texto) {
 
         SimpleMailMessage mensagem = new SimpleMailMessage();
@@ -25,7 +30,7 @@ public class EmailService {
         mensagem.setSubject(assunto);
         mensagem.setText(texto);
         mensagem.setFrom(remetente);
-
+        
         mailSender.send(mensagem);
     }
 }

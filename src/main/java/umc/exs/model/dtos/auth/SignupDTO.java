@@ -28,6 +28,9 @@ public class SignupDTO { // Não implementa mais ClienteConvertible
     private Boolean termsAccepted;
     private Boolean privacyAccepted;
 
+    /** 
+     * @return String
+     */
     // O método toEntity() foi removido daqui e será movido para o Mapper (veja abaixo).
     // O DTO deve ser apenas um contêiner de dados.
 

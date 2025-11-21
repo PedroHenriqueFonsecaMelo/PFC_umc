@@ -43,6 +43,11 @@ public class ClientController {
     @Autowired
     private JwtUtil jwtCookieHelper;
 
+    /** 
+     * @param response
+     * @param model
+     * @return String
+     */
     // ============================================================
     // 🔹 CADASTRO
     // ============================================================
@@ -55,6 +60,11 @@ public class ClientController {
         return "cliente/cadastro_cliente";
     }
 
+    /** 
+     * @param model
+     * @param response
+     * @return String
+     */
     @PostMapping("/cadastro")
     public String cadastrarCliente(
             @ModelAttribute SignupDTO signupDTO,
@@ -91,6 +101,11 @@ public class ClientController {
         return "redirect:/clientes/homepage";
     }
 
+    /** 
+     * @param model
+     * @param response
+     * @return String
+     */
     @PostMapping("/cadastro-completo")
     public String cadastrarClienteCompleto(
             @ModelAttribute SignupDTO signupDTO,
@@ -121,6 +136,10 @@ public class ClientController {
         return "redirect:/clientes/homepage";
     }
 
+    /** 
+     * @param model
+     * @return String
+     */
     // ==========================================================================
     // 🔹 LOGIN/LOGOUT
     // ==========================================================================
@@ -132,6 +151,12 @@ public class ClientController {
         return "cliente/login_cliente";
     }
 
+    /** 
+     * @param loginDTO
+     * @param model
+     * @param response
+     * @return String
+     */
     @PostMapping("/login")
     public String loginCliente(@ModelAttribute("loginData") LoginDTO loginDTO,
             Model model, HttpServletResponse response) {
@@ -160,6 +185,11 @@ public class ClientController {
         return "redirect:/clientes/homepage";
     }
 
+    /** 
+     * @param response
+     * @param principal
+     * @return String
+     */
     @GetMapping("/logout")
     public String logoutCliente(HttpServletResponse response, Principal principal) {
         String email = principal != null ? principal.getName() : "DESCONHECIDO";
@@ -173,6 +203,11 @@ public class ClientController {
         return "redirect:/";
     }
 
+    /** 
+     * @param principal
+     * @param model
+     * @return String
+     */
     // ==========================================================
     // 🏠 HOMEPAGE / CARREGAMENTO DO CLIENTE (GET)
     // ==========================================================
@@ -194,6 +229,11 @@ public class ClientController {
         return "cliente/homepage";
     }
 
+    /** 
+     * @param principal
+     * @param redirectAttributes
+     * @return String
+     */
     // ==========================================================
     // 💾 ATUALIZAR CLIENTE
     // ==========================================================
@@ -218,7 +258,7 @@ public class ClientController {
 
         } catch (Exception e) {
             logAuditoriaService.registrarLog("CLIENTE_ATUALIZACAO_FALHA", clienteId, emailDoClienteLogado,
-                    "Erro ao atualizar informações: " + e.getMessage());
+                    "Erro ao atualizar informações");
             // Relança a exceção para que o GlobalExceptionHandler a capture.
             throw e;
         }
@@ -226,6 +266,12 @@ public class ClientController {
         return "redirect:/clientes/homepage";
     }
 
+    /** 
+     * @param enderecoId
+     * @param principal
+     * @param redirectAttributes
+     * @return String
+     */
     // ==========================================================
     // 🗑️ DELEÇÃO DE ENDEREÇO/CARTÃO/CONTA
     // ==========================================================
@@ -246,13 +292,19 @@ public class ClientController {
             redirectAttributes.addFlashAttribute("sucesso", "Endereço removido com sucesso!");
         } catch (Exception e) {
             logAuditoriaService.registrarLog("ENDERECO_DELECAO_FALHA", clienteId, emailDoClienteLogado,
-                    "Erro ao remover endereço ID " + enderecoId + ": " + e.getMessage());
+                    "Erro ao remover endereço ID " + enderecoId + "");
             throw e;
         }
 
         return "redirect:/clientes/homepage";
     }
 
+    /** 
+     * @param cartaoId
+     * @param principal
+     * @param redirectAttributes
+     * @return String
+     */
     @PostMapping("/removerCartao")
     public String removerCartao(@RequestParam("cartaoId") Long cartaoId, Principal principal,
             RedirectAttributes redirectAttributes) {
@@ -268,13 +320,19 @@ public class ClientController {
             redirectAttributes.addFlashAttribute("sucesso", "Cartão removido com sucesso!");
         } catch (Exception e) {
             logAuditoriaService.registrarLog("CARTAO_DELECAO_FALHA", clienteId, emailDoClienteLogado,
-                    "Erro ao remover cartão ID " + cartaoId + ": " + e.getMessage());
+                    "Erro ao remover cartão ID " + cartaoId + "");
             throw e;
         }
 
         return "redirect:/clientes/homepage";
     }
 
+    /** 
+     * @param principal
+     * @param response
+     * @param redirectAttributes
+     * @return String
+     */
     @PostMapping("/deletar")
     public String deletarCliente(Principal principal, HttpServletResponse response,
             RedirectAttributes redirectAttributes) {
@@ -296,11 +354,14 @@ public class ClientController {
             return "redirect:/";
         } catch (Exception e) {
             logAuditoriaService.registrarLog("CONTA_DELECAO_FALHA", clienteId, emailDoClienteLogado,
-                    "Erro ao deletar conta: " + e.getMessage());
+                    "Erro ao deletar conta");
             throw e; // Lançar para o GlobalExceptionHandler
         }
     }
 
+    /** 
+     * @return String
+     */
     // ==========================================================================
     // 🔑 RECUPERAÇÃO DE SENHA
     // ==========================================================================
@@ -310,6 +371,11 @@ public class ClientController {
         return "cliente/recuperar_senha";
     }
 
+    /** 
+     * @param email
+     * @param redirectAttributes
+     * @return String
+     */
     @PostMapping("/recuperar-senha")
     public String iniciarRecuperacaoSenha(@RequestParam("email") String email,
             RedirectAttributes redirectAttributes) {
@@ -343,24 +409,29 @@ public class ClientController {
                     "SENHA_RECU_FALHA",
                     0L,
                     email,
-                    "Email não encontrado ou erro de envio: " + e.getMessage());
+                    "Email não encontrado ou erro de envio");
 
         } catch (Exception e) {
 
             redirectAttributes.addFlashAttribute(
                     "erro",
-                    "Erro ao processar a solicitação: " + e.getMessage());
+                    "Erro ao processar a solicitação");
 
             logAuditoriaService.registrarLog(
                     "SENHA_RECU_FALHA",
                     0L,
                     email,
-                    "Erro inesperado: " + e.getMessage());
+                    "Erro inesperado");
         }
 
         return "redirect:/clientes/login";
     }
 
+    /** 
+     * @param token
+     * @param model
+     * @return String
+     */
     @GetMapping("/reset-senha")
     public String mostrarFormularioResetSenha(@RequestParam("token") String token, Model model) {
 
@@ -387,18 +458,23 @@ public class ClientController {
 
         } catch (Exception e) {
 
-            model.addAttribute("erro", "Ocorreu um erro ao validar o token: " + e.getMessage());
+            model.addAttribute("erro", "Ocorreu um erro ao validar o token");
 
             logAuditoriaService.registrarLog(
                     "SENHA_RESET_TOKEN_FALHA",
                     0L,
                     "ERRO_VALIDACAO",
-                    "Erro ao validar token: " + e.getMessage());
+                    "Erro ao validar token");
 
             return "cliente/login_cliente";
         }
     }
 
+    /** 
+     * @param resetDTO
+     * @param redirectAttributes
+     * @return String
+     */
     @PostMapping("/alterar-senha")
     public String alterarSenha(@ModelAttribute("resetData") SenhaResetDTO resetDTO,
             RedirectAttributes redirectAttributes) {
@@ -453,7 +529,7 @@ public class ClientController {
                     "SENHA_ALTERADA_FALHA",
                     0L,
                     "TOKEN: " + token,
-                    "Erro inesperado: " + e.getMessage());
+                    "Erro inesperado");
 
             redirectAttributes.addFlashAttribute("erro", "Erro interno ao alterar a senha.");
 

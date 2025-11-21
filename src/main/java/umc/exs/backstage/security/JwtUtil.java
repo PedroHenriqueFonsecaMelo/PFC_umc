@@ -36,6 +36,10 @@ public class JwtUtil {
         this.validityMs = validityMs;
     }
 
+    /** 
+     * @param subject
+     * @return String
+     */
     // ==============================
     // 🔹 Geração de token
     // ==============================
@@ -45,12 +49,21 @@ public class JwtUtil {
         return buildToken(subject);
     }
 
+    /** 
+     * @param userDetails
+     * @return String
+     */
     // 2️⃣ Token com UserDetails
     public String generateToken(UserDetails userDetails) {
         if (userDetails == null) return null;
         return buildToken(userDetails.getUsername());
     }
 
+    /** 
+     * @param email
+     * @param id
+     * @return String
+     */
     // 3️⃣ Token com email + id
     public String generateToken(String email, Long id) {
         if (email == null || id == null) return null;
@@ -58,6 +71,10 @@ public class JwtUtil {
         return buildToken(subject);
     }
 
+    /** 
+     * @param subject
+     * @return String
+     */
     // ==============================
     // 🔹 Método interno de criação de token
     // ==============================
@@ -73,6 +90,11 @@ public class JwtUtil {
                 .compact();
     }
 
+    /** 
+     * @param token
+     * @param resolver
+     * @return T
+     */
     // ==============================
     // 🔹 Extração de claims
     // ==============================
@@ -81,6 +103,10 @@ public class JwtUtil {
         return claims == null ? null : resolver.apply(claims);
     }
 
+    /** 
+     * @param token
+     * @return Claims
+     */
     private Claims parseClaims(String token) {
         try {
             return Jwts.parser()
@@ -93,6 +119,10 @@ public class JwtUtil {
         }
     }
 
+    /** 
+     * @param token
+     * @return String
+     */
     // ==============================
     // 🔹 Extração específica
     // ==============================
@@ -102,6 +132,10 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
+    /** 
+     * @param token
+     * @return Pair<String, Long>
+     */
     // Extração de email e id, se token tiver o formato "email:id"
     public Pair<String, Long> extractEmailAndId(String token) {
         String subject = extractSubject(token);
@@ -117,16 +151,28 @@ public class JwtUtil {
         }
     }
 
+    /** 
+     * @param token
+     * @return String
+     */
     public String extractEmail(String token) {
         Pair<String, Long> pair = extractEmailAndId(token);
         return pair != null ? pair.getFirst() : null;
     }
 
+    /** 
+     * @param token
+     * @return Long
+     */
     public Long extractId(String token) {
         Pair<String, Long> pair = extractEmailAndId(token);
         return pair != null ? pair.getSecond() : null;
     }
 
+    /** 
+     * @param token
+     * @return String
+     */
     public String extractUsername(String token) {
         String subject = extractSubject(token);
         if (subject == null) return null;
@@ -141,6 +187,10 @@ public class JwtUtil {
         return subject;
     }   
 
+    /** 
+     * @param token
+     * @return boolean
+     */
     // ==============================
     // 🔹 Validação
     // ==============================
@@ -152,6 +202,11 @@ public class JwtUtil {
         return exp == null || exp.after(new Date());
     }
 
+    /** 
+     * @param token
+     * @param userDetails
+     * @return boolean
+     */
     public boolean validateToken(String token, UserDetails userDetails) {
         if (token == null || userDetails == null) return false;
 
@@ -169,6 +224,10 @@ public class JwtUtil {
     }
 
     
+    /** 
+     * @param response
+     * @param token
+     */
     // ============================================================
     // 🔧 COOKIES (Mantido inalterado)
     // ============================================================
@@ -184,6 +243,9 @@ public class JwtUtil {
         response.addHeader("Set-Cookie", cookie.toString());
     }
 
+    /** 
+     * @param response
+     */
     public void clearJwtCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from("token", "")
                 .httpOnly(true)

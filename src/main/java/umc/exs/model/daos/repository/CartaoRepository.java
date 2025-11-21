@@ -30,4 +30,19 @@ public interface CartaoRepository extends JpaRepository<Cartao, Long> {
         @Param("bandeira") String bandeira,
         @Param("cpfTitular") String cpfTitular
     );
+    
+    @Query("SELECT c FROM Cartao c WHERE " +
+           "c.numero = :numero AND " +
+           "c.nomeTitular = :nomeTitular AND " +
+           "c.validade = :validade AND " +
+           "c.bandeira = :bandeira AND " +
+           "c.cpfTitular = :cpfTitular")
+    Optional<Cartao> findByValueFields(
+        @Param("numero") String numero,
+        @Param("nomeTitular") String nomeTitular,
+        @Param("validade") String validade,
+        @Param("bandeira") String bandeira,
+        @Param("cpfTitular") String cpfTitular
+    );
+
 }

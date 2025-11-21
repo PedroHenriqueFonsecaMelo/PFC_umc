@@ -12,6 +12,9 @@ import lombok.NonNull;
 @EnableWebSocketMessageBroker // Habilita o processamento de mensagens STOMP sobre WebSockets
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+    /** 
+     * @param config
+     */
     @Override
     public void configureMessageBroker(@SuppressWarnings("null") @NonNull MessageBrokerRegistry config) {
         // Define o prefixo para tópicos de destino (onde a aplicação envia mensagens)
@@ -23,6 +26,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         config.setApplicationDestinationPrefixes("/app");
     }
 
+    /** 
+     * @param registry
+     */
     @Override
     public void registerStompEndpoints(@SuppressWarnings("null") @NonNull StompEndpointRegistry registry) {
         // Registra o endpoint que os clientes usarão para se conectar ao WebSocket.

@@ -8,10 +8,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Value;
 
 import umc.exs.model.daos.mappers.CartaoMapper;
 import umc.exs.model.daos.mappers.ClienteMapper;
@@ -54,6 +54,10 @@ public class ClienteService {
     @Autowired
     private EmailService emailService;
 
+    /** 
+     * @param signupDTO
+     * @return ClienteDTO
+     */
     // ==========================================================
     // 🔹 SALVAR (CADASTRO)
     // ==========================================================
@@ -69,6 +73,12 @@ public class ClienteService {
         return ClienteMapper.fromEntity(salvo);
     }
 
+    /** 
+     * @param signupDTO
+     * @param enderecoDTO
+     * @param cartaoDTO
+     * @return ClienteDTO
+     */
     @Transactional
     public ClienteDTO salvarClienteCompleto(SignupDTO signupDTO, EnderecoDTO enderecoDTO, CartaoDTO cartaoDTO) {
         validarDadosSignup(signupDTO);
@@ -100,6 +110,11 @@ public class ClienteService {
         return ClienteMapper.fromEntity(salvo);
     }
 
+    /** 
+     * @param clienteId
+     * @param clienteAtualizadoDTO
+     * @return ClienteDTO
+     */
     // ==========================================================
     // 💾 ATUALIZAR
     // ==========================================================
@@ -234,10 +249,12 @@ public class ClienteService {
                 // Cartão NOVO (ID nulo/0): Busca por reutilização ou Cria
 
                 // ASSUMIR MÉTODO EXISTENTE: Tenta encontrar um cartão idêntico no banco
+                // converter validade (YearMonth) para String antes de consultar o repositório
+                String validadeStr = CartaoMapper.yearMonthToString(dto.getValidade());
                 Optional<Cartao> cartaoReutilizado = cartaoRepository.findByValueFields(
                         dto.getNumero(),
                         dto.getNomeTitular(),
-                        dto.getValidade(),
+                        validadeStr,
                         dto.getBandeira(),
                         dto.getCpfTitular());
 
@@ -267,6 +284,10 @@ public class ClienteService {
         return ClienteMapper.fromEntity(salvo);
     }
 
+    /** 
+     * @param clienteId
+     * @param enderecoId
+     */
     // ==========================================================
     // 🗑️ MÉTODOS DE DELEÇÃO (M2M)
     // ==========================================================
@@ -297,6 +318,10 @@ public class ClienteService {
         }
     }
 
+    /** 
+     * @param clienteId
+     * @param cartaoId
+     */
     @Transactional
     public void deletarCartaoDoCliente(Long clienteId, Long cartaoId) {
         // ⚠️ MUDANÇA AQUI: usando o método personalizado que força o JOIN FETCH
@@ -321,6 +346,9 @@ public class ClienteService {
         }
     }
 
+    /** 
+     * @param clienteId
+     */
     @Transactional
     public void deletarClientePorId(Long clienteId) {
         Cliente cliente = clienteRepository.findById(clienteId)
@@ -339,6 +367,11 @@ public class ClienteService {
         clienteRepository.delete(cliente);
     }
 
+    /** 
+     * @param email
+     * @param senha
+     * @return Optional<ClienteDTO>
+     */
     // ==========================================================
     // 🔒 AUTENTICAÇÃO E BUSCA
     // ==========================================================
@@ -367,6 +400,10 @@ public class ClienteService {
         }
     }
 
+    /** 
+     * @param email
+     * @return Optional<ClienteDTO>
+     */
     public Optional<ClienteDTO> buscarClientePorEmail(String email) {
         String safeEmail;
         try {
@@ -379,11 +416,18 @@ public class ClienteService {
                 .map(ClienteMapper::fromEntity);
     }
 
+    /** 
+     * @param clienteId
+     * @return Optional<ClienteDTO>
+     */
     public Optional<ClienteDTO> buscarClientePorId(Long clienteId) {
         return clienteRepository.findById(clienteId)
                 .map(ClienteMapper::fromEntity);
     }
 
+    /** 
+     * @param dto
+     */
     // ==========================================================
     // 🔒 MÉTODOS DE VALIDAÇÃO PRIVADOS (Com uso de FieldValidation)
     // ==========================================================
@@ -432,6 +476,9 @@ public class ClienteService {
         dto.setGen(FieldValidation.sanitize(dto.getGen()));
     }
 
+    /** 
+     * @param dto
+     */
     private void validarDadosAtualizacao(ClienteDTO dto) {
         // Validação Anti-SQLi para o Nome (dados editáveis)
         if (dto.getNome() != null && !FieldValidation.isSafe(dto.getNome())) {
@@ -453,6 +500,9 @@ public class ClienteService {
             dto.setGen(FieldValidation.sanitize(dto.getGen()));
     }
 
+    /** 
+     * @param dto
+     */
     private void validarDadosEndereco(EnderecoDTO dto) {
         if (!FieldValidation.validarCampos(dto)) {
             throw new IllegalArgumentException("Todos os campos obrigatórios do endereço devem ser preenchidos.");
@@ -478,6 +528,9 @@ public class ClienteService {
         dto.setComplemento(FieldValidation.sanitize(dto.getComplemento()));
     }
 
+    /** 
+     * @param dto
+     */
     private void validarDadosCartao(CartaoDTO dto) {
         if (!FieldValidation.validarCampos(dto)) {
             throw new IllegalArgumentException("Todos os campos obrigatórios do cartão devem ser preenchidos.");
@@ -497,6 +550,9 @@ public class ClienteService {
         dto.setNomeTitular(FieldValidation.sanitize(dto.getNomeTitular()));
     }
 
+    /** 
+     * @param email
+     */
     // ==========================================================
     // 🔒 MÉTODOS DE EMAIL
     // ==========================================================
@@ -518,6 +574,9 @@ public class ClienteService {
 
         String link = baseUrl + "/clientes/reset-senha?token=" + token;
 
+        System.out.println("Seu link de recuperação: " + link);
+
+
         String assunto = "Recuperação de Senha";
         String texto = "Olá,\n\nClique no link abaixo para redefinir sua senha:\n\n" +
                 link + "\n\nSe você não solicitou, apenas ignore este e-mail.";
@@ -525,11 +584,18 @@ public class ClienteService {
         emailService.enviar(email, assunto, texto);
     }
 
+    /** 
+     * @return String
+     */
     private String gerarTokenManual() {
         // Token UUID tradicional e sem traços
         return java.util.UUID.randomUUID().toString().replace("-", "");
     }
 
+    /** 
+     * @param token
+     * @return boolean
+     */
     @Transactional
     public boolean validarTokenRecuperacao(String token) {
 
@@ -545,6 +611,11 @@ public class ClienteService {
         return LocalDateTime.now().isBefore(rec.getDataExpiracao());
     }
 
+    /** 
+     * @param token
+     * @param novaSenha
+     * @return String
+     */
     @Transactional
     public String alterarSenhaComToken(String token, String novaSenha) {
 

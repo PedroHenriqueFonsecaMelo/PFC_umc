@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class SecurityDebugController {
 
+    /** 
+     * @return ResponseEntity<String>
+     */
     @GetMapping("/debug")
     public ResponseEntity<String> debugAuth() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

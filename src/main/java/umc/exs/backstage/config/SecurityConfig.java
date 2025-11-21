@@ -25,6 +25,9 @@ public class SecurityConfig {
     @Value("${app.allowed-origin:http://localhost:5173}")
     private String allowedOrigin;
 
+    /** 
+     * @return CorsConfigurationSource
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
@@ -41,6 +44,12 @@ public class SecurityConfig {
         return source;
     }
 
+    /** 
+     * @param http
+     * @param jwtRequestFilter
+     * @return SecurityFilterChain
+     * @throws Exception
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtRequestFilter jwtRequestFilter) throws Exception {
         http
@@ -57,11 +66,19 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /** 
+     * @return PasswordEncoder
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /** 
+     * @param cfg
+     * @return AuthenticationManager
+     * @throws Exception
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
         return cfg.getAuthenticationManager();

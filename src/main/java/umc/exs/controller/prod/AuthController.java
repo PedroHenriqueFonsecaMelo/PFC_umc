@@ -49,6 +49,11 @@ public class AuthController {
         response.addHeader("Set-Cookie", cookie.toString());
     }
 
+    /** 
+     * @param loginDto
+     * @param response
+     * @return ResponseEntity<?>
+     */
     // ============================================================
     // LOGIN
     // ============================================================
@@ -75,6 +80,11 @@ public class AuthController {
         }
     }
 
+    /** 
+     * @param signupDTO
+     * @param response
+     * @return ResponseEntity<?>
+     */
     // ============================================================
     // REGISTRO
     // ============================================================

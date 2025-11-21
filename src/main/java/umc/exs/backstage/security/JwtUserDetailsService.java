@@ -22,6 +22,11 @@ public class JwtUserDetailsService implements UserDetailsService {
     @Autowired
     private AdminRepository adminRepository;
 
+    /** 
+     * @param username
+     * @return UserDetails
+     * @throws UsernameNotFoundException
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // Try admin first
@@ -39,6 +44,11 @@ public class JwtUserDetailsService implements UserDetailsService {
         return new User(c.getEmail(), pwd, List.of(new SimpleGrantedAuthority("ROLE_USER")));
     }
 
+    /** 
+     * @param userId
+     * @return UserDetails
+     * @throws UsernameNotFoundException
+     */
     public UserDetails loadUserByUserId(Long userId) throws UsernameNotFoundException {
         // Try admin first
         Optional<Administrador> adminOpt = adminRepository.findById(userId);
@@ -55,6 +65,12 @@ public class JwtUserDetailsService implements UserDetailsService {
         return new User(c.getEmail(), pwd, List.of(new SimpleGrantedAuthority("ROLE_USER")));
     }
 
+    /** 
+     * @param email
+     * @param id
+     * @return UserDetails
+     * @throws UsernameNotFoundException
+     */
     public UserDetails LoadUserByUserEmailAndId (String email, Long id) throws UsernameNotFoundException {
         // Try admin first
         Optional<Administrador> adminOpt = adminRepository.findByEmailAndId(email, id);

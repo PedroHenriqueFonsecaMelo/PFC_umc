@@ -79,6 +79,10 @@ public class LogAuditoriaService {
                     logDTO);
         }
     }
+    /** 
+     * @param idUsuario
+     * @return List<LogAuditoria>
+     */
     public List<LogAuditoria> buscarLogsDoCliente(Long idUsuario){
         return logAuditoriaRepository.findByIdUsuarioOrderByDataHoraDesc(idUsuario);
     }

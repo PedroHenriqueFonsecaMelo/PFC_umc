@@ -16,27 +16,45 @@ public class ResponseDTO<T> {
         this.error = error;
     }
 
+    /** 
+     * @return String
+     */
     // Getters and Setters
     public String getMessage() {
         return message;
     }
 
+    /** 
+     * @param message
+     */
     public void setMessage(String message) {
         this.message = message;
     }
 
+    /** 
+     * @return T
+     */
     public T getData() {
         return data;
     }
 
+    /** 
+     * @param data
+     */
     public void setData(T data) {
         this.data = data;
     }
 
+    /** 
+     * @return String
+     */
     public String getError() {
         return error;
     }
 
+    /** 
+     * @param error
+     */
     public void setError(String error) {
         this.error = error;
     }
