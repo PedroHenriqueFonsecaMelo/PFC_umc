@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Recuperação de Senha</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f2f2f2;
+            padding: 40px;
+        }
+        .container {
+            width: 380px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 12px;
+        }
+        button {
+            cursor: pointer;
+        }
+        .msg-sucesso {
+            color: green;
+            margin-bottom: 10px;
+        }
+        .msg-erro {
+            color: red;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h2>Recuperação de Senha</h2>
+
+    <!-- Mensagens -->
+    <p th:if="${sucesso}" th:text="${sucesso}" class="msg-sucesso"></p>
+    <p th:if="${erro}" th:text="${erro}" class="msg-erro"></p>
+
+    <form th:action="@{/clientes/recuperar-senha}" method="post">
+
+        <label>Email cadastrado:</label>
+        <input type="email" name="email" placeholder="Digite seu email" required>
+
+        <button type="submit">Enviar link de recuperação</button>
+    </form>
+
+</div>
+
+</body>
+</html>

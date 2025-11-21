@@ -69,7 +69,7 @@ public class ClientController {
             model.addAttribute("cliente", signupDTO);
             return "cliente/cadastro_cliente";
         }
-        if ((signupDTO.getSenha() == null ? confirmPassword != null : !signupDTO.getSenha().equals(confirmPassword))){
+        if ((signupDTO.getSenha() == null ? confirmPassword != null : !signupDTO.getSenha().equals(confirmPassword))) {
             model.addAttribute("erro", "As senhas devem ser iguais");
             model.addAttribute("cliente", signupDTO);
             return "cliente/cadastro_cliente";
@@ -234,7 +234,6 @@ public class ClientController {
     @PostMapping("/removerEndereco")
     public String removerEndereco(@RequestParam("enderecoId") Long enderecoId, Principal principal,
             RedirectAttributes redirectAttributes) {
-                
 
         String emailDoClienteLogado = principal.getName();
         Long clienteId = clienteService.buscarClientePorEmail(emailDoClienteLogado)
@@ -261,7 +260,6 @@ public class ClientController {
         String emailDoClienteLogado = principal.getName();
         Long clienteId = clienteService.buscarClientePorEmail(emailDoClienteLogado)
                 .map(ClienteDTO::getId).orElseThrow(() -> new RuntimeException("Cliente logado não encontrado."));
-
 
         try {
             clienteService.deletarCartaoDoCliente(clienteId, cartaoId);
@@ -307,95 +305,164 @@ public class ClientController {
     // 🔑 RECUPERAÇÃO DE SENHA
     // ==========================================================================
 
+    @GetMapping("/recuperar-senha")
+    public String mostrarPaginaRecuperarSenha() {
+        return "cliente/recuperar_senha";
+    }
+
     @PostMapping("/recuperar-senha")
-    public String iniciarRecuperacaoSenha(@RequestParam("email") String email, RedirectAttributes redirectAttributes) {
+    public String iniciarRecuperacaoSenha(@RequestParam("email") String email,
+            RedirectAttributes redirectAttributes) {
         try {
             if (email == null || email.isBlank()) {
                 redirectAttributes.addFlashAttribute("erro", "O email não pode ser vazio.");
-                return "redirect:/clientes/login"; // Ou para uma página de recuperação dedicada
+                return "redirect:/clientes/login";
             }
-            
-            // O Service deve gerar o token, salvar no BD e enviar o e-mail com o link.
+
+            // Inicia o processo: gera token, salva e envia o email
             clienteService.iniciarRecuperacaoSenha(email);
 
-            logAuditoriaService.registrarLog("SENHA_RECU_INICIO", 0L, email, "Processo de recuperação de senha iniciado.");
-            redirectAttributes.addFlashAttribute("sucesso", "Um link para resetar sua senha foi enviado para o seu email.");
-            
+            logAuditoriaService.registrarLog(
+                    "SENHA_RECU_INICIO",
+                    0L,
+                    email,
+                    "Processo de recuperação de senha iniciado.");
+
+            redirectAttributes.addFlashAttribute(
+                    "sucesso",
+                    "Um link para resetar sua senha foi enviado para o seu email.");
+
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("sucesso", "Um link para resetar sua senha foi enviado (se o email existir em nosso sistema).");
-            logAuditoriaService.registrarLog("SENHA_RECU_FALHA", 0L, email, "Email não encontrado ou erro de envio: " + e.getMessage());
+
+            // Não revelamos para o usuário se o e-mail existe
+            redirectAttributes.addFlashAttribute(
+                    "sucesso",
+                    "Um link para resetar sua senha foi enviado (se o email existir em nosso sistema).");
+
+            logAuditoriaService.registrarLog(
+                    "SENHA_RECU_FALHA",
+                    0L,
+                    email,
+                    "Email não encontrado ou erro de envio: " + e.getMessage());
+
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("erro", "Erro ao processar a solicitação: " + e.getMessage());
-            logAuditoriaService.registrarLog("SENHA_RECU_FALHA", 0L, email, "Erro inesperado: " + e.getMessage());
+
+            redirectAttributes.addFlashAttribute(
+                    "erro",
+                    "Erro ao processar a solicitação: " + e.getMessage());
+
+            logAuditoriaService.registrarLog(
+                    "SENHA_RECU_FALHA",
+                    0L,
+                    email,
+                    "Erro inesperado: " + e.getMessage());
         }
 
-        return "/clientes/login";
+        return "redirect:/clientes/login";
     }
 
-    /**
-     * 2. Valida o token e exibe o formulário para alterar a nova senha.
-     * Este método é acessado através do link enviado por e-mail.
-     */
     @GetMapping("/reset-senha")
     public String mostrarFormularioResetSenha(@RequestParam("token") String token, Model model) {
+
         try {
-            // O Service deve validar se o token existe e não expirou.
-            if (!clienteService.validarTokenRecuperacao(token)) {
-                model.addAttribute("erro", "Token inválido ou expirado. Por favor, solicite a recuperação novamente.");
-                logAuditoriaService.registrarLog("SENHA_RESET_TOKEN_FALHA", 0L, "TOKEN_INVALIDO", "Tentativa de uso de token inválido: " + token);
-                return "cliente/login_cliente"; // Retorna para a tela de login com erro
+            boolean tokenValido = clienteService.validarTokenRecuperacao(token);
+
+            if (!tokenValido) {
+                model.addAttribute("erro", "Token inválido ou expirado. Solicite a recuperação novamente.");
+
+                logAuditoriaService.registrarLog(
+                        "SENHA_RESET_TOKEN_FALHA",
+                        0L,
+                        "TOKEN_INVALIDO",
+                        "Tentativa de uso de token inválido: " + token);
+
+                return "cliente/login_cliente";
             }
 
-            // Se o token for válido, adiciona o token ao modelo e a DTO para o formulário POST
+            // Criamos o DTO para amarrar no formulário
             model.addAttribute("resetData", new SenhaResetDTO(token, null, null));
             model.addAttribute("tokenValido", true);
-            
-            return "cliente/reset_senha"; // Página com formulário de nova senha
+
+            return "cliente/reset_senha";
 
         } catch (Exception e) {
+
             model.addAttribute("erro", "Ocorreu um erro ao validar o token: " + e.getMessage());
-            logAuditoriaService.registrarLog("SENHA_RESET_TOKEN_FALHA", 0L, "ERRO_VALIDACAO", "Erro ao validar token: " + e.getMessage());
+
+            logAuditoriaService.registrarLog(
+                    "SENHA_RESET_TOKEN_FALHA",
+                    0L,
+                    "ERRO_VALIDACAO",
+                    "Erro ao validar token: " + e.getMessage());
+
             return "cliente/login_cliente";
         }
     }
 
-    /**
-     * 3. Processa a alteração da senha, valida o token novamente e o apaga.
-     */
     @PostMapping("/alterar-senha")
-    public String alterarSenha(@ModelAttribute("resetData") SenhaResetDTO resetDTO, RedirectAttributes redirectAttributes) {
+    public String alterarSenha(@ModelAttribute("resetData") SenhaResetDTO resetDTO,
+            RedirectAttributes redirectAttributes) {
+
         String token = resetDTO.getToken();
         String novaSenha = resetDTO.getNovaSenha();
         String confirmarSenha = resetDTO.getConfirmarSenha();
 
         try {
-            // 1. Validação de segurança e DTO
-            if (token == null || token.isEmpty() || novaSenha == null || novaSenha.isEmpty() || !novaSenha.equals(confirmarSenha)) {
-                redirectAttributes.addFlashAttribute("erro", "As senhas não conferem ou dados estão incompletos.");
-                // Para não perder o token no redirect, é necessário passá-lo como flash attribute
-                redirectAttributes.addFlashAttribute("resetData", new SenhaResetDTO(token, null, null)); 
-                return "redirect:/clientes/reset-senha";
+            // Validações manuais tradicionais
+            if (token == null || token.isEmpty()) {
+                redirectAttributes.addFlashAttribute("erro", "Token ausente.");
+                return "redirect:/clientes/login";
             }
 
-            // 2. O Service valida o token, altera a senha e o DELETA.
+            if (novaSenha == null || novaSenha.isEmpty() ||
+                    confirmarSenha == null || confirmarSenha.isEmpty() ||
+                    !novaSenha.equals(confirmarSenha)) {
+
+                redirectAttributes.addFlashAttribute("erro", "As senhas não conferem ou dados incompletos.");
+
+                // Preserva o token para reuso na tela
+                redirectAttributes.addFlashAttribute(
+                        "resetData",
+                        new SenhaResetDTO(token, null, null));
+
+                return "redirect:/clientes/reset-senha?token=" + token;
+            }
+
+            // Alteração real da senha
             String emailDoCliente = clienteService.alterarSenhaComToken(token, novaSenha);
 
-            logAuditoriaService.registrarLog("SENHA_ALTERADA_SUCESSO", 0L, emailDoCliente, "Senha alterada com sucesso via token de recuperação.");
-            redirectAttributes.addFlashAttribute("sucesso", "Sua senha foi alterada com sucesso! Faça login.");
-            
+            logAuditoriaService.registrarLog(
+                    "SENHA_ALTERADA_SUCESSO",
+                    0L,
+                    emailDoCliente,
+                    "Senha alterada com sucesso via token.");
+
+            redirectAttributes.addFlashAttribute("sucesso", "Senha alterada com sucesso! Faça login.");
+
             return "redirect:/clientes/login";
 
         } catch (IllegalArgumentException e) {
-            // Captura erros de token inválido/expirado ou outras validações do Service
+
             redirectAttributes.addFlashAttribute("erro", e.getMessage());
-            // Se o erro for de token, redireciona para a página de login.
-            return "redirect:/clientes/login"; 
+
+            return "redirect:/clientes/login";
+
         } catch (Exception e) {
-            logAuditoriaService.registrarLog("SENHA_ALTERADA_FALHA", 0L, "TOKEN: " + token, "Erro inesperado ao alterar senha: " + e.getMessage());
+
+            logAuditoriaService.registrarLog(
+                    "SENHA_ALTERADA_FALHA",
+                    0L,
+                    "TOKEN: " + token,
+                    "Erro inesperado: " + e.getMessage());
+
             redirectAttributes.addFlashAttribute("erro", "Erro interno ao alterar a senha.");
-            // Mantém o token no modelo para nova tentativa (pode ser um erro temporário)
-            redirectAttributes.addFlashAttribute("resetData", new SenhaResetDTO(token, null, null)); 
-            return "redirect:/clientes/reset-senha";
+
+            redirectAttributes.addFlashAttribute(
+                    "resetData",
+                    new SenhaResetDTO(token, null, null));
+
+            return "redirect:/clientes/reset-senha?token=" + token;
         }
     }
+
 }

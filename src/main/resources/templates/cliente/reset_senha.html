@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Redefinir Senha</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #e8e8e8;
+            padding: 40px;
+        }
+        .container {
+            width: 420px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 6px;
+            border: 1px solid #bbb;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 12px;
+        }
+        button {
+            cursor: pointer;
+        }
+        .msg-erro {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h2>Redefinir Senha</h2>
+
+    <!-- Se o token for inválido -->
+    <p th:if="${erro}" th:text="${erro}" class="msg-erro"></p>
+
+    <!-- Se o token for válido, mostra o formulário -->
+    <form th:if="${tokenValido}"
+          th:action="@{/clientes/alterar-senha}" method="post"
+          th:object="${resetData}">
+        
+        <!-- Campo oculto com o token -->
+        <input type="hidden" th:field="*{token}">
+
+        <label>Nova Senha:</label>
+        <input type="password" th:field="*{novaSenha}" required placeholder="Digite a nova senha">
+
+        <label>Confirme a Senha:</label>
+        <input type="password" th:field="*{confirmarSenha}" required placeholder="Repita a senha">
+
+        <button type="submit">Alterar Senha</button>
+    </form>
+
+</div>
+
+</body>
+</html>

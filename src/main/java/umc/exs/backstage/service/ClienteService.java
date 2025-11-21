@@ -1,16 +1,17 @@
 package umc.exs.backstage.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import umc.exs.model.daos.mappers.CartaoMapper;
 import umc.exs.model.daos.mappers.ClienteMapper;
@@ -32,6 +33,9 @@ import umc.exs.model.entidades.usuario.Endereco;
 @Service
 public class ClienteService {
 
+    @Value("${app.base-url}")
+    private String baseUrl;
+
     @Autowired
     private ClienteRepository clienteRepository;
 
@@ -44,7 +48,7 @@ public class ClienteService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-   @Autowired
+    @Autowired
     private RecuperacaoSenhaRepository recuperacaoSenhaRepository;
 
     @Autowired
@@ -267,7 +271,7 @@ public class ClienteService {
     // 🗑️ MÉTODOS DE DELEÇÃO (M2M)
     // ==========================================================
 
-@Transactional
+    @Transactional
     public void deletarEnderecoDoCliente(Long clienteId, Long enderecoId) {
         // ⚠️ MUDANÇA AQUI: Usa a query customizada para carregar a lista de endereços
         Cliente cliente = clienteRepository.findByIdWithEnderecos(clienteId)
@@ -493,75 +497,76 @@ public class ClienteService {
         dto.setNomeTitular(FieldValidation.sanitize(dto.getNomeTitular()));
     }
 
-    @Transactional
-    public void iniciarRecuperacaoSenha(String email) throws IllegalArgumentException {
-        // 1. Busca o cliente pelo email
-        Optional<Cliente> clienteOpt = clienteRepository.findByEmail(email);
-        
-        // Se o cliente não existir, lançamos uma exceção para o Controller
-        // (que pode retornar uma mensagem genérica para o usuário final).
-        Cliente cliente = clienteOpt.orElseThrow(() -> new IllegalArgumentException("Cliente com email " + email + " não encontrado."));
+    // ==========================================================
+    // 🔒 MÉTODOS DE EMAIL
+    // ==========================================================
 
-        // 2. Limpa tokens antigos para este cliente (garante apenas um token ativo)
+    @Transactional
+    public void iniciarRecuperacaoSenha(String email) {
+
+        Cliente cliente = clienteRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Email não encontrado."));
+
         recuperacaoSenhaRepository.deleteByCliente(cliente);
 
-        // 3. Gera o token único
-        String token = UUID.randomUUID().toString();
-        
-        // 4. Salva o novo token no BD
-        RecuperacaoSenha resetToken = new RecuperacaoSenha(token, cliente);
-        recuperacaoSenhaRepository.save(resetToken);
+        String token = gerarTokenManual();
+        LocalDateTime validade = LocalDateTime.now().plusMinutes(30);
 
-        // 5. Envia o email (simulado) com o link de reset
-        emailService.enviarEmailRecuperacaoSenha(email, token);
+        RecuperacaoSenha rec = new RecuperacaoSenha(token, cliente, validade);
+        rec.setEmail(email);
+        recuperacaoSenhaRepository.save(rec);
+
+        String link = baseUrl + "/clientes/reset-senha?token=" + token;
+
+        String assunto = "Recuperação de Senha";
+        String texto = "Olá,\n\nClique no link abaixo para redefinir sua senha:\n\n" +
+                link + "\n\nSe você não solicitou, apenas ignore este e-mail.";
+
+        emailService.enviar(email, assunto, texto);
     }
 
-    @Transactional(readOnly = true)
-    public boolean validarTokenRecuperacao(String token) {
-        if (token == null || token.isEmpty()) {
-            return false;
-        }
-
-        Optional<RecuperacaoSenha> resetTokenOpt = recuperacaoSenhaRepository.findByToken(token);
-        
-        if (resetTokenOpt.isEmpty()) {
-            return false;
-        }
-
-        RecuperacaoSenha resetToken = resetTokenOpt.get();
-        
-        // Verifica se o token expirou
-        return !resetToken.isExpirado();
+    private String gerarTokenManual() {
+        // Token UUID tradicional e sem traços
+        return java.util.UUID.randomUUID().toString().replace("-", "");
     }
 
-    
     @Transactional
-    public String alterarSenhaComToken(String token, String novaSenha) throws IllegalArgumentException {
-        // 1. Busca o token
-        Optional<RecuperacaoSenha> resetTokenOpt = recuperacaoSenhaRepository.findByToken(token);
-        
-        if (resetTokenOpt.isEmpty()) {
-            throw new IllegalArgumentException("Token inválido ou não encontrado.");
+    public boolean validarTokenRecuperacao(String token) {
+
+        Optional<RecuperacaoSenha> opt = recuperacaoSenhaRepository.findByToken(token);
+
+        if (opt.isEmpty()) {
+            return false;
         }
 
-        RecuperacaoSenha resetToken = resetTokenOpt.get();
+        RecuperacaoSenha rec = opt.get();
 
-        // 2. Valida a expiração
-        if (resetToken.isExpirado()) {
-            // Se expirado, o deletamos e lançamos a exceção
-            recuperacaoSenhaRepository.delete(resetToken);
-            throw new IllegalArgumentException("Token expirado. Por favor, solicite a recuperação novamente.");
+        // Verifica se ainda não expirou
+        return LocalDateTime.now().isBefore(rec.getDataExpiracao());
+    }
+
+    @Transactional
+    public String alterarSenhaComToken(String token, String novaSenha) {
+
+        RecuperacaoSenha rec = recuperacaoSenhaRepository.findByToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Token inválido ou expirado."));
+
+        // Confirma expiração
+        if (LocalDateTime.now().isAfter(rec.getDataExpiracao())) {
+            throw new IllegalArgumentException("Token expirado.");
         }
 
-        // 3. Atualiza a senha do cliente
-        Cliente cliente = resetToken.getCliente();
-        
-        String senhaCriptografada = passwordEncoder.encode(novaSenha);
-        cliente.setSenha(senhaCriptografada);
+        // Pega o cliente associado
+        Cliente cliente = rec.getCliente();
+
+        // Troca da senha (usando encoder se você usa)
+        cliente.setSenha(passwordEncoder.encode(novaSenha));
         clienteRepository.save(cliente);
 
-        recuperacaoSenhaRepository.delete(resetToken);
+        // O token só pode ser usado uma vez
+        recuperacaoSenhaRepository.delete(rec);
 
         return cliente.getEmail();
     }
+
 }
