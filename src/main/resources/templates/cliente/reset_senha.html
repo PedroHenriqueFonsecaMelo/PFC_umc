@@ -1,62 +1,52 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Redefinir Senha</title>
-    <style>
-        body {
-            font-family: Arial;
-            background: #e8e8e8;
-            padding: 40px;
-        }
-        .container {
-            width: 420px;
-            margin: auto;
-            background: white;
-            padding: 25px;
-            border-radius: 6px;
-            border: 1px solid #bbb;
-        }
-        input, button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 12px;
-        }
-        button {
-            cursor: pointer;
-        }
-        .msg-erro {
-            color: red;
-        }
-    </style>
-</head>
-<body>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <title>Redefinir Senha</title>
 
-<div class="container">
+        <link rel="stylesheet" th:href="@{/cliente/styles.css}">
+    </head>
 
-    <h2>Redefinir Senha</h2>
+    <body>
 
-    <!-- Se o token for inválido -->
-    <p th:if="${erro}" th:text="${erro}" class="msg-erro"></p>
+        <div class="container">
 
-    <!-- Se o token for válido, mostra o formulário -->
-    <form th:if="${tokenValido}"
-          th:action="@{/clientes/alterar-senha}" method="post"
-          th:object="${resetData}">
-        
-        <!-- Campo oculto com o token -->
-        <input type="hidden" th:field="*{token}">
+            <div class="page-header">
+                <h1>Redefinir Senha</h1>
+                <p>Insira uma nova senha para sua conta.</p>
+            </div>
 
-        <label>Nova Senha:</label>
-        <input type="password" th:field="*{novaSenha}" required placeholder="Digite a nova senha">
+            <!-- Mensagem de erro (token inválido) -->
+            <p th:if="${erro}" th:text="${erro}" class="mensagem erro"></p>
 
-        <label>Confirme a Senha:</label>
-        <input type="password" th:field="*{confirmarSenha}" required placeholder="Repita a senha">
+            <!-- Formulário somente se o token for válido -->
+            <form th:if="${tokenValido}"
+                th:action="@{/clientes/alterar-senha}"
+                method="post"
+                th:object="${resetData}">
 
-        <button type="submit">Alterar Senha</button>
-    </form>
+                <input type="hidden" th:field="*{token}">
 
-</div>
+                <div class="form-group">
+                    <label for="novaSenha">Nova senha</label>
+                    <input type="password" id="novaSenha"
+                        th:field="*{novaSenha}"
+                        placeholder="Digite a nova senha" required>
+                </div>
 
-</body>
+                <div class="form-actions-main">
+                    <button type="submit" class="btn btn-primary">Alterar
+                        senha</button>
+                </div>
+
+            </form>
+
+            <div class="account-links">
+                <a th:href="@{/clientes/login}"
+                    class="btn-link-secondary">Voltar ao login</a>
+            </div>
+
+        </div>
+
+    </body>
 </html>

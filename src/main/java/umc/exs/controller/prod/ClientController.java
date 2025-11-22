@@ -60,6 +60,18 @@ public class ClientController {
         return "cliente/cadastro_cliente";
     }
 
+    @GetMapping("/termo")
+    public String mostrarTermo(HttpServletResponse response, Model model) {
+
+        return "cliente/Termo";
+    }
+
+    @GetMapping("/politica")
+    public String mostrarPolitica(HttpServletResponse response, Model model) {
+
+        return "cliente/Politica";
+    }
+
     /** 
      * @param model
      * @param response

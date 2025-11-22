@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Minha Conta - Atualização</title>
+<link rel="stylesheet" th:href="@{/cliente/styles.css}" /> 
+
+    </head>
+    <body>
+        <div class="container">
+
+            <div class="page-header">
+                <h1>Politica de Privacidade</h1>
+                <br>
+                <br>
+                    
+<div style= "text-align: left" class="container-centralizado">                        
+POLÍTICA DE PRIVACIDADE  - SITE DESAPEGO.COM<br>
+Última atualização: 21/11/2025<br>
+1. Introdução<br>
+A presente Política de<br>
+Privacidade descreve como o Desapego coleta, utiliza, armazena e protege<br>
+os dados pessoais de seus usuários, em conformidade com a Lei Geral de<br>
+Proteção de Dados Pessoais (Lei nº 13.709/2018 – LGPD).<br>
+Ao utilizar nossos serviços, o<br>
+usuário declara ter lido, compreendido e concordado com esta Política.<br>
+2. Dados Coletados<br>
+2.1. Dados fornecidos<br>
+voluntariamente pelo usuário        <br>
+·        Nome completo<br>
+·        E-mail<br>
+·        Número de telefone (opcional)<br>
+·        Endereço (para fins de entregas e verificações)<br>
+·        Dados de login (e-mail e senha, sendo a senha<br>
+armazenada por hashing com salt)<br>
+·        Informações de anúncios publicados (fotos,<br>
+descrições, preços, localização aproximada)<br>
+2.2. Dados de pagamento<br>
+Para compras realizadas na<br>
+plataforma, são coletados:<br>
+·        Dados do cartão de crédito<br>
+·        Nome do titular<br>
+·        Código de segurança (CVV)<br>
+·        Data de validade<br>
+Importante:<br>
+<br>
+Os dados de cartão não são armazenados em texto puro. Eles são<br>
+criptografados utilizando AES (criptografia simétrica), e a chave AES é<br>
+protegida com RSA ou método assimétrico equivalente.<br>
+Seguimos boas práticas de<br>
+segurança, porém parte do processamento pode ser delegada a um provedor<br>
+externo de pagamentos (gateway), conforme o caso.<br>
+2.3. Dados coletados<br>
+automaticamente<br>
+·        Endereço IP<br>
+·        Identificador de dispositivo<br>
+·        Informações de navegador e sistema operacional<br>
+·        Logs de eventos críticos (tentativas de login,<br>
+alterações de senha, criação de anúncios, transações)<br>
+3. Finalidades do Tratamento<br>
+de Dados<br>
+Os dados pessoais são<br>
+utilizados para:<br>
+·        Criar e gerenciar contas de usuário<br>
+·        Gerenciar autenticação com Access Tokens e<br>
+Refresh Tokens (JWT)<br>
+·        Permitir a compra e venda de produtos usados<br>
+·        Prevenir fraudes e acessos indevidos<br>
+·        Exibir e organizar anúncios<br>
+·        Processar pagamentos<br>
+·        Cumprir obrigações legais e regulatórias<br>
+·        Melhorar a segurança da plataforma aplicando:<br>
+·        hashing de senhas com salt<br>
+·        criptografia AES/RSA<br>
+·        controle de sessões<br>
+·        logs de auditoria<br>
+ <br>
+ <br>
+ <br>
+4. Bases Legais Utilizadas<br>
+(LGPD)<br>
+O tratamento se fundamenta nas<br>
+seguintes bases legais:<br>
+·        Execução de contrato –<br>
+Art. 7º, V<br>
+·        Cumprimento de obrigação legal –<br>
+Art. 7º, II<br>
+·        Legítimo interesse –<br>
+Art. 7º, IX (segurança, prevenção a fraudes, auditorias)<br>
+·        Consentimento –<br>
+Art. 7º, I (envio de comunicações opcionais)<br>
+5. Segurança e Proteção de<br>
+Dados<br>
+O Desapego utiliza camadas<br>
+avançadas de segurança:<br>
+5.1. Senhas<br>
+·        Armazenadas utilizando hash + salt (ex.:<br>
+bcrypt, Argon2).<br>
+·        Nunca armazenadas ou transmitidas em texto<br>
+puro.<br>
+5.2. Criptografia<br>
+·        Dados sensíveis criptografados com AES<br>
+·        Chaves simétricas protegidas por RSA<br>
+·        Transmissão via HTTPS/TLS atualizado<br>
+·        Tokens assinados com chaves privadas seguras<br>
+5.3. Autenticação e sessões<br>
+·        Acesso com Access Token + Refresh Token<br>
+·        Rotação periódica de tokens<br>
+·        Revogação manual e automática<br>
+·        Invalidação de sessão em caso de atividade<br>
+suspeita<br>
+5.4. Recuperação de senha<br>
+O sistema utiliza<br>
+recuperação de senha por e-mail com token temporário.<br>
+<br>
+A recuperação ocorre somente após autenticação prévia e validações<br>
+internas.<br>
+ <br>
+5.5. Logs e auditoria<br>
+·        Tentativas de login<br>
+·        Alteração de senha<br>
+·        Criação/edição de anúncios<br>
+·        Transações<br>
+·        Atividades administrativas<br>
+Os logs são armazenados para<br>
+segurança, auditoria e cumprimento legal.<br>
+ <br>
+ <br>
+6. Compartilhamento de Dados<br>
+Podemos compartilhar dados<br>
+exclusivamente com:<br>
+·        Processadores de pagamento<br>
+·        Serviços de verificação de identidade<br>
+·        Autoridades legais, mediante requisição<br>
+·        Provedores de hospedagem e segurança<br>
+Não vendemos dados pessoais a<br>
+terceiros.<br>
+7. Direitos do Titular (Art.<br>
+18 da LGPD)<br>
+O usuário pode solicitar:<br>
+·        Confirmação da existência de tratamento<br>
+·        Acesso aos dados<br>
+·        Correção de dados incompletos<br>
+·        Anonimização, bloqueio ou eliminação<br>
+·        Portabilidade<br>
+·        Revogação do consentimento<br>
+·        Informação sobre compartilhamento<br>
+Solicitações podem ser feitas<br>
+pelo canal: privacidade@desapego.com<br>
+ <br>
+8. Armazenamento e Retenção<br>
+Os dados são armazenados<br>
+enquanto:<br>
+·        A conta estiver ativa<br>
+·        Houver necessidade legal ou contratual<br>
+·        Existirem obrigações fiscais e de segurança<br>
+9. Alterações desta Política<br>
+Podemos atualizar esta<br>
+Política a qualquer momento. A data da última atualização estará sempre<br>
+indicada no início do documento.<br>
+10. Contato<br>
+E-mail para dúvidas sobre<br>
+privacidade: privacidade@desapego.com<br>
+Termo de Uso - Desapego<br>
+Última atualização: 21/11/2025<br>
+1. Aceitação dos Termos<br>
+Ao acessar o site Desapego, o<br>
+usuário concorda com o presente Termo de Uso e com a Política de Privacidade<br>
+correspondente.<br>
+2. Funcionalidade da<br>
+Plataforma<br>
+O Desapego é uma plataforma de<br>
+anúncios para compra e venda de produtos usados entre usuários.<br>
+O site oferece:<br>
+·        Cadastro e autenticação segura<br>
+·        Publicação de anúncios<br>
+·        Sistema de mensagens criptografadas entre<br>
+compradores e vendedores<br>
+·        Processamento de pagamentos<br>
+·        Controle de sessões com JWT<br>
+·        Logs de ações críticas<br>
+3. Cadastro e<br>
+Responsabilidades do Usuário<br>
+Para utilizar a plataforma, o<br>
+usuário deve:<br>
+·        Fornecer dados verdadeiros<br>
+·        Manter as credenciais seguras<br>
+·        Não compartilhar sua senha<br>
+·        Ser maior de 18 anos<br>
+·        Respeitar as regras do site<br>
+O usuário é responsável por<br>
+todas as ações executadas em sua conta.<br>
+4. Segurança e Acesso<br>
+4.1. Senhas e autenticação<br>
+·        Senhas são protegidas por hashing e salt<br>
+·        O usuário deve criar uma senha forte<br>
+·        Em caso de suspeita de acesso indevido, o<br>
+usuário deve solicitar o bloqueio da conta<br>
+4.2. Sessões e tokens<br>
+O usuário concorda com a<br>
+utilização de Access Tokens e Refresh Tokens para autenticação,<br>
+inclusive:<br>
+·        Rotação automática de tokens<br>
+·        Revogação instantânea em caso de suspeita<br>
+·        Expiração automática por inatividade<br>
+5. Recuperação e alteração de<br>
+senha<br>
+O Desapego não utiliza<br>
+recuperação de senha por e-mail com token temporário.<br>
+A alteração de senha só<br>
+pode ocorrer mediante:<br>
+·        Autenticação prévia<br>
+·        Validações internas de segurança<br>
+6. Conteúdos proibidos<br>
+É proibido publicar:<br>
+·        Produtos ilegais<br>
+·        Conteúdos ofensivos, discriminatórios ou<br>
+violentos<br>
+·        Informações falsas<br>
+·        Imagens não autorizadas<br>
+·        Dados pessoais de terceiros<br>
+·        Produtos perigosos ou irregulares<br>
+ <br>
+7. Pagamentos<br>
+Ao realizar pagamentos no<br>
+site, o usuário concorda que:<br>
+·        Os dados de cartão de crédito são<br>
+criptografados com AES<br>
+·        A chave simétrica é protegida com RSA<br>
+·        Parte do processamento poderá ser feita por<br>
+serviços externos<br>
+·        A plataforma não armazena dados de cartão em<br>
+texto puro<br>
+8. Limitação de<br>
+Responsabilidade<br>
+O Desapego não é responsável<br>
+por:<br>
+·        Conteúdos publicados por usuários<br>
+·        Danos causados por mau uso da plataforma<br>
+·        Negociações feitas fora do site<br>
+·        Perdas decorrentes de falhas externas, como<br>
+gateways de pagamento ou provedores de internet<br>
+9. Suspensão ou exclusão de<br>
+conta<br>
+A plataforma pode suspender ou<br>
+excluir contas que:<br>
+·        violem o Termo de Uso<br>
+·        realizem fraude<br>
+·        publiquem anúncios indevidos<br>
+·        tentem burlar sistemas de segurança<br>
+10. Encerramento<br>
+O usuário pode excluir sua<br>
+conta a qualquer momento.<br>
+<br>
+A exclusão será feita conforme regras da LGPD (anonimização ou eliminação).<br>
+11. Alteração dos Termos<br>
+O Desapego pode modificar<br>
+estes termos a qualquer momento.<br>
+<br>
+A data da última alteração estará sempre atualizada neste documento.<br>
+12. Contato<br>
+E-mail de suporte geral: suporte@desapego.com
+</div>
+            
+                </p>
+
+            </div>
+    <a th:href="@{/clientes/cadastro}" class="voltar">Voltar</a>
+        </div>
+
+    </body>
+</html>

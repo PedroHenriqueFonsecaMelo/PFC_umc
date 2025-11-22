@@ -4,8 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bem-vindo</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #0c0b0bff;
+            
+        }
 
-    <link rel="stylesheet" th:href="@{/styles/styles.css}">
+        header {
+            background-color: #030508ff;
+            padding: 15px;
+            color: white;
+            text-align: center;
+            font-size: 22px;
+            
+        }
+
+        .container {
+            width: 85%;
+            margin: auto;
+            margin-top: 25px;
+            margin-bottom: 40px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+       
+
+  
+
+        .login {
+            margin-top: 25px;
+            display: inline-block;
+            padding: 10px 18px;
+            background-color: #030405ff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .voltar:hover {
+            background-color: #525457ff;
+        }
+
+    </style>
+   
   </head>
 
   <body>
@@ -18,7 +65,7 @@
       </div>
 
       <div class="form-actions-main">
-        <a th:href="@{/clientes/login}" class="btn btn-primary">
+        <a th:href="@{/clientes/login}" class="login">
           Ir para Login
         </a>
       </div>
