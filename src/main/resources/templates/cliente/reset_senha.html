@@ -33,6 +33,12 @@
                         th:field="*{novaSenha}"
                         placeholder="Digite a nova senha" required>
                 </div>
+                <div class="form-group">
+                    <label for="confirmarSenha">Confirmar nova senha</label>
+                    <input type="password" id="confirmarSenha"
+                        th:field="*{confirmarSenha}"
+                        placeholder="Confirme a nova senha" required>
+                </div>
 
                 <div class="form-actions-main">
                     <button type="submit" class="btn btn-primary">Alterar
