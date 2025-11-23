@@ -39,6 +39,13 @@ h1 {
   color: var(--cor-preto);
   font-weight: 700;
 }
+.termos-scroll {
+  overflow-y: auto;
+  max-height: 50vh; /* controla o tamanho da área do scroll */
+  padding-right: 10px;
+  border: 1px solid #ddd;
+  margin: 10px 0;
+}
 
 h2 {
   color: var(--cor-preto);
