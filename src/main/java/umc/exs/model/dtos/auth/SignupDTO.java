@@ -5,42 +5,50 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import umc.exs.model.dtos.interfaces.ClienteConvertible;
-import umc.exs.model.entidades.usuario.Cliente;
 
+// Importações de ClienteConvertible e Cliente removidas.
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class SignupDTO implements ClienteConvertible {
+public class SignupDTO { // Não implementa mais ClienteConvertible
 
     @NotBlank(message = "CPF é obrigatório")
     private String cpf;
+    
     @NotBlank(message = "Email é obrigatório")
     private String email;
-    private String senha;
+    
+    // Senha não precisa de @NotBlank se você for validar o comprimento/complexidade
+    private String senha; 
     private String nome;
     private String datanasc;
     private String gen;
     private Boolean termsAccepted;
     private Boolean privacyAccepted;
 
-    @Override
-    public Cliente toEntity() {
-        Cliente c = new Cliente();
-        c.setCpf(cpf);
-        c.setEmail(email);
-        c.setSenha(senha);
-        c.setNome(nome);
-        c.setDatanasc(datanasc);
-        c.setGen(gen);
-        return c;
-    }
+    /** 
+     * @return String
+     */
+    // O método toEntity() foi removido daqui e será movido para o Mapper (veja abaixo).
+    // O DTO deve ser apenas um contêiner de dados.
 
     @Override
     public String toString() {
-        return "SignupDTO [cpf=" + cpf + ", email=" + email + ", nome=" + nome + ", datanasc=" + datanasc + ", gen="
-                + gen + ", termsAccepted=" + termsAccepted + ", privacyAccepted=" + privacyAccepted + "]";
+        StringBuilder sb = new StringBuilder();
+        sb.append("SignupDTO{");
+        sb.append("cpf=").append(cpf);
+        sb.append(", email=").append(email);
+        sb.append(", senha=").append(senha);
+        sb.append(", nome=").append(nome);
+        sb.append(", datanasc=").append(datanasc);
+        sb.append(", gen=").append(gen);
+        sb.append(", termsAccepted=").append(termsAccepted);
+        sb.append(", privacyAccepted=").append(privacyAccepted);
+        sb.append('}');
+        return sb.toString();
     }
+
+   
 }

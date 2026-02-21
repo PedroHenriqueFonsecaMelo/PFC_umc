@@ -1,25 +1,67 @@
 <!DOCTYPE html>
-<html  xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>login</title>
-</head>
-<body>
-    <h1>Login do Cliente</h1>
-    <form th:action="@{/clientes/login}" method="post">
-        <div>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <div>
-            <label for="senha">Senha:</label>
-            <input type="password" id="senha" name="senha" required>
-        </div>
-        <div>
-            <button type="submit">Entrar</button>
-        </div>
-    </form>
-    
-</body>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login do Cliente</title>
+        <!-- Link para o seu arquivo de estilos -->
+        <link rel="stylesheet" th:href="@{/cliente/styles.css}" />
+    </head>
+    <body>
+
+        <!-- O .container é a div principal que cria o "card" branco -->
+        <div class="container">
+
+            <div class="page-header">
+                <h1>Login do Cliente</h1>
+            </div>
+
+            <!-- Adicionei mensagens comuns de login que usam as classes de CSS existentes -->
+            <div th:if="${param.error}" class="mensagem erro">
+                Email ou senha inválidos.
+            </div>
+            <div th:if="${param.logout}" class="mensagem sucesso">
+                Você saiu com sucesso.
+            </div>
+
+            <form th:action="@{/clientes/login}" method="post">
+
+                <!-- 
+              Usando 'form-group-2' do seu CSS, 
+              pois ele tem a cor de label escura (para fundo branco) 
+            -->
+                <div class="form-group-2">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group-2">
+                    <label for="senha">Senha:</label>
+                    <input type="password" id="senha" name="senha" required>
+                </div>
+
+                <!-- Botão de Ação -->
+                <div class="form-actions-main">
+                    <button type="submit"
+                        class="btn btn-primary">Entrar</button>
+                </div>
+
+            </form>
+
+            <hr />
+
+            <!-- Link para cadastro, usando classes existentes -->
+            <div class="account-links">
+                <a th:href="@{/clientes/cadastro}"
+                    class="btn-link-secondary">Não tem conta? Cadastre-se</a>
+            </div>
+
+            <!-- Link para cadastro, usando classes existentes -->
+            <div class="account-links">
+                <a th:href="@{/clientes/recuperar-senha}"
+                    class="btn-link-secondary">Esqueceu a senha ?</a>
+            </div>
+
+        </div> <!-- Fim .container -->
+    </body>
 </html>

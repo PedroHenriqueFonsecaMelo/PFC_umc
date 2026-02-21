@@ -3,3 +3,14 @@
 /logs
 /logs/application.log
 /logs/*
+/docker-compose.yml
+/.env
+/.env.local
+/.env.example
+/.env.production
+/.env.test
+/.idea
+*.iml
+/out
+user.db
+/user.db

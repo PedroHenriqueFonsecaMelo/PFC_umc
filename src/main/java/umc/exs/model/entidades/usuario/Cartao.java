@@ -1,7 +1,6 @@
 package umc.exs.model.entidades.usuario;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -10,117 +9,39 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Data // Inclui @Getter, @Setter, @ToString, @RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(of = "id") // Usa apenas o ID para comparação
 public class Cartao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String numero;
 
     @Column
     private String bandeira;
 
-    @Column
+    @Column(nullable = false)
     private String nomeTitular;
 
     @Column
     private String validade;
 
-    @Column
-    private String cvv;
+    @Column(nullable = false)
+    private String cpfTitular;
 
-    @Column
-    private boolean preferencial;
-
+    // MappedBy indica que a relação é gerenciada pelo campo 'cartoes' na classe Cliente
     @ManyToMany(mappedBy = "cartoes")
     private Set<Cliente> clientes = new HashSet<>();
 
-    // Getters e setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNumero() {
-        return numero;
-    }
-
-    public void setNumero(String numero) {
-        this.numero = numero;
-    }
-
-    public String getBandeira() {
-        return bandeira;
-    }
-
-    public void setBandeira(String bandeira) {
-        this.bandeira = bandeira;
-    }
-
-    public String getNomeTitular() {
-        return nomeTitular;
-    }
-
-    public void setNomeTitular(String nomeTitular) {
-        this.nomeTitular = nomeTitular;
-    }
-
-    public String getValidade() {
-        return validade;
-    }
-
-    public void setValidade(String validade) {
-        this.validade = validade;
-    }
-
-    public String getCvv() {
-        return cvv;
-    }
-
-    public void setCvv(String cvv) {
-        this.cvv = cvv;
-    }
-
-    public boolean isPreferencial() {
-        return preferencial;
-    }
-
-    public void setPreferencial(boolean preferencial) {
-        this.preferencial = preferencial;
-    }
-
-    public Set<Cliente> getClientes() {
-        return clientes;
-    }
-
-    public void setClientes(Set<Cliente> clientes) {
-        this.clientes = clientes;
-    }
-
-    public void addCliente(Cliente cliente) {
-        this.clientes.add(cliente);
-        cliente.getCartoes().add(this);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null || getClass() != obj.getClass())
-            return false;
-        Cartao other = (Cartao) obj;
-        return Objects.equals(id, other.id);
-    }
 }
