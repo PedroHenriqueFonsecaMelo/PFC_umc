@@ -1,54 +1,61 @@
 package umc.exs.model.dtos.auth;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// Importações de ClienteConvertible e Cliente removidas.
-
+/**
+ * DTO para captura de dados no registro de novos clientes.
+ * Focado apenas no transporte e validação básica de campos.
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class SignupDTO { // Não implementa mais ClienteConvertible
+public class SignupDTO {
 
-    @NotBlank(message = "CPF é obrigatório")
+    @NotBlank(message = "O CPF é obrigatório.")
+    @Pattern(regexp = "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", message = "Formato de CPF inválido (000.000.000-00).")
     private String cpf;
     
-    @NotBlank(message = "Email é obrigatório")
+    @NotBlank(message = "O e-mail é obrigatório.")
+    @Email(message = "Por favor, insira um e-mail válido.")
     private String email;
     
-    // Senha não precisa de @NotBlank se você for validar o comprimento/complexidade
+    @NotBlank(message = "A senha é obrigatória.")
+    @Size(min = 8, message = "A senha deve ter no mínimo 8 caracteres.")
     private String senha; 
+
+    @NotBlank(message = "O nome é obrigatório.")
+    @Size(min = 3, max = 100, message = "O nome deve ter entre 3 e 100 caracteres.")
     private String nome;
+
+    @NotBlank(message = "A data de nascimento é obrigatória.")
     private String datanasc;
+
+    @NotBlank(message = "O gênero deve ser informado.")
     private String gen;
+
+    // Nota: A validação de 'true' para estes campos geralmente é feita no Controller
+    // para permitir que o usuário receba uma mensagem específica de erro.
     private Boolean termsAccepted;
     private Boolean privacyAccepted;
 
-    /** 
-     * @return String
-     */
-    // O método toEntity() foi removido daqui e será movido para o Mapper (veja abaixo).
-    // O DTO deve ser apenas um contêiner de dados.
-
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("SignupDTO{");
-        sb.append("cpf=").append(cpf);
-        sb.append(", email=").append(email);
-        sb.append(", senha=").append(senha);
-        sb.append(", nome=").append(nome);
-        sb.append(", datanasc=").append(datanasc);
-        sb.append(", gen=").append(gen);
-        sb.append(", termsAccepted=").append(termsAccepted);
-        sb.append(", privacyAccepted=").append(privacyAccepted);
-        sb.append('}');
-        return sb.toString();
+        return "SignupDTO{" +
+                "cpf='" + cpf + '\'' +
+                ", email='" + email + '\'' +
+                ", nome='" + nome + '\'' +
+                ", datanasc='" + datanasc + '\'' +
+                ", gen='" + gen + '\'' +
+                ", termsAccepted=" + termsAccepted +
+                ", privacyAccepted=" + privacyAccepted +
+                '}';
     }
-
-   
 }

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Carteira de Tokens | PFC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen font-sans">
+
+    <nav class="bg-indigo-700 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold italic">TOKEN-SYSTEM <span class="text-xs font-light">PFC v1.0</span></h1>
+            <div class="flex items-center gap-4">
+                <span id="displayNome" class="font-medium">Carregando...</span>
+                <button onclick="logout()" class="text-sm bg-indigo-800 px-3 py-1 rounded hover:bg-red-600 transition">Sair</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <div class="glass-card p-8 rounded-2xl shadow-xl flex flex-col justify-center items-center text-center">
+                <div class="bg-indigo-100 p-4 rounded-full mb-4">
+                    <i class="fa-solid fa-wallet text-4xl text-indigo-600"></i>
+                </div>
+                <h2 class="text-gray-500 uppercase tracking-widest text-sm font-bold">Saldo Disponível</h2>
+                <div class="flex items-baseline gap-2 mt-2">
+                    <span class="text-2xl font-bold text-indigo-600">T$</span>
+                    <span id="displaySaldo" class="text-6xl font-black text-slate-800">0.00</span>
+                </div>
+                <p class="mt-4 text-gray-400 text-xs italic">* Tokens podem ser usados em todo o ecossistema do projeto.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
+                <h3 class="text-xl font-bold mb-6 text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-cart-shopping text-indigo-600"></i> Recarregar Carteira
+                </h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Quantidade de Tokens</label>
+                        <input type="number" id="valorTokens" placeholder="Ex: 50.00" 
+                               class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Cartão de Crédito</label>
+                        <div class="relative">
+                            <input type="text" id="numeroCartao" placeholder="0000 0000 0000 0000" 
+                                   class="w-full p-3 pl-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                            <i class="fa-solid fa-credit-card absolute left-3 top-4 text-gray-400"></i>
+                        </div>
+                    </div>
+
+                    <button id="btnComprar" onclick="efetuarCompra()" 
+                            class="w-full bg-indigo-600 text-white font-bold py-4 rounded-lg hover:bg-indigo-700 transition shadow-lg flex justify-center items-center gap-2">
+                        Confirmar Compra
+                    </button>
+                </div>
+                
+                <div id="feedback" class="mt-4 text-center text-sm font-medium hidden"></div>
+            </div>
+
+        </div>
+    </main>
+
+    
+
+    <script th:src="@{/cliente/script.js}"></script>
+    <script th:src="@{/cliente/wallet.js}"></script>
+</body>
+</html>

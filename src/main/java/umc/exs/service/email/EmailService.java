@@ -1,4 +1,4 @@
-package umc.exs.service;
+package umc.exs.service.email;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;

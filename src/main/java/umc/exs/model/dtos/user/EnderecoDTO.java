@@ -1,18 +1,11 @@
 package umc.exs.model.dtos.user;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import umc.exs.model.dtos.interfaces.EnderecoConvertible;
-import umc.exs.model.entidades.usuario.Endereco;
-import umc.exs.model.daos.mappers.EnderecoMapper; // Importado para delegação
+import lombok.*;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-public class EnderecoDTO implements EnderecoConvertible {
+public class EnderecoDTO {
     
     private Long id;
     private String rua;
@@ -24,21 +17,4 @@ public class EnderecoDTO implements EnderecoConvertible {
     private String pais;
     private String complemento;
     private String tipoResidencia;
-
-    // O DTO delega a conversão ao Mapper
-    /** 
-     * @return Endereco
-     */
-    @Override
-    public Endereco toEntity() {
-        return EnderecoMapper.toEntity(this);
-    }
-    /** 
-     * @param endereco
-     * @return EnderecoDTO
-     */
-    @Override
-    public EnderecoDTO fromEntity (Endereco endereco){
-        return EnderecoMapper.fromEntity(endereco);
-    }
 }

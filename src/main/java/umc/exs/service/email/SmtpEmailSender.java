@@ -1,4 +1,4 @@
-package umc.exs.service;
+package umc.exs.service.email;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;

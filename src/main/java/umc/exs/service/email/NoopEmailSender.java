@@ -1,4 +1,4 @@
-package umc.exs.service;
+package umc.exs.service.email;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

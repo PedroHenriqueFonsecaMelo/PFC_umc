@@ -10,38 +10,41 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
-@Data // Inclui @Getter, @Setter, @ToString, @RequiredArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-@EqualsAndHashCode(of = "id") // Usa apenas o ID para comparação
+@AllArgsConstructor
+@EqualsAndHashCode(of = "id")
+@ToString(exclude = "clientes")
 public class Cartao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String numero;
 
-    @Column
+    @Column(nullable = false)
     private String bandeira;
 
     @Column(nullable = false)
     private String nomeTitular;
 
-    @Column
+    @Column(nullable = false)
     private String validade;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 14)
     private String cpfTitular;
 
-    // MappedBy indica que a relação é gerenciada pelo campo 'cartoes' na classe Cliente
+    // Lado inverso da relação Many-to-Many
     @ManyToMany(mappedBy = "cartoes")
     private Set<Cliente> clientes = new HashSet<>();
-
 }

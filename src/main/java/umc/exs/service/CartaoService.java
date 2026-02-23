@@ -1,11 +1,9 @@
 package umc.exs.service;
 
 import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import lombok.RequiredArgsConstructor;
 import umc.exs.model.daos.mappers.CartaoMapper;
 import umc.exs.model.daos.repository.CartaoRepository;
 import umc.exs.model.dtos.user.CartaoDTO;
@@ -13,37 +11,52 @@ import umc.exs.model.entidades.usuario.Cartao;
 import umc.exs.model.entidades.usuario.Cliente;
 
 @Service
+@RequiredArgsConstructor
 public class CartaoService {
 
-    @Autowired
-    private CartaoRepository cartaoRepository;
+    private final CartaoRepository cartaoRepository;
+    private final CartaoMapper cartaoMapper; // Injetado
 
     @Transactional
     public Cartao saveOrReuseCartao(CartaoDTO dto) {
-        String validadeStr = CartaoMapper.yearMonthToString(dto.getValidade());
+        // CORREÇÃO: Usando o nome do método definido no Mapper
+        String validadeStr = cartaoMapper.toValidadeString(dto.getValidade());
+
         Optional<Cartao> cartaoReutilizado = cartaoRepository.findByValueFields(
-                dto.getNumero(), dto.getNomeTitular(), validadeStr, dto.getBandeira(), dto.getCpfTitular());
+                dto.getNumero(),
+                dto.getNomeTitular(),
+                validadeStr,
+                dto.getBandeira(),
+                dto.getCpfTitular());
 
         if (cartaoReutilizado.isPresent()) {
             return cartaoReutilizado.get();
         }
 
-        Cartao cartao = CartaoMapper.toEntity(dto);
+        Cartao cartao = cartaoMapper.toEntity(dto);
         return cartaoRepository.save(cartao);
     }
 
     @Transactional
     public void deletarCartaoDoCliente(Cliente cliente, Long cartaoId) {
-        Cartao cartao = cliente.getCartoes().stream()
-                .filter(c -> c.getId().equals(cartaoId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Cartão não encontrado ou não pertence ao cliente."));
+        Cartao cartaoParaRemover = null;
 
-        cliente.getCartoes().remove(cartao);
-        cartao.getClientes().remove(cliente);
+        for (Cartao c : cliente.getCartoes()) {
+            if (c.getId().equals(cartaoId)) {
+                cartaoParaRemover = c;
+                break;
+            }
+        }
 
-        if (cartao.getClientes().isEmpty()) {
-            cartaoRepository.delete(cartao);
+        if (cartaoParaRemover == null) {
+            throw new IllegalArgumentException("Cartão não encontrado ou não pertence ao cliente.");
+        }
+
+        cliente.getCartoes().remove(cartaoParaRemover);
+        cartaoParaRemover.getClientes().remove(cliente);
+
+        if (cartaoParaRemover.getClientes().isEmpty()) {
+            cartaoRepository.delete(cartaoParaRemover);
         }
     }
 }

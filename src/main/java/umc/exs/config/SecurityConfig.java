@@ -25,15 +25,17 @@ public class SecurityConfig {
     @Value("${app.allowed-origin:http://localhost:5173}")
     private String allowedOrigin;
 
+    /**
+     * Configuração de CORS para permitir que o Frontend (ex: React/Vue ou o próprio navegador)
+     * consiga enviar cookies e headers para este servidor.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
         CorsConfiguration cfg = new CorsConfiguration();
         cfg.setAllowedOrigins(List.of(allowedOrigin));
-        cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
-        cfg.setAllowCredentials(true);
-
+        cfg.setAllowCredentials(true); // Obrigatório para cookies JWT funcionarem
         cfg.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -41,24 +43,42 @@ public class SecurityConfig {
         return source;
     }
 
+    /**
+     * Define a corrente de filtros de segurança e as permissões de URL.
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtRequestFilter jwtRequestFilter) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .csrf(csrf -> csrf.disable()) // Desabilitado para uso de Tokens JWT
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Não cria sessão no servidor
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/index", "/home", "/auth/**", "/debug", "/clientes/**", "/login", "/error").permitAll()
-                .requestMatchers("/css/**", "/js/**", "/images/**","/cliente/**", "/index/**", "/favicon.io/**").permitAll()
+                // ROTAS PÚBLICAS: Acesso livre para qualquer um
+                .requestMatchers("/", "/index", "/home", "/error", "/favicon.ico").permitAll()
+                .requestMatchers("/clientes/login", "/clientes/novo-cadastro").permitAll() 
+                .requestMatchers("/auth/**", "/debug").permitAll()
+                
+                // RECURSOS ESTÁTICOS: CSS, JS e Imagens devem ser públicos
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.io/**", "/cliente/**").permitAll()
+                .requestMatchers("/clientes/tokens").permitAll() // Permite carregar o HTML
+                
+                // ROTAS PRIVADAS: Somente usuários com JWT válido entram aqui
+                .requestMatchers("/clientes/meu-perfil").authenticated()
+                .requestMatchers("/clientes/sair").authenticated()
+                
+                // QUALQUER OUTRA ROTA: Exige autenticação por padrão
                 .anyRequest().authenticated()
             );
 
+        // Insere o filtro JWT antes do filtro de autenticação padrão do Spring
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+        // Algoritmo de Hashing para senhas (BCrypt é o padrão da indústria)
         return new BCryptPasswordEncoder();
     }
 
