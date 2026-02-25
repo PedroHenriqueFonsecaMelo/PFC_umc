@@ -1,146 +1,93 @@
-// Simulação de um "Estado Global" na página
-let userState = {
-    saldo: 0.0,
-    nome: ""
-};
+let userState = { saldo: 0.0, nome: "" };
 
-// 1. Função para carregar dados do perfil (incluindo o saldo inicial)
+// Ao carregar a página
+document.addEventListener("DOMContentLoaded", () => {
+    loadUserProfile();
+    carregarHistorico();
+
+    const metodoSelect = document.getElementById('metodoPagamento');
+    const sectionCartao = document.getElementById('sectionCartao');
+
+    // Alternar campos de cartão
+    metodoSelect.addEventListener('change', (e) => {
+        sectionCartao.classList.toggle('hidden', e.target.value === 'PIX');
+    });
+
+    // Interceptar envio do formulário
+    document.getElementById('formCompra').addEventListener('submit', efetuarCompra);
+});
+
 async function loadUserProfile() {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
     try {
-        const response = await fetch('https://localhost:8443/clientes/meu-perfil', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
+        const response = await fetch('/clientes/meu-perfil'); // Ajustado para rota relativa
         if (response.ok) {
             const data = await response.json();
             userState.saldo = data.saldoTokens || 0.0;
             userState.nome = data.nome;
-            updateUI(); // Atualiza o HTML
+            updateUI();
         }
-    } catch (error) {
-        console.error("Erro ao carregar perfil:", error);
-    }
-}
-
-// 2. Função de Compra (conecta com o Controller que criámos)
-async function efetuarCompra() {
-    const valorInput = document.getElementById('valorTokens').value;
-    const cartaoInput = document.getElementById('numeroCartao').value;
-    const token = localStorage.getItem('token');
-
-    if (!valorInput || valorInput <= 0) {
-        alert("Insira um valor válido.");
-        return;
-    }
-
-    // Feedback visual de "A processar..."
-    const btn = document.getElementById('btnComprar');
-    btn.innerText = "A processar pagamento...";
-    btn.disabled = true;
-
-    try {
-        const response = await fetch('https://localhost:8443/clientes/tokens/comprar', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                valor: parseFloat(valorInput),
-                numeroCartao: cartaoInput
-            })
-        });
-
-        if (response.ok) {
-            const clienteAtualizado = await response.json();
-            
-            // ATUALIZAÇÃO DO ESTADO: O ponto mais importante
-            userState.saldo = clienteAtualizado.saldoTokens;
-            
-            alert("Compra realizada com sucesso!");
-            updateUI(); // Reflete o novo saldo no ecrã imediatamente
-        } else {
-            const msg = await response.text();
-            alert("Falha: " + msg);
-        }
-    } catch (error) {
-        alert("Erro de conexão com o servidor.");
-    } finally {
-        btn.innerText = "Confirmar Compra";
-        btn.disabled = false;
-    }
-}
-
-// 3. Função que manipula o DOM (HTML)
-function updateUI() {
-    document.getElementById('displaySaldo').innerText = userState.saldo.toFixed(2);
-    document.getElementById('displayNome').innerText = userState.nome;
-}
-
-// Inicialização ao carregar a página
-window.onload = loadUserProfile;
-
-let metodoSelecionado = 'CARTAO'; // Padrão
-
-document.addEventListener("DOMContentLoaded", () => {
-    verificarCartao();
-
-    // Seleção de Método
-    document.getElementById('btnSelectCartao').addEventListener('click', () => {
-        metodoSelecionado = 'CARTAO';
-        document.getElementById('sectionCartao').classList.remove('hidden');
-        document.getElementById('msgPix').classList.add('hidden');
-    });
-
-    document.getElementById('btnSelectPix').addEventListener('click', () => {
-        metodoSelecionado = 'PIX';
-        document.getElementById('sectionCartao').classList.add('hidden');
-        document.getElementById('msgPix').classList.remove('hidden');
-    });
-
-    document.getElementById('formCompra').addEventListener('submit', efetuarCompra);
-});
-
-async function verificarCartao() {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/clientes/meu-perfil/tem-cartao', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const temCartao = await res.json();
-
-    if (!temCartao) {
-        alert("Atenção: Você não possui cartões cadastrados. Use PIX ou cadastre um cartão no perfil.");
-        document.getElementById('btnSelectCartao').disabled = true;
-    }
+    } catch (error) { console.error("Erro ao carregar perfil:", error); }
 }
 
 async function efetuarCompra(e) {
     e.preventDefault();
-    const token = localStorage.getItem('token');
+    const btn = document.getElementById('btnComprar');
+    const valor = document.getElementById('valor').value;
+    const metodo = document.getElementById('metodoPagamento').value;
+    const cartao = document.getElementById('numCartao').value;
 
-    const payload = {
-        valor: parseFloat(document.getElementById('valor').value),
-        metodoPagamento: metodoSelecionado,
-        numeroCartao: metodoSelecionado === 'CARTAO' ? document.getElementById('numCartao').value : null
-    };
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin"></i> Processando...';
 
-    const res = await fetch('/clientes/tokens/comprar', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-    });
+    try {
+        const response = await fetch('/clientes/tokens/comprar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                valor: parseFloat(valor),
+                metodoPagamento: metodo,
+                numeroCartao: metodo === 'CARTAO' ? cartao : null
+            })
+        });
 
-    if (res.ok) {
-        alert("Compra registrada com sucesso!");
-        location.reload();
-    } else {
-        const erro = await res.text();
-        alert("Erro: " + erro);
+        if (response.ok) {
+            const data = await response.json();
+            userState.saldo = data.saldoTokens;
+            updateUI();
+            carregarHistorico(); // Atualiza a tabela imediatamente
+            alert("Sucesso! Seus tokens já estão disponíveis.");
+            e.target.reset();
+        } else {
+            const erro = await response.text();
+            alert("Erro no pagamento: " + erro);
+        }
+    } catch (error) {
+        alert("Erro técnico de conexão.");
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "Confirmar Compra";
     }
+}
+
+async function carregarHistorico() {
+    const tbody = document.getElementById('lista-transacoes');
+    try {
+        const res = await fetch('/clientes/tokens/historico');
+        if (res.ok) {
+            const transacoes = await res.json();
+            tbody.innerHTML = transacoes.map(t => `
+                <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+                    <td class="p-4">${new Date(t.dataHora).toLocaleString('pt-BR')}</td>
+                    <td class="p-4 font-bold text-indigo-600">T$ ${t.valor.toFixed(2)}</td>
+                    <td class="p-4"><span class="px-2 py-1 bg-slate-100 rounded text-xs">${t.metodoPagamento}</span></td>
+                    <td class="p-4 text-xs text-gray-400">${t.finalCartao ? 'Final ****' + t.finalCartao : '-'}</td>
+                </tr>
+            `).join('');
+        }
+    } catch (e) { console.error("Erro histórico:", e); }
+}
+
+function updateUI() {
+    document.getElementById('displaySaldo').innerText = userState.saldo.toFixed(2);
+    document.getElementById('displayNome').innerText = userState.nome;
 }

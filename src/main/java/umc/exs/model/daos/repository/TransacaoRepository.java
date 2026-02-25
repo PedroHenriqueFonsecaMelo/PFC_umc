@@ -5,10 +5,12 @@
 
 package umc.exs.model.daos.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import umc.exs.model.entidades.foundation.Transacao;
 
 public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
-
+    List<Transacao> findByClienteIdOrderByDataHoraDesc(Long clienteId);
 }

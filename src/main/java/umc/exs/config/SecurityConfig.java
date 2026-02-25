@@ -25,17 +25,13 @@ public class SecurityConfig {
     @Value("${app.allowed-origin:http://localhost:5173}")
     private String allowedOrigin;
 
-    /**
-     * Configuração de CORS para permitir que o Frontend (ex: React/Vue ou o próprio navegador)
-     * consiga enviar cookies e headers para este servidor.
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
         cfg.setAllowedOrigins(List.of(allowedOrigin));
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
-        cfg.setAllowCredentials(true); // Obrigatório para cookies JWT funcionarem
+        cfg.setAllowCredentials(true);
         cfg.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -43,34 +39,44 @@ public class SecurityConfig {
         return source;
     }
 
-    /**
-     * Define a corrente de filtros de segurança e as permissões de URL.
-     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtRequestFilter jwtRequestFilter) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable()) // Desabilitado para uso de Tokens JWT
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Não cria sessão no servidor
+            .csrf(csrf -> csrf.disable()) 
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) 
             .authorizeHttpRequests(auth -> auth
-                // ROTAS PÚBLICAS: Acesso livre para qualquer um
+                // ROTAS PÚBLICAS GERAIS
                 .requestMatchers("/", "/index", "/home", "/error", "/favicon.ico").permitAll()
+                
+                // LOGIN E CADASTRO
                 .requestMatchers("/clientes/login", "/clientes/novo-cadastro").permitAll() 
+                
+                // RECURSOS ESTÁTICOS
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/cliente/**").permitAll()
+
+                // --- CORREÇÃO AQUI: ROTAS DE RECUPERAÇÃO DE SENHA ---
+                // Precisam ser permitAll porque o usuário não está autenticado ao usá-las
+                .requestMatchers("/clientes/recuperar-senha/**").permitAll()
+                .requestMatchers("/clientes/reset-senha/**").permitAll()
+                .requestMatchers("/clientes/alterar-senha/**").permitAll()
+                
+                // TOKEN E CARTEIRA (Libera a página, mas o POST /comprar exige login)
+                .requestMatchers("/clientes/tokens").permitAll() 
+                
+                // DEBUG E AUTH REST
                 .requestMatchers("/auth/**", "/debug").permitAll()
                 
-                // RECURSOS ESTÁTICOS: CSS, JS e Imagens devem ser públicos
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.io/**", "/cliente/**").permitAll()
-                .requestMatchers("/clientes/tokens").permitAll() // Permite carregar o HTML
-                
-                // ROTAS PRIVADAS: Somente usuários com JWT válido entram aqui
-                .requestMatchers("/clientes/meu-perfil").authenticated()
+                // ROTAS PRIVADAS
+                .requestMatchers("/clientes/meu-perfil", "/clientes/meu-perfil-json").authenticated()
                 .requestMatchers("/clientes/sair").authenticated()
+                .requestMatchers("/clientes/tokens/comprar").authenticated()
+                .requestMatchers("/clientes/tokens/historico").authenticated()
                 
-                // QUALQUER OUTRA ROTA: Exige autenticação por padrão
+                // QUALQUER OUTRA ROTA
                 .anyRequest().authenticated()
             );
 
-        // Insere o filtro JWT antes do filtro de autenticação padrão do Spring
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
@@ -78,7 +84,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Algoritmo de Hashing para senhas (BCrypt é o padrão da indústria)
         return new BCryptPasswordEncoder();
     }
 

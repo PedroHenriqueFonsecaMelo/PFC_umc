@@ -12,29 +12,29 @@ import jakarta.servlet.http.HttpServletRequest;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public String handleValidationExceptions(IllegalArgumentException ex,
-                                             HttpServletRequest request,
-                                             RedirectAttributes redirectAttributes) {
+    public String handleIllegalArgument(IllegalArgumentException ex,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
 
-        System.err.println("Erro de Validação/Argumento no Serviço: " + ex.getMessage());
+        // Log básico (Considere usar um Logger SLF4J no futuro)
+        System.err.println("Erro de Regra de Negócio: " + ex.getMessage());
+
         redirectAttributes.addFlashAttribute("erro", ex.getMessage());
 
         String referer = request.getHeader("Referer");
-        if (referer != null && !referer.isEmpty()) {
-            if (referer.contains("/clientes/login")) {
-                 return "redirect:/clientes/login";
-            }
-            return "redirect:" + referer;
+        if (referer != null && referer.contains("/clientes/login")) {
+            return "redirect:/clientes/login";
         }
 
-        return "redirect:/clientes/homepage";
+        return (referer != null) ? "redirect:" + referer : "redirect:/";
     }
 
     @ExceptionHandler(Exception.class)
-    public ModelAndView handleAllExceptions(HttpServletRequest req, Exception ex) {
+    public ModelAndView handleGenericException(HttpServletRequest req, Exception ex) {
         ModelAndView mav = new ModelAndView("error/500");
-        System.err.println("URL: " + req.getRequestURL() + " | Exceção: " + ex.getMessage());
-        mav.addObject("mensagem", "Não foi possível processar sua requisição.");
+        System.err.println("Erro Crítico em: " + req.getRequestURL() + " -> " + ex.getMessage());
+
+        mav.addObject("mensagem", "Ocorreu um erro interno. Tente novamente mais tarde.");
         mav.addObject("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         return mav;
     }
