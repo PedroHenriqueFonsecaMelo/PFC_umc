@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Vitrine de Livros - Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <nav class="bg-indigo-600 p-4 text-white shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold"><i class="fa-solid fa-store mr-2"></i>Book Market</h1>
+            <div id="saldoUsuario" class="bg-indigo-700 px-4 py-2 rounded-full font-mono">
+                Carregando saldo...
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-6">
+        <div class="mb-8">
+            <h2 class="text-3xl font-extrabold text-gray-800">Livros Disponíveis</h2>
+            <p class="text-gray-600">Encontre ofertas de diferentes vendedores e estados.</p>
+        </div>
+
+        <div id="gridLivros" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            </div>
+    </main>
+
+    <script th:src="@{/produto/vitrine_livros.js}"></script>
+
+</body>
+</html>

@@ -52,8 +52,12 @@ public class SecurityConfig {
                 // LOGIN E CADASTRO
                 .requestMatchers("/clientes/login", "/clientes/novo-cadastro").permitAll() 
                 
+                // PÁGINAS DE VENDER E VITRINE (A página é pública, mas as ações de venda e compra exigem login)
+                .requestMatchers("/vender", "/vitrine").permitAll()
+                
                 // RECURSOS ESTÁTICOS
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/cliente/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
 
                 // --- CORREÇÃO AQUI: ROTAS DE RECUPERAÇÃO DE SENHA ---
                 // Precisam ser permitAll porque o usuário não está autenticado ao usá-las

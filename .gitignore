@@ -14,3 +14,5 @@
 /out
 user.db
 /user.db
+*.log
+*.tmp

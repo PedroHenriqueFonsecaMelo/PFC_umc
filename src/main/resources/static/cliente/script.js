@@ -1,9 +1,9 @@
 /**
- * APP.JS - Lógica Centralizada (Sem JS no HTML)
+ * APP.JS - Lógica Centralizada
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Inicializa componentes de formulários dinâmicos
+    // 1. Inicializa componentes de formulários dinâmicos (Endereços/Cartões)
     initDynamicForms();
 
     // 2. Escuta o formulário de Login
@@ -14,7 +14,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const compraForm = document.getElementById('compraTokensForm');
     if (compraForm) compraForm.addEventListener('submit', handleCompraTokens);
     
-    // 4. Se houver um display de saldo, carrega os dados do usuário
+    // 4. Escuta o botão de Logout
+    const btnLogout = document.getElementById('btnLogout');
+    if (btnLogout) btnLogout.addEventListener('click', logout);
+
+    // 5. Se houver um display de saldo, carrega os dados do usuário logado
     if (document.getElementById('displaySaldo')) {
         carregarDadosUsuario();
     }
@@ -44,13 +48,16 @@ async function handleLogin(event) {
 
         if (response.ok) {
             const data = await response.json();
+            // Salva o token para as próximas requisições
             localStorage.setItem('token', data.token);
-            window.location.href = '/home';
+            // Redireciona para a vitrine (ou home)
+            window.location.href = '/vitrine';
         } else {
             if (msgErro) msgErro.classList.remove('hidden');
         }
     } catch (error) {
         console.error("Erro no login:", error);
+        alert("Erro ao conectar com o servidor.");
     } finally {
         btn.disabled = false;
     }
@@ -58,7 +65,37 @@ async function handleLogin(event) {
 
 function logout() {
     localStorage.removeItem('token');
-    window.location.href = '/login';
+    window.location.href = '/clientes/login';
+}
+
+/* ============================================================
+   LÓGICA DE CARREGAMENTO DE DADOS
+   ============================================================ */
+
+async function carregarDadosUsuario() {
+    const token = localStorage.getItem('token');
+    const displaySaldo = document.getElementById('displaySaldo');
+    
+    if (!token) return;
+
+    try {
+        const response = await fetch('/clientes/meu-perfil-json', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            const cliente = await response.json();
+            if (displaySaldo) displaySaldo.innerText = cliente.saldoTokens.toFixed(2);
+            
+            const welcomeMsg = document.getElementById('welcomeMsg');
+            if (welcomeMsg) welcomeMsg.innerText = `Olá, ${cliente.nome}!`;
+        } else if (response.status === 401) {
+            logout();
+        }
+    } catch (error) {
+        console.error("Erro ao carregar dados do usuário:", error);
+    }
 }
 
 /* ============================================================
@@ -70,14 +107,15 @@ async function handleCompraTokens(event) {
     const token = localStorage.getItem('token');
 
     if (!token) {
-        alert("Sessão expirada ou usuário não logado.");
-        window.location.href = '/login';
+        alert("Sessão expirada. Faça login novamente.");
+        window.location.href = '/clientes/login';
         return;
     }
 
     const payload = {
         valor: parseFloat(document.getElementById('valorTokens').value),
-        numeroCartao: document.getElementById('numeroCartao').value
+        metodoPagamento: document.getElementById('metodoPagamento').value, // Certifique-se que este ID existe no HTML
+        numeroCartao: document.getElementById('numeroCartao')?.value || ""
     };
 
     try {
@@ -92,11 +130,13 @@ async function handleCompraTokens(event) {
 
         if (response.ok) {
             const data = await response.json();
-            alert("Tokens creditados!");
-            document.getElementById('displaySaldo').innerText = data.saldoTokens.toFixed(2);
+            alert("Tokens creditados com sucesso!");
+            if (document.getElementById('displaySaldo')) {
+                document.getElementById('displaySaldo').innerText = data.saldoTokens.toFixed(2);
+            }
         } else {
             const erro = await response.text();
-            alert("Erro: " + erro);
+            alert("Erro no pagamento: " + erro);
         }
     } catch (error) {
         console.error("Falha na compra:", error);
@@ -146,8 +186,7 @@ function adicionarItem(tipo) {
 
     wrapper.innerHTML = tipo === 'enderecos' ? htmlEndereco : htmlCartao;
     
-    // Evento de remoção (Sem JS no HTML)
-    wrapper.querySelector('.btn-remover').addEventListener('click', (e) => {
+    wrapper.querySelector('.btn-remover').addEventListener('click', () => {
         wrapper.remove();
         reorganizarIndices(`#${containerId}`, `.${tipo.slice(0, -1)}-item`, tipo);
     });
@@ -165,6 +204,7 @@ function reorganizarIndices(selectorContainer, itemSelector, arrayName) {
         item.querySelectorAll("[name]").forEach(field => {
             const name = field.getAttribute("name");
             if (!name) return;
+            // Substitui nomeArray[X] por nomeArray[novoIndex]
             const newName = name.replace(new RegExp(arrayName + "\\[[0-9]+\\]"), `${arrayName}[${idx}]`);
             field.setAttribute("name", newName);
         });
