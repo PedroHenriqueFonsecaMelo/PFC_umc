@@ -20,3 +20,4 @@ user.db
 *.jpg
 *.sql
 *.sql.gz
+/uploads
