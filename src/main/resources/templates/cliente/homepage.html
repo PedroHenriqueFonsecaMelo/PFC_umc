@@ -224,11 +224,11 @@
                     <!-- Cartões -->
                     <h2>Histórico</h2>
                     <div class="form-actions-main">
-                        <a th:href ="@{/historico/cliente}" class="btn btn-primary">
+                        <a th:href="@{/historico/cliente}"
+                            class="btn btn-primary">
                             Consultar Histórico </a>
                     </div>
-                     <h2>Atualizar Cadastro</h2>
-
+                    <h2>Atualizar Cadastro</h2>
 
                     <div class="form-actions-main">
                         <button type="submit" class="btn btn-primary">💾
@@ -249,6 +249,7 @@
 
         <!-- script externo -->
         <script th:src="@{/cliente/script.js}"></script>
+        <script th:src="@{/cliente/correioAPI.js}"></script>
 
         <!-- inicializadores de índices (usados pelo script) -->
         <script th:inline="javascript">

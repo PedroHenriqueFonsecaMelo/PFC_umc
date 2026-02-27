@@ -3,117 +3,23 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Vender Livro - Marketplace</title>
+        <title>Vender Livro - Projeto Salt</title>
+
+        <script
+            src="https://unpkg.com/react@18/umd/react.development.js"></script>
+        <script
+            src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
         <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     </head>
     <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
 
-        <div class="max-w-2xl w-full bg-white p-8 rounded-2xl shadow-xl">
-            <div class="flex items-center gap-3 mb-8">
-                <div class="bg-indigo-600 p-3 rounded-lg text-white">
-                    <i class="fa-solid fa-book-open text-2xl"></i>
-                </div>
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Anunciar
-                        Livro</h2>
-                    <p class="text-gray-500">Ganhe tokens vendendo seus livros
-                        usados</p>
-                </div>
-            </div>
+        <div id="root" class="max-w-2xl w-full"></div>
 
-            <form id="formVenda" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-sm font-semibold text-gray-700 mb-1">Título
-                            do Livro</label>
-                        <input type="text" id="titulo"
-                            class="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-                            placeholder="Ex: O Hobbit" required>
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-semibold text-gray-700 mb-1">Autor</label>
-                        <input type="text" id="autor"
-                            class="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-                            placeholder="Ex: J.R.R. Tolkien" required>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-sm font-semibold text-gray-700 mb-1">ISBN
-                            (Opcional)</label>
-                        <input type="text" id="isbn"
-                            class="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-                            placeholder="000-00-0000-000-0">
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-semibold text-gray-700 mb-1">Preço
-                            (Tokens)</label>
-                        <div class="relative">
-                            <span
-                                class="absolute left-3 top-3 text-gray-400">T$</span>
-                            <input type="number" id="precoTokens"
-                                class="w-full border border-gray-300 p-3 pl-10 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-                                placeholder="0.00" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <label
-                        class="block text-sm font-semibold text-gray-700 mb-1">Estado
-                        do Livro</label>
-                    <select id="estado"
-                        class="w-full border border-gray-300 p-3 rounded-xl bg-white focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer">
-                        <option value="NOVO">Novo (Nunca usado)</option>
-                        <option value="OTIMO">Ótimo (Sem marcas
-                            evidentes)</option>
-                        <option value="BOM">Bom (Marcas leves de uso)</option>
-                        <option value="DESGASTADO">Desgastado (Possui
-                            avarias)</option>
-                    </select>
-                    <p class="text-xs text-gray-400 mt-1">* O preço será
-                        avaliado conforme o estado selecionado.</p>
-                </div>
-
-                <div>
-                    <label
-                        class="block text-sm font-semibold text-gray-700 mb-1">Foto
-                        Real do Produto</label>
-                    <div id="dropzone"
-                        class="border-2 border-dashed border-gray-300 p-8 text-center rounded-2xl hover:border-indigo-500 transition cursor-pointer relative">
-                        <input type="file" id="foto" accept="image/*"
-                            class="hidden">
-                        <div id="uploadPlaceholder">
-                            <i
-                                class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-500 mb-3"></i>
-                            <p class="text-gray-600">Clique ou arraste a foto do
-                                livro aqui</p>
-                        </div>
-                        <img id="preview"
-                            class="hidden max-h-48 mx-auto rounded-lg shadow-md border">
-                        <button type="button" id="btnRemove"
-                            class="hidden absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full shadow-lg">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <button type="submit" id="btnSubmit"
-                    class="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2">
-                    <span>Publicar Anúncio</span>
-                    <i class="fa-solid fa-paper-plane"></i>
-                </button>
-            </form>
-        </div>
-
-        <script th:src="@{/produto/venda_livro.js}"></script>
+        <script type="text/babel" th:src="@{/produto/venda_livro.js}"></script>
 
     </body>
 </html>
