@@ -16,3 +16,7 @@ user.db
 /user.db
 *.log
 *.tmp
+*.png
+*.jpg
+*.sql
+*.sql.gz
