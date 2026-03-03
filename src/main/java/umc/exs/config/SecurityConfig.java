@@ -66,7 +66,7 @@ public class SecurityConfig {
                 .requestMatchers("/clientes/alterar-senha/**").permitAll()
                 
                 // TOKEN E CARTEIRA (Libera a página, mas o POST /comprar exige login)
-                .requestMatchers("/clientes/tokens").permitAll() 
+                .requestMatchers("/api/tokens").permitAll() 
                 
                 // DEBUG E AUTH REST
                 .requestMatchers("/auth/**", "/debug").permitAll()
@@ -74,8 +74,8 @@ public class SecurityConfig {
                 // ROTAS PRIVADAS
                 .requestMatchers("/clientes/meu-perfil", "/clientes/meu-perfil-json").authenticated()
                 .requestMatchers("/clientes/sair").authenticated()
-                .requestMatchers("/clientes/tokens/comprar").authenticated()
-                .requestMatchers("/clientes/tokens/historico").authenticated()
+                .requestMatchers("/api/tokens/comprar").authenticated()
+                .requestMatchers("/api/tokens/historico").authenticated()
                 
                 // QUALQUER OUTRA ROTA
                 .anyRequest().authenticated()

@@ -119,7 +119,7 @@ async function handleCompraTokens(event) {
     };
 
     try {
-        const response = await fetch('/clientes/tokens/comprar', {
+        const response = await fetch('/api/tokens/comprar', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

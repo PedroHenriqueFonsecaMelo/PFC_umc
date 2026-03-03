@@ -1,4 +1,4 @@
-package umc.exs.controller;
+package umc.exs.controller.api;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ import umc.exs.service.ClienteService;
  */
 @Slf4j
 @RestController
-@RequestMapping("/clientes/tokens")
+@RequestMapping("/api/tokens")
 @RequiredArgsConstructor
 public class TokenController {
 

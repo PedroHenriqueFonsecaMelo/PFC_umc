@@ -40,7 +40,7 @@ async function efetuarCompra(e) {
     btn.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin"></i> Processando...';
 
     try {
-        const response = await fetch('/clientes/tokens/comprar', {
+        const response = await fetch('/api/tokens/comprar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -72,7 +72,7 @@ async function efetuarCompra(e) {
 async function carregarHistorico() {
     const tbody = document.getElementById('lista-transacoes');
     try {
-        const res = await fetch('/clientes/tokens/historico');
+        const res = await fetch('/api/tokens/historico');
         if (res.ok) {
             const transacoes = await res.json();
             tbody.innerHTML = transacoes.map(t => `
