@@ -30,4 +30,7 @@ public class Transacao {
     private LocalDateTime dataHora;
     private String metodoPagamento; 
     private String finalCartao; 
+
+    private String pagamentoId;
+    private String status;
 }

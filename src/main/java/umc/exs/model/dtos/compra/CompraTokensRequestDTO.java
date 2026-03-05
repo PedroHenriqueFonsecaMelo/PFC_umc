@@ -1,4 +1,4 @@
-package umc.exs.model.dtos.user;
+package umc.exs.model.dtos.compra;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -15,8 +15,16 @@ public class CompraTokensRequestDTO {
     @NotBlank(message = "O método de pagamento deve ser informado.")
     private String metodoPagamento;
 
+    private Long clienteId;
+
+    // Dados de entrada (Cartão)
     private String numeroCartao;
     private String nomeCartao;
     private String cvv;
     private String validade;
+
+    // --- NOVOS CAMPOS PARA RESPOSTA (PIX) ---
+    private String pixCopiaECola;
+    private String qrCodeBase64;
+    private String pagamentoId;
 }

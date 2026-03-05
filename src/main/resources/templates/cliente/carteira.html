@@ -1,130 +1,212 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Carteira de Tokens | PFC</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Minha Carteira de Tokens | PFC</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <style>
         .glass-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
+        /* Estética suave para o scroll da tabela */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 10px; }
     </style>
-</head>
-<body class="bg-slate-100 min-h-screen font-sans">
+    </head>
+    <body class="bg-slate-100 min-h-screen font-sans">
 
-    <nav class="bg-indigo-700 text-white p-4 shadow-lg">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold italic tracking-tighter">
-                TOKEN-SYSTEM <span class="text-xs font-light ml-1 opacity-70">PFC v1.0</span>
-            </h1>
-            <div class="flex items-center gap-4">
-                <div class="flex flex-col text-right mr-2">
-                    <span id="displayNome" class="text-sm font-medium leading-none">Carregando...</span>
-                    <span class="text-[10px] opacity-70">Cliente Verificado</span>
+        <nav class="bg-indigo-700 text-white p-4 shadow-lg">
+            <div class="container mx-auto flex justify-between items-center">
+                <h1 class="text-xl font-bold italic tracking-tighter">
+                    TOKEN-SYSTEM <span
+                        class="text-xs font-light ml-1 opacity-70">PFC
+                        v1.0</span>
+                </h1>
+                <div class="flex items-center gap-4">
+                    <div class="flex flex-col text-right mr-2">
+                        <span id="displayNome"
+                            class="text-sm font-medium leading-none">Carregando...</span>
+                        <span class="text-[10px] opacity-70">Cliente
+                            Verificado</span>
+                    </div>
+                    <a th:href="@{/clientes/sair}"
+                        class="text-sm bg-indigo-800 px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </a>
                 </div>
-                <a th:href="@{/clientes/sair}" class="text-sm bg-indigo-800 px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </a>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <main class="container mx-auto px-4 py-8 max-w-5xl">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <div class="glass-card p-8 rounded-2xl shadow-xl flex flex-col justify-center items-center text-center border-t-4 border-t-indigo-500">
-                <div class="bg-indigo-100 p-4 rounded-full mb-4">
-                    <i class="fa-solid fa-wallet text-4xl text-indigo-600"></i>
-                </div>
-                <h2 class="text-gray-500 uppercase tracking-widest text-xs font-bold">Saldo Disponível</h2>
-                <div class="flex items-baseline gap-2 mt-2">
-                    <span class="text-2xl font-bold text-indigo-600">T$</span>
-                    <span id="displaySaldo" class="text-6xl font-black text-slate-800">0.00</span>
-                </div>
-                <p class="mt-6 text-gray-400 text-[10px] leading-tight italic">
-                    * Os tokens são creditados instantaneamente após a confirmação do pagamento.
-                </p>
-            </div>
+        <main class="container mx-auto px-4 py-8 max-w-5xl">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            <div class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
-                <h3 class="text-xl font-bold mb-6 text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-cart-shopping text-indigo-600"></i> Comprar Novos Tokens
-                </h3>
-                
-                <form id="formCompra" class="space-y-5">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Valor da Recarga (R$)</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-3 text-gray-400">R$</span>
-                                <input type="number" id="valor" step="0.01" min="1" required placeholder="0.00"
-                                    class="w-full p-3 pl-10 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                <div
+                    class="glass-card p-8 rounded-2xl shadow-xl flex flex-col justify-center items-center text-center border-t-4 border-t-indigo-500 h-fit">
+                    <div class="bg-indigo-100 p-4 rounded-full mb-4">
+                        <i
+                            class="fa-solid fa-wallet text-4xl text-indigo-600"></i>
+                    </div>
+                    <h2
+                        class="text-gray-500 uppercase tracking-widest text-xs font-bold">Saldo
+                        Disponível</h2>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span
+                            class="text-2xl font-bold text-indigo-600">T$</span>
+                        <span id="displaySaldo"
+                            class="text-6xl font-black text-slate-800">0.00</span>
+                    </div>
+                    <p
+                        class="mt-6 text-gray-400 text-[10px] leading-tight italic">
+                        * Os tokens são creditados instantaneamente após a
+                        confirmação do pagamento.
+                    </p>
+                </div>
+
+                <div
+                    class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
+                    <h3
+                        class="text-xl font-bold mb-6 text-slate-800 flex items-center gap-2">
+                        <i
+                            class="fa-solid fa-cart-shopping text-indigo-600"></i>
+                        Comprar Novos Tokens
+                    </h3>
+
+                    <form id="formCompra" class="space-y-5">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label
+                                    class="block text-sm font-semibold text-gray-700 mb-2">Valor
+                                    da Recarga (R$)</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-3 text-gray-400">R$</span>
+                                    <input type="number" id="valor" step="0.01"
+                                        min="1" required placeholder="0.00"
+                                        class="w-full p-3 pl-10 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label
+                                    class="block text-sm font-semibold text-gray-700 mb-2">Forma
+                                    de Pagamento</label>
+                                <select id="metodoPagamento"
+                                    class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
+                                    <option value="CARTAO">💳 Cartão de
+                                        Crédito</option>
+                                    <option value="PIX">⚡ PIX (Aprovação na
+                                        hora)</option>
+                                </select>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Forma de Pagamento</label>
-                            <select id="metodoPagamento" class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
-                                <option value="CARTAO">💳 Cartão de Crédito</option>
-                                <option value="PIX">⚡ PIX (Aprovação na hora)</option>
-                            </select>
+                        <div id="sectionCartao"
+                            class="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                            <label
+                                class="block text-sm font-semibold text-gray-700 mb-2">Dados
+                                do Cartão</label>
+                            <div class="relative">
+                                <input type="text" id="numCartao"
+                                    placeholder="0000 0000 0000 0000"
+                                    class="w-full p-3 pl-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                                <i
+                                    class="fa-solid fa-credit-card absolute left-3 top-4 text-gray-400"></i>
+                            </div>
                         </div>
-                    </div>
 
-                    <div id="sectionCartao" class="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Dados do Cartão</label>
-                        <div class="relative">
-                            <input type="text" id="numCartao" placeholder="0000 0000 0000 0000" 
-                                   class="w-full p-3 pl-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition">
-                            <i class="fa-solid fa-credit-card absolute left-3 top-4 text-gray-400"></i>
-                        </div>
-                    </div>
-
-                    <div id="msgPix" class="hidden p-4 bg-green-50 text-green-700 rounded-xl border border-green-200 text-sm">
-                        <i class="fa-solid fa-bolt mr-2"></i> O QR Code do PIX será gerado após clicar em confirmar.
-                    </div>
-
-                    <button type="submit" id="btnComprar" 
+                        <button type="submit" id="btnComprar"
                             class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl hover:bg-indigo-700 transition-all shadow-lg active:scale-[0.98] flex justify-center items-center gap-3">
-                        <i class="fa-solid fa-check-double"></i> Confirmar e Pagar
-                    </button>
-                </form>
-                
-                <div id="feedback" class="mt-4 text-center text-sm hidden"></div>
-            </div>
+                            <i class="fa-solid fa-check-double"></i> Confirmar e
+                            Pagar
+                        </button>
+                    </form>
+                </div>
 
-            <div class="lg:col-span-3 mt-4 bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
-                <div class="bg-slate-800 p-4 flex justify-between items-center">
-                    <h4 class="font-bold text-white text-sm">
-                        <i class="fa-solid fa-clock-rotate-left mr-2 text-indigo-400"></i>HISTÓRICO RECENTE
-                    </h4>
-                    <span class="text-[10px] text-slate-400 uppercase tracking-widest">Últimas 10 transações</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-[10px] uppercase tracking-wider border-b border-slate-200">
-                                <th class="p-4 font-bold">Data e Hora</th>
-                                <th class="p-4 font-bold">Crédito (Tokens)</th>
-                                <th class="p-4 font-bold">Método</th>
-                                <th class="p-4 font-bold text-right">Referência</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-transacoes" class="text-sm text-slate-600 divide-y divide-slate-100">
+                <div
+                    class="lg:col-span-3 mt-4 bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+                    <div
+                        class="bg-slate-800 p-4 flex justify-between items-center">
+                        <h4 class="font-bold text-white text-sm">
+                            <i
+                                class="fa-solid fa-clock-rotate-left mr-2 text-indigo-400"></i>HISTÓRICO
+                            RECENTE
+                        </h4>
+                        <span
+                            class="text-[10px] text-slate-400 uppercase tracking-widest">Últimas
+                            transações</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr
+                                    class="bg-slate-50 text-slate-500 text-[10px] uppercase tracking-wider border-b border-slate-200">
+                                    <th class="p-4 font-bold">Data e Hora</th>
+                                    <th class="p-4 font-bold">Crédito
+                                        (Tokens)</th>
+                                    <th class="p-4 font-bold">Método</th>
+                                    <th class="p-4 font-bold">Referência</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-transacoes"
+                                class="text-sm text-slate-600 divide-y divide-slate-100">
                             </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
+            </div>
+        </main>
+
+        <div id="modalPix"
+            class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl">
+                <div class="text-center">
+                    <div
+                        class="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i
+                            class="fa-solid fa-qrcode text-2xl text-indigo-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-slate-800">Pagamento via
+                        PIX</h3>
+                    <p class="text-slate-500 text-sm mt-2">Escaneie o código
+                        abaixo para finalizar a compra</p>
+                </div>
+
+                <div
+                    class="mt-8 flex justify-center bg-slate-50 p-6 rounded-2xl border-2 border-dashed border-slate-200">
+                    <img id="imgQrCode" src alt="QR Code PIX" class="w-48 h-48">
+                </div>
+
+                <div class="mt-6">
+                    <label
+                        class="text-[10px] font-bold uppercase text-slate-400 ml-1">PIX
+                        Copia e Cola</label>
+                    <div class="flex gap-2 mt-1">
+                        <input type="text" id="textoCopiaECola" readonly
+                            class="w-full bg-slate-100 p-3 rounded-xl text-xs font-mono border-none focus:ring-0">
+                        <button onclick="copyPix()"
+                            class="bg-indigo-600 text-white px-4 rounded-xl hover:bg-indigo-700 transition">
+                            <i class="fa-solid fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button onclick="fecharModalPix()"
+                    class="w-full mt-8 py-4 bg-slate-800 text-white font-bold rounded-2xl hover:bg-slate-900 transition shadow-lg">
+                    Já realizei o pagamento
+                </button>
+                <button onclick="simularAvisoBanco()"
+                    class="mt-2 text-[10px] text-slate-300 hover:text-indigo-400 transition mx-auto block">
+                    [ DEBUG: Simular Webhook Banco ]
+                </button>
             </div>
         </div>
-    </main>
-
-    
-
-    <script th:src="@{/cliente/script.js}"></script>
-    <script th:src="@{/cliente/wallet.js}"></script>
-</body>
+        <script th:src="@{/cliente/script.js}"></script>
+        <script th:src="@{/cliente/wallet.js}"></script>
+    </body>
 </html>

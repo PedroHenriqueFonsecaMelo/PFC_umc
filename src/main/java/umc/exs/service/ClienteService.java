@@ -3,6 +3,7 @@ package umc.exs.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -327,6 +328,76 @@ public class ClienteService {
                 throw new IllegalArgumentException("Senha inválida.");
             }
         }
+    }
+ //<-------------------------------------------------------------------------------------------
+    // 🔐 MÉTODOS PARA O CONTROLLER DE TOKENS (PIX)
+
+    @Transactional
+    public void registrarTransacaoPendente(Long clienteId, Double valor, String pagamentoId) {
+        Cliente cliente = clienteRepository.findById(clienteId).orElseThrow();
+
+        Transacao t = new Transacao();
+        t.setCliente(cliente);
+        t.setValor(valor);
+        t.setPagamentoId(pagamentoId);
+        t.setStatus("PENDENTE");
+        t.setMetodoPagamento("PIX");
+        t.setDataHora(LocalDateTime.now());
+
+        transacaoRepository.save(t);
+    }
+
+    // Chamado pelo Controller (Polling)
+    public boolean verificarSeFoiPago(String pagamentoId) {
+        Transacao t;
+        try {
+            t = transacaoRepository.findByPagamentoId(pagamentoId);
+        } catch (Exception e) {
+            log.error("Erro ao buscar transação para pagamentoId: {}", pagamentoId, e);
+            throw new RuntimeException("Erro ao verificar status do pagamento");
+        }
+        Map<String, Object> infoLog = Map.of(
+                "pagamentoId", pagamentoId,
+                "transacaoEncontrada", t != null,
+                "statusTransacao", t != null ? t.getStatus() : "N/A"
+        );
+
+        return infoLog.get("transacaoEncontrada").equals(true) && "CONCLUIDO".equals(infoLog.get("statusTransacao"));
+    }
+
+    // Chamado pelo Simulador de Webhook
+    @Transactional
+    public void aprovarPagamento(String pagamentoId) {
+
+        Transacao t;
+        
+        try {
+            t = transacaoRepository.findByPagamentoId(pagamentoId);
+        } catch (Exception e) {
+            throw new RuntimeException("Transação não encontrada para o pagamentoId: " + pagamentoId);
+        }
+        
+
+        if ("PENDENTE".equals(t.getStatus())) {
+            t.setStatus("CONCLUIDO");
+
+            // Adiciona o saldo ao cliente
+            Cliente cliente = t.getCliente();
+            cliente.setSaldoTokens(cliente.getSaldoTokens() + t.getValor());
+
+            transacaoRepository.save(t);
+            clienteRepository.save(cliente);
+        }
+    }
+
+    public Object buscarPorId(Long id) {
+        Cliente cliente;
+        try {
+            cliente = clienteRepository.findById(id).get();
+        } catch (Exception e) {
+            throw new RuntimeException("Cliente não encontrado para o ID: " + id);
+        }
+        return clienteMapper.toDTO(cliente);
     }
 
 }

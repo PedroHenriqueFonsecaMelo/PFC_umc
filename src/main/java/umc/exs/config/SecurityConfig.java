@@ -76,6 +76,7 @@ public class SecurityConfig {
                 .requestMatchers("/clientes/sair").authenticated()
                 .requestMatchers("/api/tokens/comprar").authenticated()
                 .requestMatchers("/api/tokens/historico").authenticated()
+                .requestMatchers("/api/tokens/**").authenticated()
                 
                 // QUALQUER OUTRA ROTA
                 .anyRequest().authenticated()

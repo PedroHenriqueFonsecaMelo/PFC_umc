@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadUserProfile() {
     try {
-        const response = await fetch('/clientes/meu-perfil'); // Ajustado para rota relativa
+        const response = await fetch('/clientes/meu-perfil');
         if (response.ok) {
             const data = await response.json();
             userState.saldo = data.saldoTokens || 0.0;
@@ -28,7 +28,6 @@ async function loadUserProfile() {
         }
     } catch (error) { console.error("Erro ao carregar perfil:", error); }
 }
-
 async function efetuarCompra(e) {
     e.preventDefault();
     const btn = document.getElementById('btnComprar');
@@ -50,23 +49,49 @@ async function efetuarCompra(e) {
             })
         });
 
+        const data = await response.json();
+
         if (response.ok) {
-            const data = await response.json();
-            userState.saldo = data.saldoTokens;
-            updateUI();
-            carregarHistorico(); // Atualiza a tabela imediatamente
-            alert("Sucesso! Seus tokens já estão disponíveis.");
-            e.target.reset();
+            // VERIFICA SE É PIX
+            if (data.qrCodeBase64) {
+                document.getElementById('imgQrCode').src = data.qrCodeBase64;
+                document.getElementById('textoCopiaECola').value = data.pixCopiaECola;
+                document.getElementById('modalPix').classList.remove('hidden');
+                
+                iniciarVerificacao(data.pagamentoId); 
+
+            } else {
+                // SUCESSO DIRETO (CARTÃO)
+                userState.saldo = data.saldoTokens;
+                updateUI();
+                carregarHistorico();
+                alert("Sucesso! Seus tokens já estão disponíveis.");
+                e.target.reset();
+            }
         } else {
-            const erro = await response.text();
-            alert("Erro no pagamento: " + erro);
+            alert("Erro no pagamento: " + (data.message || "Verifique os dados."));
         }
     } catch (error) {
+        console.error(error);
         alert("Erro técnico de conexão.");
     } finally {
         btn.disabled = false;
-        btn.innerText = "Confirmar Compra";
+        btn.innerHTML = '<i class="fa-solid fa-check-double"></i> Confirmar e Pagar';
     }
+}
+
+// Função para copiar o código PIX
+function copyPix() {
+    const input = document.getElementById('textoCopiaECola');
+    input.select();
+    navigator.clipboard.writeText(input.value);
+    alert("Código copiado!");
+}
+
+function fecharModalPix() {
+    document.getElementById('modalPix').classList.add('hidden');
+    loadUserProfile();
+    carregarHistorico();
 }
 
 async function carregarHistorico() {
@@ -85,6 +110,70 @@ async function carregarHistorico() {
             `).join('');
         }
     } catch (e) { console.error("Erro histórico:", e); }
+}
+
+let intervaloCheck; // Variável global para controlar o timer
+
+function iniciarVerificacao(pagamentoId) {
+    if (intervaloCheck) clearInterval(intervaloCheck);
+
+    console.log("Iniciando verificação do PIX: " + pagamentoId);
+
+    intervaloCheck = setInterval(async () => {
+        try {
+            const response = await fetch(`/api/tokens/verificar-pagamento/${pagamentoId}`);
+            const data = await response.json();
+
+            if (data.status === "APROVADO") {
+                console.log("Pagamento aprovado detectado!");
+                
+                // 1. Para o cronômetro
+                clearInterval(intervaloCheck); 
+                
+                // 2. Fecha o modal (Garante que a classe 'hidden' seja adicionada)
+                const modal = document.getElementById('modalPix');
+                modal.classList.add('hidden');
+
+                // 3. Feedback para o usuário
+                alert("🚀 Sucesso! O pagamento foi compensado e seus tokens já estão disponíveis.");
+
+                // 4. Atualiza a tela sem dar F5
+                if (typeof loadUserProfile === "function") loadUserProfile();
+                if (typeof carregarHistorico === "function") carregarHistorico();
+            }
+        } catch (e) {
+            console.error("Erro ao verificar status do PIX:", e);
+        }
+    }, 3000); // Tenta a cada 3 segundos
+}
+
+function confirmarPagamentoSucesso() {
+    document.getElementById('modalPix').classList.add('hidden');
+    alert("🚀 Pagamento detectado com sucesso! Seus tokens foram adicionados.");
+    loadUserProfile();
+    carregarHistorico();
+}
+
+async function simularAvisoBanco() {
+    const fullCode = document.getElementById('textoCopiaECola').value;
+    
+    const regex = /PX-\d+/;
+    const match = fullCode.match(regex);
+    const pagamentoId = match ? match[0] : null;
+
+    if (!pagamentoId) {
+        console.error("ID de pagamento não encontrado no código PIX");
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/tokens/simular-webhook/${pagamentoId}`);
+        if(response.ok) {
+            console.log("Comando de aprovação enviado para o ID: " + pagamentoId);
+        }
+    } catch (e) {
+        console.error("Erro ao simular aprovação", e);
+    }
 }
 
 function updateUI() {
