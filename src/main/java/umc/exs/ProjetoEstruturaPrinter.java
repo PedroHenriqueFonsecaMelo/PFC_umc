@@ -1,4 +1,4 @@
-package umc.exs.handler;
+package umc.exs;
 import java.io.File;
 
 public class ProjetoEstruturaPrinter {

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>História do Livro</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-gray-50 p-8">
+
+        <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow">
+            <h1 id="tituloLivro"
+                class="text-3xl font-bold mb-4">Carregando...</h1>
+            <div id="containerCapa" class="mb-4"></div>
+            <div id="containerResumo"
+                class="text-gray-700 leading-relaxed"></div>
+        </div>
+
+    <script th:src="@{/produto/pesquisa_livro.js}" defer></script>
+    </body>
+</html>

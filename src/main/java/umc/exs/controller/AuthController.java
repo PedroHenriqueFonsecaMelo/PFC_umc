@@ -11,12 +11,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletResponse;
-import umc.exs.security.JwtUserDetailsService;
-import umc.exs.security.JwtUtil;
-import umc.exs.service.ClienteService;
 import umc.exs.model.dtos.auth.LoginDTO;
 import umc.exs.model.dtos.auth.SignupDTO;
 import umc.exs.model.dtos.user.ClienteDTO;
+import umc.exs.security.JwtUserDetailsService;
+import umc.exs.security.JwtUtil;
+import umc.exs.service.ClienteService;
 
 @RestController
 @RequestMapping("/auth")

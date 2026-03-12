@@ -5,9 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import umc.exs.model.dtos.auth.SignupDTO;
+import umc.exs.model.dtos.user.CartaoDTO;
+import umc.exs.model.dtos.user.ClienteDTO;
+import umc.exs.model.dtos.user.EnderecoDTO;
 import umc.exs.model.daos.mappers.ClienteMapper;
 import umc.exs.model.daos.mappers.EnderecoMapper;
 import umc.exs.model.daos.repository.CartaoRepository;
@@ -23,10 +25,6 @@ import umc.exs.model.daos.repository.ClienteRepository;
 import umc.exs.model.daos.repository.EnderecoRepository;
 import umc.exs.model.daos.repository.RecuperacaoSenhaRepository;
 import umc.exs.model.daos.repository.TransacaoRepository;
-import umc.exs.model.dtos.auth.SignupDTO;
-import umc.exs.model.dtos.user.CartaoDTO;
-import umc.exs.model.dtos.user.ClienteDTO;
-import umc.exs.model.dtos.user.EnderecoDTO;
 import umc.exs.model.entidades.foundation.RecuperacaoSenha;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cartao;
@@ -122,19 +120,24 @@ public class ClienteService {
     }
 
     private void atualizarEnderecosManualmente(Cliente cliente, List<EnderecoDTO> dtos) {
-        Set<Long> idsNoDto = dtos.stream()
-                .map(EnderecoDTO::getId)
-                .filter(id -> id != null && id != 0)
-                .collect(Collectors.toSet());
+        // construir conjunto de ids vindos no DTO usando loop tradicional
+        java.util.Set<Long> idsNoDto = new java.util.HashSet<>();
+        for (EnderecoDTO dto : dtos) {
+            Long id = dto.getId();
+            if (id != null && id != 0) {
+                idsNoDto.add(id);
+            }
+        }
 
         // Desassocia os que não vieram no DTO
-        cliente.getEnderecos().removeIf(e -> {
+        java.util.Iterator<Endereco> iter = cliente.getEnderecos().iterator();
+        while (iter.hasNext()) {
+            Endereco e = iter.next();
             if (!idsNoDto.contains(e.getId())) {
                 e.getClientes().remove(cliente);
-                return true;
+                iter.remove();
             }
-            return false;
-        });
+        }
 
         // Adiciona/Atualiza os que vieram
         for (EnderecoDTO endDto : dtos) {
@@ -153,18 +156,22 @@ public class ClienteService {
     }
 
     private void atualizarCartoesManualmente(Cliente cliente, List<CartaoDTO> dtos) {
-        Set<Long> idsNoDto = dtos.stream()
-                .map(CartaoDTO::getId)
-                .filter(id -> id != null && id != 0)
-                .collect(Collectors.toSet());
+        java.util.Set<Long> idsNoDto = new java.util.HashSet<>();
+        for (CartaoDTO dto : dtos) {
+            Long id = dto.getId();
+            if (id != null && id != 0) {
+                idsNoDto.add(id);
+            }
+        }
 
-        cliente.getCartoes().removeIf(c -> {
+        java.util.Iterator<Cartao> iter = cliente.getCartoes().iterator();
+        while (iter.hasNext()) {
+            Cartao c = iter.next();
             if (!idsNoDto.contains(c.getId())) {
                 c.getClientes().remove(cliente);
-                return true;
+                iter.remove();
             }
-            return false;
-        });
+        }
 
         for (CartaoDTO cartaoDto : dtos) {
             Cartao cartao;
@@ -190,8 +197,12 @@ public class ClienteService {
                 .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado."));
 
         // Limpa M2M para evitar violação de constraint ou órfãos presos
-        cliente.getEnderecos().forEach(e -> e.getClientes().remove(cliente));
-        cliente.getCartoes().forEach(c -> c.getClientes().remove(cliente));
+        for (Endereco e : cliente.getEnderecos()) {
+            e.getClientes().remove(cliente);
+        }
+        for (Cartao c : cliente.getCartoes()) {
+            c.getClientes().remove(cliente);
+        }
 
         clienteRepository.delete(cliente);
         log.info("Cliente ID {} removido com sucesso.", clienteId);
@@ -247,9 +258,14 @@ public class ClienteService {
     // ==========================================================
 
     public Optional<ClienteDTO> autenticarCliente(String email, String senha) {
-        return clienteRepository.findByEmail(FieldValidation.sanitizeEmail(email))
-                .filter(c -> passwordEncoder.matches(senha, c.getSenha()))
-                .map(clienteMapper::toDTO);
+        Optional<Cliente> opt = clienteRepository.findByEmail(FieldValidation.sanitizeEmail(email));
+        if (opt.isPresent()) {
+            Cliente c = opt.get();
+            if (passwordEncoder.matches(senha, c.getSenha())) {
+                return Optional.of(clienteMapper.toDTO(c));
+            }
+        }
+        return Optional.empty();
     }
 
     public Optional<ClienteDTO> buscarClientePorEmail(String email) {

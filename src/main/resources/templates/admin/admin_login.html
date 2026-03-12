@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login do Administrador | Projeto Salt</title>
+    <link rel="stylesheet" th:href="@{/cliente/styles.css}" />
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 450px;
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-header h1 {
+            color: #1a1a2e;
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+        
+        .page-header p {
+            color: #666;
+            margin: 0;
+        }
+        
+        .mensagem {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .erro {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+        
+        .sucesso {
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .form-group-2 {
+            margin-bottom: 20px;
+        }
+        
+        .form-group-2 label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group-2 input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group-2 input:focus {
+            outline: none;
+            border-color: #1a1a2e;
+        }
+        
+        .form-actions-main {
+            margin-top: 25px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #1a1a2e;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #16213e;
+        }
+        
+        hr {
+            margin: 25px 0;
+            border: none;
+            border-top: 1px solid #eee;
+        }
+        
+        .account-links {
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .btn-link-secondary {
+            color: #1a1a2e;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .btn-link-secondary:hover {
+            text-decoration: underline;
+        }
+        
+        .admin-badge {
+            display: inline-block;
+            background-color: #1a1a2e;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="page-header">
+            <span class="admin-badge">ÁREA ADMINISTRATIVA</span>
+            <h1>Login do Administrador</h1>
+            <p>Gerencie livros e aprovações</p>
+        </div>
+
+        <div th:if="${param.error}" class="mensagem erro">
+            E-mail ou senha inválidos.
+        </div>
+
+        <div th:if="${param.logout}" class="mensagem sucesso">
+            Você saiu com sucesso.
+        </div>
+
+        <div th:if="${erro}" class="mensagem erro" th:text="${erro}">
+            Erro message
+        </div>
+
+        <form th:action="@{/admin/login}" method="post" class="login-form"> 
+            
+            <div class="form-group-2">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required
+                       placeholder="admin@exemplo.com">
+            </div>
+
+            <div class="form-group-2">
+                <label for="senha">Senha:</label>
+                <input type="password" id="senha" name="senha" required
+                       placeholder="********">
+            </div>
+
+            <div class="form-actions-main">
+                <button type="submit" class="btn btn-primary">
+                    Entrar
+                </button>
+            </div>
+        </form>
+
+        <hr />
+
+        <div class="account-links">
+            <a th:href="@{/}" class="btn-link-secondary">
+                ← Voltar ao site
+            </a>
+        </div>
+
+        <div class="account-links">
+            <a th:href="@{/clientes/login}" class="btn-link-secondary">
+                Área do Cliente
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>
+

@@ -9,7 +9,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import umc.exs.model.daos.repository.AdminRepository;
 import umc.exs.model.daos.repository.ClienteRepository;
+import umc.exs.model.entidades.foundation.Administrador;
 import umc.exs.model.entidades.usuario.Cliente;
 
 @Service
@@ -17,9 +19,23 @@ public class JwtUserDetailsService implements UserDetailsService {
 
     @Autowired
     private ClienteRepository clienteRepository;
+    
+    @Autowired
+    private AdminRepository adminRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // First try to find an admin
+        Optional<Administrador> optAdmin = adminRepository.findByEmail(username);
+        if (optAdmin.isPresent()) {
+            Administrador admin = optAdmin.get();
+            return User.withUsername(admin.getEmail())
+                    .password(admin.getPassword())
+                    .authorities("ROLE_ADMIN", "ADMIN")
+                    .build();
+        }
+        
+        // Then try to find a regular client
         Optional<Cliente> opt = clienteRepository.findByEmail(username);
         Cliente c = opt.orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 

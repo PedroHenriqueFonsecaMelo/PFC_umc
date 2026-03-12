@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel de Auditoria</title>
+    <style>
+        .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; }
+        .card { border: 1px solid #ddd; padding: 15px; border-radius: 10px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card img { width: 100%; height: 200px; object-fit: cover; border-radius: 5px; }
+        .price-display { font-size: 1.2em; font-weight: bold; color: #2563eb; margin: 10px 0; }
+        select, button { width: 100%; margin-top: 5px; padding: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="book-grid" id="pendingBooks"></div>
+
+    <script th:inline="javascript">
+        // Mapeamento dinâmico baseado no seu Enum
+        const priceMap = { "NOVO": 50, "OTIMO": 40, "BOM": 30, "DESGASTADO": 20, "RUIM": 0 };
+
+        async function loadBooks() {
+            const res = await fetch('/api/admin/livros/pendentes');
+            const books = await res.json();
+            
+            document.getElementById('pendingBooks').innerHTML = books.map(b => `
+                <div class="card" id="card-${b.id}">
+                    <img src="${b.fotoUrl}" alt="Capa">
+                    <h3>${b.titulo}</h3>
+                    
+                    <select id="sel-${b.id}" onchange="updatePrice(${b.id})">
+                        <option value="NOVO">Novo (T$ 50)</option>
+                        <option value="OTIMO">Ótimo (T$ 40)</option>
+                        <option value="BOM">Bom (T$ 30)</option>
+                        <option value="DESGASTADO">Desgastado (T$ 20)</option>
+                        <option value="RUIM">Ruim (T$ 0)</option>
+                    </select>
+                    
+                    <div class="price-display" id="price-${b.id}">T$ 50</div>
+                    
+                    <button onclick="aprovar(${b.id})">Aprovar Livro</button>
+                    <button style="background:#dc2626; color:white; border:none;" onclick="rejeitar(${b.id})">Rejeitar</button>
+                </div>
+            `).join('');
+        }
+
+        function updatePrice(id) {
+            const val = document.getElementById(`sel-${id}`).value;
+            document.getElementById(`price-${id}`).innerText = `T$ ${priceMap[val]}`;
+        }
+
+        async function aprovar(id) {
+            const estado = document.getElementById(`sel-${id}`).value;
+            await fetch(`/api/admin/livros/${id}/aprovar`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ estadoAprovado: estado, comentario: "Aprovado via sistema" })
+            });
+            loadBooks();
+        }
+        
+        loadBooks();
+    </script>
+</body>
+</html>

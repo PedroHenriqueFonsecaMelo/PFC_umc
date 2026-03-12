@@ -5,7 +5,6 @@ function App() {
         titulo: '',
         autor: '',
         isbn: '',
-        precoTokens: '',
         estado: 'NOVO'
     });
     const [foto, setFoto] = useState(null);
@@ -73,8 +72,6 @@ function App() {
             titulo: formData.titulo,
             autor: formData.autor,
             isbn: formData.isbn,
-            precoTokens: parseFloat(formData.precoTokens),
-            estado: formData.estado
         };
 
         // O segredo para o Spring Boot aceitar o JSON junto com o arquivo:
@@ -141,19 +138,9 @@ function App() {
 
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1">Preço (Tokens)</label>
-                        <input type="number" id="precoTokens" value={formData.precoTokens} onChange={handleInputChange} required
-                            className="w-full border border-gray-300 p-3 rounded-xl outline-none" />
-                    </div>
 
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">Estado</label>
-                        <select id="estado" value={formData.estado} onChange={handleInputChange}
-                            className="w-full border border-gray-300 p-3 rounded-xl bg-white outline-none cursor-pointer">
-                            <option value="NOVO">Novo (Nunca usado)</option>
-                            <option value="OTIMO">Ótimo (Sem marcas)</option>
-                            <option value="BOM">Bom (Marcas leves)</option>
-                            <option value="DESGASTADO">Desgastado (Com avarias)</option>
-                        </select>
+     <input type="number" id="precoTokens" value={formData.precoTokens} onChange={handleInputChange} required
+                            className="w-full border border-gray-300 p-3 rounded-xl outline-none" />
                     </div>
                 </div>
 
@@ -184,7 +171,6 @@ function App() {
         </div>
     );
 }
-
 // Renderiza a aplicação na div #root do seu HTML
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);

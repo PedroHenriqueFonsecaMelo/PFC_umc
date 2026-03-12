@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.model.daos.repository.LivroRepository;
 import umc.exs.model.dtos.LivroRequestDTO;
 import umc.exs.model.entidades.foundation.LivroAnuncio;
 import umc.exs.service.LivroService;
@@ -26,7 +25,6 @@ import umc.exs.service.LivroService;
 public class LivroControllerApi {
 
     private final LivroService livroService;
-    private final LivroRepository livroRepository;
 
     @PostMapping(value = "/vender", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> criarAnuncio(
@@ -45,22 +43,24 @@ public class LivroControllerApi {
             return ResponseEntity.ok(anuncio);
         } catch (Exception e) {
             // Logar o erro ajuda a debugar se o Service falhar
-            e.printStackTrace(); 
             return ResponseEntity.badRequest().body("Erro ao criar anúncio: " + e.getMessage());
         }
     }
 
+    /**
+     * Lista todos os livros aprovados (para a vitrine)
+     */
     @GetMapping("/todos")
     public ResponseEntity<List<LivroAnuncio>> listarTodos() {
-        // Melhor retornar ResponseEntity para manter o padrão da API
-        return ResponseEntity.ok(livroRepository.findAll());
+        // Retorna apenas livros aprovados para a vitrine
+        return ResponseEntity.ok(livroService.listarLivrosAprovados());
     }
 
     @PostMapping("/{id}/comprar")
     public ResponseEntity<?> comprarLivro(
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails user) {
-        
+
         if (user == null) {
             return ResponseEntity.status(401).body("Usuário precisa estar logado para comprar.");
         }

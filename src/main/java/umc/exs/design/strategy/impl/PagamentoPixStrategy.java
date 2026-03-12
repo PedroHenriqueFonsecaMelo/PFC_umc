@@ -1,8 +1,9 @@
 package umc.exs.design.strategy.impl;
 
 import org.springframework.stereotype.Component;
-import umc.exs.design.strategy.PagamentoStrategy;
+
 import umc.exs.model.dtos.compra.CompraTokensRequestDTO;
+import umc.exs.design.strategy.PagamentoStrategy;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

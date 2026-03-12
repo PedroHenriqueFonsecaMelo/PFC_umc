@@ -55,8 +55,17 @@ public class SecurityConfig {
                 // PÁGINAS DE VENDER E VITRINE (A página é pública, mas as ações de venda e compra exigem login)
                 .requestMatchers("/vender", "/vitrine").permitAll()
                 
+                // ADMIN LOGIN - Página pública de login do admin
+                .requestMatchers("/admin/login").permitAll()
+                
+                // PÁGINA ADMIN - Requer autenticação de admin
+                .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                
+                // PÁGINA DE HISTÓRIA DO LIVRO (avaliações)
+                .requestMatchers("/livros/*/historia").permitAll()
+                
                 // RECURSOS ESTÁTICOS
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/cliente/**").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/cliente/**", "/produto/**", "/static/**").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
 
                 // --- CORREÇÃO AQUI: ROTAS DE RECUPERAÇÃO DE SENHA ---
@@ -70,6 +79,9 @@ public class SecurityConfig {
                 
                 // DEBUG E AUTH REST
                 .requestMatchers("/auth/**", "/debug").permitAll()
+                
+                // ROTAS DE ADMIN - Requer autenticação de admin
+                .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
                 
                 // ROTAS PRIVADAS
                 .requestMatchers("/clientes/meu-perfil", "/clientes/meu-perfil-json").authenticated()

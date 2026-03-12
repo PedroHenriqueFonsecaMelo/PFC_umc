@@ -31,7 +31,7 @@ async function carregarLivros() {
                 <div class="relative h-56 bg-gray-200">
                     <img src="${livro.fotoUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                     <span class="absolute top-3 right-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-indigo-600 shadow-sm">
-                        ${livro.estado}
+                        ${livro.estadoAprovado || livro.estado}
                     </span>
                 </div>
                 <div class="p-5">
@@ -40,9 +40,9 @@ async function carregarLivros() {
                     
                     <div class="flex items-center justify-between mt-auto">
                         <div class="text-indigo-600 font-extrabold text-xl">
-                            T$ ${livro.precoTokens.toFixed(2)}
+                            T$ ${livro.precoAprovado.toFixed(2)}
                         </div>
-                        <button onclick="comprarLivro(${livro.id}, ${livro.precoTokens})" 
+                        <button onclick="comprarLivro(${livro.id}, ${livro.precoAprovado})" 
                                 class="bg-gray-900 text-white px-4 py-2 rounded-xl hover:bg-indigo-600 transition-colors text-sm font-bold">
                             Comprar
                         </button>

@@ -4,9 +4,9 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
+import umc.exs.model.dtos.user.EnderecoDTO;
 import umc.exs.model.daos.mappers.EnderecoMapper;
 import umc.exs.model.daos.repository.EnderecoRepository;
-import umc.exs.model.dtos.user.EnderecoDTO;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.entidades.usuario.Endereco;
 

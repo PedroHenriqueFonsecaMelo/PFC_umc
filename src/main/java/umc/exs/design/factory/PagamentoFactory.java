@@ -5,8 +5,7 @@ import umc.exs.design.strategy.PagamentoStrategy;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.HashMap;
 
 @Service
 public class PagamentoFactory {
@@ -15,11 +14,14 @@ public class PagamentoFactory {
 
     // Construtor: Cria um mapa onde a chave é o nome (CARTAO, PIX) e o valor é a classe
     public PagamentoFactory(List<PagamentoStrategy> listaEstrategias) {
-        estrategias = listaEstrategias.stream()
-                .collect(Collectors.toMap(
-                    PagamentoStrategy::getTipoPagamento, 
-                    Function.identity()
-                ));
+        // construir mapa manualmente para evitar streams
+        Map<String, PagamentoStrategy> mapa = new HashMap<>();
+        for (PagamentoStrategy estrategia : listaEstrategias) {
+            if (estrategia != null && estrategia.getTipoPagamento() != null) {
+                mapa.put(estrategia.getTipoPagamento(), estrategia);
+            }
+        }
+        estrategias = mapa;
     }
 
     public PagamentoStrategy buscarEstrategia(String metodo) {
