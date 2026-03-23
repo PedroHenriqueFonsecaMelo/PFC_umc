@@ -27,11 +27,11 @@ public class LogAuditoria {
     private Long id;
 
     // ID do usuário alvo da ação
-    @Column(name = "id_usuario", nullable = false)
+    @Column(name = "id_usuario", nullable = true)
     private Long idUsuario;
 
     // Email do usuário (para referência rápida no banco)
-    @Column(name = "email_usuario", length = 100, nullable = false)
+    @Column(name = "email_usuario", length = 100, nullable = true)
     private String emailUsuario;
 
     // Tipo de ação realizada (ex: LOGIN_SUCESSO)

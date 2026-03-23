@@ -28,10 +28,21 @@ public class JwtUtil {
     private String cookieName;
 
     // Helper para gerar a chave segura a partir da String
+    /**
+     * Gera chave assinatura HMAC-SHA secreta JWT.
+     * 
+     * @return SecretKey signing
+     */
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Gera token JWT com subject, expiração configurada.
+     * 
+     * @param subject username/email
+     * @return token string
+     */
     public String generateToken(String subject) {
         Date now = new Date();
         Date exp = new Date(now.getTime() + expirationMs);
@@ -44,35 +55,59 @@ public class JwtUtil {
                 .compact();
     }
 
+    /**
+     * Extrai username do payload JWT verificado.
+     * 
+     * @param token JWT
+     * @return subject username
+     */
     public String extractUsername(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
-                .getPayload()             
+                .getPayload()
                 .getSubject();
     }
 
+    /**
+     * Valida token JWT assinatura/expiração.
+     * 
+     * @param token JWT
+     * @return válido
+     */
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token);
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
 
+    /**
+     * Adiciona cookie HTTP-only JWT response.
+     * Secure false, path /.
+     * 
+     * @param response servlet
+     * @param token    JWT
+     */
     public void addTokenCookie(HttpServletResponse response, String token) {
         Cookie c = new Cookie(cookieName, token);
         c.setHttpOnly(true);
-        c.setSecure(false); // Defina como true em produção (HTTPS)
+        c.setSecure(false);
         c.setPath("/");
         response.addCookie(c);
     }
 
+    /**
+     * Limpa cookie JWT definindo maxAge=0.
+     * 
+     * @param response servlet
+     */
     public void clearJwtCookie(HttpServletResponse response) {
         Cookie c = new Cookie(cookieName, "");
         c.setHttpOnly(true);
@@ -81,3 +116,10 @@ public class JwtUtil {
         response.addCookie(c);
     }
 }
+
+/**
+ * DESCRIÇÃO DO ARQUIVO:
+ * Utilitários JWT para geração/validação tokens, cookies HTTP-only.
+ * Config secret/expiration via properties, HMAC-SHA signing.
+ * Usado em auth controllers/filters.
+ */

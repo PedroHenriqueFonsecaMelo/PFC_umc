@@ -2,21 +2,24 @@ package umc.exs.model.entidades.foundation;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import umc.exs.model.entidades.foundation.enums.EstadoLivro;
+import umc.exs.DTOs.livro.LivroExibicaoDTO;
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.enums.EstadoLivro;
 
-// Entidade para o Anúncio do Livro
+
 @Entity
 @Data
 @Builder
@@ -30,24 +33,38 @@ public class LivroAnuncio {
     private String titulo;
     private String autor;
     private String isbn;
-    private String fotoUrl;
+
+    @Column(name = "fotos_urls", columnDefinition = "TEXT") 
+    @Builder.Default
+    private String fotosUrls = "[]"; 
     
-    @ManyToOne
-    private Cliente vendedor;
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "lote_id")
+    private Lote lote;
 
     private LocalDateTime dataAnuncio;
     
-    // Status de controle
     @Builder.Default
     private Boolean aprovado = false; 
 
-    // Estes campos são nulos até que o admin os defina
     private Double precoAprovado; 
     
     @Enumerated(EnumType.STRING)
     private EstadoLivro estadoAprovado; 
     
-    private String comentarioAprovacao;
     private LocalDateTime dataAprovacao;
+
     private Long adminAprovadorId;
+    
+    public LivroExibicaoDTO paraDTO() {
+        String primeiraFoto = "";
+        try {
+            if (fotosUrls != null && fotosUrls.contains("\"")) {
+                primeiraFoto = fotosUrls.split("\"")[1];
+            }
+        } catch (Exception e) {
+            primeiraFoto = "";
+        }
+        return new LivroExibicaoDTO(id, titulo, autor, isbn, primeiraFoto, estadoAprovado, precoAprovado);
+    }
 }

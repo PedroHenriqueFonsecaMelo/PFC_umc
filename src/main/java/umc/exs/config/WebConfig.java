@@ -12,6 +12,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Profile("local")
 public class WebConfig implements WebMvcConfigurer {
 
+    /**
+     * Configura handler recursos estáticos para uploads.
+     * Mapeia /uploads/** → diretório ./uploads/ local (perfil local).
+     * 
+     * @param registry recursos web
+     */
     @SuppressWarnings("null")
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -24,3 +30,10 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:/" + uploadPath + "/");
     }
 }
+
+/**
+ * DESCRIÇÃO DO ARQUIVO:
+ * Config WebMvc local (perfil 'local').
+ * Serve arquivos uploads/livros/** estáticos.
+ * Caminho absoluto ./uploads.
+ */

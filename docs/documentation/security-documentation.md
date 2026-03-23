@@ -406,51 +406,33 @@ public void registrarLog(String acao, Long idUsuario, String emailUsuario, Strin
 
 ---
 
-## 12. Resumo das Rotas de Segurança
+## 12. Fluxo Autenticação (Mermaid)
 
-### Rotas Públicas
-
-| Rota | Descrição |
-|------|-----------|
-| `/` | Página inicial |
-| `/clientes/login` | Login |
-| `/clientes/novo-cadastro` | Cadastro |
-| `/clientes/recuperar-senha` | Recuperação |
-| `/clientes/reset-senha` | Reset senha |
-| `/livros/vender` | Página de venda (visualizar) |
-| `/livros/vitrine` | Vitrine (visualizar) |
-| `/auth/**` | API de autenticação |
-
-### Rotas de Admin
-
-| Rota | Descrição |
-|------|-----------|
-| `/admin/**` | Painel administrativo |
-| `/api/admin/**` | API administrativa |
-
-### Rotas Autenticadas
-
-| Rota | Descrição |
-|------|-----------|
-| `/clientes/meu-perfil` | Perfil do usuário |
-| `/clientes/carteira` | Carteira de tokens |
-| `/clientes/atualizar` | Atualizar dados |
-| `/api/tokens/comprar` | Comprar tokens |
-| `/api/livros/vender` | Criar anúncio |
-| `/api/livros/{id}/comprar` | Comprar livro |
-
----
-
-## Conclusão
-
-O sistema de segurança do projeto utiliza:
-
-1. **JWT** para autenticação stateless
-2. **BCrypt** para criptografia de senhas
-3. **Cookies HTTP-only** para armazenamento seguro de tokens
-4. **Spring Security** para autorização baseada em rotas
-5. **Auditoria** para rastreamento de ações
-6. **Recuperação de senha** com tokens de expiração
-
-Esta combinação fornece um nível robusto de segurança adequado para aplicações web modernas.
+```mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant C as Controller
+    participant F as JwtRequestFilter
+    participant S as JwtUserDetailsService
+    participant J as JwtUtil
+    participant DB as Banco
+    
+    U->>C: POST /auth/login
+    C->>S: loadUserByUsername(email)
+    S->>DB: SELECT * FROM users WHERE email=?
+    DB-->>S: UserDetails
+    C->>J: generateToken(email)
+    J-->>C: token
+    C-->>U: 200 OK + Cookie token
+    
+    Note right of U: Próximas requisições
+    
+    U->>F: GET /clientes/perfil (com cookie)
+    F->>J: validateToken(token)
+    J-->>F: válido
+    F->>S: loadUserByUsername(username)
+    S->>DB: SELECT * FROM users
+    F-->>C: SecurityContext configurado
+    C->>@AuthenticationPrincipal: userDetails
+    C-->>U: página perfil
 

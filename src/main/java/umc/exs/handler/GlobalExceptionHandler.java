@@ -16,7 +16,6 @@ public class GlobalExceptionHandler {
             HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
 
-        // Log básico (Considere usar um Logger SLF4J no futuro)
         System.err.println("Erro de Regra de Negócio: " + ex.getMessage());
 
         redirectAttributes.addFlashAttribute("erro", ex.getMessage());

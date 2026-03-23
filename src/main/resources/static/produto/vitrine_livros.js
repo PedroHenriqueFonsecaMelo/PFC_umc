@@ -26,32 +26,50 @@ async function carregarLivros() {
             return;
         }
 
-        grid.innerHTML = livros.map(livro => `
-            <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all border border-gray-100 overflow-hidden group">
-                <div class="relative h-56 bg-gray-200">
-                    <img src="${livro.fotoUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                    <span class="absolute top-3 right-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-indigo-600 shadow-sm">
-                        ${livro.estadoAprovado || livro.estado}
-                    </span>
-                </div>
-                <div class="p-5">
-                    <h3 class="font-bold text-gray-800 text-lg truncate">${livro.titulo}</h3>
-                    <p class="text-sm text-gray-500 mb-4">por ${livro.autor}</p>
-                    
-                    <div class="flex items-center justify-between mt-auto">
-                        <div class="text-indigo-600 font-extrabold text-xl">
-                            T$ ${livro.precoAprovado.toFixed(2)}
-                        </div>
-                        <button onclick="comprarLivro(${livro.id}, ${livro.precoAprovado})" 
-                                class="bg-gray-900 text-white px-4 py-2 rounded-xl hover:bg-indigo-600 transition-colors text-sm font-bold">
-                            Comprar
-                        </button>
+        grid.innerHTML = livros.map(livro => {
+            // LÓGICA PARA PEGAR A PRIMEIRA FOTO
+            let primeiraFoto = 'https://via.placeholder.com/300x400?text=Sem+Foto';
+            
+            try {
+                // Tenta fazer o parse da string JSON vinda do banco
+                if (livro.fotosUrls) {
+                    const fotosArray = JSON.parse(livro.fotosUrls);
+                    if (Array.isArray(fotosArray) && fotosArray.length > 0) {
+                        primeiraFoto = fotosArray[0];
+                    }
+                }
+            } catch (e) {
+                console.error("Erro ao processar fotos do livro: " + livro.titulo, e);
+            }
+
+            return `
+                <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all border border-gray-100 overflow-hidden group">
+                    <div class="relative h-56 bg-gray-200">
+                        <img src="${primeiraFoto}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        <span class="absolute top-3 right-3 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-indigo-600 shadow-sm">
+                            ${livro.estadoAprovado || 'BOM'}
+                        </span>
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-3"><i class="fa-solid fa-user-tag mr-1"></i> Vendedor: ${livro.vendedor.nome}</p>
+                    <div class="p-5">
+                        <h3 class="font-bold text-gray-800 text-lg truncate">${livro.titulo}</h3>
+                        <p class="text-sm text-gray-500 mb-4">por ${livro.autor}</p>
+                        
+                        <div class="flex items-center justify-between mt-auto">
+                            <div class="text-indigo-600 font-extrabold text-xl">
+                                T$ ${(livro.precoAprovado || 0).toFixed(2)}
+                            </div>
+                            <button onclick="comprarLivro(${livro.id}, ${livro.precoAprovado})" 
+                                    class="bg-gray-900 text-white px-4 py-2 rounded-xl hover:bg-indigo-600 transition-colors text-sm font-bold">
+                                Comprar
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-3"><i class="fa-solid fa-store mr-1"></i> Sistema Marketplace</p>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     } catch (err) {
+        console.error(err);
         grid.innerHTML = `<p class="col-span-full text-center text-red-400">Erro ao carregar vitrine.</p>`;
     }
 }

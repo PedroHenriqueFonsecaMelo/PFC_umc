@@ -1,176 +1,188 @@
 const { useState } = React;
 
 function App() {
-    const [formData, setFormData] = useState({
-        titulo: '',
-        autor: '',
-        isbn: '',
-        estado: 'NOVO'
-    });
-    const [foto, setFoto] = useState(null);
-    const [preview, setPreview] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [buscandoIsbn, setBuscandoIsbn] = useState(false);
+    const MAX_LIVROS = 5;
+    const [books, setBooks] = useState([{ id: Date.now(), isbn: '', titulo: '', autor: '', fotos: [] }]);
+    const [submitLoading, setSubmitLoading] = useState(false);
 
-    // Busca automática na API da Open Library ao digitar ISBN
-    const buscarDadosLivro = async (valorIsbn) => {
-        const isbnLimpo = valorIsbn.replace(/-/g, "").trim();
-        // A busca só dispara se tiver um tamanho mínimo de ISBN (10 ou 13)
+    const addBook = () => {
+        if (books.length < MAX_LIVROS) {
+            setBooks([...books, { id: Date.now(), isbn: '', titulo: '', autor: '', fotos: [] }]);
+        }
+    };
+
+    const removeBook = (id) => {
+        if (books.length > 1) setBooks(books.filter(b => b.id !== id));
+    };
+
+    const clearBook = (id) => {
+        setBooks(books.map(book =>
+            book.id === id ? { id, isbn: '', titulo: '', autor: '', fotos: [] } : book
+        ));
+    };
+
+    const updateBookField = (bookId, field, value) => {
+        setBooks(prev => prev.map(book =>
+            book.id === bookId ? { ...book, [field]: value } : book
+        ));
+    };
+
+    const buscarDadosLivro = async (bookId, isbnBruto) => {
+        const isbnLimpo = isbnBruto.replace(/\D/g, "");
         if (isbnLimpo.length < 10) return;
 
-        setBuscandoIsbn(true);
+        updateBookField(bookId, 'buscandoIsbn', true);
         try {
             const res = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbnLimpo}&format=json&jscmd=data`);
             const data = await res.json();
             const info = data[`ISBN:${isbnLimpo}`];
 
             if (info) {
-                setFormData(prev => ({
-                    ...prev,
-                    titulo: info.title || prev.titulo,
-                    autor: info.authors ? info.authors[0].name : prev.autor
-                }));
+                updateBookField(bookId, 'titulo', info.title || '');
+                updateBookField(bookId, 'autor', info.authors ? info.authors[0].name : '');
             }
-        } catch (error) {
-            console.error("Erro ao buscar livro:", error);
-        } finally {
-            setBuscandoIsbn(false);
-        }
+        } catch (e) { console.error(e); }
+        finally { updateBookField(bookId, 'buscandoIsbn', false); }
     };
 
-    const handleInputChange = (e) => {
-        const { id, value } = e.target;
-        setFormData(prev => ({ ...prev, [id]: value }));
-
-        // Se o campo for ISBN, tenta buscar os dados
-        if (id === 'isbn' && (value.length >= 10)) {
-            buscarDadosLivro(value);
-        }
-    };
-
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setFoto(file);
-            setPreview(URL.createObjectURL(file));
-        }
+    const handleFileChange = (bookId, e) => {
+        const files = Array.from(e.target.files).slice(0, 3);
+        const previews = files.map(file => ({ file, url: URL.createObjectURL(file) }));
+        updateBookField(bookId, 'fotos', previews);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        if (!foto) {
-            alert("Por favor, anexe uma foto do livro.");
-            return;
-        }
+        setSubmitLoading(true);
 
-        setLoading(true);
-        const data = new FormData();
-        
-        // Monta o objeto exatamente como o seu LivroRequestDTO espera
-        const dadosLivro = {
-            titulo: formData.titulo,
-            autor: formData.autor,
-            isbn: formData.isbn,
+        const formData = new FormData();
+
+        const loteDados = {
+            livros: books.map(b => ({
+                titulo: b.titulo.trim(),
+                autor: b.autor.trim(),
+                isbn: b.isbn.replace(/\D/g, "")
+            }))
         };
 
-        // O segredo para o Spring Boot aceitar o JSON junto com o arquivo:
-        // Enviar o JSON como um Blob de tipo application/json
-        data.append("dados", new Blob([JSON.stringify(dadosLivro)], { type: "application/json" }));
-        data.append("foto", foto);
+        // CORREÇÃO AQUI: Definir explicitamente o tipo do Blob como application/json
+        const jsonBlob = new Blob([JSON.stringify(loteDados)], {
+            type: 'application/json'
+        });
+
+        formData.append("loteDados", jsonBlob);
+
+        // Anexar fotos (mesma lógica anterior)
+        books.forEach(book => {
+            if (book.fotos) {
+                book.fotos.forEach(fotoObj => {
+                    formData.append("fotos", fotoObj.file);
+                });
+            }
+        });
 
         try {
-            const response = await fetch('/api/livros/vender', {
+            const response = await fetch('/api/livros/lotes/vender', {
                 method: 'POST',
-                body: data
-                // IMPORTANTE: Não defina headers de Content-Type aqui. 
-                // O navegador fará isso automaticamente para o Multipart.
+                // Importante: NÃO defina headers de Content-Type aqui
+                body: formData
             });
 
             if (response.ok) {
-                alert("Parabéns! Seu anúncio foi publicado com sucesso.");
+                alert("Lote enviado com sucesso!");
                 window.location.href = "/clientes/meu-perfil";
             } else {
-                const erroTexto = await response.text();
-                alert("Erro ao publicar anúncio: " + erroTexto);
+                const errorMsg = await response.text();
+                console.error("Erro do servidor:", errorMsg);
+                alert("Erro ao enviar: " + errorMsg);
             }
         } catch (error) {
-            console.error("Erro na requisição:", error);
-            alert("Erro de conexão com o servidor.");
+            alert("Erro de conexão.");
         } finally {
-            setLoading(false);
+            setSubmitLoading(false);
         }
     };
 
     return (
-        <div className="bg-white p-8 rounded-2xl shadow-xl">
-            <div className="flex items-center gap-3 mb-8">
-                <div className="bg-indigo-600 p-3 rounded-lg text-white">
-                    <i className="fa-solid fa-book-open text-2xl"></i>
-                </div>
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Anunciar Livro</h2>
-                    <p className="text-gray-500">React + Busca Automática via ISBN</p>
-                </div>
+        <div className="bg-white p-6 md:p-10 rounded-3xl shadow-2xl max-w-4xl mx-auto my-10 font-sans">
+            <div className="flex justify-between items-center mb-8 border-b pb-6">
+                <h1 className="text-2xl font-black text-indigo-600 uppercase tracking-tight">Vender Lote</h1>
+                <button type="button" onClick={addBook} className="bg-green-500 text-white px-4 py-2 rounded-xl font-bold text-sm">
+                    + Livro ({books.length}/5)
+                </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">ISBN</label>
-                        <input type="text" id="isbn" value={formData.isbn} onChange={handleInputChange}
-                            className="w-full border border-gray-300 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-                            placeholder="Digite o ISBN para buscar informações" />
-                        {buscandoIsbn && <p className="text-xs text-indigo-500 animate-pulse mt-1">Consultando banco de dados de livros...</p>}
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">Título</label>
-                        <input type="text" id="titulo" value={formData.titulo} onChange={handleInputChange} required
-                            className="w-full border border-gray-300 p-3 rounded-xl outline-none" />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">Autor</label>
-                        <input type="text" id="autor" value={formData.autor} onChange={handleInputChange} required
-                            className="w-full border border-gray-300 p-3 rounded-xl outline-none" />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">Preço (Tokens)</label>
-
-     <input type="number" id="precoTokens" value={formData.precoTokens} onChange={handleInputChange} required
-                            className="w-full border border-gray-300 p-3 rounded-xl outline-none" />
-                    </div>
-                </div>
-
-                <div className="relative border-2 border-dashed border-gray-300 p-6 text-center rounded-2xl hover:border-indigo-500 transition cursor-pointer">
-                    <input type="file" onChange={handleFileChange} accept="image/*" className="absolute inset-0 w-full opacity-0 cursor-pointer" />
-                    {!preview ? (
-                        <div>
-                            <i className="fa-solid fa-cloud-arrow-up text-3xl text-indigo-500 mb-2"></i>
-                            <p className="text-gray-600">Clique ou arraste a foto do livro aqui</p>
+                {books.map((book, index) => (
+                    <div key={book.id} className="p-6 bg-gray-50 rounded-2xl border-2 border-gray-100 relative">
+                        <div className="flex justify-between mb-4">
+                            <span className="font-bold text-gray-400">#0{index + 1}</span>
+                            <div className="space-x-4">
+                                <button type="button" onClick={() => clearBook(book.id)} className="text-xs font-bold text-orange-400 uppercase">Limpar</button>
+                                {books.length > 1 && <button type="button" onClick={() => removeBook(book.id)} className="text-xs font-bold text-red-400 uppercase">Remover</button>}
+                            </div>
                         </div>
-                    ) : (
-                        <div className="relative inline-block">
-                            <img src={preview} className="max-h-48 rounded-lg shadow-md" />
-                            <p className="text-xs text-gray-400 mt-2 font-semibold">Clique para trocar a foto</p>
-                        </div>
-                    )}
-                </div>
 
-                <button type="submit" disabled={loading}
-                    className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 disabled:bg-gray-400">
-                    {loading ? (
-                        <><i className="fa-solid fa-spinner animate-spin"></i> Processando...</>
-                    ) : (
-                        <><span>Publicar Anúncio</span> <i className="fa-solid fa-paper-plane"></i></>
-                    )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="md:col-span-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase">ISBN (Cole ou digite tudo)</label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        className="w-full p-4 rounded-xl border-2 border-white bg-white shadow-sm focus:border-indigo-400 outline-none transition-all"
+                                        value={book.isbn}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            updateBookField(book.id, 'isbn', val);
+                                            if (val.replace(/\D/g, "").length >= 10) buscarDadosLivro(book.id, val);
+                                        }}
+                                        placeholder="Ex: 9788532511010"
+                                    />
+                                    {book.buscandoIsbn && <div className="absolute right-4 top-4"><i className="fa-solid fa-spinner animate-spin text-indigo-500"></i></div>}
+                                </div>
+                            </div>
+                            <input
+                                type="text" placeholder="Título" required
+                                className="w-full p-4 rounded-xl border-2 border-white bg-white shadow-sm focus:border-indigo-400 outline-none"
+                                value={book.titulo} onChange={(e) => updateBookField(book.id, 'titulo', e.target.value)}
+                            />
+                            <input
+                                type="text" placeholder="Autor" required
+                                className="w-full p-4 rounded-xl border-2 border-white bg-white shadow-sm focus:border-indigo-400 outline-none"
+                                value={book.autor} onChange={(e) => updateBookField(book.id, 'autor', e.target.value)}
+                            />
+                        </div>
+
+                        <div className="mt-4 relative border-2 border-dashed border-gray-200 rounded-xl p-6 text-center bg-white">
+                            <input
+                                type="file" multiple accept="image/*"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                onChange={(e) => handleFileChange(book.id, e)}
+                            />
+                            <div className="text-gray-400">
+                                {book.fotos?.length > 0 ? (
+                                    <div className="flex justify-center gap-2">
+                                        {book.fotos.map((f, i) => <img key={i} src={f.url} className="w-12 h-12 object-cover rounded-md" />)}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm font-bold">Clique para adicionar fotos</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+
+                <button
+                    type="submit"
+                    disabled={submitLoading}
+                    className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black text-xl shadow-lg hover:bg-indigo-700 disabled:bg-gray-300 transition-all"
+                >
+                    {submitLoading ? "ENVIANDO..." : "PUBLICAR LOTE"}
                 </button>
             </form>
         </div>
     );
 }
-// Renderiza a aplicação na div #root do seu HTML
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);

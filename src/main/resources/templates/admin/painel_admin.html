@@ -1,64 +1,229 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Painel de Auditoria</title>
-    <style>
-        .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; }
-        .card { border: 1px solid #ddd; padding: 15px; border-radius: 10px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .card img { width: 100%; height: 200px; object-fit: cover; border-radius: 5px; }
-        .price-display { font-size: 1.2em; font-weight: bold; color: #2563eb; margin: 10px 0; }
-        select, button { width: 100%; margin-top: 5px; padding: 8px; cursor: pointer; }
+    <head>
+        <meta charset="UTF-8">
+        <title>Painel de Auditoria - UMC EXS</title>
+        <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        h2 { color: #1e293b; border-bottom: 2px solid #2563eb; padding-bottom: 10px; }
+        .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
+        
+        .card { border: none; padding: 20px; border-radius: 12px; background: #fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        
+        /* Container de Fotos */
+        .fotos-wrapper { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; border-bottom: 1px solid #eee; margin-bottom: 15px; }
+        .foto-item { position: relative; min-width: 80px; height: 80px; }
+        .foto-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+        .btn-del-foto { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+        
+        .btn-add-foto { min-width: 80px; height: 80px; border: 2px dashed #cbd5e1; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; font-size: 24px; }
+        .btn-add-foto:hover { background: #f8fafc; border-color: #2563eb; color: #2563eb; }
+
+        .price-display { font-size: 1.3em; font-weight: bold; color: #059669; margin: 15px 0; text-align: center; background: #ecfdf5; padding: 5px; border-radius: 8px; }
+        
+        select, button { width: 100%; margin-top: 10px; padding: 12px; cursor: pointer; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; }
+        
+        .btn-aprovar { background-color: #2563eb; color: white; border: none; font-weight: bold; margin-top: 20px; }
+        .btn-aprovar:hover { background-color: #1d4ed8; }
+        
+        .btn-rejeitar { background-color: #ffffff; color: #dc2626; border: 1px solid #dc2626; font-weight: 500; }
+        .btn-rejeitar:hover { background-color: #fef2f2; }
+
+        .loading { text-align: center; padding: 50px; color: #64748b; }
     </style>
-</head>
-<body>
-    <div class="book-grid" id="pendingBooks"></div>
+    </head>
+    <body>
 
-    <script th:inline="javascript">
-        // Mapeamento dinâmico baseado no seu Enum
+        <h2>Painel do Administrador: Avaliação de Lotes</h2>
+
+        <div id="contentArea">
+            <div class="loading">Carregando lotes pendentes...</div>
+        </div>
+
+        <script th:inline="javascript">
+    /*<![CDATA[*/
+        
         const priceMap = { "NOVO": 50, "OTIMO": 40, "BOM": 30, "DESGASTADO": 20, "RUIM": 0 };
+        // Armazena temporariamente os livros do lote atual para manipulação de fotos
+        let livrosCache = []; 
 
-        async function loadBooks() {
-            const res = await fetch('/api/admin/livros/pendentes');
-            const books = await res.json();
+        async function loadLotes() {
+            const container = document.getElementById('contentArea');
+            try {
+                const res = await fetch('/api/admin/lotes/pendentes');
+                const lotes = await res.json();
+                
+                if (lotes.length === 0) {
+                    container.innerHTML = '<div class="card"><h3>Nenhum lote pendente para avaliação no momento.</h3></div>';
+                    return;
+                }
+
+                let html = '<h3>Lotes Aguardando Revisão</h3><div class="book-grid">';
+                lotes.forEach(lote => {
+                    html += `
+                        <div class="card">
+                            <div style="color: #64748b; font-size: 12px;">Protocolo: ${lote.codigoProtocolo}</div>
+                            <h3 style="margin: 10px 0;">Lote #${lote.id}</h3>
+                            <p><strong>Data de Envio:</strong> ${new Date(lote.dataCriacao).toLocaleDateString()}</p>
+                            <button class="btn-aprovar" onclick="loadLivrosLote(${lote.id})">Abrir Lote para Auditoria</button>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            } catch (error) {
+                container.innerHTML = '<p style="color:red;">Erro ao conectar com o servidor.</p>';
+            }
+        }
+
+        async function loadLivrosLote(loteId) {
+            try {
+                const res = await fetch('/api/admin/lotes/' + loteId);
+                livrosCache = await res.json();
+                renderLivros();
+            } catch (error) {
+                alert("Erro ao carregar livros do lote.");
+            }
+        }
+
+        function renderLivros() {
+            const container = document.getElementById('contentArea');
+            let html = `<h3>Auditando Livros</h3><div class="book-grid">`;
             
-            document.getElementById('pendingBooks').innerHTML = books.map(b => `
-                <div class="card" id="card-${b.id}">
-                    <img src="${b.fotoUrl}" alt="Capa">
-                    <h3>${b.titulo}</h3>
-                    
-                    <select id="sel-${b.id}" onchange="updatePrice(${b.id})">
-                        <option value="NOVO">Novo (T$ 50)</option>
-                        <option value="OTIMO">Ótimo (T$ 40)</option>
-                        <option value="BOM">Bom (T$ 30)</option>
-                        <option value="DESGASTADO">Desgastado (T$ 20)</option>
-                        <option value="RUIM">Ruim (T$ 0)</option>
-                    </select>
-                    
-                    <div class="price-display" id="price-${b.id}">T$ 50</div>
-                    
-                    <button onclick="aprovar(${b.id})">Aprovar Livro</button>
-                    <button style="background:#dc2626; color:white; border:none;" onclick="rejeitar(${b.id})">Rejeitar</button>
-                </div>
-            `).join('');
+            livrosCache.forEach((b, bookIdx) => {
+                const fotos = JSON.parse(b.fotosUrls || "[]");
+                
+                let fotosHtml = '<div class="fotos-wrapper">';
+                fotos.forEach((url, fotoIdx) => {
+                    fotosHtml += `
+                        <div class="foto-item">
+                            <img src="${url}" alt="Foto">
+                            <button class="btn-del-foto" onclick="removerFoto(${bookIdx}, ${fotoIdx})">×</button>
+                        </div>`;
+                });
+                
+                // Botão de Adicionar (apenas se tiver menos de 5 fotos, por exemplo)
+                fotosHtml += `
+                    <label class="btn-add-foto" for="upload-${bookIdx}">+</label>
+                    <input type="file" id="upload-${bookIdx}" style="display:none" accept="image/*" onchange="subirFoto(event, ${bookIdx})">
+                </div>`;
+
+                html += `
+                    <div class="card" id="card-${b.id}">
+                        ${fotosHtml}
+                        <h3 style="margin-bottom:5px;">${b.titulo}</h3>
+                        <p style="font-size:13px; color: #64748b; margin:0;">Autor: ${b.autor} | ISBN: ${b.isbn}</p>
+                        
+                        <div style="margin-top:15px;">
+                            <label style="font-size:12px; font-weight:bold; color:#475569;">AVALIAÇÃO DO ESTADO:</label>
+                            <select id="sel-${b.id}" onchange="updatePrice(${b.id})">
+                                <option value="NOVO">Novo</option>
+                                <option value="OTIMO">Ótimo</option>
+                                <option value="BOM" selected>Bom</option>
+                                <option value="DESGASTADO">Desgastado</option>
+                                <option value="RUIM">Ruim (Inviável)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="price-display" id="price-${b.id}">Sugestão: T$ 30</div>
+                        
+                        <button class="btn-aprovar" onclick="finalizarAprovacao(${bookIdx})">Confirmar e Publicar</button>
+                        <button class="btn-rejeitar" onclick="rejeitar(${b.id})">Rejeitar este Livro</button>
+                    </div>
+                `;
+            });
+            
+            html += `</div><br><button onclick="loadLotes()" style="background:none; color:#64748b; border:none; text-decoration:underline;">← Voltar para a lista de lotes</button>`;
+            container.innerHTML = html;
         }
 
         function updatePrice(id) {
             const val = document.getElementById(`sel-${id}`).value;
-            document.getElementById(`price-${id}`).innerText = `T$ ${priceMap[val]}`;
+            document.getElementById(`price-${id}`).innerText = `Sugestão: T$ ${priceMap[val]}`;
         }
 
-        async function aprovar(id) {
-            const estado = document.getElementById(`sel-${id}`).value;
-            await fetch(`/api/admin/livros/${id}/aprovar`, {
+        // --- LÓGICA DE FOTOS ---
+
+        function removerFoto(bookIdx, fotoIdx) {
+            let fotos = JSON.parse(livrosCache[bookIdx].fotosUrls);
+            fotos.splice(fotoIdx, 1);
+            livrosCache[bookIdx].fotosUrls = JSON.stringify(fotos);
+            renderLivros();
+        }
+
+        function subirFoto(event, bookIdx) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Simulação de upload: Em um sistema real, você faria um fetch(POST) para uma rota de upload
+            // e pegaria a URL de retorno. Aqui vamos simular adicionando um caminho temporário ou Base64.
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                let fotos = JSON.parse(livrosCache[bookIdx].fotosUrls || "[]");
+                fotos.push(e.target.result); // Adiciona o Base64 (apenas para demonstração visual)
+                livrosCache[bookIdx].fotosUrls = JSON.stringify(fotos);
+                renderLivros();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- LÓGICA DE BACKEND ---
+
+        async function finalizarAprovacao(bookIdx) {
+            const livro = livrosCache[bookIdx];
+            const estado = document.getElementById(`sel-${livro.id}`).value;
+            
+            const payload = {
+                estadoAprovado: estado,
+                comentario: "Aprovado via Painel Admin",
+                fotosUrls: livro.fotosUrls // Envia o JSON de fotos (incluindo as alterações)
+            };
+
+            const res = await fetch(`/api/admin/livros/${livro.id}/aprovar`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ estadoAprovado: estado, comentario: "Aprovado via sistema" })
+                body: JSON.stringify(payload)
             });
-            loadBooks();
+
+            if (res.ok) {
+                alert("Livro publicado com sucesso!");
+                livrosCache.splice(bookIdx, 1);
+                if(livrosCache.length === 0) loadLotes(); else renderLivros();
+            } else {
+                alert("Erro ao aprovar livro.");
+            }
         }
-        
-        loadBooks();
+
+        async function rejeitar(id) {
+            // Adicione um confirm apenas para evitar cliques acidentais
+            if (!confirm("Tem certeza que deseja rejeitar este livro?")) return;
+
+            const estado = document.getElementById(`sel-${id}`).value;
+
+            const res = await fetch(`/api/admin/livros/${id}/rejeitar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({estado: estado})
+            });
+
+            if (res.ok) {
+                alert("Livro rejeitado e removido da fila.");
+                // Remove do cache local para atualizar a tela sem recarregar tudo
+                livrosCache = livrosCache.filter(l => l.id !== id);
+                if(livrosCache.length === 0) loadLotes(); else renderLivros();
+            } else {
+                const errorText = await res.text();
+                alert("Erro ao rejeitar: " + errorText);
+            }
+        }
+
+        // Início
+        loadLotes();
+
+    /*]]>*/
     </script>
-</body>
+    </body>
 </html>

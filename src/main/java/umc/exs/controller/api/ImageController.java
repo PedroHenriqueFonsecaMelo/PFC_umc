@@ -14,16 +14,31 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ImageController {
 
+    /**
+     * Serve imagens de livros do uploads.
+     * Retorna FileSystemResource ou default no-image se não existe.
+     * Endpoint direto /uploads/livros/filename.
+     * Usado por frontend vitrine.
+     */
     @GetMapping("/uploads/livros/{filename:.+}")
     public ResponseEntity<Resource> serveImage(@PathVariable String filename) {
+
         Path path = Paths.get("uploads/livros/" + filename);
         Resource file = new FileSystemResource(path);
 
         if (file.exists()) {
             return ResponseEntity.ok(file);
         } else {
- 
+
             return ResponseEntity.ok(new ClassPathResource("static/images/no-image.png"));
         }
     }
 }
+
+/**
+ * DESCRIÇÃO DO ARQUIVO:
+ * Controller para servir imagens de livros estáticas.
+ * Endpoint /uploads/livros/{filename} retorna arquivo ou no-image.png.
+ * Usa FileSystemResource/ClassPathResource.
+ * Essencial para vitrine frontend.
+ */

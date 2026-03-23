@@ -25,16 +25,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import umc.exs.model.entidades.foundation.enums.Genero;
+import umc.exs.model.enums.Genero;
 
 @Entity
 @Table(name = "users")
-@Getter // Melhor usar Getter/Setter separados para evitar problemas com ToString/Equals
+@Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = {"cartoes", "enderecos", "senha"}) // Segurança e Performance
+@ToString(exclude = {"cartoes", "enderecos", "senha"})
 public class Cliente {
 
     @Id
@@ -73,7 +73,6 @@ public class Cliente {
     @Column(nullable = false)
     private Double saldoTokens = 0.0;
 
-    // Cascade PERSIST e MERGE são perfeitos para o seu fluxo de "Reuso" de endereços/cartões
     @ManyToMany(fetch = FetchType.LAZY, cascade = {
             CascadeType.PERSIST,
             CascadeType.MERGE

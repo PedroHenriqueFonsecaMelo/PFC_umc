@@ -577,27 +577,58 @@ void updateEntityFromDto(ClienteDTO dto, @MappingTarget Cliente entity);
 
 ---
 
-## 7. Resumo em Tabela
+## 7. Anotações Adicionais do Projeto
+
+### @Profile
+**Definição**: Ativa configuração apenas para um perfil específico do Spring Boot (local, prod, test).
+
+**Exemplo**:
+```java
+@Configuration
+@Profile("local")
+public class WebConfig implements WebMvcConfigurer { ... }
+```
+
+### @EnableWebSocketMessageBroker
+**Definição**: Habilita suporte a WebSocket com STOMP protocol.
+
+**Exemplo**:
+```java
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer { ... }
+```
+
+### @SuppressWarnings("null")
+**Definição**: Suprime warnings específicos do compilador (null checks).
+
+### @NonNull
+**Definição**: Indica que parâmetro não pode ser null (Lombok/IDEs).
+
+### @RequiredArgsConstructor (Lombok)
+**Definição**: Gera construtor para campos `final`.
+
+## 8. Resumo em Tabela (Texto)
 
 | Annotation | Pacote | Uso Principal |
 |------------|--------|---------------|
-| @SpringBootApplication | Spring Boot | Classe principal |
-| @Controller | Spring MVC | Controllers Thymeleaf |
-| @RestController | Spring MVC | APIs REST |
-| @Service | Spring | Camada de serviço |
-| @Repository | Spring | Repositories JPA |
-| @Component | Spring | Componentes genéricos |
-| @Configuration | Spring | Configurações |
-| @Autowired | Spring | Injeção de dependência |
-| @Transactional | Spring | Transações DB |
+| @SpringBootApp | Spring Boot | Classe principal |
+| @Controller | Spring MVC | View controllers |
+| @RestController | Spring MVC | REST APIs |
+| @Service | Spring | Services |
+| @Repository | Spring Data | Repositories |
+| @Component | Spring | Components |
+| @Configuration | Spring | Configs |
+| @Autowired | Spring | DI |
+| @Transactional | Spring Tx | Transações |
 | @Entity | JPA | Entidades |
-| @Id | JPA | Chave primária |
-| @ManyToOne, @OneToMany | JPA | Relações DB |
-| @Column | JPA | Colunas DB |
-| @NotBlank, @NotNull | Bean Validation | Validação |
-| @Getter, @Setter | Lombok | Getters/Setters |
-| @Builder | Lombok | Builder Pattern |
-| @Mapper | MapStruct | Mapeamento DTOs |
-| @RequestMapping | Spring Web | Rotas |
-| @AuthenticationPrincipal | Spring Security | Usuário logado |
+| @Id | JPA | PK |
+| @ManyToOne | JPA | Relacionamentos |
+| @NotBlank | Validation | Validação |
+| @Builder | Lombok | Builder |
+| @Mapper | MapStruct | DTO mapping |
+| @Profile | Spring | Perfil específico |
+| @Value | Spring | Properties |
+
+**Atualizado**: Inclui todas anotações do projeto. Tabela textual.
 

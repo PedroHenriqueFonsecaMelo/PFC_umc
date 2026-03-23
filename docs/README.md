@@ -38,6 +38,19 @@ Este é um sistema de ** marketplace de livros** com as seguintes funcionalidade
 - **Avaliações**: Sistema de reviews e notas para livros
 - **Administração**: Painel admin para aprovação de livros
 
+### Arquitetura (ASCII Art)
+
+```
+Frontend (Thymeleaf)       Controllers API    Services        Model
++----------------+         +-------------+   +--------+     +----------+
+| ClientCtrl     | ----->  | AuthCtrl    |-->| Client |---->| Repo     |
+| IndexCtrl      |         | LivroCtrlApi|   | Service|     | DB (MySQL)
+| AdminViewCtrl  |         | TokenCtrl   |   +--------+
++----------------+         +-------------+   
+```
+
+**Atualizado**: Diagrama ASCII arquitetura textual.
+
 ---
 
 ## 📁 Estrutura de Diretórios

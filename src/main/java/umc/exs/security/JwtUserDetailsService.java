@@ -9,10 +9,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import umc.exs.model.daos.repository.AdminRepository;
-import umc.exs.model.daos.repository.ClienteRepository;
 import umc.exs.model.entidades.foundation.Administrador;
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.repository.AdminRepository;
+import umc.exs.repository.ClienteRepository;
 
 @Service
 public class JwtUserDetailsService implements UserDetailsService {

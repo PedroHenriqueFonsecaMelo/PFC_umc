@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.model.dtos.AvaliacaoLivroDTO;
+import umc.exs.DTOs.livro.AvaliacaoLivroDTO;
 import umc.exs.model.entidades.foundation.AvaliacaoLivro;
-import umc.exs.service.AvaliacaoLivroService;
+import umc.exs.service.core.AvaliacaoLivroService;
 
 @RestController
 @RequestMapping("/api/avaliacoes")
@@ -43,8 +43,17 @@ public class AvaliacaoLivroController {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Erro ao criar avaliação.");
-        }
     }
+}
+
+/**
+ * DESCRIÇÃO DO ARQUIVO:
+ * Controller API avaliações livros.
+ * Endpoints /api/avaliacoes POST criar, GET /livro/{isbn}, /media.
+ * Integra AvaliacaoLivroService, autenticação UserDetails.
+ * Retorna avaliações, média ou entidade salva.
+ */
+
 
     /**
      * Get all reviews for a specific book by ISBN

@@ -22,7 +22,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = "clientes") // Evita recursão infinita (Ciclo vicioso)
+@ToString(exclude = "clientes")
 public class Endereco {
 
     @Id
