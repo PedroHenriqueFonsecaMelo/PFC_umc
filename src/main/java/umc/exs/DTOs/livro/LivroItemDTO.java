@@ -11,4 +11,5 @@ public class LivroItemDTO {
     private String titulo;
     private String autor;
     private String isbn;
+    private int quantidadedeFotos;
 }

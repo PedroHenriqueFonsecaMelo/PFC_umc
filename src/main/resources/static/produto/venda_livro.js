@@ -61,7 +61,8 @@ function App() {
             livros: books.map(b => ({
                 titulo: b.titulo.trim(),
                 autor: b.autor.trim(),
-                isbn: b.isbn.replace(/\D/g, "")
+                isbn: b.isbn.replace(/\D/g, ""),
+                quantidadedeFotos: b.fotos ? b.fotos.length : 0
             }))
         };
 

@@ -74,7 +74,7 @@ public class LivroService {
         for (LivroItemDTO item : dto.getLivros()) {
             List<String> bookFotosUrls = new ArrayList<>();
 
-            int fotosPorLivro = 3;
+            int fotosPorLivro =  item.getQuantidadedeFotos();
 
             for (int k = 0; k < fotosPorLivro; k++) {
                 if (fotoIndex < fotos.size()) {
@@ -96,8 +96,12 @@ public class LivroService {
 
             String jsonFotos = "[]";
             try {
-                jsonFotos = objectMapper.writeValueAsString(bookFotosUrls);
+                if (!bookFotosUrls.isEmpty()) {
+                    jsonFotos = objectMapper.writeValueAsString(bookFotosUrls);
+                }
+                
             } catch (JsonProcessingException e) {
+                System.out.println("Erro ao converter fotos para JSON: " + e.getMessage());
                 jsonFotos = "[]";
             }
 
@@ -267,10 +271,6 @@ public class LivroService {
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
 
         String emailAdmin = "admin@sistema.com";
-
-        System.out.println("estado: " + estado);
-        System.out.println("estado: " + EstadoLivro.RUIM.name());
-        System.out.println("estado: " + EstadoLivro.RUIM.name().toString());
 
 
         if (!estado.equalsIgnoreCase(EstadoLivro.RUIM.name().toString())) {
