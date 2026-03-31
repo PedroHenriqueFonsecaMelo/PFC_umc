@@ -4,97 +4,166 @@
     <meta charset="UTF-8">
     <title>Auditoria - Suas Atividades</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --ink:    #2C241B;
+            --paper:  #F9F6F0;
+            --cream:  #EDE8DF;
+            --accent: #722F37;
+            --forest: #4A5D23;
+            --white:  #FFFFFF;
+            --muted:  #7A6E65;
+            --border: rgba(44,36,27,.15);
+        }
+
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
         }
 
         header {
-            background-color: #030508ff;
-            padding: 15px;
-            color: white;
-            text-align: center;
-            font-size: 22px;
+            background: var(--ink);
+            color: var(--paper);
+            padding: 1rem 5vw;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .header-voltar {
+            display: inline-block;
+            padding: .5rem 1rem;
+            background: var(--ink);
+            color: var(--paper);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .8rem;
+            font-weight: 500;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 1px solid rgba(249,246,240,.3);
+            transition: background .2s, color .2s, border-color .2s;
+        }
+
+        .header-voltar:hover {
+            background: var(--paper);
+            color: var(--ink);
+        }
+
+        .header-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--paper);
+            white-space: nowrap;
         }
 
         .container {
-            width: 85%;
-            margin: auto;
-            margin-top: 25px;
-            margin-bottom: 40px;
-            background-color: white;
-            padding: 20px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--white);
+            border: 1px solid var(--border);
+            box-shadow: 4px 4px 0 var(--border);
         }
 
         h2 {
-            margin-top: 0;
-            color: #06090cff;
-            font-size: 26px;
-            font-weight: normal;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(44,36,27,.12);
+            padding-bottom: .75rem;
+            margin-bottom: 1rem;
+            color: var(--ink);
+        }
+
+        .descricao {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.6;
         }
 
         table {
-            width: 100%;
             border-collapse: collapse;
-            margin-top: 25px;
+            width: 100%;
+            margin-top: 1.5rem;
         }
 
-        table thead {
-            background-color: #e1e1e1;
-        }
-
-        table th, table td {
-            padding: 12px;
-            border: 1px solid #bbb;
+        table th {
+            font-size: .68rem;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 2px solid var(--ink);
+            padding: .75rem;
             text-align: left;
-            font-size: 15px;
         }
 
-        table tr:nth-child(even) {
-            background-color: #f9f9f9;
+        table td {
+            padding: .75rem;
+            border-bottom: 1px solid rgba(44,36,27,.08);
+            font-size: .875rem;
+        }
+
+        table tr:hover td {
+            background: rgba(44,36,27,.03);
         }
 
         .empty-message {
-            font-size: 17px;
-            padding: 15px;
             text-align: center;
-            color: #555;
+            color: var(--muted);
+            padding: 2rem;
+            font-style: italic;
+            font-family: 'IM Fell English', serif;
         }
 
-        .voltar {
-            margin-top: 25px;
+        .btn-voltar {
             display: inline-block;
-            padding: 10px 18px;
-            background-color: #030405ff;
-            color: white;
+            margin-top: 1.75rem;
+            padding: .65rem 1.5rem;
+            background: var(--ink);
+            color: var(--paper);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .78rem;
+            font-weight: 500;
+            letter-spacing: .12em;
+            text-transform: uppercase;
             text-decoration: none;
-            border-radius: 4px;
+            border: 2px solid var(--ink);
+            transition: background .2s, color .2s;
         }
 
-        .voltar:hover {
-            background-color: #525457ff;
+        .btn-voltar:hover {
+            background: transparent;
+            color: var(--ink);
         }
-
     </style>
 </head>
 
 <body>
 
 <header>
-    Histórico de Auditoria
+    <a th:href="@{/clientes/meu-perfil}" class="header-voltar">← Voltar</a>
+    <span class="header-title">Auditoria</span>
 </header>
 
 <div class="container">
 
     <h2>Registros de suas atividades</h2>
 
-    <p>Aqui você encontra as ações registradas pelo sistema relacionadas à sua conta.</p>
+    <p class="descricao">Aqui você encontra as ações registradas pelo sistema relacionadas à sua conta.</p>
 
     <!-- Caso não exista nenhum log -->
     <div th:if="${#lists.isEmpty(logs)}" class="empty-message">
@@ -120,7 +189,7 @@
         </tbody>
     </table>
 
-    <a th:href="@{/clientes/homepage}" class="voltar">Voltar</a>
+    <a th:href="@{/clientes/homepage}" class="btn-voltar">← Página inicial</a>
 </div>
 
 </body>

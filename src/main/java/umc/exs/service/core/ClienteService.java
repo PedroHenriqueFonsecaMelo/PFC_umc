@@ -144,11 +144,34 @@ public class ClienteService {
     // 🔐 SEGURANÇA E BUSCA
     // ==========================================================
 
+    @Transactional
     public Optional<ClienteDTO> autenticarCliente(String email, String senha) {
-        return coreService.encontrarPorEmail(email)
-                .filter(c -> passwordEncoder.matches(senha, c.getSenha()))
-                .map(clienteMapper::paraDTO);
-                
+        Optional<Cliente> clienteOpt = coreService.encontrarPorEmail(email);
+
+        if (clienteOpt.isEmpty()) {
+            // Usuário não encontrado — não revela qual campo está errado
+            return Optional.empty();
+        }
+
+        Cliente cliente = clienteOpt.get();
+
+        // Verifica bloqueio ANTES de checar senha (evita timing attack)
+        if (cliente.isBloqueada()) {
+            throw new IllegalArgumentException("Conta bloqueada por excesso de tentativas. Contate o suporte.");
+        }
+
+        if (!passwordEncoder.matches(senha, cliente.getSenha())) {
+            // Incrementa tentativas e salva
+            cliente.registrarFalhaLogin();
+            clienteRepository.save(cliente);
+            return Optional.empty();
+        }
+
+        // Login bem-sucedido — reseta tentativas
+        cliente.resetarTentativas();
+        clienteRepository.save(cliente);
+
+        return Optional.of(clienteMapper.paraDTO(cliente));
     }
 
     public void iniciarRecuperacaoSenha(String email) {

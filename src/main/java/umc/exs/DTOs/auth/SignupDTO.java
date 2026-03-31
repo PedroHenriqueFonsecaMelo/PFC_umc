@@ -21,7 +21,7 @@ import lombok.Setter;
 public class SignupDTO {
 
     @NotBlank(message = "O CPF é obrigatório.")
-    @Pattern(regexp = "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", message = "Formato: 000.000.000-00")
+    @Pattern(regexp = "\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}", message = "CPF inválido. Use 000.000.000-00 ou apenas números.")
     private String cpf;
 
     @NotBlank(message = "O e-mail é obrigatório.")

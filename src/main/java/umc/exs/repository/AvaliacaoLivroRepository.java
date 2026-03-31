@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import umc.exs.model.entidades.foundation.AvaliacaoLivro;
 
@@ -35,6 +36,12 @@ public interface AvaliacaoLivroRepository extends JpaRepository<AvaliacaoLivro, 
      * @return true se existe
      */
     boolean existsByIsbnAndAvaliadorId(String isbn, Long avaliadorId);
+
+    /**
+     * Retorna ISBNs distintos que possuem ao menos uma avaliação.
+     */
+    @Query("SELECT DISTINCT a.isbn FROM AvaliacaoLivro a WHERE a.isbn IS NOT NULL")
+    List<String> findDistinctIsbns();
 }
 
 /**

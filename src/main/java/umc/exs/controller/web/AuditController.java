@@ -3,7 +3,7 @@ package umc.exs.controller.web;
 import java.security.Principal;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,14 +16,12 @@ import umc.exs.service.core.ClienteService;
 import umc.exs.service.log.LogAuditoriaService;
 
 @Controller
+@RequiredArgsConstructor
 @RequestMapping("/historico")
 public class AuditController {
 
-    @Autowired
-    private ClienteService clienteService;
-
-    @Autowired
-    private LogAuditoriaService logAuditoriaService;
+    private final ClienteService clienteService;
+    private final LogAuditoriaService logAuditoriaService;
 
 /**
  * Mostra auditoria logs cliente autenticado.

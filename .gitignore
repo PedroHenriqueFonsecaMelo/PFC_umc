@@ -6,7 +6,6 @@
 /docker-compose.yml
 /.env
 /.env.local
-/.env.example
 /.env.production
 /.env.test
 /.idea
@@ -21,3 +20,7 @@ user.db
 *.sql
 *.sql.gz
 /uploads
+*.p12
+logs/
+.idea
+CLAUDE.md

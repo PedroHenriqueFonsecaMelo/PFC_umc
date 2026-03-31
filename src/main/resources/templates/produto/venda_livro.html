@@ -1,25 +1,680 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Vender Múltiplos Livros (até 5) - Projeto Salt</title>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vender Livros — Bibliotroca</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        <script
-            src="https://unpkg.com/react@18/umd/react.development.js"></script>
-        <script
-            src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    :root {
+      --ink:    #2C241B;
+      --paper:  #F9F6F0;
+      --cream:  #EDE8DF;
+      --accent: #722F37;
+      --forest: #4A5D23;
+      --muted:  #7A6E65;
+      --white:  #FFFFFF;
+      --border: rgba(44,36,27,.15);
+      --serif:  'Playfair Display', Georgia, serif;
+      --fell:   'IM Fell English', Georgia, serif;
+      --sans:   'DM Sans', sans-serif;
+    }
 
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    </head>
-    <body class="bg-gradient-to-br from-indigo-50 to-purple-50 min-h-screen flex items-center justify-center p-4">
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+    }
 
-        <div id="root" class="max-w-4xl w-full"></div>
+    /* ── MASTHEAD ────────────────────────────────────────────── */
+    .masthead {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: var(--paper);
+      border-bottom: 2px solid var(--ink);
+    }
+    .masthead-top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .6rem 5vw;
+      border-bottom: 1px solid var(--border);
+    }
+    .masthead-tagline {
+      font-size: .68rem; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--muted); flex: 1;
+    }
+    @media (max-width:599px) { .masthead-tagline { display: none; } }
+    .masthead-logo {
+      font-family: var(--serif);
+      font-size: clamp(1.4rem,3vw,2rem); font-weight: 700;
+      color: var(--ink); text-decoration: none;
+      letter-spacing: -.02em; text-align: center; flex: 1;
+    }
+    .masthead-logo em { font-style: italic; color: var(--accent); }
+    .masthead-actions {
+      display: flex; align-items: center; gap: .75rem;
+      justify-content: flex-end; flex: 1;
+    }
+    .masthead-nav {
+      display: flex; align-items: center; justify-content: center;
+      padding: .45rem 0;
+    }
+    .masthead-nav a {
+      font-size: .7rem; font-weight: 500;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none;
+      padding: 0 1.5rem;
+      border-right: 1px solid var(--border);
+      transition: color .2s;
+    }
+    .masthead-nav a:first-child { border-left: 1px solid var(--border); }
+    .masthead-nav a:hover,
+    .masthead-nav a.active { color: var(--ink); }
+    .btn-classic {
+      font-family: var(--sans); font-size: .72rem; font-weight: 500;
+      letter-spacing: .09em; text-transform: uppercase;
+      padding: .38rem .95rem;
+      border: 1.5px solid var(--ink);
+      background: transparent; color: var(--ink);
+      text-decoration: none; transition: background .2s, color .2s;
+    }
+    .btn-classic:hover { background: var(--ink); color: var(--paper); }
+    .btn-classic-filled {
+      background: var(--accent); border-color: var(--accent); color: var(--white);
+    }
+    .btn-classic-filled:hover { background: #5a2329; border-color: #5a2329; }
+    .btn-logout {
+      font-size: .72rem; font-weight: 500; letter-spacing: .07em;
+      text-transform: uppercase; padding: .35rem .85rem;
+      background: transparent; color: var(--ink);
+      border: 1.5px solid var(--border);
+      cursor: pointer; text-decoration: none;
+      transition: background .2s, color .2s;
+    }
+    .btn-logout:hover { background: var(--ink); color: var(--paper); }
+    .nav-guest { display: flex; align-items: center; gap: .75rem; }
+    .nav-user { display: none; align-items: center; gap: .75rem; }
+    .nav-user-name { font-size: .78rem; font-weight: 500; color: var(--ink); }
+    .nav-user-name span { color: var(--accent); font-style: italic; }
 
-        <script type="text/babel" th:src="@{/produto/venda_livro.js}"></script>
+    /* ── PAGE ────────────────────────────────────────────────── */
+    .page-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 118px 5vw 5rem;
+    }
 
-    </body>
+    .page-header {
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-kicker {
+      font-size: .67rem; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--muted);
+      display: flex; align-items: center; gap: .75rem;
+      margin-bottom: .75rem;
+    }
+    .page-kicker::before {
+      content: ''; height: 1px; width: 24px; background: var(--border);
+    }
+    .page-title {
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700; letter-spacing: -.02em; line-height: 1.1;
+      margin-bottom: .5rem;
+    }
+    .page-title em { font-style: italic; color: var(--accent); }
+    .page-sub {
+      font-family: var(--fell); font-style: italic;
+      font-size: .95rem; color: var(--muted); line-height: 1.7;
+    }
+
+    /* ── TOOLBAR (contador + botão adicionar) ────────────────── */
+    .toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem; flex-wrap: wrap; gap: .75rem;
+    }
+    .toolbar-count {
+      font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--muted);
+    }
+    .toolbar-count strong { color: var(--ink); font-weight: 600; }
+    .btn-add {
+      font-family: var(--sans); font-size: .72rem; font-weight: 600;
+      letter-spacing: .09em; text-transform: uppercase;
+      padding: .5rem 1.25rem;
+      border: 1.5px solid var(--forest);
+      background: transparent; color: var(--forest);
+      cursor: pointer; transition: background .2s, color .2s;
+    }
+    .btn-add:hover:not(:disabled) { background: var(--forest); color: var(--white); }
+    .btn-add:disabled { opacity: .38; cursor: not-allowed; }
+
+    /* ── BOOK CARD ───────────────────────────────────────────── */
+    .book-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      margin-bottom: 1.25rem;
+      position: relative;
+      animation: cardIn .35s ease both;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .book-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--forest), var(--accent));
+    }
+
+    .book-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.25rem .75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .book-num {
+      font-family: var(--serif); font-size: .8rem; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase;
+      color: rgba(44,36,27,.35);
+    }
+    .book-actions { display: flex; gap: 1rem; }
+    .btn-text {
+      font-size: .69rem; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; background: none; border: none;
+      cursor: pointer; transition: color .2s; padding: 0;
+    }
+    .btn-text.clear  { color: rgba(114,47,55,.5); }
+    .btn-text.clear:hover  { color: var(--accent); }
+    .btn-text.remove { color: rgba(44,36,27,.3); }
+    .btn-text.remove:hover { color: var(--ink); }
+
+    .book-card-body { padding: 1.25rem; }
+
+    .fields-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .875rem;
+      margin-bottom: .875rem;
+    }
+    .fields-row.full { grid-template-columns: 1fr; }
+    @media (max-width: 560px) { .fields-row { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: .35rem; }
+    .field label {
+      font-size: .65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .1em;
+      color: rgba(74,93,35,.7);
+    }
+    .field-wrap { position: relative; }
+    .field input[type="text"] {
+      width: 100%; padding: .7rem .875rem;
+      background: var(--paper);
+      border: 1px solid rgba(74,93,35,.2);
+      border-radius: 0;
+      color: var(--ink); font-size: .9rem;
+      font-family: var(--sans); outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field input[type="text"]::placeholder { color: rgba(44,36,27,.3); }
+    .field input[type="text"]:focus {
+      border-color: var(--forest);
+      box-shadow: 0 0 0 3px rgba(74,93,35,.1);
+    }
+    .spinner {
+      position: absolute; right: .75rem; top: 50%;
+      transform: translateY(-50%);
+      width: 14px; height: 14px;
+      border: 2px solid rgba(74,93,35,.2);
+      border-top-color: var(--forest);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+    .spinner.active { display: block; }
+
+    /* ── UPLOAD ──────────────────────────────────────────────── */
+    .upload-area {
+      position: relative;
+      border: 1.5px dashed rgba(74,93,35,.3);
+      background: var(--paper);
+      padding: 1.25rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    .upload-area:hover { border-color: var(--forest); background: rgba(74,93,35,.03); }
+    .upload-area input[type="file"] {
+      position: absolute; inset: 0; opacity: 0;
+      cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-placeholder {
+      font-family: var(--fell); font-style: italic;
+      font-size: .85rem; color: var(--muted);
+      pointer-events: none;
+    }
+    .upload-placeholder small {
+      display: block; margin-top: .2rem;
+      font-size: .72rem; font-style: normal;
+      font-family: var(--sans); letter-spacing: .06em;
+      text-transform: uppercase; opacity: .6;
+    }
+    .upload-previews {
+      display: flex; gap: .5rem; justify-content: center;
+      flex-wrap: wrap; pointer-events: none;
+    }
+    .upload-previews img {
+      width: 56px; height: 56px; object-fit: cover;
+      border: 1px solid var(--border);
+    }
+
+    /* ── SUBMIT ──────────────────────────────────────────────── */
+    .submit-area { margin-top: 2rem; }
+    .btn-submit {
+      width: 100%; padding: 1rem;
+      background: var(--ink); color: var(--paper);
+      border: 2px solid var(--ink);
+      font-family: var(--sans); font-size: .82rem; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase;
+      cursor: pointer; transition: background .2s, color .2s;
+      position: relative; overflow: hidden;
+    }
+    .btn-submit:hover:not(:disabled) { background: transparent; color: var(--ink); }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── ALERT ───────────────────────────────────────────────── */
+    .alert {
+      padding: .75rem 1rem; margin-bottom: 1.5rem;
+      font-size: .83rem; font-weight: 500;
+      display: flex; align-items: center; gap: .6rem;
+      border: 1px solid;
+    }
+    .alert-erro { background: rgba(114,47,55,.07); border-color: rgba(114,47,55,.25); color: var(--accent); }
+    .alert-erro::before { content: '✕'; font-weight: 700; }
+    .alert-ok { background: rgba(74,93,35,.07); border-color: rgba(74,93,35,.25); color: var(--forest); }
+    .alert-ok::before { content: '✓'; font-weight: 700; }
+    .alert { display: none; }
+    .alert.show { display: flex; }
+
+    /* ── FOOTER ──────────────────────────────────────────────── */
+    footer {
+      background: var(--ink); color: rgba(249,246,240,.35);
+      padding: 2rem 5vw; text-align: center;
+    }
+    footer::before {
+      content: '◆  ◆  ◆'; display: block;
+      font-size: .6rem; letter-spacing: .5em;
+      color: rgba(249,246,240,.15); margin-bottom: 1.25rem;
+    }
+    .footer-logo {
+      font-family: var(--serif); font-size: 1.1rem; font-weight: 700;
+      color: rgba(249,246,240,.5); font-style: italic; margin-bottom: .3rem;
+    }
+    .footer-logo em { color: var(--accent); }
+    .footer-copy { font-size: .68rem; }
+  </style>
+</head>
+<body>
+
+  <!-- MASTHEAD -->
+  <header class="masthead">
+    <div class="masthead-top">
+      <span class="masthead-tagline">Marketplace de Livros Usados</span>
+      <a class="masthead-logo" th:href="@{/}">Biblio<em>troca</em></a>
+      <div class="masthead-actions">
+        <div class="nav-guest" id="navGuest">
+          <a class="btn-classic" th:href="@{/entrar}">Entrar</a>
+          <a class="btn-classic btn-classic-filled" th:href="@{/clientes/novo-cadastro}">Cadastrar</a>
+        </div>
+        <div class="nav-user" id="navUser">
+          <span class="nav-user-name">Olá, <span id="navPrimeiroNome">...</span></span>
+          <a class="btn-logout" th:href="@{/clientes/meu-perfil}">Perfil</a>
+          <a class="btn-logout" th:href="@{/clientes/sair}">Sair</a>
+        </div>
+      </div>
+    </div>
+    <nav class="masthead-nav">
+      <a th:href="@{/livros/vitrine}">Vitrine</a>
+      <a th:href="@{/livros/vender}" class="active">Vender</a>
+      <a id="navMinhaConta" th:href="@{/entrar}">Minha Conta</a>
+    </nav>
+  </header>
+
+  <!-- CONTEÚDO -->
+  <div class="page-wrap">
+
+    <header class="page-header">
+      <div class="page-kicker">Anunciar livros</div>
+      <h1 class="page-title">Vender <em>livros</em></h1>
+      <p class="page-sub">
+        Cadastre até 5 livros de uma vez. Nossa curadoria avalia cada título
+        antes de publicar na vitrine — você recebe tokens quando a venda for concluída.
+      </p>
+    </header>
+
+    <div class="alert alert-erro" id="alertErro"></div>
+    <div class="alert alert-ok"   id="alertOk"></div>
+
+    <div class="toolbar">
+      <span class="toolbar-count">
+        <strong id="countAtual">1</strong> / 5 livros adicionados
+      </span>
+      <button class="btn-add" id="btnAdicionar" type="button">+ Adicionar livro</button>
+    </div>
+
+    <form id="formVenda" novalidate>
+      <div id="livrosContainer"></div>
+
+      <div class="submit-area">
+        <button class="btn-submit" id="btnSubmit" type="submit">
+          Enviar para avaliação
+        </button>
+      </div>
+    </form>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Biblio<em>troca</em></div>
+    <p class="footer-copy">© 2025 Bibliotroca — Todos os direitos reservados</p>
+  </footer>
+
+  <script>
+    /* ─────────────────────────────────────────────────────────
+       Estado
+    ───────────────────────────────────────────────────────── */
+    const MAX = 5;
+    let livros = [];
+    let nextId = 1;
+
+    /* ─────────────────────────────────────────────────────────
+       Nav — detecta sessão
+    ───────────────────────────────────────────────────────── */
+    (async function() {
+      try {
+        const res = await fetch('/clientes/meu-perfil-json', { credentials: 'include' });
+        if (!res.ok) return;
+        const c = await res.json();
+        const nome = (c.nome || '').split(' ')[0];
+        document.getElementById('navPrimeiroNome').textContent = nome;
+        document.getElementById('navGuest').style.display = 'none';
+        document.getElementById('navUser').style.display  = 'flex';
+        document.getElementById('navMinhaConta').href = '/clientes/meu-perfil';
+      } catch (_) {}
+    })();
+
+    /* ─────────────────────────────────────────────────────────
+       Template de card de livro
+    ───────────────────────────────────────────────────────── */
+    function criarCard(id, index) {
+      const card = document.createElement('div');
+      card.className = 'book-card';
+      card.dataset.id = id;
+      card.innerHTML = `
+        <div class="book-card-header">
+          <span class="book-num">Livro #0${index}</span>
+          <div class="book-actions">
+            <button type="button" class="btn-text clear"  data-action="limpar"  data-id="${id}">Limpar</button>
+            <button type="button" class="btn-text remove" data-action="remover" data-id="${id}">Remover</button>
+          </div>
+        </div>
+        <div class="book-card-body">
+          <div class="fields-row full">
+            <div class="field">
+              <label for="isbn-${id}">ISBN</label>
+              <div class="field-wrap">
+                <input type="text" id="isbn-${id}" data-field="isbn" data-id="${id}"
+                       placeholder="Ex: 9788532511010" maxlength="17" autocomplete="off"/>
+                <div class="spinner" id="spinner-${id}"></div>
+              </div>
+            </div>
+          </div>
+          <div class="fields-row">
+            <div class="field">
+              <label for="titulo-${id}">Título</label>
+              <div class="field-wrap">
+                <input type="text" id="titulo-${id}" data-field="titulo" data-id="${id}"
+                       placeholder="Título do livro" required/>
+              </div>
+            </div>
+            <div class="field">
+              <label for="autor-${id}">Autor</label>
+              <div class="field-wrap">
+                <input type="text" id="autor-${id}" data-field="autor" data-id="${id}"
+                       placeholder="Nome do autor" required/>
+              </div>
+            </div>
+          </div>
+          <div class="upload-area" id="upload-area-${id}">
+            <input type="file" multiple accept="image/*" id="fotos-${id}" data-id="${id}"/>
+            <div class="upload-placeholder" id="upload-placeholder-${id}">
+              Clique para adicionar fotos do livro
+              <small>até 3 imagens · JPG ou PNG</small>
+            </div>
+            <div class="upload-previews" id="upload-previews-${id}" style="display:none"></div>
+          </div>
+        </div>`;
+      return card;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       Gerência de livros
+    ───────────────────────────────────────────────────────── */
+    function adicionarLivro() {
+      if (livros.length >= MAX) return;
+      const id = nextId++;
+      livros.push({ id, isbn: '', titulo: '', autor: '', arquivos: [], quantidadedeFotos: 0 });
+      const index = livros.length;
+      const card = criarCard(id, index);
+      document.getElementById('livrosContainer').appendChild(card);
+      atualizarUI();
+      // scroll suave até o novo card
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function removerLivro(id) {
+      if (livros.length <= 1) return;
+      livros = livros.filter(l => l.id !== id);
+      document.querySelector(`.book-card[data-id="${id}"]`).remove();
+      // reindex visual
+      document.querySelectorAll('.book-card').forEach((card, i) => {
+        card.querySelector('.book-num').textContent = `Livro #0${i + 1}`;
+      });
+      atualizarUI();
+    }
+
+    function limparLivro(id) {
+      const livro = livros.find(l => l.id === id);
+      if (!livro) return;
+      livro.isbn = ''; livro.titulo = ''; livro.autor = ''; livro.arquivos = []; livro.quantidadedeFotos = 0;
+      document.getElementById(`isbn-${id}`).value   = '';
+      document.getElementById(`titulo-${id}`).value = '';
+      document.getElementById(`autor-${id}`).value  = '';
+      document.getElementById(`fotos-${id}`).value  = '';
+      document.getElementById(`upload-placeholder-${id}`).style.display = '';
+      const prev = document.getElementById(`upload-previews-${id}`);
+      prev.innerHTML = ''; prev.style.display = 'none';
+    }
+
+    function atualizarUI() {
+      document.getElementById('countAtual').textContent = livros.length;
+      document.getElementById('btnAdicionar').disabled = livros.length >= MAX;
+      // esconde botão remover se só há 1 livro
+      document.querySelectorAll('.btn-text.remove').forEach(btn => {
+        btn.style.visibility = livros.length > 1 ? 'visible' : 'hidden';
+      });
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       Atualiza campo no estado
+    ───────────────────────────────────────────────────────── */
+    function setField(id, field, value) {
+      const livro = livros.find(l => l.id === id);
+      if (livro) livro[field] = value;
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       Busca dados pelo ISBN (OpenLibrary)
+    ───────────────────────────────────────────────────────── */
+    async function buscarIsbn(id, isbnBruto) {
+      const isbn = isbnBruto.replace(/\D/g, '');
+      if (isbn.length < 10) return;
+      const spinner = document.getElementById(`spinner-${id}`);
+      spinner.classList.add('active');
+      try {
+        const res  = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`);
+        const data = await res.json();
+        const info = data[`ISBN:${isbn}`];
+        if (info) {
+          const titulo = info.title || '';
+          const autor  = info.authors ? info.authors[0].name : '';
+          document.getElementById(`titulo-${id}`).value = titulo;
+          document.getElementById(`autor-${id}`).value  = autor;
+          setField(id, 'titulo', titulo);
+          setField(id, 'autor',  autor);
+        }
+      } catch (_) {}
+      finally { spinner.classList.remove('active'); }
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       Upload de fotos — preview
+    ───────────────────────────────────────────────────────── */
+    function handleFotos(id, files) {
+      const selecionados = Array.from(files).slice(0, 3);
+      const livro = livros.find(l => l.id === id);
+      if (livro) {
+        livro.arquivos = selecionados;
+        livro.quantidadedeFotos = selecionados.length;
+      }
+
+      const placeholder = document.getElementById(`upload-placeholder-${id}`);
+      const previews    = document.getElementById(`upload-previews-${id}`);
+
+      if (selecionados.length > 0) {
+        placeholder.style.display = 'none';
+        previews.style.display    = 'flex';
+        previews.innerHTML = selecionados.map(f => {
+          const url = URL.createObjectURL(f);
+          return `<img src="${url}" alt="preview"/>`;
+        }).join('');
+      } else {
+        placeholder.style.display = '';
+        previews.style.display    = 'none';
+        previews.innerHTML        = '';
+      }
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       Delegação de eventos no container
+    ───────────────────────────────────────────────────────── */
+    document.getElementById('livrosContainer').addEventListener('click', e => {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      const id = Number(btn.dataset.id);
+      if (btn.dataset.action === 'remover') removerLivro(id);
+      if (btn.dataset.action === 'limpar')  limparLivro(id);
+    });
+
+    document.getElementById('livrosContainer').addEventListener('input', e => {
+      const el = e.target;
+      if (!el.dataset.field) return;
+      const id = Number(el.dataset.id);
+      setField(id, el.dataset.field, el.value);
+      if (el.dataset.field === 'isbn') buscarIsbn(id, el.value);
+    });
+
+    document.getElementById('livrosContainer').addEventListener('change', e => {
+      const el = e.target;
+      if (el.type !== 'file') return;
+      const id = Number(el.dataset.id);
+      handleFotos(id, el.files);
+    });
+
+    document.getElementById('btnAdicionar').addEventListener('click', adicionarLivro);
+
+    /* ─────────────────────────────────────────────────────────
+       Submit
+    ───────────────────────────────────────────────────────── */
+    document.getElementById('formVenda').addEventListener('submit', async e => {
+      e.preventDefault();
+      esconderAlertas();
+
+      // Validação básica
+      const invalidos = livros.filter(l => !l.titulo.trim() || !l.autor.trim());
+      if (invalidos.length > 0) {
+        mostrarErro('Preencha título e autor de todos os livros.');
+        return;
+      }
+
+      const btnSubmit = document.getElementById('btnSubmit');
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = 'Enviando…';
+
+      const formData = new FormData();
+      const loteJson = { livros: livros.map(l => ({
+        titulo: l.titulo.trim(),
+        autor:  l.autor.trim(),
+        isbn:   l.isbn.replace(/\D/g, ''),
+        quantidadedeFotos: l.quantidadedeFotos
+      }))};
+      formData.append('loteDados', new Blob([JSON.stringify(loteJson)], { type: 'application/json' }));
+      livros.forEach(l => l.arquivos.forEach(f => formData.append('fotos', f)));
+
+      try {
+        const res = await fetch('/api/livros/lotes/vender', { method: 'POST', body: formData });
+        if (res.ok) {
+          mostrarOk('Lote enviado! Nossa curadoria avaliará em breve.');
+          setTimeout(() => window.location.href = '/', 2000);
+        } else {
+          const msg = await res.text();
+          mostrarErro(msg || 'Erro ao enviar o lote. Tente novamente.');
+          btnSubmit.disabled = false;
+          btnSubmit.textContent = 'Enviar para avaliação';
+        }
+      } catch (_) {
+        mostrarErro('Erro de conexão. Verifique sua internet e tente novamente.');
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = 'Enviar para avaliação';
+      }
+    });
+
+    /* ─────────────────────────────────────────────────────────
+       Alertas
+    ───────────────────────────────────────────────────────── */
+    function mostrarErro(msg) {
+      const el = document.getElementById('alertErro');
+      el.textContent = ''; // reseta (o ::before cuida do ✕)
+      // usa dataset para texto
+      el.dataset.msg = msg;
+      el.className = 'alert alert-erro show';
+      // workaround: coloca no span dentro
+      el.innerHTML = msg;
+      el.classList.add('show');
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    function mostrarOk(msg) {
+      const el = document.getElementById('alertOk');
+      el.innerHTML = msg;
+      el.classList.add('show');
+    }
+    function esconderAlertas() {
+      document.getElementById('alertErro').classList.remove('show');
+      document.getElementById('alertOk').classList.remove('show');
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       Init — adiciona o primeiro card
+    ───────────────────────────────────────────────────────── */
+    adicionarLivro();
+  </script>
+
+</body>
 </html>

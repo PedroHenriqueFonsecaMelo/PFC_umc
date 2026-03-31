@@ -1,379 +1,442 @@
-/* === VARIÁVEIS DE COR E GLOBAIS === */
+/* === VARIÁVEIS DE COR — PALETA VINTAGE BIBLIOTROCA === */
 :root {
-  --cor-fundo: #222222;
-  --cor-container: #ffffff;
-  --cor-preto: #222222;
-  --cor-cinza-escuro: #555555ff;
-  --cor-cinza-escuro-arrumado: #ffffff; /* <- Você mudou isso para branco */
-  --cor-cinza-medio: #aaaaaa;
-  --cor-cinza-claro: #eeeeee;
-  --raio-borda: 8px;
+  --ink:    #2C241B;
+  --paper:  #F9F6F0;
+  --cream:  #EDE8DF;
+  --accent: #722F37;
+  --forest: #4A5D23;
+  --white:  #FFFFFF;
+  --muted:  #7A6E65;
+  --border: rgba(44, 36, 27, .15);
 }
 
-* {
+/* === RESET BÁSICO === */
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* === FONTES GOOGLE === */
+/* Importadas via <link> no HTML para melhor performance */
+
+/* === BODY === */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--cor-fundo);
-  color: var(--cor-cinza-escuro);
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
   line-height: 1.6;
+  font-weight: 400;
 }
 
-/* === CONTAINER PRINCIPAL (CARD) === */
+/* === NAV DE RETORNO === */
+nav.page-nav {
+  background: var(--ink);
+  padding: .5rem 5vw;
+  margin-bottom: 0;
+}
+
+nav.page-nav a {
+  color: var(--paper);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .75rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+nav.page-nav a:hover {
+  color: var(--cream);
+}
+
+/* === CONTAINER PRINCIPAL === */
 .container {
-  max-width: 900px;
+  max-width: 680px;
   width: 95%;
-  margin: 30px auto;
-  padding: 30px 40px;
-  background-color: var(--cor-container);
-  border-radius: var(--raio-borda);
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  box-shadow: 4px 4px 0 var(--ink);
 }
 
-/* === TIPOGRAFIA E TÍTULOS === */
-h1 {
-  color: var(--cor-preto);
-  font-weight: 700;
+/* === CABEÇALHO DA PÁGINA === */
+.page-header {
+  text-align: center;
+  margin-bottom: 1.75rem;
 }
-.termos-scroll {
-  overflow-y: auto;
-  max-height: 50vh; /* controla o tamanho da área do scroll */
-  padding-right: 10px;
-  border: 1px solid #ddd;
-  margin: 10px 0;
+
+.page-header h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--ink);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: .75rem;
+  margin-bottom: .5rem;
+}
+
+.page-header p {
+  font-family: 'IM Fell English', Georgia, serif;
+  font-style: italic;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+/* === TÍTULOS INTERNOS === */
+h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--ink);
+  font-weight: 700;
 }
 
 h2 {
-  color: var(--cor-preto);
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--ink);
   font-weight: 600;
-  border-bottom: 1px solid var(--cor-cinza-claro);
-  padding-bottom: 10px;
-  margin-top: 20px;
-  margin-bottom: 25px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: .5rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
-.page-header {
-  text-align: center;
-  margin-bottom: 25px;
-}
-.page-header p {
-  font-size: 1.1rem;
-  color: var(--cor-cinza-escuro);
-}
-
+/* === SEPARADOR === */
 hr {
-  border: 0;
-  height: 1px;
-  background-color: var(--cor-cinza-claro);
-  margin: 40px 0;
+  border: none;
+  border-top: 1px solid rgba(44, 36, 27, .12);
+  margin: 1.5rem 0;
 }
 
-/* === MENSAGENS (SUCESSO/ERRO) === */
+/* === MENSAGENS (SUCESSO / ERRO) === */
 .mensagem {
-  padding: 15px 20px;
-  margin-bottom: 20px;
-  border-radius: var(--raio-borda);
-  font-weight: 600;
+  padding: .75rem 1rem;
+  margin-bottom: 1.25rem;
+  font-weight: 500;
+  font-size: .9rem;
   border: 1px solid;
 }
-.mensagem.sucesso {
-  background-color: #f0f0f0;
-  border-color: var(--cor-cinza-medio);
-  color: var(--cor-cinza-escuro);
-}
+
 .mensagem.erro {
-  background-color: var(--cor-preto);
-  border-color: var(--cor-preto);
-  color: var(--cor-container);
+  background: rgba(114, 47, 55, .08);
+  border-color: rgba(114, 47, 55, .3);
+  color: var(--accent);
 }
 
-/* === ESTRUTURA DO FORMULÁRIO === */
+.mensagem.sucesso {
+  background: rgba(74, 93, 35, .08);
+  border-color: rgba(74, 93, 35, .3);
+  color: var(--forest);
+}
+
+/* === FIELDSET / LEGEND === */
 fieldset {
-  border: none;
-  padding: 0;
+  border: 1px solid var(--border);
+  padding: 1.25rem;
   margin: 0;
 }
 
 legend {
-  font-size: 1.3rem;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1rem;
   font-weight: 600;
-  color: var(--cor-preto);
-  margin-bottom: 20px;
-  width: 100%;
+  color: var(--ink);
+  padding: 0 .5rem;
+  width: auto;
 }
 
-/* GRUPO DE FORMULÁRIO (LABEL + INPUT) */
+/* === GRUPOS DE FORMULÁRIO === */
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
   display: flex;
-  flex-direction: column; /* Label em cima, input embaixo */
+  flex-direction: column;
 }
 
-
-
-.form-group label {
-  font-weight: 600;
-  margin-bottom: 6px;
-  font-size: 0.9rem;
-  color: var(--cor-cinza-escuro-arrumado); /* <- Cor branca que você definiu */
+.form-group-2 {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
+/* === LABELS === */
+label {
+  display: block;
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--muted);
+  margin-bottom: .4rem;
+}
 
+/* Overrides para labels dentro de checkboxes */
+.form-group-checkboxes label {
+  font-size: .9rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  cursor: pointer;
+}
 
+/* === INPUTS, SELECT, TEXTAREA === */
+input[type="text"],
+input[type="email"],
+input[type="date"],
+input[type="password"],
+select,
+textarea {
+  width: 100%;
+  padding: .7rem .9rem;
+  border: 1.5px solid rgba(44, 36, 27, .18);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem;
+  outline: none;
+  transition: border-color .2s ease;
+  appearance: auto;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="date"]:focus,
+input[type="password"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+}
+
+input[readonly] {
+  background-color: var(--cream);
+  cursor: not-allowed;
+}
+
+/* Compatibilidade com seletores antigos dentro de .form-group e .form-group-2 */
 .form-group input[type="text"],
 .form-group input[type="email"],
 .form-group input[type="date"],
-.form-group input[type="password"] {
-  width: 100%;
-  padding: 12px;
-  font-size: 1rem;
-  border: 1px solid var(--cor-cinza-medio);
-  border-radius: 5px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: var(--cor-preto);
-  box-shadow: 0 0 5px rgba(247, 236, 236, 0.1);
-}
-
-/* Você tem duas regras .form-group input[readonly], a última prevalece */
-.form-group input[readonly] {
-  background-color: var(--cor-fundo); /* Deixa o fundo cinza-claro */
-  cursor: not-allowed;
-}
-.form-group input[readonly] {
-  background-color: var(--cor-container); /* Esta está sobrescrevendo a de cima */
-  cursor: not-allowed;
-}
-
-
-/* Você duplicou todo o .form-group como .form-group-2,
-   recomendo usar só .form-group, mas mantive por via das dúvidas */
-.form-group-2 {
-  margin-bottom: 15px;
-  display: flex;
-  flex-direction: column; /* Label em cima, input embaixo */
-}
-.form-group-2 label {
-  font-weight: 600;
-  margin-bottom: 6px;
-  font-size: 0.9rem;
-  color: var(--cor-cinza-escuro);
-}
+.form-group input[type="password"],
 .form-group-2 input[type="text"],
 .form-group-2 input[type="email"],
 .form-group-2 input[type="date"],
 .form-group-2 input[type="password"] {
   width: 100%;
-  padding: 12px;
-  font-size: 1rem;
-  border: 1px solid var(--cor-cinza-medio);
-  border-radius: 5px;
-  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.form-group-2 input[readonly] {
-  background-color: var(--cor-fundo); /* Deixa o fundo cinza-claro */
-  cursor: not-allowed;
-}
+
+.form-group input:focus,
 .form-group-2 input:focus {
+  border-color: var(--accent);
   outline: none;
-  border-color: var(--cor-preto);
-  box-shadow: 0 0 5px rgba(247, 236, 236, 0.1);
 }
+
+.form-group input[readonly],
 .form-group-2 input[readonly] {
-  background-color: var(--cor-container);
+  background-color: var(--cream);
   cursor: not-allowed;
 }
-/* Fim da duplicação */
 
-
-/* GRID DO FORMULÁRIO */
+/* === GRID DE FORMULÁRIO === */
 .form-grid {
   display: grid;
-  /* Cria colunas responsivas: tenta 2, mas se não couber (min 250px), fica 1 */
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
 }
 
-/* "CARDS" INTERNOS PARA ENDEREÇOS/CARTÕES */
-.item-card {
-  background: var(--cor-fundo);
-  border: 1px solid var(--cor-cinza-claro);
-  padding: 20px;
-  border-radius: var(--raio-borda);
-  margin-bottom: 20px;
-}
-.item-card fieldset {
-  border: none;
-}
-.item-card legend {
-  font-size: 1.1rem;
-}
-.novo-item {
-  /* Destaque para itens adicionados via JS */
-  border-color: var(--cor-preto);
+/* === CHECKBOXES === */
+.form-group-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin-bottom: 1rem;
 }
 
+/* === ÁREA ROLÁVEL DE TERMOS === */
+.termos-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 8px;
+  border: 1px solid var(--border);
+  margin: .75rem 0;
+}
 
-/* === BOTÕES E AÇÕES === */
+/* === BOTÕES === */
 .btn {
-  padding: 12px 20px;
-  font-size: 1rem;
-  font-weight: 700;
-  border-radius: 5px;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: all 0.2s ease-in-out;
-  text-decoration: none;
   display: inline-block;
+  padding: .75rem 2rem;
+  background: var(--ink);
+  color: var(--paper);
+  border: 2px solid var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .2s ease, color .2s ease;
 }
 
-/* Botão Primário (Preto) */
-.btn-primary {
-  background-color: var(--cor-preto);
-  color: var(--cor-container);
-  border-color: var(--cor-preto);
+.btn:hover {
+  background: transparent;
+  color: var(--ink);
 }
+
+.btn-primary {
+  display: inline-block;
+  padding: .75rem 2rem;
+  background: var(--ink);
+  color: var(--paper);
+  border: 2px solid var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .2s ease, color .2s ease;
+}
+
 .btn-primary:hover {
-  background-color: #444;
-  border-color: #444;
+  background: transparent;
+  color: var(--ink);
 }
 
-/* Botão Secundário (Branco) */
 .btn-secondary {
-  background-color: var(--cor-container);
-  color: var(--cor-preto);
-  border-color: var(--cor-cinza-medio);
+  display: inline-block;
+  padding: .75rem 2rem;
+  background: transparent;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .2s ease, color .2s ease;
 }
+
 .btn-secondary:hover {
-  background-color: var(--cor-fundo);
-  border-color: var(--cor-cinza-escuro);
-  color: var(--cor-container)
+  background: var(--ink);
+  color: var(--paper);
 }
 
-/* Link de Perigo (Remover) */
-.btn-link-danger {
-  font-weight: 600;
-  color: var(--cor-cinza-escuro-arrumado);
-  text-decoration: none;
-  font-size: 0.9rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-.btn-link-danger:hover {
-  color: var(--cor-cinza-escuro);
-  text-decoration: underline;
-}
-
-/* Link de Perigo (Remover) */
+/* Links de perigo / ação textual */
+.btn-link-danger,
 .btn-link-danger-2 {
+  font-family: 'DM Sans', sans-serif;
   font-weight: 600;
-  color: var(--cor-cinza-escuro);
+  color: var(--accent);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: .9rem;
   background: none;
   border: none;
   cursor: pointer;
 }
+
+.btn-link-danger:hover,
 .btn-link-danger-2:hover {
-  color: var(--cor-preto);
   text-decoration: underline;
 }
 
+/* Link secundário bordô */
 .btn-link-secondary {
-    font-weight: 600;
-    color: var(--cor-cinza-escuro);
-    text-decoration: none;
-}
-.btn-link-secondary:hover {
-    color: var(--cor-preto);
+  color: var(--accent);
+  font-size: .85rem;
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent);
+  font-family: 'DM Sans', sans-serif;
 }
 
-/* GRUPOS DE AÇÕES */
+.btn-link-secondary:hover {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+/* === GRUPOS DE AÇÕES === */
 .form-actions-top {
-  margin: 10px 0 20px 0;
+  margin: .75rem 0 1.25rem 0;
 }
+
 .form-actions-bottom {
-  margin-top: 20px;
+  margin-top: 1.25rem;
 }
+
 .form-actions-main {
-  text-align: center;
-  margin: 20px 0;
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
 }
-.btn-primary {
-  min-width: 250px; /* Faz o botão principal ter um bom tamanho */
-}
+
+/* === LINKS DE CONTA === */
 .account-links {
   text-align: center;
+  margin-top: 1.5rem;
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 1.25rem;
 }
 
-/* === RESPONSIVIDADE === */
-@media (max-width: 768px) {
-  .container {
-    width: 100%;
-    margin: 0;
-    padding: 20px;
-    border-radius: 0;
-  }
-
-  .form-grid {
-    /* Força uma coluna única em telas pequenas */
-    grid-template-columns: 1fr;
-  }
-
-  .btn-primary {
-    width: 100%;
-    min-width: auto;
-  }
+/* === CARDS INTERNOS (endereços / cartões) === */
+.item-card {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
 }
 
-/* === [NOVO] ESTILO PARA PÁGINAS SIMPLES (Acesso Negado, etc.) === */
-/* Este bloco é a única coisa nova que adicionei ao seu CSS */
+.item-card fieldset {
+  border: none;
+  padding: 0;
+}
 
+.item-card legend {
+  font-size: 1rem;
+}
+
+.novo-item {
+  border-color: var(--accent);
+}
+
+/* === PÁGINAS SIMPLES (acesso negado, etc.) === */
 .content-card-simple {
-  text-align: center; /* Centraliza tudo */
-  padding: 40px 20px; /* Adiciona um respiro interno */
+  text-align: center;
+  padding: 2.5rem 1.25rem;
 }
 
 .content-card-simple h1 {
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
 }
 
 .content-card-simple p {
-  font-size: 1.1rem;
-  color: var(--cor-cinza-escuro);
-  margin-bottom: 30px; /* Espaço antes dos links */
+  font-size: 1.05rem;
+  color: var(--muted);
+  margin-bottom: 1.75rem;
 }
 
 .content-card-simple .account-links {
-  gap: 30px; /* Aumenta o espaço entre os links */
+  gap: 1.75rem;
 }
 
-/* [NOVO] Estilo para os detalhes na página de sucesso */
+/* === DETALHES DE ATUALIZAÇÃO === */
 .update-details {
-  background-color: var(--cor-fundo); /* Fundo cinza escuro */
-  border: 1px solid var(--cor-cinza-claro);
-  border-radius: var(--raio-borda);
-  padding: 15px 20px;
-  margin: 25px auto;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem auto;
   max-width: 400px;
-  text-align: left; /* Alinha o texto à esquerda dentro da caixa */
+  text-align: left;
 }
 
 .update-details p {
-  font-size: 1rem;
-  color: var(--cor-cinza-escuro-arrumado); /* Cor branca (que você definiu) */
-  margin-bottom: 10px;
+  font-size: .95rem;
+  color: var(--ink);
+  margin-bottom: .6rem;
 }
 
 .update-details p:last-child {
@@ -381,5 +444,29 @@ legend {
 }
 
 .update-details p strong {
-  color: var(--cor-cinza-medio); /* Cinza claro para o "Nome:" e "Email:" */
+  color: var(--muted);
+}
+
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+    margin: 0;
+    padding: 1.5rem;
+    box-shadow: none;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-primary,
+  .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .form-actions-main {
+    flex-direction: column;
+  }
 }

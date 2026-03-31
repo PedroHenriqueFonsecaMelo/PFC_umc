@@ -24,14 +24,11 @@ public class AvaliacaoLivroController {
 
     private final AvaliacaoLivroService avaliacaoService;
 
-    /**
-     * Create a new review for a book
-     */
     @PostMapping
     public ResponseEntity<?> criarAvaliacao(
             @AuthenticationPrincipal UserDetails user,
             @RequestBody AvaliacaoLivroDTO dto) {
-        
+
         if (user == null) {
             return ResponseEntity.status(401).body("Usuário precisa estar logado.");
         }
@@ -43,21 +40,9 @@ public class AvaliacaoLivroController {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Erro ao criar avaliação.");
+        }  // ← brace corrigida
     }
-}
 
-/**
- * DESCRIÇÃO DO ARQUIVO:
- * Controller API avaliações livros.
- * Endpoints /api/avaliacoes POST criar, GET /livro/{isbn}, /media.
- * Integra AvaliacaoLivroService, autenticação UserDetails.
- * Retorna avaliações, média ou entidade salva.
- */
-
-
-    /**
-     * Get all reviews for a specific book by ISBN
-     */
     @GetMapping("/livro/{isbn}")
     public ResponseEntity<?> buscarAvaliacoes(@PathVariable String isbn) {
         try {
@@ -68,9 +53,6 @@ public class AvaliacaoLivroController {
         }
     }
 
-    /**
-     * Get average rating for a specific book
-     */
     @GetMapping("/livro/{isbn}/media")
     public ResponseEntity<?> buscarMedia(@PathVariable String isbn) {
         try {
@@ -84,4 +66,3 @@ public class AvaliacaoLivroController {
         }
     }
 }
-

@@ -16,15 +16,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import umc.exs.DTOs.admin.AdminAprovacaoDTO;
+import umc.exs.DTOs.admin.DashboardMetricasDTO;
+import umc.exs.DTOs.compra.AtualizarEnvioDTO;
 import umc.exs.DTOs.compra.LoteExibicaoDTO;
+import umc.exs.DTOs.compra.PedidoDTO;
 import umc.exs.model.entidades.foundation.Administrador;
 import umc.exs.model.entidades.foundation.LivroAnuncio;
 import umc.exs.model.enums.EstadoLivro;
 import umc.exs.repository.AdminRepository;
+import umc.exs.service.core.DashboardService;
 import umc.exs.service.core.LivroService;
 import umc.exs.service.core.LoteService;
+import umc.exs.service.core.PedidoService;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -33,12 +40,14 @@ public class AdminControllerApi {
     private final LivroService livroService;
     private final AdminRepository adminRepository;
     private final LoteService loteService;
+    private final PedidoService pedidoService;
+    private final DashboardService dashboardService;
 
     /**
      * Lista lotes de livros pendentes de aprovação.
      * Retorna DTOs com ID, protocolo, status, data.
      * Acesso admin.
-     * 
+     *
      * @return List<LoteExibicaoDTO> lotes pendentes
      */
     @GetMapping("/lotes/pendentes")
@@ -55,7 +64,7 @@ public class AdminControllerApi {
      * Lista livros de um lote pendente.
      * Retorna mapas com id, título, autor, isbn, fotosUrls (lista completa).
      * Para visualização admin.
-     * 
+     *
      * @param id lote ID
      * @return List<Map> livros lote
      */
@@ -91,7 +100,6 @@ public class AdminControllerApi {
      * Lista livros pendentes de aprovação.
      * Filtrados por aprovado = false.
      * Para painel admin.
-     * 
      * @return List<LivroAnuncio> pendentes
      */
     @GetMapping("/livros/pendentes")
@@ -122,7 +130,7 @@ public class AdminControllerApi {
             return ResponseEntity.status(401).body("Acesso negado: Admin não autenticado.");
         }
         if (aprovacao.getEstadoAprovado() == EstadoLivro.RUIM){
-            return ResponseEntity.status(401).body("Livro com estado RUIM");
+            return ResponseEntity.status(400).body("Livros com estado RUIM devem ser rejeitados, não aprovados.");
         }
 
         try {
@@ -166,6 +174,9 @@ public class AdminControllerApi {
 
         try {
             Optional<Administrador> adminOpt = adminRepository.findByEmail(user.getUsername());
+            if (adminOpt.isEmpty()) {
+                return ResponseEntity.status(401).body("Conta de administrador não encontrada.");
+            }
             Long adminId = adminOpt.get().getId();
             String comentario = rejeicao.getOrDefault("comentario", "Sem comentário");
             String estado = rejeicao.get("estado");
@@ -175,17 +186,58 @@ public class AdminControllerApi {
 
             return ResponseEntity.ok(Map.of("success", true));
         } catch (Exception e) {
-            // Logue o erro no console para você ver o que é de verdade!
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body("Erro real: " + e.getMessage());
+            log.error("Erro ao rejeitar livro ID {}: {}", id, e.getMessage());
+            return ResponseEntity.badRequest().body("Erro ao rejeitar livro: " + e.getMessage());
         }
+    }
+
+    // ==========================================================
+    // PEDIDOS — Gestão de Envio
+    // ==========================================================
+
+    /**
+     * Lista todos os pedidos do sistema para o admin.
+     * Retorna id, comprador, livro, status de envio e data.
+     */
+    @GetMapping("/pedidos")
+    public ResponseEntity<List<PedidoDTO>> listarTodosPedidos() {
+        return ResponseEntity.ok(pedidoService.listarTodos());
+    }
+
+    /**
+     * Atualiza o status de envio de um pedido.
+     * Permite avançar para EM_TRANSITO, ENTREGUE ou CANCELADO.
+     * Opcionalmente registra código de rastreio.
+     */
+    @PostMapping("/pedidos/{id}/envio")
+    public ResponseEntity<?> atualizarEnvio(
+            @PathVariable Long id,
+            @RequestBody AtualizarEnvioDTO dto,
+            @AuthenticationPrincipal UserDetails user) {
+
+        if (user == null)
+            return ResponseEntity.status(401).body("Não autenticado.");
+
+        try {
+            PedidoDTO atualizado = pedidoService.atualizarStatus(id, dto.getStatusEnvio(), dto.getCodigoRastreio());
+            return ResponseEntity.ok(atualizado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // ==========================================================
+    // DASHBOARD — Métricas
+    // ==========================================================
+
+    /**
+     * Retorna todas as métricas da dashboard administrativa:
+     * contadores de clientes, livros, visitas, pedidos, tokens
+     * e séries mensais dos últimos 12 meses para os gráficos.
+     */
+    @GetMapping("/dashboard/metricas")
+    public ResponseEntity<DashboardMetricasDTO> getMetricas() {
+        return ResponseEntity.ok(dashboardService.getMetricas());
     }
 }
 
-/**
- * DESCRIÇÃO DO ARQUIVO:
- * Controller REST API para painel admin aprovação livros.
- * Listagens lotes/livros pendentes, aprovar/rejeitar com validação admin.
- * Integra LivroService, LoteService, AdminRepository.
- * Retorna JSON listas ou mensagens success/error.
- */

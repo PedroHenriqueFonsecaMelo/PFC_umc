@@ -1,5 +1,6 @@
 package umc.exs.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,5 +24,8 @@ public interface LivroRepository extends JpaRepository<LivroAnuncio, Long> {
     List<LivroAnuncio> findByAprovadoTrue();
 
     Optional<LivroAnuncio> findByIdAndAprovadoTrue(Long id);
+
+    /** Livros anunciados a partir de uma data (para agrupamento mensal no dashboard). */
+    List<LivroAnuncio> findByDataAnuncioAfter(LocalDateTime data);
 }
 

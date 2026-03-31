@@ -1,7 +1,6 @@
 package umc.exs.service.core;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +22,7 @@ public class AvaliacaoLivroService {
     private final AvaliacaoLivroRepository avaliacaoRepository;
     private final ClienteRepository clienteRepository;
     private final LogAuditoriaService logAuditoria;
+    private final umc.exs.service.gamificacao.GamificacaoService gamificacaoService;
 
     /**
      * Create a new book review
@@ -67,6 +67,9 @@ public class AvaliacaoLivroService {
         // Salvar
         AvaliacaoLivro saved = avaliacaoRepository.save(avaliacao);
 
+        // Gamificação: XP por avaliação
+        gamificacaoService.xpAvaliacao(avaliador.getId());
+
         // Registrar auditoria
         logAuditoria.registrarLog("AVALIACAO_CRIADA", avaliador.getId(), avaliador.getEmail(), 
             "Avaliou o livro '" + dto.getTituloLivro() + "' com nota " + dto.getNota());
@@ -81,17 +84,7 @@ public class AvaliacaoLivroService {
         if (isbn == null || isbn.trim().isEmpty()) {
             throw new RuntimeException("ISBN é obrigatório");
         }
-        
-        List<AvaliacaoLivro> todasAvaliacoes = avaliacaoRepository.findAll();
-        List<AvaliacaoLivro> filtradas = new ArrayList<>();
-        
-        for (AvaliacaoLivro avaliacao : todasAvaliacoes) {
-            if (avaliacao.getIsbn() != null && avaliacao.getIsbn().equals(isbn)) {
-                filtradas.add(avaliacao);
-            }
-        }
-        
-        return filtradas;
+        return avaliacaoRepository.findByIsbn(isbn);
     }
 
     /**
@@ -125,17 +118,7 @@ public class AvaliacaoLivroService {
      * Get all unique books that have reviews
      */
     public List<String> buscarLivrosComAvaliacoes() {
-        List<AvaliacaoLivro> todasAvaliacoes = avaliacaoRepository.findAll();
-        List<String> livros = new ArrayList<>();
-        
-        for (AvaliacaoLivro avaliacao : todasAvaliacoes) {
-            String isbn = avaliacao.getIsbn();
-            if (isbn != null && !livros.contains(isbn)) {
-                livros.add(isbn);
-            }
-        }
-        
-        return livros;
+        return avaliacaoRepository.findDistinctIsbns();
     }
 }
 

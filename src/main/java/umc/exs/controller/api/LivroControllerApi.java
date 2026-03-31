@@ -9,12 +9,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
+import umc.exs.DTOs.compra.CarrinhoCompraRequestDTO;
+import umc.exs.DTOs.compra.CarrinhoCompraResponseDTO;
 import umc.exs.DTOs.compra.LoteRequestDTO;
 import umc.exs.DTOs.livro.LivroRequestDTO;
 import umc.exs.model.entidades.foundation.LivroAnuncio;
@@ -120,11 +124,27 @@ public class LivroControllerApi {
     }
 
     /**
-     * DESCRIÇÃO DO ARQUIVO:
-     * Controller API livros (venda, compra, listagem).
-     * Endpoints lotes/vender (multipart lote), /vender (único), /todos (aprovados),
-     * /{id}/comprar.
-     * Usa LivroService, valida auth, trata exceções JSON.
-     * Suporta imagens upload para anúncios.
+     * Compra todos os livros do carrinho em uma única transação.
+     * Valida saldo total antes de debitar qualquer valor.
+     * Retorna resumo com comprados, falhas e saldo restante.
+     * Requer autenticação.
      */
+    @PostMapping("/carrinho/comprar")
+    public ResponseEntity<?> comprarCarrinho(
+            @AuthenticationPrincipal UserDetails user,
+            @Valid @RequestBody CarrinhoCompraRequestDTO request) {
+
+        if (user == null) {
+            return ResponseEntity.status(401).body("Usuário precisa estar logado para comprar.");
+        }
+
+        try {
+            CarrinhoCompraResponseDTO resultado = livroService.comprarCarrinho(user.getUsername(), request);
+            return ResponseEntity.ok(resultado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Erro ao processar o carrinho.");
+        }
+    }
 }

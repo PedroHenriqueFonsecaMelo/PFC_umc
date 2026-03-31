@@ -12,10 +12,13 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import umc.exs.DTOs.admin.AdminAprovacaoDTO;
+import umc.exs.DTOs.compra.CarrinhoCompraRequestDTO;
+import umc.exs.DTOs.compra.CarrinhoCompraResponseDTO;
 import umc.exs.DTOs.compra.LoteRequestDTO;
 import umc.exs.DTOs.livro.LivroItemDTO;
 import umc.exs.DTOs.livro.LivroRequestDTO;
@@ -30,6 +33,7 @@ import umc.exs.service.log.LogAuditoriaService;
 
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LivroService {
@@ -38,6 +42,8 @@ public class LivroService {
     private final ClienteRepository clienteRepository;
     private final LoteRepository loteRepository;
     private final LogAuditoriaService logAuditoria;
+    private final umc.exs.service.gamificacao.GamificacaoService gamificacaoService;
+    private final PedidoService pedidoService;
 
     private static final double TOKEN_REWARD = 10.0;
 
@@ -47,11 +53,13 @@ public class LivroService {
     /**
      * Cria lote venda com múltiplos livros + fotos.
      * Salva imagens uploads/livros, JSON fotos.
-     * Recompensa tokens por livro, log LOTE_CADASTRADO.
+     * Recompensa tokens por livro APENAS NA APROVAÇÃO, log LOTE_CADASTRADO.
      * Limite 5 pendentes cliente.
+     * * ALTERAÇÃO: Quantidade de fotos por livro é DINÂMICA (item.getQuantidadedeFotos()).
      */
     @Transactional
     public Lote criarLote(String email, LoteRequestDTO dto, List<MultipartFile> fotos) {
+        log.info("Iniciando criarLote para email: {}, fotos size: {}", email, fotos != null ? fotos.size() : "null");
         Optional<Cliente> clienteOpt = clienteRepository.findByEmail(email);
         if (clienteOpt.isEmpty()) {
             throw new RuntimeException("Cliente não encontrado");
@@ -73,12 +81,18 @@ public class LivroService {
         int fotoIndex = 0;
         for (LivroItemDTO item : dto.getLivros()) {
             List<String> bookFotosUrls = new ArrayList<>();
-
-            int fotosPorLivro =  item.getQuantidadedeFotos();
+            
+            int fotosPorLivro = item.getQuantidadedeFotos();
+            if (fotosPorLivro == 0) {
+                fotosPorLivro = fotos.size() / dto.getLivros().size();
+                log.info("fotosPorLivro era 0, ajustado para: {}", fotosPorLivro);
+            }
+            log.info("Processando item: {}, fotosPorLivro: {}", item.getTitulo(), fotosPorLivro);
 
             for (int k = 0; k < fotosPorLivro; k++) {
                 if (fotoIndex < fotos.size()) {
                     MultipartFile foto = fotos.get(fotoIndex);
+                    
                     if (foto != null && !foto.isEmpty()) {
                         String nomeFoto = UUID.randomUUID() + "_" + foto.getOriginalFilename();
                         Path caminho = Paths.get("uploads/livros/" + nomeFoto);
@@ -86,6 +100,7 @@ public class LivroService {
                             Files.createDirectories(caminho.getParent());
                             Files.copy(foto.getInputStream(), caminho);
                             bookFotosUrls.add("/uploads/livros/" + nomeFoto);
+                            log.info("Foto salva: {}", "/uploads/livros/" + nomeFoto);
                         } catch (IOException e) {
                             throw new RuntimeException("Erro ao salvar foto: " + foto.getOriginalFilename());
                         }
@@ -94,16 +109,16 @@ public class LivroService {
                 }
             }
 
+            log.info("bookFotosUrls size após loop: {}", bookFotosUrls.size());
             String jsonFotos = "[]";
             try {
                 if (!bookFotosUrls.isEmpty()) {
                     jsonFotos = objectMapper.writeValueAsString(bookFotosUrls);
                 }
-                
             } catch (JsonProcessingException e) {
-                System.out.println("Erro ao converter fotos para JSON: " + e.getMessage());
                 jsonFotos = "[]";
             }
+            log.info("jsonFotos final: {}", jsonFotos);
 
             LivroAnuncio anuncio = LivroAnuncio.builder()
                     .titulo(item.getTitulo())
@@ -111,6 +126,7 @@ public class LivroService {
                     .isbn(item.getIsbn())
                     .fotosUrls(jsonFotos)
                     .lote(lote)
+                    .vendedor(cliente)
                     .dataAnuncio(LocalDateTime.now())
                     .aprovado(false)
                     .build();
@@ -118,12 +134,8 @@ public class LivroService {
             livroRepository.save(anuncio);
         }
 
-        // Atualiza saldo e logs...
-        cliente.setSaldoTokens(cliente.getSaldoTokens() + TOKEN_REWARD * dto.getLivros().size());
-        clienteRepository.save(cliente);
-
         logAuditoria.registrarLog("LOTE_CADASTRADO", cliente.getId(), cliente.getEmail(),
-                "Lote " + lote.getId() + " com " + dto.getLivros().size() + " livros");
+                "Lote " + lote.getId() + " - aguardando aprovação");
 
         return lote;
     }
@@ -159,17 +171,6 @@ public class LivroService {
             jsonFotos = "[\"" + urlFinal + "\"]";
         }
 
-        LivroAnuncio anuncio = LivroAnuncio.builder()
-                .titulo(dto.getTitulo())
-                .autor(dto.getAutor())
-                .isbn(dto.getIsbn())
-                .fotosUrls(jsonFotos)
-                .dataAnuncio(LocalDateTime.now())
-                .aprovado(false)
-                .build();
-
-        LivroAnuncio salvo = livroRepository.save(anuncio);
-
         Optional<Cliente> clienteOpt = clienteRepository.findByEmail(email);
 
         if (clienteOpt.isEmpty()) {
@@ -178,13 +179,20 @@ public class LivroService {
 
         Cliente vendedor = clienteOpt.get();
 
-        if (vendedor != null) {
-            vendedor.setSaldoTokens(vendedor.getSaldoTokens() + TOKEN_REWARD);
-            clienteRepository.save(vendedor);
+        LivroAnuncio anuncio = LivroAnuncio.builder()
+                .titulo(dto.getTitulo())
+                .autor(dto.getAutor())
+                .isbn(dto.getIsbn())
+                .fotosUrls(jsonFotos)
+                .vendedor(vendedor)
+                .dataAnuncio(LocalDateTime.now())
+                .aprovado(false)
+                .build();
 
-            logAuditoria.registrarLog("LIVRO_CADASTRADO_RECOMPENSA", vendedor.getId(), vendedor.getEmail(),
-                    "Livro " + salvo.getId() + " T$" + TOKEN_REWARD);
-        }
+        LivroAnuncio salvo = livroRepository.save(anuncio);
+
+        logAuditoria.registrarLog("LIVRO_CADASTRADO", vendedor.getId(), vendedor.getEmail(),
+                "Livro " + salvo.getId() + " - aguardando aprovação");
 
         return salvo;
     }
@@ -246,6 +254,24 @@ public class LivroService {
 
         LivroAnuncio saved = livroRepository.save(anuncio);
 
+        // Identificar o vendedor: campo direto ou via lote
+        Cliente vendedor = anuncio.getVendedor();
+        if (vendedor == null && anuncio.getLote() != null) {
+            vendedor = anuncio.getLote().getCliente();
+        }
+
+        if (vendedor != null) {
+            // Creditar tokens ao vendedor apenas na aprovação
+            vendedor.setSaldoTokens(vendedor.getSaldoTokens() + TOKEN_REWARD);
+            clienteRepository.save(vendedor);
+
+            // Gamificação: XP ao vendedor
+            gamificacaoService.xpLivroAprovado(vendedor.getId());
+
+            logAuditoria.registrarLog("LIVRO_APROVADO_RECOMPENSA", vendedor.getId(), vendedor.getEmail(),
+                    "Livro " + livroId + " aprovado - T$" + TOKEN_REWARD + " creditados");
+        }
+
         if (anuncio.getLote() != null) {
             Long loteId = anuncio.getLote().getId();
             long pendingCount = livroRepository.countPendingByLoteId(loteId);
@@ -270,22 +296,19 @@ public class LivroService {
         LivroAnuncio anuncio = livroRepository.findById(livroId)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
 
-        String emailAdmin = "admin@sistema.com";
-
-
-        if (!estado.equalsIgnoreCase(EstadoLivro.RUIM.name().toString())) {
+        if (!estado.equalsIgnoreCase(EstadoLivro.RUIM.name())) {
             throw new RuntimeException("Apenas livros com estado RUIM ou pior podem ser rejeitados");
         }
 
         livroRepository.delete(anuncio);
 
-        logAuditoria.registrarLog("LIVRO_REJEITADO", adminId, emailAdmin,
+        logAuditoria.registrarLog("LIVRO_REJEITADO", adminId, "admin#" + adminId,
                 "Livro ID " + livroId + " rejeitado pelo administrador.");
     }
 
     /**
      * Processa compra livro aprovado.
-     * Deduz tokens comprador, deleta anúncio.
+     * Registra pedido, deduz tokens, deleta anúncio.
      * Log COMPRA_LIVRO_SUCESSO.
      */
     @Transactional
@@ -301,12 +324,144 @@ public class LivroService {
             throw new RuntimeException("Saldo insuficiente T$" + preco);
         }
 
+        // Registra pedido ANTES de deletar o livro
+        pedidoService.registrarPedido(comprador, anuncio);
+
         comprador.setSaldoTokens(comprador.getSaldoTokens() - preco);
         livroRepository.delete(anuncio);
         clienteRepository.save(comprador);
 
         logAuditoria.registrarLog("COMPRA_LIVRO_SUCESSO", comprador.getId(), comprador.getEmail(),
                 "Livro " + livroId + " T$" + preco);
+
+        // Gamificação: XP para o comprador
+        gamificacaoService.xpCompra(comprador.getId());
+    }
+
+    /**
+     * Processa compra em lote via carrinho.
+     *
+     * Estratégia:
+     *   1. Valida se o comprador existe e não está bloqueado.
+     *   2. Busca todos os livros solicitados de uma vez (evita N queries).
+     *   3. Verifica saldo total antes de qualquer débito (Fail-Fast).
+     *   4. Executa as compras individualmente dentro da mesma transação:
+     *      - se um livro não for encontrado ou já tiver sido comprado por
+     *        outro usuário (race condition), ele vai para a lista de falhas
+     *        sem abortar os demais.
+     *   5. Persiste o novo saldo e loga a operação.
+     *
+     * @param emailComprador email do usuário autenticado
+     * @param request        lista de IDs dos livros no carrinho
+     * @return               resumo com comprados, falhas e saldo restante
+     */
+    @Transactional
+    public CarrinhoCompraResponseDTO comprarCarrinho(String emailComprador, CarrinhoCompraRequestDTO request) {
+
+        // 1. Valida comprador
+        Cliente comprador = clienteRepository.findByEmail(emailComprador)
+                .orElseThrow(() -> new RuntimeException("Comprador não encontrado."));
+
+        if (comprador.isBloqueada()) {
+            throw new RuntimeException("Sua conta está bloqueada. Entre em contato com o suporte.");
+        }
+
+        List<Long> ids = request.getLivroIds();
+        if (ids == null || ids.isEmpty()) {
+            throw new RuntimeException("O carrinho está vazio.");
+        }
+
+        // 2. Busca todos os livros aprovados de uma vez
+        List<LivroAnuncio> livrosEncontrados = livroRepository.findAllById(ids)
+                .stream()
+                .filter(l -> Boolean.TRUE.equals(l.getAprovado()))
+                .toList();
+
+        // Detecta IDs que não foram encontrados ou não estão aprovados
+        java.util.Set<Long> idsEncontrados = new java.util.HashSet<>();
+        livrosEncontrados.forEach(l -> idsEncontrados.add(l.getId()));
+
+        List<CarrinhoCompraResponseDTO.ItemResultado> falhas = new ArrayList<>();
+        for (Long id : ids) {
+            if (!idsEncontrados.contains(id)) {
+                falhas.add(CarrinhoCompraResponseDTO.ItemResultado.builder()
+                        .livroId(id)
+                        .motivo("Livro não encontrado ou indisponível.")
+                        .build());
+            }
+        }
+
+        // 3. Verifica saldo total antes de debitar qualquer valor
+        double totalNecessario = livrosEncontrados.stream()
+                .mapToDouble(l -> l.getPrecoAprovado() != null ? l.getPrecoAprovado() : 0.0)
+                .sum();
+
+        if (comprador.getSaldoTokens() < totalNecessario) {
+            throw new RuntimeException(String.format(
+                    "Saldo insuficiente. Necessário: T$ %.2f | Disponível: T$ %.2f",
+                    totalNecessario, comprador.getSaldoTokens()));
+        }
+
+        // 4. Executa as compras
+        List<CarrinhoCompraResponseDTO.ItemResultado> comprados = new ArrayList<>();
+        double totalGasto = 0.0;
+
+        for (LivroAnuncio livro : livrosEncontrados) {
+            try {
+                Double preco = livro.getPrecoAprovado();
+                if (preco == null) {
+                    falhas.add(CarrinhoCompraResponseDTO.ItemResultado.builder()
+                            .livroId(livro.getId())
+                            .titulo(livro.getTitulo())
+                            .motivo("Livro sem preço definido.")
+                            .build());
+                    continue;
+                }
+
+                // Registra pedido ANTES de deletar o livro
+                pedidoService.registrarPedido(comprador, livro);
+
+                comprador.setSaldoTokens(comprador.getSaldoTokens() - preco);
+                totalGasto += preco;
+
+                livroRepository.delete(livro);
+
+                comprados.add(CarrinhoCompraResponseDTO.ItemResultado.builder()
+                        .livroId(livro.getId())
+                        .titulo(livro.getTitulo())
+                        .preco(preco)
+                        .build());
+
+                // XP por compra
+                gamificacaoService.xpCompra(comprador.getId());
+
+            } catch (Exception e) {
+                falhas.add(CarrinhoCompraResponseDTO.ItemResultado.builder()
+                        .livroId(livro.getId())
+                        .titulo(livro.getTitulo())
+                        .motivo("Erro ao processar: " + e.getMessage())
+                        .build());
+            }
+        }
+
+        // 5. Persiste saldo atualizado e loga
+        clienteRepository.save(comprador);
+
+        logAuditoria.registrarLog(
+                "COMPRA_CARRINHO",
+                comprador.getId(),
+                comprador.getEmail(),
+                String.format("%d livro(s) comprado(s), %d falha(s), T$ %.2f debitados.",
+                        comprados.size(), falhas.size(), totalGasto));
+
+        return CarrinhoCompraResponseDTO.builder()
+                .totalSolicitados(ids.size())
+                .totalComprados(comprados.size())
+                .totalGasto(totalGasto)
+                .saldoRestante(comprador.getSaldoTokens())
+                .comprados(comprados)
+                .falhas(falhas)
+                .build();
     }
 }
 

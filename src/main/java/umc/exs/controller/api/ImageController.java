@@ -33,6 +33,23 @@ public class ImageController {
             return ResponseEntity.ok(new ClassPathResource("static/images/no-image.png"));
         }
     }
+
+    /**
+     * Serve imagens de posts do blog.
+     * Endpoint /uploads/blog/filename.
+     */
+    @GetMapping("/uploads/blog/{filename:.+}")
+    public ResponseEntity<Resource> serveBlogImage(@PathVariable String filename) {
+
+        Path path = Paths.get("uploads/blog/" + filename);
+        Resource file = new FileSystemResource(path);
+
+        if (file.exists()) {
+            return ResponseEntity.ok(file);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
 
 /**

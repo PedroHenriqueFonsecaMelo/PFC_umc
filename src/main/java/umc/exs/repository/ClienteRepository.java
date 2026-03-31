@@ -1,5 +1,6 @@
 package umc.exs.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +37,9 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     Optional<Cliente> findByIdWithEnderecos(@Param("id") Long id);
 
     boolean existsByEmail(String email);
-    
+
     boolean existsByCpf(String cpf);
+
+    /** Clientes cadastrados a partir de uma data (para agrupamento mensal no dashboard). */
+    List<Cliente> findByDataCriacaoAfter(LocalDateTime data);
 }

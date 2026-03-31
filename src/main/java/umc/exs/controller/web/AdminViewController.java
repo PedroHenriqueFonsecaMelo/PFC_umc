@@ -1,12 +1,12 @@
 package umc.exs.controller.web;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,22 +20,18 @@ import umc.exs.DTOs.auth.LoginDTO;
 import umc.exs.repository.AdminRepository;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
+import umc.exs.service.log.LogAuditoriaService;
 
 @Controller
+@RequiredArgsConstructor
 @RequestMapping("/admin")
 public class AdminViewController {
 
-    @Autowired
-    private JwtUserDetailsService userDetailsService;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private AdminRepository adminRepository;
+    private final JwtUserDetailsService userDetailsService;
+    private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
+    private final AdminRepository adminRepository;
+    private final LogAuditoriaService logAuditoriaService;
 
 /**
  * Exibe página login admin.
@@ -123,10 +119,25 @@ public class AdminViewController {
     }
 
 /**
+ * Exibe dashboard administrativa com métricas e gráficos.
+ */
+    @GetMapping("/dashboard")
+    public String dashboard() {
+
+        return "admin/dashboard";
+    }
+
+/**
  * Logout admin.
  * Clear JWT cookie + SecurityContext.
  * Redirect admin/login?logout.
  */
+    @GetMapping("/audit")
+    public String auditoria(Model model) {
+        model.addAttribute("logs", logAuditoriaService.buscarTodosLogs());
+        return "admin/auditoria";
+    }
+
     @GetMapping("/sair")
     public String logout(HttpServletResponse response) {
 

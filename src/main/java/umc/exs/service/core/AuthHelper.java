@@ -1,11 +1,11 @@
 package umc.exs.service.core;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,16 +14,12 @@ import umc.exs.security.JwtUtil;
 import umc.exs.service.log.LogAuditoriaService;
 
 @Service
+@RequiredArgsConstructor
 public class AuthHelper {
 
-    @Autowired
-    private JwtUserDetailsService userDetailsService;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private LogAuditoriaService logAuditoriaService;
+    private final JwtUserDetailsService userDetailsService;
+    private final JwtUtil jwtUtil;
+    private final LogAuditoriaService logAuditoriaService;
 
     /**
      * Autentica usuário e define cookie JWT.

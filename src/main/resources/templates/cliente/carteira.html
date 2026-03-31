@@ -1,212 +1,550 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Minha Carteira de Tokens | PFC</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-        <style>
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Carteira | Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --ink:    #2C241B;
+            --paper:  #F9F6F0;
+            --cream:  #EDE8DF;
+            --accent: #722F37;
+            --forest: #4A5D23;
+            --white:  #FFFFFF;
+            --muted:  #7A6E65;
+            --border: rgba(44,36,27,.15);
         }
-        /* Estética suave para o scroll da tabela */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #F9F6F0;
+            color: #2C241B;
+            min-height: 100vh;
+        }
+
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: #EDE8DF; }
+        ::-webkit-scrollbar-thumb { background: #7A6E65; }
+
+        /* ── NAV ── */
+        nav {
+            background: #2C241B;
+            padding: .75rem 5vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-brand {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            color: #F9F6F0;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        #displayNome {
+            color: rgba(249,246,240,.8);
+            font-size: .875rem;
+        }
+        .nav-sair {
+            background: transparent;
+            border: 1.5px solid rgba(249,246,240,.3);
+            color: rgba(249,246,240,.8);
+            padding: .35rem .85rem;
+            font-size: .72rem;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all .2s;
+        }
+        .nav-sair:hover {
+            background: #722F37;
+            border-color: #722F37;
+            color: #F9F6F0;
+        }
+
+        /* ── MAIN ── */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 5vw;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        @media (min-width: 768px) {
+            .grid-layout { grid-template-columns: 1fr 2fr; }
+        }
+
+        /* ── CARD SALDO ── */
+        .card-saldo {
+            background: #FFFFFF;
+            border: 1px solid rgba(44,36,27,.12);
+            padding: 2rem;
+            box-shadow: 4px 4px 0 rgba(44,36,27,.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .saldo-icon-wrap {
+            background: #EDE8DF;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .saldo-icon-wrap i { font-size: 1.5rem; color: #722F37; }
+        .saldo-label {
+            font-size: .65rem;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: #7A6E65;
+            margin-bottom: .5rem;
+        }
+        .saldo-row {
+            display: flex;
+            align-items: baseline;
+            gap: .35rem;
+            margin-bottom: 1.5rem;
+        }
+        .saldo-prefix {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #722F37;
+            font-weight: 700;
+        }
+        #displaySaldo {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #2C241B;
+            line-height: 1;
+        }
+        .saldo-nota {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            color: #7A6E65;
+            font-size: .8rem;
+            line-height: 1.5;
+        }
+
+        /* ── CARD COMPRAR ── */
+        .card-comprar {
+            background: #FFFFFF;
+            border: 1px solid rgba(44,36,27,.12);
+            padding: 2rem;
+        }
+        .card-comprar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: #2C241B;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        .card-comprar-title i { color: #722F37; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 560px) { .form-row { grid-template-columns: 1fr; } }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: .35rem;
+        }
+        .form-group label {
+            font-size: .68rem;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #7A6E65;
+        }
+        .input-wrap {
+            position: relative;
+        }
+        .input-prefix {
+            position: absolute;
+            left: .75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7A6E65;
+            font-size: .85rem;
+        }
+        .input-icon {
+            position: absolute;
+            left: .75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7A6E65;
+        }
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: .65rem .85rem;
+            border: 1.5px solid rgba(44,36,27,.18);
+            background: #F9F6F0;
+            color: #2C241B;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .875rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+        input[type="number"].with-prefix,
+        input[type="text"].with-prefix { padding-left: 2.5rem; }
+        input.with-icon { padding-left: 2.5rem; }
+
+        input:focus, select:focus { border-color: #722F37; }
+
+        #sectionCartao {
+            background: #F9F6F0;
+            border: 1px solid rgba(44,36,27,.12);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        #sectionCartao label {
+            font-size: .68rem;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #7A6E65;
+            display: block;
+            margin-bottom: .5rem;
+        }
+
+        #btnComprar {
+            background: #2C241B;
+            color: #F9F6F0;
+            border: 2px solid #2C241B;
+            padding: .85rem;
+            width: 100%;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+        }
+        #btnComprar:hover {
+            background: transparent;
+            color: #2C241B;
+        }
+
+        /* ── TABELA HISTÓRICO ── */
+        .card-historico {
+            background: #FFFFFF;
+            border: 1px solid rgba(44,36,27,.12);
+            overflow: hidden;
+        }
+        @media (min-width: 768px) {
+            .card-historico { grid-column: span 3; }
+        }
+        .historico-header {
+            background: #2C241B;
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .historico-header-title {
+            font-size: .75rem;
+            font-weight: 700;
+            color: #F9F6F0;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        .historico-header-sub {
+            font-size: .65rem;
+            color: rgba(249,246,240,.5);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+        }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        thead tr { background: #EDE8DF; }
+        th {
+            padding: .75rem 1rem;
+            font-size: .65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: #7A6E65;
+        }
+        td {
+            padding: .75rem 1rem;
+            font-size: .875rem;
+            color: #2C241B;
+            border-bottom: 1px solid rgba(44,36,27,.06);
+        }
+
+        /* ── MODAL PIX ── */
+        #modalPix {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(44,36,27,.8);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        #modalPix.hidden { display: none; }
+
+        .modal-box {
+            background: #F9F6F0;
+            border: 2px solid #2C241B;
+            padding: 2rem;
+            max-width: 420px;
+            width: 100%;
+            margin: auto;
+        }
+        .modal-header { text-align: center; margin-bottom: 1.5rem; }
+        .modal-icon-wrap {
+            background: #EDE8DF;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto .75rem;
+        }
+        .modal-icon-wrap i { font-size: 1.4rem; color: #722F37; }
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: #2C241B;
+        }
+        .modal-sub { color: #7A6E65; font-size: .875rem; margin-top: .35rem; }
+
+        .qr-container {
+            background: #EDE8DF;
+            border: 1px solid rgba(44,36,27,.15);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        #imgQrCode { width: 180px; height: 180px; display: block; }
+
+        .pix-label {
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #7A6E65;
+            margin-bottom: .35rem;
+        }
+        .pix-row { display: flex; gap: .5rem; }
+        #textoCopiaECola {
+            flex: 1;
+            background: #EDE8DF;
+            border: none;
+            padding: .75rem;
+            font-family: monospace;
+            font-size: .8rem;
+            color: #2C241B;
+            outline: none;
+        }
+        .btn-copiar {
+            background: #722F37;
+            color: #F9F6F0;
+            border: none;
+            padding: .75rem 1rem;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .btn-copiar:hover { background: #5a2329; }
+
+        .btn-fechar-pix {
+            background: #2C241B;
+            color: #F9F6F0;
+            border: none;
+            width: 100%;
+            padding: .85rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .8rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background .2s;
+        }
+        .btn-fechar-pix:hover { background: #3a2e24; }
+
+        .btn-debug {
+            display: block;
+            margin: .5rem auto 0;
+            background: none;
+            border: none;
+            color: rgba(44,36,27,.3);
+            font-size: .7rem;
+            cursor: pointer;
+            text-align: center;
+        }
+        .btn-debug:hover { color: rgba(44,36,27,.6); }
     </style>
-    </head>
-    <body class="bg-slate-100 min-h-screen font-sans">
+</head>
+<body>
 
-        <nav class="bg-indigo-700 text-white p-4 shadow-lg">
-            <div class="container mx-auto flex justify-between items-center">
-                <h1 class="text-xl font-bold italic tracking-tighter">
-                    TOKEN-SYSTEM <span
-                        class="text-xs font-light ml-1 opacity-70">PFC
-                        v1.0</span>
-                </h1>
-                <div class="flex items-center gap-4">
-                    <div class="flex flex-col text-right mr-2">
-                        <span id="displayNome"
-                            class="text-sm font-medium leading-none">Carregando...</span>
-                        <span class="text-[10px] opacity-70">Cliente
-                            Verificado</span>
-                    </div>
-                    <a th:href="@{/clientes/sair}"
-                        class="text-sm bg-indigo-800 px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </a>
-                </div>
-            </div>
-        </nav>
-
-        <main class="container mx-auto px-4 py-8 max-w-5xl">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-                <div
-                    class="glass-card p-8 rounded-2xl shadow-xl flex flex-col justify-center items-center text-center border-t-4 border-t-indigo-500 h-fit">
-                    <div class="bg-indigo-100 p-4 rounded-full mb-4">
-                        <i
-                            class="fa-solid fa-wallet text-4xl text-indigo-600"></i>
-                    </div>
-                    <h2
-                        class="text-gray-500 uppercase tracking-widest text-xs font-bold">Saldo
-                        Disponível</h2>
-                    <div class="flex items-baseline gap-2 mt-2">
-                        <span
-                            class="text-2xl font-bold text-indigo-600">T$</span>
-                        <span id="displaySaldo"
-                            class="text-6xl font-black text-slate-800">0.00</span>
-                    </div>
-                    <p
-                        class="mt-6 text-gray-400 text-[10px] leading-tight italic">
-                        * Os tokens são creditados instantaneamente após a
-                        confirmação do pagamento.
-                    </p>
-                </div>
-
-                <div
-                    class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
-                    <h3
-                        class="text-xl font-bold mb-6 text-slate-800 flex items-center gap-2">
-                        <i
-                            class="fa-solid fa-cart-shopping text-indigo-600"></i>
-                        Comprar Novos Tokens
-                    </h3>
-
-                    <form id="formCompra" class="space-y-5">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label
-                                    class="block text-sm font-semibold text-gray-700 mb-2">Valor
-                                    da Recarga (R$)</label>
-                                <div class="relative">
-                                    <span
-                                        class="absolute left-3 top-3 text-gray-400">R$</span>
-                                    <input type="number" id="valor" step="0.01"
-                                        min="1" required placeholder="0.00"
-                                        class="w-full p-3 pl-10 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
-                                </div>
-                            </div>
-
-                            <div>
-                                <label
-                                    class="block text-sm font-semibold text-gray-700 mb-2">Forma
-                                    de Pagamento</label>
-                                <select id="metodoPagamento"
-                                    class="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50">
-                                    <option value="CARTAO">💳 Cartão de
-                                        Crédito</option>
-                                    <option value="PIX">⚡ PIX (Aprovação na
-                                        hora)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div id="sectionCartao"
-                            class="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                            <label
-                                class="block text-sm font-semibold text-gray-700 mb-2">Dados
-                                do Cartão</label>
-                            <div class="relative">
-                                <input type="text" id="numCartao"
-                                    placeholder="0000 0000 0000 0000"
-                                    class="w-full p-3 pl-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition">
-                                <i
-                                    class="fa-solid fa-credit-card absolute left-3 top-4 text-gray-400"></i>
-                            </div>
-                        </div>
-
-                        <button type="submit" id="btnComprar"
-                            class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl hover:bg-indigo-700 transition-all shadow-lg active:scale-[0.98] flex justify-center items-center gap-3">
-                            <i class="fa-solid fa-check-double"></i> Confirmar e
-                            Pagar
-                        </button>
-                    </form>
-                </div>
-
-                <div
-                    class="lg:col-span-3 mt-4 bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
-                    <div
-                        class="bg-slate-800 p-4 flex justify-between items-center">
-                        <h4 class="font-bold text-white text-sm">
-                            <i
-                                class="fa-solid fa-clock-rotate-left mr-2 text-indigo-400"></i>HISTÓRICO
-                            RECENTE
-                        </h4>
-                        <span
-                            class="text-[10px] text-slate-400 uppercase tracking-widest">Últimas
-                            transações</span>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr
-                                    class="bg-slate-50 text-slate-500 text-[10px] uppercase tracking-wider border-b border-slate-200">
-                                    <th class="p-4 font-bold">Data e Hora</th>
-                                    <th class="p-4 font-bold">Crédito
-                                        (Tokens)</th>
-                                    <th class="p-4 font-bold">Método</th>
-                                    <th class="p-4 font-bold">Referência</th>
-                                </tr>
-                            </thead>
-                            <tbody id="lista-transacoes"
-                                class="text-sm text-slate-600 divide-y divide-slate-100">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <div id="modalPix"
-            class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl">
-                <div class="text-center">
-                    <div
-                        class="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i
-                            class="fa-solid fa-qrcode text-2xl text-indigo-600"></i>
-                    </div>
-                    <h3 class="text-2xl font-black text-slate-800">Pagamento via
-                        PIX</h3>
-                    <p class="text-slate-500 text-sm mt-2">Escaneie o código
-                        abaixo para finalizar a compra</p>
-                </div>
-
-                <div
-                    class="mt-8 flex justify-center bg-slate-50 p-6 rounded-2xl border-2 border-dashed border-slate-200">
-                    <img id="imgQrCode" src alt="QR Code PIX" class="w-48 h-48">
-                </div>
-
-                <div class="mt-6">
-                    <label
-                        class="text-[10px] font-bold uppercase text-slate-400 ml-1">PIX
-                        Copia e Cola</label>
-                    <div class="flex gap-2 mt-1">
-                        <input type="text" id="textoCopiaECola" readonly
-                            class="w-full bg-slate-100 p-3 rounded-xl text-xs font-mono border-none focus:ring-0">
-                        <button onclick="copyPix()"
-                            class="bg-indigo-600 text-white px-4 rounded-xl hover:bg-indigo-700 transition">
-                            <i class="fa-solid fa-copy"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <button onclick="fecharModalPix()"
-                    class="w-full mt-8 py-4 bg-slate-800 text-white font-bold rounded-2xl hover:bg-slate-900 transition shadow-lg">
-                    Já realizei o pagamento
-                </button>
-                <button onclick="simularAvisoBanco()"
-                    class="mt-2 text-[10px] text-slate-300 hover:text-indigo-400 transition mx-auto block">
-                    [ DEBUG: Simular Webhook Banco ]
-                </button>
-            </div>
+    <nav>
+        <span class="nav-brand">Bibliotroca &middot; Carteira</span>
+        <div class="nav-right">
+            <span id="displayNome">Carregando...</span>
+            <a th:href="@{/clientes/sair}" class="nav-sair">
+                <i class="fa-solid fa-right-from-bracket"></i> Sair
+            </a>
         </div>
-        <script th:src="@{/cliente/script.js}"></script>
-        <script th:src="@{/cliente/wallet.js}"></script>
-    </body>
+    </nav>
+
+    <main>
+        <div class="grid-layout">
+
+            <!-- Saldo -->
+            <div class="card-saldo">
+                <div class="saldo-icon-wrap">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <div class="saldo-label">Saldo Disponível</div>
+                <div class="saldo-row">
+                    <span class="saldo-prefix">T$</span>
+                    <span id="displaySaldo">0.00</span>
+                </div>
+                <p class="saldo-nota">
+                    * Os tokens são creditados instantaneamente após a confirmação do pagamento.
+                </p>
+            </div>
+
+            <!-- Comprar Tokens -->
+            <div class="card-comprar">
+                <div class="card-comprar-title">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    Comprar Novos Tokens
+                </div>
+
+                <form id="formCompra">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="valor">Valor da Recarga (R$)</label>
+                            <div class="input-wrap">
+                                <span class="input-prefix">R$</span>
+                                <input type="number" id="valor" step="0.01" min="1" required placeholder="0.00" class="with-prefix">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="metodoPagamento">Forma de Pagamento</label>
+                            <select id="metodoPagamento">
+                                <option value="CARTAO">💳 Cartão de Crédito</option>
+                                <option value="PIX">⚡ PIX (Aprovação na hora)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="sectionCartao">
+                        <label for="numCartao">Dados do Cartão</label>
+                        <div class="input-wrap">
+                            <input type="text" id="numCartao" placeholder="0000 0000 0000 0000" class="with-icon">
+                            <i class="fa-solid fa-credit-card input-icon"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnComprar">
+                        <i class="fa-solid fa-check-double"></i> Confirmar e Pagar
+                    </button>
+                </form>
+            </div>
+
+            <!-- Histórico -->
+            <div class="card-historico">
+                <div class="historico-header">
+                    <span class="historico-header-title">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Histórico Recente
+                    </span>
+                    <span class="historico-header-sub">Últimas transações</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data e Hora</th>
+                                <th>Crédito (Tokens)</th>
+                                <th>Método</th>
+                                <th>Referência</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-transacoes"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODAL PIX -->
+    <div id="modalPix" style="display:none;position:fixed;inset:0;background:rgba(44,36,27,.8);z-index:50;align-items:center;justify-content:center;padding:1rem;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-icon-wrap">
+                    <i class="fa-solid fa-qrcode"></i>
+                </div>
+                <div class="modal-title">Pagamento via PIX</div>
+                <p class="modal-sub">Escaneie o código abaixo para finalizar a compra</p>
+            </div>
+
+            <div class="qr-container">
+                <img id="imgQrCode" src alt="QR Code PIX">
+            </div>
+
+            <div>
+                <div class="pix-label">PIX Copia e Cola</div>
+                <div class="pix-row">
+                    <input type="text" id="textoCopiaECola" readonly>
+                    <button class="btn-copiar" onclick="copyPix()">
+                        <i class="fa-solid fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn-fechar-pix" onclick="fecharModalPix()">
+                Já realizei o pagamento
+            </button>
+            <button class="btn-debug" onclick="simularAvisoBanco()">
+                [ DEBUG: Simular Webhook Banco ]
+            </button>
+        </div>
+    </div>
+
+    <script th:src="@{/cliente/script.js}"></script>
+    <script th:src="@{/cliente/wallet.js}"></script>
+</body>
 </html>

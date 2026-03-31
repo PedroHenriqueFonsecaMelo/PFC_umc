@@ -98,19 +98,16 @@ public class JwtUtil {
     public void addTokenCookie(HttpServletResponse response, String token) {
         Cookie c = new Cookie(cookieName, token);
         c.setHttpOnly(true);
-        c.setSecure(false);
+        c.setSecure(true);   // obrigatório em HTTPS
         c.setPath("/");
+        c.setMaxAge(7 * 24 * 60 * 60); // 7 dias
         response.addCookie(c);
     }
 
-    /**
-     * Limpa cookie JWT definindo maxAge=0.
-     * 
-     * @param response servlet
-     */
     public void clearJwtCookie(HttpServletResponse response) {
         Cookie c = new Cookie(cookieName, "");
         c.setHttpOnly(true);
+        c.setSecure(true);
         c.setPath("/");
         c.setMaxAge(0);
         response.addCookie(c);

@@ -30,7 +30,9 @@ public class SecurityConfig {
         CorsConfiguration cfg = new CorsConfiguration();
         cfg.setAllowedOrigins(List.of(allowedOrigin));
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        cfg.setAllowedHeaders(List.of("*"));
+        // Restringir apenas headers necessários — não usar "*"
+        cfg.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With"));
+        cfg.setExposedHeaders(List.of("Set-Cookie"));
         cfg.setAllowCredentials(true);
         cfg.setMaxAge(3600L);
 
@@ -47,7 +49,7 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) 
             .authorizeHttpRequests(auth -> auth
                 // ROTAS PÚBLICAS GERAIS
-                .requestMatchers("/", "/index", "/home", "/error", "/favicon.ico").permitAll()
+                .requestMatchers("/", "/index", "/home", "/entrar", "/error", "/favicon.ico").permitAll()
                 
                 // LOGIN E CADASTRO
                 .requestMatchers("/clientes/login", "/clientes/novo-cadastro").permitAll() 
@@ -76,19 +78,35 @@ public class SecurityConfig {
                 
                 // TOKEN E CARTEIRA (Libera a página, mas o POST /comprar exige login)
                 .requestMatchers("/api/tokens").permitAll() 
+                .requestMatchers("/api/livros/carrinho/comprar").authenticated()
                 
                 // DEBUG E AUTH REST
                 .requestMatchers("/auth/**", "/debug").permitAll()
                 
                 // ROTAS DE ADMIN - Requer autenticação de admin
                 .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+
+                // BLOG - leitura pública, escrita/exclusão apenas admin
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/blog", "/api/blog/**").permitAll()
+                .requestMatchers("/api/blog/**").hasAuthority("ADMIN")
+
+                // GAMIFICAÇÃO - ranking público, perfil exige login
+                .requestMatchers("/api/gamificacao/ranking").permitAll()
+                .requestMatchers("/api/gamificacao/meu-perfil").authenticated()
+
+                // API PÚBLICA - livros e avaliações (visíveis sem login)
+                .requestMatchers("/api/livros/todos").permitAll()
+                .requestMatchers("/api/avaliacoes/livro/**").permitAll()
+                .requestMatchers("/livros/vitrine", "/vender").permitAll()
                 
                 // ROTAS PRIVADAS
                 .requestMatchers("/clientes/meu-perfil", "/clientes/meu-perfil-json").authenticated()
+                .requestMatchers("/clientes/minhas-compras").authenticated()
                 .requestMatchers("/clientes/sair").authenticated()
                 .requestMatchers("/api/tokens/comprar").authenticated()
                 .requestMatchers("/api/tokens/historico").authenticated()
                 .requestMatchers("/api/tokens/**").authenticated()
+                .requestMatchers("/api/pedidos/**").authenticated()
                 
                 // QUALQUER OUTRA ROTA
                 .anyRequest().authenticated()

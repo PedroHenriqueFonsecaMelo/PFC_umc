@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -82,7 +84,7 @@ public class ClientController {
 
             @Valid @ModelAttribute("cliente") SignupDTO signupDTO,
             BindingResult result,
-            @RequestParam String confirmPassword,
+            @RequestParam(name = "confirmPassword") String confirmPassword,
             Model model,
             HttpServletResponse response) {
 
@@ -154,7 +156,7 @@ public class ClientController {
 
         ClienteDTO cliente = clienteOpt.get();
         authHelper.authenticateAndSetCookie(cliente.getEmail(), cliente.getId(), response, "LOGIN_SUCESSO");
-        return "redirect:/clientes/meu-perfil";
+        return "redirect:/";
     }
 
     @GetMapping("/sair")
@@ -182,6 +184,28 @@ public class ClientController {
 
         model.addAttribute("cliente", clienteDTO);
         return "cliente/homepage";
+    }
+
+    /**
+     * Retorna os dados do cliente logado como JSON.
+     * Usado pelo frontend para exibir saldo e nome sem recarregar a página.
+     */
+    @GetMapping("/meu-perfil-json")
+    @ResponseBody
+    public ResponseEntity<?> perfilJson(@AuthenticationPrincipal UserDetails user) {
+        if (user == null) return ResponseEntity.status(401).body("Não autenticado.");
+        return clienteService.buscarClientePorEmail(user.getUsername())
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(404).body("Cliente não encontrado."));
+    }
+
+    /**
+     * Página de compras do cliente (pendentes + concluídas).
+     */
+    @GetMapping("/minhas-compras")
+    public String minhasCompras(@AuthenticationPrincipal UserDetails user) {
+        if (user == null) return "redirect:/clientes/login";
+        return "cliente/minhas-compras";
     }
 
     @PostMapping("/atualizar")

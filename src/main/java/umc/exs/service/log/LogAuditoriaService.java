@@ -3,17 +3,19 @@ package umc.exs.service.log;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import umc.exs.model.entidades.foundation.LogAuditoria;
 import umc.exs.repository.LogAuditoriaRepository;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class LogAuditoriaService {
 
-    @Autowired
-    private LogAuditoriaRepository repository;
+    private final LogAuditoriaRepository repository;
 
 /**
  * Registra log ação usuário no banco.
@@ -29,9 +31,10 @@ public class LogAuditoriaService {
         try {
             LogAuditoria la = new LogAuditoria(idUsuario, emailUsuario, acao, detalhes, LocalDateTime.now());
             repository.save(la);
-        } catch (Exception ignored) {
-            // Best-effort: swallow to avoid breaking auth flows
-    }
+        } catch (Exception e) {
+            // Best-effort: não quebra o fluxo principal, mas registra no console
+            log.warn("Falha ao salvar log de auditoria [acao={}, usuarioId={}]: {}", acao, idUsuario, e.getMessage());
+        }
 }
 
 /**
@@ -52,5 +55,10 @@ public class LogAuditoriaService {
     public List<LogAuditoria> buscarLogsDoCliente(Long clienteId) {
 
         return repository.findByIdUsuarioOrderByDataHoraDesc(clienteId);
+    }
+
+    public List<LogAuditoria> buscarTodosLogs() {
+
+        return repository.findAllByOrderByDataHoraDesc();
     }
 }

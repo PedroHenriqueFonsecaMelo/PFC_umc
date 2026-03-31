@@ -1,11 +1,116 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Erro Interno</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erro Interno — Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --ink:    #2C241B;
+            --paper:  #F9F6F0;
+            --cream:  #EDE8DF;
+            --accent: #722F37;
+            --forest: #4A5D23;
+            --white:  #FFFFFF;
+            --muted:  #7A6E65;
+            --border: rgba(44,36,27,.15);
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'DM Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            box-shadow: 4px 4px 0 var(--border);
+            max-width: 520px;
+            width: 100%;
+            padding: 3rem 2.5rem;
+            text-align: center;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: -.01em;
+            margin-bottom: 1rem;
+        }
+
+        .ornamento {
+            color: var(--muted);
+            font-size: 1rem;
+            letter-spacing: .4em;
+            margin-bottom: 1.75rem;
+            user-select: none;
+        }
+
+        .heading {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 1rem;
+        }
+
+        .descricao {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .btn-voltar {
+            display: inline-block;
+            padding: .75rem 2rem;
+            background: var(--ink);
+            color: var(--paper);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .8rem;
+            font-weight: 500;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 2px solid var(--ink);
+            transition: background .2s, color .2s;
+        }
+
+        .btn-voltar:hover {
+            background: transparent;
+            color: var(--ink);
+        }
+    </style>
 </head>
 <body>
-    <h1>Ops! Algo deu Errado.</h1>
-    <p>Ocorreu um erro interno no servidor (500). Por favor, tente novamente mais tarde.</p>
-    </body>
+    <div class="card">
+        <div class="logo">Bibliotroca</div>
+        <div class="ornamento">✦ ✦ ✦</div>
+        <h1 class="heading">Algo deu errado.</h1>
+        <p class="descricao">
+            Ocorreu um erro interno no servidor. Os nossos escribas já foram notificados —
+            por favor, tente novamente em alguns instantes.
+        </p>
+        <a href="/" class="btn-voltar">Voltar ao início</a>
+    </div>
+</body>
 </html>

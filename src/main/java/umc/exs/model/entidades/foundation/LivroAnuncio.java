@@ -42,6 +42,10 @@ public class LivroAnuncio {
     @JoinColumn(name = "lote_id")
     private Lote lote;
 
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "vendedor_id")
+    private Cliente vendedor;
+
     private LocalDateTime dataAnuncio;
     
     @Builder.Default

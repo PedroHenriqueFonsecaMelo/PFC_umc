@@ -3,6 +3,7 @@ package umc.exs.DTOs.compra;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
@@ -20,6 +21,7 @@ public class CompraTokensRequestDTO {
     // Dados de entrada (Cartão)
     private String numeroCartao;
     private String nomeCartao;
+    @JsonIgnore
     private String cvv;
     private String validade;
 

@@ -2,11 +2,11 @@ package umc.exs.security;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import umc.exs.model.entidades.foundation.Administrador;
@@ -15,13 +15,11 @@ import umc.exs.repository.AdminRepository;
 import umc.exs.repository.ClienteRepository;
 
 @Service
+@RequiredArgsConstructor
 public class JwtUserDetailsService implements UserDetailsService {
 
-    @Autowired
-    private ClienteRepository clienteRepository;
-    
-    @Autowired
-    private AdminRepository adminRepository;
+    private final ClienteRepository clienteRepository;
+    private final AdminRepository adminRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

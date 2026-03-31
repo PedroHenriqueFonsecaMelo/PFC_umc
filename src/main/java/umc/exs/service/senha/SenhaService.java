@@ -14,8 +14,6 @@ import umc.exs.repository.RecuperacaoSenhaRepository;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.log.LogAuditoriaService;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -33,8 +31,7 @@ public class SenhaService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private LogAuditoriaService logAuditoriaService;
+    private final LogAuditoriaService logAuditoriaService;
 
     @Value("${app.base-url:https://localhost:8443}")
     private String baseUrl;
