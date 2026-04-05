@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -55,7 +57,8 @@ public class LivroService {
      * Salva imagens uploads/livros, JSON fotos.
      * Recompensa tokens por livro APENAS NA APROVAÇÃO, log LOTE_CADASTRADO.
      * Limite 5 pendentes cliente.
-     * * ALTERAÇÃO: Quantidade de fotos por livro é DINÂMICA (item.getQuantidadedeFotos()).
+     * * ALTERAÇÃO: Quantidade de fotos por livro é DINÂMICA
+     * (item.getQuantidadedeFotos()).
      */
     @Transactional
     public Lote criarLote(String email, LoteRequestDTO dto, List<MultipartFile> fotos) {
@@ -81,7 +84,7 @@ public class LivroService {
         int fotoIndex = 0;
         for (LivroItemDTO item : dto.getLivros()) {
             List<String> bookFotosUrls = new ArrayList<>();
-            
+
             int fotosPorLivro = item.getQuantidadedeFotos();
             if (fotosPorLivro == 0) {
                 fotosPorLivro = fotos.size() / dto.getLivros().size();
@@ -92,7 +95,7 @@ public class LivroService {
             for (int k = 0; k < fotosPorLivro; k++) {
                 if (fotoIndex < fotos.size()) {
                     MultipartFile foto = fotos.get(fotoIndex);
-                    
+
                     if (foto != null && !foto.isEmpty()) {
                         String nomeFoto = UUID.randomUUID() + "_" + foto.getOriginalFilename();
                         Path caminho = Paths.get("uploads/livros/" + nomeFoto);
@@ -342,18 +345,18 @@ public class LivroService {
      * Processa compra em lote via carrinho.
      *
      * Estratégia:
-     *   1. Valida se o comprador existe e não está bloqueado.
-     *   2. Busca todos os livros solicitados de uma vez (evita N queries).
-     *   3. Verifica saldo total antes de qualquer débito (Fail-Fast).
-     *   4. Executa as compras individualmente dentro da mesma transação:
-     *      - se um livro não for encontrado ou já tiver sido comprado por
-     *        outro usuário (race condition), ele vai para a lista de falhas
-     *        sem abortar os demais.
-     *   5. Persiste o novo saldo e loga a operação.
+     * 1. Valida se o comprador existe e não está bloqueado.
+     * 2. Busca todos os livros solicitados de uma vez (evita N queries).
+     * 3. Verifica saldo total antes de qualquer débito (Fail-Fast).
+     * 4. Executa as compras individualmente dentro da mesma transação:
+     * - se um livro não for encontrado ou já tiver sido comprado por
+     * outro usuário (race condition), ele vai para a lista de falhas
+     * sem abortar os demais.
+     * 5. Persiste o novo saldo e loga a operação.
      *
      * @param emailComprador email do usuário autenticado
      * @param request        lista de IDs dos livros no carrinho
-     * @return               resumo com comprados, falhas e saldo restante
+     * @return resumo com comprados, falhas e saldo restante
      */
     @Transactional
     public CarrinhoCompraResponseDTO comprarCarrinho(String emailComprador, CarrinhoCompraRequestDTO request) {
@@ -378,7 +381,7 @@ public class LivroService {
                 .toList();
 
         // Detecta IDs que não foram encontrados ou não estão aprovados
-        java.util.Set<Long> idsEncontrados = new java.util.HashSet<>();
+        Set<Long> idsEncontrados = new HashSet<>();
         livrosEncontrados.forEach(l -> idsEncontrados.add(l.getId()));
 
         List<CarrinhoCompraResponseDTO.ItemResultado> falhas = new ArrayList<>();

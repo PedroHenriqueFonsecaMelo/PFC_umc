@@ -12,7 +12,7 @@ import java.util.List;
 public interface LoteRepository extends JpaRepository<Lote, Long> {
     List<Lote> findByStatus(Lote.LoteStatus status);
 
-@Query("SELECT COUNT(l) FROM Lote l WHERE l.cliente.id = :clienteId AND l.status = :status")
+    @Query("SELECT COUNT(l) FROM Lote l WHERE l.cliente.id = :clienteId AND l.status = :status")
     long countByClienteIdAndStatus(@Param("clienteId") Long clienteId, @Param("status") Lote.LoteStatus status);
 
     List<Lote> findByClienteAndStatus(Cliente cliente, Lote.LoteStatus status);

@@ -41,9 +41,9 @@ public class LivroControllerApi {
     @PostMapping(value = "/lotes/vender", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> criarLoteVenda(
 
-        @AuthenticationPrincipal UserDetails user,
-        @RequestPart("loteDados") LoteRequestDTO loteDados,
-        @RequestPart("fotos") List<MultipartFile> fotos) {
+            @AuthenticationPrincipal UserDetails user,
+            @RequestPart("loteDados") LoteRequestDTO loteDados,
+            @RequestPart("fotos") List<MultipartFile> fotos) {
 
         if (user == null) {
             return ResponseEntity.status(401).body("Usuário precisa estar logado.");

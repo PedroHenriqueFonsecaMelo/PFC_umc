@@ -98,7 +98,7 @@ public class JwtUtil {
     public void addTokenCookie(HttpServletResponse response, String token) {
         Cookie c = new Cookie(cookieName, token);
         c.setHttpOnly(true);
-        c.setSecure(true);   // obrigatório em HTTPS
+        c.setSecure(true); // obrigatório em HTTPS
         c.setPath("/");
         c.setMaxAge(7 * 24 * 60 * 60); // 7 dias
         response.addCookie(c);

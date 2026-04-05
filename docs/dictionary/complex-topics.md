@@ -1,6 +1,8 @@
 # 📖 Tópicos Avançados
 
-Este documento explica conceitos avançados e complexos utilizados no projeto, como Expressões Lambda, Streams, Programação Funcional e outros padrões importantes.
+Este documento explica conceitos avançados e complexos utilizados no projeto,
+como Expressões Lambda, Streams, Programação Funcional e outros padrões
+importantes.
 
 ---
 
@@ -8,7 +10,9 @@ Este documento explica conceitos avançados e complexos utilizados no projeto, c
 
 ### O que são?
 
-Expressões Lambda são funções anônimas que podem ser passadas como argumento para métodos ou armazenadas em variáveis. Introduzidas no Java 8, elas permitem escrever código mais conciso e expressivo.
+Expressões Lambda são funções anônimas que podem ser passadas como argumento
+para métodos ou armazenadas em variáveis. Introduzidas no Java 8, elas permitem
+escrever código mais conciso e expressivo.
 
 ### Sintaxe Básica
 
@@ -34,6 +38,7 @@ nome -> System.out.println("Olá, " + nome)
 ### Exemplos no Projeto
 
 #### Exemplo 1: Comparator com Lambda
+
 ```java
 // Tradicional (sem lambda)
 Collections.sort(lista, new Comparator<Livro>() {
@@ -51,6 +56,7 @@ lista.sort(Comparator.comparing(Livro::getTitulo));
 ```
 
 #### Exemplo 2: Runnable com Lambda
+
 ```java
 // Tradicional
 Thread t = new Thread(new Runnable() {
@@ -65,6 +71,7 @@ Thread t = () -> System.out.println("Executando");
 ```
 
 #### Exemplo 3: Predicate (condições)
+
 ```java
 // Predicate para filtrar clientes maiores de idade
 Predicate<Cliente> maiorDeIdade = cliente -> {
@@ -84,16 +91,19 @@ if (maiorDeIdade.test(cliente)) {
 
 ### O que são?
 
-Streams são sequências de elementos que suportam operações agregadas. Permitem processar coleções de forma funcional e paralela.
+Streams são sequências de elementos que suportam operações agregadas. Permitem
+processar coleções de forma funcional e paralela.
 
 ### Operações Principais
 
 #### Pipeline de Stream
+
 ```
 Fonte (Collection/Array) → Intermediate Operations → Terminal Operation → Resultado
 ```
 
 #### Intermediate Operations (retornam Stream)
+
 - `filter(Predicate)` - Filtra elementos
 - `map(Function)` - Transforma elementos
 - `flatMap(Function)` - Achata estruturas
@@ -103,6 +113,7 @@ Fonte (Collection/Array) → Intermediate Operations → Terminal Operation → 
 - `skip(n)` - Pula elementos
 
 #### Terminal Operations (retornam resultado)
+
 - `collect()` - Coleta para Collection
 - `forEach(Consumer)` - Iera sobre elementos
 - `count()` - Conta elementos
@@ -115,6 +126,7 @@ Fonte (Collection/Array) → Intermediate Operations → Terminal Operation → 
 ### Exemplos no Projeto
 
 #### Exemplo 1: Filtrar e Coletar
+
 ```java
 // Encontrar livros aprovados
 List<LivroAnuncio> aprovados = livros.stream()
@@ -131,6 +143,7 @@ for (LivroAnuncio livro : livros) {
 ```
 
 #### Exemplo 2: Mapear e Transformar
+
 ```java
 // Obter lista de nomes de clientes
 List<String> nomes = clientes.stream()
@@ -145,6 +158,7 @@ for (Cliente cliente : clientes) {
 ```
 
 #### Exemplo 3: Encontrar Primeiro Elemento
+
 ```java
 // Encontrar cliente por email
 Optional<Cliente> encontrado = clientes.stream()
@@ -162,6 +176,7 @@ for (Cliente c : clientes) {
 ```
 
 #### Exemplo 4: Agrupar por Categoria
+
 ```java
 // Agrupar livros por gênero
 Map<String, List<LivroAnuncio>> porGenero = livros.stream()
@@ -169,6 +184,7 @@ Map<String, List<LivroAnuncio>> porGenero = livros.stream()
 ```
 
 #### Exemplo 5: Estatísticas
+
 ```java
 // Calcular média de notas
 Double mediaNotas = avaliacoes.stream()
@@ -194,7 +210,8 @@ double mediaNotas = quantidade > 0 ? (double) soma / quantidade : 0.0;
 
 ### O que são?
 
-Method References são formas simplificadas de expressões Lambda que chamam um método diretamente.
+Method References são formas simplificadas de expressões Lambda que chamam um
+método diretamente.
 
 ### Sintaxe
 
@@ -248,7 +265,8 @@ lista.sort(Comparator.comparing(Cliente::getNome));
 
 ### O que é?
 
-Optional é um container que pode conter ou não um valor não-nulo. Ajuda a evitar NullPointerException e escrever código mais limpo.
+Optional é um container que pode conter ou não um valor não-nulo. Ajuda a evitar
+NullPointerException e escrever código mais limpo.
 
 ### Criação
 
@@ -320,14 +338,14 @@ Interfaces com apenas um método abstrato. A base para expressões lambda.
 
 ### Principais Interfaces java.util.function
 
-| Interface | Método | Descrição |
-|-----------|--------|-----------|
-| `Function<T,R>` | `R apply(T t)` | Transforma T em R |
-| `Predicate<T>` | `boolean test(T t)` | Retorna boolean |
-| `Consumer<T>` | `void accept(T t)` | Executa ação |
-| `Supplier<T>` | `T get()` | Fornece valor |
-| `UnaryOperator<T>` | `T apply(T t)` | Operador unário |
-| `BinaryOperator<T>` | `T apply(T t1, T t2)` | Operador binário |
+| Interface           | Método                | Descrição         |
+| ------------------- | --------------------- | ----------------- |
+| `Function<T,R>`     | `R apply(T t)`        | Transforma T em R |
+| `Predicate<T>`      | `boolean test(T t)`   | Retorna boolean   |
+| `Consumer<T>`       | `void accept(T t)`    | Executa ação      |
+| `Supplier<T>`       | `T get()`             | Fornece valor     |
+| `UnaryOperator<T>`  | `T apply(T t)`        | Operador unário   |
+| `BinaryOperator<T>` | `T apply(T t1, T t2)` | Operador binário  |
 
 ### Exemplos no Projeto
 
@@ -356,7 +374,8 @@ Supplier<LocalDateTime> agora = () -> LocalDateTime.now();
 
 ### O que é?
 
-O padrão Builder permite construir objetos complexos passo a passo. Lombok simplifica com `@Builder`.
+O padrão Builder permite construir objetos complexos passo a passo. Lombok
+simplifica com `@Builder`.
 
 ### Exemplo no Projeto
 
@@ -388,7 +407,8 @@ LivroAnuncio anuncio = LivroAnuncio.builder()
 
 ### Conceito
 
-AOP permite separar cross-cutting concerns (loggin, segurança, transações) do código de negócio.
+AOP permite separar cross-cutting concerns (loggin, segurança, transações) do
+código de negócio.
 
 ### Exemplo: @Transactional
 
@@ -411,7 +431,8 @@ public ClienteDTO salvarCliente(SignupDTO signupDTO) {
 
 ### O que é?
 
-Padrão onde objetos recebem suas dependências de fontes externas em vez de criá-las internamente.
+Padrão onde objetos recebem suas dependências de fontes externas em vez de
+criá-las internamente.
 
 ### Exemplo no Projeto
 
@@ -441,11 +462,13 @@ public class ClientController {
 
 ### Conceito
 
-Garante que uma classe tenha apenas uma instância e fornece um ponto global de acesso a ela.
+Garante que uma classe tenha apenas uma instância e fornece um ponto global de
+acesso a ela.
 
 ### Exemplos no Projeto
 
 **Spring Beans são Singletons por padrão:**
+
 ```java
 @Service
 public class ClienteService {
@@ -478,7 +501,8 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
 ### Conceito
 
-Objeto para transferência de dados entre camadas, especialmente entre API e banco.
+Objeto para transferência de dados entre camadas, especialmente entre API e
+banco.
 
 ### Exemplo no Projeto
 
@@ -548,7 +572,8 @@ public class TokenController {
 
 ### Conceito
 
-Padrão que cria objetos sem especificar a classe exata do objeto que será criado.
+Padrão que cria objetos sem especificar a classe exata do objeto que será
+criado.
 
 ### Exemplo no Projeto
 
@@ -583,6 +608,7 @@ public class PagamentoFactory {
 Token compactado e autocontido que transmite claims (declarações) entre partes.
 
 ### Estrutura do JWT
+
 ```
 xxxxx.yyyyy.zzzzz
 Header.Payload.Signature
@@ -839,6 +865,7 @@ long count = livros.stream()
 ## Conclusão
 
 Estes conceitos formam a base do código moderno em Java. A combinação de:
+
 - **Expressões Lambda** + **Streams** = Código funcional e conciso
 - **Optional** = Tratamento seguro de nulos
 - **Design Patterns** (Factory, Strategy, Builder) = Código manutenível
@@ -847,4 +874,3 @@ Estes conceitos formam a base do código moderno em Java. A combinação de:
 - **JPA/Hibernate** = Mapeamento objeto-relacional
 
 Torna o código mais legível, manutenível e eficiente.
-

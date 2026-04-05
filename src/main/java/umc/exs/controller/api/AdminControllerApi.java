@@ -3,6 +3,7 @@ package umc.exs.controller.api;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
@@ -75,7 +76,7 @@ public class AdminControllerApi {
 
         List<Map<String, Object>> resposta = livros.stream()
                 .map(b -> {
-                    java.util.HashMap<String, Object> map = new java.util.HashMap<>();
+                    HashMap<String, Object> map = new HashMap<>();
                     map.put("id", b.getId());
                     map.put("titulo", b.getTitulo());
                     map.put("autor", b.getAutor());
@@ -100,6 +101,7 @@ public class AdminControllerApi {
      * Lista livros pendentes de aprovação.
      * Filtrados por aprovado = false.
      * Para painel admin.
+     * 
      * @return List<LivroAnuncio> pendentes
      */
     @GetMapping("/livros/pendentes")
@@ -129,7 +131,7 @@ public class AdminControllerApi {
         if (user == null) {
             return ResponseEntity.status(401).body("Acesso negado: Admin não autenticado.");
         }
-        if (aprovacao.getEstadoAprovado() == EstadoLivro.RUIM){
+        if (aprovacao.getEstadoAprovado() == EstadoLivro.RUIM) {
             return ResponseEntity.status(400).body("Livros com estado RUIM devem ser rejeitados, não aprovados.");
         }
 
@@ -240,4 +242,3 @@ public class AdminControllerApi {
         return ResponseEntity.ok(dashboardService.getMetricas());
     }
 }
-

@@ -4,16 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
-import java.time.format.TextStyle;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,7 +23,8 @@ public class PostBlogService {
         return postBlogRepository.findAllByOrderByDataPublicacaoDesc();
     }
 
-    public PostBlog criarPost(String titulo, String conteudo, String autorNome, MultipartFile imagem) throws IOException {
+    public PostBlog criarPost(String titulo, String conteudo, String autorNome, MultipartFile imagem)
+            throws IOException {
         String imagemUrl = null;
 
         if (imagem != null && !imagem.isEmpty()) {

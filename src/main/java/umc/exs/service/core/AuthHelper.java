@@ -25,9 +25,10 @@ public class AuthHelper {
      * Autentica usuário e define cookie JWT.
      * Carrega UserDetails, gera token, set Auth context.
      * Registra log auditoria ação específica.
-     * @param email usuário
-     * @param id cliente
-     * @param response cookie
+     * 
+     * @param email     usuário
+     * @param id        cliente
+     * @param response  cookie
      * @param logAction tipo log
      */
     public void authenticateAndSetCookie(String email, Long id, HttpServletResponse response, String logAction) {
@@ -54,4 +55,3 @@ public class AuthHelper {
  * Registra logAuditoria sucesso/falha.
  * Usado controllers login/register.
  */
-

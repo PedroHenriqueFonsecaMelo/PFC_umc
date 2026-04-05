@@ -7,16 +7,19 @@ package umc.exs.mappers;
  */
 public final class CpfUtil {
 
-    private CpfUtil() {}
+    private CpfUtil() {
+    }
 
     /**
      * Mascara CPF para exibição segura no frontend.
      * Exemplo: "12345678901" → "***.***. 789-01"
      */
     public static String mascararCpf(String cpf) {
-        if (cpf == null) return null;
+        if (cpf == null)
+            return null;
         String digits = cpf.replaceAll("[^0-9]", "");
-        if (digits.length() != 11) return "***.***.***-**";
+        if (digits.length() != 11)
+            return "***.***.***-**";
         return String.format("***.***.%s-%s",
                 digits.substring(6, 9),
                 digits.substring(9));

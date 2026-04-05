@@ -15,7 +15,8 @@ import umc.exs.model.entidades.usuario.Cliente;
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
-    // Carrega o cliente com todas as associações em uma única consulta (Eager Loading planejado)
+    // Carrega o cliente com todas as associações em uma única consulta (Eager
+    // Loading planejado)
     @EntityGraph(attributePaths = { "enderecos", "cartoes" })
     Optional<Cliente> findByEmail(String email);
 
@@ -24,7 +25,8 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
     Optional<Cliente> findByCpf(String cpf);
 
-    // Query para verificar se o ID pertence àquele e-mail (Segurança extra em filtros)
+    // Query para verificar se o ID pertence àquele e-mail (Segurança extra em
+    // filtros)
     @Query("SELECT c FROM Cliente c WHERE c.email = :email AND c.id = :id")
     Optional<Cliente> findByEmailAndId(@Param("email") String email, @Param("id") Long id);
 
@@ -40,6 +42,9 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
     boolean existsByCpf(String cpf);
 
-    /** Clientes cadastrados a partir de uma data (para agrupamento mensal no dashboard). */
+    /**
+     * Clientes cadastrados a partir de uma data (para agrupamento mensal no
+     * dashboard).
+     */
     List<Cliente> findByDataCriacaoAfter(LocalDateTime data);
 }

@@ -17,8 +17,6 @@ user.db
 *.tmp
 *.png
 *.jpg
-*.sql
-*.sql.gz
 /uploads
 *.p12
 logs/

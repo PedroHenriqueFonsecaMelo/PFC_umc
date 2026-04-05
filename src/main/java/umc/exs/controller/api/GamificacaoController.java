@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * API REST de gamificação da Bibliotroca.
  *
- * GET /api/gamificacao/ranking  → Top 5 global (público)
+ * GET /api/gamificacao/ranking → Top 5 global (público)
  * GET /api/gamificacao/meu-perfil → perfil do usuário logado (autenticado)
  */
 @RestController

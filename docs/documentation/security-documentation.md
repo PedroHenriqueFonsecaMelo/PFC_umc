@@ -2,7 +2,8 @@
 
 ## Visão Geral
 
-Este documento explica os mecanismos de segurança implementados no projeto, incluindo autenticação, autorização, JWT e configuração de segurança.
+Este documento explica os mecanismos de segurança implementados no projeto,
+incluindo autenticação, autorização, JWT e configuração de segurança.
 
 ---
 
@@ -10,13 +11,13 @@ Este documento explica os mecanismos de segurança implementados no projeto, inc
 
 ### Componentes Principais
 
-| Componente | Descrição |
-|------------|-----------|
-| **JwtUtil** | Geração e validação de tokens JWT |
-| **JwtRequestFilter** | Filtro que processa requisições com JWT |
-| **JwtUserDetailsService** | Carrega usuários do banco para autenticação |
-| **JwtAuthenticationEntryPoint** | Manipula erros de autenticação |
-| **SecurityConfig** | Configuração global de segurança |
+| Componente                      | Descrição                                   |
+| ------------------------------- | ------------------------------------------- |
+| **JwtUtil**                     | Geração e validação de tokens JWT           |
+| **JwtRequestFilter**            | Filtro que processa requisições com JWT     |
+| **JwtUserDetailsService**       | Carrega usuários do banco para autenticação |
+| **JwtAuthenticationEntryPoint** | Manipula erros de autenticação              |
+| **SecurityConfig**              | Configuração global de segurança            |
 
 ---
 
@@ -24,7 +25,8 @@ Este documento explica os mecanismos de segurança implementados no projeto, inc
 
 ### O que é JWT?
 
-JWT é um padrão para criação de tokens de acesso que permitem transmitir informações entre partes de forma segura e compacta.
+JWT é um padrão para criação de tokens de acesso que permitem transmitir
+informações entre partes de forma segura e compacta.
 
 ### Estrutura do Token
 
@@ -43,13 +45,13 @@ xxxxx.yyyyy.zzzzz
 
 **Funcionalidades**:
 
-| Método | Descrição |
-|--------|-----------|
-| `generateToken(String subject)` | Gera um novo token JWT |
-| `extractUsername(String token)` | Extrai o username (email) do token |
-| `validateToken(String token)` | Valida a assinatura e expiração |
+| Método                                        | Descrição                            |
+| --------------------------------------------- | ------------------------------------ |
+| `generateToken(String subject)`               | Gera um novo token JWT               |
+| `extractUsername(String token)`               | Extrai o username (email) do token   |
+| `validateToken(String token)`                 | Valida a assinatura e expiração      |
 | `addTokenCookie(HttpServletResponse, String)` | Adiciona token como cookie HTTP-only |
-| `clearJwtCookie(HttpServletResponse)` | Remove o cookie de token |
+| `clearJwtCookie(HttpServletResponse)`         | Remove o cookie de token             |
 
 **Configurações**:
 
@@ -88,7 +90,8 @@ public String generateToken(String subject) {
 
 **Localização**: `src/main/java/umc/exs/security/JwtRequestFilter.java`
 
-**O que faz**: Intercepta todas as requisições HTTP e verifica a presença de um token JWT válido.
+**O que faz**: Intercepta todas as requisições HTTP e verifica a presença de um
+token JWT válido.
 
 **Fluxo de Processamento**:
 
@@ -146,7 +149,8 @@ private String resolveTokenFromRequest(HttpServletRequest request) {
 
 **Localização**: `src/main/java/umc/exs/security/JwtUserDetailsService.java`
 
-**O que faz**: Carrega os dados do usuário do banco de dados para o Spring Security.
+**O que faz**: Carrega os dados do usuário do banco de dados para o Spring
+Security.
 
 **Responsabilidades**:
 
@@ -264,6 +268,7 @@ boolean matches = passwordEncoder.matches(senhaDigitada, senhaCriptografada);
 **O que é**: Verificar a identidade do usuário (quem você é).
 
 **No projeto**:
+
 - Validação de credenciais (email + senha)
 - Geração de token JWT
 - Login via `AuthController` e `ClientController`
@@ -273,6 +278,7 @@ boolean matches = passwordEncoder.matches(senhaDigitada, senhaCriptografada);
 **O que é**: Verificar o que o usuário pode fazer (permissões).
 
 **No projeto**:
+
 - `hasAuthority("ADMIN")` - Rotas restritas a administradores
 - Roles definidas no `UserDetails`
 - Configuração em `SecurityConfig`
@@ -329,16 +335,16 @@ boolean matches = passwordEncoder.matches(senhaDigitada, senhaCriptografada);
 
 O projeto mantém logs de auditoria para operações sensíveis:
 
-| Ação | Descrição |
-|------|-----------|
-| LOGIN_SUCESSO | Login bem-sucedido |
-| LOGIN_FALHA | Credenciais inválidas |
-| LOGOUT_SUCESSO | Logout |
-| CADASTRO_SUCESSO | Novo cadastro |
-| SENHA_RECU_INICIO | Início de recuperação |
-| LIVRO_APROVADO | Livro aprovado pelo admin |
-| LIVRO_REJEITADO | Livro rejeitado pelo admin |
-| COMPRA_LIVRO_SUCESSO | Compra realizada |
+| Ação                 | Descrição                  |
+| -------------------- | -------------------------- |
+| LOGIN_SUCESSO        | Login bem-sucedido         |
+| LOGIN_FALHA          | Credenciais inválidas      |
+| LOGOUT_SUCESSO       | Logout                     |
+| CADASTRO_SUCESSO     | Novo cadastro              |
+| SENHA_RECU_INICIO    | Início de recuperação      |
+| LIVRO_APROVADO       | Livro aprovado pelo admin  |
+| LIVRO_REJEITADO      | Livro rejeitado pelo admin |
+| COMPRA_LIVRO_SUCESSO | Compra realizada           |
 
 **LogAuditoriaService**:
 
@@ -382,27 +388,27 @@ public void registrarLog(String acao, Long idUsuario, String emailUsuario, Strin
 
 ### ✅ Implementado
 
-| Prática | Descrição |
-|---------|-----------|
-| Senhas criptografadas | BCrypt com salt |
-| Token em cookie HTTP-only | Previne XSS |
-| Sessões Stateless | JWT sem estado |
-| CSRF Desabilitado | APIs REST (seguro com JWT) |
-| CORS configurado | Apenas origem permitida |
-| Validação de entrada | Bean Validation |
-| Auditoria de ações | LogAuditoriaService |
-| Recuperação de senha | Token com expiração |
-| Tentativas de login | Bloqueio após 5 falhas |
+| Prática                   | Descrição                  |
+| ------------------------- | -------------------------- |
+| Senhas criptografadas     | BCrypt com salt            |
+| Token em cookie HTTP-only | Previne XSS                |
+| Sessões Stateless         | JWT sem estado             |
+| CSRF Desabilitado         | APIs REST (seguro com JWT) |
+| CORS configurado          | Apenas origem permitida    |
+| Validação de entrada      | Bean Validation            |
+| Auditoria de ações        | LogAuditoriaService        |
+| Recuperação de senha      | Token com expiração        |
+| Tentativas de login       | Bloqueio após 5 falhas     |
 
 ### ⚠️ Recomendações Futuras
 
-| Prática | Descrição |
-|---------|-----------|
-| HTTPS em produção | Cookie secure = true |
-| Rate limiting | Limitar tentativas de login |
-| 2FA | Autenticação de dois fatores |
-| Refresh tokens | Renovação de token |
-| Auditoria detalhada | Log de IP, User-Agent |
+| Prática             | Descrição                    |
+| ------------------- | ---------------------------- |
+| HTTPS em produção   | Cookie secure = true         |
+| Rate limiting       | Limitar tentativas de login  |
+| 2FA                 | Autenticação de dois fatores |
+| Refresh tokens      | Renovação de token           |
+| Auditoria detalhada | Log de IP, User-Agent        |
 
 ---
 
@@ -435,4 +441,4 @@ sequenceDiagram
     F-->>C: SecurityContext configurado
     C->>@AuthenticationPrincipal: userDetails
     C-->>U: página perfil
-
+```

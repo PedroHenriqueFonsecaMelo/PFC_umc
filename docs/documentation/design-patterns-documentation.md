@@ -2,13 +2,16 @@
 
 ## Visão Geral
 
-Este documento explica os padrões de projeto (Design Patterns) utilizados no projeto, incluindo Strategy Pattern e Factory Pattern para gestão de pagamentos.
+Este documento explica os padrões de projeto (Design Patterns) utilizados no
+projeto, incluindo Strategy Pattern e Factory Pattern para gestão de pagamentos.
 
 ---
 
 ## O que são Design Patterns?
 
-**Design Patterns** são soluções recorrentes para problemas comuns em desenvolvimento de software. Eles representam boas práticas desenvolvidas e testadas ao longo do tempo.
+**Design Patterns** são soluções recorrentes para problemas comuns em
+desenvolvimento de software. Eles representam boas práticas desenvolvidas e
+testadas ao longo do tempo.
 
 ---
 
@@ -16,7 +19,9 @@ Este documento explica os padrões de projeto (Design Patterns) utilizados no pr
 
 ### O que é?
 
-O **Strategy Pattern** define uma família de algoritmos, encapsula cada um e os torna intercambiáveis. Permite que o algoritmo varie independentemente dos clientes que o utilizam.
+O **Strategy Pattern** define uma família de algoritmos, encapsula cada um e os
+torna intercambiáveis. Permite que o algoritmo varie independentemente dos
+clientes que o utilizam.
 
 ### Quando usar?
 
@@ -43,7 +48,8 @@ public interface PagamentoStrategy {
 
 **1. PagamentoPixStrategy**
 
-**Localização**: `src/main/java/umc/exs/design/strategy/impl/PagamentoPixStrategy.java`
+**Localização**:
+`src/main/java/umc/exs/design/strategy/impl/PagamentoPixStrategy.java`
 
 ```java
 @Slf4j
@@ -84,7 +90,8 @@ public class PagamentoPixStrategy implements PagamentoStrategy {
 
 **2. PagamentoCartaoStrategy**
 
-**Localização**: `src/main/java/umc/exs/design/strategy/impl/PagamentoCartaoStrategy.java`
+**Localização**:
+`src/main/java/umc/exs/design/strategy/impl/PagamentoCartaoStrategy.java`
 
 ```java
 @Slf4j
@@ -157,13 +164,13 @@ public class TokenController {
 
 ### Benefícios do Strategy Pattern
 
-| Benefício | Descrição |
-|-----------|-----------|
-| **Extensibilidade** | Adicionar novo método de pagamento = nova classe |
-| **Simplicidade** | Elimina condicionais complexas |
-| **Testabilidade** | Cada estratégia testada isoladamente |
-| **Manutenibilidade** | Mudanças em um método não afetam outros |
-| **SRP** | Cada classe tem uma única responsabilidade |
+| Benefício            | Descrição                                        |
+| -------------------- | ------------------------------------------------ |
+| **Extensibilidade**  | Adicionar novo método de pagamento = nova classe |
+| **Simplicidade**     | Elimina condicionais complexas                   |
+| **Testabilidade**    | Cada estratégia testada isoladamente             |
+| **Manutenibilidade** | Mudanças em um método não afetam outros          |
+| **SRP**              | Cada classe tem uma única responsabilidade       |
 
 ### Diagrama do Strategy Pattern
 
@@ -194,7 +201,8 @@ public class TokenController {
 
 ### O que é?
 
-O **Factory Pattern** cria objetos sem especificar a classe exata do objeto que será criado. Usa uma interface comum para criar objetos.
+O **Factory Pattern** cria objetos sem especificar a classe exata do objeto que
+será criado. Usa uma interface comum para criar objetos.
 
 ### Quando usar?
 
@@ -235,7 +243,9 @@ public class PagamentoFactory {
 
 ### Como o Spring Injeta as Estratégias
 
-O Spring automaticamente detecta todas as classes que implementam `PagamentoStrategy` e as injeta como uma `List<PagamentoStrategy>` no construtor da Factory.
+O Spring automaticamente detecta todas as classes que implementam
+`PagamentoStrategy` e as injeta como uma `List<PagamentoStrategy>` no construtor
+da Factory.
 
 ```java
 // O Spring detecta:
@@ -247,12 +257,12 @@ public PagamentoFactory(List<PagamentoStrategy> listaEstrategias) { ... }
 
 ### Benefícios do Factory Pattern
 
-| Benefício | Descrição |
-|-----------|-----------|
-| **Desacoplamento** | Cliente não depende de classes concretas |
-| **Centralização** | Criação de objetos em um único lugar |
-| **Flexibilidade** | Adicionar novas estratégias facilmente |
-| **Injeção Automática** | Spring gerencia dependências |
+| Benefício              | Descrição                                |
+| ---------------------- | ---------------------------------------- |
+| **Desacoplamento**     | Cliente não depende de classes concretas |
+| **Centralização**      | Criação de objetos em um único lugar     |
+| **Flexibilidade**      | Adicionar novas estratégias facilmente   |
+| **Injeção Automática** | Spring gerencia dependências             |
 
 ### Diagrama do Factory Pattern
 
@@ -301,6 +311,7 @@ LivroAnuncio anuncio = LivroAnuncio.builder()
 ```
 
 **Benefícios**:
+
 - Código mais legível
 - Parâmetros nomeados
 - Valores opcionais
@@ -391,16 +402,16 @@ public class ClienteService {
 
 ## 4. Resumo dos Patterns
 
-| Pattern | Onde Usado | Benefício |
-|---------|-----------|-----------|
-| **Strategy** | Pagamentos (Pix, Cartão) | Algoritmos intercambiáveis |
-| **Factory** | PagamentoFactory | Criação centralizada |
-| **Builder** | Lombok @Builder | Construção flexível |
-| **DAO** | JpaRepository | Abstração de dados |
-| **DTO** | ClienteDTO, SignupDTO | Transferência de dados |
-| **Mapper** | MapStruct | Conversão automática |
-| **Singleton** | Services Spring | Uma única instância |
-| **MVC** | Controller/Service/Model | Separação de preocupações |
+| Pattern       | Onde Usado               | Benefício                  |
+| ------------- | ------------------------ | -------------------------- |
+| **Strategy**  | Pagamentos (Pix, Cartão) | Algoritmos intercambiáveis |
+| **Factory**   | PagamentoFactory         | Criação centralizada       |
+| **Builder**   | Lombok @Builder          | Construção flexível        |
+| **DAO**       | JpaRepository            | Abstração de dados         |
+| **DTO**       | ClienteDTO, SignupDTO    | Transferência de dados     |
+| **Mapper**    | MapStruct                | Conversão automática       |
+| **Singleton** | Services Spring          | Uma única instância        |
+| **MVC**       | Controller/Service/Model | Separação de preocupações  |
 
 ---
 
@@ -435,6 +446,7 @@ public class PagamentoBoletoStrategy implements PagamentoStrategy {
    - A Factory disponibilizará o novo método
 
 3. **Usar no Controller**:
+
 ```java
 // Tudo continua igual!
 PagamentoStrategy estrategia = pagamentoFactory.buscarEstrategia("BOLETO");
@@ -449,12 +461,14 @@ Os padrões **Strategy** e **Factory** são fundamentais para este projeto porqu
 
 1. **Separam a lógica de pagamento** - Cada método tem sua própria classe
 2. **Facilitam manutenção** - Mudanças em um método não afetam outros
-3. **Permitem extensão** - Novos métodos são adicionados sem modificar código existente
+3. **Permitem extensão** - Novos métodos são adicionados sem modificar código
+   existente
 4. **São testáveis** - Cada estratégia pode ser testada isoladamente
-5. **Usam injeção de dependência** - Spring gerencia as dependências automaticamente
+5. **Usam injeção de dependência** - Spring gerencia as dependências
+   automaticamente
 
 Estes padrões seguem os princípios **SOLID**, especialmente:
+
 - **S**ingle Responsibility Principle (SRP)
 - **O**pen/Closed Principle (OCP)
 - **D**ependency Inversion Principle (DIP)
-

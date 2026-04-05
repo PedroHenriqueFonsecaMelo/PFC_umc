@@ -51,4 +51,3 @@ public class AvaliacaoLivro {
     @ManyToOne
     private Cliente avaliador;
 }
-

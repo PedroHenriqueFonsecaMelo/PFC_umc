@@ -19,7 +19,6 @@ import umc.exs.DTOs.livro.LivroExibicaoDTO;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.EstadoLivro;
 
-
 @Entity
 @Data
 @Builder
@@ -34,10 +33,10 @@ public class LivroAnuncio {
     private String autor;
     private String isbn;
 
-    @Column(name = "fotos_urls", columnDefinition = "TEXT") 
+    @Column(name = "fotos_urls", columnDefinition = "TEXT")
     @Builder.Default
-    private String fotosUrls = "[]"; 
-    
+    private String fotosUrls = "[]";
+
     @ManyToOne(optional = true)
     @JoinColumn(name = "lote_id")
     private Lote lote;
@@ -47,19 +46,19 @@ public class LivroAnuncio {
     private Cliente vendedor;
 
     private LocalDateTime dataAnuncio;
-    
-    @Builder.Default
-    private Boolean aprovado = false; 
 
-    private Double precoAprovado; 
-    
+    @Builder.Default
+    private Boolean aprovado = false;
+
+    private Double precoAprovado;
+
     @Enumerated(EnumType.STRING)
-    private EstadoLivro estadoAprovado; 
-    
+    private EstadoLivro estadoAprovado;
+
     private LocalDateTime dataAprovacao;
 
     private Long adminAprovadorId;
-    
+
     public LivroExibicaoDTO paraDTO() {
         String primeiraFoto = "";
         try {

@@ -12,10 +12,9 @@ import umc.exs.model.enums.EstadoLivro;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdminAprovacaoDTO {
-    
+
     private EstadoLivro estadoAprovado;
     private String comentario;
     private String fotosUrls;
-    
-}
 
+}

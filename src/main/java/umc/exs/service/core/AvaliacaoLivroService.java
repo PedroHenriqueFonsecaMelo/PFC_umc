@@ -71,8 +71,8 @@ public class AvaliacaoLivroService {
         gamificacaoService.xpAvaliacao(avaliador.getId());
 
         // Registrar auditoria
-        logAuditoria.registrarLog("AVALIACAO_CRIADA", avaliador.getId(), avaliador.getEmail(), 
-            "Avaliou o livro '" + dto.getTituloLivro() + "' com nota " + dto.getNota());
+        logAuditoria.registrarLog("AVALIACAO_CRIADA", avaliador.getId(), avaliador.getEmail(),
+                "Avaliou o livro '" + dto.getTituloLivro() + "' com nota " + dto.getNota());
 
         return saved;
     }
@@ -92,25 +92,25 @@ public class AvaliacaoLivroService {
      */
     public Double calcularMediaPorIsbn(String isbn) {
         List<AvaliacaoLivro> avaliacoes = buscarAvaliacoesPorIsbn(isbn);
-        
+
         if (avaliacoes.isEmpty()) {
             return null;
         }
-        
+
         int soma = 0;
         int quantidade = 0;
-        
+
         for (AvaliacaoLivro avaliacao : avaliacoes) {
             if (avaliacao.getNota() != null) {
                 soma = soma + avaliacao.getNota();
                 quantidade++;
             }
         }
-        
+
         if (quantidade == 0) {
             return null;
         }
-        
+
         return (double) soma / quantidade;
     }
 
@@ -121,4 +121,3 @@ public class AvaliacaoLivroService {
         return avaliacaoRepository.findDistinctIsbns();
     }
 }
-

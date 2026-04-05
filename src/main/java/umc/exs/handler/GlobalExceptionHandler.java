@@ -1,16 +1,20 @@
 package umc.exs.handler;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.http.HttpServletRequest;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 @Slf4j
 @ControllerAdvice
@@ -37,10 +41,12 @@ public class GlobalExceptionHandler {
         // Proteção contra Open Redirect: só redireciona para caminhos internos
         if (referer != null && isSameOrigin(request, referer)) {
             try {
-                java.net.URI uri = new java.net.URI(referer);
+                URI uri = new URI(referer);
                 String path = uri.getPath();
                 return "redirect:" + (path != null && !path.isBlank() ? path : "/");
-            } catch (Exception ignored) {}
+            } catch (URISyntaxException e) {
+                log.warn("Invalid referer for redirect: {}", referer, e);
+            }
         }
         return "redirect:/";
     }
@@ -74,12 +80,34 @@ public class GlobalExceptionHandler {
     /** Valida que o Referer pertence ao mesmo host — previne Open Redirect */
     private boolean isSameOrigin(HttpServletRequest request, String referer) {
         try {
-            java.net.URI refererUri = new java.net.URI(referer);
+            URI refererUri = new URI(referer);
             String refererHost = refererUri.getHost();
-            String serverHost  = request.getServerName();
+            String serverHost = request.getServerName();
             return refererHost != null && refererHost.equalsIgnoreCase(serverHost);
-        } catch (Exception e) {
+        } catch (URISyntaxException e) {
+            log.warn("Invalid referer origin check: {}", referer, e);
             return false;
         }
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Object handleValidationException(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
+
+        // Mapeia os erros: Nome do campo -> Mensagem
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors()
+                .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+
+        if (isRestRequest(request)) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "error", "Dados inválidos",
+                    "fields", errors));
+        }
+
+        // Para MVC, geralmente o BindingResult já trata na View,
+        // mas você pode redirecionar se desejar:
+        return new ModelAndView("error/400", Map.of("mensagens", errors));
     }
 }

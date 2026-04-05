@@ -23,7 +23,7 @@ public class VisitaSiteService {
     public void registrarVisita() {
         LocalDate hoje = LocalDate.now();
         VisitaSite visita = visitaSiteRepository.findByData(hoje)
-            .orElseGet(() -> VisitaSite.builder().data(hoje).total(0L).build());
+                .orElseGet(() -> VisitaSite.builder().data(hoje).total(0L).build());
         visita.setTotal(visita.getTotal() + 1);
         visitaSiteRepository.save(visita);
     }

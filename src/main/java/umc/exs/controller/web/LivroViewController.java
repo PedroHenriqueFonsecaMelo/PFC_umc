@@ -17,6 +17,6 @@ public class LivroViewController {
     // Rota para abrir a vitrine de compras
     @GetMapping("/vitrine")
     public String paginaVitrine() {
-        return "produto/vitrine_livros"; 
+        return "produto/vitrine_livros";
     }
 }
