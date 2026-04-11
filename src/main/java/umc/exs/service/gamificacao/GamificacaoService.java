@@ -6,11 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.exs.DTOs.gamificacao.MeuPerfilGamificacaoDTO;
 import umc.exs.DTOs.gamificacao.RankingItemDTO;
-import umc.exs.model.entidades.foundation.PontuacaoUsuario;
+import umc.exs.model.entidades.social.PontuacaoUsuario;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.NivelUsuario;
-import umc.exs.repository.ClienteRepository;
-import umc.exs.repository.PontuacaoUsuarioRepository;
+import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.repository.usuario.PontuacaoUsuarioRepository;
 import umc.exs.service.log.LogAuditoriaService;
 
 import java.time.LocalDateTime;
@@ -21,15 +21,15 @@ import java.util.List;
  * Serviço central de gamificação da Bibliotroca.
  *
  * Responsabilidades:
- *  - Criar/atualizar pontuação do usuário
- *  - Calcular nível e badge com base em XP
- *  - Retornar ranking Top 5 global
- *  - Retornar perfil de gamificação do usuário logado
+ * - Criar/atualizar pontuação do usuário
+ * - Calcular nível e badge com base em XP
+ * - Retornar ranking Top 5 global
+ * - Retornar perfil de gamificação do usuário logado
  *
  * XP concedido por ação:
- *  - Livro aprovado pelo admin : +50 XP (categoria APROVACAO)
- *  - Comprar um livro          : +30 XP (categoria COMPRA)
- *  - Avaliar um livro          : +10 XP (categoria AVALIACAO)
+ * - Livro aprovado pelo admin : +50 XP (categoria APROVACAO)
+ * - Comprar um livro : +30 XP (categoria COMPRA)
+ * - Avaliar um livro : +10 XP (categoria AVALIACAO)
  */
 @Service
 @RequiredArgsConstructor
@@ -37,8 +37,8 @@ public class GamificacaoService {
 
     // --- Constantes de XP ---
     public static final int XP_LIVRO_APROVADO = 50;
-    public static final int XP_COMPRA         = 30;
-    public static final int XP_AVALIACAO      = 10;
+    public static final int XP_COMPRA = 30;
+    public static final int XP_AVALIACAO = 10;
 
     private final PontuacaoUsuarioRepository pontuacaoRepository;
     private final ClienteRepository clienteRepository;
@@ -67,15 +67,14 @@ public class GamificacaoService {
         pontuacaoRepository.save(pontuacao);
 
         // Log se subiu de nível
-        NivelUsuario nivelAntes  = NivelUsuario.calcular(xpAntes);
+        NivelUsuario nivelAntes = NivelUsuario.calcular(xpAntes);
         NivelUsuario nivelDepois = NivelUsuario.calcular(pontuacao.getXpTotal());
         if (!nivelAntes.equals(nivelDepois)) {
             logAuditoria.registrarLog(
-                "NIVEL_SUBIU",
-                clienteId,
-                pontuacao.getCliente().getEmail(),
-                "Subiu para " + nivelDepois.getDescricao() + " (" + pontuacao.getXpTotal() + " XP)"
-            );
+                    "NIVEL_SUBIU",
+                    clienteId,
+                    pontuacao.getCliente().getEmail(),
+                    "Subiu para " + nivelDepois.getDescricao() + " (" + pontuacao.getXpTotal() + " XP)");
         }
     }
 
@@ -113,15 +112,14 @@ public class GamificacaoService {
             NivelUsuario nivel = p.getNivel();
 
             ranking.add(new RankingItemDTO(
-                i + 1,
-                p.getCliente().getNome(),
-                p.getXpTotal(),
-                nivel.getDescricao(),
-                nivel.getBadge(),
-                p.getXpLivrosAprovados(),
-                p.getXpCompras(),
-                p.getXpAvaliacoes()
-            ));
+                    i + 1,
+                    p.getCliente().getNome(),
+                    p.getXpTotal(),
+                    nivel.getDescricao(),
+                    nivel.getBadge(),
+                    p.getXpLivrosAprovados(),
+                    p.getXpCompras(),
+                    p.getXpAvaliacoes()));
         }
         return ranking;
     }
@@ -142,35 +140,34 @@ public class GamificacaoService {
         if (pontuacao == null) {
             // Usuário ainda sem XP
             return new MeuPerfilGamificacaoDTO(
-                email, 0,
-                NivelUsuario.INICIANTE.getDescricao(),
-                NivelUsuario.INICIANTE.getBadge(),
-                NivelUsuario.BRONZE.getXpMinimo(), // 200 XP para o próximo
-                0, 0, 0, 0
-            );
+                    email, 0,
+                    NivelUsuario.INICIANTE.getDescricao(),
+                    NivelUsuario.INICIANTE.getBadge(),
+                    NivelUsuario.BRONZE.getXpMinimo(), // 200 XP para o próximo
+                    0, 0, 0, 0);
         }
 
         NivelUsuario nivel = pontuacao.getNivel();
         int xpProximo = calcularXpParaProximoNivel(nivel, pontuacao.getXpTotal());
-        int posicao   = calcularPosicaoRanking(pontuacao.getCliente().getId());
+        int posicao = calcularPosicaoRanking(pontuacao.getCliente().getId());
 
         return new MeuPerfilGamificacaoDTO(
-            pontuacao.getCliente().getNome(),
-            pontuacao.getXpTotal(),
-            nivel.getDescricao(),
-            nivel.getBadge(),
-            xpProximo,
-            posicao,
-            pontuacao.getXpLivrosAprovados(),
-            pontuacao.getXpCompras(),
-            pontuacao.getXpAvaliacoes()
-        );
+                pontuacao.getCliente().getNome(),
+                pontuacao.getXpTotal(),
+                nivel.getDescricao(),
+                nivel.getBadge(),
+                xpProximo,
+                posicao,
+                pontuacao.getXpLivrosAprovados(),
+                pontuacao.getXpCompras(),
+                pontuacao.getXpAvaliacoes());
     }
 
     // -------------------------------------------------------
     // HELPERS PRIVADOS
     // -------------------------------------------------------
 
+    @SuppressWarnings("null")
     private PontuacaoUsuario criarPontuacaoInicial(Long clienteId) {
         Cliente cliente = clienteRepository.findById(clienteId)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado: " + clienteId));

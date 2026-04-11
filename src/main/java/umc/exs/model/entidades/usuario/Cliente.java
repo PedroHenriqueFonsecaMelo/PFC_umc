@@ -2,9 +2,12 @@ package umc.exs.model.entidades.usuario;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -18,6 +21,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -25,6 +29,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import umc.exs.model.entidades.livro.AvaliacaoLivro;
 import umc.exs.model.enums.Genero;
 
 @Entity
@@ -34,7 +39,7 @@ import umc.exs.model.enums.Genero;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = {"cartoes", "enderecos", "senha"})
+@ToString(exclude = { "cartoes", "enderecos", "senha" })
 public class Cliente {
 
     @Id
@@ -76,27 +81,25 @@ public class Cliente {
     @Column
     private String fotoPerfil;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, cascade = {
             CascadeType.PERSIST,
             CascadeType.MERGE
     })
-    @JoinTable(
-        name = "cliente_cartao", 
-        joinColumns = @JoinColumn(name = "cliente_id"), 
-        inverseJoinColumns = @JoinColumn(name = "cartao_id")
-    )
+    @JoinTable(name = "cliente_cartao", joinColumns = @JoinColumn(name = "cliente_id"), inverseJoinColumns = @JoinColumn(name = "cartao_id"))
     private Set<Cartao> cartoes = new HashSet<>();
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, cascade = {
             CascadeType.PERSIST,
             CascadeType.MERGE
     })
-    @JoinTable(
-        name = "cliente_endereco", 
-        joinColumns = @JoinColumn(name = "cliente_id"), 
-        inverseJoinColumns = @JoinColumn(name = "endereco_id")
-    )
+    @JoinTable(name = "cliente_endereco", joinColumns = @JoinColumn(name = "cliente_id"), inverseJoinColumns = @JoinColumn(name = "endereco_id"))
     private Set<Endereco> enderecos = new HashSet<>();
+
+    @OneToMany(mappedBy = "avaliador")
+    @JsonIgnore
+    private List<AvaliacaoLivro> avaliacoes;
 
     // --- Métodos de Negócio (Encapsulamento) ---
 

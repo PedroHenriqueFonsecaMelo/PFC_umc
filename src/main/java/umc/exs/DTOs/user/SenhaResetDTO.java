@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SenhaResetDTO {
 
-
     private String token;
     private String novaSenha;
     private String confirmarSenha;

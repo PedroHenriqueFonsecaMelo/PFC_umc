@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.model.entidades.foundation.PostBlog;
-import umc.exs.repository.PostBlogRepository;
+import umc.exs.model.entidades.social.PostBlog;
+import umc.exs.repository.negocios.PostBlogRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +23,9 @@ public class PostBlogService {
         return postBlogRepository.findAllByOrderByDataPublicacaoDesc();
     }
 
-    public PostBlog criarPost(String titulo, String conteudo, String autorNome, MultipartFile imagem) throws IOException {
+    @SuppressWarnings("null")
+    public PostBlog criarPost(String titulo, String conteudo, String autorNome, MultipartFile imagem)
+            throws IOException {
         String imagemUrl = null;
 
         if (imagem != null && !imagem.isEmpty()) {
@@ -49,6 +51,7 @@ public class PostBlogService {
         return postBlogRepository.save(post);
     }
 
+    @SuppressWarnings("null")
     public void deletarPost(Long id) {
         postBlogRepository.deleteById(id);
     }

@@ -3,7 +3,7 @@ package umc.exs.mappers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import umc.exs.DTOs.livro.LivroRequestDTO;
-import umc.exs.model.entidades.foundation.LivroAnuncio;
+import umc.exs.model.entidades.livro.Livro;
 
 @Mapper(componentModel = "spring")
 public interface LivroMapper {
@@ -17,7 +17,7 @@ public interface LivroMapper {
     @Mapping(target = "estadoAprovado", ignore = true)
     @Mapping(target = "dataAprovacao", ignore = true)
     @Mapping(target = "adminAprovadorId", ignore = true)
-    LivroAnuncio paraEntidade(LivroRequestDTO dto);
+    Livro paraEntidade(LivroRequestDTO dto);
 
-    LivroRequestDTO paraDTO(LivroAnuncio entity);
+    LivroRequestDTO paraDTO(Livro entity);
 }

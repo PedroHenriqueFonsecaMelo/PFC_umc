@@ -21,8 +21,8 @@ import umc.exs.DTOs.compra.CarrinhoCompraRequestDTO;
 import umc.exs.DTOs.compra.CarrinhoCompraResponseDTO;
 import umc.exs.DTOs.compra.LoteRequestDTO;
 import umc.exs.DTOs.livro.LivroRequestDTO;
-import umc.exs.model.entidades.foundation.LivroAnuncio;
 import umc.exs.model.entidades.foundation.Lote;
+import umc.exs.model.entidades.livro.Livro;
 import umc.exs.service.core.LivroService;
 
 @RestController
@@ -41,9 +41,9 @@ public class LivroControllerApi {
     @PostMapping(value = "/lotes/vender", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> criarLoteVenda(
 
-        @AuthenticationPrincipal UserDetails user,
-        @RequestPart("loteDados") LoteRequestDTO loteDados,
-        @RequestPart("fotos") List<MultipartFile> fotos) {
+            @AuthenticationPrincipal UserDetails user,
+            @RequestPart("loteDados") LoteRequestDTO loteDados,
+            @RequestPart("fotos") List<MultipartFile> fotos) {
 
         if (user == null) {
             return ResponseEntity.status(401).body("Usuário precisa estar logado.");
@@ -77,7 +77,7 @@ public class LivroControllerApi {
         }
 
         try {
-            LivroAnuncio anuncio = livroService.cadastrarVenda(user.getUsername(), dados, foto);
+            Livro anuncio = livroService.cadastrarVenda(user.getUsername(), dados, foto);
             return ResponseEntity.ok(anuncio);
         } catch (Exception e) {
             // Logar o erro ajuda a debugar se o Service falhar
@@ -92,7 +92,7 @@ public class LivroControllerApi {
      */
     @GetMapping("/todos")
 
-    public ResponseEntity<List<LivroAnuncio>> listarTodos() {
+    public ResponseEntity<List<Livro>> listarTodos() {
         // Retorna apenas livros aprovados para a vitrine
         return ResponseEntity.ok(livroService.listarLivrosAprovados());
     }

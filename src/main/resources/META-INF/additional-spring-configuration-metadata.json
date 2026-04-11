@@ -1,0 +1,37 @@
+{"properties": [
+  {
+    "name": "jwt.secret",
+    "type": "java.lang.String",
+    "description": "A description for 'jwt.secret'"
+  },
+  {
+    "name": "jwt.expiration",
+    "type": "java.lang.String",
+    "description": "A description for 'jwt.expiration'"
+  },
+  {
+    "name": "jwt.cookie.name",
+    "type": "java.lang.String",
+    "description": "A description for 'jwt.cookie.name'"
+  },
+  {
+    "name": "app.allowed-origin",
+    "type": "java.lang.String",
+    "description": "A description for 'app.allowed-origin'"
+  },
+  {
+    "name": "app.base-url",
+    "type": "java.lang.String",
+    "description": "A description for 'app.base-url'"
+  },
+  {
+    "name": "mail.from",
+    "type": "java.lang.String",
+    "description": "A description for 'mail.from'"
+  },
+  {
+    "name": "spring.sql.init.fail-on-missing-locations",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.sql.init.fail-on-missing-locations'"
+  }
+]}

@@ -57,8 +57,8 @@ async function efetuarCompra(e) {
                 document.getElementById('imgQrCode').src = data.qrCodeBase64;
                 document.getElementById('textoCopiaECola').value = data.pixCopiaECola;
                 document.getElementById('modalPix').classList.remove('hidden');
-                
-                iniciarVerificacao(data.pagamentoId); 
+
+                iniciarVerificacao(data.pagamentoId);
 
             } else {
                 // SUCESSO DIRETO (CARTÃO)
@@ -126,10 +126,10 @@ function iniciarVerificacao(pagamentoId) {
 
             if (data.status === "APROVADO") {
                 console.log("Pagamento aprovado detectado!");
-                
+
                 // 1. Para o cronômetro
-                clearInterval(intervaloCheck); 
-                
+                clearInterval(intervaloCheck);
+
                 // 2. Fecha o modal (Garante que a classe 'hidden' seja adicionada)
                 const modal = document.getElementById('modalPix');
                 modal.classList.add('hidden');
@@ -156,7 +156,7 @@ function confirmarPagamentoSucesso() {
 
 async function simularAvisoBanco() {
     const fullCode = document.getElementById('textoCopiaECola').value;
-    
+
     const regex = /PX-\d+/;
     const match = fullCode.match(regex);
     const pagamentoId = match ? match[0] : null;
@@ -165,10 +165,10 @@ async function simularAvisoBanco() {
         console.error("ID de pagamento não encontrado no código PIX");
         return;
     }
-    
+
     try {
         const response = await fetch(`/api/tokens/simular-webhook/${pagamentoId}`);
-        if(response.ok) {
+        if (response.ok) {
             console.log("Comando de aprovação enviado para o ID: " + pagamentoId);
         }
     } catch (e) {

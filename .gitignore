@@ -1,5 +1,6 @@
 /.vscode
 /target
+/target/
 /logs
 /logs/application.log
 /logs/*
@@ -22,3 +23,10 @@ user.db
 logs/
 .idea
 CLAUDE.md
+/src/main/resources/data.sql
+data.sql
+*.sql
+/TODO.md
+TODO.md
+/.classpath
+/.project

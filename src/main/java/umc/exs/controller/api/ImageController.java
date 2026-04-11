@@ -20,10 +20,12 @@ public class ImageController {
      * Endpoint direto /uploads/livros/filename.
      * Usado por frontend vitrine.
      */
+    @SuppressWarnings("null")
     @GetMapping("/uploads/livros/{filename:.+}")
     public ResponseEntity<Resource> serveImage(@PathVariable String filename) {
 
         Path path = Paths.get("uploads/livros/" + filename);
+
         Resource file = new FileSystemResource(path);
 
         if (file.exists()) {
@@ -38,6 +40,7 @@ public class ImageController {
      * Serve fotos de perfil dos clientes.
      * Endpoint /uploads/clientes/filename.
      */
+    @SuppressWarnings("null")
     @GetMapping("/uploads/clientes/{filename:.+}")
     public ResponseEntity<Resource> serveClienteImage(@PathVariable String filename) {
         Path path = Paths.get("uploads/clientes/" + filename);
@@ -53,6 +56,7 @@ public class ImageController {
      * Serve imagens de posts do blog.
      * Endpoint /uploads/blog/filename.
      */
+    @SuppressWarnings("null")
     @GetMapping("/uploads/blog/{filename:.+}")
     public ResponseEntity<Resource> serveBlogImage(@PathVariable String filename) {
 

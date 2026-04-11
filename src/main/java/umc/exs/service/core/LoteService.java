@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import umc.exs.model.entidades.foundation.Lote;
-import umc.exs.repository.LoteRepository;
+import umc.exs.repository.negocios.LoteRepository;
 
 import java.util.List;
 
@@ -16,6 +16,7 @@ public class LoteService {
     /**
      * Lista lotes com status PENDENTE.
      * Para aprovação admin.
+     * 
      * @return lista Lote pendentes
      */
     public List<Lote> listarPendentes() {
@@ -25,9 +26,11 @@ public class LoteService {
     /**
      * Busca lote por ID.
      * Throw se não encontrado.
+     * 
      * @param id lote
      * @return Lote
      */
+    @SuppressWarnings("null")
     public Lote findById(Long id) {
         return loteRepository.findById(id).orElseThrow(() -> new RuntimeException("Lote não encontrado"));
     }
@@ -35,6 +38,7 @@ public class LoteService {
     /**
      * Conta pendentes por cliente ID.
      * Limite cadastro lotes usuário.
+     * 
      * @param clienteId
      * @return count
      */
@@ -50,4 +54,3 @@ public class LoteService {
  * Usa LoteRepository Spring Data.
  * Status PENDENTE/TOTAL_APROVADO enum.
  */
-

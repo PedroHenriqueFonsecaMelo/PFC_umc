@@ -1,6 +1,7 @@
 # 📚 Documentação Completa do Projeto
 
-Bem-vindo à documentação completa do projeto. Este arquivo serve como índice para todos os documentos de documentação.
+Bem-vindo à documentação completa do projeto. Este arquivo serve como índice
+para todos os documentos de documentação.
 
 ---
 
@@ -8,26 +9,27 @@ Bem-vindo à documentação completa do projeto. Este arquivo serve como índice
 
 ### 1. Dicionário e Conceitos
 
-| Arquivo | Descrição |
-|---------|-----------|
-| [dictionary/annotations.md](dictionary/annotations.md) | Dicionário completo de todas as anotações (annotations) usadas no projeto |
-| [dictionary/complex-topics.md](dictionary/complex-topics.md) | Tópicos avançados: Lambda, Streams, Optional, Design Patterns, JWT, etc. |
+| Arquivo                                                      | Descrição                                                                 |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| [dictionary/annotations.md](dictionary/annotations.md)       | Dicionário completo de todas as anotações (annotations) usadas no projeto |
+| [dictionary/complex-topics.md](dictionary/complex-topics.md) | Tópicos avançados: Lambda, Streams, Optional, Design Patterns, JWT, etc.  |
 
 ### 2. Arquitetura da Aplicação
 
-| Arquivo | Descrição |
-|---------|-----------|
-| [controller-documentation.md](controller-documentation.md) | Documentação de todos os Controllers (MVC e REST) |
-| [service-documentation.md](service-documentation.md) | Documentação de todos os Services |
-| [model-documentation.md](model-documentation.md) | Entidades, Repositories, DTOs e Mappers |
-| [security-documentation.md](security-documentation.md) | Sistema de segurança, JWT e autenticação |
-| [design-patterns-documentation.md](design-patterns-documentation.md) | Padrões de projeto utilizados |
+| Arquivo                                                              | Descrição                                         |
+| -------------------------------------------------------------------- | ------------------------------------------------- |
+| [controller-documentation.md](controller-documentation.md)           | Documentação de todos os Controllers (MVC e REST) |
+| [service-documentation.md](service-documentation.md)                 | Documentação de todos os Services                 |
+| [model-documentation.md](model-documentation.md)                     | Entidades, Repositories, DTOs e Mappers           |
+| [security-documentation.md](security-documentation.md)               | Sistema de segurança, JWT e autenticação          |
+| [design-patterns-documentation.md](design-patterns-documentation.md) | Padrões de projeto utilizados                     |
 
 ---
 
 ## 🚀 Visão Geral do Projeto
 
-Este é um sistema de ** marketplace de livros** com as seguintes funcionalidades principais:
+Este é um sistema de ** marketplace de livros** com as seguintes funcionalidades
+principais:
 
 ### Funcionalidades
 
@@ -46,7 +48,7 @@ Frontend (Thymeleaf)       Controllers API    Services        Model
 | ClientCtrl     | ----->  | AuthCtrl    |-->| Client |---->| Repo     |
 | IndexCtrl      |         | LivroCtrlApi|   | Service|     | DB (MySQL)
 | AdminViewCtrl  |         | TokenCtrl   |   +--------+
-+----------------+         +-------------+   
++----------------+         +-------------+
 ```
 
 **Atualizado**: Diagrama ASCII arquitetura textual.
@@ -140,34 +142,34 @@ Usuário → LivroControllerApi → LivroService
 
 ## 🛠️ Tecnologias Utilizadas
 
-| Tecnologia | Uso |
-|------------|-----|
-| **Java 17** | Linguagem principal |
-| **Spring Boot** | Framework web |
+| Tecnologia          | Uso                      |
+| ------------------- | ------------------------ |
+| **Java 17**         | Linguagem principal      |
+| **Spring Boot**     | Framework web            |
 | **Spring Security** | Segurança e autenticação |
-| **Spring Data JPA** | Persistência de dados |
-| **Hibernate** | ORM |
-| **MySQL** | Banco de dados |
-| **Thymeleaf** | Templates HTML |
-| **Lombok** | Redução de boilerplate |
-| **MapStruct** | Mapeamento DTO/Entidade |
-| **JWT** | Tokens de autenticação |
-| **BCrypt** | Criptografia de senhas |
+| **Spring Data JPA** | Persistência de dados    |
+| **Hibernate**       | ORM                      |
+| **MySQL**           | Banco de dados           |
+| **Thymeleaf**       | Templates HTML           |
+| **Lombok**          | Redução de boilerplate   |
+| **MapStruct**       | Mapeamento DTO/Entidade  |
+| **JWT**             | Tokens de autenticação   |
+| **BCrypt**          | Criptografia de senhas   |
 
 ---
 
 ## 📖 Glossário Rápido
 
-| Termo | Significado |
-|-------|------------|
+| Termo          | Significado                                 |
+| -------------- | ------------------------------------------- |
 | **Controller** | Recebe requisições HTTP e retorna respostas |
-| **Service** | Contém lógica de negócio |
-| **Repository** | Acessa o banco de dados |
-| **DTO** | Objeto para transferência de dados |
-| **Entity** | Representa uma tabela no banco |
-| **JWT** | Token para autenticação |
-| **Strategy** | Padrão para algoritmos intercambiáveis |
-| **Factory** | Padrão para criação de objetos |
+| **Service**    | Contém lógica de negócio                    |
+| **Repository** | Acessa o banco de dados                     |
+| **DTO**        | Objeto para transferência de dados          |
+| **Entity**     | Representa uma tabela no banco              |
+| **JWT**        | Token para autenticação                     |
+| **Strategy**   | Padrão para algoritmos intercambiáveis      |
+| **Factory**    | Padrão para criação de objetos              |
 
 ---
 
@@ -175,14 +177,18 @@ Usuário → LivroControllerApi → LivroService
 
 ### Novo no Projeto?
 
-1. Leia **[dictionary/annotations.md](dictionary/annotations.md)** para entender as anotações
-2. Veja **[controller-documentation.md](controller-documentation.md)** para entender as rotas
-3. Leia **[security-documentation.md](security-documentation.md)** para entender a autenticação
+1. Leia **[dictionary/annotations.md](dictionary/annotations.md)** para entender
+   as anotações
+2. Veja **[controller-documentation.md](controller-documentation.md)** para
+   entender as rotas
+3. Leia **[security-documentation.md](security-documentation.md)** para entender
+   a autenticação
 
 ### Quer Entender os Padrões de Código?
 
 1. Leia **[design-patterns-documentation.md](design-patterns-documentation.md)**
-2. Veja **[dictionary/complex-topics.md](dictionary/complex-topics.md)** para tópicos avançados
+2. Veja **[dictionary/complex-topics.md](dictionary/complex-topics.md)** para
+   tópicos avançados
 
 ### Precisa Modificar algo?
 
@@ -202,5 +208,4 @@ Usuário → LivroControllerApi → LivroService
 
 ---
 
-*Documentação gerada automaticamente para o projeto.*
-
+_Documentação gerada automaticamente para o projeto._

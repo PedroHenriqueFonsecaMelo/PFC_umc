@@ -39,11 +39,11 @@ function totalCarrinho() {
 
 function renderCarrinho() {
     const carrinho = getCarrinho();
-    const lista    = document.getElementById('carrinhoLista');
-    const totalEl  = document.getElementById('carrinhoTotal');
+    const lista = document.getElementById('carrinhoLista');
+    const totalEl = document.getElementById('carrinhoTotal');
     const contador = document.getElementById('carrinhoContador');
-    const vazio    = document.getElementById('carrinhoVazio');
-    const acoes    = document.getElementById('carrinhoAcoes');
+    const vazio = document.getElementById('carrinhoVazio');
+    const acoes = document.getElementById('carrinhoAcoes');
 
     if (!lista) return;
 
@@ -54,21 +54,21 @@ function renderCarrinho() {
 
     if (carrinho.length === 0) {
         lista.innerHTML = '';
-        if (vazio)  vazio.style.display  = 'block';
-        if (acoes)  acoes.style.display  = 'none';
+        if (vazio) vazio.style.display = 'block';
+        if (acoes) acoes.style.display = 'none';
         if (totalEl) totalEl.textContent = 'T$ 0,00';
         return;
     }
 
-    if (vazio)  vazio.style.display  = 'none';
-    if (acoes)  acoes.style.display  = 'flex';
+    if (vazio) vazio.style.display = 'none';
+    if (acoes) acoes.style.display = 'flex';
 
     lista.innerHTML = carrinho.map(item => {
         let foto = 'https://via.placeholder.com/48x64?text=📚';
         try {
             const arr = JSON.parse(item.fotosUrls);
             if (Array.isArray(arr) && arr.length > 0) foto = arr[0];
-        } catch (_) {}
+        } catch (_) { }
 
         return `
         <div class="carr-item" id="carr-item-${item.id}">
@@ -109,7 +109,7 @@ function atualizarBotoes() {
 function toggleCarrinho() {
     const sidebar = document.getElementById('carrinhoSidebar');
     const overlay = document.getElementById('carrinhoOverlay');
-    const aberto  = sidebar.classList.toggle('aberto');
+    const aberto = sidebar.classList.toggle('aberto');
     overlay.style.display = aberto ? 'block' : 'none';
     if (aberto) renderCarrinho();
 }
@@ -172,7 +172,7 @@ function mostrarToastResultado(data) {
     const toast = document.getElementById('toastCompra');
     if (!toast) return;
 
-    const ok   = data.totalComprados || 0;
+    const ok = data.totalComprados || 0;
     const fail = (data.falhas || []).length;
 
     if (ok > 0 && fail === 0) {
@@ -201,7 +201,7 @@ async function carregarSaldo() {
             const el = document.getElementById('saldoUsuario');
             if (el) el.innerHTML = `<i class="fa-solid fa-coins mr-1 text-yellow-400"></i> T$ ${c.saldoTokens.toFixed(2)}`;
         }
-    } catch (_) {}
+    } catch (_) { }
 }
 
 /* ── CARREGAR LIVROS ─────────────────────────────────────────── */
@@ -221,7 +221,7 @@ async function carregarLivros() {
             try {
                 const arr = JSON.parse(livro.fotosUrls);
                 if (Array.isArray(arr) && arr.length > 0) foto = arr[0];
-            } catch (_) {}
+            } catch (_) { }
 
             const livroJson = JSON.stringify(livro).replace(/'/g, "\\'").replace(/"/g, '&quot;');
 

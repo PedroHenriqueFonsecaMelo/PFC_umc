@@ -11,7 +11,7 @@ import umc.exs.mappers.CartaoMapper;
 import umc.exs.mappers.DateMapper;
 import umc.exs.model.entidades.usuario.Cartao;
 import umc.exs.model.entidades.usuario.Cliente;
-import umc.exs.repository.CartaoRepository;
+import umc.exs.repository.usuario.CartaoRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -19,8 +19,9 @@ public class CartaoService {
 
     private final CartaoRepository cartaoRepository;
     private final CartaoMapper cartaoMapper;
-    private final DateMapper dateMapper; 
+    private final DateMapper dateMapper;
 
+    @SuppressWarnings("null")
     @Transactional
     public Cartao saveOrReuseCartao(CartaoDTO dto) {
         String validadeStr = dateMapper.yearMonthToString(dto.getValidade());

@@ -9,10 +9,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import umc.exs.model.entidades.foundation.Administrador;
+import umc.exs.model.entidades.logic.Administrador;
 import umc.exs.model.entidades.usuario.Cliente;
-import umc.exs.repository.AdminRepository;
-import umc.exs.repository.ClienteRepository;
+import umc.exs.repository.logic.AdminRepository;
+import umc.exs.repository.usuario.ClienteRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +32,7 @@ public class JwtUserDetailsService implements UserDetailsService {
                     .authorities("ROLE_ADMIN", "ADMIN")
                     .build();
         }
-        
+
         // Then try to find a regular client
         Optional<Cliente> opt = clienteRepository.findByEmail(username);
         Cliente c = opt.orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));

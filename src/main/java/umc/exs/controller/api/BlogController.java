@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.model.entidades.foundation.PostBlog;
-import umc.exs.repository.AdminRepository;
+import umc.exs.model.entidades.social.PostBlog;
+import umc.exs.repository.logic.AdminRepository;
 import umc.exs.service.core.PostBlogService;
 
 @RestController
@@ -43,8 +43,7 @@ public class BlogController {
                         "conteudo", p.getConteudo(),
                         "imagemUrl", p.getImagemUrl() != null ? p.getImagemUrl() : "",
                         "autorNome", p.getAutorNome() != null ? p.getAutorNome() : "Administrador",
-                        "dataPublicacao", p.getDataPublicacao().format(FMT)
-                ))
+                        "dataPublicacao", p.getDataPublicacao().format(FMT)))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(posts);
     }

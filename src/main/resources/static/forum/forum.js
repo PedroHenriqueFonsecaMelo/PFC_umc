@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ── Modal: Criar Tópico ─────────────────────────────────────────────────
 
     const btnAbrirModal = document.getElementById('btn-abrir-modal');
-    const modalOverlay  = document.getElementById('modal-novo-topico');
+    const modalOverlay = document.getElementById('modal-novo-topico');
     const btnFecharModal = document.getElementById('btn-fechar-modal');
 
     if (btnAbrirModal && modalOverlay) {
@@ -54,24 +54,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 method: 'POST',
                 credentials: 'include'
             })
-            .then(function (res) {
-                if (res.status === 401 || res.status === 403) {
-                    window.location.href = '/clientes/login';
-                    return null;
-                }
-                return res.json();
-            })
-            .then(function (data) {
-                if (!data) return;
-                var countEl = self.querySelector('.curtida-count');
-                if (countEl) countEl.textContent = data.curtidas;
-                if (data.liked) {
-                    self.classList.add('liked');
-                } else {
-                    self.classList.remove('liked');
-                }
-            })
-            .catch(function () {});
+                .then(function (res) {
+                    if (res.status === 401 || res.status === 403) {
+                        window.location.href = '/clientes/login';
+                        return null;
+                    }
+                    return res.json();
+                })
+                .then(function (data) {
+                    if (!data) return;
+                    var countEl = self.querySelector('.curtida-count');
+                    if (countEl) countEl.textContent = data.curtidas;
+                    if (data.liked) {
+                        self.classList.add('liked');
+                    } else {
+                        self.classList.remove('liked');
+                    }
+                })
+                .catch(function () { });
         });
     });
 
@@ -87,18 +87,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 method: 'POST',
                 credentials: 'include'
             })
-            .then(function (res) {
-                if (res.status === 401 || res.status === 403) {
-                    return res.json().then(function (d) { alert(d.erro || 'Sem permissão.'); return null; });
-                }
-                return res.json();
-            })
-            .then(function (data) {
-                if (!data) return;
-                // Reload para refletir mudança de estado no servidor
-                window.location.reload();
-            })
-            .catch(function () {});
+                .then(function (res) {
+                    if (res.status === 401 || res.status === 403) {
+                        return res.json().then(function (d) { alert(d.erro || 'Sem permissão.'); return null; });
+                    }
+                    return res.json();
+                })
+                .then(function (data) {
+                    if (!data) return;
+                    // Reload para refletir mudança de estado no servidor
+                    window.location.reload();
+                })
+                .catch(function () { });
         });
     });
 
@@ -113,16 +113,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 method: 'DELETE',
                 credentials: 'include'
             })
-            .then(function (res) { return res.json(); })
-            .then(function (data) {
-                var card = document.getElementById('topico-card-' + topicoId);
-                if (card) {
-                    card.style.transition = 'opacity .3s';
-                    card.style.opacity = '0';
-                    setTimeout(function () { card.remove(); }, 300);
-                }
-            })
-            .catch(function () {});
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    var card = document.getElementById('topico-card-' + topicoId);
+                    if (card) {
+                        card.style.transition = 'opacity .3s';
+                        card.style.opacity = '0';
+                        setTimeout(function () { card.remove(); }, 300);
+                    }
+                })
+                .catch(function () { });
         });
     });
 
@@ -137,16 +137,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 method: 'DELETE',
                 credentials: 'include'
             })
-            .then(function (res) { return res.json(); })
-            .then(function (data) {
-                var card = document.getElementById('resposta-card-' + respostaId);
-                if (card) {
-                    card.style.transition = 'opacity .3s';
-                    card.style.opacity = '0';
-                    setTimeout(function () { card.remove(); }, 300);
-                }
-            })
-            .catch(function () {});
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    var card = document.getElementById('resposta-card-' + respostaId);
+                    if (card) {
+                        card.style.transition = 'opacity .3s';
+                        card.style.opacity = '0';
+                        setTimeout(function () { card.remove(); }, 300);
+                    }
+                })
+                .catch(function () { });
         });
     });
 

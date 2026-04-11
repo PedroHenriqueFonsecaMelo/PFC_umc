@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import umc.exs.DTOs.auth.SignupDTO;
 import umc.exs.model.entidades.usuario.Cliente;
-import umc.exs.repository.ClienteRepository;
+import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.senha.FieldValidation;
 
 @Service
@@ -77,6 +77,7 @@ public class ClientMainService {
     // 🔍 BUSCAS ATÔMICAS (ENTITY LEVEL)
     // ==========================================================
 
+    @SuppressWarnings("null")
     @Transactional
     public Cliente buscarPorId(Long id) {
         return clienteRepository.findById(id)

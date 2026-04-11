@@ -12,6 +12,7 @@ public interface EnderecoMapper {
     /**
      * Converte DTO para entidade Endereco.
      * Ignora relação clientes bidirecional.
+     * 
      * @param dto dados endereço
      */
     @Mapping(target = "clientes", ignore = true)
@@ -20,6 +21,7 @@ public interface EnderecoMapper {
     /**
      * Converte entidade para DTO.
      * Completo mapeamento campos.
+     * 
      * @param endereco entidade
      */
     EnderecoDTO paraDTO(Endereco endereco);
@@ -27,7 +29,8 @@ public interface EnderecoMapper {
     /**
      * Atualiza entidade de DTO.
      * Ignora ID e clientes (merge parcial).
-     * @param dto origem
+     * 
+     * @param dto    origem
      * @param entity alvo update
      */
     @Mapping(target = "id", ignore = true)
@@ -43,4 +46,3 @@ public interface EnderecoMapper {
  * atualizarEntidadeDeDto: merge parcial perfil.
  * Component Spring autowired.
  */
-

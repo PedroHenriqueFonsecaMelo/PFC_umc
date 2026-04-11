@@ -22,10 +22,10 @@ import umc.exs.DTOs.admin.DashboardMetricasDTO;
 import umc.exs.DTOs.compra.AtualizarEnvioDTO;
 import umc.exs.DTOs.compra.LoteExibicaoDTO;
 import umc.exs.DTOs.compra.PedidoDTO;
-import umc.exs.model.entidades.foundation.Administrador;
-import umc.exs.model.entidades.foundation.LivroAnuncio;
+import umc.exs.model.entidades.livro.Livro;
+import umc.exs.model.entidades.logic.Administrador;
 import umc.exs.model.enums.EstadoLivro;
-import umc.exs.repository.AdminRepository;
+import umc.exs.repository.logic.AdminRepository;
 import umc.exs.service.core.DashboardService;
 import umc.exs.service.core.LivroService;
 import umc.exs.service.core.LoteService;
@@ -71,7 +71,7 @@ public class AdminControllerApi {
     @GetMapping("/lotes/{id}")
     public ResponseEntity<List<Map<String, Object>>> listarLivrosLote(@PathVariable Long id) {
 
-        List<LivroAnuncio> livros = livroService.listarLivrosPorLote(id);
+        List<Livro> livros = livroService.listarLivrosPorLote(id);
 
         List<Map<String, Object>> resposta = livros.stream()
                 .map(b -> {
@@ -100,13 +100,14 @@ public class AdminControllerApi {
      * Lista livros pendentes de aprovação.
      * Filtrados por aprovado = false.
      * Para painel admin.
+     * 
      * @return List<LivroAnuncio> pendentes
      */
     @GetMapping("/livros/pendentes")
-    public ResponseEntity<List<LivroAnuncio>> listarLivrosPendentes() {
+    public ResponseEntity<List<Livro>> listarLivrosPendentes() {
 
         // O Service já retorna a lista filtrada usando o loop tradicional
-        List<LivroAnuncio> livros = livroService.listarLivrosPendentes();
+        List<Livro> livros = livroService.listarLivrosPendentes();
         return ResponseEntity.ok(livros);
     }
 
@@ -129,7 +130,7 @@ public class AdminControllerApi {
         if (user == null) {
             return ResponseEntity.status(401).body("Acesso negado: Admin não autenticado.");
         }
-        if (aprovacao.getEstadoAprovado() == EstadoLivro.RUIM){
+        if (aprovacao.getEstadoAprovado() == EstadoLivro.RUIM) {
             return ResponseEntity.status(400).body("Livros com estado RUIM devem ser rejeitados, não aprovados.");
         }
 
@@ -240,4 +241,3 @@ public class AdminControllerApi {
         return ResponseEntity.ok(dashboardService.getMetricas());
     }
 }
-

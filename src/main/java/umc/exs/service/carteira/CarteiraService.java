@@ -10,8 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cliente;
-import umc.exs.repository.ClienteRepository;
-import umc.exs.repository.TransacaoRepository;
+import umc.exs.repository.negocios.TransacaoRepository;
+import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.log.LogAuditoriaService;
 
 @Slf4j
@@ -23,6 +23,7 @@ public class CarteiraService {
     private final ClienteRepository clienteRepository;
     private final LogAuditoriaService logAuditoriaService; // ← agora via construtor
 
+    @SuppressWarnings("null")
     @Transactional
     public void adicionarTokens(Cliente cliente, Double valor, String metodo, String infoAdicional) {
         double saldoAnterior = (cliente.getSaldoTokens() != null) ? cliente.getSaldoTokens() : 0.0;
@@ -53,6 +54,7 @@ public class CarteiraService {
         return transacaoRepository.findByClienteIdOrderByDataHoraDesc(clienteId);
     }
 
+    @SuppressWarnings("null")
     @Transactional
     public void registrarIntencaoPagamento(Cliente cliente, Double valor, String pagamentoId) {
         Transacao t = Transacao.builder()

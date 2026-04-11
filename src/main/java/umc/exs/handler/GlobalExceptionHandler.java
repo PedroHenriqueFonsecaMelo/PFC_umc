@@ -40,7 +40,8 @@ public class GlobalExceptionHandler {
                 java.net.URI uri = new java.net.URI(referer);
                 String path = uri.getPath();
                 return "redirect:" + (path != null && !path.isBlank() ? path : "/");
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
         return "redirect:/";
     }
@@ -76,7 +77,7 @@ public class GlobalExceptionHandler {
         try {
             java.net.URI refererUri = new java.net.URI(referer);
             String refererHost = refererUri.getHost();
-            String serverHost  = request.getServerName();
+            String serverHost = request.getServerName();
             return refererHost != null && refererHost.equalsIgnoreCase(serverHost);
         } catch (Exception e) {
             return false;

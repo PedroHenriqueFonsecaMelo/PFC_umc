@@ -1,7 +1,7 @@
 // Função para buscar CEP usando a API ViaCEP
 async function buscarCep(index) {
     const cep = document.getElementById(`cep-${index}`).value.replace(/\D/g, '');
-    
+
     if (cep.length !== 8) return;
 
     try {

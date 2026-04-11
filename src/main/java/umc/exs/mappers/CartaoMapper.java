@@ -21,7 +21,8 @@ public interface CartaoMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "clientes", ignore = true)
-    // Removed source="validade" as it is redundant and can sometimes confuse the processor
-    @Mapping(target = "validade", qualifiedByName = "yearMonthToString") 
+    // Removed source="validade" as it is redundant and can sometimes confuse the
+    // processor
+    @Mapping(target = "validade", qualifiedByName = "yearMonthToString")
     void atualizarEntidadeDeDto(CartaoDTO dto, @MappingTarget Cartao entity);
 }

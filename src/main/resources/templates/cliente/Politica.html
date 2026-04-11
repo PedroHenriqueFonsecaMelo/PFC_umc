@@ -1,125 +1,248 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Política de Privacidade — Bibliotroca</title>
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Georgia', serif; background: #F9F6F0; color: #2C241B; min-height: 100vh; }
-        .topbar { background: #2C241B; padding: .75rem 5vw; display: flex; align-items: center; justify-content: space-between; }
-        .topbar-brand { font-family: 'Georgia', serif; font-size: 1.4rem; font-style: italic; color: #F9F6F0; text-decoration: none; }
-        .topbar-back { font-size: .75rem; color: rgba(249,246,240,.7); text-decoration: none; letter-spacing: .06em; text-transform: uppercase; border: 1px solid rgba(249,246,240,.3); padding: .3rem .75rem; border-radius: 6px; }
-        .topbar-back:hover { background: rgba(249,246,240,.1); }
-        .container { max-width: 760px; margin: 3rem auto; padding: 0 5vw 4rem; }
-        h1 { font-family: 'Georgia', serif; font-size: 2rem; margin-bottom: .25rem; }
-        .updated { font-size: .85rem; color: #7A6E65; font-style: italic; margin-bottom: 2rem; border-bottom: 1px solid rgba(44,36,27,.12); padding-bottom: 1rem; }
-        h2 { font-size: 1rem; font-family: 'Georgia', serif; margin: 1.75rem 0 .5rem; }
-        p { font-size: .925rem; line-height: 1.8; color: #3a3028; margin-bottom: .75rem; }
-        ul { padding-left: 1.25rem; margin-bottom: .75rem; }
-        ul li { font-size: .925rem; line-height: 1.8; color: #3a3028; margin-bottom: .2rem; }
-    </style>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Política de Privacidade — Bibliotroca</title>
+        <style>
+            *, *::before, *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                font-family: "Georgia", serif;
+                background: #f9f6f0;
+                color: #2c241b;
+                min-height: 100vh;
+            }
+            .topbar {
+                background: #2c241b;
+                padding: 0.75rem 5vw;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .topbar-brand {
+                font-family: "Georgia", serif;
+                font-size: 1.4rem;
+                font-style: italic;
+                color: #f9f6f0;
+                text-decoration: none;
+            }
+            .topbar-back {
+                font-size: 0.75rem;
+                color: rgba(249, 246, 240, 0.7);
+                text-decoration: none;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                border: 1px solid rgba(249, 246, 240, 0.3);
+                padding: 0.3rem 0.75rem;
+                border-radius: 6px;
+            }
+            .topbar-back:hover {
+                background: rgba(249, 246, 240, 0.1);
+            }
+            .container {
+                max-width: 760px;
+                margin: 3rem auto;
+                padding: 0 5vw 4rem;
+            }
+            h1 {
+                font-family: "Georgia", serif;
+                font-size: 2rem;
+                margin-bottom: 0.25rem;
+            }
+            .updated {
+                font-size: 0.85rem;
+                color: #7a6e65;
+                font-style: italic;
+                margin-bottom: 2rem;
+                border-bottom: 1px solid rgba(44, 36, 27, 0.12);
+                padding-bottom: 1rem;
+            }
+            h2 {
+                font-size: 1rem;
+                font-family: "Georgia", serif;
+                margin: 1.75rem 0 0.5rem;
+            }
+            p {
+                font-size: 0.925rem;
+                line-height: 1.8;
+                color: #3a3028;
+                margin-bottom: 0.75rem;
+            }
+            ul {
+                padding-left: 1.25rem;
+                margin-bottom: 0.75rem;
+            }
+            ul li {
+                font-size: 0.925rem;
+                line-height: 1.8;
+                color: #3a3028;
+                margin-bottom: 0.2rem;
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="topbar">
+            <a th:href="@{/}" class="topbar-brand">Biblio<em
+                    style="color: #722f37"
+                >troca</em></a>
+            <a th:href="@{/}" class="topbar-back">← Voltar</a>
+        </nav>
 
-<nav class="topbar">
-    <a th:href="@{/}" class="topbar-brand">Biblio<em style="color:#722F37">troca</em></a>
-    <a th:href="@{/}" class="topbar-back">← Voltar</a>
-</nav>
+        <div class="container">
+            <h1>Política de Privacidade</h1>
+            <p class="updated">Última atualização: 07 de abril de 2026</p>
 
-<div class="container">
-    <h1>Política de Privacidade</h1>
-    <p class="updated">Última atualização: 07 de abril de 2026</p>
+            <h2>1. Introdução</h2>
+            <p>
+                Esta Política de Privacidade descreve como a Bibliotroca.com
+                coleta, utiliza, armazena e protege os dados pessoais de seus
+                usuários, em conformidade com a Lei Geral de Proteção de Dados
+                Pessoais – LGPD (Lei nº 13.709/2018).
+            </p>
 
-    <h2>1. Introdução</h2>
-    <p>Esta Política de Privacidade descreve como a Bibliotroca.com coleta, utiliza, armazena e protege os dados pessoais de seus usuários, em conformidade com a Lei Geral de Proteção de Dados Pessoais – LGPD (Lei nº 13.709/2018).</p>
+            <h2>2. Dados Coletados</h2>
+            <ul>
+                <li>Dados cadastrais (nome, e-mail e senha);</li>
+                <li>
+                    Endereço e informações para envio e recebimento de livros;
+                </li>
+                <li>Telefone (opcional);</li>
+                <li>Dados de autenticação e acesso;</li>
+                <li>Informações sobre livros cadastrados para avaliação;</li>
+                <li>
+                    Dados relacionados a transações financeiras, exclusivamente
+                    via Pix, sem o armazenamento de dados bancários sensíveis.
+                </li>
+            </ul>
 
-    <h2>2. Dados Coletados</h2>
-    <ul>
-        <li>Dados cadastrais (nome, e-mail e senha);</li>
-        <li>Endereço e informações para envio e recebimento de livros;</li>
-        <li>Telefone (opcional);</li>
-        <li>Dados de autenticação e acesso;</li>
-        <li>Informações sobre livros cadastrados para avaliação;</li>
-        <li>Dados relacionados a transações financeiras, exclusivamente via Pix, sem o armazenamento de dados bancários sensíveis.</li>
-    </ul>
+            <h2>3. Finalidades do Tratamento</h2>
+            <ul>
+                <li>Criação e gerenciamento de contas de usuário;</li>
+                <li>
+                    Execução e operacionalização dos serviços oferecidos pela
+                    plataforma;
+                </li>
+                <li>
+                    Avaliação, validação e processamento dos livros recebidos;
+                </li>
+                <li>Liberação, gestão e controle de créditos (tokens);</li>
+                <li>
+                    Prevenção a fraudes e garantia da segurança da plataforma;
+                </li>
+                <li>Cumprimento de obrigações legais e regulatórias.</li>
+            </ul>
 
-    <h2>3. Finalidades do Tratamento</h2>
-    <ul>
-        <li>Criação e gerenciamento de contas de usuário;</li>
-        <li>Execução e operacionalização dos serviços oferecidos pela plataforma;</li>
-        <li>Avaliação, validação e processamento dos livros recebidos;</li>
-        <li>Liberação, gestão e controle de créditos (tokens);</li>
-        <li>Prevenção a fraudes e garantia da segurança da plataforma;</li>
-        <li>Cumprimento de obrigações legais e regulatórias.</li>
-    </ul>
+            <h2>4. Bases Legais</h2>
+            <ul>
+                <li>Execução de contrato;</li>
+                <li>Cumprimento de obrigação legal ou regulatória;</li>
+                <li>Legítimo interesse do controlador;</li>
+                <li>Consentimento do titular, quando aplicável.</li>
+            </ul>
 
-    <h2>4. Bases Legais</h2>
-    <ul>
-        <li>Execução de contrato;</li>
-        <li>Cumprimento de obrigação legal ou regulatória;</li>
-        <li>Legítimo interesse do controlador;</li>
-        <li>Consentimento do titular, quando aplicável.</li>
-    </ul>
+            <h2>5. Segurança da Informação</h2>
+            <ul>
+                <li>Criptografia de dados;</li>
+                <li>Armazenamento seguro de senhas (hashing com salt);</li>
+                <li>Comunicação segura por meio de HTTPS;</li>
+                <li>Autenticação baseada em tokens (JWT);</li>
+                <li>Monitoramento, registro e controle de acessos.</li>
+            </ul>
 
-    <h2>5. Segurança da Informação</h2>
-    <ul>
-        <li>Criptografia de dados;</li>
-        <li>Armazenamento seguro de senhas (hashing com salt);</li>
-        <li>Comunicação segura por meio de HTTPS;</li>
-        <li>Autenticação baseada em tokens (JWT);</li>
-        <li>Monitoramento, registro e controle de acessos.</li>
-    </ul>
+            <h2>6. Compartilhamento de Dados</h2>
+            <ul>
+                <li>Provedores de serviços de pagamento;</li>
+                <li>
+                    Serviços de hospedagem, armazenamento e infraestrutura
+                    tecnológica;
+                </li>
+                <li>
+                    Autoridades públicas, mediante obrigação legal ou ordem
+                    judicial.
+                </li>
+            </ul>
 
-    <h2>6. Compartilhamento de Dados</h2>
-    <ul>
-        <li>Provedores de serviços de pagamento;</li>
-        <li>Serviços de hospedagem, armazenamento e infraestrutura tecnológica;</li>
-        <li>Autoridades públicas, mediante obrigação legal ou ordem judicial.</li>
-    </ul>
+            <h2>7. Direitos do Titular dos Dados</h2>
+            <ul>
+                <li>Confirmação da existência de tratamento;</li>
+                <li>Acesso aos dados pessoais;</li>
+                <li>
+                    Correção de dados incompletos, inexatos ou desatualizados;
+                </li>
+                <li>Exclusão ou anonimização de dados, quando aplicável;</li>
+                <li>Portabilidade dos dados;</li>
+                <li>Revogação do consentimento, quando houver.</li>
+            </ul>
 
-    <h2>7. Direitos do Titular dos Dados</h2>
-    <ul>
-        <li>Confirmação da existência de tratamento;</li>
-        <li>Acesso aos dados pessoais;</li>
-        <li>Correção de dados incompletos, inexatos ou desatualizados;</li>
-        <li>Exclusão ou anonimização de dados, quando aplicável;</li>
-        <li>Portabilidade dos dados;</li>
-        <li>Revogação do consentimento, quando houver.</li>
-    </ul>
+            <h2>8. Retenção de Dados</h2>
+            <ul>
+                <li>Enquanto a conta do usuário permanecer ativa;</li>
+                <li>
+                    Pelo período necessário para o cumprimento de obrigações
+                    legais ou regulatórias;
+                </li>
+                <li>
+                    Pelo prazo necessário para resguardar direitos da
+                    Bibliotroca.com, inclusive em eventuais demandas judiciais
+                    ou administrativas.
+                </li>
+            </ul>
 
-    <h2>8. Retenção de Dados</h2>
-    <ul>
-        <li>Enquanto a conta do usuário permanecer ativa;</li>
-        <li>Pelo período necessário para o cumprimento de obrigações legais ou regulatórias;</li>
-        <li>Pelo prazo necessário para resguardar direitos da Bibliotroca.com, inclusive em eventuais demandas judiciais ou administrativas.</li>
-    </ul>
+            <h2>9. Cookies e Tecnologias de Rastreamento</h2>
+            <ul>
+                <li>Melhorar a experiência do usuário;</li>
+                <li>Analisar desempenho, navegação e uso da plataforma;</li>
+                <li>Personalizar conteúdos e funcionalidades.</li>
+            </ul>
+            <p>
+                O usuário pode, a qualquer momento, gerenciar ou desativar os
+                cookies diretamente nas configurações de seu navegador.
+            </p>
 
-    <h2>9. Cookies e Tecnologias de Rastreamento</h2>
-    <ul>
-        <li>Melhorar a experiência do usuário;</li>
-        <li>Analisar desempenho, navegação e uso da plataforma;</li>
-        <li>Personalizar conteúdos e funcionalidades.</li>
-    </ul>
-    <p>O usuário pode, a qualquer momento, gerenciar ou desativar os cookies diretamente nas configurações de seu navegador.</p>
+            <h2>10. Transferência Internacional de Dados</h2>
+            <p>
+                Caso ocorra o tratamento ou armazenamento de dados pessoais fora
+                do território nacional, a Bibliotroca.com garantirá a
+                observância da LGPD e a adoção de níveis adequados de proteção
+                dos dados.
+            </p>
 
-    <h2>10. Transferência Internacional de Dados</h2>
-    <p>Caso ocorra o tratamento ou armazenamento de dados pessoais fora do território nacional, a Bibliotroca.com garantirá a observância da LGPD e a adoção de níveis adequados de proteção dos dados.</p>
+            <h2>11. Alterações desta Política</h2>
+            <p>
+                Esta Política de Privacidade poderá ser atualizada a qualquer
+                momento, visando aprimorar a transparência e a segurança das
+                informações. Recomenda-se a revisão periódica deste documento.
+            </p>
 
-    <h2>11. Alterações desta Política</h2>
-    <p>Esta Política de Privacidade poderá ser atualizada a qualquer momento, visando aprimorar a transparência e a segurança das informações. Recomenda-se a revisão periódica deste documento.</p>
+            <h2>12. Procedimentos Operacionais e Responsabilidades</h2>
+            <ul>
+                <li>
+                    A Bibliotroca.com recebe os livros enviados pelos usuários,
+                    realiza a avaliação e, quando validados, prossegue com o
+                    envio ao cliente final;
+                </li>
+                <li>
+                    Livros que não forem validados durante o processo de
+                    avaliação não serão devolvidos;
+                </li>
+                <li>
+                    A aquisição de créditos ou tokens na plataforma é realizada
+                    exclusivamente por meio de pagamento via Pix;
+                </li>
+                <li>
+                    Os dados fornecidos pelos usuários são protegidos por
+                    medidas de segurança adequadas; entretanto, o uso correto, a
+                    veracidade das informações e a guarda de credenciais de
+                    acesso são de responsabilidade do próprio usuário.
+                </li>
+            </ul>
 
-    <h2>12. Procedimentos Operacionais e Responsabilidades</h2>
-    <ul>
-        <li>A Bibliotroca.com recebe os livros enviados pelos usuários, realiza a avaliação e, quando validados, prossegue com o envio ao cliente final;</li>
-        <li>Livros que não forem validados durante o processo de avaliação não serão devolvidos;</li>
-        <li>A aquisição de créditos ou tokens na plataforma é realizada exclusivamente por meio de pagamento via Pix;</li>
-        <li>Os dados fornecidos pelos usuários são protegidos por medidas de segurança adequadas; entretanto, o uso correto, a veracidade das informações e a guarda de credenciais de acesso são de responsabilidade do próprio usuário.</li>
-    </ul>
-
-    <h2>13. Contato e Encarregado pelo Tratamento de Dados (DPO)</h2>
-    <p>📧 <strong>privacidade@bibliotroca.com</strong></p>
-</div>
-
-</body>
+            <h2>13. Contato e Encarregado pelo Tratamento de Dados (DPO)</h2>
+            <p>📧 <strong>privacidade@bibliotroca.com</strong></p>
+        </div>
+    </body>
 </html>

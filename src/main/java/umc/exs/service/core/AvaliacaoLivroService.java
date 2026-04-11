@@ -2,17 +2,19 @@ package umc.exs.service.core;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import umc.exs.DTOs.livro.AvaliacaoLivroDTO;
-import umc.exs.model.entidades.foundation.AvaliacaoLivro;
+import umc.exs.model.entidades.livro.AvaliacaoLivro;
+import umc.exs.model.entidades.livro.Livro;
+import umc.exs.model.entidades.livro.Obra;
 import umc.exs.model.entidades.usuario.Cliente;
-import umc.exs.repository.AvaliacaoLivroRepository;
-import umc.exs.repository.ClienteRepository;
+import umc.exs.repository.livro.AvaliacaoLivroRepository;
+import umc.exs.repository.livro.LivroRepository;
+import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.gamificacao.GamificacaoService;
 import umc.exs.service.log.LogAuditoriaService;
 
 @Service
@@ -21,104 +23,91 @@ public class AvaliacaoLivroService {
 
     private final AvaliacaoLivroRepository avaliacaoRepository;
     private final ClienteRepository clienteRepository;
+    private final LivroRepository livroRepository;
     private final LogAuditoriaService logAuditoria;
-    private final umc.exs.service.gamificacao.GamificacaoService gamificacaoService;
+    private final GamificacaoService gamificacaoService;
 
     /**
-     * Create a new book review
+     * Cria uma avaliação unificada por Obra
      */
+    @SuppressWarnings("null")
     @Transactional
     public AvaliacaoLivro criarAvaliacao(String email, AvaliacaoLivroDTO dto) {
-        // Buscar cliente
-        Optional<Cliente> clienteOpt = clienteRepository.findByEmail(email);
-        if (!clienteOpt.isPresent()) {
-            throw new RuntimeException("Usuário não encontrado");
-        }
-        Cliente avaliador = clienteOpt.get();
+        // 1. Validações de Usuário
+        Cliente avaliador = clienteRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        // Validar nota
-        if (dto.getNota() == null || dto.getNota() < 1 || dto.getNota() > 5) {
-            throw new RuntimeException("A nota deve ser entre 1 e 5");
-        }
+        // 2. Localiza o Livro e sua respectiva Obra
+        Livro livroReferencia = livroRepository.findByIsbn(dto.getIsbn())
+                .orElseThrow(() -> new RuntimeException("Livro com ISBN " + dto.getIsbn() + " não catalogado."));
 
-        // Validar campos obrigatórios
-        if (dto.getIsbn() == null || dto.getIsbn().trim().isEmpty()) {
-            throw new RuntimeException("ISBN é obrigatório");
-        }
-        if (dto.getTituloLivro() == null || dto.getTituloLivro().trim().isEmpty()) {
-            throw new RuntimeException("Título do livro é obrigatório");
+        Obra obra = livroReferencia.getObra();
+        if (obra == null) {
+            throw new RuntimeException("Este livro não possui uma Obra vinculada para agrupamento.");
         }
 
-        // Verificar se o usuário já avaliou este livro
-        boolean jaAvaliou = avaliacaoRepository.existsByIsbnAndAvaliadorId(dto.getIsbn(), avaliador.getId());
-        if (jaAvaliou) {
-            throw new RuntimeException("Você já avaliou este livro");
+        // 3. Validações de Negócio
+        validarNota(dto.getNota());
+
+        // 4. Verifica se o usuário já avaliou ESTA OBRA (independente do ISBN)
+        boolean jaAvaliouObra = avaliacaoRepository.existsByObraIdAndAvaliadorId(obra.getId(), avaliador.getId());
+        if (jaAvaliouObra) {
+            throw new RuntimeException("Você já avaliou esta obra (em outra edição ou tradução).");
         }
 
-        // Criar avaliação
-        AvaliacaoLivro avaliacao = new AvaliacaoLivro();
-        avaliacao.setIsbn(dto.getIsbn());
-        avaliacao.setTituloLivro(dto.getTituloLivro());
-        avaliacao.setNota(dto.getNota());
-        avaliacao.setComentario(dto.getComentario());
-        avaliacao.setDataAvaliacao(LocalDateTime.now());
-        avaliacao.setAvaliador(avaliador);
+        // 5. Instancia e Salva
+        AvaliacaoLivro avaliacao = AvaliacaoLivro.builder()
+                .obra(obra)
+                .tituloLivro(dto.getTituloLivro())
+                .comentario(dto.getComentario())
+                .nota(dto.getNota())
+                .dataAvaliacao(LocalDateTime.now())
+                .avaliador(avaliador)
+                .isbnOriginalNoAto(dto.getIsbn().toString())
+                .build();
 
-        // Salvar
         AvaliacaoLivro saved = avaliacaoRepository.save(avaliacao);
 
-        // Gamificação: XP por avaliação
+        // 6. Pós-processamento
         gamificacaoService.xpAvaliacao(avaliador.getId());
-
-        // Registrar auditoria
-        logAuditoria.registrarLog("AVALIACAO_CRIADA", avaliador.getId(), avaliador.getEmail(), 
-            "Avaliou o livro '" + dto.getTituloLivro() + "' com nota " + dto.getNota());
+        logAuditoria.registrarLog("AVALIACAO_CRIADA", avaliador.getId(), avaliador.getEmail(),
+                "Avaliou a obra '" + obra.getTituloOriginal() + "' via edição '" + dto.getTituloLivro() + "'");
 
         return saved;
     }
 
     /**
-     * Get all reviews for a specific book by ISBN
+     * Retorna todas as avaliações de uma obra baseada em qualquer ISBN dela
      */
-    public List<AvaliacaoLivro> buscarAvaliacoesPorIsbn(String isbn) {
-        if (isbn == null || isbn.trim().isEmpty()) {
-            throw new RuntimeException("ISBN é obrigatório");
-        }
-        return avaliacaoRepository.findByIsbn(isbn);
+    public List<AvaliacaoLivro> buscarAvaliacoesUnificadas(String isbn) {
+        Livro livro = livroRepository.findByIsbn(isbn)
+                .orElseThrow(() -> new RuntimeException("ISBN não encontrado"));
+
+        return avaliacaoRepository.findByObraIdOrderByDataAvaliacaoDesc(livro.getObra().getId());
     }
 
     /**
-     * Get average rating for a book
+     * Calcula a média global da Obra (todas as traduções/edições juntas)
      */
+    public Double calcularMediaUnificada(String isbn) {
+        Livro livro = livroRepository.findByIsbn(isbn)
+                .orElseThrow(() -> new RuntimeException("ISBN não encontrado"));
+
+        return avaliacaoRepository.getAverageRatingByObraId(livro.getObra().getId());
+    }
+
     public Double calcularMediaPorIsbn(String isbn) {
-        List<AvaliacaoLivro> avaliacoes = buscarAvaliacoesPorIsbn(isbn);
-        
-        if (avaliacoes.isEmpty()) {
-            return null;
-        }
-        
-        int soma = 0;
-        int quantidade = 0;
-        
-        for (AvaliacaoLivro avaliacao : avaliacoes) {
-            if (avaliacao.getNota() != null) {
-                soma = soma + avaliacao.getNota();
-                quantidade++;
-            }
-        }
-        
-        if (quantidade == 0) {
-            return null;
-        }
-        
-        return (double) soma / quantidade;
+        return livroRepository.findByIsbn(isbn)
+            .map(livro -> {
+                if (livro.getObra() == null) return null;
+                return avaliacaoRepository.getAverageRatingByObraId(livro.getObra().getId());
+            })
+            .orElse(null);
     }
 
-    /**
-     * Get all unique books that have reviews
-     */
-    public List<String> buscarLivrosComAvaliacoes() {
-        return avaliacaoRepository.findDistinctIsbns();
+    private void validarNota(Integer nota) {
+        if (nota == null || nota < 1 || nota > 5) {
+            throw new RuntimeException("A nota deve ser entre 1 e 5");
+        }
     }
 }
-

@@ -15,14 +15,18 @@ public final class FieldValidation {
     public static boolean validarCampos(Object obj) {
         for (Field field : obj.getClass().getDeclaredFields()) {
             // Ignora ID e campos Boolean (ex: termsAccepted, privacyAccepted)
-            if (field.getName().equalsIgnoreCase("id")) continue;
-            if (field.getType() == Boolean.class || field.getType() == boolean.class) continue;
+            if (field.getName().equalsIgnoreCase("id"))
+                continue;
+            if (field.getType() == Boolean.class || field.getType() == boolean.class)
+                continue;
 
             field.setAccessible(true);
             try {
                 Object value = field.get(obj);
-                if (value == null) return false;
-                if (value instanceof String && ((String) value).trim().isEmpty()) return false;
+                if (value == null)
+                    return false;
+                if (value instanceof String && ((String) value).trim().isEmpty())
+                    return false;
             } catch (IllegalAccessException e) {
                 return false;
             }
@@ -159,7 +163,8 @@ public final class FieldValidation {
         if (cleanDateStr.length() == 8) {
             try {
                 date = LocalDate.parse(cleanDateStr, cleanFormatter);
-            } catch (DateTimeParseException ignored) {}
+            } catch (DateTimeParseException ignored) {
+            }
         }
 
         if (date == null) {
@@ -167,7 +172,8 @@ public final class FieldValidation {
                 try {
                     date = LocalDate.parse(dateStr, formatter);
                     break;
-                } catch (DateTimeParseException ignored) {}
+                } catch (DateTimeParseException ignored) {
+                }
             }
         }
 
@@ -185,5 +191,20 @@ public final class FieldValidation {
             return false;
         LocalDate eighteenYearsAgo = LocalDate.now().minusYears(18);
         return !birthDate.isAfter(eighteenYearsAgo);
+    }
+
+    /**
+     * Mascara CPF para exibição segura no frontend.
+     * Exemplo: "12345678901" → "***.***. 789-01"
+     */
+    public static String mascararCpf(String cpf) {
+        if (cpf == null)
+            return null;
+        String digits = cpf.replaceAll("[^0-9]", "");
+        if (digits.length() != 11)
+            return "***.***.***-**";
+        return String.format("***.***.%s-%s",
+                digits.substring(6, 9),
+                digits.substring(9));
     }
 }

@@ -12,13 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import umc.exs.DTOs.forum.NovaRespostaDTO;
 import umc.exs.DTOs.forum.NovoTopicoDTO;
-import umc.exs.model.entidades.foundation.RespostaForum;
-import umc.exs.model.entidades.foundation.TopicoForum;
+import umc.exs.model.entidades.social.RespostaForum;
+import umc.exs.model.entidades.social.TopicoForum;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.CategoriaForum;
-import umc.exs.repository.ClienteRepository;
-import umc.exs.repository.RespostaForumRepository;
-import umc.exs.repository.TopicoForumRepository;
+import umc.exs.repository.negocios.RespostaForumRepository;
+import umc.exs.repository.negocios.TopicoForumRepository;
+import umc.exs.repository.usuario.ClienteRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -61,12 +61,14 @@ public class ForumService {
 
     @Transactional(readOnly = true)
     public Set<Long> getRespostasLikedByUser(Long topicoId, Long clienteId) {
-        if (clienteId == null) return Collections.emptySet();
+        if (clienteId == null)
+            return Collections.emptySet();
         return respostaRepo.findRespostaIdsLikedByClienteInTopico(topicoId, clienteId);
     }
 
     // ── Criação ───────────────────────────────────────────────────────────────
 
+    @SuppressWarnings("null")
     @Transactional
     public TopicoForum criarTopico(NovoTopicoDTO dto, Long autorId) {
         Cliente autor = clienteRepo.findById(autorId)
@@ -81,6 +83,7 @@ public class ForumService {
         return topicoRepo.save(topico);
     }
 
+    @SuppressWarnings("null")
     @Transactional
     public RespostaForum criarResposta(Long topicoId, NovaRespostaDTO dto, Long autorId) {
         TopicoForum topico = topicoRepo.findById(topicoId)
@@ -103,11 +106,13 @@ public class ForumService {
 
     // ── Moderação ─────────────────────────────────────────────────────────────
 
+    @SuppressWarnings("null")
     @Transactional
     public void deletarTopico(Long id) {
         topicoRepo.deleteById(id);
     }
 
+    @SuppressWarnings("null")
     @Transactional
     public void deletarResposta(Long id) {
         RespostaForum resposta = respostaRepo.findById(id)
@@ -122,6 +127,7 @@ public class ForumService {
 
     // ── Curtidas ──────────────────────────────────────────────────────────────
 
+    @SuppressWarnings("null")
     @Transactional
     public Map<String, Object> curtirResposta(Long respostaId, Long clienteId) {
         RespostaForum resposta = respostaRepo.findById(respostaId)
@@ -144,6 +150,7 @@ public class ForumService {
 
     // ── Melhor Resposta ───────────────────────────────────────────────────────
 
+    @SuppressWarnings("null")
     @Transactional
     public void marcarMelhorResposta(Long respostaId, Long clienteId, boolean isAdmin) {
         RespostaForum resposta = respostaRepo.findById(respostaId)

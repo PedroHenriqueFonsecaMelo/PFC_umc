@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import umc.exs.model.entidades.foundation.VisitaSite;
-import umc.exs.repository.VisitaSiteRepository;
+import umc.exs.repository.logic.VisitaSiteRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +23,7 @@ public class VisitaSiteService {
     public void registrarVisita() {
         LocalDate hoje = LocalDate.now();
         VisitaSite visita = visitaSiteRepository.findByData(hoje)
-            .orElseGet(() -> VisitaSite.builder().data(hoje).total(0L).build());
+                .orElseGet(() -> VisitaSite.builder().data(hoje).total(0L).build());
         visita.setTotal(visita.getTotal() + 1);
         visitaSiteRepository.save(visita);
     }

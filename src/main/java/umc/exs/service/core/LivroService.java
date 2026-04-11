@@ -22,13 +22,13 @@ import umc.exs.DTOs.compra.CarrinhoCompraResponseDTO;
 import umc.exs.DTOs.compra.LoteRequestDTO;
 import umc.exs.DTOs.livro.LivroItemDTO;
 import umc.exs.DTOs.livro.LivroRequestDTO;
-import umc.exs.model.entidades.foundation.LivroAnuncio;
 import umc.exs.model.entidades.foundation.Lote;
+import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.EstadoLivro;
-import umc.exs.repository.ClienteRepository;
-import umc.exs.repository.LivroRepository;
-import umc.exs.repository.LoteRepository;
+import umc.exs.repository.livro.LivroRepository;
+import umc.exs.repository.negocios.LoteRepository;
+import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.log.LogAuditoriaService;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -55,8 +55,10 @@ public class LivroService {
      * Salva imagens uploads/livros, JSON fotos.
      * Recompensa tokens por livro APENAS NA APROVAÇÃO, log LOTE_CADASTRADO.
      * Limite 5 pendentes cliente.
-     * * ALTERAÇÃO: Quantidade de fotos por livro é DINÂMICA (item.getQuantidadedeFotos()).
+     * * ALTERAÇÃO: Quantidade de fotos por livro é DINÂMICA
+     * (item.getQuantidadedeFotos()).
      */
+    @SuppressWarnings("null")
     @Transactional
     public Lote criarLote(String email, LoteRequestDTO dto, List<MultipartFile> fotos) {
         log.info("Iniciando criarLote para email: {}, fotos size: {}", email, fotos != null ? fotos.size() : "null");
@@ -81,7 +83,7 @@ public class LivroService {
         int fotoIndex = 0;
         for (LivroItemDTO item : dto.getLivros()) {
             List<String> bookFotosUrls = new ArrayList<>();
-            
+
             int fotosPorLivro = item.getQuantidadedeFotos();
             if (fotosPorLivro == 0) {
                 fotosPorLivro = fotos.size() / dto.getLivros().size();
@@ -92,7 +94,7 @@ public class LivroService {
             for (int k = 0; k < fotosPorLivro; k++) {
                 if (fotoIndex < fotos.size()) {
                     MultipartFile foto = fotos.get(fotoIndex);
-                    
+
                     if (foto != null && !foto.isEmpty()) {
                         String nomeFoto = UUID.randomUUID() + "_" + foto.getOriginalFilename();
                         Path caminho = Paths.get("uploads/livros/" + nomeFoto);
@@ -120,7 +122,7 @@ public class LivroService {
             }
             log.info("jsonFotos final: {}", jsonFotos);
 
-            LivroAnuncio anuncio = LivroAnuncio.builder()
+            Livro anuncio = Livro.builder()
                     .titulo(item.getTitulo())
                     .autor(item.getAutor())
                     .isbn(item.getIsbn())
@@ -145,8 +147,9 @@ public class LivroService {
      * Salva upload local, aprovado=false pendente.
      * Recompensa TOKEN_REWARD vendedor.
      */
+    @SuppressWarnings("null")
     @Transactional
-    public LivroAnuncio cadastrarVenda(String email, LivroRequestDTO dto, MultipartFile foto) {
+    public Livro cadastrarVenda(String email, LivroRequestDTO dto, MultipartFile foto) {
         if (foto == null || foto.isEmpty()) {
             throw new RuntimeException("A foto é obrigatória para venda individual");
         }
@@ -179,7 +182,7 @@ public class LivroService {
 
         Cliente vendedor = clienteOpt.get();
 
-        LivroAnuncio anuncio = LivroAnuncio.builder()
+        Livro anuncio = Livro.builder()
                 .titulo(dto.getTitulo())
                 .autor(dto.getAutor())
                 .isbn(dto.getIsbn())
@@ -189,7 +192,7 @@ public class LivroService {
                 .aprovado(false)
                 .build();
 
-        LivroAnuncio salvo = livroRepository.save(anuncio);
+        Livro salvo = livroRepository.save(anuncio);
 
         logAuditoria.registrarLog("LIVRO_CADASTRADO", vendedor.getId(), vendedor.getEmail(),
                 "Livro " + salvo.getId() + " - aguardando aprovação");
@@ -207,28 +210,28 @@ public class LivroService {
     /**
      * Livros lote não aprovados.
      */
-    public List<LivroAnuncio> listarLivrosPorLote(Long loteId) {
+    public List<Livro> listarLivrosPorLote(Long loteId) {
         return livroRepository.findByLoteIdAndAprovadoFalse(loteId);
     }
 
     /**
      * Livros aprovados vitrine.
      */
-    public List<LivroAnuncio> listarLivrosAprovados() {
+    public List<Livro> listarLivrosAprovados() {
         return livroRepository.findByAprovadoTrue();
     }
 
     /**
      * Livros pendentes admin.
      */
-    public List<LivroAnuncio> listarLivrosPendentes() {
+    public List<Livro> listarLivrosPendentes() {
         return livroRepository.findByAprovadoFalse();
     }
 
     /**
      * Todos livros admin.
      */
-    public List<LivroAnuncio> listarTodosLivros() {
+    public List<Livro> listarTodosLivros() {
         return livroRepository.findAll();
     }
 
@@ -240,9 +243,11 @@ public class LivroService {
      * @param adminId aprovador
      * @param dto     aprovação
      */
+    @SuppressWarnings("null")
     @Transactional
-    public LivroAnuncio aprovarLivro(Long livroId, Long adminId, AdminAprovacaoDTO dto) {
-        LivroAnuncio anuncio = livroRepository.findById(livroId)
+    public Livro aprovarLivro(Long livroId, Long adminId, AdminAprovacaoDTO dto) {
+
+        Livro anuncio = livroRepository.findById(livroId)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
 
         EstadoLivro estado = EstadoLivro.valueOf(dto.getEstadoAprovado().toString().toUpperCase());
@@ -255,7 +260,7 @@ public class LivroService {
             anuncio.setFotosUrls(dto.getFotosUrls());
         }
 
-        LivroAnuncio saved = livroRepository.save(anuncio);
+        Livro saved = livroRepository.save(anuncio);
 
         // Identificar o vendedor: campo direto ou via lote
         Cliente vendedor = anuncio.getVendedor();
@@ -293,10 +298,11 @@ public class LivroService {
      * Set aprovado=false, comentarioAprovacao.
      * Log LIVRO_REJEITADO.
      */
+    @SuppressWarnings("null")
     @Transactional
     public void rejeitarLivro(Long livroId, Long adminId, String estado, String comentario) {
 
-        LivroAnuncio anuncio = livroRepository.findById(livroId)
+        Livro anuncio = livroRepository.findById(livroId)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
 
         if (!estado.equalsIgnoreCase(EstadoLivro.RUIM.name())) {
@@ -316,7 +322,7 @@ public class LivroService {
      */
     @Transactional
     public void realizarCompra(Long livroId, String emailComprador) {
-        LivroAnuncio anuncio = livroRepository.findByIdAndAprovadoTrue(livroId)
+        Livro anuncio = livroRepository.findByIdAndAprovadoTrue(livroId)
                 .orElseThrow(() -> new RuntimeException("Anúncio não aprovado"));
 
         Cliente comprador = clienteRepository.findByEmail(emailComprador)
@@ -345,18 +351,18 @@ public class LivroService {
      * Processa compra em lote via carrinho.
      *
      * Estratégia:
-     *   1. Valida se o comprador existe e não está bloqueado.
-     *   2. Busca todos os livros solicitados de uma vez (evita N queries).
-     *   3. Verifica saldo total antes de qualquer débito (Fail-Fast).
-     *   4. Executa as compras individualmente dentro da mesma transação:
-     *      - se um livro não for encontrado ou já tiver sido comprado por
-     *        outro usuário (race condition), ele vai para a lista de falhas
-     *        sem abortar os demais.
-     *   5. Persiste o novo saldo e loga a operação.
+     * 1. Valida se o comprador existe e não está bloqueado.
+     * 2. Busca todos os livros solicitados de uma vez (evita N queries).
+     * 3. Verifica saldo total antes de qualquer débito (Fail-Fast).
+     * 4. Executa as compras individualmente dentro da mesma transação:
+     * - se um livro não for encontrado ou já tiver sido comprado por
+     * outro usuário (race condition), ele vai para a lista de falhas
+     * sem abortar os demais.
+     * 5. Persiste o novo saldo e loga a operação.
      *
      * @param emailComprador email do usuário autenticado
      * @param request        lista de IDs dos livros no carrinho
-     * @return               resumo com comprados, falhas e saldo restante
+     * @return resumo com comprados, falhas e saldo restante
      */
     @Transactional
     public CarrinhoCompraResponseDTO comprarCarrinho(String emailComprador, CarrinhoCompraRequestDTO request) {
@@ -375,7 +381,7 @@ public class LivroService {
         }
 
         // 2. Busca todos os livros aprovados de uma vez
-        List<LivroAnuncio> livrosEncontrados = livroRepository.findAllById(ids)
+        List<Livro> livrosEncontrados = livroRepository.findAllById(ids)
                 .stream()
                 .filter(l -> Boolean.TRUE.equals(l.getAprovado()))
                 .toList();
@@ -409,7 +415,7 @@ public class LivroService {
         List<CarrinhoCompraResponseDTO.ItemResultado> comprados = new ArrayList<>();
         double totalGasto = 0.0;
 
-        for (LivroAnuncio livro : livrosEncontrados) {
+        for (Livro livro : livrosEncontrados) {
             try {
                 Double preco = livro.getPrecoAprovado();
                 if (preco == null) {

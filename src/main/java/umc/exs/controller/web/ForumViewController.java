@@ -22,9 +22,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import umc.exs.DTOs.forum.NovaRespostaDTO;
 import umc.exs.DTOs.forum.NovoTopicoDTO;
-import umc.exs.model.entidades.foundation.TopicoForum;
+import umc.exs.model.entidades.social.TopicoForum;
 import umc.exs.model.enums.CategoriaForum;
-import umc.exs.repository.ClienteRepository;
+import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.core.ForumService;
 
 @Controller
@@ -99,7 +99,8 @@ public class ForumViewController {
             Model model,
             RedirectAttributes ra) {
 
-        if (user == null) return "redirect:/clientes/login";
+        if (user == null)
+            return "redirect:/clientes/login";
 
         if (result.hasErrors()) {
             Page<TopicoForum> topicos = forumService.listarTopicos(busca, categoria,
@@ -128,7 +129,8 @@ public class ForumViewController {
             @AuthenticationPrincipal UserDetails user,
             RedirectAttributes ra) {
 
-        if (user == null) return "redirect:/clientes/login";
+        if (user == null)
+            return "redirect:/clientes/login";
 
         if (result.hasErrors()) {
             ra.addFlashAttribute("erro", "A resposta não pode estar vazia.");
@@ -165,7 +167,8 @@ public class ForumViewController {
     }
 
     private Long resolverClienteId(UserDetails user) {
-        if (user == null) return null;
+        if (user == null)
+            return null;
         return clienteRepo.findByEmail(user.getUsername())
                 .map(c -> c.getId())
                 .orElse(null);

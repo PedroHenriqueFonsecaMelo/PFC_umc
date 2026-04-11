@@ -47,10 +47,8 @@ public class AuthController {
                                 "message", "Login bem-sucedido",
                                 "token", token));
                     })
-                    .orElseGet(() ->
-                        ResponseEntity.status(401)
-                                .body(Map.of("error", "E-mail ou senha inválidos."))
-                    );
+                    .orElseGet(() -> ResponseEntity.status(401)
+                            .body(Map.of("error", "E-mail ou senha inválidos.")));
 
         } catch (IllegalArgumentException e) {
             // Conta bloqueada ou regra de negócio

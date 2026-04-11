@@ -29,9 +29,9 @@ import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cartao;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.entidades.usuario.Endereco;
-import umc.exs.repository.CartaoRepository;
-import umc.exs.repository.ClienteRepository;
-import umc.exs.repository.EnderecoRepository;
+import umc.exs.repository.usuario.CartaoRepository;
+import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.repository.usuario.EnderecoRepository;
 import umc.exs.service.carteira.CarteiraService;
 import umc.exs.service.senha.FieldValidation;
 import umc.exs.service.senha.SenhaService;
@@ -40,7 +40,7 @@ import umc.exs.service.senha.SenhaService;
 @Slf4j
 @RequiredArgsConstructor
 public class ClienteService {
-    
+
     // Repositories
     private final ClienteRepository clienteRepository;
     private final CartaoRepository cartaoRepository;
@@ -217,6 +217,7 @@ public class ClienteService {
     // 🛠 MÉTODOS PRIVADOS DE SINCRONIZAÇÃO
     // ==========================================================
 
+    @SuppressWarnings("null")
     private void atualizarEnderecosManualmente(Cliente cliente, List<EnderecoDTO> dtos) {
         if (dtos == null)
             return;
@@ -255,6 +256,7 @@ public class ClienteService {
         }
     }
 
+    @SuppressWarnings("null")
     private void atualizarCartoesManualmente(Cliente cliente, List<CartaoDTO> dtos) {
         if (dtos == null)
             return;
@@ -273,7 +275,7 @@ public class ClienteService {
                 iter.remove();
             }
         }
-        
+
         for (CartaoDTO cartaoDto : dtos) {
             Cartao cartao;
             if (cartaoDto.getId() != null && cartaoDto.getId() != 0) {
@@ -295,7 +297,6 @@ public class ClienteService {
     public Optional<Cliente> buscarEntidadePorEmail(String email) {
         return coreService.encontrarPorEmail(email);
     }
-
 
     // Métodos para o fluxo de PIX delegando para a CarteiraService
     @Transactional
@@ -320,7 +321,7 @@ public class ClienteService {
 
     public Optional<ClienteDTO> buscarClientePorEmail(String email) {
         log.debug("Orquestrando busca de cliente por e-mail: {}", email);
-        
+
         return coreService.encontrarPorEmail(email)
                 .map(clienteMapper::paraDTO);
     }
@@ -328,7 +329,7 @@ public class ClienteService {
     @Transactional
     public boolean validarTokenRecuperacao(String token) {
         log.debug("Orquestrando validação de token de recuperação: {}", token);
-        
+
         return senhaService.isTokenValido(token);
     }
 }

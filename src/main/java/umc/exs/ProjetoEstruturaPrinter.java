@@ -1,9 +1,15 @@
 package umc.exs;
+
 import java.io.File;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
 public class ProjetoEstruturaPrinter {
 
     public static void main(String[] args) {
+
+        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
+
         File raiz = new File("src/main/java/umc/exs");
 
         System.out.println("DIAGRAMA DE CLASSES E PASTAS DO PROJETO");
@@ -25,7 +31,7 @@ public class ProjetoEstruturaPrinter {
 
         if (arquivo.isDirectory()) {
             System.out.println(arquivo.getName() + "/");
-            
+
             File[] filhos = arquivo.listFiles();
             if (filhos != null) {
                 for (int i = 0; i < filhos.length; i++) {

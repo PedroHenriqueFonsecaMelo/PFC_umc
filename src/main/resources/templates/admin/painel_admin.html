@@ -1,462 +1,959 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
-<head>
-  <meta charset="UTF-8"/>
-  <title>Painel Admin — Bibliotroca</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Painel Admin — Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    >
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
 
-  <style>
-    /* ── VINTAGE OVERRIDE ── */
-    :root { --ink:#2C241B;--paper:#F9F6F0;--cream:#EDE8DF;--accent:#722F37;--forest:#4A5D23;--white:#FFFFFF;--muted:#7A6E65;--border:rgba(44,36,27,.15); }
-    body { font-family:'DM Sans',sans-serif!important; background:#F9F6F0!important; color:#2C241B!important; }
-  </style>
-
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'DM Sans', sans-serif; background: #F9F6F0; }
-
-    /* ── TABS ── */
-    .tab-btn { padding: .6rem 1.4rem; border-radius: 8px; font-size: .875rem; font-weight: 600;
-      cursor: pointer; border: none; background: transparent; color: #64748b; transition: all .18s; }
-    .tab-btn.active { background: #2C241B; color: #fff; }
-    .tab-btn:not(.active):hover { background: #EDE8DF; color: #2C241B; }
-    .tab-panel { display: none; } .tab-panel.active { display: block; }
-
-    /* ── CARDS LIVROS ── */
-    .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
-    .bcard { background:#fff; border-radius:4px; padding:20px; box-shadow:4px 4px 0 rgba(44,36,27,.08); transition:transform .2s; border:1px solid rgba(44,36,27,.1); }
-    .bcard:hover { transform:translateY(-3px); }
-    .fotos-wrapper { display:flex; gap:10px; overflow-x:auto; padding:10px 0; border-bottom:1px solid rgba(44,36,27,.1); margin-bottom:15px; }
-    .foto-item { position:relative; min-width:80px; height:80px; }
-    .foto-item img { width:80px;height:80px;object-fit:cover;border-radius:2px;border:1px solid rgba(44,36,27,.15); }
-    .btn-del-foto { position:absolute;top:-5px;right:-5px;background:#722F37;color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center; }
-    .btn-add-foto { min-width:80px;height:80px;border:2px dashed rgba(44,36,27,.2);border-radius:2px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#7A6E65;font-size:24px; }
-    .btn-add-foto:hover { background:#F9F6F0;border-color:#2C241B;color:#2C241B; }
-    .price-display { font-size:1.3em;font-weight:bold;color:#4A5D23;margin:15px 0;text-align:center;background:rgba(74,93,35,.08);padding:5px;border-radius:2px; }
-    select,button:not(.nav-item-s):not(.tab-btn):not(.filter-btn):not(.btn-salvar-envio):not(.btn-publicar) { width:100%;margin-top:10px;padding:12px;cursor:pointer;border-radius:2px;border:1px solid rgba(44,36,27,.2);font-size:14px; }
-    .btn-aprovar { background:#2C241B;color:#fff;border:none;font-weight:bold;margin-top:20px; }
-    .btn-aprovar:hover { background:#722F37; }
-    .btn-rejeitar { background:#fff;color:#722F37;border:1px solid #722F37;font-weight:500; }
-    .btn-rejeitar:hover { background:rgba(114,47,55,.05); }
-
-    /* ── PEDIDOS ── */
-    .pedido-row {
-      background:#fff; border-radius:2px; border:1px solid rgba(44,36,27,.1);
-      padding:1rem 1.25rem; display:flex; align-items:center; gap:1rem;
-      transition:box-shadow .2s;
-    }
-    .pedido-row:hover { box-shadow:4px 4px 0 rgba(44,36,27,.1); }
-    .pedido-capa { width:52px;height:70px;object-fit:cover;border-radius:2px;background:#EDE8DF;flex-shrink:0; }
-
-    .status-pill {
-      display:inline-flex;align-items:center;gap:.35rem;
-      font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-      padding:.28rem .75rem;border-radius:999px;white-space:nowrap;
-    }
-    .s-AGUARDANDO_ENVIO { background:#fef9c3;color:#a16207; }
-    .s-EM_TRANSITO      { background:rgba(74,93,35,.1);color:#4A5D23; }
-    .s-ENTREGUE         { background:rgba(74,93,35,.15);color:#4A5D23; }
-    .s-CANCELADO        { background:rgba(114,47,55,.1);color:#722F37; }
-
-    .select-status {
-      font-size:.8rem; padding:.4rem .7rem; border-radius:2px;
-      border:1px solid rgba(44,36,27,.2); background:#F9F6F0; cursor:pointer;
-      width:auto; margin-top:0;
-    }
-    .btn-salvar-envio {
-      font-size:.8rem; padding:.4rem .9rem; border-radius:2px;
-      background:#2C241B; color:#fff; border:none; cursor:pointer;
-      font-weight:600; width:auto; margin-top:0; transition:background .2s;
-    }
-    .btn-salvar-envio:hover { background:#722F37; }
-
-    input.rastreio-input {
-      font-size:.8rem; padding:.4rem .7rem; border-radius:2px;
-      border:1px solid rgba(44,36,27,.2); background:#F9F6F0;
-      width:160px; margin-top:0;
-    }
-
-    /* ── FILTROS ── */
-    .filter-bar { display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.25rem; }
-    .filter-btn {
-      font-size:.75rem;padding:.35rem .9rem;border-radius:999px;
-      border:1.5px solid rgba(44,36,27,.15);background:#fff;cursor:pointer;
-      font-weight:500;color:#7A6E65;transition:all .18s;
-    }
-    .filter-btn.active,.filter-btn:hover { border-color:#2C241B;background:#2C241B;color:#fff; }
-
-    /* ── SKELETON ── */
-    .skel { background:linear-gradient(90deg,#EDE8DF 25%,#D5CFC6 50%,#EDE8DF 75%);
-      background-size:200% 100%;animation:sh 1.4s infinite;border-radius:2px;height:80px; }
-    @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
-    .loading { text-align:center;padding:50px;color:#7A6E65; }
-
-    /* ── WRAPPER ── */
-    .page-wrapper { max-width: 1100px; margin: 0 auto; padding: 2rem 5vw; }
-
-    /* ── TAB BAR ── */
-    .tab-bar-wrap {
-      display: flex;
-      gap: .5rem;
-      margin-bottom: 1.5rem;
-      background: #FFFFFF;
-      padding: .75rem;
-      border: 1px solid rgba(44,36,27,.1);
-      flex-wrap: wrap;
-    }
-
-    /* ── SEARCH INPUT ── */
-    input[type="text"].search-input {
-      width: 100%; max-width: 420px;
-      border: 1.5px solid rgba(44,36,27,.18);
-      border-radius: 2px;
-      padding: .6rem 1rem;
-      font-size: .875rem;
-      background: #F9F6F0;
-      color: #2C241B;
-      outline: none;
-      font-family: 'DM Sans', sans-serif;
-      transition: border-color .2s;
-    }
-    input[type="text"].search-input:focus { border-color: #722F37; }
-
-    /* ── BLOG FORM ── */
-    .blog-form-card {
-      background: #FFFFFF;
-      border: 1px solid rgba(44,36,27,.1);
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    .blog-section-title { font-size: .95rem; font-weight: 700; color: #2C241B; margin-bottom: 1rem; }
-    .blog-form-card label { font-size: .68rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #7A6E65; display: block; margin-bottom: .35rem; }
-    .blog-form-card input[type="text"],
-    .blog-form-card textarea {
-      width: 100%;
-      border: 1.5px solid rgba(44,36,27,.18);
-      border-radius: 2px;
-      padding: .65rem .85rem;
-      font-size: .875rem;
-      background: #F9F6F0;
-      color: #2C241B;
-      outline: none;
-      font-family: 'DM Sans', sans-serif;
-      margin-bottom: 1rem;
-      transition: border-color .2s;
-    }
-    .blog-form-card input[type="text"]:focus,
-    .blog-form-card textarea:focus { border-color: #722F37; }
-    .blog-form-card textarea { resize: vertical; }
-    .btn-publicar {
-      background: #2C241B; color: #F9F6F0;
-      border: 2px solid #2C241B;
-      padding: .6rem 1.5rem;
-      font-size: .75rem; font-weight: 700;
-      letter-spacing: .08em; text-transform: uppercase;
-      cursor: pointer; border-radius: 2px;
-      transition: all .2s;
-    }
-    .btn-publicar:hover { background: transparent; color: #2C241B; }
-
-    .blog-post-item {
-      background: #FFFFFF;
-      border: 1px solid rgba(44,36,27,.1);
-      padding: 1rem 1.25rem;
-      display: flex; gap: 1rem; align-items: flex-start;
-      margin-bottom: .75rem;
-    }
-    .blog-post-img { width: 72px; height: 72px; object-fit: cover; border-radius: 2px; flex-shrink: 0; background: #EDE8DF; }
-    .btn-remover-post {
-      font-size: .72rem; color: #722F37;
-      border: 1px solid rgba(114,47,55,.3);
-      padding: .35rem .75rem;
-      background: transparent; cursor: pointer;
-      flex-shrink: 0; transition: all .2s; border-radius: 2px;
-    }
-    .btn-remover-post:hover { background: #722F37; color: #F9F6F0; border-color: #722F37; }
-
-    /* ── PEDIDO HEADINGS ── */
-    .pedidos-heading {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.2rem; color: #2C241B; margin-bottom: 1rem;
-    }
-    .btn-refresh {
-      background: none; border: none; cursor: pointer;
-      color: #7A6E65; font-size: .8rem;
-      display: flex; align-items: center; gap: .35rem;
-      width: auto; margin: 0; padding: .35rem .65rem;
-      transition: color .2s;
-    }
-    .btn-refresh:hover { color: #2C241B; }
-
-    /* pedido meta colors */
-    .pedido-preco { color: #722F37; font-weight: 600; }
-
-    /* ── LAYOUT SIDEBAR ── */
-    html, body { height: 100%; overflow: hidden; }
-    .layout { display: flex; height: 100vh; overflow: hidden; }
-
-    .sidebar {
-      width: 240px; flex-shrink: 0;
-      background: #2C241B; color: #F9F6F0;
-      display: flex; flex-direction: column; z-index: 30;
-    }
-    .sidebar-logo {
-      display: flex; align-items: center; gap: 10px; padding: 20px;
-      border-bottom: 1px solid rgba(249,246,240,.08);
-    }
-    .sidebar-logo .s-icon { font-size: 22px; }
-    .sidebar-logo .s-name {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-weight: 700; font-size: 30px; line-height: 1.2; color: #F9F6F0;
-    }
-    .sidebar-logo .s-sub { font-size: 11px; color: rgba(249,246,240,.4); }
-    .sidebar-nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
-    .nav-label-s {
-      font-size: 10px; font-weight: 700; color: rgba(249,246,240,.3);
-      letter-spacing: .12em; text-transform: uppercase;
-      padding: 0 8px; margin-bottom: 8px; display: block;
-    }
-    .nav-item-s {
-      display: flex; align-items: center; gap: 10px;
-      padding: 9px 12px; border-radius: 10px;
-      margin-bottom: 2px; margin-top: 0;
-      font-size: 13px; font-weight: 500; text-decoration: none;
-      color: rgba(249,246,240,.55);
-      transition: background .15s, color .15s;
-      cursor: pointer; border: none; background: transparent; width: 100%;
-      text-align: left; box-shadow: none; outline: none;
-    }
-    .nav-item-s i { width: 16px; text-align: center; flex-shrink: 0; }
-    .nav-item-s:hover { background: rgba(249,246,240,.06); color: #F9F6F0; }
-    .nav-item-s.ativo  { background: #722F37; color: #F9F6F0; }
-    .sidebar-footer-s  { padding: 10px; border-top: 1px solid rgba(249,246,240,.08); }
-    .nav-item-s.sair:hover { background: rgba(114,47,55,.2); color: #e8a0a8; }
-
-    .content-wrap { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
-
-    .topbar-s {
-      background: #FFFFFF; border-bottom: 1px solid rgba(74,93,35,.12);
-      padding: 14px 24px; display: flex; align-items: center;
-      justify-content: space-between; flex-shrink: 0;
-    }
-    .topbar-s .t-title {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-weight: 700; font-size: 17px; color: #2C241B;
-    }
-    .topbar-s .t-date { font-size: 11px; color: rgba(44,36,27,.45); margin-top: 2px; }
-    .topbar-right-s { display: flex; align-items: center; gap: 10px; }
-    .badge-online-s {
-      display: flex; align-items: center; gap: 6px;
-      background: rgba(74,93,35,.08); color: #4A5D23;
-      font-size: 11px; font-weight: 600;
-      padding: 5px 12px; border-radius: 999px; border: 1px solid rgba(74,93,35,.2);
-    }
-    .badge-online-s .dot-s { width: 7px; height: 7px; background: #4A5D23; border-radius: 50%; }
-    .avatar-s {
-      width: 36px; height: 36px; background: #722F37;
-      border-radius: 50%; display: flex; align-items: center;
-      justify-content: center; color: #F9F6F0; font-size: 13px;
-    }
-
-    .main-s { flex: 1; overflow-y: auto; padding: 24px; }
-    .page-wrapper { max-width: none; margin: 0; padding: 0; }
-
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(114,47,55,.2); border-radius: 999px; }
-  </style>
-</head>
-<body>
-<div class="layout">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
-        <span class="s-icon">📚</span>
-        <div>
-          <div class="s-name">Bibliotroca</div>
-          <div class="s-sub">Painel Administrativo</div>
-        </div>
-      </a>
-    </div>
-    <nav class="sidebar-nav">
-      <span class="nav-label-s">Menu</span>
-      <a href="/admin/dashboard" class="nav-item-s"><i class="fa-solid fa-gauge"></i> Dashboard</a>
-      <button class="nav-item-s ativo" onclick="trocarTab('lotes', this)"><i class="fa-solid fa-box-open"></i> Lotes Pendentes</button>
-      <button class="nav-item-s" onclick="trocarTab('pedidos', this)">
-        <i class="fa-solid fa-truck"></i> Pedidos / Envio
-        <span id="badgePedidos" style="display:none;margin-left:auto;background:#722F37;color:#fff;font-size:.6rem;font-weight:700;padding:.1rem .45rem;border-radius:999px"></span>
-      </button>
-      <a href="/forum" class="nav-item-s"><i class="fa-solid fa-comments"></i> Fórum</a>
-      <button class="nav-item-s" onclick="trocarTab('blog', this)"><i class="fa-solid fa-pen-to-square"></i> Blog</button>
-      <a href="/admin/audit" class="nav-item-s"><i class="fa-solid fa-shield-halved"></i> Auditoria</a>
-    </nav>
-    <div class="sidebar-footer-s">
-      <a th:href="@{/admin/sair}" href="/admin/sair" class="nav-item-s sair"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
-    </div>
-  </aside>
-
-  <!-- CONTEÚDO -->
-  <div class="content-wrap">
-    <header class="topbar-s">
-      <div>
-        <div class="t-title">Painel Admin</div>
-        <div class="t-date" id="dataHoje"></div>
-      </div>
-      <div class="topbar-right-s">
-        <span class="badge-online-s"><span class="dot-s"></span> Sistema Online</span>
-        <div class="avatar-s"><i class="fa-solid fa-user"></i></div>
-      </div>
-    </header>
-
-    <div class="main-s">
-    <div class="page-wrapper">
-
-    <!-- ════ PAINEL LOTES ════ -->
-    <div class="tab-panel active" id="panel-lotes">
-      <div id="contentArea">
-        <div class="loading">Carregando lotes pendentes...</div>
-      </div>
-    </div>
-
-    <!-- ════ PAINEL PEDIDOS ════ -->
-    <div class="tab-panel" id="panel-pedidos">
-
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
-        <span class="pedidos-heading">Pedidos — Gestão de Envio</span>
-        <button onclick="carregarPedidos()" class="btn-refresh">
-          <i class="fa-solid fa-rotate-right"></i> Atualizar
-        </button>
-      </div>
-
-      <!-- Filtros de status -->
-      <div class="filter-bar">
-        <button class="filter-btn active" onclick="filtrarPedidos('TODOS', this)">Todos</button>
-        <button class="filter-btn" onclick="filtrarPedidos('AGUARDANDO_ENVIO', this)">⏳ Aguardando</button>
-        <button class="filter-btn" onclick="filtrarPedidos('EM_TRANSITO', this)">🚚 Em Trânsito</button>
-        <button class="filter-btn" onclick="filtrarPedidos('ENTREGUE', this)">✅ Entregues</button>
-        <button class="filter-btn" onclick="filtrarPedidos('CANCELADO', this)">❌ Cancelados</button>
-      </div>
-
-      <!-- Buscador -->
-      <div style="margin-bottom:1rem">
-        <input type="text" id="buscaPedido" placeholder="🔍  Buscar por título, comprador ou pedido #..."
-          oninput="renderPedidos()"
-          class="search-input"/>
-      </div>
-
-      <div id="listaPedidos" style="display:flex;flex-direction:column;gap:.75rem">
-        <div class="skel"></div>
-        <div class="skel"></div>
-        <div class="skel"></div>
-      </div>
-    </div>
-
-    <!-- ════ PAINEL BLOG ════ -->
-    <div class="tab-panel" id="panel-blog">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
-        <span class="pedidos-heading">Gerenciar Blog</span>
-      </div>
-
-      <!-- Formulário novo post -->
-      <div class="blog-form-card">
-        <div class="blog-section-title">Novo Post</div>
-        <form id="formBlog" onsubmit="publicarPost(event)" enctype="multipart/form-data">
-          <div style="margin-bottom:.75rem">
-            <label>Título</label>
-            <input type="text" id="blogTitulo" name="titulo" required placeholder="Título do post..."/>
-          </div>
-          <div style="margin-bottom:.75rem">
-            <label>Conteúdo</label>
-            <textarea id="blogConteudo" name="conteudo" required rows="5" placeholder="Escreva o texto do post..."></textarea>
-          </div>
-          <div style="margin-bottom:1.25rem">
-            <label>Imagem (opcional)</label>
-            <input type="file" id="blogImagem" name="imagem" accept="image/*"
-              style="font-size:.875rem;color:#7A6E65"/>
-            <div id="blogImgPreview" style="margin-top:.5rem"></div>
-          </div>
-          <button type="submit" class="btn-publicar">
-            Publicar Post
-          </button>
-          <span id="blogMsg" class="hidden" style="display:none;margin-left:.75rem;font-size:.875rem;color:#4A5D23"></span>
-        </form>
-      </div>
-
-      <!-- Lista de posts existentes -->
-      <div class="blog-section-title" style="margin-bottom:.75rem">Posts publicados</div>
-      <div id="listaBlog">
-        <div class="skel"></div>
-      </div>
-    </div>
-
-  </div><!-- /page-wrapper -->
-    </div><!-- /main-s -->
-  </div><!-- /content-wrap -->
-</div><!-- /layout -->
-
-  <script th:inline="javascript">
-  /*<![CDATA[*/
-
-  /* ════════════════════════════════════════
-     LOTES (código original preservado)
-  ════════════════════════════════════════ */
-  const priceMap = { "NOVO": 50, "OTIMO": 40, "BOM": 30, "DESGASTADO": 20, "RUIM": 0 };
-  let livrosCache = [];
-
-  async function loadLotes() {
-    const container = document.getElementById('contentArea');
-    container.innerHTML = '<div class="loading">Carregando lotes pendentes...</div>';
-    try {
-      const res = await fetch('/api/admin/lotes/pendentes');
-      const lotes = await res.json();
-      if (lotes.length === 0) {
-        container.innerHTML = '<div class="bcard"><h3>Nenhum lote pendente para avaliação no momento.</h3></div>';
-        return;
+    <style>
+      /* ── VINTAGE OVERRIDE ── */
+      :root {
+        --ink: #2c241b;
+        --paper: #f9f6f0;
+        --cream: #ede8df;
+        --accent: #722f37;
+        --forest: #4a5d23;
+        --white: #ffffff;
+        --muted: #7a6e65;
+        --border: rgba(44, 36, 27, 0.15);
       }
-      let html = '<h3 style="font-family:\'Playfair Display\',serif;font-size:1.1rem;margin-bottom:.75rem">Lotes Aguardando Revisão</h3><div class="book-grid">';
-      lotes.forEach(lote => {
-        html += `
+      body {
+        font-family: "DM Sans", sans-serif !important;
+        background: #f9f6f0 !important;
+        color: #2c241b !important;
+      }
+    </style>
+
+    <style>
+      *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: #f9f6f0;
+      }
+
+      /* ── TABS ── */
+      .tab-btn {
+        padding: 0.6rem 1.4rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        transition: all 0.18s;
+      }
+      .tab-btn.active {
+        background: #2c241b;
+        color: #fff;
+      }
+      .tab-btn:not(.active):hover {
+        background: #ede8df;
+        color: #2c241b;
+      }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+
+      /* ── CARDS LIVROS ── */
+      .book-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+      .bcard {
+        background: #fff;
+        border-radius: 4px;
+        padding: 20px;
+        box-shadow: 4px 4px 0 rgba(44, 36, 27, 0.08);
+        transition: transform 0.2s;
+        border: 1px solid rgba(44, 36, 27, 0.1);
+      }
+      .bcard:hover {
+        transform: translateY(-3px);
+      }
+      .fotos-wrapper {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(44, 36, 27, 0.1);
+        margin-bottom: 15px;
+      }
+      .foto-item {
+        position: relative;
+        min-width: 80px;
+        height: 80px;
+      }
+      .foto-item img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 2px;
+        border: 1px solid rgba(44, 36, 27, 0.15);
+      }
+      .btn-del-foto {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #722f37;
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .btn-add-foto {
+        min-width: 80px;
+        height: 80px;
+        border: 2px dashed rgba(44, 36, 27, 0.2);
+        border-radius: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #7a6e65;
+        font-size: 24px;
+      }
+      .btn-add-foto:hover {
+        background: #f9f6f0;
+        border-color: #2c241b;
+        color: #2c241b;
+      }
+      .price-display {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #4a5d23;
+        margin: 15px 0;
+        text-align: center;
+        background: rgba(74, 93, 35, 0.08);
+        padding: 5px;
+        border-radius: 2px;
+      }
+      select,
+      button:not(.nav-item-s):not(.tab-btn):not(.filter-btn):not(
+        .btn-salvar-envio
+      ):not(.btn-publicar) {
+        width: 100%;
+        margin-top: 10px;
+        padding: 12px;
+        cursor: pointer;
+        border-radius: 2px;
+        border: 1px solid rgba(44, 36, 27, 0.2);
+        font-size: 14px;
+      }
+      .btn-aprovar {
+        background: #2c241b;
+        color: #fff;
+        border: none;
+        font-weight: bold;
+        margin-top: 20px;
+      }
+      .btn-aprovar:hover {
+        background: #722f37;
+      }
+      .btn-rejeitar {
+        background: #fff;
+        color: #722f37;
+        border: 1px solid #722f37;
+        font-weight: 500;
+      }
+      .btn-rejeitar:hover {
+        background: rgba(114, 47, 55, 0.05);
+      }
+
+      /* ── PEDIDOS ── */
+      .pedido-row {
+        background: #fff;
+        border-radius: 2px;
+        border: 1px solid rgba(44, 36, 27, 0.1);
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: box-shadow 0.2s;
+      }
+      .pedido-row:hover {
+        box-shadow: 4px 4px 0 rgba(44, 36, 27, 0.1);
+      }
+      .pedido-capa {
+        width: 52px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 2px;
+        background: #ede8df;
+        flex-shrink: 0;
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.28rem 0.75rem;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+      .s-AGUARDANDO_ENVIO {
+        background: #fef9c3;
+        color: #a16207;
+      }
+      .s-EM_TRANSITO {
+        background: rgba(74, 93, 35, 0.1);
+        color: #4a5d23;
+      }
+      .s-ENTREGUE {
+        background: rgba(74, 93, 35, 0.15);
+        color: #4a5d23;
+      }
+      .s-CANCELADO {
+        background: rgba(114, 47, 55, 0.1);
+        color: #722f37;
+      }
+
+      .select-status {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.7rem;
+        border-radius: 2px;
+        border: 1px solid rgba(44, 36, 27, 0.2);
+        background: #f9f6f0;
+        cursor: pointer;
+        width: auto;
+        margin-top: 0;
+      }
+      .btn-salvar-envio {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.9rem;
+        border-radius: 2px;
+        background: #2c241b;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        width: auto;
+        margin-top: 0;
+        transition: background 0.2s;
+      }
+      .btn-salvar-envio:hover {
+        background: #722f37;
+      }
+
+      input.rastreio-input {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.7rem;
+        border-radius: 2px;
+        border: 1px solid rgba(44, 36, 27, 0.2);
+        background: #f9f6f0;
+        width: 160px;
+        margin-top: 0;
+      }
+
+      /* ── FILTROS ── */
+      .filter-bar {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.25rem;
+      }
+      .filter-btn {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.9rem;
+        border-radius: 999px;
+        border: 1.5px solid rgba(44, 36, 27, 0.15);
+        background: #fff;
+        cursor: pointer;
+        font-weight: 500;
+        color: #7a6e65;
+        transition: all 0.18s;
+      }
+      .filter-btn.active, .filter-btn:hover {
+        border-color: #2c241b;
+        background: #2c241b;
+        color: #fff;
+      }
+
+      /* ── SKELETON ── */
+      .skel {
+        background: linear-gradient(90deg, #ede8df 25%, #d5cfc6 50%, #ede8df 75%);
+        background-size: 200% 100%;
+        animation: sh 1.4s infinite;
+        border-radius: 2px;
+        height: 80px;
+      }
+      @keyframes sh {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      .loading {
+        text-align: center;
+        padding: 50px;
+        color: #7a6e65;
+      }
+
+      /* ── WRAPPER ── */
+      .page-wrapper {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2rem 5vw;
+      }
+
+      /* ── TAB BAR ── */
+      .tab-bar-wrap {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        background: #ffffff;
+        padding: 0.75rem;
+        border: 1px solid rgba(44, 36, 27, 0.1);
+        flex-wrap: wrap;
+      }
+
+      /* ── SEARCH INPUT ── */
+      input[type="text"].search-input {
+        width: 100%;
+        max-width: 420px;
+        border: 1.5px solid rgba(44, 36, 27, 0.18);
+        border-radius: 2px;
+        padding: 0.6rem 1rem;
+        font-size: 0.875rem;
+        background: #f9f6f0;
+        color: #2c241b;
+        outline: none;
+        font-family: "DM Sans", sans-serif;
+        transition: border-color 0.2s;
+      }
+      input[type="text"].search-input:focus {
+        border-color: #722f37;
+      }
+
+      /* ── BLOG FORM ── */
+      .blog-form-card {
+        background: #ffffff;
+        border: 1px solid rgba(44, 36, 27, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      .blog-section-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #2c241b;
+        margin-bottom: 1rem;
+      }
+      .blog-form-card label {
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #7a6e65;
+        display: block;
+        margin-bottom: 0.35rem;
+      }
+      .blog-form-card input[type="text"],
+      .blog-form-card textarea {
+        width: 100%;
+        border: 1.5px solid rgba(44, 36, 27, 0.18);
+        border-radius: 2px;
+        padding: 0.65rem 0.85rem;
+        font-size: 0.875rem;
+        background: #f9f6f0;
+        color: #2c241b;
+        outline: none;
+        font-family: "DM Sans", sans-serif;
+        margin-bottom: 1rem;
+        transition: border-color 0.2s;
+      }
+      .blog-form-card input[type="text"]:focus,
+      .blog-form-card textarea:focus {
+        border-color: #722f37;
+      }
+      .blog-form-card textarea {
+        resize: vertical;
+      }
+      .btn-publicar {
+        background: #2c241b;
+        color: #f9f6f0;
+        border: 2px solid #2c241b;
+        padding: 0.6rem 1.5rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+        border-radius: 2px;
+        transition: all 0.2s;
+      }
+      .btn-publicar:hover {
+        background: transparent;
+        color: #2c241b;
+      }
+
+      .blog-post-item {
+        background: #ffffff;
+        border: 1px solid rgba(44, 36, 27, 0.1);
+        padding: 1rem 1.25rem;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+      }
+      .blog-post-img {
+        width: 72px;
+        height: 72px;
+        object-fit: cover;
+        border-radius: 2px;
+        flex-shrink: 0;
+        background: #ede8df;
+      }
+      .btn-remover-post {
+        font-size: 0.72rem;
+        color: #722f37;
+        border: 1px solid rgba(114, 47, 55, 0.3);
+        padding: 0.35rem 0.75rem;
+        background: transparent;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: all 0.2s;
+        border-radius: 2px;
+      }
+      .btn-remover-post:hover {
+        background: #722f37;
+        color: #f9f6f0;
+        border-color: #722f37;
+      }
+
+      /* ── PEDIDO HEADINGS ── */
+      .pedidos-heading {
+        font-family: "Playfair Display", serif;
+        font-size: 1.2rem;
+        color: #2c241b;
+        margin-bottom: 1rem;
+      }
+      .btn-refresh {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #7a6e65;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        width: auto;
+        margin: 0;
+        padding: 0.35rem 0.65rem;
+        transition: color 0.2s;
+      }
+      .btn-refresh:hover {
+        color: #2c241b;
+      }
+
+      /* pedido meta colors */
+      .pedido-preco {
+        color: #722f37;
+        font-weight: 600;
+      }
+
+      /* ── LAYOUT SIDEBAR ── */
+      html, body {
+        height: 100%;
+        overflow: hidden;
+      }
+      .layout {
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .sidebar {
+        width: 240px;
+        flex-shrink: 0;
+        background: #2c241b;
+        color: #f9f6f0;
+        display: flex;
+        flex-direction: column;
+        z-index: 30;
+      }
+      .sidebar-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 20px;
+        border-bottom: 1px solid rgba(249, 246, 240, 0.08);
+      }
+      .sidebar-logo .s-icon {
+        font-size: 22px;
+      }
+      .sidebar-logo .s-name {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 700;
+        font-size: 30px;
+        line-height: 1.2;
+        color: #f9f6f0;
+      }
+      .sidebar-logo .s-sub {
+        font-size: 11px;
+        color: rgba(249, 246, 240, 0.4);
+      }
+      .sidebar-nav {
+        flex: 1;
+        padding: 12px 10px;
+        overflow-y: auto;
+      }
+      .nav-label-s {
+        font-size: 10px;
+        font-weight: 700;
+        color: rgba(249, 246, 240, 0.3);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 0 8px;
+        margin-bottom: 8px;
+        display: block;
+      }
+      .nav-item-s {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 12px;
+        border-radius: 10px;
+        margin-bottom: 2px;
+        margin-top: 0;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        color: rgba(249, 246, 240, 0.55);
+        transition: background 0.15s, color 0.15s;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        width: 100%;
+        text-align: left;
+        box-shadow: none;
+        outline: none;
+      }
+      .nav-item-s i {
+        width: 16px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      .nav-item-s:hover {
+        background: rgba(249, 246, 240, 0.06);
+        color: #f9f6f0;
+      }
+      .nav-item-s.ativo {
+        background: #722f37;
+        color: #f9f6f0;
+      }
+      .sidebar-footer-s {
+        padding: 10px;
+        border-top: 1px solid rgba(249, 246, 240, 0.08);
+      }
+      .nav-item-s.sair:hover {
+        background: rgba(114, 47, 55, 0.2);
+        color: #e8a0a8;
+      }
+
+      .content-wrap {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .topbar-s {
+        background: #ffffff;
+        border-bottom: 1px solid rgba(74, 93, 35, 0.12);
+        padding: 14px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+      }
+      .topbar-s .t-title {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 700;
+        font-size: 17px;
+        color: #2c241b;
+      }
+      .topbar-s .t-date {
+        font-size: 11px;
+        color: rgba(44, 36, 27, 0.45);
+        margin-top: 2px;
+      }
+      .topbar-right-s {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .badge-online-s {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(74, 93, 35, 0.08);
+        color: #4a5d23;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(74, 93, 35, 0.2);
+      }
+      .badge-online-s .dot-s {
+        width: 7px;
+        height: 7px;
+        background: #4a5d23;
+        border-radius: 50%;
+      }
+      .avatar-s {
+        width: 36px;
+        height: 36px;
+        background: #722f37;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #f9f6f0;
+        font-size: 13px;
+      }
+
+      .main-s {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+      }
+      .page-wrapper {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      ::-webkit-scrollbar {
+        width: 5px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(114, 47, 55, 0.2);
+        border-radius: 999px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <a
+            href="/"
+            style="display: flex; align-items: center; gap: 10px; text-decoration: none"
+          >
+            <span class="s-icon">📚</span>
+            <div>
+              <div class="s-name">Bibliotroca</div>
+              <div class="s-sub">Painel Administrativo</div>
+            </div>
+          </a>
+        </div>
+        <nav class="sidebar-nav">
+          <span class="nav-label-s">Menu</span>
+          <a href="/admin/dashboard" class="nav-item-s"><i
+              class="fa-solid fa-gauge"
+            ></i> Dashboard</a>
+          <button class="nav-item-s ativo" onclick="trocarTab('lotes', this)">
+            <i class="fa-solid fa-box-open"></i> Lotes Pendentes
+          </button>
+          <button class="nav-item-s" onclick="trocarTab('pedidos', this)">
+            <i class="fa-solid fa-truck"></i> Pedidos / Envio
+            <span
+              id="badgePedidos"
+              style="display: none; margin-left: auto; background: #722f37; color: #fff; font-size: 0.6rem; font-weight: 700; padding: 0.1rem 0.45rem; border-radius: 999px"
+            ></span>
+          </button>
+          <a href="/forum" class="nav-item-s"><i
+              class="fa-solid fa-comments"
+            ></i> Fórum</a>
+          <button class="nav-item-s" onclick="trocarTab('blog', this)">
+            <i class="fa-solid fa-pen-to-square"></i> Blog
+          </button>
+          <a href="/admin/audit" class="nav-item-s"><i
+              class="fa-solid fa-shield-halved"
+            ></i> Auditoria</a>
+        </nav>
+        <div class="sidebar-footer-s">
+          <a
+            th:href="@{/admin/sair}"
+            href="/admin/sair"
+            class="nav-item-s sair"
+          ><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
+        </div>
+      </aside>
+
+      <!-- CONTEÚDO -->
+      <div class="content-wrap">
+        <header class="topbar-s">
+          <div>
+            <div class="t-title">Painel Admin</div>
+            <div class="t-date" id="dataHoje"></div>
+          </div>
+          <div class="topbar-right-s">
+            <span class="badge-online-s"><span class="dot-s"></span> Sistema
+              Online</span>
+            <div class="avatar-s"><i class="fa-solid fa-user"></i></div>
+          </div>
+        </header>
+
+        <div class="main-s">
+          <div class="page-wrapper">
+            <!-- ════ PAINEL LOTES ════ -->
+            <div class="tab-panel active" id="panel-lotes">
+              <div id="contentArea">
+                <div class="loading">Carregando lotes pendentes...</div>
+              </div>
+            </div>
+
+            <!-- ════ PAINEL PEDIDOS ════ -->
+            <div class="tab-panel" id="panel-pedidos">
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem"
+              >
+                <span class="pedidos-heading">Pedidos — Gestão de Envio</span>
+                <button onclick="carregarPedidos()" class="btn-refresh">
+                  <i class="fa-solid fa-rotate-right"></i> Atualizar
+                </button>
+              </div>
+
+              <!-- Filtros de status -->
+              <div class="filter-bar">
+                <button
+                  class="filter-btn active"
+                  onclick="filtrarPedidos('TODOS', this)"
+                >
+                  Todos
+                </button>
+                <button
+                  class="filter-btn"
+                  onclick="filtrarPedidos('AGUARDANDO_ENVIO', this)"
+                >
+                  ⏳ Aguardando
+                </button>
+                <button
+                  class="filter-btn"
+                  onclick="filtrarPedidos('EM_TRANSITO', this)"
+                >
+                  🚚 Em Trânsito
+                </button>
+                <button
+                  class="filter-btn"
+                  onclick="filtrarPedidos('ENTREGUE', this)"
+                >
+                  ✅ Entregues
+                </button>
+                <button
+                  class="filter-btn"
+                  onclick="filtrarPedidos('CANCELADO', this)"
+                >
+                  ❌ Cancelados
+                </button>
+              </div>
+
+              <!-- Buscador -->
+              <div style="margin-bottom: 1rem">
+                <input
+                  type="text"
+                  id="buscaPedido"
+                  placeholder="🔍  Buscar por título, comprador ou pedido #..."
+                  oninput="renderPedidos()"
+                  class="search-input"
+                />
+              </div>
+
+              <div
+                id="listaPedidos"
+                style="display: flex; flex-direction: column; gap: 0.75rem"
+              >
+                <div class="skel"></div>
+                <div class="skel"></div>
+                <div class="skel"></div>
+              </div>
+            </div>
+
+            <!-- ════ PAINEL BLOG ════ -->
+            <div class="tab-panel" id="panel-blog">
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem"
+              >
+                <span class="pedidos-heading">Gerenciar Blog</span>
+              </div>
+
+              <!-- Formulário novo post -->
+              <div class="blog-form-card">
+                <div class="blog-section-title">Novo Post</div>
+                <form
+                  id="formBlog"
+                  onsubmit="publicarPost(event)"
+                  enctype="multipart/form-data"
+                >
+                  <div style="margin-bottom: 0.75rem">
+                    <label>Título</label>
+                    <input
+                      type="text"
+                      id="blogTitulo"
+                      name="titulo"
+                      required
+                      placeholder="Título do post..."
+                    />
+                  </div>
+                  <div style="margin-bottom: 0.75rem">
+                    <label>Conteúdo</label>
+                    <textarea
+                      id="blogConteudo"
+                      name="conteudo"
+                      required
+                      rows="5"
+                      placeholder="Escreva o texto do post..."
+                    ></textarea>
+                  </div>
+                  <div style="margin-bottom: 1.25rem">
+                    <label>Imagem (opcional)</label>
+                    <input
+                      type="file"
+                      id="blogImagem"
+                      name="imagem"
+                      accept="image/*"
+                      style="font-size: 0.875rem; color: #7a6e65"
+                    />
+                    <div id="blogImgPreview" style="margin-top: 0.5rem"></div>
+                  </div>
+                  <button type="submit" class="btn-publicar">
+                    Publicar Post
+                  </button>
+                  <span
+                    id="blogMsg"
+                    class="hidden"
+                    style="display: none; margin-left: 0.75rem; font-size: 0.875rem; color: #4a5d23"
+                  ></span>
+                </form>
+              </div>
+
+              <!-- Lista de posts existentes -->
+              <div class="blog-section-title" style="margin-bottom: 0.75rem">
+                Posts publicados
+              </div>
+              <div id="listaBlog">
+                <div class="skel"></div>
+              </div>
+            </div>
+          </div>
+          <!-- /page-wrapper -->
+        </div>
+        <!-- /main-s -->
+      </div>
+      <!-- /content-wrap -->
+    </div>
+    <!-- /layout -->
+
+    <script th:inline="javascript">
+      /*<![CDATA[*/
+
+      /* ════════════════════════════════════════
+                 LOTES (código original preservado)
+              ════════════════════════════════════════ */
+      const priceMap = {
+        "NOVO": 50,
+        "OTIMO": 40,
+        "BOM": 30,
+        "DESGASTADO": 20,
+        "RUIM": 0,
+      };
+      let livrosCache = [];
+
+      async function loadLotes() {
+        const container = document.getElementById("contentArea");
+        container.innerHTML =
+          '<div class="loading">Carregando lotes pendentes...</div>';
+        try {
+          const res = await fetch("/api/admin/lotes/pendentes");
+          const lotes = await res.json();
+          if (lotes.length === 0) {
+            container.innerHTML =
+              '<div class="bcard"><h3>Nenhum lote pendente para avaliação no momento.</h3></div>';
+            return;
+          }
+          let html =
+            '<h3 style="font-family:\'Playfair Display\',serif;font-size:1.1rem;margin-bottom:.75rem">Lotes Aguardando Revisão</h3><div class="book-grid">';
+          lotes.forEach((lote) => {
+            html += `
           <div class="bcard">
             <div style="color:#7A6E65;font-size:12px;">Protocolo: ${lote.codigoProtocolo}</div>
             <h3 style="margin:10px 0;">Lote #${lote.id}</h3>
-            <p><strong>Data de Envio:</strong> ${new Date(lote.dataCriacao).toLocaleDateString('pt-BR')}</p>
+            <p><strong>Data de Envio:</strong> ${
+              new Date(lote.dataCriacao).toLocaleDateString("pt-BR")
+            }</p>
             <button class="btn-aprovar" onclick="loadLivrosLote(${lote.id})">Abrir Lote para Auditoria</button>
           </div>`;
-      });
-      html += '</div>';
-      container.innerHTML = html;
-    } catch (e) {
-      container.innerHTML = '<p style="color:#722F37;">Erro ao conectar com o servidor.</p>';
-    }
-  }
+          });
+          html += "</div>";
+          container.innerHTML = html;
+        } catch (e) {
+          container.innerHTML =
+            '<p style="color:#722F37;">Erro ao conectar com o servidor.</p>';
+        }
+      }
 
-  async function loadLivrosLote(loteId) {
-    try {
-      const res = await fetch('/api/admin/lotes/' + loteId);
-      livrosCache = await res.json();
-      renderLivros();
-    } catch (e) { alert("Erro ao carregar livros do lote."); }
-  }
+      async function loadLivrosLote(loteId) {
+        try {
+          const res = await fetch("/api/admin/lotes/" + loteId);
+          livrosCache = await res.json();
+          renderLivros();
+        } catch (e) {
+          alert("Erro ao carregar livros do lote.");
+        }
+      }
 
-  function renderLivros() {
-    const container = document.getElementById('contentArea');
-    let html = `<h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:.75rem">Auditando Livros</h3><div class="book-grid">`;
-    livrosCache.forEach((b, bookIdx) => {
-      const fotos = JSON.parse(b.fotosUrls || "[]");
-      let fotosHtml = '<div class="fotos-wrapper">';
-      fotos.forEach((url, fotoIdx) => {
-        fotosHtml += `<div class="foto-item"><img src="${url}" alt="Foto">
+      function renderLivros() {
+        const container = document.getElementById("contentArea");
+        let html =
+          `<h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:.75rem">Auditando Livros</h3><div class="book-grid">`;
+        livrosCache.forEach((b, bookIdx) => {
+          const fotos = JSON.parse(b.fotosUrls || "[]");
+          let fotosHtml = '<div class="fotos-wrapper">';
+          fotos.forEach((url, fotoIdx) => {
+            fotosHtml += `<div class="foto-item"><img src="${url}" alt="Foto">
           <button class="btn-del-foto" onclick="removerFoto(${bookIdx},${fotoIdx})">×</button></div>`;
-      });
-      fotosHtml += `<label class="btn-add-foto" for="upload-${bookIdx}">+</label>
+          });
+          fotosHtml +=
+            `<label class="btn-add-foto" for="upload-${bookIdx}">+</label>
         <input type="file" id="upload-${bookIdx}" style="display:none" accept="image/*" onchange="subirFoto(event,${bookIdx})"></div>`;
-      html += `
+          html += `
         <div class="bcard" id="card-${b.id}">
           ${fotosHtml}
           <h3 style="margin-bottom:5px;">${b.titulo}</h3>
@@ -473,166 +970,202 @@
           <button class="btn-aprovar" onclick="finalizarAprovacao(${bookIdx})">Confirmar e Publicar</button>
           <button class="btn-rejeitar" onclick="rejeitar(${b.id})">Rejeitar este Livro</button>
         </div>`;
-    });
-    html += `</div><br><button onclick="loadLotes()" style="background:none;color:#7A6E65;border:none;text-decoration:underline;cursor:pointer;">← Voltar para a lista de lotes</button>`;
-    container.innerHTML = html;
-  }
+        });
+        html +=
+          `</div><br><button onclick="loadLotes()" style="background:none;color:#7A6E65;border:none;text-decoration:underline;cursor:pointer;">← Voltar para a lista de lotes</button>`;
+        container.innerHTML = html;
+      }
 
-  function updatePrice(id) {
-    const val = document.getElementById(`sel-${id}`).value;
-    document.getElementById(`price-${id}`).innerText = `Sugestão: T$ ${priceMap[val]}`;
-  }
-  function removerFoto(bookIdx, fotoIdx) {
-    let fotos = JSON.parse(livrosCache[bookIdx].fotosUrls);
-    fotos.splice(fotoIdx, 1);
-    livrosCache[bookIdx].fotosUrls = JSON.stringify(fotos);
-    renderLivros();
-  }
-  function subirFoto(event, bookIdx) {
-    const file = event.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      let fotos = JSON.parse(livrosCache[bookIdx].fotosUrls || "[]");
-      fotos.push(e.target.result);
-      livrosCache[bookIdx].fotosUrls = JSON.stringify(fotos);
-      renderLivros();
-    };
-    reader.readAsDataURL(file);
-  }
-  async function finalizarAprovacao(bookIdx) {
-    const livro = livrosCache[bookIdx];
-    const estado = document.getElementById(`sel-${livro.id}`).value;
-    const payload = { estadoAprovado: estado, comentario: "Aprovado via Painel Admin", fotosUrls: livro.fotosUrls };
-    const res = await fetch(`/api/admin/livros/${livro.id}/aprovar`, {
-      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
-    });
-    if (res.ok) {
-      mostrarToast('✅ Livro publicado com sucesso!', 'sucesso');
-      livrosCache.splice(bookIdx, 1);
-      if (livrosCache.length === 0) loadLotes(); else renderLivros();
-    } else { mostrarToast('❌ Erro ao aprovar livro.', 'erro'); }
-  }
-  async function rejeitar(id) {
-    if (!confirm("Tem certeza que deseja rejeitar este livro?")) return;
-    const estado = document.getElementById(`sel-${id}`).value;
-    const res = await fetch(`/api/admin/livros/${id}/rejeitar`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ estado })
-    });
-    if (res.ok) {
-      mostrarToast('Livro rejeitado.', 'aviso');
-      livrosCache = livrosCache.filter(l => l.id !== id);
-      if (livrosCache.length === 0) loadLotes(); else renderLivros();
-    } else {
-      const t = await res.text();
-      mostrarToast('Erro: ' + t, 'erro');
-    }
-  }
+      function updatePrice(id) {
+        const val = document.getElementById(`sel-${id}`).value;
+        document.getElementById(`price-${id}`).innerText = `Sugestão: T$ ${
+          priceMap[val]
+        }`;
+      }
+      function removerFoto(bookIdx, fotoIdx) {
+        let fotos = JSON.parse(livrosCache[bookIdx].fotosUrls);
+        fotos.splice(fotoIdx, 1);
+        livrosCache[bookIdx].fotosUrls = JSON.stringify(fotos);
+        renderLivros();
+      }
+      function subirFoto(event, bookIdx) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          let fotos = JSON.parse(livrosCache[bookIdx].fotosUrls || "[]");
+          fotos.push(e.target.result);
+          livrosCache[bookIdx].fotosUrls = JSON.stringify(fotos);
+          renderLivros();
+        };
+        reader.readAsDataURL(file);
+      }
+      async function finalizarAprovacao(bookIdx) {
+        const livro = livrosCache[bookIdx];
+        const estado = document.getElementById(`sel-${livro.id}`).value;
+        const payload = {
+          estadoAprovado: estado,
+          comentario: "Aprovado via Painel Admin",
+          fotosUrls: livro.fotosUrls,
+        };
+        const res = await fetch(`/api/admin/livros/${livro.id}/aprovar`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          mostrarToast("✅ Livro publicado com sucesso!", "sucesso");
+          livrosCache.splice(bookIdx, 1);
+          if (livrosCache.length === 0) loadLotes();
+          else renderLivros();
+        } else mostrarToast("❌ Erro ao aprovar livro.", "erro");
+      }
+      async function rejeitar(id) {
+        if (!confirm("Tem certeza que deseja rejeitar este livro?")) return;
+        const estado = document.getElementById(`sel-${id}`).value;
+        const res = await fetch(`/api/admin/livros/${id}/rejeitar`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ estado }),
+        });
+        if (res.ok) {
+          mostrarToast("Livro rejeitado.", "aviso");
+          livrosCache = livrosCache.filter((l) => l.id !== id);
+          if (livrosCache.length === 0) loadLotes();
+          else renderLivros();
+        } else {
+          const t = await res.text();
+          mostrarToast("Erro: " + t, "erro");
+        }
+      }
 
-  /* ════════════════════════════════════════
-     PEDIDOS — Gestão de Envio
-  ════════════════════════════════════════ */
-  let todosPedidos   = [];
-  let filtroAtual    = 'TODOS';
+      /* ════════════════════════════════════════
+                 PEDIDOS — Gestão de Envio
+              ════════════════════════════════════════ */
+      let todosPedidos = [];
+      let filtroAtual = "TODOS";
 
-  async function carregarPedidos() {
-    const lista = document.getElementById('listaPedidos');
-    lista.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
-    try {
-      const res = await fetch('/api/admin/pedidos');
-      if (!res.ok) throw new Error();
-      todosPedidos = await res.json();
+      async function carregarPedidos() {
+        const lista = document.getElementById("listaPedidos");
+        lista.innerHTML =
+          '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
+        try {
+          const res = await fetch("/api/admin/pedidos");
+          if (!res.ok) throw new Error();
+          todosPedidos = await res.json();
 
-      // badge
-      const pendentes = todosPedidos.filter(p => p.statusEnvio === 'AGUARDANDO_ENVIO').length;
-      const badge = document.getElementById('badgePedidos');
-      if (pendentes > 0) { badge.textContent = pendentes; badge.style.display = 'inline'; }
-      else badge.style.display = 'none';
+          // badge
+          const pendentes = todosPedidos.filter((p) =>
+            p.statusEnvio === "AGUARDANDO_ENVIO"
+          ).length;
+          const badge = document.getElementById("badgePedidos");
+          if (pendentes > 0) {
+            badge.textContent = pendentes;
+            badge.style.display = "inline";
+          } else badge.style.display = "none";
 
-      renderPedidos();
-    } catch (e) {
-      lista.innerHTML = '<p style="text-align:center;color:#722F37;padding:2rem">Erro ao carregar pedidos.</p>';
-    }
-  }
+          renderPedidos();
+        } catch (e) {
+          lista.innerHTML =
+            '<p style="text-align:center;color:#722F37;padding:2rem">Erro ao carregar pedidos.</p>';
+        }
+      }
 
-  function filtrarPedidos(status, btn) {
-    filtroAtual = status;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderPedidos();
-  }
+      function filtrarPedidos(status, btn) {
+        filtroAtual = status;
+        document.querySelectorAll(".filter-btn").forEach((b) =>
+          b.classList.remove("active")
+        );
+        btn.classList.add("active");
+        renderPedidos();
+      }
 
-  function renderPedidos() {
-    const lista   = document.getElementById('listaPedidos');
-    const busca   = (document.getElementById('buscaPedido').value || '').toLowerCase();
+      function renderPedidos() {
+        const lista = document.getElementById("listaPedidos");
+        const busca = (document.getElementById("buscaPedido").value || "")
+          .toLowerCase();
 
-    let pedidos = todosPedidos;
-    if (filtroAtual !== 'TODOS') pedidos = pedidos.filter(p => p.statusEnvio === filtroAtual);
-    if (busca) pedidos = pedidos.filter(p =>
-      p.tituloLivro.toLowerCase().includes(busca) ||
-      (p.compradorNome || '').toLowerCase().includes(busca) ||
-      (p.compradorEmail || '').toLowerCase().includes(busca) ||
-      String(p.id).includes(busca)
-    );
+        let pedidos = todosPedidos;
+        if (filtroAtual !== "TODOS") {
+          pedidos = pedidos.filter((p) => p.statusEnvio === filtroAtual);
+        }
+        if (busca) {
+          pedidos = pedidos.filter((p) =>
+            p.tituloLivro.toLowerCase().includes(busca) ||
+            (p.compradorNome || "").toLowerCase().includes(busca) ||
+            (p.compradorEmail || "").toLowerCase().includes(busca) ||
+            String(p.id).includes(busca)
+          );
+        }
 
-    if (pedidos.length === 0) {
-      lista.innerHTML = `<div style="text-align:center;padding:3rem;color:#7A6E65">
+        if (pedidos.length === 0) {
+          lista.innerHTML =
+            `<div style="text-align:center;padding:3rem;color:#7A6E65">
         <div style="font-size:2.5rem;margin-bottom:.75rem">📭</div>
         <p style="font-style:italic">Nenhum pedido encontrado para este filtro.</p>
       </div>`;
-      return;
-    }
+          return;
+        }
 
-    lista.innerHTML = pedidos.map(p => buildPedidoRow(p)).join('');
-  }
+        lista.innerHTML = pedidos.map((p) => buildPedidoRow(p)).join("");
+      }
 
-  const PROXIMOS_STATUS = {
-    'AGUARDANDO_ENVIO': ['EM_TRANSITO', 'CANCELADO'],
-    'EM_TRANSITO':      ['ENTREGUE',    'CANCELADO'],
-    'ENTREGUE':         [],
-    'CANCELADO':        [],
-  };
-  const LABEL_STATUS = {
-    'AGUARDANDO_ENVIO': 'Aguardando Envio',
-    'EM_TRANSITO':      'Em Trânsito',
-    'ENTREGUE':         'Entregue',
-    'CANCELADO':        'Cancelado',
-  };
+      const PROXIMOS_STATUS = {
+        "AGUARDANDO_ENVIO": ["EM_TRANSITO", "CANCELADO"],
+        "EM_TRANSITO": ["ENTREGUE", "CANCELADO"],
+        "ENTREGUE": [],
+        "CANCELADO": [],
+      };
+      const LABEL_STATUS = {
+        "AGUARDANDO_ENVIO": "Aguardando Envio",
+        "EM_TRANSITO": "Em Trânsito",
+        "ENTREGUE": "Entregue",
+        "CANCELADO": "Cancelado",
+      };
 
-  function buildPedidoRow(p) {
-    let foto = 'https://via.placeholder.com/52x70?text=📚';
-    try {
-      const arr = JSON.parse(p.fotosUrls || '[]');
-      if (arr.length > 0) foto = arr[0];
-    } catch (_) {}
+      function buildPedidoRow(p) {
+        let foto = "https://via.placeholder.com/52x70?text=📚";
+        try {
+          const arr = JSON.parse(p.fotosUrls || "[]");
+          if (arr.length > 0) foto = arr[0];
+        } catch (_) {}
 
-    const dataCompra = p.dataCompra
-      ? new Date(p.dataCompra).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' })
-      : '—';
+        const dataCompra = p.dataCompra
+          ? new Date(p.dataCompra).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })
+          : "—";
 
-    const proximos = PROXIMOS_STATUS[p.statusEnvio] || [];
-    const podeAtualizar = proximos.length > 0;
+        const proximos = PROXIMOS_STATUS[p.statusEnvio] || [];
+        const podeAtualizar = proximos.length > 0;
 
-    const acoesHtml = podeAtualizar ? `
+        const acoesHtml = podeAtualizar
+          ? `
       <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
         <input class="rastreio-input" id="rastreio-${p.id}" type="text"
                placeholder="Cód. rastreio (opcional)"
-               value="${p.codigoRastreio || ''}" />
+               value="${p.codigoRastreio || ""}" />
         <select class="select-status" id="status-${p.id}">
-          ${proximos.map(s => `<option value="${s}">${LABEL_STATUS[s]}</option>`).join('')}
+          ${
+            proximos.map((s) => `<option value="${s}">${LABEL_STATUS[s]}</option>`)
+              .join("")
+          }
         </select>
         <button class="btn-salvar-envio" onclick="salvarEnvio(${p.id})">
           <i class="fa-solid fa-floppy-disk"></i> Salvar
         </button>
-      </div>` : `<span style="font-size:.75rem;color:#7A6E65;font-style:italic">Status final — sem ações disponíveis</span>`;
+      </div>`
+          : `<span style="font-size:.75rem;color:#7A6E65;font-style:italic">Status final — sem ações disponíveis</span>`;
 
-    const rastreioInfo = p.codigoRastreio && p.statusEnvio === 'EM_TRANSITO'
-      ? `<div style="font-size:.75rem;color:#4A5D23;font-family:monospace;background:rgba(74,93,35,.08);padding:.2rem .6rem;border:1px solid rgba(74,93,35,.2);display:inline-flex;align-items:center;gap:.35rem;margin-top:.35rem">
+        const rastreioInfo = p.codigoRastreio && p.statusEnvio === "EM_TRANSITO"
+          ? `<div style="font-size:.75rem;color:#4A5D23;font-family:monospace;background:rgba(74,93,35,.08);padding:.2rem .6rem;border:1px solid rgba(74,93,35,.2);display:inline-flex;align-items:center;gap:.35rem;margin-top:.35rem">
            <i class="fa-solid fa-truck-fast"></i>${p.codigoRastreio}
          </div>`
-      : '';
+          : "";
 
-    return `
+        return `
       <div class="pedido-row" id="row-${p.id}">
         <img class="pedido-capa" src="${foto}" onerror="this.src='https://via.placeholder.com/52x70?text=📚'"/>
         <div style="flex:1;min-width:0">
@@ -650,8 +1183,14 @@
             <span>📅 ${dataCompra}</span>
             <span>·</span>
             <span class="pedido-preco">T$ ${p.precoLivro.toFixed(2)}</span>
-            ${p.compradorNome ? `<span>·</span><span>👤 ${p.compradorNome}</span>` : ''}
-            ${p.compradorEmail ? `<span style="font-family:monospace">(${p.compradorEmail})</span>` : ''}
+            ${
+          p.compradorNome ? `<span>·</span><span>👤 ${p.compradorNome}</span>` : ""
+        }
+            ${
+          p.compradorEmail
+            ? `<span style="font-family:monospace">(${p.compradorEmail})</span>`
+            : ""
+        }
           </div>
 
           ${rastreioInfo}
@@ -659,105 +1198,128 @@
           <div style="margin-top:.6rem">${acoesHtml}</div>
         </div>
       </div>`;
-  }
-
-  async function salvarEnvio(pedidoId) {
-    const novoStatus    = document.getElementById(`status-${pedidoId}`).value;
-    const codigoRastreio = document.getElementById(`rastreio-${pedidoId}`).value.trim();
-
-    const btn = document.querySelector(`#row-${pedidoId} .btn-salvar-envio`);
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
-
-    try {
-      const res = await fetch(`/api/admin/pedidos/${pedidoId}/envio`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ statusEnvio: novoStatus, codigoRastreio: codigoRastreio || null })
-      });
-
-      if (!res.ok) throw new Error(await res.text());
-
-      const atualizado = await res.json();
-
-      // Atualiza o cache local e re-renderiza apenas este pedido
-      const idx = todosPedidos.findIndex(p => p.id === pedidoId);
-      if (idx !== -1) todosPedidos[idx] = atualizado;
-
-      // Mensagem especial para cancelamento com estorno
-      if (novoStatus === 'CANCELADO' && atualizado.saldoAposEstorno != null) {
-        mostrarToast(
-          `✅ Pedido #${pedidoId} cancelado — T$ ${atualizado.precoLivro.toFixed(2)} estornados. ` +
-          `Novo saldo do comprador: T$ ${atualizado.saldoAposEstorno.toFixed(2)}`,
-          'sucesso'
-        );
-      } else {
-        mostrarToast(`✅ Pedido #${pedidoId} atualizado para "${LABEL_STATUS[novoStatus]}"`, 'sucesso');
       }
 
-      renderPedidos();
+      async function salvarEnvio(pedidoId) {
+        const novoStatus = document.getElementById(`status-${pedidoId}`).value;
+        const codigoRastreio = document.getElementById(`rastreio-${pedidoId}`).value
+          .trim();
 
-    } catch (e) {
-      mostrarToast('❌ Erro: ' + e.message, 'erro');
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
-    }
-  }
+        const btn = document.querySelector(`#row-${pedidoId} .btn-salvar-envio`);
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
 
-  /* ════════════════════════════════════════
-     TABS
-  ════════════════════════════════════════ */
-  function trocarTab(nome, btn) {
-    document.querySelectorAll('.nav-item-s').forEach(b => b.classList.remove('ativo'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('ativo');
-    document.getElementById('panel-' + nome).classList.add('active');
-    if (nome === 'pedidos') carregarPedidos();
-    if (nome === 'blog') carregarBlogAdmin();
-  }
+        try {
+          const res = await fetch(`/api/admin/pedidos/${pedidoId}/envio`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              statusEnvio: novoStatus,
+              codigoRastreio: codigoRastreio || null,
+            }),
+          });
 
-  document.getElementById('dataHoje').textContent =
-    new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+          if (!res.ok) throw new Error(await res.text());
 
-  /* ════════════════════════════════════════
-     TOAST
-  ════════════════════════════════════════ */
-  function mostrarToast(msg, tipo) {
-    const cores = {
-      sucesso: 'background:#dcfce7;color:#15803d;border:1px solid #bbf7d0',
-      erro:    'background:#fee2e2;color:#b91c1c;border:1px solid #fecaca',
-      aviso:   'background:#fef9c3;color:#a16207;border:1px solid #fef08a',
-    };
-    const el = document.createElement('div');
-    el.style.cssText = `
+          const atualizado = await res.json();
+
+          // Atualiza o cache local e re-renderiza apenas este pedido
+          const idx = todosPedidos.findIndex((p) => p.id === pedidoId);
+          if (idx !== -1) todosPedidos[idx] = atualizado;
+
+          // Mensagem especial para cancelamento com estorno
+          if (novoStatus === "CANCELADO" && atualizado.saldoAposEstorno != null) {
+            mostrarToast(
+              `✅ Pedido #${pedidoId} cancelado — T$ ${
+                atualizado.precoLivro.toFixed(2)
+              } estornados. ` +
+                `Novo saldo do comprador: T$ ${
+                  atualizado.saldoAposEstorno.toFixed(2)
+                }`,
+              "sucesso",
+            );
+          } else {
+            mostrarToast(
+              `✅ Pedido #${pedidoId} atualizado para "${
+                LABEL_STATUS[novoStatus]
+              }"`,
+              "sucesso",
+            );
+          }
+
+          renderPedidos();
+        } catch (e) {
+          mostrarToast("❌ Erro: " + e.message, "erro");
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
+        }
+      }
+
+      /* ════════════════════════════════════════
+                 TABS
+              ════════════════════════════════════════ */
+      function trocarTab(nome, btn) {
+        document.querySelectorAll(".nav-item-s").forEach((b) =>
+          b.classList.remove("ativo")
+        );
+        document.querySelectorAll(".tab-panel").forEach((p) =>
+          p.classList.remove("active")
+        );
+        btn.classList.add("ativo");
+        document.getElementById("panel-" + nome).classList.add("active");
+        if (nome === "pedidos") carregarPedidos();
+        if (nome === "blog") carregarBlogAdmin();
+      }
+
+      document.getElementById("dataHoje").textContent = new Date()
+        .toLocaleDateString("pt-BR", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+
+      /* ════════════════════════════════════════
+                 TOAST
+              ════════════════════════════════════════ */
+      function mostrarToast(msg, tipo) {
+        const cores = {
+          sucesso: "background:#dcfce7;color:#15803d;border:1px solid #bbf7d0",
+          erro: "background:#fee2e2;color:#b91c1c;border:1px solid #fecaca",
+          aviso: "background:#fef9c3;color:#a16207;border:1px solid #fef08a",
+        };
+        const el = document.createElement("div");
+        el.style.cssText = `
       position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);
       padding:.75rem 1.5rem;border-radius:2px;font-size:.875rem;font-weight:500;
       z-index:9999;box-shadow:4px 4px 0 rgba(44,36,27,.15);
       ${cores[tipo] || cores.aviso}`;
-    el.textContent = msg;
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 4000);
-  }
-
-  /* ════════════════════════════════════════
-     BLOG
-  ════════════════════════════════════════ */
-  async function carregarBlogAdmin() {
-    const lista = document.getElementById('listaBlog');
-    try {
-      const res = await fetch('/api/blog');
-      const posts = await res.json();
-
-      if (posts.length === 0) {
-        lista.innerHTML = '<p style="font-size:.875rem;color:#7A6E65;padding:1rem">Nenhum post publicado ainda.</p>';
-        return;
+        el.textContent = msg;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
       }
 
-      lista.innerHTML = posts.map(p => `
+      /* ════════════════════════════════════════
+                 BLOG
+              ════════════════════════════════════════ */
+      async function carregarBlogAdmin() {
+        const lista = document.getElementById("listaBlog");
+        try {
+          const res = await fetch("/api/blog");
+          const posts = await res.json();
+
+          if (posts.length === 0) {
+            lista.innerHTML =
+              '<p style="font-size:.875rem;color:#7A6E65;padding:1rem">Nenhum post publicado ainda.</p>';
+            return;
+          }
+
+          lista.innerHTML = posts.map((p) => `
         <div class="blog-post-item">
-          ${p.imagemUrl
-            ? `<img src="${p.imagemUrl}" alt="" class="blog-post-img"/>`
-            : '<div class="blog-post-img" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem">📝</div>'
+          ${
+            p.imagemUrl
+              ? `<img src="${p.imagemUrl}" alt="" class="blog-post-img"/>`
+              : '<div class="blog-post-img" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem">📝</div>'
           }
           <div style="flex:1;min-width:0">
             <div style="font-weight:700;color:#2C241B;font-size:.9rem;margin-bottom:.25rem">${p.titulo}</div>
@@ -767,68 +1329,79 @@
           <button onclick="deletarPost(${p.id})" class="btn-remover-post">
             Remover
           </button>
-        </div>`).join('');
-    } catch (e) {
-      lista.innerHTML = '<p style="font-size:.875rem;color:#722F37">Erro ao carregar posts.</p>';
-    }
-  }
+        </div>`).join("");
+        } catch (e) {
+          lista.innerHTML =
+            '<p style="font-size:.875rem;color:#722F37">Erro ao carregar posts.</p>';
+        }
+      }
 
-  async function publicarPost(e) {
-    e.preventDefault();
-    const form = document.getElementById('formBlog');
-    const msg = document.getElementById('blogMsg');
-    const data = new FormData(form);
+      async function publicarPost(e) {
+        e.preventDefault();
+        const form = document.getElementById("formBlog");
+        const msg = document.getElementById("blogMsg");
+        const data = new FormData(form);
 
-    try {
-      const res = await fetch('/api/blog', { method: 'POST', body: data, credentials: 'include' });
-      if (!res.ok) throw new Error();
-      msg.textContent = 'Post publicado!';
-      msg.style.display = 'inline';
-      form.reset();
-      document.getElementById('blogImgPreview').innerHTML = '';
-      setTimeout(() => { msg.style.display = 'none'; }, 3000);
-      carregarBlogAdmin();
-      mostrarToast('Post publicado com sucesso!', 'sucesso');
-    } catch (_) {
-      mostrarToast('Erro ao publicar post.', 'erro');
-    }
-  }
+        try {
+          const res = await fetch("/api/blog", {
+            method: "POST",
+            body: data,
+            credentials: "include",
+          });
+          if (!res.ok) throw new Error();
+          msg.textContent = "Post publicado!";
+          msg.style.display = "inline";
+          form.reset();
+          document.getElementById("blogImgPreview").innerHTML = "";
+          setTimeout(() => {
+            msg.style.display = "none";
+          }, 3000);
+          carregarBlogAdmin();
+          mostrarToast("Post publicado com sucesso!", "sucesso");
+        } catch (_) {
+          mostrarToast("Erro ao publicar post.", "erro");
+        }
+      }
 
-  async function deletarPost(id) {
-    if (!confirm('Remover este post?')) return;
-    try {
-      const res = await fetch('/api/blog/' + id, { method: 'DELETE', credentials: 'include' });
-      if (!res.ok) throw new Error();
-      mostrarToast('Post removido.', 'sucesso');
-      carregarBlogAdmin();
-    } catch (_) {
-      mostrarToast('Erro ao remover post.', 'erro');
-    }
-  }
+      async function deletarPost(id) {
+        if (!confirm("Remover este post?")) return;
+        try {
+          const res = await fetch("/api/blog/" + id, {
+            method: "DELETE",
+            credentials: "include",
+          });
+          if (!res.ok) throw new Error();
+          mostrarToast("Post removido.", "sucesso");
+          carregarBlogAdmin();
+        } catch (_) {
+          mostrarToast("Erro ao remover post.", "erro");
+        }
+      }
 
-  // Preview de imagem ao selecionar
-  document.addEventListener('DOMContentLoaded', () => {
-    const imgInput = document.getElementById('blogImagem');
-    if (imgInput) {
-      imgInput.addEventListener('change', () => {
-        const preview = document.getElementById('blogImgPreview');
-        const file = imgInput.files[0];
-        if (file) {
-          const url = URL.createObjectURL(file);
-          preview.innerHTML = `<img src="${url}" style="margin-top:.5rem;max-height:160px;border:1px solid rgba(44,36,27,.15)"/>`;
-        } else {
-          preview.innerHTML = '';
+      // Preview de imagem ao selecionar
+      document.addEventListener("DOMContentLoaded", () => {
+        const imgInput = document.getElementById("blogImagem");
+        if (imgInput) {
+          imgInput.addEventListener("change", () => {
+            const preview = document.getElementById("blogImgPreview");
+            const file = imgInput.files[0];
+            if (file) {
+              const url = URL.createObjectURL(file);
+              preview.innerHTML =
+                `<img src="${url}" style="margin-top:.5rem;max-height:160px;border:1px solid rgba(44,36,27,.15)"/>`;
+            } else {
+              preview.innerHTML = "";
+            }
+          });
         }
       });
-    }
-  });
 
-  /* ════════════════════════════════════════
-     INIT
-  ════════════════════════════════════════ */
-  loadLotes();
+      /* ════════════════════════════════════════
+                 INIT
+              ════════════════════════════════════════ */
+      loadLotes();
 
-  /*]]>*/
-  </script>
-</body>
+      /*]]>*/
+    </script>
+  </body>
 </html>

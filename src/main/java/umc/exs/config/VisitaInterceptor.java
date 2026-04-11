@@ -18,16 +18,17 @@ public class VisitaInterceptor implements HandlerInterceptor {
 
     private final VisitaSiteService visitaSiteService;
 
+    @SuppressWarnings("null")
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        if (!"GET".equalsIgnoreCase(request.getMethod())) return true;
+        if (!"GET".equalsIgnoreCase(request.getMethod()))
+            return true;
 
         String uri = request.getRequestURI();
 
-        boolean isHomepage =
-            uri.equals("/") ||
-            uri.equals("/index") ||
-            uri.equals("/home");
+        boolean isHomepage = uri.equals("/") ||
+                uri.equals("/index") ||
+                uri.equals("/home");
 
         if (isHomepage) {
             visitaSiteService.registrarVisita();

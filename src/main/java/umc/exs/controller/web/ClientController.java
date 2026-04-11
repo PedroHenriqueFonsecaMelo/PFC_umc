@@ -111,6 +111,7 @@ public class ClientController {
      * Registra cliente completo (end/ cartao).
      * Valida termos, salvaCompleto ClienteService.
      * Autentica cookie, redirect perfil.
+     * 
      * @param signupDTO cliente, enderecoDTO, cartaoDTO
      */
     @PostMapping("/cadastro-completo")
@@ -194,7 +195,8 @@ public class ClientController {
     @GetMapping("/meu-perfil-json")
     @ResponseBody
     public ResponseEntity<?> perfilJson(@AuthenticationPrincipal UserDetails user) {
-        if (user == null) return ResponseEntity.status(401).body("Não autenticado.");
+        if (user == null)
+            return ResponseEntity.status(401).body("Não autenticado.");
         return clienteService.buscarClientePorEmail(user.getUsername())
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(404).body("Cliente não encontrado."));
@@ -205,7 +207,8 @@ public class ClientController {
      */
     @GetMapping("/minhas-compras")
     public String minhasCompras(@AuthenticationPrincipal UserDetails user) {
-        if (user == null) return "redirect:/clientes/login";
+        if (user == null)
+            return "redirect:/clientes/login";
         return "cliente/minhas-compras";
     }
 
