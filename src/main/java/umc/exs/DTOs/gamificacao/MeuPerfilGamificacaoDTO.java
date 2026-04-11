@@ -17,8 +17,8 @@ public class MeuPerfilGamificacaoDTO {
     private int xpTotal;
     private String nivel;
     private String badge;
-    private int xpProximoNivel; // quantos XP faltam para o próximo nível
-    private int posicaoRanking; // posição atual no ranking global
+    private int xpProximoNivel;    // quantos XP faltam para o próximo nível
+    private int posicaoRanking;    // posição atual no ranking global
 
     // detalhamento
     private int xpLivrosAprovados;

@@ -18,9 +18,7 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
 
     public Transacao findByPagamentoId(String pagamentoId);
 
-    /**
-     * Soma de tokens de todas as transações confirmadas (tokens disponibilizados).
-     */
+    /** Soma de tokens de todas as transações confirmadas (tokens disponibilizados). */
     @Query("SELECT COALESCE(SUM(t.valor), 0) FROM Transacao t WHERE t.status = :status")
     Double sumValorByStatus(@Param("status") String status);
 }

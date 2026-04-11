@@ -16,7 +16,6 @@ public class LoteService {
     /**
      * Lista lotes com status PENDENTE.
      * Para aprovação admin.
-     * 
      * @return lista Lote pendentes
      */
     public List<Lote> listarPendentes() {
@@ -26,7 +25,6 @@ public class LoteService {
     /**
      * Busca lote por ID.
      * Throw se não encontrado.
-     * 
      * @param id lote
      * @return Lote
      */
@@ -37,7 +35,6 @@ public class LoteService {
     /**
      * Conta pendentes por cliente ID.
      * Limite cadastro lotes usuário.
-     * 
      * @param clienteId
      * @return count
      */
@@ -53,3 +50,4 @@ public class LoteService {
  * Usa LoteRepository Spring Data.
  * Status PENDENTE/TOTAL_APROVADO enum.
  */
+

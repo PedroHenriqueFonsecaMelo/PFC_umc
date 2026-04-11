@@ -10,7 +10,7 @@ public class LivroExibicaoDTO {
     private String autor;
     private String isbn;
     private String fotoUrl;
-    private String fotosUrls;
+    private String fotosUrls; 
     private String descricao;
     private EstadoLivro estadoAprovado;
     private Double precoAprovado;

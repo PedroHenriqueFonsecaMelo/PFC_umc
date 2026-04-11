@@ -58,27 +58,14 @@ public class PontuacaoUsuario {
      * Adiciona XP e atualiza a categoria correspondente.
      */
     public void adicionarXp(int quantidade, String categoria) {
-        if (this.xpTotal == null)
-            this.xpTotal = 0;
+        if (this.xpTotal == null) this.xpTotal = 0;
         this.xpTotal += quantidade;
         this.ultimaAtualizacao = LocalDateTime.now();
 
         switch (categoria) {
-            case "APROVACAO" -> {
-                if (this.xpLivrosAprovados == null)
-                    this.xpLivrosAprovados = 0;
-                this.xpLivrosAprovados += quantidade;
-            }
-            case "COMPRA" -> {
-                if (this.xpCompras == null)
-                    this.xpCompras = 0;
-                this.xpCompras += quantidade;
-            }
-            case "AVALIACAO" -> {
-                if (this.xpAvaliacoes == null)
-                    this.xpAvaliacoes = 0;
-                this.xpAvaliacoes += quantidade;
-            }
+            case "APROVACAO"  -> { if (this.xpLivrosAprovados == null) this.xpLivrosAprovados = 0; this.xpLivrosAprovados += quantidade; }
+            case "COMPRA"     -> { if (this.xpCompras == null) this.xpCompras = 0; this.xpCompras += quantidade; }
+            case "AVALIACAO"  -> { if (this.xpAvaliacoes == null) this.xpAvaliacoes = 0; this.xpAvaliacoes += quantidade; }
         }
     }
 }

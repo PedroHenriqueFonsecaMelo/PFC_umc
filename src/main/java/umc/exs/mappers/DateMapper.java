@@ -18,8 +18,7 @@ public class DateMapper {
 
     @Named("stringToYearMonth") // Usado no paraDTO (Entity -> DTO)
     public YearMonth stringToYearMonth(String validade) {
-        if (validade == null || validade.isBlank())
-            return null;
+        if (validade == null || validade.isBlank()) return null;
         try {
             return YearMonth.parse(validade, formatter);
         } catch (Exception e) {

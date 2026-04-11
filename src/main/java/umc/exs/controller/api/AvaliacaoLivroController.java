@@ -40,7 +40,7 @@ public class AvaliacaoLivroController {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Erro ao criar avaliação.");
-        } // ← brace corrigida
+        }  // ← brace corrigida
     }
 
     @GetMapping("/livro/{isbn}")

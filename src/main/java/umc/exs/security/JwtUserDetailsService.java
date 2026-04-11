@@ -32,7 +32,7 @@ public class JwtUserDetailsService implements UserDetailsService {
                     .authorities("ROLE_ADMIN", "ADMIN")
                     .build();
         }
-
+        
         // Then try to find a regular client
         Optional<Cliente> opt = clienteRepository.findByEmail(username);
         Cliente c = opt.orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));

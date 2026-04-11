@@ -1,205 +1,196 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8">
-        <title>Auditoria - Suas Atividades</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link
-            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
-            rel="stylesheet"
-        >
-        <style>
-            *, *::before, *::after {
-                box-sizing: border-box;
-                margin: 0;
-                padding: 0;
-            }
+<head>
+    <meta charset="UTF-8">
+    <title>Auditoria - Suas Atividades</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-            :root {
-                --ink: #2c241b;
-                --paper: #f9f6f0;
-                --cream: #ede8df;
-                --accent: #722f37;
-                --forest: #4a5d23;
-                --white: #ffffff;
-                --muted: #7a6e65;
-                --border: rgba(44, 36, 27, 0.15);
-            }
+        :root {
+            --ink:    #2C241B;
+            --paper:  #F9F6F0;
+            --cream:  #EDE8DF;
+            --accent: #722F37;
+            --forest: #4A5D23;
+            --white:  #FFFFFF;
+            --muted:  #7A6E65;
+            --border: rgba(44,36,27,.15);
+        }
 
-            body {
-                background: var(--paper);
-                color: var(--ink);
-                font-family: "DM Sans", sans-serif;
-                min-height: 100vh;
-            }
+        body {
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+        }
 
-            header {
-                background: var(--ink);
-                color: var(--paper);
-                padding: 1rem 5vw;
-                display: flex;
-                align-items: center;
-                position: relative;
-            }
+        header {
+            background: var(--ink);
+            color: var(--paper);
+            padding: 1rem 5vw;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
 
-            .header-voltar {
-                display: inline-block;
-                padding: 0.5rem 1rem;
-                background: var(--ink);
-                color: var(--paper);
-                font-family: "DM Sans", sans-serif;
-                font-size: 0.8rem;
-                font-weight: 500;
-                letter-spacing: 0.1em;
-                text-transform: uppercase;
-                text-decoration: none;
-                border: 1px solid rgba(249, 246, 240, 0.3);
-                transition: background 0.2s, color 0.2s, border-color 0.2s;
-            }
+        .header-voltar {
+            display: inline-block;
+            padding: .5rem 1rem;
+            background: var(--ink);
+            color: var(--paper);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .8rem;
+            font-weight: 500;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 1px solid rgba(249,246,240,.3);
+            transition: background .2s, color .2s, border-color .2s;
+        }
 
-            .header-voltar:hover {
-                background: var(--paper);
-                color: var(--ink);
-            }
+        .header-voltar:hover {
+            background: var(--paper);
+            color: var(--ink);
+        }
 
-            .header-title {
-                font-family: "Playfair Display", serif;
-                font-size: 1.25rem;
-                font-weight: 700;
-                position: absolute;
-                left: 50%;
-                transform: translateX(-50%);
-                color: var(--paper);
-                white-space: nowrap;
-            }
+        .header-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--paper);
+            white-space: nowrap;
+        }
 
-            .container {
-                max-width: 900px;
-                margin: 2rem auto;
-                padding: 2rem;
-                background: var(--white);
-                border: 1px solid var(--border);
-                box-shadow: 4px 4px 0 var(--border);
-            }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--white);
+            border: 1px solid var(--border);
+            box-shadow: 4px 4px 0 var(--border);
+        }
 
-            h2 {
-                font-family: "Playfair Display", serif;
-                font-size: 1.5rem;
-                font-weight: 700;
-                border-bottom: 1px solid rgba(44, 36, 27, 0.12);
-                padding-bottom: 0.75rem;
-                margin-bottom: 1rem;
-                color: var(--ink);
-            }
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(44,36,27,.12);
+            padding-bottom: .75rem;
+            margin-bottom: 1rem;
+            color: var(--ink);
+        }
 
-            .descricao {
-                font-family: "IM Fell English", serif;
-                font-style: italic;
-                color: var(--muted);
-                font-size: 1rem;
-                line-height: 1.6;
-            }
+        .descricao {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
 
-            table {
-                border-collapse: collapse;
-                width: 100%;
-                margin-top: 1.5rem;
-            }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
 
-            table th {
-                font-size: 0.68rem;
-                letter-spacing: 0.12em;
-                text-transform: uppercase;
-                color: var(--muted);
-                border-bottom: 2px solid var(--ink);
-                padding: 0.75rem;
-                text-align: left;
-            }
+        table th {
+            font-size: .68rem;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 2px solid var(--ink);
+            padding: .75rem;
+            text-align: left;
+        }
 
-            table td {
-                padding: 0.75rem;
-                border-bottom: 1px solid rgba(44, 36, 27, 0.08);
-                font-size: 0.875rem;
-            }
+        table td {
+            padding: .75rem;
+            border-bottom: 1px solid rgba(44,36,27,.08);
+            font-size: .875rem;
+        }
 
-            table tr:hover td {
-                background: rgba(44, 36, 27, 0.03);
-            }
+        table tr:hover td {
+            background: rgba(44,36,27,.03);
+        }
 
-            .empty-message {
-                text-align: center;
-                color: var(--muted);
-                padding: 2rem;
-                font-style: italic;
-                font-family: "IM Fell English", serif;
-            }
+        .empty-message {
+            text-align: center;
+            color: var(--muted);
+            padding: 2rem;
+            font-style: italic;
+            font-family: 'IM Fell English', serif;
+        }
 
-            .btn-voltar {
-                display: inline-block;
-                margin-top: 1.75rem;
-                padding: 0.65rem 1.5rem;
-                background: var(--ink);
-                color: var(--paper);
-                font-family: "DM Sans", sans-serif;
-                font-size: 0.78rem;
-                font-weight: 500;
-                letter-spacing: 0.12em;
-                text-transform: uppercase;
-                text-decoration: none;
-                border: 2px solid var(--ink);
-                transition: background 0.2s, color 0.2s;
-            }
+        .btn-voltar {
+            display: inline-block;
+            margin-top: 1.75rem;
+            padding: .65rem 1.5rem;
+            background: var(--ink);
+            color: var(--paper);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .78rem;
+            font-weight: 500;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 2px solid var(--ink);
+            transition: background .2s, color .2s;
+        }
 
-            .btn-voltar:hover {
-                background: transparent;
-                color: var(--ink);
-            }
-        </style>
-    </head>
+        .btn-voltar:hover {
+            background: transparent;
+            color: var(--ink);
+        }
+    </style>
+</head>
 
-    <body>
-        <header>
-            <a th:href="@{/clientes/meu-perfil}" class="header-voltar"
-            >← Voltar</a>
-            <span class="header-title">Auditoria</span>
-        </header>
+<body>
 
-        <div class="container">
-            <h2>Registros de suas atividades</h2>
+<header>
+    <a th:href="@{/clientes/meu-perfil}" class="header-voltar">← Voltar</a>
+    <span class="header-title">Auditoria</span>
+</header>
 
-            <p class="descricao">
-                Aqui você encontra as ações registradas pelo sistema
-                relacionadas à sua conta.
-            </p>
+<div class="container">
 
-            <!-- Caso não exista nenhum log -->
-            <div th:if="${#lists.isEmpty(logs)}" class="empty-message">
-                Nenhuma atividade registrada até o momento.
-            </div>
+    <h2>Registros de suas atividades</h2>
 
-            <!-- Tabela dos logs -->
-            <table th:if="${!#lists.isEmpty(logs)}">
-                <thead>
-                    <tr>
-                        <th>Ação</th>
-                        <th>Detalhes</th>
-                        <th>Data e Hora</th>
-                    </tr>
-                </thead>
+    <p class="descricao">Aqui você encontra as ações registradas pelo sistema relacionadas à sua conta.</p>
 
-                <tbody>
-                    <tr th:each="log : ${logs}">
-                        <td th:text="${log.acao}">AÇÃO</td>
-                        <td th:text="${log.detalhes}">DETALHES</td>
-                        <td th:text="${log.dataHora}">DATA</td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- Caso não exista nenhum log -->
+    <div th:if="${#lists.isEmpty(logs)}" class="empty-message">
+        Nenhuma atividade registrada até o momento.
+    </div>
 
-            <a th:href="@{/clientes/homepage}" class="btn-voltar"
-            >← Página inicial</a>
-        </div>
-    </body>
+    <!-- Tabela dos logs -->
+    <table th:if="${!#lists.isEmpty(logs)}">
+        <thead>
+            <tr>
+                <th>Ação</th>
+                <th>Detalhes</th>
+                <th>Data e Hora</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr th:each="log : ${logs}">
+                <td th:text="${log.acao}">AÇÃO</td>
+                <td th:text="${log.detalhes}">DETALHES</td>
+                <td th:text="${log.dataHora}">DATA</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a th:href="@{/clientes/homepage}" class="btn-voltar">← Página inicial</a>
+</div>
+
+</body>
 </html>

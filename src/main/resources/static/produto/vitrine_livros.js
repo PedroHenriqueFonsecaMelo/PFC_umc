@@ -1,6 +1,6 @@
 /* ================================================================
-   vitrine_livros.js — Vitrine + Carrinho de Compras
-   Carrinho salvo em localStorage, compra via /api/livros/{id}/comprar
+   vitrine_livros.js — Vitrine + Minha Estante
+   Estante salva em localStorage, compra via /api/livros/{id}/comprar
    ================================================================ */
 
 /* ── CARRINHO (localStorage) ──────────────────────────────────── */
@@ -39,11 +39,11 @@ function totalCarrinho() {
 
 function renderCarrinho() {
     const carrinho = getCarrinho();
-    const lista = document.getElementById('carrinhoLista');
-    const totalEl = document.getElementById('carrinhoTotal');
+    const lista    = document.getElementById('carrinhoLista');
+    const totalEl  = document.getElementById('carrinhoTotal');
     const contador = document.getElementById('carrinhoContador');
-    const vazio = document.getElementById('carrinhoVazio');
-    const acoes = document.getElementById('carrinhoAcoes');
+    const vazio    = document.getElementById('carrinhoVazio');
+    const acoes    = document.getElementById('carrinhoAcoes');
 
     if (!lista) return;
 
@@ -54,21 +54,21 @@ function renderCarrinho() {
 
     if (carrinho.length === 0) {
         lista.innerHTML = '';
-        if (vazio) vazio.style.display = 'block';
-        if (acoes) acoes.style.display = 'none';
+        if (vazio)  vazio.style.display  = 'block';
+        if (acoes)  acoes.style.display  = 'none';
         if (totalEl) totalEl.textContent = 'T$ 0,00';
         return;
     }
 
-    if (vazio) vazio.style.display = 'none';
-    if (acoes) acoes.style.display = 'flex';
+    if (vazio)  vazio.style.display  = 'none';
+    if (acoes)  acoes.style.display  = 'flex';
 
     lista.innerHTML = carrinho.map(item => {
         let foto = 'https://via.placeholder.com/48x64?text=📚';
         try {
             const arr = JSON.parse(item.fotosUrls);
             if (Array.isArray(arr) && arr.length > 0) foto = arr[0];
-        } catch (_) { }
+        } catch (_) {}
 
         return `
         <div class="carr-item" id="carr-item-${item.id}">
@@ -93,11 +93,11 @@ function atualizarBotoes() {
     document.querySelectorAll('.btn-carrinho').forEach(btn => {
         const id = parseInt(btn.dataset.id);
         if (ids.has(id)) {
-            btn.textContent = '✓ No carrinho';
+            btn.textContent = '✓ Na estante';
             btn.classList.add('no-carrinho');
             btn.disabled = true;
         } else {
-            btn.textContent = '🛒 Colocar no carrinho';
+            btn.innerHTML = '<img src="/imagens/estante.png" style="width:48px;height:48px;object-fit:contain;vertical-align:middle;margin-right:5px"> Colocar na estante';
             btn.classList.remove('no-carrinho');
             btn.disabled = false;
         }
@@ -109,7 +109,7 @@ function atualizarBotoes() {
 function toggleCarrinho() {
     const sidebar = document.getElementById('carrinhoSidebar');
     const overlay = document.getElementById('carrinhoOverlay');
-    const aberto = sidebar.classList.toggle('aberto');
+    const aberto  = sidebar.classList.toggle('aberto');
     overlay.style.display = aberto ? 'block' : 'none';
     if (aberto) renderCarrinho();
 }
@@ -172,7 +172,7 @@ function mostrarToastResultado(data) {
     const toast = document.getElementById('toastCompra');
     if (!toast) return;
 
-    const ok = data.totalComprados || 0;
+    const ok   = data.totalComprados || 0;
     const fail = (data.falhas || []).length;
 
     if (ok > 0 && fail === 0) {
@@ -201,7 +201,7 @@ async function carregarSaldo() {
             const el = document.getElementById('saldoUsuario');
             if (el) el.innerHTML = `<i class="fa-solid fa-coins mr-1 text-yellow-400"></i> T$ ${c.saldoTokens.toFixed(2)}`;
         }
-    } catch (_) { }
+    } catch (_) {}
 }
 
 /* ── CARREGAR LIVROS ─────────────────────────────────────────── */
@@ -221,7 +221,7 @@ async function carregarLivros() {
             try {
                 const arr = JSON.parse(livro.fotosUrls);
                 if (Array.isArray(arr) && arr.length > 0) foto = arr[0];
-            } catch (_) { }
+            } catch (_) {}
 
             const livroJson = JSON.stringify(livro).replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
@@ -240,7 +240,7 @@ async function carregarLivros() {
                         class="btn-carrinho"
                         data-id="${livro.id}"
                         onclick="handleAdicionarCarrinho(this, ${livroJson})">
-                        🛒 Colocar no carrinho
+                        <img src="/imagens/estante.png" style="width:20px;height:20px;object-fit:contain"> Colocar na estante
                     </button>
                     <p class="livro-rodape">Bibliotroca</p>
                 </div>
@@ -265,7 +265,7 @@ function handleAdicionarCarrinho(btn, livro) {
         return;
     }
 
-    btn.textContent = '✓ No carrinho';
+    btn.textContent = '✓ Na estante';
     btn.classList.add('no-carrinho');
     btn.disabled = true;
     btn.classList.add('btn-bounce');
@@ -276,7 +276,7 @@ function handleAdicionarCarrinho(btn, livro) {
     const toast = document.getElementById('toastCompra');
     if (toast) {
         toast.className = 'toast toast-info';
-        toast.innerHTML = `🛒 <strong>${livro.titulo}</strong> adicionado ao carrinho`;
+        toast.innerHTML = `<img src="/imagens/estante.png" style="width:48px;height:48px;object-fit:contain;vertical-align:middle;margin-right:5px"> <strong>${livro.titulo}</strong> adicionado à estante`;
         toast.style.display = 'block';
         setTimeout(() => { toast.style.display = 'none'; }, 2500);
     }

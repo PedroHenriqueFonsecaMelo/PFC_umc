@@ -37,7 +37,7 @@ public class SenhaService {
     private String baseUrl;
 
     /**
-     * Inicia o fluxo de esqueci minha senha.
+     * Inicia o fluxo de esqueci minha senha. 
      * Remove tokens antigos para evitar duplicidade e envia o link por e-mail.
      */
     @Transactional
@@ -47,18 +47,17 @@ public class SenhaService {
         recuperacaoSenhaRepository.deleteByCliente(cliente);
 
         String token = UUID.randomUUID().toString().replace("-", "");
-
+        
         // Expiração em 30 minutos
         RecuperacaoSenha rec = new RecuperacaoSenha(token, cliente, LocalDateTime.now().plusMinutes(30));
         rec.setEmail(cliente.getEmail()); // Garante o preenchimento do campo email se existir na entidade
-
+        
         recuperacaoSenhaRepository.save(rec);
 
         String link = baseUrl + "/clientes/reset-senha?token=" + token;
-
+        
         try {
-            emailService.enviar(cliente.getEmail(), "Recuperação de Senha",
-                    "Olá, utilize o link a seguir para redefinir sua senha: " + link);
+            emailService.enviar(cliente.getEmail(), "Recuperação de Senha", "Olá, utilize o link a seguir para redefinir sua senha: " + link);
             log.info("E-mail de recuperação enviado com sucesso para {}", cliente.getEmail());
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de recuperação para {}: {}", cliente.getEmail(), e.getMessage());
@@ -81,13 +80,12 @@ public class SenhaService {
                 });
 
         Cliente cliente = rec.getCliente();
-
+        
         // Criptografia da nova senha
         cliente.setSenha(passwordEncoder.encode(novaSenha));
         clienteRepository.save(cliente);
 
-        logAuditoriaService.registrarLog("SENHA_ALTERADA", cliente.getId(), cliente.getEmail(),
-                "Redefinida via token de recuperação");
+        logAuditoriaService.registrarLog("SENHA_ALTERADA", cliente.getId(), cliente.getEmail(), "Redefinida via token de recuperação");
 
         // Remove o token após o uso (segurança)
         recuperacaoSenhaRepository.delete(rec);
@@ -96,8 +94,7 @@ public class SenhaService {
     }
 
     /**
-     * Apenas valida se o token ainda é útil (usado no carregamento da página de
-     * reset).
+     * Apenas valida se o token ainda é útil (usado no carregamento da página de reset).
      */
     @Transactional(readOnly = true)
     public boolean isTokenValido(String token) {

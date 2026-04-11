@@ -1,5 +1,4 @@
 package umc.exs;
-
 import java.io.File;
 
 public class ProjetoEstruturaPrinter {
@@ -26,7 +25,7 @@ public class ProjetoEstruturaPrinter {
 
         if (arquivo.isDirectory()) {
             System.out.println(arquivo.getName() + "/");
-
+            
             File[] filhos = arquivo.listFiles();
             if (filhos != null) {
                 for (int i = 0; i < filhos.length; i++) {

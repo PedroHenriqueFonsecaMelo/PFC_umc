@@ -33,9 +33,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function mascaraCpf(e) {
     let v = e.target.value.replace(/\D/g, '').slice(0, 11);
-    if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
-    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
-    else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, '$1.$2');
+    if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+    else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/,        '$1.$2.$3');
+    else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/,               '$1.$2');
     e.target.value = v;
 }
 
@@ -162,7 +162,7 @@ function initDynamicForms() {
 }
 
 function adicionarEndereco() { adicionarItem('enderecos'); }
-function adicionarCartao() { adicionarItem('cartoes'); }
+function adicionarCartao()   { adicionarItem('cartoes'); }
 
 function adicionarItem(tipo) {
     const containerId = tipo === 'enderecos' ? 'enderecos-list-container' : 'cartoes-list-container';
@@ -228,7 +228,7 @@ async function handleLogin(event) {
     event.preventDefault();
     const btn = event.target.querySelector('button');
     const msgErro = document.getElementById('msg-erro');
-
+    
     const loginData = {
         email: document.getElementById('email').value,
         senha: document.getElementById('senha').value
@@ -271,7 +271,7 @@ function logout() {
 async function carregarDadosUsuario() {
     const token = localStorage.getItem('token');
     const displaySaldo = document.getElementById('displaySaldo');
-
+    
     if (!token) return;
 
     try {
@@ -283,7 +283,7 @@ async function carregarDadosUsuario() {
         if (response.ok) {
             const cliente = await response.json();
             if (displaySaldo) displaySaldo.innerText = cliente.saldoTokens.toFixed(2);
-
+            
             const welcomeMsg = document.getElementById('welcomeMsg');
             if (welcomeMsg) welcomeMsg.innerText = `Olá, ${cliente.nome}!`;
         } else if (response.status === 401) {
@@ -381,7 +381,7 @@ function adicionarItem(tipo) {
         </fieldset>`;
 
     wrapper.innerHTML = tipo === 'enderecos' ? htmlEndereco : htmlCartao;
-
+    
     wrapper.querySelector('.btn-remover').addEventListener('click', () => {
         wrapper.remove();
         reorganizarIndices(`#${containerId}`, `.${tipo.slice(0, -1)}-item`, tipo);

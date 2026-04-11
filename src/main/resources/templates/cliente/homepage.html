@@ -12,12 +12,16 @@
      TOP BAR
      ============================================================ -->
 <header class="topbar">
-    <div class="topbar-brand">
+    <a th:href="@{/}" class="topbar-brand" style="text-decoration:none;">
         <span class="brand-dot"></span>
         Bibliotroca
-    </div>
+    </a>
     <div class="topbar-actions">
-        <a th:href="@{/clientes/sair}" class="topbar-btn-danger">↪ Sair</a>
+        <a th:href="@{/livros/vitrine}" class="topbar-btn-danger" style="margin-right:.5rem;">Vitrine</a>
+        <a th:href="@{/livros/vender}" class="topbar-btn-danger" style="margin-right:.5rem;">Vender</a>
+        <a th:href="@{/forum}" class="topbar-btn-danger" style="margin-right:.5rem;">Fórum</a>
+        <a href="/#blogSection" class="topbar-btn-danger" style="margin-right:.5rem;">Blog</a>
+        <a th:href="@{/clientes/sair}" class="topbar-btn-danger">Sair</a>
     </div>
 </header>
 
@@ -28,9 +32,22 @@
 
     <!-- PROFILE HERO -->
     <section class="profile-hero">
-        <div class="avatar-ring">
-            <span class="avatar-initial"
-                  th:text="${cliente != null ? cliente.nome.substring(0,1) : '?'}">?</span>
+        <div class="avatar-wrapper">
+            <div class="avatar-ring" th:if="${cliente != null and cliente.fotoPerfil != null}">
+                <img class="avatar-foto" th:src="${cliente.fotoPerfil}" alt="Foto de perfil" />
+            </div>
+            <div class="avatar-ring" th:if="${cliente == null or cliente.fotoPerfil == null}">
+                <span class="avatar-initial"
+                      th:text="${cliente != null ? cliente.nome.substring(0,1) : '?'}">?</span>
+            </div>
+            <form th:action="@{/clientes/foto-perfil}" method="post"
+                  enctype="multipart/form-data" class="avatar-upload-form">
+                <label class="avatar-upload-btn" title="Alterar foto">
+                    📷
+                    <input type="file" name="foto" accept="image/*"
+                           onchange="this.form.submit()" style="display:none" />
+                </label>
+            </form>
         </div>
 
         <div class="profile-meta">

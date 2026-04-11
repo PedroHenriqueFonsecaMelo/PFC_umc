@@ -23,8 +23,7 @@ public class PostBlogService {
         return postBlogRepository.findAllByOrderByDataPublicacaoDesc();
     }
 
-    public PostBlog criarPost(String titulo, String conteudo, String autorNome, MultipartFile imagem)
-            throws IOException {
+    public PostBlog criarPost(String titulo, String conteudo, String autorNome, MultipartFile imagem) throws IOException {
         String imagemUrl = null;
 
         if (imagem != null && !imagem.isEmpty()) {

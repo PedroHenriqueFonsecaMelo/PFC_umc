@@ -35,6 +35,21 @@ public class ImageController {
     }
 
     /**
+     * Serve fotos de perfil dos clientes.
+     * Endpoint /uploads/clientes/filename.
+     */
+    @GetMapping("/uploads/clientes/{filename:.+}")
+    public ResponseEntity<Resource> serveClienteImage(@PathVariable String filename) {
+        Path path = Paths.get("uploads/clientes/" + filename);
+        Resource file = new FileSystemResource(path);
+        if (file.exists()) {
+            return ResponseEntity.ok(file);
+        } else {
+            return ResponseEntity.ok(new ClassPathResource("static/images/no-image.png"));
+        }
+    }
+
+    /**
      * Serve imagens de posts do blog.
      * Endpoint /uploads/blog/filename.
      */

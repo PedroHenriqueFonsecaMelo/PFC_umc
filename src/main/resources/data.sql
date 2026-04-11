@@ -7,6 +7,9 @@
 -- ----------------------------------------------------------------
 -- 1. LIMPEZA (ordem respeita FK: filhos antes dos pais)
 -- ----------------------------------------------------------------
+DELETE FROM curtida_resposta;
+DELETE FROM resposta_forum;
+DELETE FROM topico_forum;
 DELETE FROM pontuacao_usuario;
 DELETE FROM pedido;
 DELETE FROM livro_anuncio;
@@ -102,6 +105,42 @@ VALUES
     (1, 1, 150, 100, 30, 20, '2024-01-10 10:00:00'),
     (2, 2,  90,  50, 30, 10, '2024-01-11 10:00:00'),
     (3, 3,  40,   0, 30, 10, '2024-01-12 10:00:00');
+
+-- ----------------------------------------------------------------
+-- 8. FÓRUM — tópicos e respostas de exemplo
+--    Tabela: topico_forum
+--    Colunas: id, titulo, conteudo, categoria, autor_id,
+--             data_criacao, visualizacoes, qtd_respostas, resolvido
+-- ----------------------------------------------------------------
+INSERT INTO topico_forum (id, titulo, conteudo, categoria, autor_id, data_criacao, visualizacoes, qtd_respostas, resolvido)
+VALUES
+    (1, 'Resenha: Dom Casmurro vale a leitura?',
+     'Li Dom Casmurro recentemente e fiquei com sentimentos misturados. A escrita do Machado é incrível, mas o final me deixou reflexivo. Alguém mais leu? O que acharam da Capitu?',
+     'RESENHAS', 1, '2024-03-01 10:00:00', 42, 2, 1),
+
+    (2, 'Recomendações de ficção científica para iniciantes',
+     'Estou querendo começar a ler ficção científica mas não sei por onde começar. Alguém tem boas recomendações para quem ainda não leu nada do gênero?',
+     'RECOMENDACOES', 2, '2024-03-05 14:30:00', 28, 1, 0),
+
+    (3, 'Como funciona o sistema de tokens da plataforma?',
+     'Tenho dúvida sobre como funciona o saldo de tokens. Como faço para ganhar mais tokens além de comprar? Existe algum sistema de bônus?',
+     'DUVIDAS', 3, '2024-03-10 09:15:00', 15, 0, 0);
+
+-- ----------------------------------------------------------------
+--    Tabela: resposta_forum
+--    Colunas: id, conteudo, autor_id, topico_id,
+--             data_criacao, melhor_resposta, qtd_curtidas
+-- ----------------------------------------------------------------
+INSERT INTO resposta_forum (id, conteudo, autor_id, topico_id, data_criacao, melhor_resposta, qtd_curtidas)
+VALUES
+    (1, 'Com certeza vale! Dom Casmurro é uma das obras mais importantes da literatura brasileira. A dúvida sobre a Capitu é justamente o que torna o livro eterno — cada leitor chega a uma conclusão diferente.',
+     2, 1, '2024-03-01 11:20:00', 1, 3),
+
+    (2, 'Concordo com a Maria! Eu li três vezes e em cada leitura percebo detalhes novos. A narração em primeira pessoa do Bentinho é o grande truque do Machado.',
+     3, 1, '2024-03-02 08:45:00', 0, 1),
+
+    (3, 'Para iniciantes em ficção científica recomendo começar pelo Fundação do Isaac Asimov ou O Guia do Mochileiro das Galáxias. São acessíveis e viciantes!',
+     1, 2, '2024-03-05 16:00:00', 0, 2);
 
 -- ================================================================
 -- RESUMO DE ACESSO

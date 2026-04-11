@@ -7,622 +7,378 @@
 
         <!-- <link rel="stylesheet" th:href="@{/cliente/styles.css}" /> -->
         <link rel="stylesheet" th:href="@{/cliente/styles.css}" />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
-            rel="stylesheet"
-        />
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
     </head>
     <body>
-        <nav
-            class="page-nav"
-            style="background: #2c241b; padding: 0.5rem 5vw; margin-bottom: 0"
-        >
-            <a
-                href="/"
-                style="color: #f9f6f0; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; font-family: 'DM Sans', sans-serif"
-            >← Início</a>
-        </nav>
+
+        <nav class="page-nav" style="background:#2C241B;padding:.5rem 5vw;margin-bottom:0"><a href="/" style="color:#F9F6F0;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;font-family:'DM Sans',sans-serif">← Início</a></nav>
 
         <div class="container">
             <div class="page-header">
                 <h1>Cadastro de Cliente</h1>
             </div>
 
-            <div th:if="${erro}" class="mensagem erro" th:text="${erro}">
-                Mensagem de Erro
-            </div>
+            <div th:if="${erro}" class="mensagem erro"
+                th:text="${erro}">Mensagem de Erro</div>
 
-            <form
-                id="cadastroForm"
-                th:action="@{/clientes/novo-cadastro}"
-                method="post"
-            >
+            <form id="cadastroForm" th:action="@{/clientes/novo-cadastro}"
+                method="post">
+
                 <div class="form-grid">
                     <div class="form-group-2">
                         <label for="nome">Nome:</label>
-                        <input
-                            type="text"
-                            id="nome"
-                            name="nome"
-                            required
-                            th:value="${cliente != null && cliente.nome != null ? cliente.nome : ''}"
-                        />
+                        <input type="text" id="nome" name="nome" required
+                            th:value="${cliente != null && cliente.nome != null ? cliente.nome : ''}" />
                     </div>
 
                     <div class="form-group-2">
                         <label for="email">Email:</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            required
-                            th:value="${cliente != null && cliente.email != null ? cliente.email : ''}"
-                        />
+                        <input type="email" id="email" name="email" required
+                            th:value="${cliente != null && cliente.email != null ? cliente.email : ''}" />
                     </div>
 
                     <div class="form-group-2">
                         <label for="datanasc">Data de Nascimento:</label>
-                        <input
-                            type="date"
-                            id="datanasc"
-                            name="datanasc"
+                        <input type="date" id="datanasc" name="datanasc"
                             required
-                            th:value="${cliente != null && cliente.datanasc != null ? cliente.datanasc : ''}"
-                        />
+                            th:value="${cliente != null && cliente.datanasc != null ? cliente.datanasc : ''}" />
                     </div>
 
                     <div class="form-group-2">
                         <label for="gen">Gênero:</label>
                         <select id="gen" name="gen" required>
-                            <option
-                                value
+                            <option value
                                 th:if="${cliente == null or cliente.gen == null}"
-                                selected
-                                hidden
-                            >
-                                Selecione
-                            </option>
-                            <option
-                                value="M"
-                                th:selected="${cliente != null and cliente.gen == 'M'}"
-                            >
-                                M - Masculino
-                            </option>
-                            <option
-                                value="F"
-                                th:selected="${cliente != null and cliente.gen == 'F'}"
-                            >
-                                F - Feminino
-                            </option>
-                            <option
-                                value="OUTRO"
-                                th:selected="${cliente != null and cliente.gen == 'OUTRO'}"
-                            >
-                                Outro
-                            </option>
+                                selected hidden>Selecione</option>
+                            <option value="M"
+                                th:selected="${cliente != null and cliente.gen == 'M'}">M
+                                - Masculino</option>
+                            <option value="F"
+                                th:selected="${cliente != null and cliente.gen == 'F'}">F
+                                - Feminino</option>
+                            <option value="OUTRO"
+                                th:selected="${cliente != null and cliente.gen == 'OUTRO'}">Outro</option>
                         </select>
                     </div>
 
                     <div class="form-group-2">
                         <label for="cpf">CPF:</label>
-                        <input
-                            type="text"
-                            id="cpf"
-                            name="cpf"
-                            required
+                        <input type="text" id="cpf" name="cpf" required
                             th:value="${cliente != null && cliente.cpf != null ? cliente.cpf : ''}"
-                            placeholder="Apenas números, 11 dígitos"
-                        />
+                            placeholder="Apenas números, 11 dígitos" />
                     </div>
 
                     <div class="form-group-2">
                         <label for="senha">Senha:</label>
-                        <input
-                            type="password"
-                            id="senha"
-                            name="senha"
-                            required
-                            placeholder="Mínimo 8 caracteres"
-                        />
+                        <input type="password" id="senha" name="senha" required
+                            placeholder="Mínimo 8 caracteres" />
                     </div>
                     <div class="form-group-2">
                         <label for="confirmarSenha">Confirmar Senha:</label>
-                        <input
-                            type="password"
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            required
-                            placeholder="Repita a Senha"
-                        />
+                        <input type="password" id="confirmPassword"
+                            name="confirmPassword" required
+                            placeholder="Repita a Senha" />
                     </div>
-                </div>
-                <hr />
+
+                </div> <hr />
 
                 <div class="form-group-checkboxes">
                     <div class="form-actions-main">
-                        <button
-                            class="btn btn-primary"
-                            onclick="document.getElementById('modal').style.display='block'"
-                        >
+                        <button class="btn btn-primary"
+                            onclick="document.getElementById('modal').style.display='block'">
                             Termos de uso
                         </button>
-                        <button
-                            class="btn btn-primary"
-                            onclick="document.getElementById('modal2').style.display='block'"
-                        >
+                        <button class="btn btn-primary"
+                            onclick="document.getElementById('modal2').style.display='block'">
                             Politica de privacidade
                         </button>
                     </div>
-                    <div
-                        id="modal"
-                        style="display: none; position: fixed; inset: 0; background: #0008"
-                    >
+                    <div id="modal"
+                        style="display:none; position:fixed; inset:0; background:#0008;">
                         <div
-                            style="background: white; margin: 50px auto; padding: 20px; width: 60%"
-                        >
+                            style="background:white; margin:50px auto; padding:20px; width:60%;">
                             <h2>Termos de Uso</h2>
                             <div class="termos-scroll">
-                                <div
-                                    style="text-align: left"
-                                    class="container-centralizado"
-                                >
-                                    <p>
-                                        <strong>TERMO DE USO -
-                                            DESAPEGO.COM</strong>
-                                        <br>
-                                        Última atualização: 21/11/2025
-                                    </p>
+                                <div style="text-align: left;"
+                                    class="container-centralizado">
 
-                                    <p>
-                                        <strong>1. Aceitação dos Termos</strong>
-                                        <br>
-                                        Ao acessar o site Desapego, o usuário
-                                        concorda com este Termo de Uso e com a
-                                        Política de Privacidade correspondente.
-                                    </p>
+                                    <p><strong>TERMOS DE USO — BIBLIOTROCA.COM</strong><br>
+                                        Última atualização: 23 de março de 2026</p>
 
-                                    <p>
-                                        <strong>2. Funcionalidade da
-                                            Plataforma</strong>
-                                        <br>
-                                        O Desapego é uma plataforma destinada à
-                                        compra e venda de produtos usados entre
-                                        usuários.<br>
-                                        A plataforma oferece:<br>
-                                        • Cadastro e autenticação segura<br>
-                                        • Publicação de anúncios<br>
-                                        • Sistema de mensagens criptografadas<br
-                                        >
-                                        • Processamento de pagamentos<br>
-                                        • Controle de sessões com JWT<br>
-                                        • Logs de ações críticas para auditoria
-                                    </p>
+                                    <p><strong>1. Aceitação dos Termos</strong><br>
+                                        Ao acessar, navegar ou utilizar a plataforma Bibliotroca.com, o usuário
+                                        declara ter lido, compreendido e concordado integralmente com estes
+                                        Termos de Uso e com a Política de Privacidade associada. Caso não
+                                        concorde com quaisquer de suas disposições, deverá abster-se de
+                                        utilizar a plataforma.</p>
 
-                                    <p>
-                                        <strong>3. Cadastro e Responsabilidades
-                                            do Usuário</strong>
-                                        <br>
-                                        Para utilizar a plataforma, o usuário
-                                        deve:<br>
-                                        • Informar dados verdadeiros<br>
-                                        • Manter suas credenciais seguras<br>
-                                        • Ser maior de 18 anos<br>
-                                        • Respeitar regras e boas práticas do
-                                        site
-                                    </p>
+                                    <p><strong>2. Definições</strong><br>
+                                        Para fins deste instrumento, consideram-se:<br>
+                                        • <strong>Plataforma:</strong> o ambiente digital disponibilizado pela Bibliotroca.com;<br>
+                                        • <strong>Usuário:</strong> qualquer pessoa física que acesse ou utilize a plataforma;<br>
+                                        • <strong>Créditos (ou Tokens):</strong> unidades digitais internas utilizadas para a
+                                        aquisição de livros disponíveis na plataforma.</p>
 
-                                    <p>
-                                        <strong>4. Segurança e Acesso</strong>
-                                    </p>
+                                    <p><strong>3. Objeto e Funcionamento da Plataforma</strong><br>
+                                        A Bibliotroca.com é uma plataforma digital destinada à intermediação de
+                                        troca de livros por meio de um sistema de créditos, possibilitando:<br>
+                                        • Cadastro de usuários;<br>
+                                        • Envio de livros para avaliação;<br>
+                                        • Conversão de livros aprovados em créditos;<br>
+                                        • Aquisição de livros disponíveis mediante utilização de créditos;<br>
+                                        • Compra de créditos exclusivamente por meio de pagamento via Pix.<br><br>
+                                        A plataforma atua como intermediadora do serviço, organizando o fluxo
+                                        de envio, avaliação e redistribuição de livros, não se responsabilizando
+                                        pelo conteúdo intelectual das obras enviadas pelos usuários.</p>
 
-                                    <p>
-                                        <strong>4.1. Senhas</strong>
-                                        <br>
-                                        • Armazenadas com hashing e salt<br>
-                                        • Nunca armazenadas em texto puro
-                                    </p>
+                                    <p><strong>4. Cadastro e Elegibilidade</strong><br>
+                                        Ao se cadastrar, o usuário declara que:<br>
+                                        • Possui capacidade civil plena, sendo maior de 18 (dezoito) anos;<br>
+                                        • Fornecerá informações verdadeiras, corretas, completas e atualizadas;<br>
+                                        • É integralmente responsável pela confidencialidade de suas credenciais
+                                        de acesso.<br><br>
+                                        A Bibliotroca.com poderá, a seu critério, solicitar verificações
+                                        adicionais de identidade ou suspender o acesso em caso de
+                                        inconsistências cadastrais.</p>
 
-                                    <p>
-                                        <strong>4.2. Sessões e Tokens</strong>
-                                        <br>
-                                        • Rotação automática de tokens<br>
-                                        • Revogação imediata em caso de risco<br
-                                        >
-                                        • Expiração por tempo de inatividade
-                                    </p>
+                                    <p><strong>5. Envio e Avaliação de Livros</strong><br>
+                                        Os livros enviados pelos usuários passarão por critérios técnicos,
+                                        qualitativos e operacionais previamente definidos pela plataforma.<br>
+                                        Ao enviar um livro, o usuário declara ciência e concordância de que:<br>
+                                        • A aceitação do livro não é garantida;<br>
+                                        • Livros não aprovados no processo de avaliação não serão devolvidos,
+                                        salvo exceção previamente informada pela plataforma;<br>
+                                        • Em caso de aprovação, o livro passa a integrar o acervo operacional
+                                        da Bibliotroca.com para fins de troca e redistribuição.</p>
 
-                                    <p>
-                                        <strong>5. Recuperação e Alteração de
-                                            Senha</strong>
-                                        <br>
-                                        A alteração de senha ocorre somente após
-                                        validações internas e confirmação de
-                                        identidade.
-                                    </p>
+                                    <p><strong>6. Créditos (Tokens)</strong><br>
+                                        Os créditos disponibilizados na plataforma:<br>
+                                        • São concedidos após aprovação dos livros enviados ou mediante compra
+                                        direta;<br>
+                                        • Não possuem valor monetário fora da plataforma;<br>
+                                        • Não são resgatáveis, reembolsáveis, transferíveis entre usuários ou
+                                        convertidos em moeda corrente.<br><br>
+                                        A Bibliotroca.com reserva-se o direito de alterar políticas de
+                                        conversão, validade e utilização de créditos, mediante comunicação
+                                        prévia aos usuários.</p>
 
-                                    <p>
-                                        <strong>6. Conteúdos Proibidos</strong>
-                                        <br>
-                                        Não é permitido publicar:<br>
-                                        • Produtos ilegais<br>
-                                        • Conteúdos ofensivos ou
-                                        discriminatórios<br>
-                                        • Dados pessoais de terceiros<br>
-                                        • Materiais perigosos ou proibidos por
-                                        lei
-                                    </p>
+                                    <p><strong>7. Pagamentos</strong><br>
+                                        Os pagamentos realizados na plataforma:<br>
+                                        • Ocorrem exclusivamente por meio de Pix, salvo futura disponibilização
+                                        expressa de outros meios;<br>
+                                        • São processados por instituições e intermediadores de pagamento
+                                        terceirizados;<br>
+                                        • Estão sujeitos à confirmação da instituição financeira responsável.<br><br>
+                                        Os créditos serão liberados somente após a confirmação do pagamento.</p>
 
-                                    <p>
-                                        <strong>7. Pagamentos</strong>
-                                        <br>
-                                        Dados de pagamento são criptografados
-                                        com AES e protegidos por RSA ou método
-                                        equivalente.
-                                    </p>
+                                    <p><strong>8. Condutas Proibidas</strong><br>
+                                        É expressamente vedado ao usuário:<br>
+                                        • Enviar livros ilegais, piratas, falsificados, danificados ou em
+                                        desacordo com a legislação vigente;<br>
+                                        • Utilizar a plataforma para atividades ilícitas, fraudulentas ou que
+                                        violem a boa-fé;<br>
+                                        • Violar direitos de propriedade intelectual de terceiros;<br>
+                                        • Tentar acessar sistemas, dados ou contas de forma não autorizada.</p>
 
-                                    <p>
-                                        <strong>8. Limitação de
-                                            Responsabilidade</strong>
-                                        <br>
-                                        O Desapego não se responsabiliza pelas
-                                        negociações realizadas entre usuários,
-                                        danos causados por terceiros ou uso
-                                        inadequado da plataforma.
-                                    </p>
+                                    <p><strong>9. Limitação de Responsabilidade</strong><br>
+                                        Na extensão máxima permitida pela legislação aplicável, a
+                                        Bibliotroca.com:<br>
+                                        • Não se responsabiliza por danos indiretos, lucros cessantes ou
+                                        prejuízos decorrentes do uso da plataforma;<br>
+                                        • Não garante funcionamento contínuo, ininterrupto ou livre de falhas
+                                        técnicas;<br>
+                                        • Não se responsabiliza por informações fornecidas pelos usuários ou
+                                        por condutas de terceiros.</p>
 
-                                    <p>
-                                        <strong>9. Suspensão ou Exclusão de
-                                            Conta</strong>
-                                        <br>
-                                        A conta pode ser suspensa ou excluída em
-                                        caso de violação das regras ou
-                                        comportamento inadequado.
-                                    </p>
+                                    <p><strong>10. Suspensão e Exclusão de Conta</strong><br>
+                                        A Bibliotroca.com poderá suspender ou excluir, total ou parcialmente,
+                                        o acesso do usuário, a qualquer tempo, em caso de:<br>
+                                        • Violação destes Termos de Uso;<br>
+                                        • Indícios ou confirmação de fraude, má-fé ou atividade ilícita;<br>
+                                        • Uso indevido da plataforma ou dos créditos.</p>
 
-                                    <p>
-                                        <strong>10. Encerramento</strong>
-                                        <br>
-                                        O usuário pode solicitar o encerramento
-                                        da conta a qualquer momento, observadas
-                                        as obrigações legais remanescentes.
-                                    </p>
+                                    <p><strong>11. Encerramento da Conta pelo Usuário</strong><br>
+                                        O usuário poderá solicitar o encerramento de sua conta a qualquer
+                                        momento, desde que não existam obrigações, créditos em disputa ou
+                                        operações pendentes.</p>
 
-                                    <p>
-                                        <strong>11. Alterações dos
-                                            Termos</strong>
-                                        <br>
-                                        Este Termo pode ser atualizado. A data
-                                        da última modificação será sempre
-                                        exibida no início.
-                                    </p>
+                                    <p><strong>12. Propriedade Intelectual</strong><br>
+                                        Todos os direitos relativos à plataforma, incluindo, mas não se
+                                        limitando a software, marcas, logotipos, layout, textos e sistemas,
+                                        são de titularidade exclusiva da Bibliotroca.com, sendo vedada sua
+                                        reprodução ou uso não autorizado.</p>
 
-                                    <p>
-                                        <strong>12. Contato</strong>
-                                        <br>
-                                        Em caso de dúvidas:
-                                        <strong>suporte@desapego.com</strong>
-                                    </p>
+                                    <p><strong>13. Alterações dos Termos</strong><br>
+                                        Estes Termos de Uso poderão ser alterados a qualquer momento. A
+                                        continuidade da utilização da plataforma após eventuais alterações
+                                        implicará aceitação integral da nova versão.</p>
+
+                                    <p><strong>14. Legislação Aplicável e Foro</strong><br>
+                                        Este Termo de Uso é regido pelas leis da República Federativa do
+                                        Brasil, incluindo a Lei nº 13.709/2018 (Lei Geral de Proteção de
+                                        Dados).<br>
+                                        Fica eleito o foro da comarca do domicílio do usuário para dirimir
+                                        quaisquer controvérsias decorrentes deste instrumento, salvo
+                                        disposição legal diversa.</p>
+
+                                    <p><strong>15. Contato</strong><br>
+                                        Para dúvidas, suporte ou solicitações, o usuário poderá entrar em
+                                        contato por meio do e-mail:<br>
+                                        📧 <strong>suporte@bibliotroca.com</strong></p>
+
                                 </div>
                             </div>
-                            <button
-                                class="btn btn-primary"
-                                id="btnFecharTermos"
-                                onclick="document.getElementById('modal').style.display='none'"
-                            >
+                            <button class="btn btn-primary" id="btnFecharTermos"
+                                onclick="document.getElementById('modal').style.display='none'">
                                 Fechar
                             </button>
                         </div>
                     </div>
 
-                    <div
-                        id="modal2"
-                        style="display: none; position: fixed; inset: 0; background: #0008"
-                    >
+                    <div id="modal2"
+                        style="display:none; position:fixed; inset:0; background:#0008;">
                         <div
-                            style="background: white; margin: 50px auto; padding: 20px; width: 60%"
-                        >
-                            <h2>Termos de Uso</h2>
+                            style="background:white; margin:50px auto; padding:20px; width:60%;">
+                            <h2>Política de Privacidade</h2>
                             <div class="termos-scroll">
-                                <div
-                                    style="text-align: left"
-                                    class="container-centralizado"
-                                >
-                                    <p>
-                                        <strong>POLÍTICA DE PRIVACIDADE - SITE
-                                            DESAPEGO.COM</strong>
-                                        <br>
-                                        Última atualização: 21/11/2025
-                                    </p>
+                                <div style="text-align: left;"
+                                    class="container-centralizado">
 
-                                    <p>
-                                        <strong>1. Introdução</strong>
-                                        <br>
-                                        A presente Política de Privacidade
-                                        descreve como o Desapego coleta,
-                                        utiliza, armazena e protege os dados
-                                        pessoais de seus usuários, em
-                                        conformidade com a Lei Geral de Proteção
-                                        de Dados Pessoais (Lei nº 13.709/2018 –
-                                        LGPD).<br>
-                                        Ao utilizar nossos serviços, o usuário
-                                        declara ter lido, compreendido e
-                                        concordado com esta Política.
-                                    </p>
+                                    <p><strong>POLÍTICA DE PRIVACIDADE — BIBLIOTROCA.COM</strong><br>
+                                        Última atualização: 07 de abril de 2026</p>
 
-                                    <p><strong>2. Dados Coletados</strong></p>
+                                    <p><strong>1. Introdução</strong><br>
+                                        Esta Política de Privacidade descreve como a Bibliotroca.com coleta,
+                                        utiliza, armazena e protege os dados pessoais de seus usuários, em
+                                        conformidade com a Lei Geral de Proteção de Dados Pessoais – LGPD
+                                        (Lei nº 13.709/2018).</p>
 
-                                    <p>
-                                        <strong>2.1. Dados fornecidos
-                                            voluntariamente pelo usuário</strong
-                                        >
-                                        <br>
-                                        • Nome completo<br>
-                                        • E-mail<br>
-                                        • Número de telefone (opcional)<br>
-                                        • Endereço (para fins de entregas e
-                                        verificações)<br>
-                                        • Dados de login (e-mail e senha, sendo
-                                        a senha armazenada por hashing com
-                                        salt)<br>
-                                        • Informações de anúncios publicados
-                                        (fotos, descrições, preços, localização
-                                        aproximada)
-                                    </p>
+                                    <p><strong>2. Dados Coletados</strong><br>
+                                        A plataforma poderá coletar os seguintes dados pessoais:<br>
+                                        • Dados cadastrais (nome, e-mail e senha);<br>
+                                        • Endereço e informações para envio e recebimento de livros;<br>
+                                        • Telefone (opcional);<br>
+                                        • Dados de autenticação e acesso;<br>
+                                        • Informações sobre livros cadastrados para avaliação;<br>
+                                        • Dados relacionados a transações financeiras, exclusivamente via Pix,
+                                        sem o armazenamento de dados bancários sensíveis.</p>
 
-                                    <p>
-                                        <strong>2.2. Dados de pagamento</strong>
-                                        <br>
-                                        Para compras realizadas na plataforma,
-                                        são coletados:<br>
-                                        • Dados do cartão de crédito<br>
-                                        • Nome do titular<br>
-                                        • Código de segurança (CVV)<br>
-                                        • Data de validade<br>
-                                        Importante: Os dados de cartão não são
-                                        armazenados em texto puro. Eles são
-                                        criptografados utilizando AES
-                                        (criptografia simétrica), e a chave AES
-                                        é protegida com RSA ou método
-                                        assimétrico equivalente.<br>
-                                        Seguimos boas práticas de segurança,
-                                        porém parte do processamento pode ser
-                                        delegada a um provedor externo de
-                                        pagamentos (gateway), conforme o caso.
-                                    </p>
+                                    <p><strong>3. Finalidades do Tratamento</strong><br>
+                                        Os dados pessoais são tratados para as seguintes finalidades:<br>
+                                        • Criação e gerenciamento de contas de usuário;<br>
+                                        • Execução e operacionalização dos serviços oferecidos pela plataforma;<br>
+                                        • Avaliação, validação e processamento dos livros recebidos;<br>
+                                        • Liberação, gestão e controle de créditos (tokens);<br>
+                                        • Prevenção a fraudes e garantia da segurança da plataforma;<br>
+                                        • Cumprimento de obrigações legais e regulatórias.</p>
 
-                                    <p>
-                                        <strong>2.3. Dados coletados
-                                            automaticamente</strong>
-                                        <br>
-                                        • Endereço IP<br>
-                                        • Identificador de dispositivo<br>
-                                        • Informações de navegador e sistema
-                                        operacional<br>
-                                        • Logs de eventos críticos (tentativas
-                                        de login, alterações de senha, criação
-                                        de anúncios, transações)
-                                    </p>
+                                    <p><strong>4. Bases Legais</strong><br>
+                                        O tratamento dos dados pessoais está fundamentado nas seguintes bases
+                                        legais, conforme a LGPD:<br>
+                                        • Execução de contrato;<br>
+                                        • Cumprimento de obrigação legal ou regulatória;<br>
+                                        • Legítimo interesse do controlador;<br>
+                                        • Consentimento do titular, quando aplicável.</p>
 
-                                    <p>
-                                        <strong>3. Finalidades do Tratamento de
-                                            Dados</strong>
-                                        <br>
-                                        Os dados pessoais são utilizados
-                                        para:<br>
-                                        • Criar e gerenciar contas de usuário<br
-                                        >
-                                        • Gerenciar autenticação com Access
-                                        Tokens e Refresh Tokens (JWT)<br>
-                                        • Permitir a compra e venda de produtos
-                                        usados<br>
-                                        • Prevenir fraudes e acessos
-                                        indevidos<br>
-                                        • Exibir e organizar anúncios<br>
-                                        • Processar pagamentos<br>
-                                        • Cumprir obrigações legais e
-                                        regulatórias<br>
-                                        • Melhorar a segurança da plataforma
-                                        aplicando:<br>
-                                        &nbsp;&nbsp;– hashing de senhas com
-                                        salt<br>
-                                        &nbsp;&nbsp;– criptografia AES/RSA<br>
-                                        &nbsp;&nbsp;– controle de sessões<br>
-                                        &nbsp;&nbsp;– logs de auditoria
-                                    </p>
+                                    <p><strong>5. Segurança da Informação</strong><br>
+                                        Adotamos medidas técnicas e organizacionais adequadas para proteger os
+                                        dados pessoais, incluindo, mas não se limitando a:<br>
+                                        • Criptografia de dados;<br>
+                                        • Armazenamento seguro de senhas (hashing com salt);<br>
+                                        • Comunicação segura por meio de HTTPS;<br>
+                                        • Autenticação baseada em tokens (JWT);<br>
+                                        • Monitoramento, registro e controle de acessos.</p>
 
-                                    <p>
-                                        <strong>4. Bases Legais Utilizadas
-                                            (LGPD)</strong>
-                                        <br>
-                                        • Execução de contrato – Art. 7º, V<br>
-                                        • Cumprimento de obrigação legal – Art.
-                                        7º, II<br>
-                                        • Legítimo interesse – Art. 7º, IX
-                                        (segurança, prevenção a fraudes,
-                                        auditorias)<br>
-                                        • Consentimento – Art. 7º, I (envio de
-                                        comunicações opcionais)
-                                    </p>
+                                    <p><strong>6. Compartilhamento de Dados</strong><br>
+                                        Os dados pessoais poderão ser compartilhados, quando necessário, com:<br>
+                                        • Provedores de serviços de pagamento;<br>
+                                        • Serviços de hospedagem, armazenamento e infraestrutura tecnológica;<br>
+                                        • Autoridades públicas, mediante obrigação legal ou ordem judicial.</p>
 
-                                    <p>
-                                        <strong>5. Segurança e Proteção de
-                                            Dados</strong>
-                                    </p>
+                                    <p><strong>7. Direitos do Titular dos Dados</strong><br>
+                                        Nos termos da LGPD, o titular dos dados poderá solicitar, a qualquer
+                                        momento:<br>
+                                        • Confirmação da existência de tratamento;<br>
+                                        • Acesso aos dados pessoais;<br>
+                                        • Correção de dados incompletos, inexatos ou desatualizados;<br>
+                                        • Exclusão ou anonimização de dados, quando aplicável;<br>
+                                        • Portabilidade dos dados;<br>
+                                        • Revogação do consentimento, quando houver.</p>
 
-                                    <p>
-                                        <strong>5.1. Senhas</strong>
-                                        <br>
-                                        • Armazenadas utilizando hash + salt
-                                        (ex.: bcrypt, Argon2).<br>
-                                        • Nunca armazenadas ou transmitidas em
-                                        texto puro.
-                                    </p>
+                                    <p><strong>8. Retenção de Dados</strong><br>
+                                        Os dados pessoais serão armazenados:<br>
+                                        • Enquanto a conta do usuário permanecer ativa;<br>
+                                        • Pelo período necessário para o cumprimento de obrigações legais ou
+                                        regulatórias;<br>
+                                        • Pelo prazo necessário para resguardar direitos da Bibliotroca.com,
+                                        inclusive em eventuais demandas judiciais ou administrativas.</p>
 
-                                    <p>
-                                        <strong>5.2. Criptografia</strong>
-                                        <br>
-                                        • Dados sensíveis criptografados com
-                                        AES<br>
-                                        • Chaves simétricas protegidas por
-                                        RSA<br>
-                                        • Transmissão via HTTPS/TLS
-                                        atualizado<br>
-                                        • Tokens assinados com chaves privadas
-                                        seguras
-                                    </p>
+                                    <p><strong>9. Cookies e Tecnologias de Rastreamento</strong><br>
+                                        A plataforma poderá utilizar cookies e tecnologias semelhantes com a
+                                        finalidade de:<br>
+                                        • Melhorar a experiência do usuário;<br>
+                                        • Analisar desempenho, navegação e uso da plataforma;<br>
+                                        • Personalizar conteúdos e funcionalidades.<br>
+                                        O usuário pode, a qualquer momento, gerenciar ou desativar os cookies
+                                        diretamente nas configurações de seu navegador.</p>
 
-                                    <p>
-                                        <strong>5.3. Autenticação e
-                                            sessões</strong>
-                                        <br>
-                                        • Acesso com Access Token + Refresh
-                                        Token<br>
-                                        • Rotação periódica de tokens<br>
-                                        • Revogação manual e automática<br>
-                                        • Invalidação de sessão em caso de
-                                        atividade suspeita
-                                    </p>
+                                    <p><strong>10. Transferência Internacional de Dados</strong><br>
+                                        Caso ocorra o tratamento ou armazenamento de dados pessoais fora do
+                                        território nacional, a Bibliotroca.com garantirá a observância da LGPD
+                                        e a adoção de níveis adequados de proteção dos dados.</p>
 
-                                    <p>
-                                        <strong>5.4. Recuperação de
-                                            senha</strong>
-                                        <br>
-                                        O sistema utiliza recuperação de senha
-                                        por e-mail com token temporário.<br>
-                                        A recuperação ocorre somente após
-                                        autenticação prévia e validações
-                                        internas.
-                                    </p>
+                                    <p><strong>11. Alterações desta Política</strong><br>
+                                        Esta Política de Privacidade poderá ser atualizada a qualquer momento,
+                                        visando aprimorar a transparência e a segurança das informações.
+                                        Recomenda-se a revisão periódica deste documento.</p>
 
-                                    <p>
-                                        <strong>5.5. Logs e auditoria</strong>
-                                        <br>
-                                        • Tentativas de login<br>
-                                        • Alteração de senha<br>
-                                        • Criação/edição de anúncios<br>
-                                        • Transações<br>
-                                        • Atividades administrativas<br>
-                                        Os logs são armazenados para segurança,
-                                        auditoria e cumprimento legal.
-                                    </p>
+                                    <p><strong>12. Procedimentos Operacionais e Responsabilidades</strong><br>
+                                        • A Bibliotroca.com recebe os livros enviados pelos usuários, realiza a
+                                        avaliação e, quando validados, prossegue com o envio ao cliente final;<br>
+                                        • Livros que não forem validados durante o processo de avaliação não
+                                        serão devolvidos;<br>
+                                        • A aquisição de créditos ou tokens na plataforma é realizada
+                                        exclusivamente por meio de pagamento via Pix;<br>
+                                        • Os dados fornecidos pelos usuários são protegidos por medidas de
+                                        segurança adequadas; entretanto, o uso correto, a veracidade das
+                                        informações e a guarda de credenciais de acesso são de responsabilidade
+                                        do próprio usuário.</p>
 
-                                    <p>
-                                        <strong>6. Compartilhamento de
-                                            Dados</strong>
-                                        <br>
-                                        Podemos compartilhar dados
-                                        exclusivamente com:<br>
-                                        • Processadores de pagamento<br>
-                                        • Serviços de verificação de
-                                        identidade<br>
-                                        • Autoridades legais, mediante
-                                        requisição<br>
-                                        • Provedores de hospedagem e
-                                        segurança<br>
-                                        Não vendemos dados pessoais a terceiros.
-                                    </p>
+                                    <p><strong>13. Contato e Encarregado pelo Tratamento de Dados (DPO)</strong><br>
+                                        Para dúvidas, solicitações ou assuntos relacionados à privacidade e
+                                        proteção de dados, o usuário poderá entrar em contato pelo e-mail:<br>
+                                        <strong>privacidade@bibliotroca.com</strong></p>
 
-                                    <p>
-                                        <strong>7. Direitos do Titular (Art. 18
-                                            da LGPD)</strong>
-                                        <br>
-                                        O usuário pode solicitar:<br>
-                                        • Confirmação da existência de
-                                        tratamento<br>
-                                        • Acesso aos dados<br>
-                                        • Correção de dados incompletos<br>
-                                        • Anonimização, bloqueio ou
-                                        eliminação<br>
-                                        • Portabilidade<br>
-                                        • Revogação do consentimento<br>
-                                        • Informação sobre compartilhamento<br>
-                                        Solicitações podem ser feitas pelo
-                                        canal:
-                                        <strong>privacidade@desapego.com</strong
-                                        >
-                                    </p>
-
-                                    <p>
-                                        <strong>8. Armazenamento e
-                                            Retenção</strong>
-                                        <br>
-                                        Os dados são armazenados enquanto:<br>
-                                        • A conta estiver ativa<br>
-                                        • Houver necessidade legal ou
-                                        contratual<br>
-                                        • Existirem obrigações fiscais e de
-                                        segurança
-                                    </p>
-
-                                    <p>
-                                        <strong>9. Alterações desta
-                                            Política</strong>
-                                        <br>
-                                        Podemos atualizar esta Política a
-                                        qualquer momento. A data da última
-                                        atualização estará sempre indicada no
-                                        início do documento.
-                                    </p>
-
-                                    <p>
-                                        <strong>10. Contato</strong>
-                                        <br>
-                                        E-mail para dúvidas sobre privacidade:
-                                        <strong>privacidade@desapego.com</strong
-                                        >
-                                    </p>
-
-                                    <hr>
-                                    <p>
-                                        Ao utilizar nossos serviços, você
-                                        concorda com os termos desta Política de
-                                        Privacidade.
-                                    </p>
                                 </div>
                             </div>
-                            <button
-                                class="btn btn-primary"
-                                id="btnFecharPrivacidade"
-                                onclick="document.getElementById('modal2').style.display='none'"
-                            >
+                            <button class="btn btn-primary" id="btnFecharPrivacidade"
+                                onclick="document.getElementById('modal2').style.display='none'">
                                 Fechar
                             </button>
                         </div>
                     </div>
 
                     <label for="termsAccepted">
-                        <input
-                            type="checkbox"
-                            id="termsAccepted"
-                            name="termsAccepted"
-                            value="true"
-                        >
+                        <input type="checkbox" id="termsAccepted"
+                            name="termsAccepted" value="true">
                         Aceito os Termos de Serviço
                     </label>
                     <label for="privacyAccepted">
-                        <input
-                            type="checkbox"
-                            id="privacyAccepted"
-                            name="privacyAccepted"
-                            value="true"
-                        >
+                        <input type="checkbox" id="privacyAccepted"
+                            name="privacyAccepted" value="true">
                         Aceito a Política de Privacidade
                     </label>
 
-                    <p
-                        id="senhaErro"
-                        class="mensagem erro"
-                        style="display: none; margin-top: 15px"
-                    >
-                        As senhas não conferem!
-                    </p>
+                    <p id="senhaErro" class="mensagem erro"
+                        style="display:none; margin-top: 15px;">As senhas não
+                        conferem!</p>
                 </div>
 
                 <div class="form-actions-main">
-                    <button type="submit" class="btn btn-primary">
-                        Cadastrar
-                    </button>
+                    <button type="submit"
+                        class="btn btn-primary">Cadastrar</button>
                 </div>
+
             </form>
         </div>
         <script th:src="@{/cliente/script.js}"></script>

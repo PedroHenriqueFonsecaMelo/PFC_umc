@@ -28,12 +28,12 @@ public class Endereco {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    
     private String pais;
-
+    
     @Column(nullable = false, length = 9)
     private String cep;
-
+    
     private String estado;
     private String cidade;
     private String rua;

@@ -43,7 +43,8 @@ public class BlogController {
                         "conteudo", p.getConteudo(),
                         "imagemUrl", p.getImagemUrl() != null ? p.getImagemUrl() : "",
                         "autorNome", p.getAutorNome() != null ? p.getAutorNome() : "Administrador",
-                        "dataPublicacao", p.getDataPublicacao().format(FMT)))
+                        "dataPublicacao", p.getDataPublicacao().format(FMT)
+                ))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(posts);
     }

@@ -34,15 +34,14 @@ public class TokenControllerApi {
     private final PagamentoFactory pagamentoFactory;
     private final LogAuditoriaService logAuditoriaService;
 
-    /**
-     * Processa compra de tokens via API.
-     * Suporta PIX (pendente) e cartão (imediato) com Strategy.
-     * Registra log auditoria sucesso/falha.
-     * 
-     * @param userDetails usuário autenticado
-     * @param request     DTO valor/método/cartão
-     */
-    @PostMapping("/comprar")
+/**
+ * Processa compra de tokens via API.
+ * Suporta PIX (pendente) e cartão (imediato) com Strategy.
+ * Registra log auditoria sucesso/falha.
+ * @param userDetails usuário autenticado
+ * @param request DTO valor/método/cartão
+ */
+@PostMapping("/comprar")
     public ResponseEntity<?> comprar(
 
             @AuthenticationPrincipal UserDetails userDetails,
@@ -55,7 +54,7 @@ public class TokenControllerApi {
         }
 
         try {
-
+            
             // 2. Buscar o cliente real no banco pelo e-mail do login
             String emailLogado = userDetails.getUsername();
             Cliente cliente = clienteService.buscarEntidadePorEmail(emailLogado)
@@ -107,15 +106,14 @@ public class TokenControllerApi {
         }
     }
 
-    /**
-     * Retorna histórico de transações de tokens do usuário autenticado.
-     * Ordenado por data descendente.
-     * Requer autenticação.
-     * 
-     * @param userDetails usuário logado para filtrar
-     * @return List<Transacao> histórico
-     */
-    @GetMapping("/historico")
+/**
+ * Retorna histórico de transações de tokens do usuário autenticado.
+ * Ordenado por data descendente.
+ * Requer autenticação.
+ * @param userDetails usuário logado para filtrar
+ * @return List<Transacao> histórico
+ */
+@GetMapping("/historico")
     public ResponseEntity<List<Transacao>> buscarHistorico(@AuthenticationPrincipal UserDetails userDetails) {
 
         if (userDetails == null)
@@ -123,15 +121,15 @@ public class TokenControllerApi {
         return ResponseEntity.ok(clienteService.listarHistoricoTransacoes(userDetails.getUsername()));
     }
 
-    /**
-     * Verifica status de pagamento PIX pendente.
-     * Retorna PENDENTE ou APROVADO.
-     * Usado por frontend polling.
-     * 
-     * @param pagamentoId ID do pagamento
-     */
-    @GetMapping("/verificar-pagamento/{pagamentoId}")
+/**
+ * Verifica status de pagamento PIX pendente.
+ * Retorna PENDENTE ou APROVADO.
+ * Usado por frontend polling.
+ * @param pagamentoId ID do pagamento
+ */
+@GetMapping("/verificar-pagamento/{pagamentoId}")
     public ResponseEntity<?> verificarPagamento(@PathVariable String pagamentoId) {
+
 
         boolean pago = clienteService.verificarSeFoiPago(pagamentoId);
 
@@ -141,18 +139,17 @@ public class TokenControllerApi {
         return ResponseEntity.ok(Map.of("status", "PENDENTE"));
     }
 
-    /**
-     * Simula webhook de aprovação PIX para teste.
-     * Chama aprovarPagamento no clienteService.
-     * Útil para desenvolvimento local.
-     * 
-     * @param pagamentoId ID a aprovar
-     */
-    @GetMapping("/simular-webhook/{pagamentoId}")
+/**
+ * Simula webhook de aprovação PIX para teste.
+ * Chama aprovarPagamento no clienteService.
+ * Útil para desenvolvimento local.
+ * @param pagamentoId ID a aprovar
+ */
+@GetMapping("/simular-webhook/{pagamentoId}")
     public ResponseEntity<?> simularWebhook(@PathVariable String pagamentoId) {
 
         log.info("--- SIMULAÇÃO DE WEBHOOK RECEBIDA: Pagamento ID {} ---", pagamentoId);
-
+        
         try {
             clienteService.aprovarPagamento(pagamentoId);
             return ResponseEntity.ok(Map.of("mensagem", "Pagamento aprovado via simulação!"));
@@ -166,8 +163,9 @@ public class TokenControllerApi {
 /**
  * DESCRIÇÃO DO ARQUIVO:
  * Controller REST API para compra de tokens.
- * Endpoints /api/tokens/comprar (PIX/cartão), /historico, verificar-pagamento,
- * simular-webhook.
+ * Endpoints /api/tokens/comprar (PIX/cartão), /historico, verificar-pagamento, simular-webhook.
  * Usa PagamentoFactory/Strategy, ClienteService, LogAuditoriaService.
  * Suporta autenticação JWT, retorna JSON status.
  */
+
+

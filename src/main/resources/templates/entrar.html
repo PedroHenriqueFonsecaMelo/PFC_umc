@@ -1,841 +1,587 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Entrar — Bibliotroca</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      /* ── Reset ─────────────────────────────────────────────── */
-      *, *::before, *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      html, body {
-        height: 100%;
-      }
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Entrar — Bibliotroca</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
 
-      /* ── Corpo ──────────────────────────────────────────────── */
-      body {
-        font-family: "DM Sans", sans-serif;
-        min-height: 100vh;
-        overflow: hidden;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background:
-          radial-gradient(
-            ellipse at center,
-            transparent 30%,
-            rgba(249, 246, 240, 0.6) 100%
-          ),
-          radial-gradient(
-          ellipse 900px 600px at 50% 46%,
-          rgba(74, 93, 35, 0.10) 0%,
-          rgba(74, 93, 35, 0.05) 50%,
-          transparent 72%
-        ),
-          #f9f6f0;
-      }
+    /* ── Reset ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
 
-      /* Textura de grão */
-      body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-        opacity: 0.025;
-        pointer-events: none;
-        z-index: 0;
-      }
+    /* ── Corpo ──────────────────────────────────────────────── */
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(ellipse at center, transparent 30%, rgba(249,246,240,0.6) 100%),
+        radial-gradient(ellipse 900px 600px at 50% 46%,
+          rgba(74,93,35,0.10) 0%,
+          rgba(74,93,35,0.05) 50%,
+          transparent 72%),
+        #F9F6F0;
+    }
 
-      /* ── Estantes de fundo ──────────────────────────────────── */
-      .shelves-bg {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 0;
-        overflow: hidden;
-      }
-      .shelf-line {
-        position: absolute;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: rgba(74, 93, 35, 0.1);
-      }
-      .shelf-line:nth-child(1) {
-        top: 18%;
-      }
-      .shelf-line:nth-child(2) {
-        top: 40%;
-      }
-      .shelf-line:nth-child(3) {
-        top: 62%;
-      }
-      .shelf-line:nth-child(4) {
-        top: 82%;
-      }
+    /* Textura de grão */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025; pointer-events: none; z-index: 0;
+    }
 
-      .bg-books {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 100px;
-        display: flex;
-        align-items: flex-end;
-        gap: 3px;
-        padding: 0 2vw;
-        opacity: 0.18;
-      }
-      .bg-book {
-        flex-shrink: 0;
-        border-radius: 2px 2px 0 0;
-      }
+    /* ── Estantes de fundo ──────────────────────────────────── */
+    .shelves-bg {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .shelf-line {
+      position: absolute; left: 0; right: 0;
+      height: 1px; background: rgba(74,93,35,0.1);
+    }
+    .shelf-line:nth-child(1) { top: 18%; }
+    .shelf-line:nth-child(2) { top: 40%; }
+    .shelf-line:nth-child(3) { top: 62%; }
+    .shelf-line:nth-child(4) { top: 82%; }
 
-      /* ── Partículas ─────────────────────────────────────────── */
-      .particles {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 1;
-      }
-      .p {
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(74, 93, 35, 0.35);
-        animation: drift var(--d, 9s) ease-in-out infinite var(--dl, 0s);
-      }
-      @keyframes drift {
-        0% {
-          transform: translateY(0) translateX(0) scale(1);
-          opacity: 0;
-        }
-        15% {
-          opacity: 0.65;
-        }
-        85% {
-          opacity: 0.25;
-        }
-        100% {
-          transform: translateY(-110px) translateX(var(--dx, 18px)) scale(0.4);
-          opacity: 0;
-        }
-      }
+    .bg-books {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 100px;
+      display: flex; align-items: flex-end;
+      gap: 3px; padding: 0 2vw;
+      opacity: 0.18;
+    }
+    .bg-book { flex-shrink: 0; border-radius: 2px 2px 0 0; }
 
-      /* ── Botão voltar ───────────────────────────────────────── */
-      .back-link {
-        position: fixed;
-        top: 28px;
-        left: 32px;
-        z-index: 10;
-        font-size: 0.82rem;
-        font-weight: 500;
-        color: rgba(74, 93, 35, 0.55);
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        letter-spacing: 0.04em;
-        transition: color 0.25s;
-      }
-      .back-link:hover {
-        color: rgba(74, 93, 35, 0.9);
-      }
+    /* ── Partículas ─────────────────────────────────────────── */
+    .particles { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+    .p {
+      position: absolute; border-radius: 50%;
+      background: rgba(74,93,35,0.35);
+      animation: drift var(--d,9s) ease-in-out infinite var(--dl,0s);
+    }
+    @keyframes drift {
+      0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+      15%  { opacity: 0.65; }
+      85%  { opacity: 0.25; }
+      100% { transform: translateY(-110px) translateX(var(--dx,18px)) scale(0.4); opacity: 0; }
+    }
 
-      /* ── Wrapper central ────────────────────────────────────── */
-      .page-content {
-        position: relative;
-        z-index: 5;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 0 16px;
-        animation: fadeUp 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
-      }
-      @keyframes fadeUp {
-        from {
-          opacity: 0;
-          transform: translateY(32px) perspective(800px) rotateX(4deg);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0) perspective(800px) rotateX(0deg);
-        }
-      }
+    /* ── Botão voltar ───────────────────────────────────────── */
+    .back-link {
+      position: fixed; top: 28px; left: 32px; z-index: 10;
+      font-size: 0.82rem; font-weight: 500;
+      color: rgba(74,93,35,0.55); text-decoration: none;
+      display: flex; align-items: center; gap: 6px;
+      letter-spacing: 0.04em; transition: color 0.25s;
+    }
+    .back-link:hover { color: rgba(74,93,35,0.9); }
 
-      /* ══════════════════════════════════════════════════════════
-         LIVRO ABERTO
-      ══════════════════════════════════════════════════════════ */
-      .book {
-        display: flex;
-        width: 780px;
-        max-width: 96vw;
-        border-radius: 3px 10px 10px 3px;
-        box-shadow:
-          -10px 6px 0 #d0cbc2,
-          -10px 6px 18px rgba(0, 0, 0, 0.14),
-          6px 16px 60px rgba(0, 0, 0, 0.11),
-          0 2px 8px rgba(0, 0, 0, 0.07);
-        transform: perspective(1400px) rotateY(3deg);
-        transition: transform 0.5s ease, box-shadow 0.5s ease;
-      }
-      .book:hover {
-        transform: perspective(1400px) rotateY(0deg);
-        box-shadow:
-          -6px 4px 0 #d0cbc2,
-          -6px 4px 12px rgba(0, 0, 0, 0.11),
-          0 20px 70px rgba(0, 0, 0, 0.09),
-          0 2px 8px rgba(0, 0, 0, 0.05);
-      }
+    /* ── Wrapper central ────────────────────────────────────── */
+    .page-content {
+      position: relative; z-index: 5;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 0 16px;
+      animation: fadeUp 0.85s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(32px) perspective(800px) rotateX(4deg); }
+      to   { opacity: 1; transform: translateY(0)    perspective(800px) rotateX(0deg); }
+    }
 
-      /* ── Capa esquerda ──────────────────────────────────────── */
-      .book-cover {
-        flex: 0 0 46%;
-        background: linear-gradient(
-          175deg,
+    /* ══════════════════════════════════════════════════════════
+       LIVRO ABERTO
+    ══════════════════════════════════════════════════════════ */
+    .book {
+      display: flex;
+      width: 780px;
+      max-width: 96vw;
+      border-radius: 3px 10px 10px 3px;
+      box-shadow:
+        -10px 6px 0   #d0cbc2,
+        -10px 6px 18px rgba(0,0,0,0.14),
+        6px  16px 60px rgba(0,0,0,0.11),
+        0     2px  8px rgba(0,0,0,0.07);
+      transform: perspective(1400px) rotateY(3deg);
+      transition: transform 0.5s ease, box-shadow 0.5s ease;
+    }
+    .book:hover {
+      transform: perspective(1400px) rotateY(0deg);
+      box-shadow:
+        -6px 4px 0   #d0cbc2,
+        -6px 4px 12px rgba(0,0,0,0.11),
+        0   20px 70px rgba(0,0,0,0.09),
+        0    2px  8px rgba(0,0,0,0.05);
+    }
+
+    /* ── Capa esquerda ──────────────────────────────────────── */
+    .book-cover {
+      flex: 0 0 46%;
+      background:
+        linear-gradient(175deg,
           #eae5dc 0%,
           #e2ddd3 30%,
           #d9d3c8 60%,
-          #d2ccc0 100%
-        );
-        border-radius: 3px 0 0 3px;
-        padding: 44px 34px 40px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        position: relative;
-        overflow: hidden;
-      }
+          #d2ccc0 100%);
+      border-radius: 3px 0 0 3px;
+      padding: 44px 34px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
 
-      /* Textura de couro na capa */
-      .book-cover::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-image: repeating-linear-gradient(
+    /* Textura de couro na capa */
+    .book-cover::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        repeating-linear-gradient(
           0deg,
           transparent,
           transparent 3px,
-          rgba(74, 93, 35, 0.02) 3px,
-          rgba(74, 93, 35, 0.02) 4px
+          rgba(74,93,35,0.02) 3px,
+          rgba(74,93,35,0.02) 4px
         );
-        pointer-events: none;
-      }
+      pointer-events: none;
+    }
 
-      /* Borda interna da capa */
-      .book-cover::after {
-        content: "";
-        position: absolute;
-        inset: 10px;
-        border: 1px solid rgba(114, 47, 55, 0.35);
-        border-radius: 2px;
-        pointer-events: none;
-      }
+    /* Borda interna da capa */
+    .book-cover::after {
+      content: '';
+      position: absolute;
+      inset: 10px;
+      border: 1px solid rgba(114,47,55,0.35);
+      border-radius: 2px;
+      pointer-events: none;
+    }
 
-      /* Ornamento de canto */
-      .cover-corner {
-        position: absolute;
-        width: 22px;
-        height: 22px;
-        border-color: rgba(114, 47, 55, 0.5);
-        border-style: solid;
-      }
-      .cover-corner.tl {
-        top: 18px;
-        left: 18px;
-        border-width: 2px 0 0 2px;
-      }
-      .cover-corner.tr {
-        top: 18px;
-        right: 18px;
-        border-width: 2px 2px 0 0;
-      }
-      .cover-corner.bl {
-        bottom: 18px;
-        left: 18px;
-        border-width: 0 0 2px 2px;
-      }
-      .cover-corner.br {
-        bottom: 18px;
-        right: 18px;
-        border-width: 0 2px 2px 0;
-      }
+    /* Ornamento de canto */
+    .cover-corner {
+      position: absolute;
+      width: 22px; height: 22px;
+      border-color: rgba(114,47,55,0.5);
+      border-style: solid;
+    }
+    .cover-corner.tl { top: 18px; left: 18px; border-width: 2px 0 0 2px; }
+    .cover-corner.tr { top: 18px; right: 18px; border-width: 2px 2px 0 0; }
+    .cover-corner.bl { bottom: 18px; left: 18px; border-width: 0 0 2px 2px; }
+    .cover-corner.br { bottom: 18px; right: 18px; border-width: 0 2px 2px 0; }
 
-      /* Branding da capa */
-      .cover-brand {
-        position: relative;
-        z-index: 1;
-      }
-      .cover-icon {
-        font-size: 2.6rem;
-        display: block;
-        margin-bottom: 12px;
-        filter: drop-shadow(0 0 14px rgba(74, 93, 35, 0.35));
-      }
-      .cover-title {
-        font-family: "Playfair Display", Georgia, serif;
-        font-size: 1.9rem;
-        font-weight: 700;
-        color: #2c241b;
-        letter-spacing: -0.02em;
-        line-height: 1.15;
-      }
-      .cover-title em {
-        font-style: italic;
-        color: #722f37;
-      }
-      .cover-tagline {
-        margin-top: 10px;
-        font-size: 0.72rem;
-        font-weight: 400;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: rgba(114, 47, 55, 0.55);
-      }
+    /* Branding da capa */
+    .cover-brand {
+      position: relative; z-index: 1;
+    }
+    .cover-icon {
+      font-size: 2.6rem;
+      display: block;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 0 14px rgba(74,93,35,0.35));
+    }
+    .cover-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 3.8rem;
+      font-weight: 700;
+      color: #2C241B;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+    .cover-title em { font-style: italic; color: #722F37; }
+    .cover-tagline {
+      margin-top: 10px;
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(114,47,55,0.55);
+    }
 
-      /* Linha separadora decorativa */
-      .cover-divider {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin: 20px 0;
-      }
-      .cover-divider span {
-        flex: 1;
-        height: 1px;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(114, 47, 55, 0.45),
-          transparent
-        );
-      }
-      .cover-divider i {
-        font-style: normal;
-        font-size: 0.75rem;
-        color: rgba(114, 47, 55, 0.55);
-      }
+    /* Linha separadora decorativa */
+    .cover-divider {
+      position: relative; z-index: 1;
+      display: flex; align-items: center; gap: 10px;
+      margin: 20px 0;
+    }
+    .cover-divider span {
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(114,47,55,0.45), transparent);
+    }
+    .cover-divider i {
+      font-style: normal;
+      font-size: 0.75rem;
+      color: rgba(114,47,55,0.55);
+    }
 
-      /* Citação na capa */
-      .cover-quote {
-        position: relative;
-        z-index: 1;
-      }
-      .cover-quote p {
-        font-family: "IM Fell English", Georgia, serif;
-        font-style: italic;
-        font-size: 0.82rem;
-        line-height: 1.65;
-        color: rgba(44, 36, 27, 0.6);
-      }
-      .cover-quote footer {
-        margin-top: 8px;
-        font-size: 0.68rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: rgba(114, 47, 55, 0.5);
-      }
+    /* Citação na capa */
+    .cover-quote {
+      position: relative; z-index: 1;
+    }
+    .cover-quote p {
+      font-family: 'IM Fell English', Georgia, serif;
+      font-style: italic;
+      font-size: 0.82rem;
+      line-height: 1.65;
+      color: rgba(44,36,27,0.6);
+    }
+    .cover-quote footer {
+      margin-top: 8px;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(114,47,55,0.5);
+    }
 
-      /* Número de página decorativo */
-      .cover-page-num {
-        position: relative;
-        z-index: 1;
-        font-size: 0.68rem;
-        color: rgba(114, 47, 55, 0.4);
-        letter-spacing: 0.08em;
-        text-align: center;
-      }
+    /* Número de página decorativo */
+    .cover-page-num {
+      position: relative; z-index: 1;
+      font-size: 0.68rem;
+      color: rgba(114,47,55,0.4);
+      letter-spacing: 0.08em;
+      text-align: center;
+    }
 
-      /* ── Lombada ────────────────────────────────────────────── */
-      .book-spine {
-        flex: 0 0 14px;
-        background: linear-gradient(
-          90deg,
-          #c4bfb8 0%,
-          #d2cdc5 20%,
-          #dbd6ce 50%,
-          #d2cdc5 80%,
-          #bcb7b0 100%
-        );
-        box-shadow:
-          inset 3px 0 8px rgba(0, 0, 0, 0.08),
-          inset -2px 0 6px rgba(0, 0, 0, 0.05),
-          inset 0 0 0 1px rgba(0, 0, 0, 0.04);
-        position: relative;
-      }
-      .book-spine::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 50%;
-        width: 1px;
-        background: linear-gradient(
-          180deg,
-          transparent 0%,
-          rgba(74, 93, 35, 0.2) 15%,
-          rgba(74, 93, 35, 0.3) 50%,
-          rgba(74, 93, 35, 0.2) 85%,
-          transparent 100%
-        );
-      }
+    /* ── Lombada ────────────────────────────────────────────── */
+    .book-spine {
+      flex: 0 0 14px;
+      background: linear-gradient(90deg,
+        #c4bfb8 0%,
+        #d2cdc5 20%,
+        #dbd6ce 50%,
+        #d2cdc5 80%,
+        #bcb7b0 100%);
+      box-shadow:
+        inset 3px  0 8px rgba(0,0,0,0.08),
+        inset -2px 0 6px rgba(0,0,0,0.05),
+        inset 0 0 0 1px rgba(0,0,0,0.04);
+      position: relative;
+    }
+    .book-spine::before {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0; left: 50%;
+      width: 1px;
+      background: linear-gradient(180deg,
+        transparent 0%,
+        rgba(74,93,35,0.2) 15%,
+        rgba(74,93,35,0.3) 50%,
+        rgba(74,93,35,0.2) 85%,
+        transparent 100%);
+    }
 
-      /* ── Página direita (formulário) ────────────────────────── */
-      .book-page {
-        flex: 1;
-        background: #ffffff;
-        border-radius: 0 10px 10px 0;
-        padding: 40px 38px 34px;
-        position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(74, 93, 35, 0.15);
-        border-left: none;
-      }
+    /* ── Página direita (formulário) ────────────────────────── */
+    .book-page {
+      flex: 1;
+      background: #FFFFFF;
+      border-radius: 0 10px 10px 0;
+      padding: 40px 38px 34px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(74,93,35,0.15);
+      border-left: none;
+    }
 
-      /* Linhas de página pautada */
-      .book-page::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-image: repeating-linear-gradient(
-          180deg,
-          transparent,
-          transparent 28px,
-          rgba(74, 93, 35, 0.04) 28px,
-          rgba(74, 93, 35, 0.04) 29px
-        );
-        pointer-events: none;
-      }
+    /* Linhas de página pautada */
+    .book-page::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: repeating-linear-gradient(
+        180deg,
+        transparent,
+        transparent 28px,
+        rgba(74,93,35,0.04) 28px,
+        rgba(74,93,35,0.04) 29px
+      );
+      pointer-events: none;
+    }
 
-      /* Linha de acento superior */
-      .book-page::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: linear-gradient(
-          90deg,
-          transparent 0%,
-          #4a5d23 30%,
-          #722f37 55%,
-          transparent 100%
-        );
-      }
+    /* Linha de acento superior */
+    .book-page::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        #4A5D23 30%,
+        #722F37 55%,
+        transparent 100%);
+    }
 
-      /* ── Cabeçalho da página ────────────────────────────────── */
-      .page-header {
-        margin-bottom: 26px;
-        position: relative;
-        z-index: 1;
-      }
-      .page-header h1 {
-        font-family: "Playfair Display", Georgia, serif;
-        font-size: 1.55rem;
-        font-weight: 700;
-        color: #2c241b;
-        letter-spacing: -0.02em;
-        margin-bottom: 5px;
-      }
-      .page-header p {
-        font-size: 0.81rem;
-        color: rgba(44, 36, 27, 0.55);
-        font-weight: 300;
-      }
+    /* ── Cabeçalho da página ────────────────────────────────── */
+    .page-header {
+      margin-bottom: 26px;
+      position: relative; z-index: 1;
+    }
+    .page-header h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: #2C241B;
+      letter-spacing: -0.02em;
+      margin-bottom: 5px;
+    }
+    .page-header p {
+      font-size: 0.81rem;
+      color: rgba(44,36,27,0.55);
+      font-weight: 300;
+    }
 
-      /* ── Alertas ────────────────────────────────────────────── */
-      .alert {
-        padding: 10px 14px;
-        border-radius: 4px;
-        font-size: 0.82rem;
-        font-weight: 500;
-        margin-bottom: 18px;
-        border: 1px solid;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        position: relative;
-        z-index: 1;
-      }
-      .alert-erro {
-        background: rgba(114, 47, 55, 0.08);
-        border-color: rgba(114, 47, 55, 0.25);
-        color: #722f37;
-      }
-      .alert-erro::before {
-        content: "✕";
-        font-weight: 700;
-      }
-      .alert-sucesso {
-        background: rgba(74, 93, 35, 0.08);
-        border-color: rgba(74, 93, 35, 0.25);
-        color: #4a5d23;
-      }
-      .alert-sucesso::before {
-        content: "✓";
-        font-weight: 700;
-      }
+    /* ── Alertas ────────────────────────────────────────────── */
+    .alert {
+      padding: 10px 14px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      margin-bottom: 18px;
+      border: 1px solid;
+      display: flex; align-items: center; gap: 8px;
+      position: relative; z-index: 1;
+    }
+    .alert-erro  { background: rgba(114,47,55,0.08); border-color: rgba(114,47,55,0.25); color: #722F37; }
+    .alert-erro::before  { content: '✕'; font-weight: 700; }
+    .alert-sucesso { background: rgba(74,93,35,0.08); border-color: rgba(74,93,35,0.25); color: #4A5D23; }
+    .alert-sucesso::before { content: '✓'; font-weight: 700; }
 
-      /* ── Campos ─────────────────────────────────────────────── */
-      .field {
-        margin-bottom: 16px;
-        position: relative;
-        z-index: 1;
-      }
-      .field label {
-        display: block;
-        font-size: 0.68rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: rgba(74, 93, 35, 0.65);
-        margin-bottom: 6px;
-      }
-      .field input {
-        width: 100%;
-        padding: 11px 15px;
-        background: #f9f6f0;
-        border: 1px solid rgba(74, 93, 35, 0.2);
-        border-radius: 4px;
-        color: #2c241b;
-        font-size: 0.9rem;
-        font-family: "DM Sans", sans-serif;
-        outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
-      }
-      .field input::placeholder {
-        color: rgba(44, 36, 27, 0.3);
-      }
-      .field input:focus {
-        border-color: #4a5d23;
-        box-shadow: 0 0 0 3px rgba(74, 93, 35, 0.12);
-      }
+    /* ── Campos ─────────────────────────────────────────────── */
+    .field { margin-bottom: 16px; position: relative; z-index: 1; }
+    .field label {
+      display: block;
+      font-size: 0.68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: rgba(74,93,35,0.65); margin-bottom: 6px;
+    }
+    .field input {
+      width: 100%;
+      padding: 11px 15px;
+      background: #F9F6F0;
+      border: 1px solid rgba(74,93,35,0.2);
+      border-radius: 4px;
+      color: #2C241B;
+      font-size: 0.9rem;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input::placeholder { color: rgba(44,36,27,0.3); }
+    .field input:focus {
+      border-color: #4A5D23;
+      box-shadow: 0 0 0 3px rgba(74,93,35,0.12);
+    }
 
-      /* ── Botão ──────────────────────────────────────────────── */
-      .btn-entrar {
-        width: 100%;
-        padding: 13px;
-        margin-top: 6px;
-        background: transparent;
-        border: 1px solid #4a5d23;
-        border-radius: 4px;
-        color: #4a5d23;
-        font-size: 0.86rem;
-        font-weight: 700;
-        font-family: "DM Sans", sans-serif;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        cursor: pointer;
-        transition: all 0.22s ease;
-        position: relative;
-        overflow: hidden;
-        z-index: 1;
-      }
-      .btn-entrar::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(74, 93, 35, 0.12),
-          transparent
-        );
-        transform: translateX(-100%);
-        transition: transform 0.5s ease;
-      }
-      .btn-entrar:hover {
-        background: rgba(74, 93, 35, 0.08);
-        box-shadow: 4px 4px 0 rgba(114, 47, 55, 0.25);
-      }
-      .btn-entrar:hover::before {
-        transform: translateX(100%);
-      }
-      .btn-entrar:active {
-        transform: scale(0.98);
-      }
+    /* ── Botão ──────────────────────────────────────────────── */
+    .btn-entrar {
+      width: 100%; padding: 13px; margin-top: 6px;
+      background: transparent;
+      border: 1px solid #4A5D23;
+      border-radius: 4px;
+      color: #4A5D23;
+      font-size: 0.86rem; font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      position: relative; overflow: hidden; z-index: 1;
+    }
+    .btn-entrar::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(74,93,35,0.12), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.5s ease;
+    }
+    .btn-entrar:hover {
+      background: rgba(74,93,35,0.08);
+      box-shadow: 4px 4px 0 rgba(114,47,55,0.25);
+    }
+    .btn-entrar:hover::before { transform: translateX(100%); }
+    .btn-entrar:active { transform: scale(0.98); }
 
-      /* ── Divisor ────────────────────────────────────────────── */
-      .divider {
-        border: none;
-        border-top: 1px solid rgba(74, 93, 35, 0.15);
-        margin: 22px 0 16px;
-        position: relative;
-        z-index: 1;
+    /* ── Divisor ────────────────────────────────────────────── */
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(74,93,35,0.15);
+      margin: 22px 0 16px;
+      position: relative; z-index: 1;
+    }
+
+    /* ── Links ──────────────────────────────────────────────── */
+    .panel-links {
+      display: flex; justify-content: center; gap: 26px;
+      position: relative; z-index: 1;
+    }
+    .panel-link {
+      font-size: 0.77rem; color: rgba(74,93,35,0.55);
+      text-decoration: none; transition: color 0.2s; letter-spacing: 0.02em;
+    }
+    .panel-link:hover { color: #4A5D23; }
+
+    /* Nota de rodapé */
+    .footnote {
+      margin-top: 20px;
+      font-size: 0.73rem;
+      color: rgba(44,36,27,0.4);
+      text-align: center; letter-spacing: 0.03em;
+    }
+
+    /* ── Responsivo ─────────────────────────────────────────── */
+    @media (max-width: 680px) {
+      body { overflow: auto; justify-content: flex-start; padding: 64px 0 40px; }
+      .book {
+        flex-direction: column;
+        border-radius: 8px;
+        transform: none;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
       }
-
-      /* ── Links ──────────────────────────────────────────────── */
-      .panel-links {
-        display: flex;
-        justify-content: center;
-        gap: 26px;
-        position: relative;
-        z-index: 1;
+      .book:hover { transform: none; }
+      .book-cover {
+        flex: none; border-radius: 8px 8px 0 0;
+        padding: 28px 24px 20px;
       }
-      .panel-link {
-        font-size: 0.77rem;
-        color: rgba(74, 93, 35, 0.55);
-        text-decoration: none;
-        transition: color 0.2s;
-        letter-spacing: 0.02em;
-      }
-      .panel-link:hover {
-        color: #4a5d23;
-      }
+      .book-cover::after { display: none; }
+      .cover-corner { display: none; }
+      .cover-quote  { display: none; }
+      .book-spine   { flex: 0 0 6px; border-radius: 0; }
+      .book-page    { border-radius: 0 0 8px 8px; padding: 28px 24px 24px; border: 1px solid rgba(74,93,35,0.15); border-top: none; }
+      .bg-books     { display: none; }
+    }
 
-      /* Nota de rodapé */
-      .footnote {
-        margin-top: 20px;
-        font-size: 0.73rem;
-        color: rgba(44, 36, 27, 0.4);
-        text-align: center;
-        letter-spacing: 0.03em;
-      }
+  </style>
+</head>
+<body>
 
-      /* ── Responsivo ─────────────────────────────────────────── */
-      @media (max-width: 680px) {
-        body {
-          overflow: auto;
-          justify-content: flex-start;
-          padding: 64px 0 40px;
-        }
-        .book {
-          flex-direction: column;
-          border-radius: 8px;
-          transform: none;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-        }
-        .book:hover {
-          transform: none;
-        }
-        .book-cover {
-          flex: none;
-          border-radius: 8px 8px 0 0;
-          padding: 28px 24px 20px;
-        }
-        .book-cover::after {
-          display: none;
-        }
-        .cover-corner {
-          display: none;
-        }
-        .cover-quote {
-          display: none;
-        }
-        .book-spine {
-          flex: 0 0 6px;
-          border-radius: 0;
-        }
-        .book-page {
-          border-radius: 0 0 8px 8px;
-          padding: 28px 24px 24px;
-          border: 1px solid rgba(74, 93, 35, 0.15);
-          border-top: none;
-        }
-        .bg-books {
-          display: none;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Estantes de fundo -->
-    <div class="shelves-bg" aria-hidden="true">
-      <div class="shelf-line"></div>
-      <div class="shelf-line"></div>
-      <div class="shelf-line"></div>
-      <div class="shelf-line"></div>
-      <div class="bg-books" id="bgBooks"></div>
-    </div>
+  <!-- Estantes de fundo -->
+  <div class="shelves-bg" aria-hidden="true">
+    <div class="shelf-line"></div>
+    <div class="shelf-line"></div>
+    <div class="shelf-line"></div>
+    <div class="shelf-line"></div>
+    <div class="bg-books" id="bgBooks"></div>
+  </div>
 
-    <!-- Partículas -->
-    <div class="particles" aria-hidden="true">
-      <div
-        class="p"
-        style="width: 2px; height: 2px; left: 8%; top: 73%; --d: 10s; --dl: 0s; --dx: 14px"
-      >
-      </div>
-      <div
-        class="p"
-        style="width: 3px; height: 3px; left: 20%; top: 81%; --d: 12s; --dl: 1.8s; --dx: -12px"
-      >
-      </div>
-      <div
-        class="p"
-        style="width: 2px; height: 2px; left: 38%; top: 69%; --d: 9s; --dl: 0.6s; --dx: 20px"
-      >
-      </div>
-      <div
-        class="p"
-        style="width: 3px; height: 3px; left: 56%; top: 77%; --d: 14s; --dl: 3.2s; --dx: -16px"
-      >
-      </div>
-      <div
-        class="p"
-        style="width: 2px; height: 2px; left: 72%; top: 71%; --d: 11s; --dl: 0.4s; --dx: 10px"
-      >
-      </div>
-      <div
-        class="p"
-        style="width: 2px; height: 2px; left: 85%; top: 83%; --d: 13s; --dl: 2.0s; --dx: -9px"
-      >
-      </div>
-      <div
-        class="p"
-        style="width: 3px; height: 3px; left: 49%; top: 85%; --d: 8s; --dl: 1.2s; --dx: 18px"
-      >
-      </div>
-      <div
-        class="p"
-        style="width: 2px; height: 2px; left: 29%; top: 61%; --d: 15s; --dl: 4.5s; --dx: -11px"
-      >
-      </div>
-    </div>
+  <!-- Partículas -->
+  <div class="particles" aria-hidden="true">
+    <div class="p" style="width:2px;height:2px; left:8%;  top:73%; --d:10s; --dl:0s;   --dx:14px;"></div>
+    <div class="p" style="width:3px;height:3px; left:20%; top:81%; --d:12s; --dl:1.8s; --dx:-12px;"></div>
+    <div class="p" style="width:2px;height:2px; left:38%; top:69%; --d:9s;  --dl:0.6s; --dx:20px;"></div>
+    <div class="p" style="width:3px;height:3px; left:56%; top:77%; --d:14s; --dl:3.2s; --dx:-16px;"></div>
+    <div class="p" style="width:2px;height:2px; left:72%; top:71%; --d:11s; --dl:0.4s; --dx:10px;"></div>
+    <div class="p" style="width:2px;height:2px; left:85%; top:83%; --d:13s; --dl:2.0s; --dx:-9px;"></div>
+    <div class="p" style="width:3px;height:3px; left:49%; top:85%; --d:8s;  --dl:1.2s; --dx:18px;"></div>
+    <div class="p" style="width:2px;height:2px; left:29%; top:61%; --d:15s; --dl:4.5s; --dx:-11px;"></div>
+  </div>
 
-    <!-- Voltar -->
-    <a th:href="@{/}" href="/" class="back-link">← Início</a>
+  <!-- Voltar -->
+  <a th:href="@{/}" href="/" class="back-link">← Início</a>
 
-    <!-- Livro aberto -->
-    <main class="page-content">
-      <div class="book">
-        <!-- Capa / página esquerda -->
-        <div class="book-cover" aria-hidden="true">
-          <div class="cover-corner tl"></div>
-          <div class="cover-corner tr"></div>
-          <div class="cover-corner bl"></div>
-          <div class="cover-corner br"></div>
+  <!-- Livro aberto -->
+  <main class="page-content">
+    <div class="book">
 
-          <div class="cover-brand">
-            <span class="cover-icon">📚</span>
-            <div class="cover-title">Biblio<em>troca</em></div>
-            <div class="cover-tagline">Sua estante compartilhada</div>
-          </div>
+      <!-- Capa / página esquerda -->
+      <div class="book-cover" aria-hidden="true">
+        <div class="cover-corner tl"></div>
+        <div class="cover-corner tr"></div>
+        <div class="cover-corner bl"></div>
+        <div class="cover-corner br"></div>
 
-          <div class="cover-divider">
-            <span></span>
-            <i>✦</i>
-            <span></span>
-          </div>
-
-          <div class="cover-quote">
-            <p>"Um livro é um sonho que você segura nas mãos."</p>
-            <footer>— Neil Gaiman</footer>
-          </div>
-
-          <div class="cover-page-num">i</div>
+        <div class="cover-brand">
+          <span class="cover-icon">📚</span>
+          <div class="cover-title">Biblio<em>troca</em></div>
+          <div class="cover-tagline">Sua estante compartilhada</div>
         </div>
 
-        <!-- Lombada -->
-        <div class="book-spine"></div>
-
-        <!-- Página direita — formulário -->
-        <div class="book-page">
-          <div class="page-header">
-            <h1>Bem-vindo de volta</h1>
-            <p>Acesse sua conta para explorar e trocar livros.</p>
-          </div>
-
-          <!-- Alertas -->
-          <div th:if="${erro}" class="alert alert-erro" th:text="${erro}"></div>
-          <div th:if="${param.logout}" class="alert alert-sucesso">
-            Você saiu com sucesso.
-          </div>
-
-          <!-- Formulário unificado -->
-          <form th:action="@{/entrar}" action="/entrar" method="post">
-            <div class="field">
-              <label for="email">E-mail</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                placeholder="seu@email.com"
-                th:value="${emailAnterior}"
-              />
-            </div>
-
-            <div class="field">
-              <label for="senha">Senha</label>
-              <input
-                type="password"
-                id="senha"
-                name="senha"
-                required
-                placeholder="••••••••"
-              />
-            </div>
-
-            <button type="submit" class="btn-entrar">Abrir a biblioteca</button>
-          </form>
-
-          <hr class="divider" />
-
-          <div class="panel-links">
-            <a
-              th:href="@{/clientes/novo-cadastro}"
-              href="/clientes/novo-cadastro"
-              class="panel-link"
-            >Criar conta</a>
-            <a
-              th:href="@{/clientes/recuperar-senha}"
-              href="/clientes/recuperar-senha"
-              class="panel-link"
-            >Esqueceu a senha?</a>
-          </div>
+        <div class="cover-divider">
+          <span></span><i>✦</i><span></span>
         </div>
-        <!-- /book-page -->
+
+        <div class="cover-quote">
+          <p>"Um livro é um sonho que você segura nas mãos."</p>
+          <footer>— Neil Gaiman</footer>
+        </div>
+
+        <div class="cover-page-num">i</div>
       </div>
-      <!-- /book -->
 
-      <p class="footnote">Bibliotroca &mdash; Sistema de Troca de Livros</p>
-    </main>
+      <!-- Lombada -->
+      <div class="book-spine"></div>
 
-    <script>
-      (function () {
-        var paleta = [
-          "#4A5D23",
-          "#5a7029",
-          "#3d4e1d",
-          "#6b8535",
-          "#2C241B",
-          "#722F37",
-          "#8a3a44",
-          "#c8c0b0",
-          "#d4cec5",
-          "#e8e3da",
-          "#b5a890",
-          "#9aab6a",
-          "#7a9050",
-          "#ddd8ce",
-          "#c0bab0",
-        ];
-        var container = document.getElementById("bgBooks");
-        if (!container) return;
-        var n = Math.ceil(window.innerWidth / 8);
-        var html = "";
-        for (var i = 0; i < n; i++) {
-          var h = 40 + Math.random() * 55;
-          var w = 5 + Math.random() * 10;
-          var c = paleta[Math.floor(Math.random() * paleta.length)];
-          html += '<div class="bg-book" style="width:' + w + "px;height:" + h +
-            "px;background:" + c + '"></div>';
-        }
-        container.innerHTML = html;
-      })();
-    </script>
-  </body>
+      <!-- Página direita — formulário -->
+      <div class="book-page">
+
+        <div class="page-header">
+          <h1>Bem-vindo de volta</h1>
+          <p>Acesse sua conta para explorar e trocar livros.</p>
+        </div>
+
+        <!-- Alertas -->
+        <div th:if="${erro}" class="alert alert-erro" th:text="${erro}"></div>
+        <div th:if="${param.logout}" class="alert alert-sucesso">
+          Você saiu com sucesso.
+        </div>
+
+        <!-- Formulário unificado -->
+        <form th:action="@{/entrar}" action="/entrar" method="post">
+
+          <div class="field">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email"
+                   required placeholder="seu@email.com"
+                   th:value="${emailAnterior}"/>
+          </div>
+
+          <div class="field">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha"
+                   required placeholder="••••••••"/>
+          </div>
+
+          <button type="submit" class="btn-entrar">Abrir a biblioteca</button>
+
+        </form>
+
+        <hr class="divider"/>
+
+        <div class="panel-links">
+          <a th:href="@{/clientes/novo-cadastro}" href="/clientes/novo-cadastro" class="panel-link">Criar conta</a>
+          <a th:href="@{/clientes/recuperar-senha}" href="/clientes/recuperar-senha" class="panel-link">Esqueceu a senha?</a>
+        </div>
+
+      </div><!-- /book-page -->
+    </div><!-- /book -->
+
+    <p class="footnote">Bibliotroca &mdash; Sistema de Troca de Livros</p>
+  </main>
+
+  <script>
+    (function() {
+      var paleta = [
+        '#4A5D23','#5a7029','#3d4e1d','#6b8535','#2C241B',
+        '#722F37','#8a3a44','#c8c0b0','#d4cec5','#e8e3da',
+        '#b5a890','#9aab6a','#7a9050','#ddd8ce','#c0bab0',
+      ];
+      var container = document.getElementById('bgBooks');
+      if (!container) return;
+      var n = Math.ceil(window.innerWidth / 8);
+      var html = '';
+      for (var i = 0; i < n; i++) {
+        var h = 40 + Math.random() * 55;
+        var w = 5  + Math.random() * 10;
+        var c = paleta[Math.floor(Math.random() * paleta.length)];
+        html += '<div class="bg-book" style="width:'+w+'px;height:'+h+'px;background:'+c+'"></div>';
+      }
+      container.innerHTML = html;
+    })();
+  </script>
+
+</body>
 </html>

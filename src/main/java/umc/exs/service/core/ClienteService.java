@@ -1,10 +1,17 @@
 package umc.exs.service.core;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Iterator;
+import java.util.UUID;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,7 +40,7 @@ import umc.exs.service.senha.SenhaService;
 @Slf4j
 @RequiredArgsConstructor
 public class ClienteService {
-
+    
     // Repositories
     private final ClienteRepository clienteRepository;
     private final CartaoRepository cartaoRepository;
@@ -106,6 +113,23 @@ public class ClienteService {
         atualizarCartoesManualmente(clienteExistente, dto.getCartoes());
 
         return clienteMapper.paraDTO(clienteRepository.save(clienteExistente));
+    }
+
+    @Transactional
+    public String uploadFotoPerfil(Long clienteId, MultipartFile foto) {
+        Cliente cliente = coreService.buscarPorId(clienteId);
+        try {
+            String nomeArquivo = UUID.randomUUID() + "_" + foto.getOriginalFilename();
+            Path destino = Paths.get("uploads/clientes/" + nomeArquivo);
+            Files.createDirectories(destino.getParent());
+            Files.copy(foto.getInputStream(), destino);
+            String url = "/uploads/clientes/" + nomeArquivo;
+            cliente.setFotoPerfil(url);
+            clienteRepository.save(cliente);
+            return url;
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao salvar foto de perfil.", e);
+        }
     }
 
     @Transactional
@@ -249,7 +273,7 @@ public class ClienteService {
                 iter.remove();
             }
         }
-
+        
         for (CartaoDTO cartaoDto : dtos) {
             Cartao cartao;
             if (cartaoDto.getId() != null && cartaoDto.getId() != 0) {
@@ -271,6 +295,7 @@ public class ClienteService {
     public Optional<Cliente> buscarEntidadePorEmail(String email) {
         return coreService.encontrarPorEmail(email);
     }
+
 
     // Métodos para o fluxo de PIX delegando para a CarteiraService
     @Transactional
@@ -295,7 +320,7 @@ public class ClienteService {
 
     public Optional<ClienteDTO> buscarClientePorEmail(String email) {
         log.debug("Orquestrando busca de cliente por e-mail: {}", email);
-
+        
         return coreService.encontrarPorEmail(email)
                 .map(clienteMapper::paraDTO);
     }
@@ -303,7 +328,7 @@ public class ClienteService {
     @Transactional
     public boolean validarTokenRecuperacao(String token) {
         log.debug("Orquestrando validação de token de recuperação: {}", token);
-
+        
         return senhaService.isTokenValido(token);
     }
 }

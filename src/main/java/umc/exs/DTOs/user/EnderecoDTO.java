@@ -67,3 +67,4 @@ public class EnderecoDTO {
  * Usado forms frontend, mappers entidades.
  * Sem validações anotadas (service layer).
  */
+

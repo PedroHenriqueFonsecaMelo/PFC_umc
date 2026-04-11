@@ -1,13 +1,13 @@
 /* === VARIÁVEIS DE COR — PALETA VINTAGE BIBLIOTROCA === */
 :root {
-  --ink: #2c241b;
-  --paper: #f9f6f0;
-  --cream: #ede8df;
-  --accent: #722f37;
-  --forest: #4a5d23;
-  --white: #ffffff;
-  --muted: #7a6e65;
-  --border: rgba(44, 36, 27, 0.15);
+  --ink:    #2C241B;
+  --paper:  #F9F6F0;
+  --cream:  #EDE8DF;
+  --accent: #722F37;
+  --forest: #4A5D23;
+  --white:  #FFFFFF;
+  --muted:  #7A6E65;
+  --border: rgba(44, 36, 27, .15);
 }
 
 /* === RESET BÁSICO === */
@@ -22,7 +22,7 @@
 
 /* === BODY === */
 body {
-  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--paper);
   color: var(--ink);
   line-height: 1.6;
@@ -32,15 +32,15 @@ body {
 /* === NAV DE RETORNO === */
 nav.page-nav {
   background: var(--ink);
-  padding: 0.5rem 5vw;
+  padding: .5rem 5vw;
   margin-bottom: 0;
 }
 
 nav.page-nav a {
   color: var(--paper);
-  font-family: "DM Sans", sans-serif;
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .75rem;
+  letter-spacing: .1em;
   text-transform: uppercase;
   text-decoration: none;
 }
@@ -67,17 +67,17 @@ nav.page-nav a:hover {
 }
 
 .page-header h1 {
-  font-family: "Playfair Display", Georgia, serif;
+  font-family: 'Playfair Display', Georgia, serif;
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--ink);
   border-bottom: 1px solid var(--border);
-  padding-bottom: 0.75rem;
-  margin-bottom: 0.5rem;
+  padding-bottom: .75rem;
+  margin-bottom: .5rem;
 }
 
 .page-header p {
-  font-family: "IM Fell English", Georgia, serif;
+  font-family: 'IM Fell English', Georgia, serif;
   font-style: italic;
   color: var(--muted);
   font-size: 1rem;
@@ -85,17 +85,17 @@ nav.page-nav a:hover {
 
 /* === TÍTULOS INTERNOS === */
 h1 {
-  font-family: "Playfair Display", Georgia, serif;
+  font-family: 'Playfair Display', Georgia, serif;
   color: var(--ink);
   font-weight: 700;
 }
 
 h2 {
-  font-family: "Playfair Display", Georgia, serif;
+  font-family: 'Playfair Display', Georgia, serif;
   color: var(--ink);
   font-weight: 600;
   border-bottom: 1px solid var(--border);
-  padding-bottom: 0.5rem;
+  padding-bottom: .5rem;
   margin-top: 1.25rem;
   margin-bottom: 1.5rem;
 }
@@ -103,28 +103,28 @@ h2 {
 /* === SEPARADOR === */
 hr {
   border: none;
-  border-top: 1px solid rgba(44, 36, 27, 0.12);
+  border-top: 1px solid rgba(44, 36, 27, .12);
   margin: 1.5rem 0;
 }
 
 /* === MENSAGENS (SUCESSO / ERRO) === */
 .mensagem {
-  padding: 0.75rem 1rem;
+  padding: .75rem 1rem;
   margin-bottom: 1.25rem;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: .9rem;
   border: 1px solid;
 }
 
 .mensagem.erro {
-  background: rgba(114, 47, 55, 0.08);
-  border-color: rgba(114, 47, 55, 0.3);
+  background: rgba(114, 47, 55, .08);
+  border-color: rgba(114, 47, 55, .3);
   color: var(--accent);
 }
 
 .mensagem.sucesso {
-  background: rgba(74, 93, 35, 0.08);
-  border-color: rgba(74, 93, 35, 0.3);
+  background: rgba(74, 93, 35, .08);
+  border-color: rgba(74, 93, 35, .3);
   color: var(--forest);
 }
 
@@ -136,11 +136,11 @@ fieldset {
 }
 
 legend {
-  font-family: "Playfair Display", Georgia, serif;
+  font-family: 'Playfair Display', Georgia, serif;
   font-size: 1rem;
   font-weight: 600;
   color: var(--ink);
-  padding: 0 0.5rem;
+  padding: 0 .5rem;
   width: auto;
 }
 
@@ -160,24 +160,24 @@ legend {
 /* === LABELS === */
 label {
   display: block;
-  font-size: 0.68rem;
+  font-size: .68rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: .12em;
   color: var(--muted);
-  margin-bottom: 0.4rem;
+  margin-bottom: .4rem;
 }
 
 /* Overrides para labels dentro de checkboxes */
 .form-group-checkboxes label {
-  font-size: 0.9rem;
+  font-size: .9rem;
   font-weight: 400;
   text-transform: none;
   letter-spacing: 0;
   color: var(--ink);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: .5rem;
   cursor: pointer;
 }
 
@@ -189,14 +189,14 @@ input[type="password"],
 select,
 textarea {
   width: 100%;
-  padding: 0.7rem 0.9rem;
-  border: 1.5px solid rgba(44, 36, 27, 0.18);
+  padding: .7rem .9rem;
+  border: 1.5px solid rgba(44, 36, 27, .18);
   background: var(--paper);
   color: var(--ink);
-  font-family: "DM Sans", sans-serif;
-  font-size: 0.95rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: border-color .2s ease;
   appearance: auto;
 }
 
@@ -249,7 +249,7 @@ input[readonly] {
 .form-group-checkboxes {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: .5rem;
   margin-bottom: 1rem;
 }
 
@@ -259,24 +259,24 @@ input[readonly] {
   overflow-y: auto;
   padding-right: 8px;
   border: 1px solid var(--border);
-  margin: 0.75rem 0;
+  margin: .75rem 0;
 }
 
 /* === BOTÕES === */
 .btn {
   display: inline-block;
-  padding: 0.75rem 2rem;
+  padding: .75rem 2rem;
   background: var(--ink);
   color: var(--paper);
   border: 2px solid var(--ink);
-  font-family: "DM Sans", sans-serif;
-  font-size: 0.78rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .78rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: .1em;
   text-transform: uppercase;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background .2s ease, color .2s ease;
 }
 
 .btn:hover {
@@ -286,18 +286,18 @@ input[readonly] {
 
 .btn-primary {
   display: inline-block;
-  padding: 0.75rem 2rem;
+  padding: .75rem 2rem;
   background: var(--ink);
   color: var(--paper);
   border: 2px solid var(--ink);
-  font-family: "DM Sans", sans-serif;
-  font-size: 0.78rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .78rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: .1em;
   text-transform: uppercase;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background .2s ease, color .2s ease;
 }
 
 .btn-primary:hover {
@@ -307,18 +307,18 @@ input[readonly] {
 
 .btn-secondary {
   display: inline-block;
-  padding: 0.75rem 2rem;
+  padding: .75rem 2rem;
   background: transparent;
   color: var(--ink);
   border: 2px solid var(--ink);
-  font-family: "DM Sans", sans-serif;
-  font-size: 0.78rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .78rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: .1em;
   text-transform: uppercase;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background .2s ease, color .2s ease;
 }
 
 .btn-secondary:hover {
@@ -329,11 +329,11 @@ input[readonly] {
 /* Links de perigo / ação textual */
 .btn-link-danger,
 .btn-link-danger-2 {
-  font-family: "DM Sans", sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-weight: 600;
   color: var(--accent);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: .9rem;
   background: none;
   border: none;
   cursor: pointer;
@@ -347,10 +347,10 @@ input[readonly] {
 /* Link secundário bordô */
 .btn-link-secondary {
   color: var(--accent);
-  font-size: 0.85rem;
+  font-size: .85rem;
   text-decoration: none;
   border-bottom: 1px solid var(--accent);
-  font-family: "DM Sans", sans-serif;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .btn-link-secondary:hover {
@@ -360,7 +360,7 @@ input[readonly] {
 
 /* === GRUPOS DE AÇÕES === */
 .form-actions-top {
-  margin: 0.75rem 0 1.25rem 0;
+  margin: .75rem 0 1.25rem 0;
 }
 
 .form-actions-bottom {
@@ -434,9 +434,9 @@ input[readonly] {
 }
 
 .update-details p {
-  font-size: 0.95rem;
+  font-size: .95rem;
   color: var(--ink);
-  margin-bottom: 0.6rem;
+  margin-bottom: .6rem;
 }
 
 .update-details p:last-child {

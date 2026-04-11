@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpServletResponse;
 import umc.exs.DTOs.auth.LoginDTO;
+import umc.exs.repository.AdminRepository;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
 import umc.exs.service.log.LogAuditoriaService;
@@ -29,15 +30,15 @@ public class AdminViewController {
     private final JwtUserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final AdminRepository adminRepository;
     private final LogAuditoriaService logAuditoriaService;
 
-    /**
-     * Exibe página login admin.
-     * Prepara LoginDTO model.
-     * 
-     * @param model LoginDTO
-     * @return admin_login.html
-     */
+/**
+ * Exibe página login admin.
+ * Prepara LoginDTO model.
+ * @param model LoginDTO
+ * @return admin_login.html
+ */
     @GetMapping("/login")
     public String loginPage(Model model) {
 
@@ -47,12 +48,12 @@ public class AdminViewController {
         return "admin/admin_login";
     }
 
-    /**
-     * Processa login admin.
-     * Valida ROLE_ADMIN + senha, gera JWT cookie.
-     * Config SecurityContext, redirect painel.
-     * Trata erros 401/404.
-     */
+/**
+ * Processa login admin.
+ * Valida ROLE_ADMIN + senha, gera JWT cookie.
+ * Config SecurityContext, redirect painel.
+ * Trata erros 401/404.
+ */
     @PostMapping("/login")
     public String processLogin(
 
@@ -83,8 +84,7 @@ public class AdminViewController {
             jwtUtil.addTokenCookie(response, token);
 
             // Configura a autenticação no contexto de segurança
-            Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null,
-                    userDetails.getAuthorities());
+            Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(auth);
 
             // Armazena o token no modelo para ser usado pelo JavaScript
@@ -95,42 +95,43 @@ public class AdminViewController {
             model.addAttribute("erro", "E-mail ou senha inválidos.");
             return "admin/admin_login";
 
-        }
     }
+}
 
-    /**
-     * DESCRIÇÃO DO ARQUIVO:
-     * Controller web painel admin (login/logout/painel).
-     * Gerencia /admin/login, /painel, /sair com JWT + SecurityContext.
-     * Valida ROLE_ADMIN, PasswordEncoder, retorna templates Thymeleaf.
-     * Cookie JWT HTTP-only para sessões admin.
-     */
+/**
+ * DESCRIÇÃO DO ARQUIVO:
+ * Controller web painel admin (login/logout/painel).
+ * Gerencia /admin/login, /painel, /sair com JWT + SecurityContext.
+ * Valida ROLE_ADMIN, PasswordEncoder, retorna templates Thymeleaf.
+ * Cookie JWT HTTP-only para sessões admin.
+ */
 
-    /**
-     * Exibe painel admin HTML.
-     * Apenas template painel_admin.html.
-     * Sem lógica adicional.
-     */
+
+/**
+ * Exibe painel admin HTML.
+ * Apenas template painel_admin.html.
+ * Sem lógica adicional.
+ */
     @GetMapping("/painel")
     public String painelAdmin() {
 
         return "admin/painel_admin";
     }
 
-    /**
-     * Exibe dashboard administrativa com métricas e gráficos.
-     */
+/**
+ * Exibe dashboard administrativa com métricas e gráficos.
+ */
     @GetMapping("/dashboard")
     public String dashboard() {
 
         return "admin/dashboard";
     }
 
-    /**
-     * Logout admin.
-     * Clear JWT cookie + SecurityContext.
-     * Redirect admin/login?logout.
-     */
+/**
+ * Logout admin.
+ * Clear JWT cookie + SecurityContext.
+ * Redirect admin/login?logout.
+ */
     @GetMapping("/audit")
     public String auditoria(Model model) {
         model.addAttribute("logs", logAuditoriaService.buscarTodosLogs());

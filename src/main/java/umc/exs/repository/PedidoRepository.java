@@ -23,10 +23,7 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<Pedido> findByCompradorIdAndStatusEnvioNotInOrderByDataCompraDesc(
             Long compradorId, List<StatusEnvio> statusExcluidos);
 
-    /**
-     * Pedidos realizados a partir de uma data (para agrupamento mensal no
-     * dashboard).
-     */
+    /** Pedidos realizados a partir de uma data (para agrupamento mensal no dashboard). */
     List<Pedido> findByDataCompraAfter(LocalDateTime data);
 
     /** Soma total de tokens gastos em pedidos (tokens utilizados). */

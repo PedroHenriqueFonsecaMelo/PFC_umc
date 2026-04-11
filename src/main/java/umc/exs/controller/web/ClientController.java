@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -110,7 +111,6 @@ public class ClientController {
      * Registra cliente completo (end/ cartao).
      * Valida termos, salvaCompleto ClienteService.
      * Autentica cookie, redirect perfil.
-     * 
      * @param signupDTO cliente, enderecoDTO, cartaoDTO
      */
     @PostMapping("/cadastro-completo")
@@ -194,8 +194,7 @@ public class ClientController {
     @GetMapping("/meu-perfil-json")
     @ResponseBody
     public ResponseEntity<?> perfilJson(@AuthenticationPrincipal UserDetails user) {
-        if (user == null)
-            return ResponseEntity.status(401).body("Não autenticado.");
+        if (user == null) return ResponseEntity.status(401).body("Não autenticado.");
         return clienteService.buscarClientePorEmail(user.getUsername())
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(404).body("Cliente não encontrado."));
@@ -206,9 +205,17 @@ public class ClientController {
      */
     @GetMapping("/minhas-compras")
     public String minhasCompras(@AuthenticationPrincipal UserDetails user) {
-        if (user == null)
-            return "redirect:/clientes/login";
+        if (user == null) return "redirect:/clientes/login";
         return "cliente/minhas-compras";
+    }
+
+    @PostMapping("/foto-perfil")
+    public String uploadFotoPerfil(@RequestParam("foto") MultipartFile foto,
+            @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
+        Long id = clienteService.buscarClientePorEmail(user.getUsername()).map(ClienteDTO::getId).orElseThrow();
+        clienteService.uploadFotoPerfil(id, foto);
+        ra.addFlashAttribute("sucesso", "Foto de perfil atualizada!");
+        return "redirect:/clientes/meu-perfil";
     }
 
     @PostMapping("/atualizar")

@@ -1,7 +1,6 @@
 # 📂 Documentação de Model
 
 Esta seção documenta a camada de modelo do projeto, incluindo:
-
 1. **Entidades** - Classes que mapeiam tabelas do banco de dados
 2. **Repositories** - Interfaces para acesso a dados (DAO Pattern)
 3. **DTOs** - Objetos para transferência de dados
@@ -11,9 +10,7 @@ Esta seção documenta a camada de modelo do projeto, incluindo:
 
 ## O que são Entidades?
 
-**Entidades** são classes Java anotadas com `@Entity` que representam tabelas no
-banco de dados. Cada instância de uma entidade corresponde a uma linha na
-tabela.
+**Entidades** são classes Java anotadas com `@Entity` que representam tabelas no banco de dados. Cada instância de uma entidade corresponde a uma linha na tabela.
 
 ### Características das Entidades
 
@@ -30,32 +27,31 @@ tabela.
 
 **Localização**: `src/main/java/umc/exs/model/entidades/usuario/Cliente.java`
 
-**Descrição**: Entidade principal que representa os usuários/clientes do
-sistema.
+**Descrição**: Entidade principal que representa os usuários/clientes do sistema.
 
 **Tabela**: `users`
 
 **Campos**:
 
-| Campo       | Tipo          | Descrição                    |
-| ----------- | ------------- | ---------------------------- |
-| id          | Long          | Chave primária               |
-| senha       | String        | Senha criptografada (BCrypt) |
-| nome        | String        | Nome completo                |
-| datanasc    | String        | Data de nascimento           |
-| gen         | Genero        | Gênero (M, F, OUTRO)         |
-| cpf         | String        | CPF único                    |
-| email       | String        | Email único                  |
-| tentativas  | int           | Tentativas de login falhadas |
-| bloqueada   | boolean       | Status de bloqueio           |
-| dataCriacao | LocalDateTime | Data de cadastro             |
-| saldoTokens | Double        | Saldo de tokens              |
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | Long | Chave primária |
+| senha | String | Senha criptografada (BCrypt) |
+| nome | String | Nome completo |
+| datanasc | String | Data de nascimento |
+| gen | Genero | Gênero (M, F, OUTRO) |
+| cpf | String | CPF único |
+| email | String | Email único |
+| tentativas | int | Tentativas de login falhadas |
+| bloqueada | boolean | Status de bloqueio |
+| dataCriacao | LocalDateTime | Data de cadastro |
+| saldoTokens | Double | Saldo de tokens |
 
 **Relacionamentos**:
 
-| Tipo       | Entidade | Descrição            |
-| ---------- | -------- | -------------------- |
-| ManyToMany | Cartao   | Cartões do cliente   |
+| Tipo | Entidade | Descrição |
+|------|----------|-----------|
+| ManyToMany | Cartao | Cartões do cliente |
 | ManyToMany | Endereco | Endereços do cliente |
 
 **Métodos de Negócio**:
@@ -84,24 +80,24 @@ public void resetarTentativas() {
 
 **Campos**:
 
-| Campo          | Tipo   | Descrição                |
-| -------------- | ------ | ------------------------ |
-| id             | Long   | Chave primária           |
-| pais           | String | País                     |
-| cep            | String | CEP                      |
-| estado         | String | Estado                   |
-| cidade         | String | Cidade                   |
-| rua            | String | Rua                      |
-| bairro         | String | Bairro                   |
-| numero         | String | Número                   |
-| complemento    | String | Complemento              |
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | Long | Chave primária |
+| pais | String | País |
+| cep | String | CEP |
+| estado | String | Estado |
+| cidade | String | Cidade |
+| rua | String | Rua |
+| bairro | String | Bairro |
+| numero | String | Número |
+| complemento | String | Complemento |
 | tipoResidencia | String | Tipo (casa, apartamento) |
 
 **Relacionamentos**:
 
-| Tipo       | Entidade | Descrição                       |
-| ---------- | -------- | ------------------------------- |
-| ManyToMany | Cliente  | Clientes que usam este endereço |
+| Tipo | Entidade | Descrição |
+|------|----------|-----------|
+| ManyToMany | Cliente | Clientes que usam este endereço |
 
 ---
 
@@ -113,60 +109,58 @@ public void resetarTentativas() {
 
 **Campos**:
 
-| Campo       | Tipo   | Descrição                   |
-| ----------- | ------ | --------------------------- |
-| id          | Long   | Chave primária              |
-| numero      | String | Número do cartão (único)    |
-| bandeira    | String | Bandeira (Visa, Mastercard) |
-| nomeTitular | String | Nome do titular             |
-| validade    | String | Validade (MM/AA)            |
-| cpfTitular  | String | CPF do titular              |
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | Long | Chave primária |
+| numero | String | Número do cartão (único) |
+| bandeira | String | Bandeira (Visa, Mastercard) |
+| nomeTitular | String | Nome do titular |
+| validade | String | Validade (MM/AA) |
+| cpfTitular | String | CPF do titular |
 
 **Relacionamentos**:
 
-| Tipo       | Entidade | Descrição                     |
-| ---------- | -------- | ----------------------------- |
-| ManyToMany | Cliente  | Clientes que usam este cartão |
+| Tipo | Entidade | Descrição |
+|------|----------|-----------|
+| ManyToMany | Cliente | Clientes que usam este cartão |
 
 ---
 
 ### 4. LivroAnuncio
 
-**Localização**:
-`src/main/java/umc/exs/model/entidades/foundation/LivroAnuncio.java`
+**Localização**: `src/main/java/umc/exs/model/entidades/foundation/LivroAnuncio.java`
 
 **Descrição**: Entidade que representa um anúncio de livro à venda.
 
 **Campos**:
 
-| Campo               | Tipo          | Descrição                  |
-| ------------------- | ------------- | -------------------------- |
-| id                  | Long          | Chave primária             |
-| titulo              | String        | Título do livro            |
-| autor               | String        | Autor                      |
-| isbn                | String        | ISBN                       |
-| fotoUrl             | String        | URL da foto                |
-| vendedor            | Cliente       | Vendedor (ManyToOne)       |
-| dataAnuncio         | LocalDateTime | Data do anúncio            |
-| aprovado            | Boolean       | Status de aprovação        |
-| precoAprovado       | Double        | Preço definido pelo admin  |
-| estadoAprovado      | EstadoLivro   | Estado definido pelo admin |
-| comentarioAprovacao | String        | Comentário do admin        |
-| dataAprovacao       | LocalDateTime | Data de aprovação          |
-| adminAprovadorId    | Long          | ID do admin aprovador      |
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | Long | Chave primária |
+| titulo | String | Título do livro |
+| autor | String | Autor |
+| isbn | String | ISBN |
+| fotoUrl | String | URL da foto |
+| vendedor | Cliente | Vendedor (ManyToOne) |
+| dataAnuncio | LocalDateTime | Data do anúncio |
+| aprovado | Boolean | Status de aprovação |
+| precoAprovado | Double | Preço definido pelo admin |
+| estadoAprovado | EstadoLivro | Estado definido pelo admin |
+| comentarioAprovacao | String | Comentário do admin |
+| dataAprovacao | LocalDateTime | Data de aprovação |
+| adminAprovadorId | Long | ID do admin aprovador |
 
 **Relacionamentos**:
 
-| Tipo      | Entidade | Descrição         |
-| --------- | -------- | ----------------- |
-| ManyToOne | Cliente  | Vendedor do livro |
+| Tipo | Entidade | Descrição |
+|------|----------|-----------|
+| ManyToOne | Cliente | Vendedor do livro |
 
 ---
 
 ### 5. Administrador
 
-**Localização**:
-`src/main/java/umc/exs/model/entidades/foundation/Administrador.java`
+**Localização**: `src/main/java/umc/exs/model/entidades/foundation/Administrador.java`
 
 **Descrição**: Entidade que representa administradores do sistema.
 
@@ -174,94 +168,90 @@ public void resetarTentativas() {
 
 **Campos**:
 
-| Campo    | Tipo   | Descrição      |
-| -------- | ------ | -------------- |
-| id       | Long   | Chave primária |
-| nome     | String | Nome           |
-| email    | String | Email          |
-| password | String | Senha          |
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | Long | Chave primária |
+| nome | String | Nome |
+| email | String | Email |
+| password | String | Senha |
 
 ---
 
 ### 6. Transacao
 
-**Localização**:
-`src/main/java/umc/exs/model/entidades/foundation/Transacao.java`
+**Localização**: `src/main/java/umc/exs/model/entidades/foundation/Transacao.java`
 
 **Descrição**: Entidade que representa transações de tokens.
 
 **Campos**:
 
-| Campo           | Tipo          | Descrição                    |
-| --------------- | ------------- | ---------------------------- |
-| id              | Long          | Chave primária               |
-| cliente         | Cliente       | Cliente (ManyToOne)          |
-| valor           | Double        | Valor em tokens              |
-| dataHora        | LocalDateTime | Data/hora                    |
-| metodoPagamento | String        | Método (PIX, CARTAO)         |
-| finalCartao     | String        | 4 últimos dígitos            |
-| pagamentoId     | String        | ID do pagamento PIX          |
-| status          | String        | Status (PENDENTE, CONCLUIDO) |
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | Long | Chave primária |
+| cliente | Cliente | Cliente (ManyToOne) |
+| valor | Double | Valor em tokens |
+| dataHora | LocalDateTime | Data/hora |
+| metodoPagamento | String | Método (PIX, CARTAO) |
+| finalCartao | String | 4 últimos dígitos |
+| pagamentoId | String | ID do pagamento PIX |
+| status | String | Status (PENDENTE, CONCLUIDO) |
 
 ---
 
 ### 7. AvaliacaoLivro
 
-**Localização**:
-`src/main/java/umc/exs/model/entidades/foundation/AvaliacaoLivro.java`
+**Localização**: `src/main/java/umc/exs/model/entidades/foundation/AvaliacaoLivro.java`
 
 **Descrição**: Entidade que representa avaliações de livros.
 
 **Campos**:
 
-| Campo         | Tipo          | Descrição           |
-| ------------- | ------------- | ------------------- |
-| id            | Long          | Chave primária      |
-| isbn          | String        | ISBN do livro       |
-| tituloLivro   | String        | Título do livro     |
-| nota          | Integer       | Nota (1-5)          |
-| comentario    | String        | Comentário          |
-| dataAvaliacao | LocalDateTime | Data da avaliação   |
-| avaliador     | Cliente       | Cliente que avaliou |
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | Long | Chave primária |
+| isbn | String | ISBN do livro |
+| tituloLivro | String | Título do livro |
+| nota | Integer | Nota (1-5) |
+| comentario | String | Comentário |
+| dataAvaliacao | LocalDateTime | Data da avaliação |
+| avaliador | Cliente | Cliente que avaliou |
 
 ---
 
 ### 8. LogAuditoria
 
-**Localização**:
-`src/main/java/umc/exs/model/entidades/foundation/LogAuditoria.java`
+**Localização**: `src/main/java/umc/exs/model/entidades/foundation/LogAuditoria.java`
 
 **Descrição**: Entidade para registro de auditoria de ações.
 
 **Campos**:
 
-| Campo        | Tipo          | Descrição        |
-| ------------ | ------------- | ---------------- |
-| id           | Long          | Chave primária   |
-| idUsuario    | Long          | ID do usuário    |
-| emailUsuario | String        | Email do usuário |
-| acao         | String        | Ação realizada   |
-| detalhes     | String        | Detalhes         |
-| dataHora     | LocalDateTime | Data/hora        |
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | Long | Chave primária |
+| idUsuario | Long | ID do usuário |
+| emailUsuario | String | Email do usuário |
+| acao | String | Ação realizada |
+| detalhes | String | Detalhes |
+| dataHora | LocalDateTime | Data/hora |
 
 ---
 
 ### 9. RecuperacaoSenha
 
-**Localização**:
-`src/main/java/umc/exs/model/entidades/foundation/RecuperacaoSenha.java`
+**Localização**: `src/main/java/umc/exs/model/entidades/foundation/RecuperacaoSenha.java`
 
 **Descrição**: Entidade para tokens de recuperação de senha.
 
 **Campos**:
 
-| Campo         | Tipo          | Descrição           |
-| ------------- | ------------- | ------------------- |
-| id            | Long          | Chave primária      |
-| token         | String        | Token único         |
-| email         | String        | Email               |
-| cliente       | Cliente       | Cliente (ManyToOne) |
-| dataExpiracao | LocalDateTime | Data de expiração   |
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | Long | Chave primária |
+| token | String | Token único |
+| email | String | Email |
+| cliente | Cliente | Cliente (ManyToOne) |
+| dataExpiracao | LocalDateTime | Data de expiração |
 
 ---
 
@@ -269,8 +259,7 @@ public void resetarTentativas() {
 
 ### Genero
 
-**Localização**:
-`src/main/java/umc/exs/model/entidades/foundation/enums/Genero.java`
+**Localização**: `src/main/java/umc/exs/model/entidades/foundation/enums/Genero.java`
 
 ```java
 public enum Genero {
@@ -282,8 +271,7 @@ public enum Genero {
 
 ### EstadoLivro
 
-**Localização**:
-`src/main/java/umc/exs/model/entidades/foundation/enums/EstadoLivro.java`
+**Localização**: `src/main/java/umc/exs/model/entidades/foundation/enums/EstadoLivro.java`
 
 ```java
 public enum EstadoLivro {
@@ -298,87 +286,80 @@ public enum EstadoLivro {
 
 ## Repositories
 
-**O que são**: Interfaces que estendem `JpaRepository` para operações de banco
-de dados.
+**O que são**: Interfaces que estendem `JpaRepository` para operações de banco de dados.
 
 ### 1. ClienteRepository
 
-**Localização**:
-`src/main/java/umc/exs/model/daos/repository/ClienteRepository.java`
+**Localização**: `src/main/java/umc/exs/model/daos/repository/ClienteRepository.java`
 
 **Métodos principais**:
 
-| Método                                    | Descrição                         |
-| ----------------------------------------- | --------------------------------- |
-| `findByEmail(String email)`               | Busca por email (com EntityGraph) |
-| `findByCpf(String cpf)`                   | Busca por CPF                     |
-| `findByEmailAndId(String email, Long id)` | Busca por email e ID              |
-| `findByIdWithCartoes(Long id)`            | Busca com cartões                 |
-| `findByIdWithEnderecos(Long id)`          | Busca com endereços               |
-| `existsByEmail(String email)`             | Verifica existência por email     |
+| Método | Descrição |
+|--------|-----------|
+| `findByEmail(String email)` | Busca por email (com EntityGraph) |
+| `findByCpf(String cpf)` | Busca por CPF |
+| `findByEmailAndId(String email, Long id)` | Busca por email e ID |
+| `findByIdWithCartoes(Long id)` | Busca com cartões |
+| `findByIdWithEnderecos(Long id)` | Busca com endereços |
+| `existsByEmail(String email)` | Verifica existência por email |
 
 ---
 
 ### 2. LivroRepository
 
-**Localização**:
-`src/main/java/umc/exs/model/daos/repository/LivroRepository.java`
+**Localização**: `src/main/java/umc/exs/model/daos/repository/LivroRepository.java`
 
 **Métodos principais**:
 
-| Método                             | Descrição                  |
-| ---------------------------------- | -------------------------- |
-| `findByAprovadoTrue()`             | Livros aprovados (vitrine) |
-| `findByAprovadoFalse()`            | Livros pendentes (admin)   |
-| `findByIdAndAprovadoTrue(Long id)` | Livro específico aprovado  |
+| Método | Descrição |
+|--------|-----------|
+| `findByAprovadoTrue()` | Livros aprovados (vitrine) |
+| `findByAprovadoFalse()` | Livros pendentes (admin) |
+| `findByIdAndAprovadoTrue(Long id)` | Livro específico aprovado |
 
 ---
 
 ### 3. TransacaoRepository
 
-**Localização**:
-`src/main/java/umc/exs/model/daos/repository/TransacaoRepository.java`
+**Localização**: `src/main/java/umc/exs/model/daos/repository/TransacaoRepository.java`
 
 **Métodos principais**:
 
-| Método                                        | Descrição                     |
-| --------------------------------------------- | ----------------------------- |
-| `findByClienteIdOrderByDataHoraDesc(Long id)` | Histórico do cliente          |
-| `findByPagamentoId(String pagamentoId)`       | Transação por ID de pagamento |
+| Método | Descrição |
+|--------|-----------|
+| `findByClienteIdOrderByDataHoraDesc(Long id)` | Histórico do cliente |
+| `findByPagamentoId(String pagamentoId)` | Transação por ID de pagamento |
 
 ---
 
 ### 4. AvaliacaoLivroRepository
 
-**Localização**:
-`src/main/java/umc/exs/model/daos/repository/AvaliacaoLivroRepository.java`
+**Localização**: `src/main/java/umc/exs/model/daos/repository/AvaliacaoLivroRepository.java`
 
 **Métodos principais**:
 
-| Método                                             | Descrição           |
-| -------------------------------------------------- | ------------------- |
-| `findAll()`                                        | Todas as avaliações |
+| Método | Descrição |
+|--------|-----------|
+| `findAll()` | Todas as avaliações |
 | `existsByIsbnAndAvaliadorId(String isbn, Long id)` | Verifica se avaliou |
 
 ---
 
 ### 5. LogAuditoriaRepository
 
-**Localização**:
-`src/main/java/umc/exs/model/daos/repository/LogAuditoriaRepository.java`
+**Localização**: `src/main/java/umc/exs/model/daos/repository/LogAuditoriaRepository.java`
 
 **Métodos principais**:
 
-| Método                                        | Descrição       |
-| --------------------------------------------- | --------------- |
+| Método | Descrição |
+|--------|-----------|
 | `findByIdUsuarioOrderByDataHoraDesc(Long id)` | Logs do usuário |
 
 ---
 
 ### 6. EnderecoRepository
 
-**Localização**:
-`src/main/java/umc/exs/model/daos/repository/EnderecoRepository.java`
+**Localização**: `src/main/java/umc/exs/model/daos/repository/EnderecoRepository.java`
 
 **Métodos**: Herda métodos padrão do JpaRepository.
 
@@ -386,21 +367,19 @@ de dados.
 
 ### 7. CartaoRepository
 
-**Localização**:
-`src/main/java/umc/exs/model/daos/repository/CartaoRepository.java`
+**Localização**: `src/main/java/umc/exs/model/daos/repository/CartaoRepository.java`
 
 **Métodos principais**:
 
-| Método                        | Descrição                  |
-| ----------------------------- | -------------------------- |
+| Método | Descrição |
+|--------|-----------|
 | `findByNumero(String numero)` | Busca por número de cartão |
 
 ---
 
 ## DTOs
 
-**O que são**: Data Transfer Objects - objetos para transferência de dados entre
-camadas.
+**O que são**: Data Transfer Objects - objetos para transferência de dados entre camadas.
 
 ### 1. SignupDTO
 
@@ -410,16 +389,16 @@ camadas.
 
 **Campos**:
 
-| Campo           | Validação                           |
-| --------------- | ----------------------------------- |
-| cpf             | Obrigatório, formato 000.000.000-00 |
-| email           | Obrigatório, email válido           |
-| senha           | Obrigatório, mínimo 8 caracteres    |
-| nome            | Obrigatório                         |
-| datanasc        | Obrigatório                         |
-| gen             | Obrigatório                         |
-| termsAccepted   | @AssertTrue                         |
-| privacyAccepted | @AssertTrue                         |
+| Campo | Validação |
+|-------|-----------|
+| cpf | Obrigatório, formato 000.000.000-00 |
+| email | Obrigatório, email válido |
+| senha | Obrigatório, mínimo 8 caracteres |
+| nome | Obrigatório |
+| datanasc | Obrigatório |
+| gen | Obrigatório |
+| termsAccepted | @AssertTrue |
+| privacyAccepted | @AssertTrue |
 
 ---
 
@@ -439,8 +418,7 @@ camadas.
 
 **Uso**: Resposta de dados do cliente.
 
-**Campos**: `id`, `nome`, `email`, `datanasc`, `gen`, `senha`, `cpf`,
-`saldoTokens`, `enderecos`, `cartoes`
+**Campos**: `id`, `nome`, `email`, `datanasc`, `gen`, `senha`, `cpf`, `saldoTokens`, `enderecos`, `cartoes`
 
 ---
 
@@ -472,21 +450,20 @@ camadas.
 
 ### 7. CompraTokensRequestDTO
 
-**Localização**:
-`src/main/java/umc/exs/model/dtos/compra/CompraTokensRequestDTO.java`
+**Localização**: `src/main/java/umc/exs/model/dtos/compra/CompraTokensRequestDTO.java`
 
 **Uso**: Compra de tokens.
 
 **Campos**:
 
-| Campo           | Descrição                   |
-| --------------- | --------------------------- |
-| valor           | Valor da compra             |
-| metodoPagamento | PIX ou CARTAO               |
-| numeroCartao    | Número do cartão            |
-| pixCopiaECola   | PIX Copia e Cola (resposta) |
-| qrCodeBase64    | QR Code PIX (resposta)      |
-| pagamentoId     | ID do pagamento PIX         |
+| Campo | Descrição |
+|-------|-----------|
+| valor | Valor da compra |
+| metodoPagamento | PIX ou CARTAO |
+| numeroCartao | Número do cartão |
+| pixCopiaECola | PIX Copia e Cola (resposta) |
+| qrCodeBase64 | QR Code PIX (resposta) |
+| pagamentoId | ID do pagamento PIX |
 
 ---
 
@@ -520,8 +497,7 @@ camadas.
 
 ## Mappers (MapStruct)
 
-**O que são**: Interfaces que geram código para conversão entre Entidades e
-DTOs.
+**O que são**: Interfaces que geram código para conversão entre Entidades e DTOs.
 
 ### 1. ClienteMapper
 
@@ -529,11 +505,11 @@ DTOs.
 
 **Métodos**:
 
-| Método                                                    | Descrição                        |
-| --------------------------------------------------------- | -------------------------------- |
-| `toEntity(SignupDTO)`                                     | Converte SignupDTO para Cliente  |
-| `toDTO(Cliente)`                                          | Converte Cliente para ClienteDTO |
-| `updateEntityFromDto(ClienteDTO, @MappingTarget Cliente)` | Atualiza entidade existente      |
+| Método | Descrição |
+|--------|-----------|
+| `toEntity(SignupDTO)` | Converte SignupDTO para Cliente |
+| `toDTO(Cliente)` | Converte Cliente para ClienteDTO |
+| `updateEntityFromDto(ClienteDTO, @MappingTarget Cliente)` | Atualiza entidade existente |
 
 ---
 
@@ -622,23 +598,19 @@ DTOs.
 ## Padrões Utilizados
 
 ### 1. DAO Pattern (Repository)
-
 Repositórios abstraem o acesso ao banco de dados.
 
 ### 2. DTO Pattern
-
 DTOs separam a representação interna (entidades) da representação externa (API).
 
 ### 3. Mapper Pattern
-
 Mapeadores convertem entre entidades e DTOs automaticamente.
 
 ### 4. Cascade Types
-
 - `CascadeType.PERSIST`: Salva automaticamente entidades relacionadas
 - `CascadeType.MERGE`: Atualiza automaticamente entidades relacionadas
 
 ### 5. Fetch Types
-
 - `FetchType.EAGER`: Carrega dados imediatamente
 - `FetchType.LAZY`: Carrega dados sob demanda (preferível para performance)
+

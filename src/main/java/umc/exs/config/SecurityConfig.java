@@ -1,10 +1,10 @@
 package umc.exs.config;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,113 +18,124 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import umc.exs.security.JwtRequestFilter;
-import umc.exs.security.RateLimitFilter;
-import umc.exs.security.CustomAccessDeniedHandler;
 
 @Configuration
 public class SecurityConfig {
 
-        @Value("${app.allowed-origin:http://localhost:5173}")
-        private String allowedOrigin;
+    @Value("${app.allowed-origin:http://localhost:5173}")
+    private String allowedOrigin;
 
-        @Bean
-        public CorsConfigurationSource corsConfigurationSource() {
-                CorsConfiguration cfg = new CorsConfiguration();
-                cfg.setAllowedOrigins(List.of(allowedOrigin));
-                cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                cfg.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With"));
-                cfg.setExposedHeaders(List.of("Set-Cookie"));
-                cfg.setAllowCredentials(true);
-                cfg.setMaxAge(3600L);
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration cfg = new CorsConfiguration();
+        cfg.setAllowedOrigins(List.of(allowedOrigin));
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Restringir apenas headers necessários — não usar "*"
+        cfg.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With"));
+        cfg.setExposedHeaders(List.of("Set-Cookie"));
+        cfg.setAllowCredentials(true);
+        cfg.setMaxAge(3600L);
 
-                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-                source.registerCorsConfiguration("/**", cfg);
-                return source;
-        }
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", cfg);
+        return source;
+    }
 
-        @Bean
-        public SecurityFilterChain filterChain(HttpSecurity http,
-                        JwtRequestFilter jwtRequestFilter,
-                        RateLimitFilter rateLimitFilter,
-                        CustomAccessDeniedHandler accessDeniedHandler) throws Exception {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtRequestFilter jwtRequestFilter) throws Exception {
+        http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable()) 
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) 
+            .authorizeHttpRequests(auth -> auth
+                // ROTAS PÚBLICAS GERAIS
+                .requestMatchers("/", "/index", "/home", "/entrar", "/error", "/favicon.ico").permitAll()
+                
+                // LOGIN E CADASTRO
+                .requestMatchers("/clientes/login", "/clientes/novo-cadastro").permitAll() 
+                
+                // PÁGINAS DE VENDER E VITRINE (A página é pública, mas as ações de venda e compra exigem login)
+                .requestMatchers("/vender", "/vitrine").permitAll()
+                
+                // ADMIN LOGIN - Página pública de login do admin
+                .requestMatchers("/admin/login").permitAll()
+                
+                // PÁGINA ADMIN - Requer autenticação de admin
+                .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                
+                // PÁGINA DE HISTÓRIA DO LIVRO (avaliações)
+                .requestMatchers("/livros/*/historia").permitAll()
+                
+                // RECURSOS ESTÁTICOS
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/imagens/**", "/cliente/**", "/produto/**", "/static/**").permitAll()
+                .requestMatchers("/uploads/**", "/uploads/clientes/**").permitAll()
 
-                // 1. Recursos Estáticos e Páginas Iniciais
-                final String[] STATIC_AND_PUBLIC_PAGES = {
-                                "/", "/index", "/home", "/entrar", "/error", "/favicon.ico",
-                                "/css/**", "/js/**", "/images/**", "/cliente/**", "/produto/**", "/static/**",
-                                "/uploads/**",
-                                "/vender", "/vitrine", "/livros/vitrine"
-                };
+                // --- CORREÇÃO AQUI: ROTAS DE RECUPERAÇÃO DE SENHA ---
+                // Precisam ser permitAll porque o usuário não está autenticado ao usá-las
+                .requestMatchers("/clientes/termo", "/clientes/politica", "/clientes/sobre").permitAll()
+                .requestMatchers("/clientes/recuperar-senha/**").permitAll()
+                .requestMatchers("/clientes/reset-senha/**").permitAll()
+                .requestMatchers("/clientes/alterar-senha/**").permitAll()
+                
+                // TOKEN E CARTEIRA (Libera a página, mas o POST /comprar exige login)
+                .requestMatchers("/api/tokens").permitAll() 
+                .requestMatchers("/api/livros/carrinho/comprar").authenticated()
+                
+                // DEBUG E AUTH REST
+                .requestMatchers("/auth/**", "/debug").permitAll()
+                
+                // ROTAS DE ADMIN - Requer autenticação de admin
+                .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
 
-                // 2. Fluxo de Autenticação e Recuperação
-                final String[] AUTH_FLOW = {
-                                "/clientes/login", "/clientes/novo-cadastro",
-                                "/clientes/recuperar-senha/**", "/clientes/reset-senha/**", "/clientes/alterar-senha/**"
-                };
+                // BLOG - leitura pública, escrita/exclusão apenas admin
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/blog", "/api/blog/**").permitAll()
+                .requestMatchers("/api/blog/**").hasAuthority("ADMIN")
 
-                // 3. APIs de Leitura Pública ou Utilitários
-                final String[] PUBLIC_APIS = {
-                                "/api/tokens", "/api/livros/todos", "/api/avaliacoes/livro/**",
-                                "/api/gamificacao/ranking", "/auth/**", "/debug"
-                };
+                // FÓRUM - leitura pública, criação exige login, moderação exige admin
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/forum", "/forum/**").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/forum/topicos").permitAll()
+                .requestMatchers("/api/forum/topicos/*/deletar").hasAuthority("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/forum/topicos/**").hasAuthority("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/forum/respostas/**").hasAuthority("ADMIN")
+                .requestMatchers("/api/forum/respostas/*/curtir").authenticated()
+                .requestMatchers("/api/forum/respostas/*/melhor").authenticated()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/forum/topicos").authenticated()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/forum/topicos/*/respostas").authenticated()
 
-                http
-                                .headers(headers -> headers
-                                                .contentSecurityPolicy(
-                                                                csp -> csp.policyDirectives("default-src 'self'"))
-                                                .frameOptions(frame -> frame.deny())
-                                                .httpStrictTransportSecurity(hsts -> hsts.maxAgeInSeconds(31536000)
-                                                                .includeSubDomains(true))
-                                                .contentTypeOptions(cto -> {
-                                                }))
-                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                                .csrf(csrf -> csrf.disable())
-                                .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
-                                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                                .authorizeHttpRequests(auth -> auth
-                                                // Aplicando os agrupamentos
-                                                .requestMatchers(STATIC_AND_PUBLIC_PAGES).permitAll()
-                                                .requestMatchers(AUTH_FLOW).permitAll()
-                                                .requestMatchers(PUBLIC_APIS).permitAll()
+                // GAMIFICAÇÃO - ranking público, perfil exige login
+                .requestMatchers("/api/gamificacao/ranking").permitAll()
+                .requestMatchers("/api/gamificacao/meu-perfil").authenticated()
 
-                                                // --- ROTAS ESPECÍFICAS QUE FORAM RECUPERADAS ---
-                                                .requestMatchers("/livros/*/historia").permitAll()
+                // API PÚBLICA - livros e avaliações (visíveis sem login)
+                .requestMatchers("/api/livros/todos").permitAll()
+                .requestMatchers("/api/avaliacoes/livro/**").permitAll()
+                .requestMatchers("/livros/vitrine", "/vender").permitAll()
+                
+                // ROTAS PRIVADAS
+                .requestMatchers("/clientes/meu-perfil", "/clientes/meu-perfil-json").authenticated()
+                .requestMatchers("/clientes/minhas-compras").authenticated()
+                .requestMatchers("/clientes/sair").authenticated()
+                .requestMatchers("/api/tokens/comprar").authenticated()
+                .requestMatchers("/api/tokens/historico").authenticated()
+                .requestMatchers("/api/tokens/**").authenticated()
+                .requestMatchers("/api/pedidos/**").authenticated()
+                
+                // QUALQUER OUTRA ROTA
+                .anyRequest().authenticated()
+            );
 
-                                                // BLOG: Público lê, Admin escreve
-                                                .requestMatchers(HttpMethod.GET, "/api/blog", "/api/blog/**")
-                                                .permitAll()
+        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        
+        return http.build();
+    }
 
-                                                // --- REGRAS DE AUTORIDADE (ADMIN) ---
-                                                .requestMatchers("/admin/**", "/api/admin/**", "/api/blog/**")
-                                                .hasAuthority("ADMIN")
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-                                                // --- REGRAS DE AUTENTICAÇÃO (CLIENTE LOGADO) ---
-                                                .requestMatchers(
-                                                                "/clientes/meu-perfil", "/clientes/meu-perfil-json",
-                                                                "/clientes/minhas-compras",
-                                                                "/clientes/sair",
-                                                                "/api/tokens/comprar", "/api/tokens/historico",
-                                                                "/api/tokens/**",
-                                                                "/api/pedidos/**", "/api/livros/carrinho/comprar",
-                                                                "/api/gamificacao/meu-perfil")
-                                                .authenticated()
-
-                                                // Qualquer outra coisa não listada
-                                                .anyRequest().authenticated());
-
-                http.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class);
-                http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-
-                return http.build();
-        }
-
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-                return new BCryptPasswordEncoder();
-        }
-
-        @Bean
-        public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
-                return cfg.getAuthenticationManager();
-        }
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
+        return cfg.getAuthenticationManager();
+    }
 }

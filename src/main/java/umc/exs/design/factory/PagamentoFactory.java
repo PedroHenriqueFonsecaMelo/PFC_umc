@@ -12,8 +12,7 @@ public class PagamentoFactory {
 
     private final Map<String, PagamentoStrategy> estrategias;
 
-    // Construtor: Cria um mapa onde a chave é o nome (CARTAO, PIX) e o valor é a
-    // classe
+    // Construtor: Cria um mapa onde a chave é o nome (CARTAO, PIX) e o valor é a classe
     public PagamentoFactory(List<PagamentoStrategy> listaEstrategias) {
         // construir mapa manualmente para evitar streams
         Map<String, PagamentoStrategy> mapa = new HashMap<>();

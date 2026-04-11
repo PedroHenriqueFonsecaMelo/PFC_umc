@@ -9,7 +9,7 @@ import umc.exs.model.entidades.foundation.LogAuditoria;
 
 @Repository
 public interface LogAuditoriaRepository extends JpaRepository<LogAuditoria, Long> {
-
+        
         List<LogAuditoria> findByIdUsuarioOrderByDataHoraDesc(Long idUsuario);
 
         List<LogAuditoria> findAllByOrderByDataHoraDesc();

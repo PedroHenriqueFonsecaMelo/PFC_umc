@@ -24,6 +24,7 @@ public interface AvaliacaoLivroRepository extends JpaRepository<AvaliacaoLivro, 
      * @param id avaliação
      * @return Optional AvaliacaoLivro
      */
+    @SuppressWarnings("null")
     Optional<AvaliacaoLivro> findById(Long id);
 
     /**

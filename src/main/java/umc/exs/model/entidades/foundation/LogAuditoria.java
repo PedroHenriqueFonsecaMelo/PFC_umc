@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "log_auditoria")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Data 
 public class LogAuditoria {
 
     private static final DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -36,7 +36,7 @@ public class LogAuditoria {
 
     // Tipo de ação realizada (ex: LOGIN_SUCESSO)
     @Column(name = "acao", length = 50, nullable = false)
-    private String acao;
+    private String acao; 
 
     // Mensagem detalhada sobre a ação
     @Column(name = "detalhes", columnDefinition = "TEXT")
@@ -46,6 +46,7 @@ public class LogAuditoria {
     @Column(name = "data_hora", nullable = false)
     private String dataHora;
 
+
     public LogAuditoria(Long idUsuario, String emailUsuario, String acao, String detalhes, LocalDateTime dataHora) {
         this.idUsuario = idUsuario;
         this.emailUsuario = emailUsuario;
@@ -54,4 +55,6 @@ public class LogAuditoria {
         this.dataHora = dataHora.format(f);
     }
 
+    
 }
+

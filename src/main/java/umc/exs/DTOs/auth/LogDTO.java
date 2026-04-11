@@ -13,40 +13,19 @@ public class LogDTO {
         this.detalhes = detalhes;
         this.timestamp = timestamp;
     }
-
+    
     // Inclua o construtor vazio, getters e setters completos
-    public LogDTO() {
-    }
+    public LogDTO() {}
+    
+    public String getAcao() { return acao; }
+    public void setAcao(String acao) { this.acao = acao; }
 
-    public String getAcao() {
-        return acao;
-    }
+    public Long getIdUsuario() { return idUsuario; }
+    public void setIdUsuario(Long idUsuario) { this.idUsuario = idUsuario; }
 
-    public void setAcao(String acao) {
-        this.acao = acao;
-    }
+    public String getDetalhes() { return detalhes; }
+    public void setDetaihes(String detalhes) { this.detalhes = detalhes; }
 
-    public Long getIdUsuario() {
-        return idUsuario;
-    }
-
-    public void setIdUsuario(Long idUsuario) {
-        this.idUsuario = idUsuario;
-    }
-
-    public String getDetalhes() {
-        return detalhes;
-    }
-
-    public void setDetaihes(String detalhes) {
-        this.detalhes = detalhes;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
+    public String getTimestamp() { return timestamp; }
+    public void setTimestamp(String timestamp) { this.timestamp = timestamp; }
 }

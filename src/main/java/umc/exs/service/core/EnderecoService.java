@@ -23,13 +23,12 @@ public class EnderecoService {
      * Salva novo ou reutiliza endereço existente.
      * Busca por campos chave (CEP/rua etc).
      * Retorna entidade salva/reutilizada.
-     * 
      * @param dto dados endereço
      */
     @Transactional
     public Endereco saveOrReuseEndereco(EnderecoDTO dto) {
         Optional<Endereco> enderecoReutilizado = enderecoRepository.findByValueFields(
-                dto.getCep(), dto.getRua(), dto.getNumero(), dto.getComplemento(),
+                dto.getCep(), dto.getRua(), dto.getNumero(), dto.getComplemento(), 
                 dto.getBairro(), dto.getCidade(), dto.getEstado());
 
         if (enderecoReutilizado.isPresent()) {
@@ -43,8 +42,7 @@ public class EnderecoService {
     /**
      * Remove endereço de cliente específico.
      * Limpa bidirecional, deleta se sem clientes.
-     * 
-     * @param cliente    dono
+     * @param cliente dono
      * @param enderecoId ID
      */
     @Transactional
@@ -78,3 +76,4 @@ public class EnderecoService {
  * Transacional, usa EnderecoRepository/Mapper.
  * Bidirecional limpa corretamente M2M Cliente-Endereco.
  */
+

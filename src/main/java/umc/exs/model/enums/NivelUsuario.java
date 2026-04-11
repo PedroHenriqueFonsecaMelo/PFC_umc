@@ -19,21 +19,10 @@ public enum NivelUsuario {
         this.xpMaximo = xpMaximo;
     }
 
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public String getBadge() {
-        return badge;
-    }
-
-    public int getXpMinimo() {
-        return xpMinimo;
-    }
-
-    public int getXpMaximo() {
-        return xpMaximo;
-    }
+    public String getDescricao() { return descricao; }
+    public String getBadge()     { return badge; }
+    public int getXpMinimo()     { return xpMinimo; }
+    public int getXpMaximo()     { return xpMaximo; }
 
     public static NivelUsuario calcular(int xpTotal) {
         for (NivelUsuario nivel : values()) {

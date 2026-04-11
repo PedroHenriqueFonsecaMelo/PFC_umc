@@ -1,519 +1,364 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Minhas Compras — Bibliotroca</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
-      rel="stylesheet"
-    >
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <style>
-      :root {
-        --ink: #2c241b;
-        --paper: #f9f6f0;
-        --cream: #ede8df;
-        --accent: #722f37;
-        --forest: #4a5d23;
-        --white: #ffffff;
-        --muted: #7a6e65;
-        --border: rgba(44, 36, 27, 0.15);
-      }
-      *, *::before, *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Minhas Compras — Bibliotroca</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    :root {
+      --ink:    #2C241B;
+      --paper:  #F9F6F0;
+      --cream:  #EDE8DF;
+      --accent: #722F37;
+      --forest: #4A5D23;
+      --white:  #FFFFFF;
+      --muted:  #7A6E65;
+      --border: rgba(44,36,27,.15);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      body {
-        font-family: "DM Sans", sans-serif;
-        background: #f9f6f0;
-        color: #2c241b;
-        min-height: 100vh;
-      }
+    body { font-family: 'DM Sans', sans-serif; background: #F9F6F0; color: #2C241B; min-height: 100vh; }
 
-      /* ── NAV ── */
-      nav {
-        background: #2c241b;
-        padding: 0.75rem 5vw;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .nav-left {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-      }
-      .nav-back {
-        color: rgba(249, 246, 240, 0.7);
-        text-decoration: none;
-        font-size: 0.8rem;
-        transition: color 0.2s;
-      }
-      .nav-back:hover {
-        color: #f9f6f0;
-      }
-      .nav-divider {
-        color: rgba(249, 246, 240, 0.3);
-      }
-      .nav-title {
-        font-family: "Playfair Display", serif;
-        font-size: 1.1rem;
-        color: #f9f6f0;
-      }
-      .nav-right {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-      }
-      #nomeUsuario {
-        font-size: 0.85rem;
-        color: rgba(249, 246, 240, 0.7);
-      }
-      #saldoNav {
-        background: rgba(249, 246, 240, 0.1);
-        border: 1px solid rgba(249, 246, 240, 0.2);
-        padding: 0.25rem 0.85rem;
-        font-size: 0.8rem;
-        font-family: monospace;
-        color: #f9f6f0;
-      }
+    /* ── NAV ── */
+    nav {
+      background: #2C241B;
+      padding: .75rem 5vw;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-left { display: flex; align-items: center; gap: .75rem; }
+    .nav-back {
+      color: rgba(249,246,240,.7);
+      text-decoration: none;
+      font-size: .8rem;
+      transition: color .2s;
+    }
+    .nav-back:hover { color: #F9F6F0; }
+    .nav-divider { color: rgba(249,246,240,.3); }
+    .nav-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: #F9F6F0;
+    }
+    .nav-right { display: flex; align-items: center; gap: .75rem; }
+    #nomeUsuario { font-size: .85rem; color: rgba(249,246,240,.7); }
+    #saldoNav {
+      background: rgba(249,246,240,.1);
+      border: 1px solid rgba(249,246,240,.2);
+      padding: .25rem .85rem;
+      font-size: .8rem;
+      font-family: monospace;
+      color: #F9F6F0;
+    }
 
-      /* ── MAIN ── */
-      main {
-        max-width: 700px;
-        margin: 0 auto;
-        padding: 2rem 5vw;
-      }
+    /* ── MAIN ── */
+    main { max-width: 700px; margin: 0 auto; padding: 2rem 5vw; }
 
-      /* ── TABS ── */
-      .tabs-container {
-        display: flex;
-        gap: 0;
-        border-bottom: 2px solid #2c241b;
-        margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-      }
+    /* ── TABS ── */
+    .tabs-container {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid #2C241B;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
 
-      .tab-btn {
-        padding: 0.5rem 1.25rem;
-        background: transparent;
-        border: none;
-        border-bottom: 3px solid transparent;
-        margin-bottom: -2px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        cursor: pointer;
-        color: #7a6e65;
-        transition: all 0.2s;
-        white-space: nowrap;
-        font-family: "DM Sans", sans-serif;
-      }
-      .tab-btn.active {
-        border-bottom-color: #722f37;
-        color: #2c241b;
-      }
-      .tab-btn:not(.active):hover {
-        color: #2c241b;
-      }
+    .tab-btn {
+      padding: .5rem 1.25rem;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      font-size: .75rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      color: #7A6E65;
+      transition: all .2s;
+      white-space: nowrap;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .tab-btn.active {
+      border-bottom-color: #722F37;
+      color: #2C241B;
+    }
+    .tab-btn:not(.active):hover { color: #2C241B; }
 
-      /* ── TAB PANELS ── */
-      .tab-panel {
-        display: none;
-      }
-      .tab-panel.active {
-        display: block;
-      }
+    /* ── TAB PANELS ── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
 
-      /* ── BADGES ── */
-      .badge-count {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: #722f37;
-        color: #f9f6f0;
-        font-size: 0.65rem;
-        font-weight: 700;
-        min-width: 18px;
-        height: 18px;
-        padding: 0 0.35rem;
-        border-radius: 999px;
-        margin-left: 0.4rem;
-        vertical-align: middle;
-      }
+    /* ── BADGES ── */
+    .badge-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #722F37;
+      color: #F9F6F0;
+      font-size: .65rem;
+      font-weight: 700;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 .35rem;
+      border-radius: 999px;
+      margin-left: .4rem;
+      vertical-align: middle;
+    }
 
-      /* ── STATUS BADGE ── */
-      .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        font-size: 0.62rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        padding: 0.2rem 0.65rem;
-        border: 1px solid;
-      }
-      .status-badge::before {
-        content: "";
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: currentColor;
-        flex-shrink: 0;
-      }
+    /* ── STATUS BADGE ── */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .62rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: .2rem .65rem;
+      border: 1px solid;
+    }
+    .status-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
 
-      .status-AGUARDANDO_ENVIO {
-        background: #fef9c3;
-        color: #a16207;
-        border-color: #fde68a;
-      }
-      .status-EM_TRANSITO {
-        background: rgba(74, 93, 35, 0.1);
-        color: #4a5d23;
-        border-color: rgba(74, 93, 35, 0.3);
-      }
-      .status-ENTREGUE {
-        background: rgba(74, 93, 35, 0.15);
-        color: #4a5d23;
-        border-color: rgba(74, 93, 35, 0.4);
-      }
-      .status-CANCELADO {
-        background: rgba(114, 47, 55, 0.1);
-        color: #722f37;
-        border-color: rgba(114, 47, 55, 0.3);
-      }
+    .status-AGUARDANDO_ENVIO { background: #fef9c3; color: #a16207; border-color: #fde68a; }
+    .status-EM_TRANSITO      { background: rgba(74,93,35,.1); color: #4A5D23; border-color: rgba(74,93,35,.3); }
+    .status-ENTREGUE         { background: rgba(74,93,35,.15); color: #4A5D23; border-color: rgba(74,93,35,.4); }
+    .status-CANCELADO        { background: rgba(114,47,55,.1); color: #722F37; border-color: rgba(114,47,55,.3); }
 
-      /* ── PEDIDO CARD ── */
-      .pedido-card {
-        background: #ffffff;
-        border: 1px solid rgba(44, 36, 27, 0.12);
-        padding: 1.25rem;
-        display: flex;
-        gap: 1.25rem;
-        align-items: flex-start;
-        margin-bottom: 1rem;
-        transition: box-shadow 0.2s;
-      }
-      .pedido-card:hover {
-        box-shadow: 4px 4px 0 rgba(44, 36, 27, 0.1);
-      }
+    /* ── PEDIDO CARD ── */
+    .pedido-card {
+      background: #FFFFFF;
+      border: 1px solid rgba(44,36,27,.12);
+      padding: 1.25rem;
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      transition: box-shadow .2s;
+    }
+    .pedido-card:hover { box-shadow: 4px 4px 0 rgba(44,36,27,.1); }
 
-      .pedido-capa {
-        width: 72px;
-        height: 96px;
-        object-fit: cover;
-        background: #ede8df;
-        flex-shrink: 0;
-        border: 1px solid rgba(44, 36, 27, 0.1);
-      }
+    .pedido-capa {
+      width: 72px;
+      height: 96px;
+      object-fit: cover;
+      background: #EDE8DF;
+      flex-shrink: 0;
+      border: 1px solid rgba(44,36,27,.1);
+    }
 
-      .pedido-info {
-        flex: 1;
-        min-width: 0;
-      }
-      .pedido-titulo {
-        font-weight: 700;
-        color: #2c241b;
-        font-size: 0.95rem;
-        line-height: 1.3;
-      }
-      .pedido-autor {
-        font-size: 0.85rem;
-        color: #7a6e65;
-        margin-top: 0.15rem;
-      }
-      .pedido-meta {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-        margin-top: 0.5rem;
-        font-size: 0.78rem;
-        color: #7a6e65;
-      }
-      .pedido-preco {
-        font-weight: 600;
-        color: #722f37;
-      }
-      .pedido-estorno {
-        font-weight: 600;
-        font-size: 0.72rem;
-        color: #4a5d23;
-        background: rgba(74, 93, 35, 0.08);
-        padding: 0.15rem 0.5rem;
-        border: 1px solid rgba(74, 93, 35, 0.2);
-      }
+    .pedido-info { flex: 1; min-width: 0; }
+    .pedido-titulo { font-weight: 700; color: #2C241B; font-size: .95rem; line-height: 1.3; }
+    .pedido-autor  { font-size: .85rem; color: #7A6E65; margin-top: .15rem; }
+    .pedido-meta {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      flex-wrap: wrap;
+      margin-top: .5rem;
+      font-size: .78rem;
+      color: #7A6E65;
+    }
+    .pedido-preco { font-weight: 600; color: #722F37; }
+    .pedido-estorno { font-weight: 600; font-size: .72rem; color: #4A5D23; background: rgba(74,93,35,.08); padding: .15rem .5rem; border: 1px solid rgba(74,93,35,.2); }
 
-      .rastreio-info {
-        margin-top: 0.4rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        font-size: 0.75rem;
-        color: #4a5d23;
-        font-family: monospace;
-        background: rgba(74, 93, 35, 0.08);
-        padding: 0.2rem 0.6rem;
-        border: 1px solid rgba(74, 93, 35, 0.2);
-      }
+    .rastreio-info {
+      margin-top: .4rem;
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .75rem;
+      color: #4A5D23;
+      font-family: monospace;
+      background: rgba(74,93,35,.08);
+      padding: .2rem .6rem;
+      border: 1px solid rgba(74,93,35,.2);
+    }
 
-      /* ── TIMELINE ── */
-      .timeline {
-        display: flex;
-        gap: 0;
-        margin-top: 0.75rem;
-      }
-      .tl-step {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        position: relative;
-      }
-      .tl-step:not(:last-child)::after {
-        content: "";
-        position: absolute;
-        top: 10px;
-        left: 50%;
-        right: -50%;
-        height: 2px;
-        background: #d5cfc6;
-        z-index: 0;
-      }
-      .tl-step.done::after {
-        background: #4a5d23;
-      }
-      .tl-step.active::after {
-        background: #d5cfc6;
-      }
+    /* ── TIMELINE ── */
+    .timeline { display: flex; gap: 0; margin-top: .75rem; }
+    .tl-step {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      position: relative;
+    }
+    .tl-step:not(:last-child)::after {
+      content: '';
+      position: absolute; top: 10px; left: 50%; right: -50%;
+      height: 2px; background: #D5CFC6; z-index: 0;
+    }
+    .tl-step.done::after  { background: #4A5D23; }
+    .tl-step.active::after { background: #D5CFC6; }
 
-      .tl-dot {
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        z-index: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.6rem;
-        font-weight: 700;
-        background: #d5cfc6;
-        color: #7a6e65;
-      }
-      .tl-step.done .tl-dot {
-        background: #4a5d23;
-        color: #fff;
-      }
-      .tl-step.active .tl-dot {
-        background: #722f37;
-        color: #fff;
-        box-shadow: 0 0 0 3px rgba(114, 47, 55, 0.2);
-      }
+    .tl-dot {
+      width: 20px; height: 20px; border-radius: 50%; z-index: 1;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .6rem; font-weight: 700;
+      background: #D5CFC6; color: #7A6E65;
+    }
+    .tl-step.done   .tl-dot { background: #4A5D23; color: #fff; }
+    .tl-step.active .tl-dot { background: #722F37; color: #fff; box-shadow: 0 0 0 3px rgba(114,47,55,.2); }
 
-      .tl-label {
-        font-size: 0.6rem;
-        color: #7a6e65;
-        margin-top: 0.25rem;
-        text-align: center;
-      }
-      .tl-step.done .tl-label {
-        color: #4a5d23;
-        font-weight: 600;
-      }
-      .tl-step.active .tl-label {
-        color: #722f37;
-        font-weight: 600;
-      }
+    .tl-label { font-size: .6rem; color: #7A6E65; margin-top: .25rem; text-align: center; }
+    .tl-step.done   .tl-label { color: #4A5D23; font-weight: 600; }
+    .tl-step.active .tl-label { color: #722F37; font-weight: 600; }
 
-      /* ── SKELETON ── */
-      .skeleton {
-        background: linear-gradient(90deg, #ede8df 25%, #d5cfc6 50%, #ede8df 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.4s infinite;
-        height: 112px;
-        margin-bottom: 1rem;
-      }
-      @keyframes shimmer {
-        0% {
-          background-position: 200% 0;
-        }
-        100% {
-          background-position: -200% 0;
-        }
-      }
+    /* ── SKELETON ── */
+    .skeleton {
+      background: linear-gradient(90deg, #EDE8DF 25%, #D5CFC6 50%, #EDE8DF 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      height: 112px;
+      margin-bottom: 1rem;
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-      /* ── EMPTY STATE ── */
-      .empty-state {
-        text-align: center;
-        padding: 4rem 1rem;
-        color: #7a6e65;
-      }
-      .empty-state .icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-      }
-      .empty-state p {
-        font-style: italic;
-        font-family: "IM Fell English", serif;
-        font-size: 0.9375rem;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- NAV -->
-    <nav>
-      <div class="nav-left">
-        <a th:href="@{/clientes/meu-perfil}" class="nav-back">
-          <i class="fa-solid fa-arrow-left"></i> Voltar
-        </a>
-        <span class="nav-divider">|</span>
-        <span class="nav-title">Minhas Compras</span>
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align: center; padding: 4rem 1rem; color: #7A6E65; }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-state p { font-style: italic; font-family: 'IM Fell English', serif; font-size: .9375rem; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-left">
+      <a th:href="@{/clientes/meu-perfil}" class="nav-back">
+        <i class="fa-solid fa-arrow-left"></i> Voltar
+      </a>
+      <span class="nav-divider">|</span>
+      <span class="nav-title">Minhas Compras</span>
+    </div>
+    <div class="nav-right">
+      <span id="nomeUsuario">Carregando...</span>
+      <span id="saldoNav">T$ --</span>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- TABS -->
+    <div class="tabs-container">
+      <button class="tab-btn active" onclick="trocarTab('pendentes', this)">
+        Em andamento
+        <span id="badgePendentes" class="badge-count" style="display:none"></span>
+      </button>
+      <button class="tab-btn" onclick="trocarTab('concluidos', this)">
+        Concluídas
+        <span id="badgeConcluidos" class="badge-count" style="display:none"></span>
+      </button>
+      <button class="tab-btn" onclick="trocarTab('todos', this)">
+        Todas
+      </button>
+    </div>
+
+    <!-- PANEL: Pendentes -->
+    <div class="tab-panel active" id="panel-pendentes">
+      <div id="lista-pendentes">
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
       </div>
-      <div class="nav-right">
-        <span id="nomeUsuario">Carregando...</span>
-        <span id="saldoNav">T$ --</span>
+    </div>
+
+    <!-- PANEL: Concluídos -->
+    <div class="tab-panel" id="panel-concluidos">
+      <div id="lista-concluidos">
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
       </div>
-    </nav>
+    </div>
 
-    <main>
-      <!-- TABS -->
-      <div class="tabs-container">
-        <button class="tab-btn active" onclick="trocarTab('pendentes', this)">
-          Em andamento
-          <span
-            id="badgePendentes"
-            class="badge-count"
-            style="display: none"
-          ></span>
-        </button>
-        <button class="tab-btn" onclick="trocarTab('concluidos', this)">
-          Concluídas
-          <span
-            id="badgeConcluidos"
-            class="badge-count"
-            style="display: none"
-          ></span>
-        </button>
-        <button class="tab-btn" onclick="trocarTab('todos', this)">
-          Todas
-        </button>
+    <!-- PANEL: Todos -->
+    <div class="tab-panel" id="panel-todos">
+      <div id="lista-todos">
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
       </div>
+    </div>
 
-      <!-- PANEL: Pendentes -->
-      <div class="tab-panel active" id="panel-pendentes">
-        <div id="lista-pendentes">
-          <div class="skeleton"></div>
-          <div class="skeleton"></div>
-        </div>
-      </div>
+  </main>
 
-      <!-- PANEL: Concluídos -->
-      <div class="tab-panel" id="panel-concluidos">
-        <div id="lista-concluidos">
-          <div class="skeleton"></div>
-          <div class="skeleton"></div>
-        </div>
-      </div>
+  <script>
+    /* ── UTILS ── */
+    const token = localStorage.getItem('token');
+    const authHeader = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-      <!-- PANEL: Todos -->
-      <div class="tab-panel" id="panel-todos">
-        <div id="lista-todos">
-          <div class="skeleton"></div>
-          <div class="skeleton"></div>
-        </div>
-      </div>
-    </main>
+    function fmtData(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
 
-    <script>
-      /* ── UTILS ── */
-      const token = localStorage.getItem("token");
-      const authHeader = token ? { "Authorization": `Bearer ${token}` } : {};
+    function fmtHora(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
 
-      function fmtData(iso) {
-        if (!iso) return "—";
-        const d = new Date(iso);
-        return d.toLocaleDateString("pt-BR", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        });
-      }
+    function primeiraFoto(fotosUrls) {
+      try {
+        const arr = JSON.parse(fotosUrls);
+        if (Array.isArray(arr) && arr.length > 0) return arr[0];
+      } catch (_) {}
+      return null;
+    }
 
-      function fmtHora(iso) {
-        if (!iso) return "";
-        const d = new Date(iso);
-        return d.toLocaleTimeString("pt-BR", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-      }
+    /* ── TIMELINE ── */
+    const PASSOS = [
+      { key: 'AGUARDANDO_ENVIO', label: 'Aguardando' },
+      { key: 'EM_TRANSITO',      label: 'Em trânsito' },
+      { key: 'ENTREGUE',         label: 'Entregue'    },
+    ];
 
-      function primeiraFoto(fotosUrls) {
-        try {
-          const arr = JSON.parse(fotosUrls);
-          if (Array.isArray(arr) && arr.length > 0) return arr[0];
-        } catch (_) {}
-        return null;
-      }
-
-      /* ── TIMELINE ── */
-      const PASSOS = [
-        { key: "AGUARDANDO_ENVIO", label: "Aguardando" },
-        { key: "EM_TRANSITO", label: "Em trânsito" },
-        { key: "ENTREGUE", label: "Entregue" },
-      ];
-
-      function buildTimeline(status) {
-        if (status === "CANCELADO") {
-          return `<div class="mt-3" style="margin-top:.75rem">
+    function buildTimeline(status) {
+      if (status === 'CANCELADO') {
+        return `<div class="mt-3" style="margin-top:.75rem">
           <span class="status-badge status-CANCELADO">Cancelado</span>
         </div>`;
-        }
-        const ordemAtual = PASSOS.findIndex((p) => p.key === status);
-        return `
+      }
+      const ordemAtual = PASSOS.findIndex(p => p.key === status);
+      return `
         <div class="timeline">
-          ${
-          PASSOS.map((p, i) => {
-            const cls = i < ordemAtual ? "done" : i === ordemAtual ? "active" : "";
-            const icon = i < ordemAtual ? "✓" : i + 1;
+          ${PASSOS.map((p, i) => {
+            const cls = i < ordemAtual ? 'done' : i === ordemAtual ? 'active' : '';
+            const icon = i < ordemAtual ? '✓' : i + 1;
             return `
               <div class="tl-step ${cls}">
                 <div class="tl-dot">${icon}</div>
                 <div class="tl-label">${p.label}</div>
               </div>`;
-          }).join("")
-        }
+          }).join('')}
         </div>`;
-      }
+    }
 
-      /* ── CARD HTML ── */
-      function buildCard(p) {
-        const foto = primeiraFoto(p.fotosUrls);
-        const imgSrc = foto || "https://via.placeholder.com/72x96?text=📚";
+    /* ── CARD HTML ── */
+    function buildCard(p) {
+      const foto = primeiraFoto(p.fotosUrls);
+      const imgSrc = foto || 'https://via.placeholder.com/72x96?text=📚';
 
-        const rastreio = (p.codigoRastreio && p.statusEnvio === "EM_TRANSITO")
-          ? `<div class="rastreio-info">
+      const rastreio = (p.codigoRastreio && p.statusEnvio === 'EM_TRANSITO')
+        ? `<div class="rastreio-info">
              <i class="fa-solid fa-truck-fast"></i> ${p.codigoRastreio}
            </div>`
-          : "";
+        : '';
 
-        const dataAtual = p.dataAtualizacaoStatus
-          ? `<span style="font-size:.75rem;color:#7A6E65">Atualizado em ${
-            fmtData(p.dataAtualizacaoStatus)
-          }</span>`
-          : "";
+      const dataAtual = p.dataAtualizacaoStatus
+        ? `<span style="font-size:.75rem;color:#7A6E65">Atualizado em ${fmtData(p.dataAtualizacaoStatus)}</span>`
+        : '';
 
-        return `
+      return `
         <div class="pedido-card">
           <img class="pedido-capa" src="${imgSrc}" alt="${p.tituloLivro}"
                onerror="this.src='https://via.placeholder.com/72x96?text=📚'"/>
@@ -532,13 +377,10 @@
               <span>${fmtData(p.dataCompra)} ${fmtHora(p.dataCompra)}</span>
               <span>·</span>
               <span class="pedido-preco">T$ ${p.precoLivro.toFixed(2)}</span>
-              ${
-          p.statusEnvio === "CANCELADO"
-            ? `<span>·</span><span class="pedido-estorno">↩ T$ ${
-              p.precoLivro.toFixed(2)
-            } estornados</span>`
-            : ""
-        }
+              ${p.statusEnvio === 'CANCELADO'
+                ? `<span>·</span><span class="pedido-estorno">↩ T$ ${p.precoLivro.toFixed(2)} estornados</span>`
+                : ''
+              }
             </div>
 
             ${rastreio}
@@ -546,112 +388,91 @@
             ${buildTimeline(p.statusEnvio)}
           </div>
         </div>`;
-      }
+    }
 
-      /* ── EMPTY STATE ── */
-      function emptyState(msg) {
-        return `<div class="empty-state">
+    /* ── EMPTY STATE ── */
+    function emptyState(msg) {
+      return `<div class="empty-state">
         <div class="icon">📭</div>
         <p>${msg}</p>
       </div>`;
-      }
+    }
 
-      /* ── FETCH ── */
-      async function carregarLista(endpoint, containerId) {
-        const container = document.getElementById(containerId);
-        try {
-          const res = await fetch(endpoint, { headers: authHeader });
-          if (res.status === 401) {
-            window.location.href = "/clientes/login";
-            return [];
-          }
-          if (!res.ok) throw new Error("Falha na API");
-          const lista = await res.json();
-          return lista;
-        } catch (e) {
-          container.innerHTML =
-            `<p style="text-align:center;color:#722F37;padding:2rem">Erro ao carregar pedidos.</p>`;
+    /* ── FETCH ── */
+    async function carregarLista(endpoint, containerId) {
+      const container = document.getElementById(containerId);
+      try {
+        const res = await fetch(endpoint, { headers: authHeader });
+        if (res.status === 401) {
+          window.location.href = '/clientes/login';
           return [];
         }
+        if (!res.ok) throw new Error('Falha na API');
+        const lista = await res.json();
+        return lista;
+      } catch (e) {
+        container.innerHTML = `<p style="text-align:center;color:#722F37;padding:2rem">Erro ao carregar pedidos.</p>`;
+        return [];
       }
+    }
 
-      function renderLista(lista, containerId, mensagemVazia) {
-        const container = document.getElementById(containerId);
-        if (!lista || lista.length === 0) {
-          container.innerHTML = emptyState(mensagemVazia);
-          return;
+    function renderLista(lista, containerId, mensagemVazia) {
+      const container = document.getElementById(containerId);
+      if (!lista || lista.length === 0) {
+        container.innerHTML = emptyState(mensagemVazia);
+        return;
+      }
+      container.innerHTML = lista.map(buildCard).join('');
+    }
+
+    /* ── SALDO E NOME ── */
+    async function carregarPerfil() {
+      try {
+        const res = await fetch('/clientes/meu-perfil-json', { headers: authHeader });
+        if (res.ok) {
+          const c = await res.json();
+          document.getElementById('nomeUsuario').textContent = c.nome || '';
+          document.getElementById('saldoNav').textContent = `T$ ${(c.saldoTokens || 0).toFixed(2)}`;
         }
-        container.innerHTML = lista.map(buildCard).join("");
+      } catch (_) {}
+    }
+
+    /* ── TABS ── */
+    function trocarTab(nome, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + nome).classList.add('active');
+    }
+
+    /* ── INIT ── */
+    async function init() {
+      carregarPerfil();
+
+      const [pendentes, concluidos, todos] = await Promise.all([
+        carregarLista('/api/pedidos/pendentes', 'lista-pendentes'),
+        carregarLista('/api/pedidos/concluidos', 'lista-concluidos'),
+        carregarLista('/api/pedidos/todos',      'lista-todos'),
+      ]);
+
+      renderLista(pendentes,  'lista-pendentes', 'Nenhuma compra em andamento no momento.');
+      renderLista(concluidos, 'lista-concluidos', 'Nenhuma compra concluída ainda.');
+      renderLista(todos,      'lista-todos',      'Você ainda não realizou nenhuma compra.');
+
+      // Badges
+      if (pendentes.length > 0) {
+        const b = document.getElementById('badgePendentes');
+        b.textContent = pendentes.length;
+        b.style.display = 'inline-flex';
       }
-
-      /* ── SALDO E NOME ── */
-      async function carregarPerfil() {
-        try {
-          const res = await fetch("/clientes/meu-perfil-json", {
-            headers: authHeader,
-          });
-          if (res.ok) {
-            const c = await res.json();
-            document.getElementById("nomeUsuario").textContent = c.nome || "";
-            document.getElementById("saldoNav").textContent = `T$ ${
-              (c.saldoTokens || 0).toFixed(2)
-            }`;
-          }
-        } catch (_) {}
+      if (concluidos.length > 0) {
+        const b = document.getElementById('badgeConcluidos');
+        b.textContent = concluidos.length;
+        b.style.display = 'inline-flex';
       }
+    }
 
-      /* ── TABS ── */
-      function trocarTab(nome, btn) {
-        document.querySelectorAll(".tab-btn").forEach((b) =>
-          b.classList.remove("active")
-        );
-        document.querySelectorAll(".tab-panel").forEach((p) =>
-          p.classList.remove("active")
-        );
-        btn.classList.add("active");
-        document.getElementById("panel-" + nome).classList.add("active");
-      }
-
-      /* ── INIT ── */
-      async function init() {
-        carregarPerfil();
-
-        const [pendentes, concluidos, todos] = await Promise.all([
-          carregarLista("/api/pedidos/pendentes", "lista-pendentes"),
-          carregarLista("/api/pedidos/concluidos", "lista-concluidos"),
-          carregarLista("/api/pedidos/todos", "lista-todos"),
-        ]);
-
-        renderLista(
-          pendentes,
-          "lista-pendentes",
-          "Nenhuma compra em andamento no momento.",
-        );
-        renderLista(
-          concluidos,
-          "lista-concluidos",
-          "Nenhuma compra concluída ainda.",
-        );
-        renderLista(
-          todos,
-          "lista-todos",
-          "Você ainda não realizou nenhuma compra.",
-        );
-
-        // Badges
-        if (pendentes.length > 0) {
-          const b = document.getElementById("badgePendentes");
-          b.textContent = pendentes.length;
-          b.style.display = "inline-flex";
-        }
-        if (concluidos.length > 0) {
-          const b = document.getElementById("badgeConcluidos");
-          b.textContent = concluidos.length;
-          b.style.display = "inline-flex";
-        }
-      }
-
-      init();
-    </script>
-  </body>
+    init();
+  </script>
+</body>
 </html>

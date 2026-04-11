@@ -17,3 +17,4 @@ public class AvaliacaoLivroDTO {
     private Integer nota;
     private String comentario;
 }
+

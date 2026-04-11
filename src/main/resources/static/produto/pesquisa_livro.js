@@ -1,10 +1,10 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const pathParts = window.location.pathname.split('/').filter(Boolean);
 
-    const isbn = pathParts[1];
-
+    const isbn = pathParts[1]; 
+    
     console.log("ISBN extraído:", isbn);
-
+    
     if (isbn && isbn.length > 5) {
         await carregarDadosLivro(isbn);
     } else {
@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function carregarDadosLivro(isbn) {
     console.log("Buscando dados para o ISBN:", isbn);
-
+    
     let infoOL = null;
     let resumoEncontrado = "";
 
@@ -39,7 +39,7 @@ async function carregarDadosLivro(isbn) {
     if (!resumoFinal && infoOL?.description) {
         resumoFinal = typeof infoOL.description === 'string' ? infoOL.description : infoOL.description.value;
     }
-
+    
     if (!resumoFinal && infoOL?.subjects) {
         const temas = infoOL.subjects.slice(0, 5).map(s => s.name.replace("series:", "").replace(/_/g, " ")).join(", ");
         resumoFinal = `Sinopse indisponível. Temas: ${temas}.`;

@@ -1,644 +1,550 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Minha Carteira | Bibliotroca</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link
-            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
-            rel="stylesheet"
-        >
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-        >
-        <style>
-            :root {
-                --ink: #2c241b;
-                --paper: #f9f6f0;
-                --cream: #ede8df;
-                --accent: #722f37;
-                --forest: #4a5d23;
-                --white: #ffffff;
-                --muted: #7a6e65;
-                --border: rgba(44, 36, 27, 0.15);
-            }
-            *, *::before, *::after {
-                box-sizing: border-box;
-                margin: 0;
-                padding: 0;
-            }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Carteira | Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --ink:    #2C241B;
+            --paper:  #F9F6F0;
+            --cream:  #EDE8DF;
+            --accent: #722F37;
+            --forest: #4A5D23;
+            --white:  #FFFFFF;
+            --muted:  #7A6E65;
+            --border: rgba(44,36,27,.15);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-            body {
-                font-family: "DM Sans", sans-serif;
-                background: #f9f6f0;
-                color: #2c241b;
-                min-height: 100vh;
-            }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #F9F6F0;
+            color: #2C241B;
+            min-height: 100vh;
+        }
 
-            ::-webkit-scrollbar {
-                width: 6px;
-            }
-            ::-webkit-scrollbar-track {
-                background: #ede8df;
-            }
-            ::-webkit-scrollbar-thumb {
-                background: #7a6e65;
-            }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #EDE8DF; }
+        ::-webkit-scrollbar-thumb { background: #7A6E65; }
 
-            /* ── NAV ── */
-            nav {
-                background: #2c241b;
-                padding: 0.75rem 5vw;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            .nav-brand {
-                font-family: "Playfair Display", serif;
-                font-style: italic;
-                font-size: 1.1rem;
-                color: #f9f6f0;
-            }
-            .nav-right {
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-            }
-            #displayNome {
-                color: rgba(249, 246, 240, 0.8);
-                font-size: 0.875rem;
-            }
-            .nav-sair {
-                background: transparent;
-                border: 1.5px solid rgba(249, 246, 240, 0.3);
-                color: rgba(249, 246, 240, 0.8);
-                padding: 0.35rem 0.85rem;
-                font-size: 0.72rem;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-                text-decoration: none;
-                transition: all 0.2s;
-            }
-            .nav-sair:hover {
-                background: #722f37;
-                border-color: #722f37;
-                color: #f9f6f0;
-            }
+        /* ── NAV ── */
+        nav {
+            background: #2C241B;
+            padding: .75rem 5vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-brand {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 2.2rem;
+            color: #F9F6F0;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        #displayNome {
+            color: rgba(249,246,240,.8);
+            font-size: .875rem;
+        }
+        .nav-sair {
+            background: transparent;
+            border: 1.5px solid rgba(249,246,240,.3);
+            color: rgba(249,246,240,.8);
+            padding: .35rem .85rem;
+            font-size: .72rem;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all .2s;
+        }
+        .nav-sair:hover {
+            background: #722F37;
+            border-color: #722F37;
+            color: #F9F6F0;
+        }
 
-            /* ── MAIN ── */
-            main {
-                max-width: 900px;
-                margin: 0 auto;
-                padding: 2rem 5vw;
-            }
+        /* ── MAIN ── */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 5vw;
+        }
 
-            .grid-layout {
-                display: grid;
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-            @media (min-width: 768px) {
-                .grid-layout {
-                    grid-template-columns: 1fr 2fr;
-                }
-            }
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        @media (min-width: 768px) {
+            .grid-layout { grid-template-columns: 1fr 2fr; }
+        }
 
-            /* ── CARD SALDO ── */
-            .card-saldo {
-                background: #ffffff;
-                border: 1px solid rgba(44, 36, 27, 0.12);
-                padding: 2rem;
-                box-shadow: 4px 4px 0 rgba(44, 36, 27, 0.1);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-            .saldo-icon-wrap {
-                background: #ede8df;
-                width: 56px;
-                height: 56px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-bottom: 1rem;
-            }
-            .saldo-icon-wrap i {
-                font-size: 1.5rem;
-                color: #722f37;
-            }
-            .saldo-label {
-                font-size: 0.65rem;
-                letter-spacing: 0.15em;
-                text-transform: uppercase;
-                color: #7a6e65;
-                margin-bottom: 0.5rem;
-            }
-            .saldo-row {
-                display: flex;
-                align-items: baseline;
-                gap: 0.35rem;
-                margin-bottom: 1.5rem;
-            }
-            .saldo-prefix {
-                font-family: "Playfair Display", serif;
-                font-size: 1.5rem;
-                color: #722f37;
-                font-weight: 700;
-            }
-            #displaySaldo {
-                font-family: "Playfair Display", serif;
-                font-size: 3.5rem;
-                font-weight: 700;
-                color: #2c241b;
-                line-height: 1;
-            }
-            .saldo-nota {
-                font-family: "IM Fell English", serif;
-                font-style: italic;
-                color: #7a6e65;
-                font-size: 0.8rem;
-                line-height: 1.5;
-            }
+        /* ── CARD SALDO ── */
+        .card-saldo {
+            background: #FFFFFF;
+            border: 1px solid rgba(44,36,27,.12);
+            padding: 2rem;
+            box-shadow: 4px 4px 0 rgba(44,36,27,.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .saldo-icon-wrap {
+            background: #EDE8DF;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .saldo-icon-wrap i { font-size: 1.5rem; color: #722F37; }
+        .saldo-label {
+            font-size: .65rem;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: #7A6E65;
+            margin-bottom: .5rem;
+        }
+        .saldo-row {
+            display: flex;
+            align-items: baseline;
+            gap: .35rem;
+            margin-bottom: 1.5rem;
+        }
+        .saldo-prefix {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #722F37;
+            font-weight: 700;
+        }
+        #displaySaldo {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #2C241B;
+            line-height: 1;
+        }
+        .saldo-nota {
+            font-family: 'IM Fell English', serif;
+            font-style: italic;
+            color: #7A6E65;
+            font-size: .8rem;
+            line-height: 1.5;
+        }
 
-            /* ── CARD COMPRAR ── */
-            .card-comprar {
-                background: #ffffff;
-                border: 1px solid rgba(44, 36, 27, 0.12);
-                padding: 2rem;
-            }
-            .card-comprar-title {
-                font-family: "Playfair Display", serif;
-                font-size: 1.2rem;
-                color: #2c241b;
-                margin-bottom: 1.5rem;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
-            .card-comprar-title i {
-                color: #722f37;
-            }
+        /* ── CARD COMPRAR ── */
+        .card-comprar {
+            background: #FFFFFF;
+            border: 1px solid rgba(44,36,27,.12);
+            padding: 2rem;
+        }
+        .card-comprar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: #2C241B;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        .card-comprar-title i { color: #722F37; }
 
-            .form-row {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 1rem;
-                margin-bottom: 1rem;
-            }
-            @media (max-width: 560px) {
-                .form-row {
-                    grid-template-columns: 1fr;
-                }
-            }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 560px) { .form-row { grid-template-columns: 1fr; } }
 
-            .form-group {
-                display: flex;
-                flex-direction: column;
-                gap: 0.35rem;
-            }
-            .form-group label {
-                font-size: 0.68rem;
-                font-weight: 600;
-                letter-spacing: 0.1em;
-                text-transform: uppercase;
-                color: #7a6e65;
-            }
-            .input-wrap {
-                position: relative;
-            }
-            .input-prefix {
-                position: absolute;
-                left: 0.75rem;
-                top: 50%;
-                transform: translateY(-50%);
-                color: #7a6e65;
-                font-size: 0.85rem;
-            }
-            .input-icon {
-                position: absolute;
-                left: 0.75rem;
-                top: 50%;
-                transform: translateY(-50%);
-                color: #7a6e65;
-            }
-            input[type="number"],
-            input[type="text"],
-            select {
-                width: 100%;
-                padding: 0.65rem 0.85rem;
-                border: 1.5px solid rgba(44, 36, 27, 0.18);
-                background: #f9f6f0;
-                color: #2c241b;
-                font-family: "DM Sans", sans-serif;
-                font-size: 0.875rem;
-                outline: none;
-                transition: border-color 0.2s;
-            }
-            input[type="number"].with-prefix,
-            input[type="text"].with-prefix {
-                padding-left: 2.5rem;
-            }
-            input.with-icon {
-                padding-left: 2.5rem;
-            }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: .35rem;
+        }
+        .form-group label {
+            font-size: .68rem;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #7A6E65;
+        }
+        .input-wrap {
+            position: relative;
+        }
+        .input-prefix {
+            position: absolute;
+            left: .75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7A6E65;
+            font-size: .85rem;
+        }
+        .input-icon {
+            position: absolute;
+            left: .75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7A6E65;
+        }
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: .65rem .85rem;
+            border: 1.5px solid rgba(44,36,27,.18);
+            background: #F9F6F0;
+            color: #2C241B;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .875rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+        input[type="number"].with-prefix,
+        input[type="text"].with-prefix { padding-left: 2.5rem; }
+        input.with-icon { padding-left: 2.5rem; }
 
-            input:focus, select:focus {
-                border-color: #722f37;
-            }
+        input:focus, select:focus { border-color: #722F37; }
 
-            #sectionCartao {
-                background: #f9f6f0;
-                border: 1px solid rgba(44, 36, 27, 0.12);
-                padding: 1rem;
-                margin-bottom: 1rem;
-            }
-            #sectionCartao label {
-                font-size: 0.68rem;
-                font-weight: 600;
-                letter-spacing: 0.1em;
-                text-transform: uppercase;
-                color: #7a6e65;
-                display: block;
-                margin-bottom: 0.5rem;
-            }
+        #sectionCartao {
+            background: #F9F6F0;
+            border: 1px solid rgba(44,36,27,.12);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        #sectionCartao label {
+            font-size: .68rem;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #7A6E65;
+            display: block;
+            margin-bottom: .5rem;
+        }
 
-            #btnComprar {
-                background: #2c241b;
-                color: #f9f6f0;
-                border: 2px solid #2c241b;
-                padding: 0.85rem;
-                width: 100%;
-                font-family: "DM Sans", sans-serif;
-                font-size: 0.75rem;
-                font-weight: 700;
-                letter-spacing: 0.1em;
-                text-transform: uppercase;
-                cursor: pointer;
-                transition: all 0.2s;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 0.5rem;
-            }
-            #btnComprar:hover {
-                background: transparent;
-                color: #2c241b;
-            }
+        #btnComprar {
+            background: #2C241B;
+            color: #F9F6F0;
+            border: 2px solid #2C241B;
+            padding: .85rem;
+            width: 100%;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+        }
+        #btnComprar:hover {
+            background: transparent;
+            color: #2C241B;
+        }
 
-            /* ── TABELA HISTÓRICO ── */
-            .card-historico {
-                background: #ffffff;
-                border: 1px solid rgba(44, 36, 27, 0.12);
-                overflow: hidden;
-            }
-            @media (min-width: 768px) {
-                .card-historico {
-                    grid-column: span 3;
-                }
-            }
-            .historico-header {
-                background: #2c241b;
-                padding: 1rem 1.25rem;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            .historico-header-title {
-                font-size: 0.75rem;
-                font-weight: 700;
-                color: #f9f6f0;
-                letter-spacing: 0.1em;
-                text-transform: uppercase;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
-            .historico-header-sub {
-                font-size: 0.65rem;
-                color: rgba(249, 246, 240, 0.5);
-                text-transform: uppercase;
-                letter-spacing: 0.1em;
-            }
-            .table-wrap {
-                overflow-x: auto;
-            }
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                text-align: left;
-            }
-            thead tr {
-                background: #ede8df;
-            }
-            th {
-                padding: 0.75rem 1rem;
-                font-size: 0.65rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.1em;
-                color: #7a6e65;
-            }
-            td {
-                padding: 0.75rem 1rem;
-                font-size: 0.875rem;
-                color: #2c241b;
-                border-bottom: 1px solid rgba(44, 36, 27, 0.06);
-            }
+        /* ── TABELA HISTÓRICO ── */
+        .card-historico {
+            background: #FFFFFF;
+            border: 1px solid rgba(44,36,27,.12);
+            overflow: hidden;
+        }
+        @media (min-width: 768px) {
+            .card-historico { grid-column: span 3; }
+        }
+        .historico-header {
+            background: #2C241B;
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .historico-header-title {
+            font-size: .75rem;
+            font-weight: 700;
+            color: #F9F6F0;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        .historico-header-sub {
+            font-size: .65rem;
+            color: rgba(249,246,240,.5);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+        }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        thead tr { background: #EDE8DF; }
+        th {
+            padding: .75rem 1rem;
+            font-size: .65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: #7A6E65;
+        }
+        td {
+            padding: .75rem 1rem;
+            font-size: .875rem;
+            color: #2C241B;
+            border-bottom: 1px solid rgba(44,36,27,.06);
+        }
 
-            /* ── MODAL PIX ── */
-            #modalPix {
-                display: none;
-                position: fixed;
-                inset: 0;
-                background: rgba(44, 36, 27, 0.8);
-                z-index: 50;
-                align-items: center;
-                justify-content: center;
-                padding: 1rem;
-            }
-            #modalPix.hidden {
-                display: none;
-            }
+        /* ── MODAL PIX ── */
+        #modalPix {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(44,36,27,.8);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        #modalPix.hidden { display: none; }
 
-            .modal-box {
-                background: #f9f6f0;
-                border: 2px solid #2c241b;
-                padding: 2rem;
-                max-width: 420px;
-                width: 100%;
-                margin: auto;
-            }
-            .modal-header {
-                text-align: center;
-                margin-bottom: 1.5rem;
-            }
-            .modal-icon-wrap {
-                background: #ede8df;
-                width: 56px;
-                height: 56px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin: 0 auto 0.75rem;
-            }
-            .modal-icon-wrap i {
-                font-size: 1.4rem;
-                color: #722f37;
-            }
-            .modal-title {
-                font-family: "Playfair Display", serif;
-                font-size: 1.4rem;
-                color: #2c241b;
-            }
-            .modal-sub {
-                color: #7a6e65;
-                font-size: 0.875rem;
-                margin-top: 0.35rem;
-            }
+        .modal-box {
+            background: #F9F6F0;
+            border: 2px solid #2C241B;
+            padding: 2rem;
+            max-width: 420px;
+            width: 100%;
+            margin: auto;
+        }
+        .modal-header { text-align: center; margin-bottom: 1.5rem; }
+        .modal-icon-wrap {
+            background: #EDE8DF;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto .75rem;
+        }
+        .modal-icon-wrap i { font-size: 1.4rem; color: #722F37; }
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: #2C241B;
+        }
+        .modal-sub { color: #7A6E65; font-size: .875rem; margin-top: .35rem; }
 
-            .qr-container {
-                background: #ede8df;
-                border: 1px solid rgba(44, 36, 27, 0.15);
-                padding: 1.5rem;
-                display: flex;
-                justify-content: center;
-                margin-bottom: 1.5rem;
-            }
-            #imgQrCode {
-                width: 180px;
-                height: 180px;
-                display: block;
-            }
+        .qr-container {
+            background: #EDE8DF;
+            border: 1px solid rgba(44,36,27,.15);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        #imgQrCode { width: 180px; height: 180px; display: block; }
 
-            .pix-label {
-                font-size: 0.65rem;
-                font-weight: 700;
-                letter-spacing: 0.1em;
-                text-transform: uppercase;
-                color: #7a6e65;
-                margin-bottom: 0.35rem;
-            }
-            .pix-row {
-                display: flex;
-                gap: 0.5rem;
-            }
-            #textoCopiaECola {
-                flex: 1;
-                background: #ede8df;
-                border: none;
-                padding: 0.75rem;
-                font-family: monospace;
-                font-size: 0.8rem;
-                color: #2c241b;
-                outline: none;
-            }
-            .btn-copiar {
-                background: #722f37;
-                color: #f9f6f0;
-                border: none;
-                padding: 0.75rem 1rem;
-                cursor: pointer;
-                transition: background 0.2s;
-            }
-            .btn-copiar:hover {
-                background: #5a2329;
-            }
+        .pix-label {
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #7A6E65;
+            margin-bottom: .35rem;
+        }
+        .pix-row { display: flex; gap: .5rem; }
+        #textoCopiaECola {
+            flex: 1;
+            background: #EDE8DF;
+            border: none;
+            padding: .75rem;
+            font-family: monospace;
+            font-size: .8rem;
+            color: #2C241B;
+            outline: none;
+        }
+        .btn-copiar {
+            background: #722F37;
+            color: #F9F6F0;
+            border: none;
+            padding: .75rem 1rem;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .btn-copiar:hover { background: #5a2329; }
 
-            .btn-fechar-pix {
-                background: #2c241b;
-                color: #f9f6f0;
-                border: none;
-                width: 100%;
-                padding: 0.85rem;
-                font-family: "DM Sans", sans-serif;
-                font-size: 0.8rem;
-                font-weight: 700;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-                cursor: pointer;
-                margin-top: 1rem;
-                transition: background 0.2s;
-            }
-            .btn-fechar-pix:hover {
-                background: #3a2e24;
-            }
+        .btn-fechar-pix {
+            background: #2C241B;
+            color: #F9F6F0;
+            border: none;
+            width: 100%;
+            padding: .85rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .8rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background .2s;
+        }
+        .btn-fechar-pix:hover { background: #3a2e24; }
 
-            .btn-debug {
-                display: block;
-                margin: 0.5rem auto 0;
-                background: none;
-                border: none;
-                color: rgba(44, 36, 27, 0.3);
-                font-size: 0.7rem;
-                cursor: pointer;
-                text-align: center;
-            }
-            .btn-debug:hover {
-                color: rgba(44, 36, 27, 0.6);
-            }
-        </style>
-    </head>
-    <body>
-        <nav>
-            <span class="nav-brand">Bibliotroca &middot; Carteira</span>
-            <div class="nav-right">
-                <span id="displayNome">Carregando...</span>
-                <a th:href="@{/clientes/sair}" class="nav-sair">
-                    <i class="fa-solid fa-right-from-bracket"></i> Sair
-                </a>
-            </div>
-        </nav>
+        .btn-debug {
+            display: block;
+            margin: .5rem auto 0;
+            background: none;
+            border: none;
+            color: rgba(44,36,27,.3);
+            font-size: .7rem;
+            cursor: pointer;
+            text-align: center;
+        }
+        .btn-debug:hover { color: rgba(44,36,27,.6); }
+    </style>
+</head>
+<body>
 
-        <main>
-            <div class="grid-layout">
-                <!-- Saldo -->
-                <div class="card-saldo">
-                    <div class="saldo-icon-wrap">
-                        <i class="fa-solid fa-wallet"></i>
-                    </div>
-                    <div class="saldo-label">Saldo Disponível</div>
-                    <div class="saldo-row">
-                        <span class="saldo-prefix">T$</span>
-                        <span id="displaySaldo">0.00</span>
-                    </div>
-                    <p class="saldo-nota">
-                        * Os tokens são creditados instantaneamente após a
-                        confirmação do pagamento.
-                    </p>
-                </div>
-
-                <!-- Comprar Tokens -->
-                <div class="card-comprar">
-                    <div class="card-comprar-title">
-                        <i class="fa-solid fa-cart-shopping"></i>
-                        Comprar Novos Tokens
-                    </div>
-
-                    <form id="formCompra">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="valor">Valor da Recarga (R$)</label>
-                                <div class="input-wrap">
-                                    <span class="input-prefix">R$</span>
-                                    <input
-                                        type="number"
-                                        id="valor"
-                                        step="0.01"
-                                        min="1"
-                                        required
-                                        placeholder="0.00"
-                                        class="with-prefix"
-                                    >
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="metodoPagamento"
-                                >Forma de Pagamento</label>
-                                <select id="metodoPagamento">
-                                    <option value="CARTAO">
-                                        💳 Cartão de Crédito
-                                    </option>
-                                    <option value="PIX">
-                                        ⚡ PIX (Aprovação na hora)
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div id="sectionCartao">
-                            <label for="numCartao">Dados do Cartão</label>
-                            <div class="input-wrap">
-                                <input
-                                    type="text"
-                                    id="numCartao"
-                                    placeholder="0000 0000 0000 0000"
-                                    class="with-icon"
-                                >
-                                <i
-                                    class="fa-solid fa-credit-card input-icon"
-                                ></i>
-                            </div>
-                        </div>
-
-                        <button type="submit" id="btnComprar">
-                            <i class="fa-solid fa-check-double"></i> Confirmar e
-                            Pagar
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Histórico -->
-                <div class="card-historico">
-                    <div class="historico-header">
-                        <span class="historico-header-title">
-                            <i class="fa-solid fa-clock-rotate-left"></i>
-                            Histórico Recente
-                        </span>
-                        <span class="historico-header-sub"
-                        >Últimas transações</span>
-                    </div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Data e Hora</th>
-                                    <th>Crédito (Tokens)</th>
-                                    <th>Método</th>
-                                    <th>Referência</th>
-                                </tr>
-                            </thead>
-                            <tbody id="lista-transacoes"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- MODAL PIX -->
-        <div
-            id="modalPix"
-            style="display: none; position: fixed; inset: 0; background: rgba(44, 36, 27, 0.8); z-index: 50; align-items: center; justify-content: center; padding: 1rem"
-        >
-            <div class="modal-box">
-                <div class="modal-header">
-                    <div class="modal-icon-wrap">
-                        <i class="fa-solid fa-qrcode"></i>
-                    </div>
-                    <div class="modal-title">Pagamento via PIX</div>
-                    <p class="modal-sub">
-                        Escaneie o código abaixo para finalizar a compra
-                    </p>
-                </div>
-
-                <div class="qr-container">
-                    <img id="imgQrCode" src alt="QR Code PIX">
-                </div>
-
-                <div>
-                    <div class="pix-label">PIX Copia e Cola</div>
-                    <div class="pix-row">
-                        <input type="text" id="textoCopiaECola" readonly>
-                        <button class="btn-copiar" onclick="copyPix()">
-                            <i class="fa-solid fa-copy"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <button class="btn-fechar-pix" onclick="fecharModalPix()">
-                    Já realizei o pagamento
-                </button>
-                <button class="btn-debug" onclick="simularAvisoBanco()">
-                    [ DEBUG: Simular Webhook Banco ]
-                </button>
-            </div>
+    <nav>
+        <span class="nav-brand">Bibliotroca &middot; Carteira</span>
+        <div class="nav-right">
+            <span id="displayNome">Carregando...</span>
+            <a th:href="@{/clientes/sair}" class="nav-sair">
+                <i class="fa-solid fa-right-from-bracket"></i> Sair
+            </a>
         </div>
+    </nav>
 
-        <script th:src="@{/cliente/script.js}"></script>
-        <script th:src="@{/cliente/wallet.js}"></script>
-    </body>
+    <main>
+        <div class="grid-layout">
+
+            <!-- Saldo -->
+            <div class="card-saldo">
+                <div class="saldo-icon-wrap">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <div class="saldo-label">Saldo Disponível</div>
+                <div class="saldo-row">
+                    <span class="saldo-prefix">T$</span>
+                    <span id="displaySaldo">0.00</span>
+                </div>
+                <p class="saldo-nota">
+                    * Os tokens são creditados instantaneamente após a confirmação do pagamento.
+                </p>
+            </div>
+
+            <!-- Comprar Tokens -->
+            <div class="card-comprar">
+                <div class="card-comprar-title">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    Comprar Novos Tokens
+                </div>
+
+                <form id="formCompra">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="valor">Valor da Recarga (R$)</label>
+                            <div class="input-wrap">
+                                <span class="input-prefix">R$</span>
+                                <input type="number" id="valor" step="0.01" min="1" required placeholder="0.00" class="with-prefix">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="metodoPagamento">Forma de Pagamento</label>
+                            <select id="metodoPagamento">
+                                <option value="CARTAO">💳 Cartão de Crédito</option>
+                                <option value="PIX">⚡ PIX (Aprovação na hora)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="sectionCartao">
+                        <label for="numCartao">Dados do Cartão</label>
+                        <div class="input-wrap">
+                            <input type="text" id="numCartao" placeholder="0000 0000 0000 0000" class="with-icon">
+                            <i class="fa-solid fa-credit-card input-icon"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnComprar">
+                        <i class="fa-solid fa-check-double"></i> Confirmar e Pagar
+                    </button>
+                </form>
+            </div>
+
+            <!-- Histórico -->
+            <div class="card-historico">
+                <div class="historico-header">
+                    <span class="historico-header-title">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Histórico Recente
+                    </span>
+                    <span class="historico-header-sub">Últimas transações</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data e Hora</th>
+                                <th>Crédito (Tokens)</th>
+                                <th>Método</th>
+                                <th>Referência</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-transacoes"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODAL PIX -->
+    <div id="modalPix" style="display:none;position:fixed;inset:0;background:rgba(44,36,27,.8);z-index:50;align-items:center;justify-content:center;padding:1rem;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-icon-wrap">
+                    <i class="fa-solid fa-qrcode"></i>
+                </div>
+                <div class="modal-title">Pagamento via PIX</div>
+                <p class="modal-sub">Escaneie o código abaixo para finalizar a compra</p>
+            </div>
+
+            <div class="qr-container">
+                <img id="imgQrCode" src alt="QR Code PIX">
+            </div>
+
+            <div>
+                <div class="pix-label">PIX Copia e Cola</div>
+                <div class="pix-row">
+                    <input type="text" id="textoCopiaECola" readonly>
+                    <button class="btn-copiar" onclick="copyPix()">
+                        <i class="fa-solid fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn-fechar-pix" onclick="fecharModalPix()">
+                Já realizei o pagamento
+            </button>
+            <button class="btn-debug" onclick="simularAvisoBanco()">
+                [ DEBUG: Simular Webhook Banco ]
+            </button>
+        </div>
+    </div>
+
+    <script th:src="@{/cliente/script.js}"></script>
+    <script th:src="@{/cliente/wallet.js}"></script>
+</body>
 </html>

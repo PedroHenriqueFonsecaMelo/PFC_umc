@@ -2,17 +2,14 @@
 
 ## O que é um Service?
 
-**Services** são a camada de lógica de negócio em aplicações Spring. Enquanto os
-**Controllers** lidam com requisições HTTP, os **Services** contêm a lógica de
-negócio real, coordinando operações e regras da aplicação.
+**Services** são a camada de lógica de negócio em aplicações Spring. Enquanto os **Controllers** lidam com requisições HTTP, os **Services** contêm a lógica de negócio real, coordinando operações e regras da aplicação.
 
 ### Responsabilidades do Service
 
 1. **Lógica de Negócio**: Implementar as regras e validações do domínio
 2. **Transações**: Gerenciar operações de banco de dados (commit/rollback)
 3. **Coordenação**: Coordenar múltiplas operações e entidades
-4. **Abstração**: Isolar a camada de acesso a dados (Repositories) dos
-   Controllers
+4. **Abstração**: Isolar a camada de acesso a dados (Repositories) dos Controllers
 
 ### Anotações Comuns
 
@@ -32,22 +29,22 @@ negócio real, coordinando operações e regras da aplicação.
 
 #### Funcionalidades Principais
 
-| Método                           | Descrição                                    |
-| -------------------------------- | -------------------------------------------- |
-| `salvarCliente()`                | Cadastra novo cliente básico                 |
-| `salvarClienteCompleto()`        | Cadastra cliente com endereço e cartão       |
+| Método | Descrição |
+|--------|-----------|
+| `salvarCliente()` | Cadastra novo cliente básico |
+| `salvarClienteCompleto()` | Cadastra cliente com endereço e cartão |
 | `atualizarClienteEAssociacoes()` | Atualiza dados do cliente e suas associações |
-| `deletarClientePorId()`          | Remove conta do cliente                      |
-| `adicionarTokens()`              | Adiciona tokens à carteira                   |
-| `listarHistoricoTransacoes()`    | Lista histórico de compras                   |
-| `autenticarCliente()`            | Valida credenciais                           |
-| `buscarClientePorEmail()`        | Busca cliente por e-mail                     |
-| `iniciarRecuperacaoSenha()`      | Gera token para recuperação                  |
-| `validarTokenRecuperacao()`      | Valida token de recuperação                  |
-| `alterarSenhaComToken()`         | Altera senha com token                       |
-| `registrarTransacaoPendente()`   | Registra transação PIX pendente              |
-| `verificarSeFoiPago()`           | Verifica status do pagamento                 |
-| `aprovarPagamento()`             | Aprova pagamento PIX                         |
+| `deletarClientePorId()` | Remove conta do cliente |
+| `adicionarTokens()` | Adiciona tokens à carteira |
+| `listarHistoricoTransacoes()` | Lista histórico de compras |
+| `autenticarCliente()` | Valida credenciais |
+| `buscarClientePorEmail()` | Busca cliente por e-mail |
+| `iniciarRecuperacaoSenha()` | Gera token para recuperação |
+| `validarTokenRecuperacao()` | Valida token de recuperação |
+| `alterarSenhaComToken()` | Altera senha com token |
+| `registrarTransacaoPendente()` | Registra transação PIX pendente |
+| `verificarSeFoiPago()` | Verifica status do pagamento |
+| `aprovarPagamento()` | Aprova pagamento PIX |
 
 #### Dependências
 
@@ -72,15 +69,15 @@ negócio real, coordinando operações e regras da aplicação.
 
 #### Funcionalidades Principais
 
-| Método                    | Descrição                             |
-| ------------------------- | ------------------------------------- |
-| `cadastrarVenda()`        | Cria novo anúncio de livro            |
-| `listarLivrosAprovados()` | Lista livros para vitrine             |
-| `listarLivrosPendentes()` | Lista livros aguardando aprovação     |
-| `listarTodosLivros()`     | Lista todos os livros (admin)         |
-| `aprovarLivro()`          | Aprova livro definindo preço e estado |
-| `rejeitarLivro()`         | Rejeita e remove livro                |
-| `realizarCompra()`        | Executa compra de livro               |
+| Método | Descrição |
+|--------|-----------|
+| `cadastrarVenda()` | Cria novo anúncio de livro |
+| `listarLivrosAprovados()` | Lista livros para vitrine |
+| `listarLivrosPendentes()` | Lista livros aguardando aprovação |
+| `listarTodosLivros()` | Lista todos os livros (admin) |
+| `aprovarLivro()` | Aprova livro definindo preço e estado |
+| `rejeitarLivro()` | Rejeita e remove livro |
+| `realizarCompra()` | Executa compra de livro |
 
 #### Características Especiais
 
@@ -88,8 +85,7 @@ negócio real, coordinando operações e regras da aplicação.
 - **Aprovação Admin**: Livros são criados com `aprovado = false`
 - **Preço Admin**: O admin define o preço na aprovação
 - **Validação de Preço**: Impede preços abusivos para livros desgasteados
-- **Transferência de Tokens**: Compra transfere tokens de comprador para
-  vendedor
+- **Transferência de Tokens**: Compra transfere tokens de comprador para vendedor
 
 #### Dependências
 
@@ -103,13 +99,12 @@ negócio real, coordinando operações e regras da aplicação.
 
 **Localização**: `src/main/java/umc/exs/service/AuthHelper.java`
 
-**O que faz**: Auxilia na autenticação de usuários após operações como cadastro
-ou login.
+**O que faz**: Auxilia na autenticação de usuários após operações como cadastro ou login.
 
 #### Funcionalidades
 
-| Método                       | Descrição                             |
-| ---------------------------- | ------------------------------------- |
+| Método | Descrição |
+|--------|-----------|
 | `authenticateAndSetCookie()` | Autentica usuário e define cookie JWT |
 
 #### Características
@@ -135,12 +130,12 @@ ou login.
 
 #### Funcionalidades Principais
 
-| Método                        | Descrição                    |
-| ----------------------------- | ---------------------------- |
-| `criarAvaliacao()`            | Cria nova avaliação de livro |
-| `buscarAvaliacoesPorIsbn()`   | Lista avaliações por ISBN    |
-| `calcularMediaPorIsbn()`      | Calcula média de notas       |
-| `buscarLivrosComAvaliacoes()` | Lista livros avaliados       |
+| Método | Descrição |
+|--------|-----------|
+| `criarAvaliacao()` | Cria nova avaliação de livro |
+| `buscarAvaliacoesPorIsbn()` | Lista avaliações por ISBN |
+| `calcularMediaPorIsbn()` | Calcula média de notas |
+| `buscarLivrosComAvaliacoes()` | Lista livros avaliados |
 
 #### Validações
 
@@ -165,8 +160,8 @@ ou login.
 
 #### Funcionalidades
 
-| Método                | Descrição                                |
-| --------------------- | ---------------------------------------- |
+| Método | Descrição |
+|--------|-----------|
 | `saveOrReuseCartao()` | Salva novo cartão ou reutiliza existente |
 
 #### Lógica
@@ -185,8 +180,8 @@ ou login.
 
 #### Funcionalidades
 
-| Método                  | Descrição                                  |
-| ----------------------- | ------------------------------------------ |
+| Método | Descrição |
+|--------|-----------|
 | `saveOrReuseEndereco()` | Salva novo endereço ou reutiliza existente |
 
 #### Lógica
@@ -213,9 +208,9 @@ ou login.
 
 #### Funcionalidades
 
-| Método                  | Descrição                |
-| ----------------------- | ------------------------ |
-| `registrarLog()`        | Registra ação do usuário |
+| Método | Descrição |
+|--------|-----------|
+| `registrarLog()` | Registra ação do usuário |
 | `buscarLogsDoCliente()` | Lista logs de um cliente |
 
 #### Ações Registradas
@@ -255,17 +250,17 @@ ou login.
 
 ## Resumo dos Services
 
-| Service               | Responsabilidade                                               |
-| --------------------- | -------------------------------------------------------------- |
-| ClienteService        | Gestão de clientes, autenticação, tokens, recuperação de senha |
-| LivroService          | Cadastro, aprovação, compra de livros                          |
-| AuthHelper            | Auxiliar de autenticação com JWT                               |
-| AvaliacaoLivroService | Avaliações e notas de livros                                   |
-| CartaoService         | Gestão de cartões                                              |
-| EnderecoService       | Gestão de endereços                                            |
-| LogAuditoriaService   | Auditoria de ações                                             |
-| PagamentoMockService  | Simulação de pagamentos                                        |
-| EmailService          | Envio de e-mails                                               |
+| Service | Responsabilidade |
+|---------|-----------------|
+| ClienteService | Gestão de clientes, autenticação, tokens, recuperação de senha |
+| LivroService | Cadastro, aprovação, compra de livros |
+| AuthHelper | Auxiliar de autenticação com JWT |
+| AvaliacaoLivroService | Avaliações e notas de livros |
+| CartaoService | Gestão de cartões |
+| EnderecoService | Gestão de endereços |
+| LogAuditoriaService | Auditoria de ações |
+| PagamentoMockService | Simulação de pagamentos |
+| EmailService | Envio de e-mails |
 
 ---
 
@@ -307,3 +302,4 @@ public class ExemploService {
     }
 }
 ```
+

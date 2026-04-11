@@ -17,7 +17,6 @@ public interface LivroMapper {
     @Mapping(target = "estadoAprovado", ignore = true)
     @Mapping(target = "dataAprovacao", ignore = true)
     @Mapping(target = "adminAprovadorId", ignore = true)
-    @Mapping(target = "vendedor", ignore = true)
     LivroAnuncio paraEntidade(LivroRequestDTO dto);
 
     LivroRequestDTO paraDTO(LivroAnuncio entity);

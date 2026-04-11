@@ -25,9 +25,7 @@ public interface LivroRepository extends JpaRepository<LivroAnuncio, Long> {
 
     Optional<LivroAnuncio> findByIdAndAprovadoTrue(Long id);
 
-    /**
-     * Livros anunciados a partir de uma data (para agrupamento mensal no
-     * dashboard).
-     */
+    /** Livros anunciados a partir de uma data (para agrupamento mensal no dashboard). */
     List<LivroAnuncio> findByDataAnuncioAfter(LocalDateTime data);
 }
+

@@ -9,6 +9,5 @@ import umc.exs.model.entidades.foundation.PostBlog;
 
 public interface PostBlogRepository extends JpaRepository<PostBlog, Long> {
     List<PostBlog> findAllByOrderByDataPublicacaoDesc();
-
     List<PostBlog> findByDataPublicacaoAfter(LocalDateTime data);
 }

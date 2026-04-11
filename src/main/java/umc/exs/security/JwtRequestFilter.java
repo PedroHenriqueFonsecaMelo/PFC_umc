@@ -34,16 +34,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         // Ignora recursos estáticos — evita N queries ao banco por asset
         if (requestURI.startsWith("/images/") ||
-                requestURI.startsWith("/css/") ||
-                requestURI.startsWith("/js/") ||
+                requestURI.startsWith("/css/")    ||
+                requestURI.startsWith("/js/")     ||
                 requestURI.startsWith("/produto/") ||
                 requestURI.startsWith("/cliente/") ||
                 requestURI.startsWith("/uploads/") ||
-                requestURI.endsWith(".js") ||
-                requestURI.endsWith(".css") ||
-                requestURI.endsWith(".ico") ||
-                requestURI.endsWith(".png") ||
-                requestURI.endsWith(".jpg") ||
+                requestURI.endsWith(".js")         ||
+                requestURI.endsWith(".css")        ||
+                requestURI.endsWith(".ico")        ||
+                requestURI.endsWith(".png")        ||
+                requestURI.endsWith(".jpg")        ||
                 requestURI.endsWith(".woff2")) {
             chain.doFilter(request, response);
             return;
@@ -56,8 +56,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails ud = userDetailsService.loadUserByUsername(username);
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(ud, null,
-                        ud.getAuthorities());
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(ud, null, ud.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
         }

@@ -16,9 +16,9 @@ public class WebConfig implements WebMvcConfigurer {
      * Configura handler recursos estáticos para uploads.
      * Mapeia /uploads/** → diretório ./uploads/ local (perfil local).
      * 
-     * @param registry registry recursos
      * @param registry recursos web
      */
+    @SuppressWarnings("null")
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Define o caminho absoluto para a pasta de uploads

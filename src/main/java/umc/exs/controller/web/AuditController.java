@@ -23,14 +23,15 @@ public class AuditController {
     private final ClienteService clienteService;
     private final LogAuditoriaService logAuditoriaService;
 
-    /**
-     * Mostra auditoria logs cliente autenticado.
-     * Busca ID email, logs data desc, model.
-     * Template cliente/auditoria.
-     */
-    @GetMapping("/cliente")
+/**
+ * Mostra auditoria logs cliente autenticado.
+ * Busca ID email, logs data desc, model.
+ * Template cliente/auditoria.
+ */
+@GetMapping("/cliente")
 
     public String mostrarAuditoria(Principal principal, Model model) {
+
 
         if (principal == null) {
             return "redirect:/clientes/login";
@@ -49,17 +50,17 @@ public class AuditController {
         return "cliente/auditoria";
     }
 
-    /**
-     * Retorna logs JSON para cliente autenticado.
-     * Mesmo filtro que mostrarAuditoria, AJAX use.
-     * Lista ordenada data desc ou vazia se não logado.
-     * 
-     * @param principal usuário
-     * @return List<LogAuditoria> logs JSON
-     */
-    @GetMapping("/cliente/json")
+/**
+ * Retorna logs JSON para cliente autenticado.
+ * Mesmo filtro que mostrarAuditoria, AJAX use.
+ * Lista ordenada data desc ou vazia se não logado.
+ * @param principal usuário
+ * @return List<LogAuditoria> logs JSON
+ */
+@GetMapping("/cliente/json")
     @ResponseBody
     public List<LogAuditoria> listarLogsJson(Principal principal) {
+
 
         if (principal == null) {
             return List.of();
@@ -82,3 +83,4 @@ public class AuditController {
  * /cliente/json retorna lista JSON para AJAX.
  * Usa ClienteService e LogAuditoriaService.
  */
+

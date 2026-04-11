@@ -17,9 +17,9 @@ import umc.exs.service.core.PedidoService;
 
 /**
  * API REST para consulta de pedidos do cliente autenticado.
- * GET /api/pedidos/pendentes → compras em andamento
+ * GET /api/pedidos/pendentes  → compras em andamento
  * GET /api/pedidos/concluidos → compras entregues
- * GET /api/pedidos/todos → histórico completo
+ * GET /api/pedidos/todos      → histórico completo
  */
 @RestController
 @RequestMapping("/api/pedidos")
@@ -31,8 +31,7 @@ public class PedidoController {
 
     @GetMapping("/pendentes")
     public ResponseEntity<?> listarPendentes(@AuthenticationPrincipal UserDetails user) {
-        if (user == null)
-            return ResponseEntity.status(401).build();
+        if (user == null) return ResponseEntity.status(401).build();
         Long id = resolverId(user.getUsername());
         List<PedidoDTO> lista = pedidoService.listarPendentes(id);
         return ResponseEntity.ok(lista);
@@ -40,8 +39,7 @@ public class PedidoController {
 
     @GetMapping("/concluidos")
     public ResponseEntity<?> listarConcluidos(@AuthenticationPrincipal UserDetails user) {
-        if (user == null)
-            return ResponseEntity.status(401).build();
+        if (user == null) return ResponseEntity.status(401).build();
         Long id = resolverId(user.getUsername());
         List<PedidoDTO> lista = pedidoService.listarConcluidos(id);
         return ResponseEntity.ok(lista);
@@ -49,8 +47,7 @@ public class PedidoController {
 
     @GetMapping("/todos")
     public ResponseEntity<?> listarTodos(@AuthenticationPrincipal UserDetails user) {
-        if (user == null)
-            return ResponseEntity.status(401).build();
+        if (user == null) return ResponseEntity.status(401).build();
         Long id = resolverId(user.getUsername());
         List<PedidoDTO> lista = pedidoService.listarPorCliente(id);
         return ResponseEntity.ok(lista);

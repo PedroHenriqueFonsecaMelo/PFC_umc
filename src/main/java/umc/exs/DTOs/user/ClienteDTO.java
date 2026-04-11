@@ -11,7 +11,7 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = { "senha" })
+@ToString(exclude = {"senha"})
 public class ClienteDTO {
 
     /**
@@ -38,7 +38,7 @@ public class ClienteDTO {
      * Gênero M/F/outros.
      */
     private String gen;
-
+    
     /**
      * Senha criptografada (não exposta).
      */
@@ -53,6 +53,11 @@ public class ClienteDTO {
      * Saldo atual tokens T$.
      */
     private Double saldoTokens = 0.0;
+
+    /**
+     * URL da foto de perfil do cliente.
+     */
+    private String fotoPerfil;
 
     /**
      * Lista endereços associados.
@@ -72,3 +77,4 @@ public class ClienteDTO {
  * Campos essenciais + listas endereços/cartões.
  * SaldoTokens default 0, usada frontend/backend.
  */
+

@@ -34,7 +34,7 @@ import umc.exs.model.enums.Genero;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
-@ToString(exclude = { "cartoes", "enderecos", "senha" })
+@ToString(exclude = {"cartoes", "enderecos", "senha"})
 public class Cliente {
 
     @Id
@@ -73,18 +73,29 @@ public class Cliente {
     @Column(nullable = false)
     private Double saldoTokens = 0.0;
 
+    @Column
+    private String fotoPerfil;
+
     @ManyToMany(fetch = FetchType.LAZY, cascade = {
             CascadeType.PERSIST,
             CascadeType.MERGE
     })
-    @JoinTable(name = "cliente_cartao", joinColumns = @JoinColumn(name = "cliente_id"), inverseJoinColumns = @JoinColumn(name = "cartao_id"))
+    @JoinTable(
+        name = "cliente_cartao", 
+        joinColumns = @JoinColumn(name = "cliente_id"), 
+        inverseJoinColumns = @JoinColumn(name = "cartao_id")
+    )
     private Set<Cartao> cartoes = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {
             CascadeType.PERSIST,
             CascadeType.MERGE
     })
-    @JoinTable(name = "cliente_endereco", joinColumns = @JoinColumn(name = "cliente_id"), inverseJoinColumns = @JoinColumn(name = "endereco_id"))
+    @JoinTable(
+        name = "cliente_endereco", 
+        joinColumns = @JoinColumn(name = "cliente_id"), 
+        inverseJoinColumns = @JoinColumn(name = "endereco_id")
+    )
     private Set<Endereco> enderecos = new HashSet<>();
 
     // --- Métodos de Negócio (Encapsulamento) ---

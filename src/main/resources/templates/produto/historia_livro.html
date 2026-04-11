@@ -1,131 +1,125 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>História do Livro — Bibliotroca</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link
-            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
-            rel="stylesheet"
-        >
-        <style>
-            *, *::before, *::after {
-                box-sizing: border-box;
-                margin: 0;
-                padding: 0;
-            }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>História do Livro — Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-            :root {
-                --ink: #2c241b;
-                --paper: #f9f6f0;
-                --cream: #ede8df;
-                --accent: #722f37;
-                --forest: #4a5d23;
-                --white: #ffffff;
-                --muted: #7a6e65;
-                --border: rgba(44, 36, 27, 0.15);
-            }
+        :root {
+            --ink:    #2C241B;
+            --paper:  #F9F6F0;
+            --cream:  #EDE8DF;
+            --accent: #722F37;
+            --forest: #4A5D23;
+            --white:  #FFFFFF;
+            --muted:  #7A6E65;
+            --border: rgba(44,36,27,.15);
+        }
 
-            body {
-                background: var(--paper);
-                color: var(--ink);
-                font-family: "DM Sans", sans-serif;
-                padding: 2rem;
-                padding-top: 80px;
-            }
+        body {
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'DM Sans', sans-serif;
+            padding: 2rem;
+            padding-top: 80px;
+        }
 
-            nav.topnav {
-                background: var(--ink);
-                color: var(--paper);
-                padding: 0.75rem 5vw;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                z-index: 30;
-            }
+        nav.topnav {
+            background: var(--ink);
+            color: var(--paper);
+            padding: .75rem 5vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 30;
+        }
 
-            .nav-link-back {
-                font-family: "DM Sans", sans-serif;
-                font-size: 0.8rem;
-                font-weight: 500;
-                letter-spacing: 0.1em;
-                text-transform: uppercase;
-                color: var(--paper);
-                text-decoration: none;
-                border: 1px solid rgba(249, 246, 240, 0.3);
-                padding: 0.35rem 0.85rem;
-                transition: background 0.2s, color 0.2s;
-            }
+        .nav-link-back {
+            font-family: 'DM Sans', sans-serif;
+            font-size: .8rem;
+            font-weight: 500;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--paper);
+            text-decoration: none;
+            border: 1px solid rgba(249,246,240,.3);
+            padding: .35rem .85rem;
+            transition: background .2s, color .2s;
+        }
 
-            .nav-link-back:hover {
-                background: var(--paper);
-                color: var(--ink);
-            }
+        .nav-link-back:hover {
+            background: var(--paper);
+            color: var(--ink);
+        }
 
-            .nav-brand {
-                font-family: "Playfair Display", serif;
-                font-size: 1.2rem;
-                font-style: italic;
-                color: var(--paper);
-                position: absolute;
-                left: 50%;
-                transform: translateX(-50%);
-            }
+        .nav-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            font-style: italic;
+            color: var(--paper);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
 
-            .container {
-                max-width: 800px;
-                margin: 2rem auto;
-                background: var(--white);
-                padding: 2rem;
-                border: 1px solid var(--border);
-                box-shadow: 4px 4px 0 rgba(44, 36, 27, 0.12);
-            }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: var(--white);
+            padding: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: 4px 4px 0 rgba(44,36,27,.12);
+        }
 
-            #tituloLivro {
-                font-family: "Playfair Display", serif;
-                font-size: 2rem;
-                font-weight: 700;
-                color: var(--ink);
-                margin-bottom: 1.5rem;
-                line-height: 1.25;
-            }
+        #tituloLivro {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 1.5rem;
+            line-height: 1.25;
+        }
 
-            #containerCapa {
-                margin-bottom: 1.5rem;
-            }
+        #containerCapa {
+            margin-bottom: 1.5rem;
+        }
 
-            #containerCapa img {
-                max-width: 220px;
-                border: 1px solid var(--border);
-                box-shadow: 3px 3px 0 var(--border);
-            }
+        #containerCapa img {
+            max-width: 220px;
+            border: 1px solid var(--border);
+            box-shadow: 3px 3px 0 var(--border);
+        }
 
-            #containerResumo {
-                font-family: "IM Fell English", serif;
-                font-size: 1rem;
-                line-height: 1.75;
-                color: var(--ink);
-            }
-        </style>
-    </head>
-    <body>
-        <nav class="topnav">
-            <a href="/livros/vitrine" class="nav-link-back">← Vitrine</a>
-            <span class="nav-brand">Bibliotroca</span>
-        </nav>
+        #containerResumo {
+            font-family: 'IM Fell English', serif;
+            font-size: 1rem;
+            line-height: 1.75;
+            color: var(--ink);
+        }
+    </style>
+</head>
+<body>
 
-        <div class="container">
-            <h1 id="tituloLivro">Carregando...</h1>
-            <div id="containerCapa"></div>
-            <div id="containerResumo"></div>
-        </div>
+    <nav class="topnav">
+        <a href="/livros/vitrine" class="nav-link-back">← Vitrine</a>
+        <span class="nav-brand">Bibliotroca</span>
+    </nav>
 
-        <script th:src="@{/produto/pesquisa_livro.js}" defer></script>
-    </body>
+    <div class="container">
+        <h1 id="tituloLivro">Carregando...</h1>
+        <div id="containerCapa"></div>
+        <div id="containerResumo"></div>
+    </div>
+
+    <script th:src="@{/produto/pesquisa_livro.js}" defer></script>
+</body>
 </html>
