@@ -177,6 +177,10 @@ async function simularAvisoBanco() {
 }
 
 function updateUI() {
-    document.getElementById('displaySaldo').innerText = userState.saldo.toFixed(2);
-    document.getElementById('displayNome').innerText = userState.nome;
+    var saldoEl = document.getElementById('displaySaldo');
+    if (saldoEl) saldoEl.innerText = userState.saldo.toFixed(2);
+    var nomeEl = document.getElementById('displayNome');
+    if (nomeEl) nomeEl.innerText = userState.nome;
+    var navSaldo = document.getElementById('navSaldo');
+    if (navSaldo) navSaldo.textContent = 'T$ ' + userState.saldo.toFixed(2);
 }

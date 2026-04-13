@@ -5,23 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard · Bibliotroca</title>
     <link rel="stylesheet" th:href="@{/cliente/homepage.css}" />
+    <link rel="stylesheet" th:href="@{/cliente/nav.css}" />
 </head>
 <body>
 
 <!-- ============================================================
      TOP BAR
      ============================================================ -->
-<header class="topbar">
-    <a th:href="@{/}" class="topbar-brand" style="text-decoration:none;">
-        <span class="brand-dot"></span>
-        Bibliotroca
+<header class="client-nav">
+    <a th:href="@{/}" class="cn-brand">
+        <span class="cn-dot"></span>Bibliotroca
     </a>
-    <div class="topbar-actions">
-        <a th:href="@{/livros/vitrine}" class="topbar-btn-danger" style="margin-right:.5rem;">Vitrine</a>
-        <a th:href="@{/livros/vender}" class="topbar-btn-danger" style="margin-right:.5rem;">Vender</a>
-        <a th:href="@{/forum}" class="topbar-btn-danger" style="margin-right:.5rem;">Fórum</a>
-        <a href="/#blogSection" class="topbar-btn-danger" style="margin-right:.5rem;">Blog</a>
-        <a th:href="@{/clientes/sair}" class="topbar-btn-danger">Sair</a>
+    <nav class="cn-links">
+        <a th:href="@{/livros/vitrine}"          class="cn-btn">Vitrine</a>
+        <a th:href="@{/livros/vender}"           class="cn-btn">Vender</a>
+        <a th:href="@{/forum}"                   class="cn-btn">Fórum</a>
+        <a th:href="@{/clientes/lista-desejos}"  class="cn-btn">Lista de Desejos</a>
+        <a th:href="@{/clientes/minhas-compras}" class="cn-btn">Minha Estante</a>
+    </nav>
+    <div class="cn-right">
+        <span class="cn-saldo" id="navSaldo">T$ --</span>
+        <a th:href="@{/clientes/meu-perfil}"     class="cn-btn">Meu Perfil</a>
+        <a th:href="@{/clientes/sair}"           class="cn-btn">Sair</a>
     </div>
 </header>
 
@@ -50,7 +55,7 @@
             </form>
         </div>
 
-        <div class="profile-meta">
+        <div class="profile-meta" style="min-width:160px;">
             <h1 class="profile-name"
                 th:text="${cliente != null ? cliente.nome : 'Usuário'}">Usuário</h1>
             <p class="profile-email"
@@ -85,6 +90,17 @@
                 <div>
                     <span class="stat-label">Nível</span>
                     <span class="stat-value" id="hero-nivel-value">—</span>
+                </div>
+            </div>
+
+            <!-- Wishlist count: loaded async via JS -->
+            <div class="stat-chip stat-desejos" style="cursor:pointer;"
+                 onclick="window.location.href='/clientes/lista-desejos'"
+                 title="Ver minha lista de desejos">
+                <span class="stat-icon">♡</span>
+                <div>
+                    <span class="stat-label">Desejos</span>
+                    <span class="stat-value" id="hero-desejos-value">—</span>
                 </div>
             </div>
         </div>
@@ -421,6 +437,33 @@
             if (nivelEl) nivelEl.textContent  = p.nivel;
             if (badgeEl) badgeEl.textContent  = p.badge;
         }).catch(function() {});
+    })();
+
+    /* ── Saldo na navbar ────────────────────────────────────── */
+    (function() {
+        fetch('/clientes/meu-perfil-json', { credentials: 'include' })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(c) {
+            if (!c) return;
+            var el = document.getElementById('navSaldo');
+            if (el) el.textContent = 'T$ ' + (c.saldoTokens || 0).toFixed(2);
+        }).catch(function() {});
+    })();
+
+    /* ── Contador lista de desejos ──────────────────────────── */
+    (function() {
+        fetch('/api/lista-desejos', { credentials: 'include' })
+        .then(function(res) {
+            if (!res.ok) return null;
+            return res.json();
+        }).then(function(lista) {
+            if (!lista) return;
+            var el = document.getElementById('hero-desejos-value');
+            if (el) el.textContent = lista.length + (lista.length === 1 ? ' item' : ' itens');
+        }).catch(function() {
+            var el = document.getElementById('hero-desejos-value');
+            if (el) el.textContent = 'Ver lista';
+        });
     })();
 </script>
 

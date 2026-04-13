@@ -29,6 +29,7 @@ import umc.exs.model.enums.EstadoLivro;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.negocios.LoteRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.email.EmailService;
 import umc.exs.service.log.LogAuditoriaService;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -44,6 +45,8 @@ public class LivroService {
     private final LogAuditoriaService logAuditoria;
     private final umc.exs.service.gamificacao.GamificacaoService gamificacaoService;
     private final PedidoService pedidoService;
+    private final EmailService emailService;
+    private final ListaDesejosService listaDesejosService;
 
     private static final double TOKEN_REWARD = 10.0;
 
@@ -61,7 +64,7 @@ public class LivroService {
     @SuppressWarnings("null")
     @Transactional
     public Lote criarLote(String email, LoteRequestDTO dto, List<MultipartFile> fotos) {
-        log.info("Iniciando criarLote para email: {}, fotos size: {}", email, fotos != null ? fotos.size() : "null");
+
         Optional<Cliente> clienteOpt = clienteRepository.findByEmail(email);
         if (clienteOpt.isEmpty()) {
             throw new RuntimeException("Cliente não encontrado");
@@ -262,6 +265,13 @@ public class LivroService {
 
         Livro saved = livroRepository.save(anuncio);
 
+        // Notificar clientes interessados via lista de desejos
+        try {
+            listaDesejosService.notificarClientesSeDisponivel(anuncio.getIsbn(), anuncio.getTitulo());
+        } catch (Exception e) {
+            log.error("Falha ao notificar lista de desejos para ISBN {}: {}", anuncio.getIsbn(), e.getMessage());
+        }
+
         // Identificar o vendedor: campo direto ou via lote
         Cliente vendedor = anuncio.getVendedor();
         if (vendedor == null && anuncio.getLote() != null) {
@@ -278,6 +288,20 @@ public class LivroService {
 
             logAuditoria.registrarLog("LIVRO_APROVADO_RECOMPENSA", vendedor.getId(), vendedor.getEmail(),
                     "Livro " + livroId + " aprovado - T$" + TOKEN_REWARD + " creditados");
+
+            // E-mail de confirmação ao vendedor
+            try {
+                emailService.enviar(
+                        vendedor.getEmail(),
+                        "Seu livro foi aprovado!",
+                        "Olá, " + vendedor.getNome() + "!\n\n" +
+                                "Seu livro \"" + anuncio.getTitulo() + "\" foi aprovado e está disponível na vitrine.\n" +
+                                "Você recebeu T$ " + TOKEN_REWARD + " como recompensa.\n\n" +
+                                "Equipe Bookstore"
+                );
+            } catch (Exception e) {
+                log.error("Falha ao enviar e-mail de aprovação para vendedor {}: {}", vendedor.getEmail(), e.getMessage());
+            }
         }
 
         if (anuncio.getLote() != null) {
@@ -307,6 +331,32 @@ public class LivroService {
 
         if (!estado.equalsIgnoreCase(EstadoLivro.RUIM.name())) {
             throw new RuntimeException("Apenas livros com estado RUIM ou pior podem ser rejeitados");
+        }
+
+        // E-mail de rejeição ao vendedor (antes de deletar)
+        Cliente vendedorRejeicao = anuncio.getVendedor();
+        if (vendedorRejeicao == null && anuncio.getLote() != null) {
+            vendedorRejeicao = anuncio.getLote().getCliente();
+        }
+        if (vendedorRejeicao != null) {
+            final String emailVendedor = vendedorRejeicao.getEmail();
+            final String nomeVendedor = vendedorRejeicao.getNome();
+            final String tituloLivro = anuncio.getTitulo();
+            try {
+                emailService.enviar(
+                        emailVendedor,
+                        "Seu livro não foi aprovado",
+                        "Olá, " + nomeVendedor + "!\n\n" +
+                                "Infelizmente, o livro \"" + tituloLivro + "\" não foi aprovado.\n" +
+                                (comentario != null && !comentario.isBlank()
+                                        ? "Motivo: " + comentario + "\n\n"
+                                        : "\n") +
+                                "Você pode enviar novos livros para avaliação a qualquer momento.\n\n" +
+                                "Equipe Bookstore"
+                );
+            } catch (Exception e) {
+                log.error("Falha ao enviar e-mail de rejeição para vendedor {}: {}", emailVendedor, e.getMessage());
+            }
         }
 
         livroRepository.delete(anuncio);
@@ -342,6 +392,22 @@ public class LivroService {
 
         logAuditoria.registrarLog("COMPRA_LIVRO_SUCESSO", comprador.getId(), comprador.getEmail(),
                 "Livro " + livroId + " T$" + preco);
+
+        // E-mail de confirmação de compra ao comprador
+        try {
+            emailService.enviar(
+                    comprador.getEmail(),
+                    "Compra realizada com sucesso!",
+                    "Olá, " + comprador.getNome() + "!\n\n" +
+                            "Sua compra do livro \"" + anuncio.getTitulo() + "\" foi confirmada.\n" +
+                            "Valor debitado: T$ " + preco + "\n" +
+                            "Saldo atual: T$ " + comprador.getSaldoTokens() + "\n\n" +
+                            "Acompanhe o status do envio em 'Minhas Compras'.\n\n" +
+                            "Equipe Bookstore"
+            );
+        } catch (Exception e) {
+            log.error("Falha ao enviar e-mail de compra para {}: {}", comprador.getEmail(), e.getMessage());
+        }
 
         // Gamificação: XP para o comprador
         gamificacaoService.xpCompra(comprador.getId());
@@ -462,6 +528,30 @@ public class LivroService {
                 comprador.getEmail(),
                 String.format("%d livro(s) comprado(s), %d falha(s), T$ %.2f debitados.",
                         comprados.size(), falhas.size(), totalGasto));
+
+        // E-mail de confirmação do carrinho ao comprador
+        if (!comprados.isEmpty()) {
+            try {
+                StringBuilder itensMsg = new StringBuilder();
+                comprados.forEach(item -> itensMsg
+                        .append("• ").append(item.getTitulo())
+                        .append(" — T$ ").append(String.format("%.2f", item.getPreco()))
+                        .append("\n"));
+                emailService.enviar(
+                        comprador.getEmail(),
+                        "Compra do carrinho confirmada!",
+                        "Olá, " + comprador.getNome() + "!\n\n" +
+                                "Sua compra foi confirmada com sucesso.\n\n" +
+                                "Itens adquiridos:\n" + itensMsg +
+                                "\nTotal debitado: T$ " + String.format("%.2f", totalGasto) + "\n" +
+                                "Saldo atual: T$ " + String.format("%.2f", comprador.getSaldoTokens()) + "\n\n" +
+                                "Acompanhe o status dos envios em 'Minhas Compras'.\n\n" +
+                                "Equipe Bookstore"
+                );
+            } catch (Exception e) {
+                log.error("Falha ao enviar e-mail de carrinho para {}: {}", comprador.getEmail(), e.getMessage());
+            }
+        }
 
         return CarrinhoCompraResponseDTO.builder()
                 .totalSolicitados(ids.size())

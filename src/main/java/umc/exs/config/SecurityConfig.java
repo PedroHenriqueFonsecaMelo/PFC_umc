@@ -49,15 +49,22 @@ public class SecurityConfig {
                                 .headers(headers -> headers
                                                 .contentSecurityPolicy(csp -> csp
                                                                 .policyDirectives("default-src 'self'; " +
-                                                                                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+                                                                // Permitir estilos do Google e FontAwesome (que você
+                                                                // usa no HTML)
+                                                                                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
                                                                                 +
-                                                                                "font-src 'self' https://fonts.gstatic.com; "
+                                                                                // Permitir fontes
+                                                                                "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
                                                                                 +
-                                                                                "script-src 'self' 'unsafe-inline'; "
+                                                                                // PERMITIR O SCRIPT DO CHART.JS
+                                                                                // (CDNJSDELIVR)
+                                                                                "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
                                                                                 +
-                                                                                "img-src 'self' data: https:; "
+                                                                                // PERMITIR CONEXÕES PARA SUA PRÓPRIA
+                                                                                // API
+                                                                                "connect-src 'self' https://www.googleapis.com https://openlibrary.org; "
                                                                                 +
-                                                                                "connect-src 'self' https://www.googleapis.com https://openlibrary.org;"))
+                                                                                "img-src 'self' data: https:;"))
                                                 .frameOptions(frame -> frame.deny())
                                                 .httpStrictTransportSecurity(hsts -> hsts.maxAgeInSeconds(31536000)
                                                                 .includeSubDomains(true))
@@ -143,6 +150,8 @@ public class SecurityConfig {
                         "/clientes/meu-perfil", "/clientes/meu-perfil-json",
                         "/clientes/minhas-compras", "/clientes/sair",
                         "/api/tokens/comprar", "/api/tokens/historico", "/api/tokens/**",
-                        "/api/pedidos/**", "/api/forum/respostas/*/curtir", "/api/forum/respostas/*/melhor"
+                        "/api/pedidos/**", "/api/forum/respostas/*/curtir", "/api/forum/respostas/*/melhor",
+                        "/api/lista-desejos", "/api/lista-desejos/**",
+                        "/clientes/lista-desejos"
         };
 }

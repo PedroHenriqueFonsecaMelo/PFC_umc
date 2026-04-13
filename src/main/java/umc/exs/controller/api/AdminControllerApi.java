@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -237,7 +238,10 @@ public class AdminControllerApi {
      * e séries mensais dos últimos 12 meses para os gráficos.
      */
     @GetMapping("/dashboard/metricas")
-    public ResponseEntity<DashboardMetricasDTO> getMetricas() {
+    public ResponseEntity<DashboardMetricasDTO> getMetricas(Model model) {
+
+        model.addAttribute("metrics", dashboardService.getMetricas());
+        
         return ResponseEntity.ok(dashboardService.getMetricas());
     }
 }

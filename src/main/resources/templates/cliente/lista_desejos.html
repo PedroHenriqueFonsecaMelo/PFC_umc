@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lista de Desejos — Bibliotroca</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  >
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <link rel="stylesheet" th:href="@{/cliente/nav.css}" />
+  <style>
+    :root {
+      --ink:    #2c241b;
+      --paper:  #f9f6f0;
+      --cream:  #ede8df;
+      --accent: #722f37;
+      --forest: #4a5d23;
+      --white:  #ffffff;
+      --muted:  #7a6e65;
+      --border: rgba(44, 36, 27, 0.15);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "DM Sans", sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* nav movido para /cliente/nav.css */
+
+    /* ── MAIN ── */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 5vw 4rem;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 2rem;
+    }
+    .page-header h1 {
+      font-family: "Playfair Display", serif;
+      font-size: 1.75rem;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .page-header h1 i { color: var(--accent); font-size: 1.4rem; }
+    .page-header p {
+      font-family: "IM Fell English", serif;
+      font-style: italic;
+      color: var(--muted);
+      margin-top: 0.35rem;
+      font-size: 0.9rem;
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-title::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── BUSCA ── */
+    .search-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .search-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .search-input {
+      flex: 1;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid rgba(44,36,27,0.18);
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: var(--muted); }
+    .btn-buscar {
+      background: var(--ink);
+      color: var(--paper);
+      border: 2px solid var(--ink);
+      padding: 0.65rem 1.25rem;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+    .btn-buscar:hover {
+      background: transparent;
+      color: var(--ink);
+    }
+    .btn-buscar:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ── RESULTADO BUSCA ── */
+    #resultadosBusca {
+      margin-top: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .resultado-item {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      padding: 0.85rem;
+      background: var(--paper);
+      border: 1px solid var(--border);
+      transition: box-shadow 0.2s;
+    }
+    .resultado-item:hover {
+      box-shadow: 3px 3px 0 rgba(44,36,27,0.08);
+    }
+    .resultado-capa {
+      width: 52px;
+      height: 72px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid rgba(44,36,27,0.1);
+      background: var(--cream);
+    }
+    .resultado-capa-placeholder {
+      width: 52px;
+      height: 72px;
+      flex-shrink: 0;
+      background: var(--cream);
+      border: 1px solid rgba(44,36,27,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    .resultado-info { flex: 1; min-width: 0; }
+    .resultado-titulo {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+    .resultado-autor {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+    .resultado-isbn {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-family: monospace;
+      margin-top: 0.25rem;
+    }
+    .resultado-isbn span {
+      background: var(--cream);
+      padding: 0.1rem 0.4rem;
+      border: 1px solid var(--border);
+    }
+    .btn-adicionar {
+      background: var(--accent);
+      color: var(--paper);
+      border: none;
+      padding: 0.45rem 0.9rem;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+      align-self: center;
+      flex-shrink: 0;
+    }
+    .btn-adicionar:hover { background: #5a2329; }
+    .btn-adicionar:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-ja-adicionado {
+      background: rgba(74,93,35,0.12);
+      color: var(--forest);
+      border: 1px solid rgba(74,93,35,0.3);
+      padding: 0.45rem 0.9rem;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      align-self: center;
+      flex-shrink: 0;
+    }
+
+    /* ── MENSAGEM DE BUSCA ── */
+    .search-hint {
+      text-align: center;
+      padding: 1.5rem 1rem;
+      color: var(--muted);
+      font-family: "IM Fell English", serif;
+      font-style: italic;
+      font-size: 0.9rem;
+    }
+    .search-error {
+      text-align: center;
+      padding: 1rem;
+      color: var(--accent);
+      font-size: 0.85rem;
+    }
+
+    /* ── LISTA DE DESEJOS SALVA ── */
+    .wishlist-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .desejo-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 1rem 1.25rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      transition: box-shadow 0.2s;
+    }
+    .desejo-card:hover {
+      box-shadow: 4px 4px 0 rgba(44,36,27,0.1);
+    }
+    .desejo-capa {
+      width: 48px;
+      height: 64px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid rgba(44,36,27,0.1);
+      background: var(--cream);
+    }
+    .desejo-capa-placeholder {
+      width: 48px;
+      height: 64px;
+      flex-shrink: 0;
+      background: var(--cream);
+      border: 1px solid rgba(44,36,27,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+    .desejo-info { flex: 1; min-width: 0; }
+    .desejo-titulo {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--ink);
+    }
+    .desejo-autor {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.1rem;
+    }
+    .desejo-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 0.35rem;
+    }
+    .desejo-isbn {
+      font-family: monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      background: var(--cream);
+      padding: 0.1rem 0.4rem;
+      border: 1px solid var(--border);
+    }
+    .desejo-data {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .btn-remover {
+      background: transparent;
+      border: 1.5px solid rgba(114,47,55,0.3);
+      color: var(--accent);
+      padding: 0.35rem 0.75rem;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-remover:hover {
+      background: var(--accent);
+      color: var(--paper);
+      border-color: var(--accent);
+    }
+
+    /* ── SKELETON ── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--cream) 25%, #d5cfc6 50%, var(--cream) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      height: 80px;
+      margin-bottom: 0.75rem;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+    }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .empty-state p {
+      font-family: "IM Fell English", serif;
+      font-style: italic;
+      font-size: 0.9375rem;
+    }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--paper);
+      border-radius: 2px;
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    #toast.sucesso { background: var(--forest); }
+    #toast.erro    { background: var(--accent); }
+
+    /* ── RESPONSIVO ── */
+    @media (max-width: 560px) {
+      .search-row { flex-direction: column; }
+      .btn-buscar { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="client-nav">
+  <a th:href="@{/}" class="cn-brand">
+    <span class="cn-dot"></span>Bibliotroca
+  </a>
+  <nav class="cn-links">
+    <a th:href="@{/livros/vitrine}"          class="cn-btn">Vitrine</a>
+    <a th:href="@{/livros/vender}"           class="cn-btn">Vender</a>
+    <a th:href="@{/forum}"                   class="cn-btn">Fórum</a>
+    <a th:href="@{/clientes/lista-desejos}"  class="cn-btn">Lista de Desejos</a>
+    <a th:href="@{/clientes/minhas-compras}" class="cn-btn">Minha Estante</a>
+  </nav>
+  <div class="cn-right">
+    <span class="cn-saldo" id="navSaldo">T$ --</span>
+    <a th:href="@{/clientes/meu-perfil}"     class="cn-btn">Meu Perfil</a>
+    <a th:href="@{/clientes/sair}"           class="cn-btn">Sair</a>
+  </div>
+</header>
+
+<main>
+  <!-- HEADER -->
+  <div class="page-header">
+    <h1><i class="fa-solid fa-heart"></i> Minha Lista de Desejos</h1>
+    <p>Busque livros por título, encontre o ISBN e salve para ser notificado quando chegarem à vitrine.</p>
+  </div>
+
+  <!-- SEÇÃO: BUSCA -->
+  <div class="section-title"><i class="fa-solid fa-magnifying-glass"></i> Buscar Livro</div>
+  <div class="search-card">
+    <div class="search-row">
+      <input
+        id="inputBusca"
+        class="search-input"
+        type="text"
+        placeholder="Ex: Dom Casmurro, Harry Potter, O Hobbit..."
+        maxlength="120"
+        autocomplete="off"
+      />
+      <button id="btnBuscar" class="btn-buscar" onclick="buscarLivros()">
+        <i class="fa-solid fa-search"></i> Buscar
+      </button>
+    </div>
+    <div id="resultadosBusca">
+      <p class="search-hint">Digite o título do livro e clique em Buscar.</p>
+    </div>
+  </div>
+
+  <!-- SEÇÃO: LISTA SALVA -->
+  <div class="section-title">
+    <i class="fa-solid fa-bookmark"></i> Livros Salvos
+    <span id="badgeTotal" style="display:none; background:var(--accent); color:var(--paper);
+      font-size:0.65rem; font-weight:700; padding:0.1rem 0.5rem; margin-left:0.25rem;">0</span>
+  </div>
+  <div id="wishlistContainer">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton" style="height:60px"></div>
+  </div>
+</main>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+  /* ── AUTH ── */
+  const token = localStorage.getItem('token');
+  const authHeaders = {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+  };
+
+  /* ISBNs já na lista (para marcar botões) */
+  let isbnsSalvos = new Set();
+
+  /* Cache de metadados buscados no OpenLibrary (isbn → {titulo, autor}) */
+  const metaCache = {};
+
+  /* ── TOAST ── */
+  function mostrarToast(msg, tipo) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'show ' + tipo;
+    setTimeout(() => { t.className = ''; }, 3200);
+  }
+
+  /* ── Saldo na navbar ── */
+  async function carregarPerfil() {
+    try {
+      const res = await fetch('/clientes/meu-perfil-json', { headers: authHeaders });
+      if (res.ok) {
+        const c = await res.json();
+        const navSaldo = document.getElementById('navSaldo');
+        if (navSaldo) navSaldo.textContent = 'T$ ' + (c.saldoTokens || 0).toFixed(2);
+      }
+    } catch (_) {}
+  }
+
+  /* ── FORMATAR DATA ── */
+  function fmtData(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  /* ── URL CAPA OPENLIBRARY ── */
+  function capaUrl(isbn) {
+    if (!isbn) return null;
+    const isbn13 = isbn.replace(/[^0-9X]/g, '');
+    if (isbn13.length === 10 || isbn13.length === 13) {
+      return 'https://covers.openlibrary.org/b/isbn/' + isbn13 + '-M.jpg';
+    }
+    return null;
+  }
+
+  /* ── BUSCA NO OPENLIBRARY ── */
+  async function buscarLivros() {
+    const input = document.getElementById('inputBusca');
+    const query = input.value.trim();
+    if (!query) { input.focus(); return; }
+
+    const btn = document.getElementById('btnBuscar');
+    const container = document.getElementById('resultadosBusca');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Buscando...';
+    container.innerHTML = '';
+
+    try {
+      const url = 'https://openlibrary.org/search.json?title=' + encodeURIComponent(query) + '&limit=10&fields=title,author_name,isbn,cover_i';
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Falha na API');
+      const data = await res.json();
+
+      const docs = (data.docs || []).filter(d => d.isbn && d.isbn.length > 0);
+
+      if (docs.length === 0) {
+        container.innerHTML = '<p class="search-hint">Nenhum resultado encontrado para "' + escHtml(query) + '".</p>';
+        return;
+      }
+
+      container.innerHTML = docs.slice(0, 8).map(doc => buildResultadoItem(doc)).join('');
+
+    } catch (e) {
+      container.innerHTML = '<p class="search-error"><i class="fa-solid fa-triangle-exclamation"></i> Erro ao buscar. Verifique a conexão e tente novamente.</p>';
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-search"></i> Buscar';
+    }
+  }
+
+  function buildResultadoItem(doc) {
+    const titulo = doc.title || 'Sem título';
+    const autores = doc.author_name ? doc.author_name.slice(0, 2).join(', ') : 'Autor desconhecido';
+
+    /* Pega ISBNs disponíveis — prefere ISBN-13 */
+    const isbns = doc.isbn || [];
+    const isbn13 = isbns.find(i => i.replace(/[^0-9]/g,'').length === 13);
+    const isbn10 = isbns.find(i => i.replace(/[^0-9X]/gi,'').length === 10);
+    const isbnEscolhido = isbn13 || isbn10 || isbns[0];
+
+    if (!isbnEscolhido) return '';
+
+    /* Capa: cover_i do OpenLibrary ou por ISBN */
+    let imgHtml;
+    if (doc.cover_i) {
+      imgHtml = `<img class="resultado-capa"
+        src="https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg"
+        alt="Capa" onerror="this.outerHTML='<div class=resultado-capa-placeholder>📚</div>'">`;
+    } else {
+      const capa = capaUrl(isbnEscolhido);
+      imgHtml = capa
+        ? `<img class="resultado-capa" src="${capa}" alt="Capa"
+             onerror="this.outerHTML='<div class=resultado-capa-placeholder>📚</div>'">`
+        : `<div class="resultado-capa-placeholder">📚</div>`;
+    }
+
+    const jaAdicionado = isbnsSalvos.has(isbnEscolhido);
+    const btnHtml = jaAdicionado
+      ? `<span class="btn-ja-adicionado"><i class="fa-solid fa-check"></i> Salvo</span>`
+      : `<button class="btn-adicionar" onclick="adicionarDesejo('${escHtml(isbnEscolhido)}', '${escHtml(titulo)}', '${escHtml(autores)}', this)">
+           <i class="fa-solid fa-heart"></i> Salvar
+         </button>`;
+
+    return `
+      <div class="resultado-item" id="res-${escHtml(isbnEscolhido)}">
+        ${imgHtml}
+        <div class="resultado-info">
+          <div class="resultado-titulo">${escHtml(titulo)}</div>
+          <div class="resultado-autor">${escHtml(autores)}</div>
+          <div class="resultado-isbn">ISBN: <span>${escHtml(isbnEscolhido)}</span></div>
+        </div>
+        ${btnHtml}
+      </div>`;
+  }
+
+  /* ── ADICIONAR DESEJO ── */
+  async function adicionarDesejo(isbn, titulo, autor, btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+    try {
+      const res = await fetch('/api/lista-desejos', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({ isbn })
+      });
+
+      if (res.status === 401) {
+        window.location.href = '/clientes/login';
+        return;
+      }
+
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(txt || 'Erro ao adicionar');
+      }
+
+      /* Armazena metadados no cache para exibir na lista */
+      metaCache[isbn] = { titulo, autor };
+
+      isbnsSalvos.add(isbn);
+      btn.outerHTML = `<span class="btn-ja-adicionado"><i class="fa-solid fa-check"></i> Salvo</span>`;
+      mostrarToast('Livro adicionado à lista de desejos!', 'sucesso');
+      carregarListaSalva();
+
+    } catch (e) {
+      mostrarToast(e.message || 'Erro ao adicionar.', 'erro');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-heart"></i> Salvar';
+    }
+  }
+
+  /* ── REMOVER DESEJO ── */
+  async function removerDesejo(id, card) {
+    card.style.opacity = '0.5';
+    try {
+      const res = await fetch('/api/lista-desejos/' + id, {
+        method: 'DELETE',
+        headers: authHeaders
+      });
+      if (res.status === 401) { window.location.href = '/clientes/login'; return; }
+      if (!res.ok) throw new Error('Erro ao remover');
+
+      card.remove();
+      mostrarToast('Livro removido da lista de desejos.', 'sucesso');
+      atualizarBadge();
+      /* Remove do set de salvos (busca por ISBN no card) */
+      const isbnEl = card.querySelector('.desejo-isbn');
+      if (isbnEl) isbnsSalvos.delete(isbnEl.textContent.trim());
+      /* Refresca botões dos resultados abertos */
+      atualizarBotoesResultados();
+
+    } catch (e) {
+      mostrarToast('Erro ao remover. Tente novamente.', 'erro');
+      card.style.opacity = '1';
+    }
+  }
+
+  /* ── CARREGAR LISTA SALVA ── */
+  async function carregarListaSalva() {
+    const container = document.getElementById('wishlistContainer');
+    try {
+      const res = await fetch('/api/lista-desejos', { headers: authHeaders });
+      if (res.status === 401) { window.location.href = '/clientes/login'; return; }
+      if (!res.ok) throw new Error('Falha na API');
+
+      const lista = await res.json();
+
+      /* Atualiza set de ISBNs salvos */
+      isbnsSalvos.clear();
+      lista.forEach(d => isbnsSalvos.add(d.isbn));
+
+      if (lista.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">🔖</div>
+            <p>Sua lista de desejos está vazia. Busque livros acima e salve os que deseja adquirir.</p>
+          </div>`;
+        atualizarBadge(0);
+        return;
+      }
+
+      /* Para cada item, busca metadados no OpenLibrary (título / autor) */
+      container.innerHTML = `<div class="skeleton"></div><div class="skeleton"></div>`;
+      const itensComMeta = await Promise.all(lista.map(d => enriquecerDesejo(d)));
+      container.innerHTML = itensComMeta.map(buildDesejoCard).join('');
+      atualizarBadge(lista.length);
+
+    } catch (e) {
+      container.innerHTML = `<p style="text-align:center;color:var(--accent);padding:2rem">Erro ao carregar a lista de desejos.</p>`;
+    }
+  }
+
+  /* Busca título e autor pelo ISBN no OpenLibrary (usa cache) */
+  async function enriquecerDesejo(desejo) {
+    if (metaCache[desejo.isbn]) {
+      return { ...desejo, ...metaCache[desejo.isbn] };
+    }
+    try {
+      const url = 'https://openlibrary.org/search.json?isbn=' + encodeURIComponent(desejo.isbn) + '&limit=1&fields=title,author_name';
+      const res = await fetch(url);
+      if (!res.ok) return desejo;
+      const data = await res.json();
+      const doc = data.docs && data.docs[0];
+      if (doc) {
+        const meta = {
+          titulo: doc.title || null,
+          autor: doc.author_name ? doc.author_name.slice(0, 2).join(', ') : null
+        };
+        metaCache[desejo.isbn] = meta;
+        return { ...desejo, ...meta };
+      }
+    } catch (_) {}
+    return desejo;
+  }
+
+  function buildDesejoCard(d) {
+    const capa = capaUrl(d.isbn);
+    const imgHtml = capa
+      ? `<img class="desejo-capa" src="${capa}" alt="Capa"
+           onerror="this.outerHTML='<div class=desejo-capa-placeholder>📚</div>'">`
+      : `<div class="desejo-capa-placeholder">📚</div>`;
+
+    const tituloHtml = d.titulo
+      ? `<div class="desejo-titulo">${escHtml(d.titulo)}</div>`
+      : `<div class="desejo-titulo" style="color:var(--muted);font-style:italic">Livro ISBN ${escHtml(d.isbn)}</div>`;
+    const autorHtml = d.autor
+      ? `<div class="desejo-autor">${escHtml(d.autor)}</div>`
+      : '';
+
+    return `
+      <div class="desejo-card" id="desejo-${d.id}">
+        ${imgHtml}
+        <div class="desejo-info">
+          ${tituloHtml}
+          ${autorHtml}
+          <div class="desejo-meta">
+            <span class="desejo-isbn">${escHtml(d.isbn)}</span>
+            <span class="desejo-data"><i class="fa-regular fa-calendar"></i> ${fmtData(d.dataAdicao)}</span>
+          </div>
+        </div>
+        <button class="btn-remover" onclick="removerDesejo(${d.id}, document.getElementById('desejo-${d.id}'))">
+          <i class="fa-solid fa-trash-can"></i> Remover
+        </button>
+      </div>`;
+  }
+
+  /* ── BADGE TOTAL ── */
+  function atualizarBadge(n) {
+    const badge = document.getElementById('badgeTotal');
+    const total = n !== undefined ? n : document.querySelectorAll('.desejo-card').length;
+    if (total > 0) {
+      badge.textContent = total;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  /* ── ATUALIZA BOTÕES DOS RESULTADOS VISÍVEIS ── */
+  function atualizarBotoesResultados() {
+    document.querySelectorAll('.resultado-item').forEach(item => {
+      const isbnEl = item.querySelector('.resultado-isbn span');
+      if (!isbnEl) return;
+      const isbn = isbnEl.textContent.trim();
+      const btnWrap = item.querySelector('.btn-adicionar, .btn-ja-adicionado');
+      if (!btnWrap) return;
+      if (isbnsSalvos.has(isbn)) {
+        btnWrap.outerHTML = `<span class="btn-ja-adicionado"><i class="fa-solid fa-check"></i> Salvo</span>`;
+      }
+    });
+  }
+
+  /* ── ESCAPE HTML (segurança) ── */
+  function escHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  /* ── ENTER NA BUSCA ── */
+  document.getElementById('inputBusca').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') buscarLivros();
+  });
+
+  /* ── INIT ── */
+  carregarPerfil();
+  carregarListaSalva();
+</script>
+
+</body>
+</html>

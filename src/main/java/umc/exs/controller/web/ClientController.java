@@ -332,6 +332,13 @@ public class ClientController {
         model.addAttribute("cliente", cliente);
         return "cliente/carteira";
     }
+
+    @GetMapping("/lista-desejos")
+    public String listaDesejos(@AuthenticationPrincipal UserDetails user) {
+        if (user == null)
+            return "redirect:/clientes/login";
+        return "cliente/lista_desejos";
+    }
 }
 
 /**

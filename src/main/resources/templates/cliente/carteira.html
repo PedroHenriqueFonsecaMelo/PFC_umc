@@ -14,6 +14,7 @@
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         >
+        <link rel="stylesheet" th:href="@{/cliente/nav.css}" />
         <style>
             :root {
                 --ink: #2c241b;
@@ -48,45 +49,7 @@
                 background: #7a6e65;
             }
 
-            /* ── NAV ── */
-            nav {
-                background: #2c241b;
-                padding: 0.75rem 5vw;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            .nav-brand {
-                font-family: "Playfair Display", serif;
-                font-style: italic;
-                font-size: 2.2rem;
-                color: #f9f6f0;
-            }
-            .nav-right {
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-            }
-            #displayNome {
-                color: rgba(249, 246, 240, 0.8);
-                font-size: 0.875rem;
-            }
-            .nav-sair {
-                background: transparent;
-                border: 1.5px solid rgba(249, 246, 240, 0.3);
-                color: rgba(249, 246, 240, 0.8);
-                padding: 0.35rem 0.85rem;
-                font-size: 0.72rem;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-                text-decoration: none;
-                transition: all 0.2s;
-            }
-            .nav-sair:hover {
-                background: #722f37;
-                border-color: #722f37;
-                color: #f9f6f0;
-            }
+            /* nav movido para /cliente/nav.css */
 
             /* ── MAIN ── */
             main {
@@ -483,15 +446,23 @@
         </style>
     </head>
     <body>
-        <nav>
-            <span class="nav-brand">Bibliotroca &middot; Carteira</span>
-            <div class="nav-right">
-                <span id="displayNome">Carregando...</span>
-                <a th:href="@{/clientes/sair}" class="nav-sair">
-                    <i class="fa-solid fa-right-from-bracket"></i> Sair
-                </a>
+        <header class="client-nav">
+            <a th:href="@{/}" class="cn-brand">
+                <span class="cn-dot"></span>Bibliotroca
+            </a>
+            <nav class="cn-links">
+                <a th:href="@{/livros/vitrine}"          class="cn-btn">Vitrine</a>
+                <a th:href="@{/livros/vender}"           class="cn-btn">Vender</a>
+                <a th:href="@{/forum}"                   class="cn-btn">Fórum</a>
+                <a th:href="@{/clientes/lista-desejos}"  class="cn-btn">Lista de Desejos</a>
+                <a th:href="@{/clientes/minhas-compras}" class="cn-btn">Minha Estante</a>
+            </nav>
+            <div class="cn-right">
+                <span class="cn-saldo" id="navSaldo">T$ --</span>
+                <a th:href="@{/clientes/meu-perfil}"     class="cn-btn">Meu Perfil</a>
+                <a th:href="@{/clientes/sair}"           class="cn-btn">Sair</a>
             </div>
-        </nav>
+        </header>
 
         <main>
             <div class="grid-layout">

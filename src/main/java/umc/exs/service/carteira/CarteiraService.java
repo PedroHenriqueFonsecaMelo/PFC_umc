@@ -12,6 +12,7 @@ import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.negocios.TransacaoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.email.EmailService;
 import umc.exs.service.log.LogAuditoriaService;
 
 @Slf4j
@@ -21,7 +22,8 @@ public class CarteiraService {
 
     private final TransacaoRepository transacaoRepository;
     private final ClienteRepository clienteRepository;
-    private final LogAuditoriaService logAuditoriaService; // ← agora via construtor
+    private final LogAuditoriaService logAuditoriaService;
+    private final EmailService emailService;
 
     @SuppressWarnings("null")
     @Transactional
@@ -46,6 +48,23 @@ public class CarteiraService {
 
         log.info("Crédito de {} tokens via {} para cliente ID {}. Saldo: {} → {}",
                 valor, metodo, cliente.getId(), saldoAnterior, cliente.getSaldoTokens());
+
+        // E-mail de confirmação de recarga ao cliente
+        try {
+            emailService.enviar(
+                    cliente.getEmail(),
+                    "Recarga de tokens confirmada!",
+                    "Olá, " + cliente.getNome() + "!\n\n" +
+                            "Sua recarga de tokens foi processada com sucesso.\n" +
+                            "Valor creditado: T$ " + String.format("%.2f", valor) + "\n" +
+                            "Método: " + metodo + "\n" +
+                            "Saldo anterior: T$ " + String.format("%.2f", saldoAnterior) + "\n" +
+                            "Saldo atual: T$ " + String.format("%.2f", cliente.getSaldoTokens()) + "\n\n" +
+                            "Equipe Bookstore"
+            );
+        } catch (Exception e) {
+            log.error("Falha ao enviar e-mail de recarga de tokens para {}: {}", cliente.getEmail(), e.getMessage());
+        }
     }
 
     @Transactional(readOnly = true)

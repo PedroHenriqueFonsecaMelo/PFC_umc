@@ -14,6 +14,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <link rel="stylesheet" th:href="@{/cliente/nav.css}" />
     <style>
       :root {
         --ink: #2c241b;
@@ -38,53 +39,7 @@
         min-height: 100vh;
       }
 
-      /* ── NAV ── */
-      nav {
-        background: #2c241b;
-        padding: 0.75rem 5vw;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .nav-left {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-      }
-      .nav-back {
-        color: rgba(249, 246, 240, 0.7);
-        text-decoration: none;
-        font-size: 0.8rem;
-        transition: color 0.2s;
-      }
-      .nav-back:hover {
-        color: #f9f6f0;
-      }
-      .nav-divider {
-        color: rgba(249, 246, 240, 0.3);
-      }
-      .nav-title {
-        font-family: "Playfair Display", serif;
-        font-size: 1.1rem;
-        color: #f9f6f0;
-      }
-      .nav-right {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-      }
-      #nomeUsuario {
-        font-size: 0.85rem;
-        color: rgba(249, 246, 240, 0.7);
-      }
-      #saldoNav {
-        background: rgba(249, 246, 240, 0.1);
-        border: 1px solid rgba(249, 246, 240, 0.2);
-        padding: 0.25rem 0.85rem;
-        font-size: 0.8rem;
-        font-family: monospace;
-        color: #f9f6f0;
-      }
+      /* nav movido para /cliente/nav.css */
 
       /* ── MAIN ── */
       main {
@@ -370,20 +325,23 @@
     </style>
   </head>
   <body>
-    <!-- NAV -->
-    <nav>
-      <div class="nav-left">
-        <a th:href="@{/clientes/meu-perfil}" class="nav-back">
-          <i class="fa-solid fa-arrow-left"></i> Voltar
-        </a>
-        <span class="nav-divider">|</span>
-        <span class="nav-title">Minhas Compras</span>
+    <header class="client-nav">
+      <a th:href="@{/}" class="cn-brand">
+        <span class="cn-dot"></span>Bibliotroca
+      </a>
+      <nav class="cn-links">
+        <a th:href="@{/livros/vitrine}"          class="cn-btn">Vitrine</a>
+        <a th:href="@{/livros/vender}"           class="cn-btn">Vender</a>
+        <a th:href="@{/forum}"                   class="cn-btn">Fórum</a>
+        <a th:href="@{/clientes/lista-desejos}"  class="cn-btn">Lista de Desejos</a>
+        <a th:href="@{/clientes/minhas-compras}" class="cn-btn">Minha Estante</a>
+      </nav>
+      <div class="cn-right">
+        <span class="cn-saldo" id="navSaldo">T$ --</span>
+        <a th:href="@{/clientes/meu-perfil}"     class="cn-btn">Meu Perfil</a>
+        <a th:href="@{/clientes/sair}"           class="cn-btn">Sair</a>
       </div>
-      <div class="nav-right">
-        <span id="nomeUsuario">Carregando...</span>
-        <span id="saldoNav">T$ --</span>
-      </div>
-    </nav>
+    </header>
 
     <main>
       <!-- TABS -->
@@ -592,10 +550,8 @@
           });
           if (res.ok) {
             const c = await res.json();
-            document.getElementById("nomeUsuario").textContent = c.nome || "";
-            document.getElementById("saldoNav").textContent = `T$ ${
-              (c.saldoTokens || 0).toFixed(2)
-            }`;
+            const navSaldo = document.getElementById("navSaldo");
+            if (navSaldo) navSaldo.textContent = `T$ ${(c.saldoTokens || 0).toFixed(2)}`;
           }
         } catch (_) {}
       }

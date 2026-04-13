@@ -15,6 +15,7 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.StatusEnvio;
 import umc.exs.repository.negocios.PedidoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.email.EmailService;
 import umc.exs.service.log.LogAuditoriaService;
 
 /**
@@ -29,6 +30,7 @@ public class PedidoService {
         private final PedidoRepository pedidoRepository;
         private final ClienteRepository clienteRepository;
         private final LogAuditoriaService logAuditoria;
+        private final EmailService emailService;
 
         // ==========================================================
         // CRIAÇÃO
@@ -161,6 +163,32 @@ public class PedidoService {
                                 pedido.getComprador().getId(),
                                 pedido.getComprador().getEmail(),
                                 "Pedido #" + pedidoId + " → " + novoStatus.getDescricao());
+
+                // E-mail ao comprador informando mudança de status
+                if (pedido.getComprador() != null) {
+                        try {
+                                Cliente compradorPedido = pedido.getComprador();
+                                String mensagemExtra = novoStatus == StatusEnvio.CANCELADO && pedido.getPrecoLivro() != null
+                                        ? "\nValor de T$ " + String.format("%.2f", pedido.getPrecoLivro()) + " foi estornado ao seu saldo.\n"
+                                        : "";
+                                String rastreioInfo = (codigoRastreio != null && !codigoRastreio.isBlank())
+                                        ? "\nCódigo de rastreio: " + codigoRastreio + "\n"
+                                        : "";
+                                emailService.enviar(
+                                        compradorPedido.getEmail(),
+                                        "Atualização do pedido #" + pedidoId,
+                                        "Olá, " + compradorPedido.getNome() + "!\n\n" +
+                                                "O status do seu pedido #" + pedidoId + " foi atualizado para: " +
+                                                novoStatus.getDescricao() + ".\n" +
+                                                "Livro: " + pedido.getTituloLivro() + "\n" +
+                                                rastreioInfo + mensagemExtra + "\n" +
+                                                "Acompanhe seus pedidos em 'Minhas Compras'.\n\n" +
+                                                "Equipe Bookstore"
+                                );
+                        } catch (Exception e) {
+                                log.error("Falha ao enviar e-mail de status do pedido #{}: {}", pedidoId, e.getMessage());
+                        }
+                }
 
                 return toDTO(salvo);
         }

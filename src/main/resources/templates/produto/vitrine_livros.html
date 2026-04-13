@@ -10,6 +10,7 @@
             href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
             rel="stylesheet"
         >
+        <link rel="stylesheet" th:href="@{/cliente/nav.css}" />
         <style>
             *, *::before, *::after {
                 box-sizing: border-box;
@@ -32,36 +33,6 @@
                 font-family: "DM Sans", sans-serif;
                 background: var(--paper);
                 color: var(--ink);
-            }
-
-            /* ── NAV ─────────────────────────────────────────────────── */
-            nav.topnav {
-                background: var(--ink);
-                color: var(--paper);
-                padding: 0.75rem 5vw;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                position: sticky;
-                top: 0;
-                z-index: 30;
-            }
-
-            .nav-brand {
-                font-family: "Playfair Display", serif;
-                font-size: 2.4rem;
-                color: var(--paper);
-                font-style: italic;
-            }
-
-            #saldoUsuario {
-                background: rgba(249, 246, 240, 0.1);
-                padding: 0.35rem 1rem;
-                border: 1px solid rgba(249, 246, 240, 0.2);
-                border-radius: 8px;
-                font-size: 0.8rem;
-                color: #ffd700;
-                font-weight: 600;
             }
 
             /* ── MAIN ────────────────────────────────────────────────── */
@@ -519,51 +490,25 @@
         <div class="toast" id="toastCompra"></div>
 
         <!-- NAV -->
-        <nav class="topnav">
-            <a
-                href="/"
-                class="nav-brand"
-                style="text-decoration: none; color: inherit"
-            >Biblio<em>troca</em></a>
-            <div style="display: flex; align-items: center; gap: 0.75rem">
-                <a
-                    href="/clientes/meu-perfil"
-                    style="background: transparent; border: 1px solid rgba(249, 246, 240, 0.3); color: rgba(249, 246, 240, 0.85); padding: 0.35rem 0.75rem; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; border-radius: 8px"
-                >Meu Perfil</a>
-                <a
-                    href="/livros/vender"
-                    style="background: transparent; border: 1px solid rgba(249, 246, 240, 0.3); color: rgba(249, 246, 240, 0.85); padding: 0.35rem 0.75rem; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; border-radius: 8px"
-                >Vender</a>
-                <a
-                    href="/forum"
-                    style="background: transparent; border: 1px solid rgba(249, 246, 240, 0.3); color: rgba(249, 246, 240, 0.85); padding: 0.35rem 0.75rem; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; border-radius: 8px"
-                >Fórum</a>
-                <a
-                    href="/#blogSection"
-                    style="background: transparent; border: 1px solid rgba(249, 246, 240, 0.3); color: rgba(249, 246, 240, 0.85); padding: 0.35rem 0.75rem; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; border-radius: 8px"
-                >Blog</a>
-                <a
-                    href="/clientes/sair"
-                    style="background: transparent; border: 1px solid rgba(249, 246, 240, 0.3); color: rgba(249, 246, 240, 0.85); padding: 0.35rem 0.75rem; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; border-radius: 8px"
-                >Sair</a>
-                <div id="saldoUsuario">Carregando saldo...</div>
-                <button
-                    onclick="toggleCarrinho()"
-                    style="background: rgba(249, 246, 240, 0.1); border: 1px solid rgba(249, 246, 240, 0.2); padding: 0.4rem 0.75rem; color: #f9f6f0; cursor: pointer; position: relative; border-radius: 8px"
-                    title="Minha Estante"
-                >
-                    <img
-                        src="/imagens/estante.png"
-                        alt="Minha Estante"
-                        style="width: 66px; height: 66px; object-fit: contain; vertical-align: middle"
-                    >
-                    <span
-                        id="carrinhoContador"
-                        style="display: none; background: #722f37; color: #fff; font-size: 0.65rem; font-weight: 700; padding: 1px 5px"
-                    ></span>
+        <header class="client-nav">
+            <a th:href="@{/}" class="cn-brand"><span class="cn-dot"></span>Bibliotroca</a>
+            <nav class="cn-links">
+                <a th:href="@{/livros/vitrine}" class="cn-btn">Vitrine</a>
+                <a th:href="@{/livros/vender}" class="cn-btn">Vender</a>
+                <a th:href="@{/forum}" class="cn-btn">Fórum</a>
+                <a th:href="@{/clientes/lista-desejos}" class="cn-btn">Lista de Desejos</a>
+                <a th:href="@{/clientes/minhas-compras}" class="cn-btn">Minha Estante</a>
+            </nav>
+            <div class="cn-right">
+                <span class="cn-saldo" id="navSaldo">T$ --</span>
+                <a th:href="@{/clientes/meu-perfil}" class="cn-btn">Meu Perfil</a>
+                <a th:href="@{/clientes/sair}" class="cn-btn">Sair</a>
+                <button onclick="toggleCarrinho()" style="background:rgba(249,246,240,0.1);border:1px solid rgba(249,246,240,0.2);padding:0.3rem 0.6rem;color:#f9f6f0;cursor:pointer;position:relative;border-radius:6px;" title="Carrinho">
+                    <img src="/imagens/estante.png" alt="Carrinho" style="width:32px;height:32px;object-fit:contain;vertical-align:middle;">
+                    <span id="carrinhoContador"></span>
                 </button>
             </div>
-        </nav>
+        </header>
 
         <!-- MAIN -->
         <main class="main-vitrine">
@@ -620,6 +565,17 @@
             </div>
         </div>
 
+        <script>
+            (async function() {
+                try {
+                    const res = await fetch('/clientes/meu-perfil-json', { credentials: 'include' });
+                    if (!res.ok) return;
+                    const c = await res.json();
+                    const el = document.getElementById('navSaldo');
+                    if (el) el.textContent = 'T$ ' + (c.saldoTokens || 0).toFixed(2);
+                } catch(_) {}
+            })();
+        </script>
         <script th:src="@{/produto/vitrine_livros.js}"></script>
     </body>
 </html>

@@ -6,38 +6,30 @@
         <title th:text="${topico.titulo} + ' · Fórum · Bibliotroca'">
             Tópico · Fórum · Bibliotroca
         </title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
         <link rel="stylesheet" th:href="@{/forum/forum.css}" />
+        <link rel="stylesheet" th:href="@{/cliente/nav.css}" />
     </head>
     <body>
         <!-- ============================================================
      TOP BAR
      ============================================================ -->
-        <header class="topbar">
-            <a th:href="@{/}" class="topbar-brand">
-                <span class="brand-dot"></span>
-                Bibliotroca
-            </a>
-            <nav class="topbar-nav">
-                <th:block th:if="${clienteLogado and !isAdmin}">
-                    <a th:href="@{/clientes/meu-perfil}" class="topbar-link"
-                    >Meu Perfil</a>
-                    <a th:href="@{/livros/vitrine}" class="topbar-link"
-                    >Vitrine</a>
-                    <a th:href="@{/livros/vender}" class="topbar-link"
-                    >Vender</a>
-                    <a th:href="@{/forum}" class="topbar-link active">Fórum</a>
-                    <a href="/#blogSection" class="topbar-link">Blog</a>
-                    <a th:href="@{/clientes/sair}" class="topbar-link danger"
-                    >Sair</a>
-                </th:block>
-                <th:block th:unless="${clienteLogado}">
-                    <a th:href="@{/livros/vitrine}" class="topbar-link"
-                    >Vitrine</a>
-                    <a th:href="@{/forum}" class="topbar-link active">Fórum</a>
-                    <a th:href="@{/clientes/login}" class="topbar-link"
-                    >Entrar</a>
-                </th:block>
+        <header class="client-nav">
+            <a th:href="@{/}" class="cn-brand"><span class="cn-dot"></span>Bibliotroca</a>
+            <nav class="cn-links">
+                <a th:href="@{/livros/vitrine}" class="cn-btn">Vitrine</a>
+                <a th:href="@{/livros/vender}" class="cn-btn">Vender</a>
+                <a th:href="@{/forum}" class="cn-btn">Fórum</a>
+                <a th:href="@{/clientes/lista-desejos}" class="cn-btn">Lista de Desejos</a>
+                <a th:href="@{/clientes/minhas-compras}" class="cn-btn">Minha Estante</a>
             </nav>
+            <div class="cn-right">
+                <span class="cn-saldo" id="navSaldo">T$ --</span>
+                <a th:href="@{/clientes/meu-perfil}" class="cn-btn">Meu Perfil</a>
+                <a th:href="@{/clientes/sair}" class="cn-btn">Sair</a>
+            </div>
         </header>
 
         <!-- ============================================================
@@ -359,5 +351,16 @@
      SCRIPTS
      ============================================================ -->
         <script th:src="@{/forum/forum.js}"></script>
+        <script>
+            (async function() {
+                try {
+                    const res = await fetch('/clientes/meu-perfil-json', { credentials: 'include' });
+                    if (!res.ok) return;
+                    const c = await res.json();
+                    const el = document.getElementById('navSaldo');
+                    if (el) el.textContent = 'T$ ' + (c.saldoTokens || 0).toFixed(2);
+                } catch(_) {}
+            })();
+        </script>
     </body>
 </html>
