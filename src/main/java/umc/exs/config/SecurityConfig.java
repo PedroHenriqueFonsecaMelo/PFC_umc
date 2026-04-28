@@ -49,19 +49,12 @@ public class SecurityConfig {
                                 .headers(headers -> headers
                                                 .contentSecurityPolicy(csp -> csp
                                                                 .policyDirectives("default-src 'self'; " +
-                                                                // Permitir estilos do Google e FontAwesome (que você
-                                                                // usa no HTML)
                                                                                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
                                                                                 +
-                                                                                // Permitir fontes
                                                                                 "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
                                                                                 +
-                                                                                // PERMITIR O SCRIPT DO CHART.JS
-                                                                                // (CDNJSDELIVR)
                                                                                 "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
                                                                                 +
-                                                                                // PERMITIR CONEXÕES PARA SUA PRÓPRIA
-                                                                                // API
                                                                                 "connect-src 'self' https://www.googleapis.com https://openlibrary.org; "
                                                                                 +
                                                                                 "img-src 'self' data: https:;"))
@@ -102,7 +95,11 @@ public class SecurityConfig {
                                                 .requestMatchers(AUTHENTICATED_ROUTES).authenticated()
 
                                                 // 6. Qualquer outra rota exige login
-                                                .anyRequest().authenticated());
+                                                .anyRequest().authenticated())
+                                .logout(logout -> logout
+                                                .logoutUrl("/clientes/sair")
+                                                .deleteCookies("jwt")
+                                                .logoutSuccessUrl("/").permitAll());
 
                 // Adição dos Filtros de JWT e Rate Limit
                 http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

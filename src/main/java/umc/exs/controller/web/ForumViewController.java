@@ -25,7 +25,7 @@ import umc.exs.DTOs.forum.NovoTopicoDTO;
 import umc.exs.model.entidades.social.TopicoForum;
 import umc.exs.model.enums.CategoriaForum;
 import umc.exs.repository.usuario.ClienteRepository;
-import umc.exs.service.core.ForumService;
+import umc.exs.service.core.interactions.ForumService;
 
 @Controller
 @RequestMapping("/forum")

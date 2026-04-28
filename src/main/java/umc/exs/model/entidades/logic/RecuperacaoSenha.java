@@ -51,4 +51,8 @@ public class RecuperacaoSenha {
         this.dataExpiracao = expiracao;
     }
 
+    public boolean isExpirado() {
+        return LocalDateTime.now().isAfter(this.dataExpiracao);
+    }
+
 }

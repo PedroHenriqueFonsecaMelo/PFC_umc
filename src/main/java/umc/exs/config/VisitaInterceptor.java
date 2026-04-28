@@ -6,7 +6,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import umc.exs.service.core.VisitaSiteService;
+import umc.exs.service.core.interactions.VisitaSiteService;
 
 /**
  * Intercepta requisições GET às páginas web públicas e registra a visita.

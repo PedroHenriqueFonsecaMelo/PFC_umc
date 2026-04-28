@@ -32,6 +32,8 @@ public class SignupDTO {
     @Size(min = 8, message = "A senha deve ter no mínimo 8 caracteres.")
     private String senha;
 
+    private String confirmPassword;
+
     @NotBlank(message = "O nome é obrigatório.")
     private String nome;
 
@@ -46,5 +48,11 @@ public class SignupDTO {
 
     @AssertTrue(message = "Você deve aceitar a política de privacidade.")
     private Boolean privacyAccepted;
+
+    @AssertTrue(message = "As senhas não coincidem")
+    public boolean isSenhaValida() {
+        if (senha == null || confirmPassword == null) return false;
+        return senha.equals(confirmPassword);
+    }
 
 }

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import umc.exs.DTOs.user.ClienteDTO;
 import umc.exs.model.entidades.logic.LogAuditoria;
-import umc.exs.service.core.ClienteService;
+import umc.exs.service.core.cliente.ClienteService;
 import umc.exs.service.log.LogAuditoriaService;
 
 @Controller
@@ -53,7 +53,6 @@ public class AuditController {
      * Retorna logs JSON para cliente autenticado.
      * Mesmo filtro que mostrarAuditoria, AJAX use.
      * Lista ordenada data desc ou vazia se não logado.
-     * 
      * @param principal usuário
      * @return List<LogAuditoria> logs JSON
      */

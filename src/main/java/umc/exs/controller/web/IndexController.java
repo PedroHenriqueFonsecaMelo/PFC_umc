@@ -19,8 +19,8 @@ import lombok.RequiredArgsConstructor;
 import umc.exs.DTOs.user.ClienteDTO;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
-import umc.exs.service.core.AuthHelper;
-import umc.exs.service.core.ClienteService;
+import umc.exs.service.core.cliente.ClienteService;
+import umc.exs.service.core.control.AuthHelper;
 
 @Controller
 @RequiredArgsConstructor

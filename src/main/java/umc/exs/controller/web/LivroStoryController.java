@@ -38,6 +38,6 @@ public class LivroStoryController {
     @GetMapping("/teste")
     public String teste() {
         // Retorna o arquivo em: src/main/resources/templates/historia_livro.html
-        return "historia_livro";
+        return "produto/historia_livro";
     }
 }
