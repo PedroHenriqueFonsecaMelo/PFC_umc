@@ -1,0 +1,149 @@
+/* ================================================================
+   auditoria.css — Auditoria de Atividades · Bibliotroca
+   ================================================================ */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --ink: #2c241b;
+    --paper: #f9f6f0;
+    --cream: #ede8df;
+    --accent: #722f37;
+    --forest: #4a5d23;
+    --white: #ffffff;
+    --muted: #7a6e65;
+    --border: rgba(44, 36, 27, 0.15);
+}
+
+body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "DM Sans", sans-serif;
+    min-height: 100vh;
+}
+
+header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 1rem 5vw;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.header-voltar {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid rgba(249, 246, 240, 0.3);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.header-voltar:hover {
+    background: var(--paper);
+    color: var(--ink);
+}
+
+.header-title {
+    font-family: "Playfair Display", serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--paper);
+    white-space: nowrap;
+}
+
+.container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--white);
+    border: 1px solid var(--border);
+    box-shadow: 4px 4px 0 var(--border);
+}
+
+h2 {
+    font-family: "Playfair Display", serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(44, 36, 27, 0.12);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+    color: var(--ink);
+}
+
+.descricao {
+    font-family: "IM Fell English", serif;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 1.5rem;
+}
+
+table th {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 2px solid var(--ink);
+    padding: 0.75rem;
+    text-align: left;
+}
+
+table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid rgba(44, 36, 27, 0.08);
+    font-size: 0.875rem;
+}
+
+table tr:hover td {
+    background: rgba(44, 36, 27, 0.03);
+}
+
+.empty-message {
+    text-align: center;
+    color: var(--muted);
+    padding: 2rem;
+    font-style: italic;
+    font-family: "IM Fell English", serif;
+}
+
+.btn-voltar {
+    display: inline-block;
+    margin-top: 1.75rem;
+    padding: 0.65rem 1.5rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 2px solid var(--ink);
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-voltar:hover {
+    background: transparent;
+    color: var(--ink);
+}

@@ -1,0 +1,102 @@
+/* ================================================================
+   vitrine.css — Vitrine de livros · Bibliotroca
+   ================================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:    #2c241b;
+  --paper:  #f9f6f0;
+  --cream:  #ede8df;
+  --accent: #722f37;
+  --forest: #4a5d23;
+  --white:  #ffffff;
+  --muted:  #7a6e65;
+  --border: rgba(44, 36, 27, 0.15);
+}
+
+body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(--ink); }
+
+/* ── Main ── */
+main.main-vitrine { max-width: 1200px; margin: 0 auto; padding: 2rem 5vw; }
+main.main-vitrine h2 { font-family: "Playfair Display", serif; font-size: 1.8rem; color: var(--ink); margin-bottom: 0.35rem; }
+main.main-vitrine > p { font-style: italic; color: var(--muted); font-family: "IM Fell English", serif; margin-bottom: 1.5rem; }
+
+#gridLivros {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ── Livro Cards ── */
+.livro-card { background: var(--white); border: 1px solid rgba(44, 36, 27, 0.12); cursor: pointer; transition: box-shadow 0.2s; overflow: hidden; }
+.livro-card:hover { box-shadow: 4px 4px 0 var(--ink); }
+.livro-card-img { height: 220px; background: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 3rem; border-bottom: 1px solid rgba(44, 36, 27, 0.1); overflow: hidden; }
+.livro-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.livro-card-body { padding: 1rem; }
+.livro-titulo { font-family: "Playfair Display", serif; font-size: 0.9rem; font-weight: 700; margin-bottom: 0.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.livro-autor { font-size: 0.78rem; color: var(--muted); font-style: italic; margin-bottom: 0.5rem; }
+.livro-preco { font-family: "Playfair Display", serif; font-size: 1rem; font-weight: 700; color: var(--ink); }
+.livro-estado { display: inline-block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--border); padding: 0.15rem 0.5rem; margin-bottom: 0.5rem; }
+.btn-carrinho { width: 100%; margin-top: 0.75rem; padding: 0.6rem; background: var(--ink); color: var(--paper); border: 2px solid var(--ink); border-radius: 8px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.2s, color 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+.btn-carrinho:hover:not(:disabled) { background: transparent; color: var(--ink); }
+.btn-carrinho.no-carrinho { background: var(--forest); border-color: var(--forest); cursor: default; }
+.livro-rodape { font-size: 0.7rem; color: var(--muted); margin-top: 0.5rem; }
+
+/* ── Carrinho Overlay ── */
+#carrinhoOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 40; backdrop-filter: blur(2px); }
+
+/* ── Carrinho Sidebar ── */
+#carrinhoSidebar {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: 380px;
+  max-width: 95vw;
+  background: var(--paper);
+  border-left: 2px solid var(--ink);
+  box-shadow: -8px 0 40px rgba(0,0,0,0.15);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(110%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#carrinhoSidebar.aberto { transform: translateX(0); }
+.carr-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(44, 36, 27, 0.12); }
+.carr-header h2 { font-family: "Playfair Display", serif; font-size: 1.1rem; font-weight: 700; color: var(--ink); }
+.carr-fechar { width: 32px; height: 32px; background: var(--cream); border: 1px solid var(--border); cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.carr-fechar:hover { filter: brightness(0.92); }
+.carr-lista { flex: 1; overflow-y: auto; padding: 1rem 1.5rem; }
+#carrinhoVazio { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+#carrinhoVazio .vazio-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+#carrinhoVazio p { font-size: 0.9rem; font-family: "IM Fell English", serif; font-style: italic; }
+.carr-item { display: flex; align-items: center; gap: 0.875rem; padding: 0.875rem 0; border-bottom: 1px solid rgba(44, 36, 27, 0.08); animation: slideIn 0.2s ease; }
+@keyframes slideIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
+.carr-item-img { width: 48px; height: 64px; object-fit: cover; background: var(--cream); flex-shrink: 0; border: 1px solid var(--border); }
+.carr-item-info { flex: 1; min-width: 0; }
+.carr-item-titulo { font-family: "Playfair Display", serif; font-size: 0.875rem; font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.carr-item-autor { font-size: 0.75rem; color: var(--muted); margin-top: 0.1rem; }
+.carr-item-preco { font-size: 0.875rem; font-weight: 700; color: var(--accent); margin-top: 0.25rem; }
+.carr-item-remover { width: 28px; height: 28px; background: rgba(114, 47, 55, 0.08); border: none; cursor: pointer; color: var(--accent); font-size: 0.75rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.carr-item-remover:hover { background: rgba(114, 47, 55, 0.18); }
+.carr-footer { padding: 1.25rem 1.5rem; border-top: 1px solid rgba(44, 36, 27, 0.12); background: var(--cream); }
+.carr-total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.carr-total-label { font-size: 0.875rem; color: var(--muted); }
+.carr-total-valor { font-family: "Playfair Display", serif; font-size: 1.25rem; font-weight: 800; color: var(--ink); }
+#carrinhoAcoes { display: none; flex-direction: column; gap: 0.5rem; }
+#btnFinalizar { width: 100%; padding: 0.875rem; background: var(--ink); color: var(--paper); border: 2px solid var(--ink); border-radius: 0; font-size: 0.9375rem; font-weight: 700; cursor: pointer; transition: background 0.2s, border-color 0.2s; font-family: "DM Sans", sans-serif; }
+#btnFinalizar:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); }
+#btnFinalizar:disabled { opacity: 0.6; cursor: not-allowed; }
+#btnLimpar { width: 100%; padding: 0.625rem; background: transparent; color: var(--muted); border: 1px solid rgba(44, 36, 27, 0.2); border-radius: 0; font-size: 0.8125rem; cursor: pointer; transition: all 0.2s; font-family: "DM Sans", sans-serif; }
+#btnLimpar:hover { border-color: var(--accent); color: var(--accent); }
+@keyframes btnBounce { 0%, 100% { transform: scale(1); } 40% { transform: scale(0.94); } 70% { transform: scale(1.04); } }
+.btn-bounce { animation: btnBounce 0.4s ease; }
+#carrinhoContador { display: none; position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; background: var(--accent); color: #fff; font-size: 0.65rem; font-weight: 700; align-items: center; justify-content: center; }
+
+/* ── Toasts ── */
+.toast { display: none; position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); padding: 0.75rem 1.5rem; border-radius: 0; font-size: 0.875rem; font-weight: 500; z-index: 99; text-align: center; box-shadow: 4px 4px 0 rgba(44, 36, 27, 0.15); max-width: 90vw; animation: toastIn 0.25s ease; }
+@keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(12px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+.toast-sucesso { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.toast-erro { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.toast-aviso { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+.toast-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }

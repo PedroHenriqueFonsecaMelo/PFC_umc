@@ -4,31 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard · Bibliotroca</title>
-    <link rel="stylesheet" th:href="@{/cliente/homepage.css}" />
-    <link rel="stylesheet" th:href="@{/cliente/nav.css}" />
+    <link rel="stylesheet" th:href="@{/css/cliente/homepage.css}" />
+    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
 </head>
 <body>
 
 <!-- ============================================================
      TOP BAR
      ============================================================ -->
-<header class="client-nav">
-    <a th:href="@{/}" class="cn-brand">
-        <span class="cn-dot"></span>Bibliotroca
-    </a>
-    <nav class="cn-links">
-        <a th:href="@{/livros/vitrine}"          class="cn-btn">Vitrine</a>
-        <a th:href="@{/livros/vender}"           class="cn-btn">Vender</a>
-        <a th:href="@{/forum}"                   class="cn-btn">Fórum</a>
-        <a th:href="@{/clientes/lista-desejos}"  class="cn-btn">Lista de Desejos</a>
-        <a th:href="@{/clientes/minhas-compras}" class="cn-btn">Minha Estante</a>
-    </nav>
-    <div class="cn-right">
-        <span class="cn-saldo" id="navSaldo">T$ --</span>
-        <a th:href="@{/clientes/meu-perfil}"     class="cn-btn">Meu Perfil</a>
-        <a th:href="@{/clientes/sair}"           class="cn-btn">Sair</a>
-    </div>
-</header>
+<header th:replace="~{fragments/client-nav :: clientNav}"></header>
 
 <!-- ============================================================
      MAIN WRAPPER
@@ -387,9 +371,12 @@
 
     <!-- DANGER ZONE -->
     <div class="danger-zone">
-        <a th:href="@{/clientes/deletar}" class="btn-danger-link">
-            Remover conta permanentemente
-        </a>
+        <form th:action="@{/clientes/deletar}" method="post"
+              onsubmit="return confirm('Tem certeza? Esta ação é irreversível e removerá sua conta permanentemente.')">
+            <button type="submit" class="btn-danger-link">
+                Remover conta permanentemente
+            </button>
+        </form>
     </div>
 
 </div><!-- /dash-wrapper -->
@@ -397,9 +384,9 @@
 <!-- ============================================================
      SCRIPTS
      ============================================================ -->
-<script th:src="@{/cliente/script.js}"></script>
-<script th:src="@{/cliente/correioAPI.js}"></script>
-<script th:src="@{/cliente/gamificacao.js}"></script>
+<script th:src="@{/js/cliente/script.js}"></script>
+<script th:src="@{/js/cliente/correioAPI.js}"></script>
+<script th:src="@{/js/cliente/gamificacao.js}"></script>
 
 <script th:inline="javascript">
     /* Contadores de índice para formulários dinâmicos */

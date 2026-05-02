@@ -1,0 +1,93 @@
+/* ================================================================
+   500.css — Página de Erro Interno · Bibliotroca
+   ================================================================ */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --ink: #2c241b;
+    --paper: #f9f6f0;
+    --cream: #ede8df;
+    --accent: #722f37;
+    --forest: #4a5d23;
+    --white: #ffffff;
+    --muted: #7a6e65;
+    --border: rgba(44, 36, 27, 0.15);
+}
+
+html, body { height: 100%; }
+
+body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "DM Sans", sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    box-shadow: 4px 4px 0 var(--border);
+    max-width: 520px;
+    width: 100%;
+    padding: 3rem 2.5rem;
+    text-align: center;
+}
+
+.logo {
+    font-family: "Playfair Display", serif;
+    font-size: 4.5rem;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    margin-bottom: 1rem;
+}
+
+.ornamento {
+    color: var(--muted);
+    font-size: 1rem;
+    letter-spacing: 0.4em;
+    margin-bottom: 1.75rem;
+    user-select: none;
+}
+
+.heading {
+    font-family: "Playfair Display", serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 1rem;
+}
+
+.descricao {
+    font-family: "IM Fell English", serif;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+}
+
+.btn-voltar {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 2px solid var(--ink);
+    transition: background 0.2s, color 0.2s;
+}
+.btn-voltar:hover { background: transparent; color: var(--ink); }
