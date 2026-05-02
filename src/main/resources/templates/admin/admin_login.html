@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acesso Restrito — Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/admin-login.css}" />
+  </head>
+  <body>
+    <!-- Estantes de fundo -->
+    <div class="shelves-bg" aria-hidden="true">
+      <div class="shelf-line"></div>
+      <div class="shelf-line"></div>
+      <div class="shelf-line"></div>
+      <div class="shelf-line"></div>
+      <div class="bg-books" id="bgBooks"></div>
+    </div>
+
+    <!-- Partículas -->
+    <div class="particles" aria-hidden="true">
+      <div
+        class="p"
+        style="width: 2px; height: 2px; left: 10%; top: 72%; --d: 10s; --dl: 0s; --dx: 14px"
+      >
+      </div>
+      <div
+        class="p"
+        style="width: 3px; height: 3px; left: 22%; top: 80%; --d: 12s; --dl: 1.8s; --dx: -12px"
+      >
+      </div>
+      <div
+        class="p"
+        style="width: 2px; height: 2px; left: 40%; top: 68%; --d: 9s; --dl: 0.6s; --dx: 20px"
+      >
+      </div>
+      <div
+        class="p"
+        style="width: 3px; height: 3px; left: 58%; top: 76%; --d: 14s; --dl: 3.2s; --dx: -16px"
+      >
+      </div>
+      <div
+        class="p"
+        style="width: 2px; height: 2px; left: 74%; top: 70%; --d: 11s; --dl: 0.4s; --dx: 10px"
+      >
+      </div>
+      <div
+        class="p"
+        style="width: 2px; height: 2px; left: 86%; top: 82%; --d: 13s; --dl: 2.0s; --dx: -9px"
+      >
+      </div>
+      <div
+        class="p"
+        style="width: 3px; height: 3px; left: 50%; top: 84%; --d: 8s; --dl: 1.2s; --dx: 18px"
+      >
+      </div>
+      <div
+        class="p"
+        style="width: 2px; height: 2px; left: 30%; top: 60%; --d: 15s; --dl: 4.5s; --dx: -11px"
+      >
+      </div>
+    </div>
+
+    <!-- Voltar -->
+    <a th:href="@{/entrar}" href="/entrar" class="back-link">← Voltar</a>
+
+    <!-- Conteúdo -->
+    <main class="page-content">
+      <!-- Logo -->
+      <div class="logo">
+        <span class="logo-icon">🔑</span>
+        <span class="logo-text">Biblio<em>troca</em></span>
+      </div>
+
+      <p class="area-label">Acesso Restrito</p>
+
+      <!-- Painel de login -->
+      <div class="login-panel">
+        <div class="restricted-badge">Área Administrativa</div>
+
+        <h1 class="panel-title">Administrador</h1>
+        <p class="panel-subtitle">
+          Gerencie livros, aprovações e usuários da plataforma.
+        </p>
+
+        <!-- Alertas -->
+        <div th:if="${param.error}" class="alert alert-erro">
+          E-mail ou senha inválidos.
+        </div>
+        <div th:if="${param.logout}" class="alert alert-sucesso">
+          Você saiu com sucesso.
+        </div>
+        <div th:if="${erro}" class="alert alert-erro" th:text="${erro}"></div>
+
+        <!-- Formulário -->
+        <form th:action="@{/admin/login}" action="/admin/login" method="post">
+          <div class="field">
+            <label for="email">E-mail</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              placeholder="admin@bibliotroca.com"
+            />
+          </div>
+
+          <div class="field">
+            <label for="senha">Senha</label>
+            <input
+              type="password"
+              id="senha"
+              name="senha"
+              required
+              placeholder="••••••••"
+            />
+          </div>
+
+          <button type="submit" class="btn-entrar">Entrar na biblioteca</button>
+        </form>
+
+        <hr class="divider" />
+
+        <div class="panel-links">
+          <a th:href="@{/}" href="/" class="panel-link">← Página inicial</a>
+          <a
+            th:href="@{/clientes/login}"
+            href="/clientes/login"
+            class="panel-link"
+          >Área do cliente</a>
+        </div>
+      </div>
+
+      <p class="footnote">Bibliotroca &mdash; Sistema de Gestão Interno</p>
+    </main>
+
+    <script th:src="@{/js/admin-login.js}"></script>
+  </body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Painel Admin — Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    >
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" th:href="@{/css/admin/layout.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/painel.css}" />
+  </head>
+  <body>
+    <div class="layout">
+      <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('lotes')}"></th:block>
+
+      <!-- CONTEÚDO -->
+      <div class="content">
+        <header class="topbar">
+          <div>
+            <div class="topbar-title">Painel Admin</div>
+            <div class="topbar-date" id="dataHoje"></div>
+          </div>
+          <div class="topbar-right">
+            <span class="badge-online"><span class="dot"></span> Sistema
+              Online</span>
+            <div class="avatar"><i class="fa-solid fa-user"></i></div>
+          </div>
+        </header>
+
+        <div class="main">
+          <div>
+            <!-- ════ PAINEL LOTES ════ -->
+            <div class="tab-panel active" id="panel-lotes">
+              <div id="contentArea">
+                <div class="loading">Carregando lotes pendentes...</div>
+              </div>
+            </div>
+
+            <!-- ════ PAINEL PEDIDOS ════ -->
+            <div class="tab-panel" id="panel-pedidos">
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem"
+              >
+                <span class="pedidos-heading">Pedidos — Gestão de Envio</span>
+                <button onclick="carregarPedidos()" class="btn-refresh">
+                  <i class="fa-solid fa-rotate-right"></i> Atualizar
+                </button>
+              </div>
+
+              <!-- Filtros de status -->
+              <div class="filter-bar">
+                <button
+                  class="filter-btn active"
+                  onclick="filtrarPedidos('TODOS', this)"
+                >
+                  Todos
+                </button>
+                <button
+                  class="filter-btn"
+                  onclick="filtrarPedidos('AGUARDANDO_ENVIO', this)"
+                >
+                  ⏳ Aguardando
+                </button>
+                <button
+                  class="filter-btn"
+                  onclick="filtrarPedidos('EM_TRANSITO', this)"
+                >
+                  🚚 Em Trânsito
+                </button>
+                <button
+                  class="filter-btn"
+                  onclick="filtrarPedidos('ENTREGUE', this)"
+                >
+                  ✅ Entregues
+                </button>
+                <button
+                  class="filter-btn"
+                  onclick="filtrarPedidos('CANCELADO', this)"
+                >
+                  ❌ Cancelados
+                </button>
+              </div>
+
+              <!-- Buscador -->
+              <div style="margin-bottom: 1rem">
+                <input
+                  type="text"
+                  id="buscaPedido"
+                  placeholder="🔍  Buscar por título, comprador ou pedido #..."
+                  oninput="renderPedidos()"
+                  class="search-input"
+                />
+              </div>
+
+              <div
+                id="listaPedidos"
+                style="display: flex; flex-direction: column; gap: 0.75rem"
+              >
+                <div class="skel"></div>
+                <div class="skel"></div>
+                <div class="skel"></div>
+              </div>
+            </div>
+
+            <!-- ════ PAINEL BLOG ════ -->
+            <div class="tab-panel" id="panel-blog">
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem"
+              >
+                <span class="pedidos-heading">Gerenciar Blog</span>
+              </div>
+
+              <!-- Formulário novo post -->
+              <div class="blog-form-card">
+                <div class="blog-section-title">Novo Post</div>
+                <form
+                  id="formBlog"
+                  onsubmit="publicarPost(event)"
+                  enctype="multipart/form-data"
+                >
+                  <div style="margin-bottom: 0.75rem">
+                    <label>Título</label>
+                    <input
+                      type="text"
+                      id="blogTitulo"
+                      name="titulo"
+                      required
+                      placeholder="Título do post..."
+                    />
+                  </div>
+                  <div style="margin-bottom: 0.75rem">
+                    <label>Conteúdo</label>
+                    <textarea
+                      id="blogConteudo"
+                      name="conteudo"
+                      required
+                      rows="5"
+                      placeholder="Escreva o texto do post..."
+                    ></textarea>
+                  </div>
+                  <div style="margin-bottom: 1.25rem">
+                    <label>Imagem (opcional)</label>
+                    <input
+                      type="file"
+                      id="blogImagem"
+                      name="imagem"
+                      accept="image/*"
+                      style="font-size: 0.875rem; color: #7a6e65"
+                    />
+                    <div id="blogImgPreview" style="margin-top: 0.5rem"></div>
+                  </div>
+                  <button type="submit" class="btn-publicar">
+                    Publicar Post
+                  </button>
+                  <span
+                    id="blogMsg"
+                    class="hidden"
+                    style="display: none; margin-left: 0.75rem; font-size: 0.875rem; color: #4a5d23"
+                  ></span>
+                </form>
+              </div>
+
+              <!-- Lista de posts existentes -->
+              <div class="blog-section-title" style="margin-bottom: 0.75rem">
+                Posts publicados
+              </div>
+              <div id="listaBlog">
+                <div class="skel"></div>
+              </div>
+            </div>
+          </div>
+          <!-- /page-wrapper -->
+        </div>
+        <!-- /main-s -->
+      </div>
+      <!-- /content-wrap -->
+    </div>
+    <!-- /layout -->
+
+    <script th:src="@{/js/admin/painel.js}"></script>
+  </body>
+</html>

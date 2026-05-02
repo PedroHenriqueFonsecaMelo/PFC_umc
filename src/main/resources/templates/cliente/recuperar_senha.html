@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Recuperação de Senha</title>
+
+        <link rel="stylesheet" th:href="@{/cliente/styles.css}" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+
+    <body>
+        <nav
+            class="page-nav"
+            style="background: #2c241b; padding: 0.5rem 5vw; margin-bottom: 0"
+        >
+            <a
+                href="/"
+                style="color: #f9f6f0; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; font-family: 'DM Sans', sans-serif"
+            >← Início</a>
+        </nav>
+
+        <div class="container">
+            <div class="page-header">
+                <h1>Recuperação de Senha</h1>
+                <p>Informe seu email para receber o link de redefinição.</p>
+            </div>
+
+            <!-- Mensagens -->
+            <p th:if="${sucesso}" th:text="${sucesso}" class="mensagem sucesso">
+            </p>
+            <p th:if="${erro}" th:text="${erro}" class="mensagem erro"></p>
+
+            <form th:action="@{/clientes/recuperar-senha}" method="post">
+                <div class="form-group">
+                    <label for="email">Email cadastrado</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Digite seu email"
+                        required
+                    >
+                </div>
+
+                <div class="form-actions-main">
+                    <button type="submit" class="btn btn-primary">
+                        Enviar link de recuperação
+                    </button>
+                </div>
+            </form>
+
+            <div class="account-links">
+                <a th:href="@{/clientes/login}" class="btn-link-secondary"
+                >Voltar para o login</a>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p C:/Users/guilh/Documentos/Guilherme/UMC/PFC/PFC6_26-04/src/main/resources/static/css/admin C:/Users/guilh/Documentos/Guilherme/UMC/PFC/PFC6_26-04/src/main/resources/static/css/cliente C:/Users/guilh/Documentos/Guilherme/UMC/PFC/PFC6_26-04/src/main/resources/static/css/forum C:/Users/guilh/Documentos/Guilherme/UMC/PFC/PFC6_26-04/src/main/resources/static/css/produto)",
+      "Bash(mkdir -p C:/Users/guilh/Documentos/Guilherme/UMC/PFC/PFC6_26-04/src/main/resources/static/js/admin C:/Users/guilh/Documentos/Guilherme/UMC/PFC/PFC6_26-04/src/main/resources/static/js/cliente C:/Users/guilh/Documentos/Guilherme/UMC/PFC/PFC6_26-04/src/main/resources/static/js/forum C:/Users/guilh/Documentos/Guilherme/UMC/PFC/PFC6_26-04/src/main/resources/static/js/produto)",
+      "Bash(mkdir -p C:/Users/guilh/Documentos/Guilherme/UMC/PFC/PFC6_26-04/src/main/resources/templates/fragments)",
+      "Bash(git mv *)",
+      "Bash(python3 -c ' *)",
+      "Bash(grep -rl \"^    <script>$\\\\|^        <script>$\\\\|^  <script>$\" src/main/resources/templates/ --include=\"*.html\")"
+    ]
+  }
+}

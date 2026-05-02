@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vender Livros — Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+    <link rel="stylesheet" th:href="@{/css/produto/venda.css}" />
+  </head>
+  <body>
+    <!-- NAV -->
+    <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+    <!-- CONTEÚDO -->
+    <div class="page-wrap">
+      <header class="page-header">
+        <div class="page-kicker">Anunciar livros</div>
+        <h1 class="page-title">Vender <em>livros</em></h1>
+        <p class="page-sub">
+          Cadastre até 5 livros de uma vez. Nossa curadoria avalia cada título
+          antes de publicar na vitrine — você recebe tokens quando a venda for
+          concluída.
+        </p>
+      </header>
+
+      <div class="alert alert-erro" id="alertErro"></div>
+      <div class="alert alert-ok" id="alertOk"></div>
+
+      <div class="toolbar">
+        <span class="toolbar-count">
+          <strong id="countAtual">1</strong> / 5 livros adicionados
+        </span>
+        <button class="btn-add" id="btnAdicionar" type="button">
+          + Adicionar livro
+        </button>
+      </div>
+
+      <form id="formVenda" novalidate>
+        <div id="livrosContainer"></div>
+
+        <div class="submit-area">
+          <button class="btn-submit" id="btnSubmit" type="submit">
+            Enviar para avaliação
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-logo">Biblio<em>troca</em></div>
+      <p class="footer-copy">
+        © 2025 Bibliotroca — Todos os direitos reservados
+      </p>
+    </footer>
+
+    <script th:src="@{/js/produto/venda_livro.js}"></script>
+  </body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+  Fragment: adminSidebar(activeMenu)
+  Uso: <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('dashboard')}"></th:block>
+  Valores de activeMenu: dashboard | lotes | pedidos | blog | forum | auditoria
+-->
+<aside th:fragment="adminSidebar(activeMenu)" class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+            <span class="sidebar-icon">📚</span>
+            <div>
+                <div class="sidebar-name">Bibliotroca</div>
+                <div class="sidebar-sub">Painel Administrativo</div>
+            </div>
+        </a>
+    </div>
+    <nav class="sidebar-nav">
+        <span class="nav-label">Menu</span>
+        <a href="/admin/dashboard" class="nav-item"
+           th:classappend="${activeMenu == 'dashboard'} ? ' ativo'">
+            <i class="fa-solid fa-gauge"></i> Dashboard
+        </a>
+        <a href="/admin/painel" class="nav-item"
+           th:classappend="${activeMenu == 'lotes'} ? ' ativo'">
+            <i class="fa-solid fa-box-open"></i> Lotes Pendentes
+        </a>
+        <a href="/admin/painel?tab=pedidos" class="nav-item"
+           th:classappend="${activeMenu == 'pedidos'} ? ' ativo'">
+            <i class="fa-solid fa-truck"></i> Pedidos / Envio
+        </a>
+        <a href="/admin/painel?tab=blog" class="nav-item"
+           th:classappend="${activeMenu == 'blog'} ? ' ativo'">
+            <i class="fa-solid fa-pen-to-square"></i> Blog
+        </a>
+        <a href="/forum" class="nav-item"
+           th:classappend="${activeMenu == 'forum'} ? ' ativo'">
+            <i class="fa-solid fa-comments"></i> Fórum
+        </a>
+        <a href="/admin/audit" class="nav-item"
+           th:classappend="${activeMenu == 'auditoria'} ? ' ativo'">
+            <i class="fa-solid fa-shield-halved"></i> Auditoria
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <a href="/admin/sair" class="nav-item nav-sair">
+            <i class="fa-solid fa-right-from-bracket"></i> Sair
+        </a>
+    </div>
+</aside>
+
+</body>
+</html>

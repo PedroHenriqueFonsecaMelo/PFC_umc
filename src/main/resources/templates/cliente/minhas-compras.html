@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minhas Compras — Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    >
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+    <link rel="stylesheet" th:href="@{/css/cliente/minhas-compras.css}" />
+  </head>
+  <body>
+    <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+    <main>
+      <!-- TABS -->
+      <div class="tabs-container">
+        <button class="tab-btn active" onclick="trocarTab('pendentes', this)">
+          Em andamento
+          <span
+            id="badgePendentes"
+            class="badge-count"
+            style="display: none"
+          ></span>
+        </button>
+        <button class="tab-btn" onclick="trocarTab('concluidos', this)">
+          Concluídas
+          <span
+            id="badgeConcluidos"
+            class="badge-count"
+            style="display: none"
+          ></span>
+        </button>
+        <button class="tab-btn" onclick="trocarTab('todos', this)">
+          Todas
+        </button>
+      </div>
+
+      <!-- PANEL: Pendentes -->
+      <div class="tab-panel active" id="panel-pendentes">
+        <div id="lista-pendentes">
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+        </div>
+      </div>
+
+      <!-- PANEL: Concluídos -->
+      <div class="tab-panel" id="panel-concluidos">
+        <div id="lista-concluidos">
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+        </div>
+      </div>
+
+      <!-- PANEL: Todos -->
+      <div class="tab-panel" id="panel-todos">
+        <div id="lista-todos">
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+        </div>
+      </div>
+    </main>
+
+    <script th:src="@{/js/cliente/minhas-compras.js}"></script>
+  </body>
+</html>

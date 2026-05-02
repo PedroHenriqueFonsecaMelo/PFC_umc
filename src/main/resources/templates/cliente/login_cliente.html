@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Entrar — Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/cliente/login_cliente.css}" />
+  </head>
+  <body>
+    <!-- Estantes de fundo -->
+    <div class="shelves-bg" aria-hidden="true">
+      <div class="shelf-line"></div>
+      <div class="shelf-line"></div>
+      <div class="shelf-line"></div>
+      <div class="shelf-line"></div>
+      <div class="bg-books" id="bgBooks"></div>
+    </div>
+
+    <!-- Partículas -->
+    <div class="particles" aria-hidden="true">
+      <div
+        class="p"
+        style="width: 2px; height: 2px; left: 8%; top: 73%; --d: 10s; --dl: 0s; --dx: 14px"
+      >
+      </div>
+      <div
+        class="p"
+        style="width: 3px; height: 3px; left: 20%; top: 81%; --d: 12s; --dl: 1.8s; --dx: -12px"
+      >
+      </div>
+      <div
+        class="p"
+        style="width: 2px; height: 2px; left: 38%; top: 69%; --d: 9s; --dl: 0.6s; --dx: 20px"
+      >
+      </div>
+      <div
+        class="p"
+        style="width: 3px; height: 3px; left: 56%; top: 77%; --d: 14s; --dl: 3.2s; --dx: -16px"
+      >
+      </div>
+      <div
+        class="p"
+        style="width: 2px; height: 2px; left: 72%; top: 71%; --d: 11s; --dl: 0.4s; --dx: 10px"
+      >
+      </div>
+      <div
+        class="p"
+        style="width: 2px; height: 2px; left: 85%; top: 83%; --d: 13s; --dl: 2.0s; --dx: -9px"
+      >
+      </div>
+      <div
+        class="p"
+        style="width: 3px; height: 3px; left: 49%; top: 85%; --d: 8s; --dl: 1.2s; --dx: 18px"
+      >
+      </div>
+      <div
+        class="p"
+        style="width: 2px; height: 2px; left: 29%; top: 61%; --d: 15s; --dl: 4.5s; --dx: -11px"
+      >
+      </div>
+    </div>
+
+    <!-- Voltar -->
+    <a th:href="@{/entrar}" href="/entrar" class="back-link">← Voltar</a>
+
+    <!-- Livro aberto -->
+    <main class="page-content">
+      <div class="book">
+        <!-- Capa / página esquerda -->
+        <div class="book-cover" aria-hidden="true">
+          <div class="cover-corner tl"></div>
+          <div class="cover-corner tr"></div>
+          <div class="cover-corner bl"></div>
+          <div class="cover-corner br"></div>
+
+          <div class="cover-brand">
+            <span class="cover-icon">📖</span>
+            <div class="cover-title">Biblio<em>troca</em></div>
+            <div class="cover-tagline">Sua estante compartilhada</div>
+          </div>
+
+          <div class="cover-divider">
+            <span></span>
+            <i>✦</i>
+            <span></span>
+          </div>
+
+          <div class="cover-quote">
+            <p>"Um livro é um sonho que você segura nas mãos."</p>
+            <footer>— Neil Gaiman</footer>
+          </div>
+
+          <div class="cover-page-num">i</div>
+        </div>
+
+        <!-- Lombada -->
+        <div class="book-spine"></div>
+
+        <!-- Página direita — formulário -->
+        <div class="book-page">
+          <div class="page-header">
+            <h1>Bem-vindo de volta</h1>
+            <p>Acesse sua conta para explorar e trocar livros.</p>
+          </div>
+
+          <!-- Alertas -->
+          <div th:if="${param.error}" class="alert alert-erro">
+            E-mail ou senha inválidos.
+          </div>
+          <div th:if="${param.logout}" class="alert alert-sucesso">
+            Você saiu com sucesso.
+          </div>
+
+          <!-- Formulário -->
+          <form
+            th:action="@{/clientes/login}"
+            action="/clientes/login"
+            method="post"
+          >
+            <div class="field">
+              <label for="email">E-mail</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                placeholder="seu@email.com"
+              />
+            </div>
+
+            <div class="field">
+              <label for="senha">Senha</label>
+              <input
+                type="password"
+                id="senha"
+                name="senha"
+                required
+                placeholder="••••••••"
+              />
+            </div>
+
+            <button type="submit" class="btn-entrar">Abrir a biblioteca</button>
+          </form>
+
+          <hr class="divider" />
+
+          <div class="panel-links">
+            <a
+              th:href="@{/clientes/novo-cadastro}"
+              href="/clientes/novo-cadastro"
+              class="panel-link"
+            >Criar conta</a>
+            <a
+              th:href="@{/clientes/recuperar-senha}"
+              href="/clientes/recuperar-senha"
+              class="panel-link"
+            >Esqueceu a senha?</a>
+          </div>
+        </div>
+        <!-- /book-page -->
+      </div>
+      <!-- /book -->
+
+      <p class="footnote">Bibliotroca &mdash; Sistema de Troca de Livros</p>
+    </main>
+
+    <script th:src="@{/js/cliente/login_cliente.js}"></script>
+  </body>
+</html>

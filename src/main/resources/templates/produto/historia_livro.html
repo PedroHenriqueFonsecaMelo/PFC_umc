@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>História do Livro — Bibliotroca</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+            rel="stylesheet"
+        >
+        <link rel="stylesheet" th:href="@{/css/produto/historia_livro.css}" />
+    </head>
+    <body>
+        <nav class="topnav">
+            <a href="/livros/vitrine" class="nav-link-back">← Vitrine</a>
+            <span class="nav-brand">Bibliotroca</span>
+        </nav>
+
+        <div class="container">
+            <h1 id="tituloLivro">Carregando...</h1>
+            <p id="autorLivro">Buscando autor...</p>
+
+            <div id="containerCapa"></div>
+            <div id="containerResumo">
+                <p>Aguarde enquanto consultamos os arquivos...</p>
+            </div>
+
+            <section class="opiniao-section">
+                <h2>Vozes dos Leitores</h2>
+
+                <div class="form-resenha">
+                    <textarea
+                        id="textoComentario"
+                        placeholder="O que você achou desta história?"
+                    ></textarea>
+                    <div class="form-footer">
+                        <select
+                            id="notaLivro"
+                            style="padding: 0.5rem; border: 1px solid var(--border)"
+                        >
+                            <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                            <option value="4">⭐⭐⭐⭐ Muito Bom</option>
+                            <option value="3">⭐⭐⭐ Bom</option>
+                            <option value="2">⭐⭐ Regular</option>
+                            <option value="1">⭐ Ruim</option>
+                        </select>
+                        <button class="btn-enviar" onclick="enviarResenha()">
+                            Publicar Resenha
+                        </button>
+                    </div>
+                </div>
+
+                <div id="listaComentarios">
+                    <p style="font-style: italic; color: var(--muted)">
+                        Nenhuma resenha disponível ainda.
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <div
+            id="config-pag"
+            th:data-isbn="${isbn}"
+            th:data-unificado="${unificado}"
+        >
+        </div>
+
+        <script th:src="@{/js/produto/pesquisa_livro.js}" defer></script>
+    </body>
+</html>

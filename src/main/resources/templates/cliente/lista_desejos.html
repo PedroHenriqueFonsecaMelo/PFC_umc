@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lista de Desejos — Bibliotroca</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  >
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+  <link rel="stylesheet" th:href="@{/css/cliente/lista_desejos.css}" />
+</head>
+<body>
+
+<header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+<main>
+  <!-- HEADER -->
+  <div class="page-header">
+    <h1><i class="fa-solid fa-heart"></i> Minha Lista de Desejos</h1>
+    <p>Busque livros por título, encontre o ISBN e salve para ser notificado quando chegarem à vitrine.</p>
+  </div>
+
+  <!-- SEÇÃO: BUSCA -->
+  <div class="section-title"><i class="fa-solid fa-magnifying-glass"></i> Buscar Livro</div>
+  <div class="search-card">
+    <div class="search-row">
+      <input
+        id="inputBusca"
+        class="search-input"
+        type="text"
+        placeholder="Ex: Dom Casmurro, Harry Potter, O Hobbit..."
+        maxlength="120"
+        autocomplete="off"
+      />
+      <button id="btnBuscar" class="btn-buscar" onclick="buscarLivros()">
+        <i class="fa-solid fa-search"></i> Buscar
+      </button>
+    </div>
+    <div id="resultadosBusca">
+      <p class="search-hint">Digite o título do livro e clique em Buscar.</p>
+    </div>
+  </div>
+
+  <!-- SEÇÃO: LISTA SALVA -->
+  <div class="section-title">
+    <i class="fa-solid fa-bookmark"></i> Livros Salvos
+    <span id="badgeTotal" style="display:none; background:var(--accent); color:var(--paper);
+      font-size:0.65rem; font-weight:700; padding:0.1rem 0.5rem; margin-left:0.25rem;">0</span>
+  </div>
+  <div id="wishlistContainer">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton" style="height:60px"></div>
+  </div>
+</main>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script th:src="@{/js/cliente/lista_desejos.js}"></script>
+
+</body>
+</html>

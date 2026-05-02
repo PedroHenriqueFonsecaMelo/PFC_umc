@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bibliotroca — Compre e Venda Livros</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/index.css}" />
+  </head>
+  <body>
+    <!-- MASTHEAD -->
+    <header class="masthead">
+      <div class="masthead-top">
+        <span class="masthead-tagline" id="mastheadTagline"></span>
+        <a class="masthead-logo" th:href="@{/}">Biblio<em>troca</em></a>
+        <div class="masthead-actions">
+          <div class="nav-guest" id="navGuest">
+            <a class="btn-classic" th:href="@{/entrar}">Entrar</a>
+            <a
+              class="btn-classic btn-classic-filled"
+              th:href="@{/clientes/novo-cadastro}"
+            >Cadastrar</a>
+          </div>
+          <div class="nav-user" id="navUser">
+            <a class="btn-logout" th:href="@{/clientes/meu-perfil}">Perfil</a>
+            <a class="btn-logout" th:href="@{/clientes/sair}">Sair</a>
+          </div>
+        </div>
+      </div>
+      <nav class="masthead-nav">
+        <a th:href="@{/livros/vitrine}">Vitrine</a>
+        <a th:href="@{/livros/vender}">Vender</a>
+        <a id="navMinhaConta" th:href="@{/entrar}">Minha Conta</a>
+      </nav>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-banner">
+        <p class="hero-kicker">Marketplace de Livros Usados</p>
+        <h1>
+          Dê uma nova vida<br>aos seus <em>livros</em>
+        </h1>
+        <p class="hero-sub">
+          Cada livro que passa de mão em mão carrega uma história — e começa uma
+          nova.
+        </p>
+        <div class="hero-cta">
+          <a class="btn-primary" th:href="@{/livros/vitrine}"
+          >Explorar a vitrine</a>
+          <a
+            class="btn-secondary"
+            id="btnQueroVender"
+            th:href="@{/clientes/novo-cadastro}"
+          >Quero vender</a>
+        </div>
+      </div>
+
+      <div class="hero-shelf-wrap">
+        <div class="hero-shelf">
+          <div class="shelf-books">
+            <div class="spine spine-1"><span>Dom Casmurro</span></div>
+            <div class="spine spine-2"><span>O Alquimista</span></div>
+            <div class="spine spine-3"><span>Sapiens</span></div>
+            <div class="spine spine-4"><span>Grande Sertão: Veredas</span></div>
+            <div class="spine spine-5"><span>Vidas Secas</span></div>
+            <div class="spine spine-6"><span>Cem Anos de Solidão</span></div>
+            <div class="spine spine-7"><span>O Senhor dos Anéis</span></div>
+            <div class="spine spine-8"><span>Crime e Castigo</span></div>
+            <div class="spine spine-9"><span>1984</span></div>
+            <div class="spine spine-10"><span>A Metamorfose</span></div>
+          </div>
+          <div class="shelf-plank"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-number">1.2<span>k</span></div>
+        <div class="stat-label">Livros disponíveis</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">800<span>+</span></div>
+        <div class="stat-label">Leitores cadastrados</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">3.4<span>k</span></div>
+        <div class="stat-label">Trocas realizadas</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">4.9<span>★</span></div>
+        <div class="stat-label">Avaliação média</div>
+      </div>
+    </div>
+
+    <!-- LIVROS EM DESTAQUE -->
+    <section class="livros-section">
+      <div class="livros-section-inner">
+        <div class="livros-header reveal">
+          <div class="livros-header-text">
+            <div class="section-kicker">Disponíveis agora</div>
+            <h2 class="section-title">Livros em destaque</h2>
+            <p class="section-sub">
+              Uma seleção dos títulos mais recentes aprovados pela nossa
+              curadoria.
+            </p>
+          </div>
+          <a class="livros-header-link" th:href="@{/livros/vitrine}"
+          >Ver todos →</a>
+        </div>
+        <div class="livros-grid" id="livrosGrid">
+          <div class="livro-skeleton">
+            <div class="sk-img"></div>
+            <div class="sk-text">
+              <div class="sk-line"></div>
+              <div class="sk-line short"></div>
+            </div>
+          </div>
+          <div class="livro-skeleton">
+            <div class="sk-img"></div>
+            <div class="sk-text">
+              <div class="sk-line"></div>
+              <div class="sk-line short"></div>
+            </div>
+          </div>
+          <div class="livro-skeleton">
+            <div class="sk-img"></div>
+            <div class="sk-text">
+              <div class="sk-line"></div>
+              <div class="sk-line short"></div>
+            </div>
+          </div>
+          <div class="livro-skeleton">
+            <div class="sk-img"></div>
+            <div class="sk-text">
+              <div class="sk-line"></div>
+              <div class="sk-line short"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMO FUNCIONA -->
+    <section class="how-section">
+      <div class="how-inner">
+        <div class="section-header reveal">
+          <div class="section-kicker centered">Simples assim</div>
+          <h2 class="section-title">Como funciona?</h2>
+          <p class="section-sub">
+            Em poucos passos você já está comprando ou vendendo livros na
+            plataforma.
+          </p>
+        </div>
+        <div class="how-steps">
+          <div class="how-step reveal">
+            <div class="how-step-num">01</div>
+            <span class="how-step-icon">📖</span>
+            <h3>Cadastre-se</h3>
+            <p>
+              Crie sua conta gratuitamente em menos de 2 minutos. Precisamos
+              apenas do básico.
+            </p>
+          </div>
+          <div class="how-step reveal">
+            <div class="how-step-num">02</div>
+            <span class="how-step-icon">📦</span>
+            <h3>Envie seus livros</h3>
+            <p>
+              Anuncie os livros que não usa mais. Nossa equipe avalia e aprova
+              cada título.
+            </p>
+          </div>
+          <div class="how-step reveal">
+            <div class="how-step-num">03</div>
+            <span class="how-step-icon">🪙</span>
+            <h3>Ganhe tokens</h3>
+            <p>
+              Receba tokens pela venda dos seus livros e use-os para comprar
+              outros títulos.
+            </p>
+          </div>
+          <div class="how-step reveal">
+            <div class="how-step-num">04</div>
+            <span class="how-step-icon">🏆</span>
+            <h3>Suba no ranking</h3>
+            <p>
+              Quanto mais você participa, mais XP acumula. Compita e ganhe
+              benefícios exclusivos.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BLOG -->
+    <section class="blog-section" id="blogSection" style="display: none">
+      <div class="blog-inner">
+        <div class="section-header reveal">
+          <div class="section-kicker centered">Novidades</div>
+          <h2 class="section-title">Blog Bibliotroca</h2>
+          <p class="section-sub">
+            Fique por dentro das novidades, dicas de leitura e atualizações da
+            plataforma.
+          </p>
+        </div>
+        <div class="blog-grid" id="blogGrid">
+          <div class="blog-vazio">Carregando posts...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RANKING -->
+    <section class="ranking-section">
+      <div class="ranking-inner">
+        <div class="ranking-header reveal">
+          <div>
+            <div class="section-kicker">Comunidade</div>
+            <h2 class="section-title">Top leitores do mês</h2>
+            <p class="section-sub">
+              Os leitores mais ativos da plataforma. Quanto mais você participa,
+              mais sobe no ranking.
+            </p>
+          </div>
+          <a
+            class="btn-secondary"
+            style="align-self: flex-end"
+            th:href="@{/clientes/novo-cadastro}"
+          >Entrar na disputa →</a>
+        </div>
+        <div class="ranking-list" id="rankingList">
+          <div class="rank-skeleton"></div>
+          <div class="rank-skeleton"></div>
+          <div class="rank-skeleton"></div>
+          <div class="rank-skeleton"></div>
+          <div class="rank-skeleton"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="cta-section">
+      <div class="cta-inner reveal">
+        <span class="cta-ornament">✦ ✦ ✦</span>
+        <div class="section-kicker centered">Comece agora</div>
+        <h2>
+          Sua próxima leitura<br>favorita está <em>aqui</em>
+        </h2>
+        <p>
+          Junte-se a centenas de leitores que já estão trocando livros e
+          descobrindo novas histórias.
+        </p>
+        <div class="cta-buttons">
+          <a class="btn-primary" th:href="@{/clientes/novo-cadastro}"
+          >Criar conta grátis</a>
+          <a class="btn-secondary" th:href="@{/livros/vitrine}"
+          >Explorar vitrine</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-logo">Biblio<em>troca</em></div>
+      <p class="footer-copyright">
+        © 2025 Bibliotroca — Todos os direitos reservados
+      </p>
+      <div class="footer-links">
+        <a th:href="@{/livros/vitrine}">Vitrine</a>
+        <a th:href="@{/livros/vender}">Vender</a>
+        <a th:href="@{/entrar}">Entrar</a>
+        <a th:href="@{/clientes/termo}">Termos de Uso</a>
+        <a th:href="@{/clientes/politica}">Política de Privacidade</a>
+      </div>
+    </footer>
+
+    <script th:src="@{/js/index.js}"></script>
+  </body>
+</html>

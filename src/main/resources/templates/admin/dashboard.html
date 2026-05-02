@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — Bibliotroca Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"
+    ></script>
+
+    <link rel="stylesheet" th:href="@{/css/admin/layout.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/dashboard.css}" />
+  </head>
+  <body>
+    <div class="layout">
+      <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('dashboard')}"></th:block>
+
+      <div class="overlay" id="overlay" onclick="fecharMenu()"></div>
+
+      <!-- ════ CONTEÚDO ════ -->
+      <div class="content">
+        <header class="topbar">
+          <div style="display: flex; align-items: center; gap: 14px">
+            <button class="menu-btn" onclick="abrirMenu()">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div>
+              <div class="topbar-title">Dashboard</div>
+              <div class="topbar-date" id="dataHoje"></div>
+            </div>
+          </div>
+          <div class="topbar-right">
+            <span class="badge-online"><span class="dot"></span> Sistema
+              Online</span>
+            <div class="avatar"><i class="fa-solid fa-user"></i></div>
+          </div>
+        </header>
+
+        <!-- Spinner enquanto carrega -->
+        <div class="spinner-wrapper" id="spinnerWrapper">
+          <div class="spinner"></div>
+        </div>
+
+        <!-- Conteúdo (oculto até dados chegarem) -->
+        <main class="main" id="mainContent" style="display: none">
+          <!-- Cards -->
+          <div>
+            <p class="section-label">Visão Geral</p>
+            <div class="cards-grid">
+              <div class="card">
+                <div class="card-top">
+                  <div class="card-icon" style="background: #4a5d23">
+                    <i class="fa-solid fa-users"></i>
+                  </div>
+                  <span
+                    class="card-badge"
+                    style="background: rgba(74, 93, 35, 0.1); color: #4a5d23"
+                  >Cadastrados</span>
+                </div>
+                <div class="card-value" id="valTotalClientes">—</div>
+                <div class="card-label">Total de Clientes</div>
+              </div>
+
+              <div class="card">
+                <div class="card-top">
+                  <div class="card-icon" style="background: #722f37">
+                    <i class="fa-solid fa-book"></i>
+                  </div>
+                  <span
+                    class="card-badge"
+                    style="background: rgba(114, 47, 55, 0.1); color: #722f37"
+                  >Anunciados</span>
+                </div>
+                <div class="card-value" id="valTotalLivros">—</div>
+                <div class="card-label">Total de Livros</div>
+              </div>
+
+              <div class="card">
+                <div class="card-top">
+                  <div class="card-icon" style="background: #4a5d23">
+                    <i class="fa-solid fa-eye"></i>
+                  </div>
+                  <span
+                    class="card-badge"
+                    style="background: rgba(74, 93, 35, 0.1); color: #4a5d23"
+                  >Páginas visitadas</span>
+                </div>
+                <div class="card-value" id="valTotalVisitas">—</div>
+                <div class="card-label">Visitas ao Site</div>
+              </div>
+
+              <div class="card">
+                <div class="card-top">
+                  <div class="card-icon" style="background: #722f37">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                  </div>
+                  <span
+                    class="card-badge"
+                    style="background: rgba(114, 47, 55, 0.1); color: #722f37"
+                  >Pedidos</span>
+                </div>
+                <div class="card-value" id="valTotalAdquiridos">—</div>
+                <div class="card-label">Livros Adquiridos</div>
+              </div>
+
+              <div class="card">
+                <div class="card-top">
+                  <div class="card-icon" style="background: #4a5d23">
+                    <i class="fa-solid fa-coins"></i>
+                  </div>
+                  <span
+                    class="card-badge"
+                    style="background: rgba(74, 93, 35, 0.1); color: #4a5d23"
+                  >Confirmados</span>
+                </div>
+                <div class="card-value" id="valTokensDisp">—</div>
+                <div class="card-label">Tokens Disponibilizados</div>
+              </div>
+
+              <div class="card">
+                <div class="card-top">
+                  <div class="card-icon" style="background: #722f37">
+                    <i class="fa-solid fa-credit-card"></i>
+                  </div>
+                  <span
+                    class="card-badge"
+                    id="badgeTokensUtil"
+                    style="background: rgba(114, 47, 55, 0.1); color: #722f37"
+                  >—</span>
+                </div>
+                <div class="card-value" id="valTokensUtil">—</div>
+                <div class="card-label">Tokens Utilizados</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gráfico de barras -->
+          <div class="chart-panel">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">
+                  <i
+                    class="fa-solid fa-users-line"
+                    style="color: #722f37; margin-right: 8px"
+                  ></i>Adesão de Novos Clientes
+                </div>
+                <div class="chart-sub" id="subBarras">Últimos 12 meses</div>
+              </div>
+              <div class="chart-legend">
+                <span class="legend-dot" style="background: #722f37"></span>
+                Novos clientes / mês
+              </div>
+            </div>
+            <canvas id="chartBarras" height="100"></canvas>
+          </div>
+
+          <!-- Gráfico de linha -->
+          <div class="chart-panel">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">
+                  <i
+                    class="fa-solid fa-chart-line"
+                    style="color: #4a5d23; margin-right: 8px"
+                  ></i>Tendência de Crescimento
+                </div>
+                <div class="chart-sub">Variação mensal de novos clientes</div>
+              </div>
+            </div>
+            <canvas id="chartLinha" height="80"></canvas>
+          </div>
+
+          <!-- Pizzas -->
+          <div class="pie-grid">
+            <div class="chart-panel">
+              <div class="chart-header">
+                <div>
+                  <div class="chart-title">
+                    <i
+                      class="fa-solid fa-chart-pie"
+                      style="color: #722f37; margin-right: 8px"
+                    ></i>Vendas por Mês
+                  </div>
+                  <div class="chart-sub" id="subPizzaVendas">
+                    Últimos 12 meses
+                  </div>
+                </div>
+              </div>
+              <canvas id="chartPizzaVendas" height="200"></canvas>
+              <div class="pie-legend" id="legendVendas"></div>
+            </div>
+
+            <div class="chart-panel">
+              <div class="chart-header">
+                <div>
+                  <div class="chart-title">
+                    <i
+                      class="fa-solid fa-chart-pie"
+                      style="color: #4a5d23; margin-right: 8px"
+                    ></i>Postagens de Livros por Mês
+                  </div>
+                  <div class="chart-sub" id="subPizzaPostagens">
+                    Últimos 12 meses
+                  </div>
+                </div>
+              </div>
+              <canvas id="chartPizzaPostagens" height="200"></canvas>
+              <div class="pie-legend" id="legendPostagens"></div>
+            </div>
+          </div>
+
+          <!-- Tabela -->
+          <div class="table-panel">
+            <div class="table-title">
+              <i
+                class="fa-solid fa-table-list"
+                style="color: #722f37; margin-right: 8px"
+              ></i>Resumo Mensal Consolidado
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Mês</th>
+                    <th>Novos Clientes</th>
+                    <th>Vendas</th>
+                    <th>Postagens</th>
+                    <th>Conversão</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaCorpo"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style="height: 16px"></div>
+        </main>
+      </div>
+    </div>
+
+    <script th:src="@{/js/admin/dashboard.js}"></script>
+  </body>
+</html>

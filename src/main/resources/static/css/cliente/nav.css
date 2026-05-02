@@ -1,0 +1,108 @@
+/* ============================================================
+   nav.css — Barra de navegação unificada · Bibliotroca
+   Usada em todas as páginas autenticadas do cliente.
+   ============================================================ */
+
+.client-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  padding: 0 5vw;
+  height: 54px;
+  background: #2c241b;
+  gap: 0.5rem;
+}
+
+/* ── Logo ── */
+.cn-brand {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-size: 1.65rem;
+  color: #f9f6f0;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  margin-right: 0.75rem;
+  line-height: 1;
+}
+
+.cn-dot {
+  width: 6px;
+  height: 6px;
+  background: #722f37;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Links centrais ── */
+.cn-links {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.cn-links::-webkit-scrollbar { display: none; }
+
+/* ── Botões ── */
+.cn-btn {
+  background: transparent;
+  border: 1.5px solid rgba(249, 246, 240, 0.28);
+  color: rgba(249, 246, 240, 0.82);
+  padding: 0.28rem 0.72rem;
+  border-radius: 6px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+.cn-btn:hover {
+  background: #722f37;
+  border-color: #722f37;
+  color: #f9f6f0;
+}
+
+/* ── Lado direito ── */
+.cn-right {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+/* ── Display de saldo ── */
+.cn-saldo {
+  font-family: monospace;
+  font-size: 0.78rem;
+  color: rgba(249, 246, 240, 0.88);
+  background: rgba(249, 246, 240, 0.07);
+  border: 1px solid rgba(249, 246, 240, 0.15);
+  padding: 0.22rem 0.7rem;
+  white-space: nowrap;
+}
+
+/* ── Responsivo ── */
+@media (max-width: 860px) {
+  .cn-brand  { font-size: 1.35rem; margin-right: 0.4rem; }
+  .cn-btn    { font-size: 0.61rem; padding: 0.22rem 0.5rem; }
+  .cn-saldo  { font-size: 0.72rem; padding: 0.2rem 0.5rem; }
+}
+
+@media (max-width: 560px) {
+  .cn-brand  { font-size: 1.2rem; }
+  .client-nav { padding: 0 4vw; gap: 0.3rem; }
+}

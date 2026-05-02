@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title th:text="${topico.titulo} + ' · Fórum · Bibliotroca'">
+            Tópico · Fórum · Bibliotroca
+        </title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" th:href="@{/css/forum/forum.css}" />
+        <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+    </head>
+    <body>
+        <!-- ============================================================
+     TOP BAR
+     ============================================================ -->
+        <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+        <!-- ============================================================
+     CONTENT
+     ============================================================ -->
+        <div class="forum-wrapper">
+            <a th:href="@{/forum}" class="back-link">← Voltar ao Fórum</a>
+
+            <!-- Alertas -->
+            <div
+                th:if="${sucesso}"
+                class="alert alert-success"
+                th:text="${sucesso}"
+            >
+            </div>
+            <div th:if="${erro}" class="alert alert-danger" th:text="${erro}">
+            </div>
+
+            <!-- ── Cabeçalho do Tópico ────────────────────────────────── -->
+            <div class="topico-header">
+                <div class="topico-meta-bar">
+                    <span
+                        th:class="'category-badge badge-' + ${topico.categoria.name()}"
+                        th:text="${topico.categoria.descricao}"
+                    >Categoria</span>
+                    <span th:if="${topico.resolvido}" class="badge-solved"
+                    >✓ Resolvido</span>
+                </div>
+
+                <h1 class="topico-titulo">
+                    <span th:text="${topico.titulo}">Título do Tópico</span>
+                </h1>
+
+                <p class="topico-conteudo" th:text="${topico.conteudo}">
+                    Conteúdo...
+                </p>
+
+                <div class="topico-stats-bar">
+                    <span class="topic-meta-item topic-meta-autor">
+                        <span class="forum-avatar-mini">
+                            <img
+                                th:if="${topico.autor.fotoPerfil != null}"
+                                th:src="${topico.autor.fotoPerfil}"
+                                class="forum-avatar-mini-img"
+                                alt="foto"
+                            />
+                            <span
+                                th:unless="${topico.autor.fotoPerfil != null}"
+                                th:text="${topico.autor.nome.substring(0,1).toUpperCase()}"
+                            >?</span>
+                        </span>
+                        <strong th:text="${topico.autor.nome}">Autor</strong>
+                    </span>
+                    <span class="topic-meta-item">
+                        ◷ <span
+                            th:text="${#temporals.format(topico.dataCriacao, 'dd/MM/yyyy HH:mm')}"
+                        >Data</span>
+                    </span>
+                    <span class="topic-meta-item">
+                        ≡ <span th:text="${topico.qtdRespostas}">0</span>
+                        respostas
+                    </span>
+                    <span class="topic-meta-item">
+                        ◈ <span th:text="${topico.visualizacoes}">0</span>
+                        visualizações
+                    </span>
+
+                    <!-- Admin: Deletar Tópico -->
+                    <button
+                        th:if="${isAdmin}"
+                        class="btn-admin-delete btn-del-topico"
+                        th:data-topico-id="${topico.id}"
+                        onclick="if(confirm('Excluir este tópico?')) { fetch('/api/forum/topicos/' + this.dataset.topicoId, {method:'DELETE',credentials:'include'}).then(()=>window.location.href='/forum'); }"
+                    >
+                        ✕ Excluir Tópico
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── Respostas ──────────────────────────────────────────── -->
+            <section class="respostas-section">
+                <h2 class="respostas-title">
+                    <span>≡</span>
+                    <span
+                        th:text="${topico.qtdRespostas} + ' Resposta' + (${topico.qtdRespostas} != 1 ? 's' : '')"
+                    >
+                        0 Respostas
+                    </span>
+                </h2>
+
+                <th:block
+                    th:if="${topico.respostas != null and !topico.respostas.isEmpty()}"
+                >
+                    <!-- Melhor resposta primeiro (se houver) -->
+                    <th:block
+                        th:each="resposta : ${topico.respostas}"
+                        th:if="${resposta.melhorResposta}"
+                    >
+                        <article
+                            th:id="'resposta-card-' + ${resposta.id}"
+                            class="resposta-card melhor-resposta"
+                        >
+                            <div class="resposta-header">
+                                <div class="resposta-autor-avatar">
+                                    <img
+                                        th:if="${resposta.autor.fotoPerfil != null}"
+                                        th:src="${resposta.autor.fotoPerfil}"
+                                        class="forum-avatar-mini-img"
+                                        alt="foto"
+                                    />
+                                    <span
+                                        th:unless="${resposta.autor.fotoPerfil != null}"
+                                        th:text="${resposta.autor.nome.substring(0, 1).toUpperCase()}"
+                                    >?</span>
+                                </div>
+                                <div class="resposta-autor-info">
+                                    <div
+                                        class="resposta-autor-nome"
+                                        th:text="${resposta.autor.nome}"
+                                    >
+                                        Autor
+                                    </div>
+                                    <div
+                                        class="resposta-data"
+                                        th:text="${#temporals.format(resposta.dataCriacao, 'dd/MM/yyyy HH:mm')}"
+                                    >
+                                        Data
+                                    </div>
+                                </div>
+                                <span class="resposta-melhor-badge"
+                                >✓ Melhor Resposta</span>
+                            </div>
+
+                            <p
+                                class="resposta-conteudo"
+                                th:text="${resposta.conteudo}"
+                            >
+                                Conteúdo
+                            </p>
+
+                            <div class="resposta-actions">
+                                <button
+                                    th:if="${clienteLogado}"
+                                    class="btn-curtir"
+                                    th:classappend="${respostasLiked.contains(resposta.id) ? ' liked' : ''}"
+                                    th:data-resposta-id="${resposta.id}"
+                                >
+                                    ♥ <span
+                                        class="curtida-count"
+                                        th:text="${resposta.qtdCurtidas}"
+                                    >0</span>
+                                </button>
+                                <span
+                                    th:unless="${clienteLogado}"
+                                    class="stat-pill"
+                                >
+                                    ♥ <span th:text="${resposta.qtdCurtidas}"
+                                    >0</span>
+                                </span>
+
+                                <!-- Desmarcar melhor resposta: autor do tópico ou admin -->
+                                <button
+                                    th:if="${clienteLogado and (clienteId == topico.autor.id or isAdmin)}"
+                                    class="btn-melhor marcado"
+                                    th:data-resposta-id="${resposta.id}"
+                                >
+                                    ✓ Desmarcar
+                                </button>
+
+                                <button
+                                    th:if="${isAdmin}"
+                                    class="btn-admin-delete btn-del-resposta"
+                                    th:data-resposta-id="${resposta.id}"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        </article>
+                    </th:block>
+
+                    <!-- Demais respostas -->
+                    <th:block
+                        th:each="resposta : ${topico.respostas}"
+                        th:unless="${resposta.melhorResposta}"
+                    >
+                        <article
+                            th:id="'resposta-card-' + ${resposta.id}"
+                            class="resposta-card"
+                        >
+                            <div class="resposta-header">
+                                <div class="resposta-autor-avatar">
+                                    <img
+                                        th:if="${resposta.autor.fotoPerfil != null}"
+                                        th:src="${resposta.autor.fotoPerfil}"
+                                        class="forum-avatar-mini-img"
+                                        alt="foto"
+                                    />
+                                    <span
+                                        th:unless="${resposta.autor.fotoPerfil != null}"
+                                        th:text="${resposta.autor.nome.substring(0, 1).toUpperCase()}"
+                                    >?</span>
+                                </div>
+                                <div class="resposta-autor-info">
+                                    <div
+                                        class="resposta-autor-nome"
+                                        th:text="${resposta.autor.nome}"
+                                    >
+                                        Autor
+                                    </div>
+                                    <div
+                                        class="resposta-data"
+                                        th:text="${#temporals.format(resposta.dataCriacao, 'dd/MM/yyyy HH:mm')}"
+                                    >
+                                        Data
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p
+                                class="resposta-conteudo"
+                                th:text="${resposta.conteudo}"
+                            >
+                                Conteúdo
+                            </p>
+
+                            <div class="resposta-actions">
+                                <button
+                                    th:if="${clienteLogado}"
+                                    class="btn-curtir"
+                                    th:classappend="${respostasLiked.contains(resposta.id) ? ' liked' : ''}"
+                                    th:data-resposta-id="${resposta.id}"
+                                >
+                                    ♥ <span
+                                        class="curtida-count"
+                                        th:text="${resposta.qtdCurtidas}"
+                                    >0</span>
+                                </button>
+                                <span
+                                    th:unless="${clienteLogado}"
+                                    class="stat-pill"
+                                >
+                                    ♥ <span th:text="${resposta.qtdCurtidas}"
+                                    >0</span>
+                                </span>
+
+                                <!-- Marcar melhor resposta: autor do tópico ou admin -->
+                                <button
+                                    th:if="${clienteLogado and (clienteId == topico.autor.id or isAdmin)}"
+                                    class="btn-melhor"
+                                    th:data-resposta-id="${resposta.id}"
+                                >
+                                    ✓ Melhor Resposta
+                                </button>
+
+                                <button
+                                    th:if="${isAdmin}"
+                                    class="btn-admin-delete btn-del-resposta"
+                                    th:data-resposta-id="${resposta.id}"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        </article>
+                    </th:block>
+                </th:block>
+
+                <!-- Estado vazio -->
+                <div
+                    th:if="${topico.respostas == null or topico.respostas.isEmpty()}"
+                    class="topic-empty"
+                >
+                    <div class="topic-empty-icon">◎</div>
+                    <p>Nenhuma resposta ainda. Seja o primeiro a responder!</p>
+                </div>
+            </section>
+
+            <!-- ── Formulário de Resposta ──────────────────────────────── -->
+            <div class="reply-form-section">
+                <th:block th:if="${clienteLogado and !isAdmin}">
+                    <h3 class="reply-form-title">Sua Resposta</h3>
+                    <form
+                        th:action="@{/forum/topicos/{id}/respostas(id=${topico.id})}"
+                        method="post"
+                        th:object="${novaResposta}"
+                    >
+                        <div class="form-group">
+                            <label for="conteudo">Escreva sua resposta *</label>
+                            <textarea
+                                id="conteudo"
+                                th:field="*{conteudo}"
+                                class="form-control"
+                                rows="5"
+                                placeholder="Compartilhe seu conhecimento ou opinião..."
+                            ></textarea>
+                            <p
+                                class="form-error"
+                                th:if="${#fields.hasErrors('conteudo')}"
+                                th:errors="*{conteudo}"
+                            >
+                            </p>
+                        </div>
+                        <button type="submit" class="btn-submit">
+                            ▶ Publicar Resposta
+                        </button>
+                    </form>
+                </th:block>
+
+                <div th:unless="${clienteLogado}" class="login-prompt">
+                    <p>
+                        <a th:href="@{/clientes/login}">Entre na sua conta</a>
+                        para participar da discussão.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <!-- /forum-wrapper -->
+
+        <!-- ============================================================
+     SCRIPTS
+     ============================================================ -->
+        <script th:src="@{/js/forum/forum.js}"></script>
+    </body>
+</html>

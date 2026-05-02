@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Fórum · Bibliotroca</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" th:href="@{/css/forum/forum.css}" />
+
+        <!-- Admin: carrega layout + ícones -->
+        <th:block th:if="${isAdmin}">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+            <link rel="stylesheet" th:href="@{/css/admin/layout.css}" />
+        </th:block>
+
+        <!-- Cliente: carrega barra de navegação -->
+        <th:block th:unless="${isAdmin}">
+            <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+        </th:block>
+    </head>
+    <body>
+
+        <!-- ════════════════════════════════════════════════════════
+             ADMIN — sidebar lateral + conteúdo
+             ════════════════════════════════════════════════════════ -->
+        <th:block th:if="${isAdmin}">
+            <div class="layout">
+                <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('forum')}"></th:block>
+                <div class="content" style="overflow-y:auto; flex:1; min-width:0">
+
+                    <div class="forum-wrapper">
+                        <div class="forum-header">
+                            <h1 class="forum-title">Fórum</h1>
+                            <p class="forum-subtitle">Discussões sobre livros, recomendações e mais.</p>
+                        </div>
+
+                        <div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
+                        <div th:if="${erro}"    class="alert alert-danger"  th:text="${erro}"></div>
+
+                        <div class="forum-toolbar">
+                            <form class="search-form" th:action="@{/forum}" method="get">
+                                <input class="search-input" type="text" name="busca"
+                                       placeholder="Buscar tópicos..." th:value="${busca}" />
+                                <select class="search-select" name="categoria">
+                                    <option value="">Todas as categorias</option>
+                                    <option th:each="cat : ${categorias}"
+                                            th:value="${cat.name()}" th:text="${cat.descricao}"
+                                            th:selected="${cat == categoriaSelecionada}"></option>
+                                </select>
+                                <button class="btn-buscar" type="submit">◉ Buscar</button>
+                            </form>
+                        </div>
+
+                        <nav class="category-tabs">
+                            <a th:href="@{/forum}"
+                               th:classappend="${categoriaSelecionada == null ? ' active' : ''}"
+                               class="cat-tab">Todos</a>
+                            <a th:each="cat : ${categorias}"
+                               th:href="@{/forum(categoria=${cat.name()})}"
+                               th:classappend="${cat == categoriaSelecionada ? ' active' : ''}"
+                               th:text="${cat.descricao}" class="cat-tab"></a>
+                        </nav>
+
+                        <div class="topic-list" th:if="${topicos != null and !topicos.isEmpty()}">
+                            <article th:each="t : ${topicos}"
+                                     th:id="'topico-card-' + ${t.id}"
+                                     th:classappend="${t.resolvido ? ' resolvido' : ''}"
+                                     class="topic-card">
+                                <div>
+                                    <a th:href="@{/forum/topicos/{id}(id=${t.id})}"
+                                       th:text="${t.titulo}" class="topic-title-link">Título</a>
+                                    <div class="topic-meta">
+                                        <span th:class="'category-badge badge-' + ${t.categoria.name()}"
+                                              th:text="${t.categoria.descricao}">Categoria</span>
+                                        <span class="topic-meta-item topic-meta-autor">
+                                            <span class="forum-avatar-mini">
+                                                <img th:if="${t.autor.fotoPerfil != null}"
+                                                     th:src="${t.autor.fotoPerfil}"
+                                                     class="forum-avatar-mini-img" alt="foto" />
+                                                <span th:unless="${t.autor.fotoPerfil != null}"
+                                                      th:text="${t.autor.nome.substring(0,1).toUpperCase()}">?</span>
+                                            </span>
+                                            <span th:text="${t.autor.nome}">Autor</span>
+                                        </span>
+                                        <span class="topic-meta-item">
+                                            ◷ <span th:text="${#temporals.format(t.dataCriacao, 'dd/MM/yyyy')}">Data</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="topic-stats">
+                                    <span class="stat-pill">≡ <span th:text="${t.qtdRespostas}">0</span> respostas</span>
+                                    <span class="stat-pill">◈ <span th:text="${t.visualizacoes}">0</span> views</span>
+                                    <span th:if="${t.resolvido}" class="badge-resolvido">✓ Resolvido</span>
+                                    <button th:if="${isAdmin}" class="btn-admin-delete btn-del-topico"
+                                            th:data-topico-id="${t.id}" title="Excluir tópico">✕</button>
+                                </div>
+                            </article>
+                        </div>
+
+                        <div th:if="${topicos == null or topicos.isEmpty()}" class="topic-empty">
+                            <div class="topic-empty-icon">◎</div>
+                            <p>Nenhum tópico encontrado.</p>
+                            <p th:if="${busca != null and !busca.isEmpty()}">Tente outros termos de busca.</p>
+                        </div>
+
+                        <nav class="pagination" th:if="${topicos != null and topicos.totalPages > 1}">
+                            <a th:href="@{/forum(busca=${busca},categoria=${categoriaSelecionada?.name()},pagina=${topicos.number - 1})}"
+                               th:classappend="${topicos.first ? ' disabled' : ''}" class="page-btn"
+                               th:attr="aria-disabled=${topicos.first}">← Anterior</a>
+                            <a th:each="i : ${#numbers.sequence(0, topicos.totalPages - 1)}"
+                               th:href="@{/forum(busca=${busca},categoria=${categoriaSelecionada?.name()},pagina=${i})}"
+                               th:text="${i + 1}"
+                               th:classappend="${i == topicos.number ? ' active' : ''}" class="page-btn">1</a>
+                            <a th:href="@{/forum(busca=${busca},categoria=${categoriaSelecionada?.name()},pagina=${topicos.number + 1})}"
+                               th:classappend="${topicos.last ? ' disabled' : ''}" class="page-btn"
+                               th:attr="aria-disabled=${topicos.last}">Próximo →</a>
+                        </nav>
+                    </div>
+                    <!-- /forum-wrapper -->
+
+                </div>
+                <!-- /content -->
+            </div>
+            <!-- /layout -->
+        </th:block>
+
+
+        <!-- ════════════════════════════════════════════════════════
+             CLIENTE — barra de navegação + conteúdo
+             ════════════════════════════════════════════════════════ -->
+        <th:block th:unless="${isAdmin}">
+            <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+            <div class="forum-wrapper">
+                <div class="forum-header">
+                    <h1 class="forum-title">Fórum</h1>
+                    <p class="forum-subtitle">Discussões sobre livros, recomendações e mais.</p>
+                </div>
+
+                <div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
+                <div th:if="${erro}"    class="alert alert-danger"  th:text="${erro}"></div>
+
+                <div class="forum-toolbar">
+                    <form class="search-form" th:action="@{/forum}" method="get">
+                        <input class="search-input" type="text" name="busca"
+                               placeholder="Buscar tópicos..." th:value="${busca}" />
+                        <select class="search-select" name="categoria">
+                            <option value="">Todas as categorias</option>
+                            <option th:each="cat : ${categorias}"
+                                    th:value="${cat.name()}" th:text="${cat.descricao}"
+                                    th:selected="${cat == categoriaSelecionada}"></option>
+                        </select>
+                        <button class="btn-buscar" type="submit">◉ Buscar</button>
+                    </form>
+                    <th:block th:if="${clienteLogado}">
+                        <button class="btn-novo-topico" id="btn-abrir-modal">+ Novo Tópico</button>
+                    </th:block>
+                    <th:block th:unless="${clienteLogado}">
+                        <a th:href="@{/clientes/login}" class="btn-novo-topico">+ Novo Tópico</a>
+                    </th:block>
+                </div>
+
+                <nav class="category-tabs">
+                    <a th:href="@{/forum}"
+                       th:classappend="${categoriaSelecionada == null ? ' active' : ''}"
+                       class="cat-tab">Todos</a>
+                    <a th:each="cat : ${categorias}"
+                       th:href="@{/forum(categoria=${cat.name()})}"
+                       th:classappend="${cat == categoriaSelecionada ? ' active' : ''}"
+                       th:text="${cat.descricao}" class="cat-tab"></a>
+                </nav>
+
+                <div class="topic-list" th:if="${topicos != null and !topicos.isEmpty()}">
+                    <article th:each="t : ${topicos}"
+                             th:id="'topico-card-' + ${t.id}"
+                             th:classappend="${t.resolvido ? ' resolvido' : ''}"
+                             class="topic-card">
+                        <div>
+                            <a th:href="@{/forum/topicos/{id}(id=${t.id})}"
+                               th:text="${t.titulo}" class="topic-title-link">Título</a>
+                            <div class="topic-meta">
+                                <span th:class="'category-badge badge-' + ${t.categoria.name()}"
+                                      th:text="${t.categoria.descricao}">Categoria</span>
+                                <span class="topic-meta-item topic-meta-autor">
+                                    <span class="forum-avatar-mini">
+                                        <img th:if="${t.autor.fotoPerfil != null}"
+                                             th:src="${t.autor.fotoPerfil}"
+                                             class="forum-avatar-mini-img" alt="foto" />
+                                        <span th:unless="${t.autor.fotoPerfil != null}"
+                                              th:text="${t.autor.nome.substring(0,1).toUpperCase()}">?</span>
+                                    </span>
+                                    <span th:text="${t.autor.nome}">Autor</span>
+                                </span>
+                                <span class="topic-meta-item">
+                                    ◷ <span th:text="${#temporals.format(t.dataCriacao, 'dd/MM/yyyy')}">Data</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="topic-stats">
+                            <span class="stat-pill">≡ <span th:text="${t.qtdRespostas}">0</span> respostas</span>
+                            <span class="stat-pill">◈ <span th:text="${t.visualizacoes}">0</span> views</span>
+                            <span th:if="${t.resolvido}" class="badge-resolvido">✓ Resolvido</span>
+                        </div>
+                    </article>
+                </div>
+
+                <div th:if="${topicos == null or topicos.isEmpty()}" class="topic-empty">
+                    <div class="topic-empty-icon">◎</div>
+                    <p>Nenhum tópico encontrado.</p>
+                    <p th:if="${busca != null and !busca.isEmpty()}">Tente outros termos de busca.</p>
+                </div>
+
+                <nav class="pagination" th:if="${topicos != null and topicos.totalPages > 1}">
+                    <a th:href="@{/forum(busca=${busca},categoria=${categoriaSelecionada?.name()},pagina=${topicos.number - 1})}"
+                       th:classappend="${topicos.first ? ' disabled' : ''}" class="page-btn"
+                       th:attr="aria-disabled=${topicos.first}">← Anterior</a>
+                    <a th:each="i : ${#numbers.sequence(0, topicos.totalPages - 1)}"
+                       th:href="@{/forum(busca=${busca},categoria=${categoriaSelecionada?.name()},pagina=${i})}"
+                       th:text="${i + 1}"
+                       th:classappend="${i == topicos.number ? ' active' : ''}" class="page-btn">1</a>
+                    <a th:href="@{/forum(busca=${busca},categoria=${categoriaSelecionada?.name()},pagina=${topicos.number + 1})}"
+                       th:classappend="${topicos.last ? ' disabled' : ''}" class="page-btn"
+                       th:attr="aria-disabled=${topicos.last}">Próximo →</a>
+                </nav>
+            </div>
+            <!-- /forum-wrapper -->
+
+            <!-- Modal: criar tópico (apenas para clientes logados) -->
+            <div id="modal-novo-topico" class="modal-overlay" th:if="${clienteLogado}">
+                <span id="tem-erro-modal" th:if="${erroCriarTopico}" style="display:none"></span>
+                <div class="modal-card">
+                    <div class="modal-title">
+                        <span>Novo Tópico</span>
+                        <button class="modal-close" id="btn-fechar-modal" type="button">✕</button>
+                    </div>
+                    <form th:action="@{/forum/topicos}" method="post" th:object="${novoTopico}">
+                        <div class="form-group">
+                            <label for="titulo">Título *</label>
+                            <input type="text" id="titulo" th:field="*{titulo}" class="form-control"
+                                   placeholder="Escreva um título claro e descritivo" />
+                            <p class="form-error" th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="categoria">Categoria *</label>
+                            <select id="categoria" th:field="*{categoria}" class="form-control">
+                                <option value="">Selecione uma categoria</option>
+                                <option th:each="cat : ${categorias}"
+                                        th:value="${cat.name()}" th:text="${cat.descricao}"></option>
+                            </select>
+                            <p class="form-error" th:if="${#fields.hasErrors('categoria')}" th:errors="*{categoria}"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="conteudo">Conteúdo *</label>
+                            <textarea id="conteudo" th:field="*{conteudo}" class="form-control" rows="6"
+                                      placeholder="Descreva sua dúvida, resenha ou recomendação..."></textarea>
+                            <p class="form-error" th:if="${#fields.hasErrors('conteudo')}" th:errors="*{conteudo}"></p>
+                        </div>
+                        <button type="submit" class="btn-submit">▶ Publicar Tópico</button>
+                    </form>
+                </div>
+            </div>
+        </th:block>
+
+        <script th:src="@{/js/forum/forum.js}"></script>
+    </body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Auditoria - Suas Atividades</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+            rel="stylesheet"
+        >
+        <link rel="stylesheet" th:href="@{/css/cliente/auditoria.css}" />
+    </head>
+
+    <body>
+        <header>
+            <a th:href="@{/clientes/meu-perfil}" class="header-voltar"
+            >← Voltar</a>
+            <span class="header-title">Auditoria</span>
+        </header>
+
+        <div class="container">
+            <h2>Registros de suas atividades</h2>
+
+            <p class="descricao">
+                Aqui você encontra as ações registradas pelo sistema
+                relacionadas à sua conta.
+            </p>
+
+            <!-- Caso não exista nenhum log -->
+            <div th:if="${#lists.isEmpty(logs)}" class="empty-message">
+                Nenhuma atividade registrada até o momento.
+            </div>
+
+            <!-- Tabela dos logs -->
+            <table th:if="${!#lists.isEmpty(logs)}">
+                <thead>
+                    <tr>
+                        <th>Ação</th>
+                        <th>Detalhes</th>
+                        <th>Data e Hora</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr th:each="log : ${logs}">
+                        <td th:text="${log.acao}">AÇÃO</td>
+                        <td th:text="${log.detalhes}">DETALHES</td>
+                        <td th:text="${log.dataHora}">DATA</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <a th:href="@{/clientes/homepage}" class="btn-voltar"
+            >← Página inicial</a>
+        </div>
+    </body>
+</html>

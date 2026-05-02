@@ -1,0 +1,92 @@
+/* ================================================================
+   venda.css — Vender Livros · Bibliotroca
+   ================================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #2c241b; --paper: #f9f6f0; --cream: #ede8df;
+  --accent: #722f37; --forest: #4a5d23; --muted: #7a6e65;
+  --white: #ffffff; --border: rgba(44, 36, 27, 0.15);
+  --serif: "Playfair Display", Georgia, serif;
+  --fell: "IM Fell English", Georgia, serif;
+  --sans: "DM Sans", sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+/* ── PAGE ── */
+.page-wrap { max-width: 860px; margin: 0 auto; padding: 2rem 5vw 5rem; }
+.page-header { margin-bottom: 2.5rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border); }
+.page-kicker { font-size: 0.67rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+.page-kicker::before { content: ""; height: 1px; width: 24px; background: var(--border); }
+.page-title { font-family: var(--serif); font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 0.5rem; }
+.page-title em { font-style: italic; color: var(--accent); }
+.page-sub { font-family: var(--fell); font-style: italic; font-size: 0.95rem; color: var(--muted); line-height: 1.7; }
+
+/* ── TOOLBAR ── */
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem; }
+.toolbar-count { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.toolbar-count strong { color: var(--ink); font-weight: 600; }
+.btn-add { font-family: var(--sans); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; padding: 0.5rem 1.25rem; border: 1.5px solid var(--forest); background: transparent; color: var(--forest); cursor: pointer; transition: background 0.2s, color 0.2s; }
+.btn-add:hover:not(:disabled) { background: var(--forest); color: var(--white); }
+.btn-add:disabled { opacity: 0.38; cursor: not-allowed; }
+
+/* ── BOOK CARD ── */
+.book-card { background: var(--white); border: 1.5px solid var(--border); margin-bottom: 1.25rem; position: relative; animation: cardIn 0.35s ease both; }
+@keyframes cardIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.book-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--forest), var(--accent)); }
+.book-card-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem 0.75rem; border-bottom: 1px solid var(--border); }
+.book-num { font-family: var(--serif); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(44, 36, 27, 0.35); }
+.book-actions { display: flex; gap: 1rem; }
+.btn-text { font-size: 0.69rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; background: none; border: none; cursor: pointer; transition: color 0.2s; padding: 0; }
+.btn-text.clear { color: rgba(114, 47, 55, 0.5); }
+.btn-text.clear:hover { color: var(--accent); }
+.btn-text.remove { color: rgba(44, 36, 27, 0.3); }
+.btn-text.remove:hover { color: var(--ink); }
+.book-card-body { padding: 1.25rem; }
+
+.fields-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.875rem; margin-bottom: 0.875rem; }
+.fields-row.full { grid-template-columns: 1fr; }
+@media (max-width: 560px) { .fields-row { grid-template-columns: 1fr; } }
+
+.field { display: flex; flex-direction: column; gap: 0.35rem; }
+.field label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(74, 93, 35, 0.7); }
+.field-wrap { position: relative; }
+.field input[type="text"] { width: 100%; padding: 0.7rem 0.875rem; background: var(--paper); border: 1px solid rgba(74, 93, 35, 0.2); color: var(--ink); font-size: 0.9rem; font-family: var(--sans); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+.field input[type="text"]::placeholder { color: rgba(44, 36, 27, 0.3); }
+.field input[type="text"]:focus { border-color: var(--forest); box-shadow: 0 0 0 3px rgba(74, 93, 35, 0.1); }
+.spinner { position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border: 2px solid rgba(74, 93, 35, 0.2); border-top-color: var(--forest); border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+@keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+.spinner.active { display: block; }
+
+/* ── UPLOAD ── */
+.upload-area { position: relative; border: 1.5px dashed rgba(74, 93, 35, 0.3); background: var(--paper); padding: 1.25rem; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+.upload-area:hover { border-color: var(--forest); background: rgba(74, 93, 35, 0.03); }
+.upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.upload-placeholder { font-family: var(--fell); font-style: italic; font-size: 0.85rem; color: var(--muted); pointer-events: none; }
+.upload-placeholder small { display: block; margin-top: 0.2rem; font-size: 0.72rem; font-style: normal; font-family: var(--sans); letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.6; }
+.upload-previews { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; pointer-events: none; }
+.upload-previews img { width: 56px; height: 56px; object-fit: cover; border: 1px solid var(--border); }
+
+/* ── SUBMIT ── */
+.submit-area { margin-top: 2rem; }
+.btn-submit { width: 100%; padding: 1rem; background: var(--ink); color: var(--paper); border: 2px solid var(--ink); font-family: var(--sans); font-size: 0.82rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; transition: background 0.2s, color 0.2s; position: relative; overflow: hidden; }
+.btn-submit:hover:not(:disabled) { background: transparent; color: var(--ink); }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── ALERT ── */
+.alert { padding: 0.75rem 1rem; margin-bottom: 1.5rem; font-size: 0.83rem; font-weight: 500; display: none; align-items: center; gap: 0.6rem; border: 1px solid; }
+.alert.show { display: flex; }
+.alert-erro { background: rgba(114, 47, 55, 0.07); border-color: rgba(114, 47, 55, 0.25); color: var(--accent); }
+.alert-erro::before { content: "✕"; font-weight: 700; }
+.alert-ok { background: rgba(74, 93, 35, 0.07); border-color: rgba(74, 93, 35, 0.25); color: var(--forest); }
+.alert-ok::before { content: "✓"; font-weight: 700; }
+
+/* ── FOOTER ── */
+footer { background: var(--ink); color: rgba(249, 246, 240, 0.35); padding: 2rem 5vw; text-align: center; }
+footer::before { content: "◆  ◆  ◆"; display: block; font-size: 0.6rem; letter-spacing: 0.5em; color: rgba(249, 246, 240, 0.15); margin-bottom: 1.25rem; }
+.footer-logo { font-family: var(--serif); font-size: 2.2rem; font-weight: 700; color: rgba(249, 246, 240, 0.5); font-style: italic; margin-bottom: 0.3rem; }
+.footer-logo em { color: var(--accent); }
+.footer-copy { font-size: 0.68rem; }

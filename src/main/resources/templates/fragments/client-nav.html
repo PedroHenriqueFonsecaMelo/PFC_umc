@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+  Fragment: clientNav
+  Uso: <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+-->
+<header th:fragment="clientNav" class="client-nav">
+    <a th:href="@{/}" class="cn-brand">
+        <span class="cn-dot"></span>Bibliotroca
+    </a>
+    <nav class="cn-links">
+        <a th:href="@{/livros/vitrine}"          class="cn-btn">Vitrine</a>
+        <a th:href="@{/livros/vender}"           class="cn-btn">Vender</a>
+        <a th:href="@{/forum}"                   class="cn-btn">Fórum</a>
+        <a th:href="@{/clientes/lista-desejos}"  class="cn-btn">Lista de Desejos</a>
+        <a th:href="@{/clientes/minhas-compras}" class="cn-btn">Minha Estante</a>
+    </nav>
+    <div class="cn-right">
+        <span class="cn-saldo" id="navSaldo">T$ --</span>
+        <a th:href="@{/clientes/meu-perfil}"     class="cn-btn">Meu Perfil</a>
+        <a th:href="@{/clientes/sair}"           class="cn-btn">Sair</a>
+    </div>
+</header>
+
+</body>
+</html>

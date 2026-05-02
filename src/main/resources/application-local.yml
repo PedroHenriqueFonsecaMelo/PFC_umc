@@ -1,0 +1,95 @@
+# ===============================
+# 📦 Application Configuration
+# ===============================
+spring:
+  application:
+    name: PFC_Projeto
+  
+  datasource:
+    url: jdbc:sqlite:user.db
+    driver-class-name: org.sqlite.JDBC
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    # Isso aqui é o que salva o erro de UnsatisfiedDependency no ClienteRepository
+    defer-datasource-initialization: true
+    show-sql: false
+    open-in-view: false
+    # Propriedades específicas para estabilizar o SQLite no Hibernate 6
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+        "[format_sql]": true
+
+  sql:
+    init:
+      mode: always
+      fail-on-missing-locations: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "${MAIL_USERNAME:}"
+    password: "${MAIL_PASSWORD:}"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  devtools:
+    restart:
+      additional-paths: src/main/java
+
+# ===============================
+# 🔐 JWT Security Configuration
+# ===============================
+jwt:
+  secret: "${JWT_SECRET:troque-esta-chave-antes-de-subir-para-producao-minimo-64-chars}"
+  expiration: 86400000
+  cookie:
+    name: token
+
+# ===============================
+# 🌐 App & Server Settings
+# ===============================
+app:
+  allowed-origin: "${ALLOWED_ORIGIN:https://localhost:8443}"
+  base-url: "https://localhost:8443"
+
+mail:
+  from: "${MAIL_FROM:noreply@umc.exs.local}"
+
+server:
+  servlet:
+    context-path: /
+  port: 8443
+  ssl:
+    enabled: true
+    key-store: "classpath:certs/keystore.p12"
+    key-store-type: PKCS12
+    key-store-password: "${SSL_KEYSTORE_PASSWORD:123456789}"
+    key-alias: UMC_PFC
+  error:
+    include-stacktrace: never
+    include-message: never
+
+# ===============================
+# 🧾 Logging Configuration (CORRIGIDO)
+# ===============================
+logging:
+  level:
+    root: WARN
+    "[umc.exs]": INFO
+    "[umc.exs.security]": INFO
+    "[umc.exs.controller]": INFO
+    "[org.hibernate.SQL]": WARN
+    "[org.springframework.security]": WARN

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Vitrine de Livros — Bibliotroca</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+            rel="stylesheet"
+        >
+        <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+        <link rel="stylesheet" th:href="@{/css/produto/vitrine.css}" />
+    </head>
+    <body>
+        <div id="carrinhoOverlay"></div>
+        <div class="toast" id="toastCompra"></div>
+
+        <!-- NAV -->
+        <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+        <!-- MAIN -->
+        <main class="main-vitrine">
+            <div style="margin-bottom: 1.5rem">
+                <h2>Livros Disponíveis</h2>
+                <p>Adicione à sua estante e finalize sua compra.</p>
+            </div>
+            <div id="gridLivros"></div>
+        </main>
+
+        <!-- ESTANTE SIDEBAR -->
+        <div id="carrinhoSidebar">
+            <div class="carr-header">
+                <h2>
+                    <img
+                        src="/imagens/estante.png"
+                        alt="Estante"
+                        style="width: 72px; height: 72px; object-fit: contain; vertical-align: middle; margin-right: 0.4rem"
+                    > Minha Estante
+                </h2>
+                <button class="carr-fechar" onclick="fecharCarrinho()">
+                    ✕
+                </button>
+            </div>
+            <div class="carr-lista" id="carrinhoLista">
+                <div id="carrinhoVazio">
+                    <div class="vazio-icon">
+                        <img
+                            src="/imagens/estante.png"
+                            alt="Estante vazia"
+                            style="width: 144px; height: 144px; object-fit: contain; opacity: 0.6"
+                        >
+                    </div>
+                    <p>
+                        Sua estante está vazia.<br>Explore a vitrine e adicione
+                        livros!
+                    </p>
+                </div>
+            </div>
+            <div class="carr-footer">
+                <div class="carr-total-row">
+                    <span class="carr-total-label">Total</span>
+                    <span class="carr-total-valor" id="carrinhoTotal"
+                    >T$ 0,00</span>
+                </div>
+                <div id="carrinhoAcoes">
+                    <button id="btnFinalizar" onclick="finalizarCompra()">
+                        Finalizar Compra
+                    </button>
+                    <button id="btnLimpar" onclick="limparCarrinho()">
+                        Limpar estante
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script th:src="@{/js/produto/vitrine_livros.js}"></script>
+    </body>
+</html>

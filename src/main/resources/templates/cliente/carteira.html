@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Minha Carteira | Bibliotroca</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+            rel="stylesheet"
+        >
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        >
+        <link rel="stylesheet" th:href="@{/cliente/nav.css}" />
+    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+    <link rel="stylesheet" th:href="@{/css/cliente/carteira.css}" />
+  </head>
+    <body>
+        <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+        <main>
+            <div class="grid-layout">
+                <!-- Saldo -->
+                <div class="card-saldo">
+                    <div class="saldo-icon-wrap">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <div class="saldo-label">Saldo Disponível</div>
+                    <div class="saldo-row">
+                        <span class="saldo-prefix">T$</span>
+                        <span id="displaySaldo">0.00</span>
+                    </div>
+                    <p class="saldo-nota">
+                        * Os tokens são creditados instantaneamente após a
+                        confirmação do pagamento.
+                    </p>
+                </div>
+
+                <!-- Comprar Tokens -->
+                <div class="card-comprar">
+                    <div class="card-comprar-title">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        Comprar Novos Tokens
+                    </div>
+
+                    <form id="formCompra">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="valor">Valor da Recarga (R$)</label>
+                                <div class="input-wrap">
+                                    <span class="input-prefix">R$</span>
+                                    <input
+                                        type="number"
+                                        id="valor"
+                                        step="0.01"
+                                        min="1"
+                                        required
+                                        placeholder="0.00"
+                                        class="with-prefix"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="metodoPagamento"
+                                >Forma de Pagamento</label>
+                                <select id="metodoPagamento">
+                                    <option value="CARTAO">
+                                        💳 Cartão de Crédito
+                                    </option>
+                                    <option value="PIX">
+                                        ⚡ PIX (Aprovação na hora)
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="sectionCartao">
+                            <label for="numCartao">Dados do Cartão</label>
+                            <div class="input-wrap">
+                                <input
+                                    type="text"
+                                    id="numCartao"
+                                    placeholder="0000 0000 0000 0000"
+                                    class="with-icon"
+                                >
+                                <i
+                                    class="fa-solid fa-credit-card input-icon"
+                                ></i>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btnComprar">
+                            <i class="fa-solid fa-check-double"></i> Confirmar e
+                            Pagar
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Histórico -->
+                <div class="card-historico">
+                    <div class="historico-header">
+                        <span class="historico-header-title">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                            Histórico Recente
+                        </span>
+                        <span class="historico-header-sub"
+                        >Últimas transações</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data e Hora</th>
+                                    <th>Crédito (Tokens)</th>
+                                    <th>Método</th>
+                                    <th>Referência</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-transacoes"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- MODAL PIX -->
+        <div
+            id="modalPix"
+            style="display: none; position: fixed; inset: 0; background: rgba(44, 36, 27, 0.8); z-index: 50; align-items: center; justify-content: center; padding: 1rem"
+        >
+            <div class="modal-box">
+                <div class="modal-header">
+                    <div class="modal-icon-wrap">
+                        <i class="fa-solid fa-qrcode"></i>
+                    </div>
+                    <div class="modal-title">Pagamento via PIX</div>
+                    <p class="modal-sub">
+                        Escaneie o código abaixo para finalizar a compra
+                    </p>
+                </div>
+
+                <div class="qr-container">
+                    <img id="imgQrCode" src alt="QR Code PIX">
+                </div>
+
+                <div>
+                    <div class="pix-label">PIX Copia e Cola</div>
+                    <div class="pix-row">
+                        <input type="text" id="textoCopiaECola" readonly>
+                        <button class="btn-copiar" onclick="copyPix()">
+                            <i class="fa-solid fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button class="btn-fechar-pix" onclick="fecharModalPix()">
+                    Já realizei o pagamento
+                </button>
+                <button class="btn-debug" onclick="simularAvisoBanco()">
+                    [ DEBUG: Simular Webhook Banco ]
+                </button>
+            </div>
+        </div>
+
+        <script th:src="@{/cliente/script.js}"></script>
+        <script th:src="@{/cliente/wallet.js}"></script>
+    </body>
+</html>

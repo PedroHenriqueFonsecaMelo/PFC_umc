@@ -1,0 +1,69 @@
+# ===============================
+# 📦 Application Configuration
+# ===============================
+spring:
+  application:
+    name: PFC_Projeto
+
+  # ===============================
+  # 🗄️ Database Configuration (RENDER/PostgreSQL)
+  # ===============================
+  datasource:
+    url: "${DATABASE_URL_JDBC}"
+    username: "${DATABASE_USERNAME}"
+    password: "${DATABASE_PASSWORD}"
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    # Desabilita open-in-view — evita overhead e LazyLoadingException indesejado
+    open-in-view: false
+    # ⚠️ SEGURANÇA: Manter false em produção para não expor dados nos logs
+    show-sql: false
+
+  # ===============================
+  # 📧 Email Configuration
+  # ===============================
+  mail:
+    host: "${MAIL_HOST}"
+    port: "${MAIL_PORT}"
+    username: "${MAIL_USERNAME}"
+    password: "${MAIL_PASSWORD}"
+
+# ===============================
+# 🌐 Server Settings
+# ===============================
+server:
+  servlet:
+    context-path: /
+  # Render define a porta AUTOMATICAMENTE via variável de ambiente PORT
+  port: "${PORT:8080}"
+
+# ===============================
+# 🔐 JWT Security Configuration
+# ===============================
+jwt:
+  secret: "${JWT_SECRET}"
+  expiration: "${JWT_EXPIRATION}"
+  cookie:
+    name: token
+
+# ===============================
+# 🚀 App Metadata
+# ===============================
+app:
+  base-url: "${APP_BASE_URL}"
+
+# ===============================
+# 🧾 Logging Configuration
+# ===============================
+logging:
+  file:
+    name: "./logs/application.log"
+  level:
+    root: WARN
+    # Configuração compacta para evitar erros de bloco
+    umc:
+      exs: INFO

@@ -1,0 +1,55 @@
+# Conversion to YAML from Properties formar report
+# Warnings:
+# - The yaml file had comments which are lost in the refactoring!
+spring:
+  application:
+    name: PFC_Projeto
+  datasource:
+    url: ${DATABASE_URL_JDBC}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+server:
+  servlet:
+    context-path: /
+  port: ${PORT:8443}
+  ssl:
+    enabled: true
+    key-store: classpath:certs/keystore.p12
+    key-store-type: PKCS12
+    key-store-password: ${SSL_KEYSTORE_PASSWORD}
+    key-alias: UMC_PFC
+  error:
+    include-stacktrace: never
+    include-message: never
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+  cookie:
+    name: token
+app:
+  allowed-origin: ${ALLOWED_ORIGIN}
+  base-url: ${APP_BASE_URL}
+logging:
+  level:
+    root: WARN
+    umc:
+      exs: INFO
