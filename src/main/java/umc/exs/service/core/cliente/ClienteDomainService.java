@@ -78,7 +78,7 @@ public class ClienteDomainService {
         }
 
         enderecoService.sincronizarEnderecos(cliente, dto.getEnderecos());
-        cartaoService.sincronizarCartoes(cliente, dto.getCartoes());
+        // cartaoService.sincronizarCartoes(cliente, dto.getCartoes()); // cartões removidos da UI
 
         return clienteMapper.paraDTO(repositoryService.salvar(cliente));
     }
@@ -150,6 +150,16 @@ public class ClienteDomainService {
         log.info("Senha redefinida com sucesso para: {}", cliente.getEmail());
     }
     
+    @Transactional
+    public void alterarSenhaComVerificacao(String email, String senhaAtual, String novaSenha) {
+        Cliente cliente = repositoryService.buscarPorEmailOuFalhar(email);
+        if (!passwordEncoder.matches(senhaAtual, cliente.getSenha())) {
+            throw new IllegalArgumentException("Senha atual incorreta.");
+        }
+        cliente.setSenha(passwordEncoder.encode(novaSenha));
+        repositoryService.salvar(cliente);
+    }
+
     public void gerarTokenRecuperacao(Cliente cliente) {
         senhaService.iniciarRecuperacao(cliente);
     }

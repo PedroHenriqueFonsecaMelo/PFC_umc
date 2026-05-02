@@ -6,6 +6,140 @@
     <title>Dashboard · Bibliotroca</title>
     <link rel="stylesheet" th:href="@{/css/cliente/homepage.css}" />
     <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        /* ── Inline panels: Compras sub-tabs ─────────────────── */
+        .csub-bar { display:flex; gap:.5rem; margin-bottom:1.25rem; flex-wrap:wrap; }
+        .csub-btn {
+            font-family:"DM Sans",sans-serif; font-size:.82rem; font-weight:500;
+            padding:.4rem 1rem; border:1.5px solid var(--border,rgba(44,36,27,.15));
+            border-radius:6px; background:transparent; color:var(--muted,#7a6e65);
+            cursor:pointer; transition:all .18s;
+        }
+        .csub-btn.active, .csub-btn:hover {
+            background:var(--accent,#722f37); color:#fff; border-color:var(--accent,#722f37);
+        }
+        .csub-panel { display:none; }
+        .csub-panel.active { display:block; }
+        .csub-badge {
+            display:inline-flex; align-items:center; justify-content:center;
+            min-width:18px; height:18px; padding:0 5px; border-radius:9px;
+            background:var(--accent,#722f37); color:#fff; font-size:.7rem; margin-left:.35rem;
+        }
+
+        /* ── Pedido card (compras) ──────────────────────────── */
+        .pedido-card {
+            display:flex; gap:1rem; padding:1rem; border:1px solid var(--border,rgba(44,36,27,.15));
+            border-radius:8px; margin-bottom:.75rem; background:#fff;
+        }
+        .pedido-capa { width:64px; height:86px; object-fit:cover; border-radius:4px; flex-shrink:0; }
+        .pedido-titulo { font-weight:600; font-size:.95rem; }
+        .pedido-autor { font-size:.8rem; color:var(--muted,#7a6e65); margin-bottom:.35rem; }
+        .pedido-meta { font-size:.78rem; color:var(--muted,#7a6e65); display:flex; flex-wrap:wrap; gap:.3rem .5rem; }
+        .pedido-preco { color:var(--accent,#722f37); font-weight:600; }
+        .pedido-estorno { color:#2d6a4f; font-weight:600; }
+        .status-badge {
+            font-size:.72rem; font-weight:600; padding:.25rem .6rem;
+            border-radius:20px; white-space:nowrap;
+        }
+        .status-AGUARDANDO_ENVIO { background:#fef9c3; color:#854d0e; }
+        .status-EM_TRANSITO { background:#dbeafe; color:#1e40af; }
+        .status-ENTREGUE { background:#d1fae5; color:#065f46; }
+        .status-CANCELADO { background:#fee2e2; color:#991b1b; }
+        .timeline { display:flex; gap:1rem; margin-top:.75rem; }
+        .tl-step { display:flex; flex-direction:column; align-items:center; gap:.25rem; }
+        .tl-dot {
+            width:26px; height:26px; border-radius:50%; border:2px solid var(--border,rgba(44,36,27,.15));
+            display:flex; align-items:center; justify-content:center; font-size:.75rem;
+            background:#f9f6f0; color:var(--muted,#7a6e65);
+        }
+        .tl-step.active .tl-dot { background:var(--accent,#722f37); border-color:var(--accent,#722f37); color:#fff; }
+        .tl-step.done .tl-dot { background:var(--forest,#4a5d23); border-color:var(--forest,#4a5d23); color:#fff; }
+        .tl-label { font-size:.7rem; color:var(--muted,#7a6e65); }
+        .empty-state { text-align:center; padding:2.5rem 1rem; color:var(--muted,#7a6e65); }
+        .empty-state .icon { font-size:2rem; margin-bottom:.5rem; }
+
+        /* ── Histórico de atividades ────────────────────────── */
+        .audit-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+        .audit-table th {
+            text-align:left; padding:.5rem .75rem; border-bottom:2px solid var(--border,rgba(44,36,27,.15));
+            font-weight:600; color:var(--muted,#7a6e65); font-size:.75rem; text-transform:uppercase;
+        }
+        .audit-table td { padding:.6rem .75rem; border-bottom:1px solid var(--border,rgba(44,36,27,.15)); vertical-align:top; }
+        .audit-table tr:last-child td { border-bottom:none; }
+        .audit-acao { font-weight:600; font-family:monospace; font-size:.78rem; color:var(--accent,#722f37); }
+        .audit-data { font-size:.75rem; color:var(--muted,#7a6e65); white-space:nowrap; }
+
+        /* ── Carteira inline ────────────────────────────────── */
+        .cw-grid { display:grid; grid-template-columns:1fr 1.5fr; gap:1.25rem; }
+        @media(max-width:700px){ .cw-grid { grid-template-columns:1fr; } }
+        .cw-saldo {
+            background:linear-gradient(135deg,var(--accent,#722f37),#9a3f49);
+            color:#fff; border-radius:10px; padding:1.5rem; text-align:center;
+        }
+        .cw-saldo-label { font-size:.85rem; opacity:.85; margin-bottom:.35rem; }
+        .cw-saldo-row { font-size:2rem; font-weight:700; }
+        .cw-saldo-prefix { font-size:1.1rem; vertical-align:super; margin-right:.2rem; opacity:.8; }
+        .cw-saldo-nota { font-size:.72rem; opacity:.7; margin-top:.75rem; }
+        .cw-form label { display:block; font-size:.8rem; font-weight:600; margin-bottom:.3rem; color:var(--muted,#7a6e65); }
+        .cw-form input, .cw-form select {
+            width:100%; padding:.55rem .75rem; border:1.5px solid var(--border,rgba(44,36,27,.15));
+            border-radius:6px; font-size:.88rem; background:#fff; color:var(--ink,#2c241b);
+            margin-bottom:.75rem;
+        }
+        .cw-form input:focus, .cw-form select:focus { outline:none; border-color:var(--accent,#722f37); }
+        .cw-btn-pay {
+            width:100%; padding:.65rem 1rem; background:var(--accent,#722f37); color:#fff;
+            border:none; border-radius:6px; font-size:.9rem; font-weight:600; cursor:pointer;
+            transition:opacity .18s;
+        }
+        .cw-btn-pay:hover { opacity:.88; }
+        .cw-btn-pay:disabled { opacity:.5; cursor:not-allowed; }
+        .cw-historico { grid-column:1/-1; margin-top:.25rem; }
+        .cw-historico-header { font-weight:600; margin-bottom:.75rem; font-size:.9rem; }
+        .cw-table { width:100%; border-collapse:collapse; font-size:.83rem; }
+        .cw-table th {
+            text-align:left; padding:.45rem .6rem; border-bottom:2px solid var(--border,rgba(44,36,27,.15));
+            font-weight:600; color:var(--muted,#7a6e65); font-size:.73rem; text-transform:uppercase;
+        }
+        .cw-table td { padding:.55rem .6rem; border-bottom:1px solid var(--border,rgba(44,36,27,.15)); }
+        .cw-table tr:last-child td { border-bottom:none; }
+        .cw-valor { font-weight:700; color:var(--forest,#4a5d23); }
+        .cw-tag {
+            display:inline-block; padding:.2rem .5rem; background:var(--cream,#ede8df);
+            border-radius:4px; font-size:.72rem;
+        }
+
+        /* ── Modal PIX ──────────────────────────────────────── */
+        .pix-modal-overlay {
+            display:none; position:fixed; inset:0;
+            background:rgba(44,36,27,.8); z-index:200;
+            align-items:center; justify-content:center; padding:1rem;
+        }
+        .pix-modal-overlay.active { display:flex; }
+        .pix-modal-box {
+            background:#fff; border-radius:12px; padding:2rem;
+            max-width:420px; width:100%; text-align:center;
+        }
+        .pix-modal-title { font-weight:700; font-size:1.1rem; margin-bottom:.35rem; }
+        .pix-modal-sub { font-size:.83rem; color:var(--muted,#7a6e65); margin-bottom:1rem; }
+        .pix-qr img { width:180px; height:180px; margin:0 auto 1rem; display:block; }
+        .pix-copy-row { display:flex; gap:.5rem; margin-bottom:1rem; }
+        .pix-copy-row input { flex:1; padding:.5rem .75rem; border:1.5px solid var(--border,rgba(44,36,27,.15)); border-radius:6px; font-size:.8rem; }
+        .pix-copy-btn {
+            padding:.5rem .75rem; background:var(--ink,#2c241b); color:#fff;
+            border:none; border-radius:6px; cursor:pointer;
+        }
+        .pix-close-btn {
+            width:100%; padding:.65rem; background:var(--accent,#722f37); color:#fff;
+            border:none; border-radius:6px; font-weight:600; cursor:pointer; margin-bottom:.5rem;
+        }
+        .pix-debug-btn {
+            width:100%; padding:.5rem; background:transparent;
+            border:1px dashed var(--border,rgba(44,36,27,.15));
+            border-radius:6px; font-size:.75rem; color:var(--muted,#7a6e65); cursor:pointer;
+        }
+    </style>
 </head>
 <body>
 
@@ -104,28 +238,33 @@
         <button class="tab-btn" data-tab="enderecos">
             <span class="tab-icon">⌖</span> Endereços
         </button>
-        <button class="tab-btn" data-tab="cartoes">
-            <span class="tab-icon">▣</span> Cartões
-        </button>
         <button class="tab-btn" data-tab="ranking">
             <span class="tab-icon">▲</span> Ranking
+        </button>
+        <button class="tab-btn" data-tab="compras">
+            <span class="tab-icon">▣</span> Compras
         </button>
         <button class="tab-btn" data-tab="historico">
             <span class="tab-icon">≡</span> Histórico
         </button>
+        <button class="tab-btn" data-tab="carteira">
+            <span class="tab-icon">◈</span> Carteira
+        </button>
     </nav>
 
     <!-- ============================================================
-         FORM — wraps panels: Perfil, Endereços, Cartões
+         PAINÉIS
          ============================================================ -->
     <div th:if="${cliente != null}">
-        <form th:action="@{/clientes/atualizar}" method="post" th:object="${cliente}">
-            <input type="hidden" th:field="*{id}" />
 
-            <!-- ------------------------------------------------
-                 PANEL 1 · DADOS PESSOAIS
-                 ------------------------------------------------ -->
-            <div id="panel-perfil" class="tab-panel active">
+        <!-- ------------------------------------------------
+             PANEL 1 · PERFIL
+             ------------------------------------------------ -->
+        <div id="panel-perfil" class="tab-panel active">
+
+            <!-- Dados Pessoais -->
+            <form th:action="@{/clientes/atualizar}" method="post" th:object="${cliente}">
+                <input type="hidden" th:field="*{id}" />
                 <div class="panel-card">
                     <h2 class="panel-title">
                         <span class="panel-title-accent">◉</span> Dados Pessoais
@@ -140,33 +279,87 @@
                             <input type="email" th:field="*{email}" required />
                         </div>
                         <div class="form-group-2">
-                            <label>CPF</label>
-                            <input type="text" th:field="*{cpf}" readonly />
-                        </div>
-                        <div class="form-group-2">
                             <label>Data de Nascimento</label>
-                            <input type="date" th:field="*{datanasc}" required />
-                        </div>
-                        <div class="form-group-2">
-                            <label>Gênero</label>
-                            <input type="text" th:field="*{gen}" />
-                        </div>
-                        <div class="form-group-2">
-                            <label>Nova Senha</label>
-                            <input type="password" th:field="*{senha}"
-                                   placeholder="Deixe em branco para manter" />
+                            <input type="text"
+                                   id="datanasc" name="datanasc"
+                                   th:value="${cliente != null && cliente.datanasc != null ? cliente.datanasc : ''}"
+                                   maxlength="10" placeholder="DD/MM/AAAA" autocomplete="off" />
+                            <p id="aviso-data-futura" style="display:none; margin-top:4px; font-size:0.8rem; color:#722f37;">
+                                Data inválida: essa data ainda não aconteceu.
+                            </p>
+                            <p id="aviso-menor-idade" style="display:none; margin-top:4px; font-size:0.8rem; color:#722f37;">
+                                Atenção: é necessário ser maior de 18 anos para se cadastrar.
+                            </p>
                         </div>
                     </div>
                 </div>
                 <div class="form-submit-row">
-                    <button type="submit" class="btn-tech-primary">▶ Salvar Alterações</button>
+                    <button type="submit" class="btn-tech-primary">▶ Salvar Dados</button>
                 </div>
+            </form>
+
+            <!-- Alterar Senha -->
+            <div class="panel-card senha-card">
+                <h2 class="panel-title">
+                    <span class="panel-title-accent">🔑</span> Alterar Senha
+                </h2>
+                <p class="senha-instrucao">Confirme sua senha atual antes de definir a nova.</p>
+                <form th:action="@{/clientes/alterar-senha-perfil}" method="post">
+                    <div class="senha-form-grid">
+                        <div class="form-group-2">
+                            <label>① Senha atual</label>
+                            <div class="input-senha-wrapper">
+                                <input type="password" id="senhaAtual" name="senhaAtual"
+                                       required placeholder="Sua senha atual" />
+                                <button type="button" class="btn-toggle-senha"
+                                        aria-label="Mostrar senha atual"
+                                        onclick="toggleSenha('senhaAtual', this)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group-2">
+                            <label>② Nova senha</label>
+                            <div class="input-senha-wrapper">
+                                <input type="password" id="novaSenha" name="novaSenha"
+                                       required placeholder="Mínimo 8 caracteres" />
+                                <button type="button" class="btn-toggle-senha"
+                                        aria-label="Mostrar nova senha"
+                                        onclick="toggleSenha('novaSenha', this)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group-2">
+                            <label>③ Confirmar nova senha</label>
+                            <div class="input-senha-wrapper">
+                                <input type="password" id="confirmarSenha" name="confirmarSenha"
+                                       required placeholder="Repita a nova senha" />
+                                <button type="button" class="btn-toggle-senha"
+                                        aria-label="Mostrar confirmação"
+                                        onclick="toggleSenha('confirmarSenha', this)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-submit-row">
+                        <button type="submit" class="btn-tech-primary">▶ Alterar Senha</button>
+                    </div>
+                </form>
             </div>
 
-            <!-- ------------------------------------------------
-                 PANEL 2 · ENDEREÇOS
-                 ------------------------------------------------ -->
-            <div id="panel-enderecos" class="tab-panel">
+        </div>
+
+        <!-- ------------------------------------------------
+             PANEL 2 · ENDEREÇOS
+             ------------------------------------------------ -->
+        <div id="panel-enderecos" class="tab-panel">
+            <form th:action="@{/clientes/atualizar}" method="post" th:object="${cliente}">
+                <input type="hidden" th:field="*{id}" />
+                <input type="hidden" th:field="*{nome}" />
+                <input type="hidden" th:field="*{datanasc}" />
+
                 <div class="add-item-row">
                     <button type="button" onclick="adicionarEndereco()" class="btn-tech-secondary">
                         + Adicionar Endereço
@@ -240,82 +433,13 @@
                 </div>
 
                 <div class="form-submit-row">
-                    <button type="submit" class="btn-tech-primary">▶ Salvar Alterações</button>
+                    <button type="submit" class="btn-tech-primary">▶ Salvar Endereços</button>
                 </div>
-            </div>
-
-            <!-- ------------------------------------------------
-                 PANEL 3 · CARTÕES
-                 ------------------------------------------------ -->
-            <div id="panel-cartoes" class="tab-panel">
-                <div class="add-item-row">
-                    <button type="button" onclick="adicionarCartao()" class="btn-tech-secondary">
-                        + Adicionar Cartão
-                    </button>
-                </div>
-
-                <div id="cartoes-list-container">
-                    <div th:each="cartao, iStat : *{cartoes}"
-                         class="cartao-item item-card">
-                        <fieldset>
-                            <legend th:text="'Cartão ' + (${iStat.index} + 1)">Cartão 1</legend>
-                            <input type="hidden"
-                                   th:field="*{cartoes[__${iStat.index}__].id}" />
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label>Número do Cartão</label>
-                                    <input type="text"
-                                           th:field="*{cartoes[__${iStat.index}__].numero}"
-                                           required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Nome no Cartão</label>
-                                    <input type="text"
-                                           th:field="*{cartoes[__${iStat.index}__].nomeTitular}"
-                                           required />
-                                </div>
-                                <div class="form-group">
-                                    <label>CPF do Titular</label>
-                                    <input type="text" readonly
-                                           th:field="*{cartoes[__${iStat.index}__].cpfTitular}" />
-                                </div>
-                                <div class="form-group">
-                                    <label>Validade</label>
-                                    <input type="text"
-                                           th:field="*{cartoes[__${iStat.index}__].validade}"
-                                           placeholder="MM/AAAA" />
-                                </div>
-                                <div class="form-group">
-                                    <label>Bandeira</label>
-                                    <input type="text"
-                                           th:field="*{cartoes[__${iStat.index}__].bandeira}" />
-                                </div>
-                                <div class="form-group">
-                                    <label>CVV</label>
-                                    <input type="text" value="***" readonly />
-                                </div>
-                            </div>
-                            <button type="submit"
-                                    formaction="/clientes/removerCartao"
-                                    formmethod="post"
-                                    name="cartaoId"
-                                    th:value="${cartao.id}"
-                                    class="btn-remover-cartao">
-                                ✕ Remover
-                            </button>
-                        </fieldset>
-                    </div>
-                </div>
-
-                <div class="form-submit-row">
-                    <button type="submit" class="btn-tech-primary">▶ Salvar Alterações</button>
-                </div>
-            </div>
-
-        </form><!-- /form -->
+            </form>
+        </div>
 
         <!-- ------------------------------------------------
-             PANEL 4 · RANKING & XP (outside form)
+             PANEL 3 · RANKING & XP
              ------------------------------------------------ -->
         <div id="panel-ranking" class="tab-panel">
             <div class="panel-card">
@@ -340,34 +464,124 @@
         </div>
 
         <!-- ------------------------------------------------
-             PANEL 5 · HISTÓRICO (outside form)
+             PANEL 4 · COMPRAS
+             ------------------------------------------------ -->
+        <div id="panel-compras" class="tab-panel">
+            <div class="panel-card">
+                <h2 class="panel-title">
+                    <span class="panel-title-accent">▣</span> Minhas Compras
+                </h2>
+                <div class="csub-bar">
+                    <button class="csub-btn active" data-csub="pendentes" onclick="comprasTab('pendentes', this)">
+                        Em andamento <span class="csub-badge" id="badge-pendentes" style="display:none"></span>
+                    </button>
+                    <button class="csub-btn" data-csub="concluidos" onclick="comprasTab('concluidos', this)">
+                        Concluídas <span class="csub-badge" id="badge-concluidos" style="display:none"></span>
+                    </button>
+                    <button class="csub-btn" data-csub="todos" onclick="comprasTab('todos', this)">
+                        Todas
+                    </button>
+                </div>
+                <div id="csub-pendentes" class="csub-panel active">
+                    <p class="gami-aviso">Carregando...</p>
+                </div>
+                <div id="csub-concluidos" class="csub-panel">
+                    <p class="gami-aviso"></p>
+                </div>
+                <div id="csub-todos" class="csub-panel">
+                    <p class="gami-aviso"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ------------------------------------------------
+             PANEL 5 · HISTÓRICO
              ------------------------------------------------ -->
         <div id="panel-historico" class="tab-panel">
             <div class="panel-card">
                 <h2 class="panel-title">
-                    <span class="panel-title-accent">≡</span> Links Rápidos
+                    <span class="panel-title-accent">≡</span> Histórico de Atividades
                 </h2>
-                <div class="historico-grid">
-                    <a th:href="@{/clientes/minhas-compras}" class="btn-nav-link">
-                        <span class="link-icon">▣</span>
-                        Minhas Compras
-                        <span class="link-arrow">→</span>
-                    </a>
-                    <a th:href="@{/historico/cliente}" class="btn-nav-link">
-                        <span class="link-icon">≡</span>
-                        Histórico de Atividades
-                        <span class="link-arrow">→</span>
-                    </a>
-                    <a th:href="@{/clientes/carteira}" class="btn-nav-link">
-                        <span class="link-icon">◈</span>
-                        Minha Carteira
-                        <span class="link-arrow">→</span>
-                    </a>
+                <div id="historico-content">
+                    <p class="gami-aviso">Carregando...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ------------------------------------------------
+             PANEL 6 · CARTEIRA
+             ------------------------------------------------ -->
+        <div id="panel-carteira" class="tab-panel">
+            <div class="panel-card">
+                <h2 class="panel-title">
+                    <span class="panel-title-accent">◈</span> Minha Carteira
+                </h2>
+                <div class="cw-grid">
+                    <div class="cw-saldo">
+                        <div class="cw-saldo-label">Saldo Disponível</div>
+                        <div class="cw-saldo-row">
+                            <span class="cw-saldo-prefix">T$</span><span id="displaySaldo"
+                                th:text="${cliente != null ? #numbers.formatDecimal(cliente.saldoTokens, 1, 'POINT', 2, 'COMMA') : '0,00'}">0,00</span>
+                        </div>
+                        <p class="cw-saldo-nota">* Tokens creditados após confirmação do pagamento.</p>
+                    </div>
+
+                    <div class="cw-form">
+                        <label for="valor">Valor da Recarga (R$)</label>
+                        <input type="number" id="valor" step="0.01" min="1" placeholder="0.00" />
+
+                        <label for="metodoPagamento">Forma de Pagamento</label>
+                        <select id="metodoPagamento">
+                            <option value="CARTAO">💳 Cartão de Crédito</option>
+                            <option value="PIX">⚡ PIX (Aprovação na hora)</option>
+                        </select>
+
+                        <div id="sectionCartao">
+                            <label for="numCartao">Número do Cartão</label>
+                            <input type="text" id="numCartao" placeholder="0000 0000 0000 0000" />
+                        </div>
+
+                        <button id="btnComprar" class="cw-btn-pay" onclick="cwEfetuarCompra(event)">
+                            <i class="fa-solid fa-check-double"></i> Confirmar e Pagar
+                        </button>
+                    </div>
+
+                    <div class="cw-historico">
+                        <div class="cw-historico-header"><i class="fa-solid fa-clock-rotate-left"></i> Histórico de Transações</div>
+                        <div class="table-wrap">
+                            <table class="cw-table">
+                                <thead>
+                                    <tr>
+                                        <th>Data e Hora</th>
+                                        <th>Crédito</th>
+                                        <th>Método</th>
+                                        <th>Referência</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lista-transacoes"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
     </div><!-- /cliente not null -->
+
+    <!-- PIX MODAL -->
+    <div id="cwModalPix" class="pix-modal-overlay">
+        <div class="pix-modal-box">
+            <div class="pix-modal-title">Pagamento via PIX</div>
+            <p class="pix-modal-sub">Escaneie o código abaixo para finalizar a compra</p>
+            <div class="pix-qr"><img id="cwImgQrCode" src="" alt="QR Code PIX" /></div>
+            <div class="pix-copy-row">
+                <input type="text" id="cwTextoPix" readonly />
+                <button class="pix-copy-btn" onclick="cwCopyPix()"><i class="fa-solid fa-copy"></i></button>
+            </div>
+            <button class="pix-close-btn" onclick="cwFecharModal()">Já realizei o pagamento</button>
+            <button class="pix-debug-btn" onclick="cwSimularWebhook()">[ DEBUG: Simular Webhook Banco ]</button>
+        </div>
+    </div>
 
     <!-- DANGER ZONE -->
     <div class="danger-zone">
@@ -391,7 +605,9 @@
 <script th:inline="javascript">
     /* Contadores de índice para formulários dinâmicos */
     let enderecoIndex = [[${cliente != null && !#lists.isEmpty(cliente.enderecos)} ? ${#lists.size(cliente.enderecos)} : 0]];
-    let cartaoIndex   = [[${cliente != null && !#lists.isEmpty(cliente.cartoes)}   ? ${#lists.size(cliente.cartoes)}   : 0]];
+
+    /* ── Lazy-load flags ───────────────────────────────────── */
+    var comprasLoaded = false, historicoLoaded = false, carteiraLoaded = false;
 
     /* ── Tab switching ─────────────────────────────────────── */
     document.querySelectorAll('.tab-btn').forEach(function(btn) {
@@ -406,6 +622,10 @@
             this.classList.add('active');
             var panel = document.getElementById('panel-' + tabId);
             if (panel) panel.classList.add('active');
+
+            if (tabId === 'compras' && !comprasLoaded) { comprasLoaded = true; initCompras(); }
+            else if (tabId === 'historico' && !historicoLoaded) { historicoLoaded = true; initHistorico(); }
+            else if (tabId === 'carteira' && !carteiraLoaded) { carteiraLoaded = true; initCarteira(); }
         });
     });
 
@@ -452,6 +672,247 @@
             if (el) el.textContent = 'Ver lista';
         });
     })();
+
+    /* ============================================================
+       COMPRAS — inline
+       ============================================================ */
+    function fmtDataComp(iso) {
+        if (!iso) return '—';
+        var d = new Date(iso);
+        return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
+    }
+    function primeiraFoto(fotosUrls) {
+        try { var a = JSON.parse(fotosUrls); if (Array.isArray(a) && a.length) return a[0]; } catch(_){}
+        return null;
+    }
+    var PASSOS_ENVIO = [
+        { key:'AGUARDANDO_ENVIO', label:'Aguardando' },
+        { key:'EM_TRANSITO',      label:'Em trânsito' },
+        { key:'ENTREGUE',         label:'Entregue'    }
+    ];
+    function buildTimeline(status) {
+        if (status === 'CANCELADO') return '<div style="margin-top:.5rem"><span class="status-badge status-CANCELADO">Cancelado</span></div>';
+        var idx = PASSOS_ENVIO.findIndex(function(p){ return p.key === status; });
+        return '<div class="timeline">' + PASSOS_ENVIO.map(function(p, i) {
+            var cls = i < idx ? 'done' : i === idx ? 'active' : '';
+            var icon = i < idx ? '✓' : (i + 1);
+            return '<div class="tl-step ' + cls + '"><div class="tl-dot">' + icon + '</div><div class="tl-label">' + p.label + '</div></div>';
+        }).join('') + '</div>';
+    }
+    function buildPedidoCard(p) {
+        var foto = primeiraFoto(p.fotosUrls);
+        var imgSrc = foto || 'https://via.placeholder.com/64x86?text=%F0%9F%93%9A';
+        return '<div class="pedido-card">' +
+            '<img class="pedido-capa" src="' + imgSrc + '" alt="' + (p.tituloLivro||'') + '" onerror="this.style.display=\'none\'" />' +
+            '<div class="pedido-info" style="flex:1">' +
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem">' +
+                    '<div><div class="pedido-titulo">' + (p.tituloLivro||'—') + '</div>' +
+                    '<div class="pedido-autor">' + (p.autorLivro||'') + '</div></div>' +
+                    '<span class="status-badge status-' + p.statusEnvio + '">' + (p.statusEnvioDescricao||p.statusEnvio) + '</span>' +
+                '</div>' +
+                '<div class="pedido-meta"><span>Pedido #' + p.id + '</span><span>·</span>' +
+                    '<span>' + fmtDataComp(p.dataCompra) + '</span><span>·</span>' +
+                    '<span class="pedido-preco">T$ ' + (p.precoLivro||0).toFixed(2) + '</span>' +
+                    (p.statusEnvio === 'CANCELADO' ? '<span>·</span><span class="pedido-estorno">↩ T$ ' + (p.precoLivro||0).toFixed(2) + ' estornados</span>' : '') +
+                '</div>' +
+                buildTimeline(p.statusEnvio) +
+            '</div></div>';
+    }
+    function emptyState(msg) {
+        return '<div class="empty-state"><div class="icon">📭</div><p>' + msg + '</p></div>';
+    }
+    function comprasTab(nome, btn) {
+        document.querySelectorAll('.csub-btn').forEach(function(b){ b.classList.remove('active'); });
+        document.querySelectorAll('.csub-panel').forEach(function(p){ p.classList.remove('active'); });
+        btn.classList.add('active');
+        var panel = document.getElementById('csub-' + nome);
+        if (panel) panel.classList.add('active');
+    }
+    async function initCompras() {
+        var pendentesEl = document.getElementById('csub-pendentes');
+        var concluidosEl = document.getElementById('csub-concluidos');
+        var todosEl = document.getElementById('csub-todos');
+
+        async function fetchPedidos(url, el) {
+            try {
+                var res = await fetch(url, { credentials:'include' });
+                if (!res.ok) { el.innerHTML = '<p style="color:#722f37;padding:1rem">Erro ao carregar pedidos.</p>'; return []; }
+                return await res.json();
+            } catch(e) {
+                el.innerHTML = '<p style="color:#722f37;padding:1rem">Erro de conexão.</p>';
+                return [];
+            }
+        }
+
+        var [pendentes, concluidos, todos] = await Promise.all([
+            fetchPedidos('/api/pedidos/pendentes', pendentesEl),
+            fetchPedidos('/api/pedidos/concluidos', concluidosEl),
+            fetchPedidos('/api/pedidos/todos', todosEl)
+        ]);
+
+        pendentesEl.innerHTML = pendentes.length ? pendentes.map(buildPedidoCard).join('') : emptyState('Nenhuma compra em andamento.');
+        concluidosEl.innerHTML = concluidos.length ? concluidos.map(buildPedidoCard).join('') : emptyState('Nenhuma compra concluída ainda.');
+        todosEl.innerHTML = todos.length ? todos.map(buildPedidoCard).join('') : emptyState('Você ainda não realizou nenhuma compra.');
+
+        if (pendentes.length > 0) {
+            var b = document.getElementById('badge-pendentes');
+            if (b) { b.textContent = pendentes.length; b.style.display = 'inline-flex'; }
+        }
+        if (concluidos.length > 0) {
+            var bc = document.getElementById('badge-concluidos');
+            if (bc) { bc.textContent = concluidos.length; bc.style.display = 'inline-flex'; }
+        }
+    }
+
+    /* ============================================================
+       HISTÓRICO — inline
+       ============================================================ */
+    async function initHistorico() {
+        var el = document.getElementById('historico-content');
+        try {
+            var res = await fetch('/historico/cliente/json', { credentials:'include' });
+            if (!res.ok) { el.innerHTML = '<p class="gami-aviso">Não foi possível carregar o histórico.</p>'; return; }
+            var logs = await res.json();
+            if (logs.length === 0) { el.innerHTML = '<p class="gami-aviso">Nenhuma atividade registrada.</p>'; return; }
+            el.innerHTML = '<table class="audit-table"><thead><tr>' +
+                '<th>Data/Hora</th><th>Ação</th><th>Detalhes</th>' +
+                '</tr></thead><tbody>' +
+                logs.map(function(l){
+                    return '<tr><td class="audit-data">' + (l.dataHora||'—') + '</td>' +
+                        '<td><span class="audit-acao">' + (l.acao||'—') + '</span></td>' +
+                        '<td>' + (l.detalhes||'') + '</td></tr>';
+                }).join('') +
+                '</tbody></table>';
+        } catch(e) {
+            el.innerHTML = '<p class="gami-aviso">Erro ao carregar histórico.</p>';
+        }
+    }
+
+    /* ============================================================
+       CARTEIRA — inline (replaces wallet.js)
+       ============================================================ */
+    var cwInterval;
+
+    function initCarteira() {
+        cwCarregarSaldo();
+        cwCarregarHistorico();
+
+        var metodo = document.getElementById('metodoPagamento');
+        var secCartao = document.getElementById('sectionCartao');
+        if (metodo && secCartao) {
+            metodo.addEventListener('change', function() {
+                secCartao.style.display = this.value === 'PIX' ? 'none' : '';
+            });
+        }
+    }
+
+    async function cwCarregarSaldo() {
+        try {
+            var res = await fetch('/clientes/meu-perfil-json', { credentials:'include' });
+            if (!res.ok) return;
+            var c = await res.json();
+            var el = document.getElementById('displaySaldo');
+            if (el) el.textContent = (c.saldoTokens||0).toFixed(2);
+            var navEl = document.getElementById('navSaldo');
+            if (navEl) navEl.textContent = 'T$ ' + (c.saldoTokens||0).toFixed(2);
+        } catch(_) {}
+    }
+
+    async function cwCarregarHistorico() {
+        var tbody = document.getElementById('lista-transacoes');
+        if (!tbody) return;
+        try {
+            var res = await fetch('/api/tokens/historico', { credentials:'include' });
+            if (!res.ok) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1rem;color:#7a6e65">Nenhuma transação.</td></tr>'; return; }
+            var transacoes = await res.json();
+            if (transacoes.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1rem;color:#7a6e65">Nenhuma transação ainda.</td></tr>'; return; }
+            tbody.innerHTML = transacoes.map(function(t) {
+                return '<tr><td>' + new Date(t.dataHora).toLocaleString('pt-BR') + '</td>' +
+                    '<td class="cw-valor">T$ ' + (t.valor||0).toFixed(2) + '</td>' +
+                    '<td><span class="cw-tag">' + (t.metodoPagamento||'—') + '</span></td>' +
+                    '<td>' + (t.finalCartao ? '****' + t.finalCartao : '—') + '</td></tr>';
+            }).join('');
+        } catch(e) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1rem;color:#722f37">Erro ao carregar histórico.</td></tr>';
+        }
+    }
+
+    async function cwEfetuarCompra(e) {
+        e.preventDefault();
+        var btn = document.getElementById('btnComprar');
+        var valor = document.getElementById('valor').value;
+        var metodo = document.getElementById('metodoPagamento').value;
+        var cartao = document.getElementById('numCartao').value;
+        if (!valor || parseFloat(valor) <= 0) { alert('Informe um valor válido.'); return; }
+        btn.disabled = true; btn.innerHTML = 'Processando...';
+        try {
+            var res = await fetch('/api/tokens/comprar', {
+                method:'POST', credentials:'include',
+                headers:{ 'Content-Type':'application/json' },
+                body: JSON.stringify({ valor: parseFloat(valor), metodoPagamento: metodo, numeroCartao: metodo === 'CARTAO' ? cartao : null })
+            });
+            var data = await res.json();
+            if (res.ok) {
+                if (data.qrCodeBase64) {
+                    document.getElementById('cwImgQrCode').src = data.qrCodeBase64;
+                    document.getElementById('cwTextoPix').value = data.pixCopiaECola || '';
+                    document.getElementById('cwModalPix').classList.add('active');
+                    cwIniciarVerificacao(data.pagamentoId);
+                } else {
+                    await cwCarregarSaldo();
+                    await cwCarregarHistorico();
+                    alert('Sucesso! Tokens adicionados ao seu saldo.');
+                    document.getElementById('valor').value = '';
+                }
+            } else {
+                alert('Erro: ' + (data.message || 'Verifique os dados e tente novamente.'));
+            }
+        } catch(err) {
+            alert('Erro de conexão. Tente novamente.');
+        } finally {
+            btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check-double"></i> Confirmar e Pagar';
+        }
+    }
+
+    function cwCopyPix() {
+        var inp = document.getElementById('cwTextoPix');
+        inp.select();
+        navigator.clipboard.writeText(inp.value).then(function(){ alert('Código PIX copiado!'); }).catch(function(){ alert('Copie manualmente: ' + inp.value); });
+    }
+
+    function cwFecharModal() {
+        document.getElementById('cwModalPix').classList.remove('active');
+        if (cwInterval) clearInterval(cwInterval);
+        cwCarregarSaldo();
+        cwCarregarHistorico();
+    }
+
+    function cwIniciarVerificacao(pagamentoId) {
+        if (cwInterval) clearInterval(cwInterval);
+        cwInterval = setInterval(async function() {
+            try {
+                var res = await fetch('/api/tokens/verificar-pagamento/' + pagamentoId, { credentials:'include' });
+                var data = await res.json();
+                if (data.status === 'APROVADO') {
+                    clearInterval(cwInterval);
+                    document.getElementById('cwModalPix').classList.remove('active');
+                    alert('Pagamento confirmado! Seus tokens já estão disponíveis.');
+                    cwCarregarSaldo();
+                    cwCarregarHistorico();
+                }
+            } catch(_) {}
+        }, 3000);
+    }
+
+    async function cwSimularWebhook() {
+        var fullCode = document.getElementById('cwTextoPix').value;
+        var match = fullCode.match(/PX-\d+/);
+        var pagId = match ? match[0] : null;
+        if (!pagId) { alert('ID de pagamento não encontrado.'); return; }
+        try {
+            await fetch('/api/tokens/simular-webhook/' + pagId, { credentials:'include' });
+        } catch(_) {}
+    }
 </script>
 
 </body>

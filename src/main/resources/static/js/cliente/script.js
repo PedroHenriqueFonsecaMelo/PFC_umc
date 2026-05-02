@@ -28,6 +28,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 7. Validação visual de senha no cadastro
     initValidacaoSenha();
+
+    // 8. Data de nascimento: impede datas futuras e exibe aviso se menor de 18 anos
+    initDataNascimento();
 });
 
 /* ============================================================
@@ -58,6 +61,86 @@ function atualizarReq(id, valido) {
     const texto = el.textContent.replace(/^[✓✗] /, '');
     el.textContent = (valido ? '✓ ' : '✗ ') + texto;
     el.style.color = valido ? '#2e7d32' : '#c62828';
+}
+
+/* ============================================================
+   DATA DE NASCIMENTO — máscara DD/MM/AAAA, valida data futura e menor de 18
+   ============================================================ */
+
+function initDataNascimento() {
+    const campo = document.getElementById('datanasc');
+    if (!campo) return;
+
+    // Converte valor inicial de YYYY-MM-DD (salvo pelo date picker antigo) para DD/MM/AAAA
+    if (/^\d{4}-\d{2}-\d{2}$/.test(campo.value)) {
+        const [y, m, d] = campo.value.split('-');
+        campo.value = `${d}/${m}/${y}`;
+    }
+
+    campo.addEventListener('input', (e) => {
+        // Máscara automática DD/MM/AAAA
+        let v = e.target.value.replace(/\D/g, '').slice(0, 8);
+        if (v.length > 4) v = v.replace(/(\d{2})(\d{2})(\d{0,4})/, '$1/$2/$3');
+        else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,2})/, '$1/$2');
+        e.target.value = v;
+
+        validarDataNascimento();
+    });
+
+    campo.addEventListener('blur', validarDataNascimento);
+}
+
+function validarDataNascimento() {
+    const campo = document.getElementById('datanasc');
+    const avisoFutura = document.getElementById('aviso-data-futura');
+    const avisoIdade  = document.getElementById('aviso-menor-idade');
+    if (!campo || !avisoFutura || !avisoIdade) return;
+
+    // Oculta ambos por padrão
+    avisoFutura.style.display = 'none';
+    avisoIdade.style.display  = 'none';
+
+    const val = campo.value;
+    if (!val || val.length < 10) return;
+
+    // Interpreta DD/MM/AAAA
+    const [dia, mes, ano] = val.split('/').map(Number);
+    if (!dia || !mes || !ano || ano < 1000) return;
+
+    const nasc = new Date(ano, mes - 1, dia);
+    // Verifica se a data é válida (ex: 31/02 seria inválido)
+    if (nasc.getDate() !== dia || nasc.getMonth() !== mes - 1) return;
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    if (nasc >= hoje) {
+        avisoFutura.style.display = 'block';
+        return;
+    }
+
+    // Calcula idade
+    let idade = hoje.getFullYear() - nasc.getFullYear();
+    const diffMes = hoje.getMonth() - nasc.getMonth();
+    if (diffMes < 0 || (diffMes === 0 && hoje.getDate() < nasc.getDate())) idade--;
+
+    if (idade < 18) avisoIdade.style.display = 'block';
+}
+
+/* ============================================================
+   TOGGLE SENHA — olho para mostrar/ocultar
+   ============================================================ */
+
+const SVG_OLHO_ABERTO = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const SVG_OLHO_FECHADO = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+
+function toggleSenha(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const mostrar = input.type === 'password';
+    input.type = mostrar ? 'text' : 'password';
+    btn.innerHTML = mostrar ? SVG_OLHO_FECHADO : SVG_OLHO_ABERTO;
+    btn.setAttribute('aria-label', mostrar ? 'Ocultar senha' : 'Mostrar senha');
 }
 
 /* ============================================================

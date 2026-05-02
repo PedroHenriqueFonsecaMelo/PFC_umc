@@ -56,10 +56,10 @@ public class Cliente {
     private String datanasc;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Genero gen;
 
-    @Column(nullable = false, unique = true, length = 14)
+    @Column(nullable = true, unique = true, length = 14)
     private String cpf;
 
     @Column(nullable = false, unique = true)

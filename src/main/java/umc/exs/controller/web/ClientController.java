@@ -3,6 +3,7 @@ package umc.exs.controller.web;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -100,7 +101,7 @@ public class ClientController {
 
         ClienteDTO cliente = clienteOpt.get();
         authHelper.authenticateAndSetCookie(cliente.getEmail(), cliente.getId(), response, "LOGIN_SUCESSO");
-        return "redirect:/";
+        return "redirect:/clientes/meu-perfil";
     }
 
     @GetMapping("/sair")
@@ -124,6 +125,16 @@ public class ClientController {
 
         model.addAttribute("cliente", clienteDTO);
         return "cliente/homepage";
+    }
+
+    @GetMapping("/meu-perfil-json")
+    @ResponseBody
+    public ResponseEntity<?> perfilJson(@AuthenticationPrincipal UserDetails user) {
+        if (user == null)
+            return ResponseEntity.status(401).build();
+        return clienteService.buscarClientePorEmail(user.getUsername())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/foto-perfil")
@@ -229,6 +240,22 @@ public class ClientController {
         }
         model.addAttribute("resetData", new SenhaResetDTO(token, null, null));
         return "cliente/reset_senha";
+    }
+
+    @PostMapping("/alterar-senha-perfil")
+    public String alterarSenhaPerfil(
+            @RequestParam String senhaAtual,
+            @RequestParam String novaSenha,
+            @RequestParam String confirmarSenha,
+            @AuthenticationPrincipal UserDetails user,
+            RedirectAttributes ra) {
+        try {
+            clienteService.alterarSenhaLogado(user.getUsername(), senhaAtual, novaSenha, confirmarSenha);
+            ra.addFlashAttribute("sucesso", "Senha alterada com sucesso!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("erro", e.getMessage());
+        }
+        return "redirect:/clientes/meu-perfil";
     }
 
     @PostMapping("/alterar-senha")

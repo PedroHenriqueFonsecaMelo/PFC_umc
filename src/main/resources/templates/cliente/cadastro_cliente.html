@@ -62,46 +62,38 @@
                     <div class="form-group-2">
                         <label for="datanasc">Data de Nascimento:</label>
                         <input
-                            type="date"
+                            type="text"
                             id="datanasc"
                             name="datanasc"
                             required
+                            maxlength="10"
+                            placeholder="DD/MM/AAAA"
+                            autocomplete="off"
                             th:value="${cliente != null && cliente.datanasc != null ? cliente.datanasc : ''}"
                         />
+                        <p id="aviso-data-futura" class="mensagem erro" style="display:none; margin-top:6px;">
+                            Data inválida: essa data ainda não aconteceu.
+                        </p>
+                        <p id="aviso-menor-idade" class="mensagem erro" style="display:none; margin-top:6px;">
+                            Atenção: é necessário ser maior de 18 anos para se cadastrar.
+                        </p>
                     </div>
 
+                    <!--
+                    GÊNERO REMOVIDO DO CADASTRO — campo comentado para referência futura
                     <div class="form-group-2">
                         <label for="gen">Gênero:</label>
                         <select id="gen" name="gen" required>
-                            <option
-                                value
-                                th:if="${cliente == null or cliente.gen == null}"
-                                selected
-                                hidden
-                            >
-                                Selecione
-                            </option>
-                            <option
-                                value="M"
-                                th:selected="${cliente != null and cliente.gen == 'M'}"
-                            >
-                                M - Masculino
-                            </option>
-                            <option
-                                value="F"
-                                th:selected="${cliente != null and cliente.gen == 'F'}"
-                            >
-                                F - Feminino
-                            </option>
-                            <option
-                                value="OUTRO"
-                                th:selected="${cliente != null and cliente.gen == 'OUTRO'}"
-                            >
-                                Outro
-                            </option>
+                            <option value selected hidden>Selecione</option>
+                            <option value="M">M - Masculino</option>
+                            <option value="F">F - Feminino</option>
+                            <option value="OUTRO">Outro</option>
                         </select>
                     </div>
+                    -->
 
+                    <!--
+                    CPF REMOVIDO DO CADASTRO — campo comentado para referência futura
                     <div class="form-group-2">
                         <label for="cpf">CPF:</label>
                         <input
@@ -109,20 +101,27 @@
                             id="cpf"
                             name="cpf"
                             required
-                            th:value="${cliente != null && cliente.cpf != null ? cliente.cpf : ''}"
                             placeholder="Apenas números, 11 dígitos"
                         />
                     </div>
+                    -->
 
                     <div class="form-group-2">
                         <label for="senha">Senha:</label>
-                        <input
-                            type="password"
-                            id="senha"
-                            name="senha"
-                            required
-                            placeholder="Mínimo 8 caracteres"
-                        />
+                        <div class="input-senha-wrapper">
+                            <input
+                                type="password"
+                                id="senha"
+                                name="senha"
+                                required
+                                placeholder="Mínimo 8 caracteres"
+                            />
+                            <button type="button" class="btn-toggle-senha" aria-label="Mostrar senha" onclick="toggleSenha('senha', this)">
+                                <svg id="ico-senha" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
                         <ul id="senha-requisitos" style="display:none; list-style:none; padding:6px 0 0; margin:0; font-size:0.82rem; font-family:'DM Sans',sans-serif">
                             <li id="req-tamanho">✗ 8 a 20 caracteres</li>
                             <li id="req-maiuscula">✗ Uma letra maiúscula (A-Z)</li>
@@ -134,13 +133,20 @@
                     </div>
                     <div class="form-group-2">
                         <label for="confirmarSenha">Confirmar Senha:</label>
-                        <input
-                            type="password"
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            required
-                            placeholder="Repita a Senha"
-                        />
+                        <div class="input-senha-wrapper">
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                required
+                                placeholder="Repita a Senha"
+                            />
+                            <button type="button" class="btn-toggle-senha" aria-label="Mostrar confirmar senha" onclick="toggleSenha('confirmPassword', this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <hr />

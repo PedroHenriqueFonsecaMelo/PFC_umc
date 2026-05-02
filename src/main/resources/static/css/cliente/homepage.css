@@ -285,6 +285,18 @@ body {
   color: #2c241b;
 }
 
+a.tab-btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+a.tab-btn:hover {
+  color: #2c241b;
+  border-bottom-color: rgba(114, 47, 55, 0.4);
+}
+
 /* ============================================================
    TAB PANELS
    ============================================================ */
@@ -643,6 +655,55 @@ legend {
 }
 
 /* ============================================================
+   ALTERAR SENHA — card dedicado
+   ============================================================ */
+.senha-card {
+  margin-top: 1.5rem;
+  border-top: 3px solid var(--accent);
+}
+
+.senha-instrucao {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-style: italic;
+  margin-bottom: 1.25rem;
+}
+
+.senha-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.input-senha-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-senha-wrapper input {
+  width: 100%;
+  padding-right: 2.8rem;
+}
+
+.btn-toggle-senha {
+  position: absolute;
+  right: 0.7rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.btn-toggle-senha:hover {
+  color: var(--ink);
+}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width: 680px) {
@@ -666,7 +727,8 @@ legend {
   .panel-card {
     padding: 1.25rem 1rem;
   }
-  .form-grid {
+  .form-grid,
+  .senha-form-grid {
     grid-template-columns: 1fr;
   }
   .tab-btn {

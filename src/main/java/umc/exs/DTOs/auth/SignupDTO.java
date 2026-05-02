@@ -20,8 +20,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class SignupDTO {
 
-    @NotBlank(message = "O CPF é obrigatório.")
-    @Pattern(regexp = "\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}", message = "CPF inválido. Use 000.000.000-00 ou apenas números.")
+    // @NotBlank(message = "O CPF é obrigatório.")
+    // @Pattern(regexp = "\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}", message = "CPF inválido. Use 000.000.000-00 ou apenas números.")
     private String cpf;
 
     @NotBlank(message = "O e-mail é obrigatório.")
@@ -40,7 +40,7 @@ public class SignupDTO {
     @NotBlank(message = "A data de nascimento é obrigatória.")
     private String datanasc;
 
-    @NotBlank(message = "O gênero deve ser informado.")
+    // @NotBlank(message = "O gênero deve ser informado.")
     private String gen;
 
     @AssertTrue(message = "Você deve aceitar os termos de uso.")

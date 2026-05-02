@@ -85,7 +85,7 @@ public class IndexController {
 
         ClienteDTO cliente = clienteOpt.get();
         authHelper.authenticateAndSetCookie(cliente.getEmail(), cliente.getId(), response, "LOGIN_SUCESSO");
-        return "redirect:/";
+        return "redirect:/clientes/meu-perfil";
     }
 
     @GetMapping("/shop")

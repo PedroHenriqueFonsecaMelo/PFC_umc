@@ -100,7 +100,6 @@ async function carregarNavUsuario() {
     const cliente = await res.json();
     const primeiroNome = (cliente.nome || "").split(" ")[0];
 
-    const saldo = (cliente.saldoTokens != null) ? Number(cliente.saldoTokens).toFixed(2) : "0.00";
     const fotoHtml = cliente.fotoPerfil
       ? `<img src="${cliente.fotoPerfil}" style="width:84px;height:84px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:.4rem;">`
       : "";
@@ -108,7 +107,8 @@ async function carregarNavUsuario() {
     document.getElementById("navGuest").style.display = "none";
     document.getElementById("navUser").style.display = "flex";
     document.getElementById("navMinhaConta").href = "/clientes/meu-perfil";
-    document.getElementById("btnQueroVender").href = "/livros/vender";
+    const btn = document.getElementById("btnQueroVender");
+    if (btn) btn.href = "/livros/vender";
   } catch (_) {}
 }
 

@@ -98,4 +98,35 @@ public class ClienteRepositoryService {
 
         clienteRepository.save(cliente);
     }
+
+    @Transactional
+    public void deletarEnderecoDoCliente(@NonNull Long clienteId, @NonNull Long enderecoId) {
+
+        Cliente cliente = clienteRepository.findById(clienteId)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado com ID: " + clienteId));
+
+        boolean removido = cliente.getEnderecos().removeIf(e -> e.getId().equals(enderecoId));
+
+        if (!removido) {
+            throw new IllegalArgumentException("Endereço não encontrado ou não pertence a este cliente.");
+        }
+
+        clienteRepository.save(cliente);
+        log.info("Endereço ID {} removido do cliente {}", enderecoId, cliente.getEmail());
+    }
+
+    @Transactional
+    public void deletarCartaoDoCliente(@NonNull Long clienteId, @NonNull Long cartaoId) {
+
+        Cliente cliente = buscarPorId(clienteId);
+
+        boolean removido = cliente.getCartoes().removeIf(c -> c.getId().equals(cartaoId));
+
+        if (!removido) {
+            throw new IllegalArgumentException("Cartão não encontrado ou não pertence a este cliente.");
+        }
+
+        clienteRepository.save(cliente);
+        log.info("Cartão ID {} removido com sucesso do cliente {}", cartaoId, cliente.getEmail());
+    }
 }

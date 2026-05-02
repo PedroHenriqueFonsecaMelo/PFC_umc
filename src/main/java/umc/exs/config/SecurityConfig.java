@@ -98,7 +98,7 @@ public class SecurityConfig {
                                                 .anyRequest().authenticated())
                                 .logout(logout -> logout
                                                 .logoutUrl("/clientes/sair")
-                                                .deleteCookies("jwt")
+                                                .deleteCookies("token")
                                                 .logoutSuccessUrl("/").permitAll());
 
                 // Adição dos Filtros de JWT e Rate Limit

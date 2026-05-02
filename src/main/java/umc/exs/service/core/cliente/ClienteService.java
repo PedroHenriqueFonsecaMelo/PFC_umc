@@ -1,9 +1,12 @@
 package umc.exs.service.core.cliente;
 
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +18,7 @@ import umc.exs.DTOs.auth.SignupDTO;
 import umc.exs.DTOs.user.CartaoDTO;
 import umc.exs.DTOs.user.ClienteDTO;
 import umc.exs.DTOs.user.EnderecoDTO;
+import umc.exs.mappers.ClienteMapper;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.service.log.LogAuditoriaService;
@@ -28,6 +32,9 @@ public class ClienteService {
     private final ClienteDomainService domainService;
     private final ClienteRepositoryService repositoryService;
     private final LogAuditoriaService auditoria;
+
+    private final PasswordEncoder passwordEncoder;
+    private final ClienteMapper clienteMapper;
 
     @Transactional
     public ClienteDTO salvarCliente(SignupDTO signupDTO) {
@@ -83,8 +90,33 @@ public class ClienteService {
 
     @Transactional
     public void deletarContaPropria(String email) {
+
         Cliente cliente = buscarEntidadePorEmail(email);
-        this.deletarClientePorId(cliente.getId());
+        Long id = cliente.getId();
+
+        String charPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%*.";
+        String senhaAleatoria = new SecureRandom().ints(50, 0, charPool.length())
+                .mapToObj(i -> String.valueOf(charPool.charAt(i)))
+                .collect(Collectors.joining());
+
+        cliente.setEmail(passwordEncoder.encode("anonimo_" + id + "@exs.com.br"));
+        cliente.setNome("Usuário Excluído");
+        cliente.setCpf("000.000.000-00");
+        cliente.setFotoPerfil(null);
+        cliente.setSaldoTokens(0.0);
+        cliente.setSenha(passwordEncoder.encode(senhaAleatoria));
+        cliente.setTentativas(10);
+        cliente.setBloqueada(true);
+
+        if (cliente.getCartoes() != null) {
+            cliente.getCartoes().clear();
+        }
+        if (cliente.getEnderecos() != null) {
+            cliente.getEnderecos().clear();
+        }
+
+        repositoryService.salvar(cliente);
+        log.info("Conta do cliente ID {} anonimizada com sucesso por solicitação do usuário.", id);
     }
 
     @Transactional
@@ -165,16 +197,16 @@ public class ClienteService {
     }
 
     public void validarNovoCliente(SignupDTO dto) {
-        if (!FieldValidation.validarCampos(dto))
-            throw new IllegalArgumentException("Campos obrigatórios ausentes.");
+        // if (!FieldValidation.validarCampos(dto))
+        //     throw new IllegalArgumentException("Campos obrigatórios ausentes.");
 
         String safeEmail = FieldValidation.sanitizeEmail(dto.getEmail());
         if (repositoryService.encontrarPorEmail(safeEmail).isPresent())
             throw new IllegalArgumentException("E-mail já cadastrado.");
         dto.setEmail(safeEmail);
 
-        if (!FieldValidation.isValidCPF(dto.getCpf()))
-            throw new IllegalArgumentException("CPF inválido.");
+        // if (!FieldValidation.isValidCPF(dto.getCpf()))
+        //     throw new IllegalArgumentException("CPF inválido.");
 
         LocalDate dataNasc = FieldValidation.isValidBirthDate(dto.getDatanasc());
         if (dataNasc == null || !FieldValidation.isOver18(dataNasc))
@@ -194,7 +226,27 @@ public class ClienteService {
         }
     }
 
+    @Transactional
+    public void alterarSenhaLogado(String email, String senhaAtual, String novaSenha, String confirmarSenha) {
+        if (!novaSenha.equals(confirmarSenha)) {
+            throw new IllegalArgumentException("As novas senhas não conferem.");
+        }
+        if (!FieldValidation.isValidPassword(novaSenha)) {
+            throw new IllegalArgumentException("A nova senha não atende aos requisitos de segurança.");
+        }
+        domainService.alterarSenhaComVerificacao(email, senhaAtual, novaSenha);
+        auditoria.registrarLog("ALTERACAO_SENHA", null, email, "Senha alterada pelo usuário logado.");
+    }
+
     public boolean validarTokenRecuperacao(String token) {
         return domainService.validarToken(token);
+    }
+
+    public void deletarEnderecoDoCliente(@NonNull Long clienteId, @NonNull Long enderecoId) {
+        repositoryService.deletarEnderecoDoCliente(clienteId, enderecoId);
+    }
+
+    public void deletarCartaoDoCliente(@NonNull Long clienteId, @NonNull Long enderecoId) {
+        repositoryService.deletarCartaoDoCliente(clienteId, enderecoId);
     }
 }
