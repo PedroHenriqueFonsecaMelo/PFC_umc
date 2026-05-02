@@ -1,0 +1,865 @@
+/* ============================================================
+   forum.css — Módulo Fórum · Bibliotroca
+   ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap");
+
+:root {
+  --ink: #2c241b;
+  --paper: #f9f6f0;
+  --cream: #ede8df;
+  --accent: #722f37;
+  --forest: #4a5d23;
+  --white: #ffffff;
+  --muted: #7a6e65;
+  --border: rgba(44, 36, 27, 0.15);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "DM Sans", sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ── TOP BAR ────────────────────────────────────────────────── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 5vw;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.topbar-brand {
+  font-family: "Playfair Display", serif;
+  font-size: 2.2rem;
+  font-style: italic;
+  color: var(--paper);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.topbar-link {
+  background: transparent;
+  border: 1.5px solid rgba(249, 246, 240, 0.3);
+  border-radius: 6px;
+  color: rgba(249, 246, 240, 0.8);
+  padding: 0.35rem 0.85rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.topbar-link:hover,
+.topbar-link.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+
+.topbar-link.danger:hover {
+  background: #8b0000;
+  border-color: #8b0000;
+}
+
+/* ── MAIN WRAPPER ───────────────────────────────────────────── */
+.forum-wrapper {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 5vw;
+}
+
+/* ── PAGE HEADER ────────────────────────────────────────────── */
+.forum-header {
+  margin-bottom: 2rem;
+}
+
+.forum-title {
+  font-family: "Playfair Display", serif;
+  font-size: 2rem;
+  color: var(--ink);
+  margin-bottom: 0.25rem;
+}
+
+.forum-subtitle {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* ── ALERTS ─────────────────────────────────────────────────── */
+.alert {
+  padding: 0.75rem 1rem;
+  border: 1px solid;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.alert-success {
+  background: rgba(74, 93, 35, 0.08);
+  border-color: rgba(74, 93, 35, 0.3);
+  color: var(--forest);
+}
+.alert-danger {
+  background: rgba(114, 47, 55, 0.08);
+  border-color: rgba(114, 47, 55, 0.3);
+  color: var(--accent);
+}
+
+/* ── TOOLBAR (busca + filtro + novo tópico) ─────────────────── */
+.forum-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.search-form {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 160px;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.875rem;
+  color: var(--ink);
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--ink);
+}
+
+.search-select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.875rem;
+  color: var(--ink);
+  cursor: pointer;
+  outline: none;
+}
+
+.btn-buscar {
+  padding: 0.5rem 1rem;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+}
+
+.btn-novo-topico {
+  height: 36px;
+}
+
+.btn-buscar:hover {
+  background: #3d3127;
+}
+
+.btn-novo-topico {
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-novo-topico:hover {
+  background: #5a1f26;
+}
+
+/* ── CATEGORY TABS ──────────────────────────────────────────── */
+.category-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.category-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.cat-tab {
+  padding: 0.55rem 1.1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.cat-tab:hover {
+  color: var(--ink);
+}
+.cat-tab.active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+/* ── TOPIC LIST ─────────────────────────────────────────────── */
+.topic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.topic-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem 1.5rem;
+  align-items: start;
+  transition: border-color 0.2s;
+}
+
+.topic-card:hover {
+  border-color: rgba(44, 36, 27, 0.35);
+}
+
+.topic-card.resolvido {
+  border-left: 3px solid var(--forest);
+}
+
+.topic-title-link {
+  font-family: "Playfair Display", serif;
+  font-size: 1.05rem;
+  color: var(--ink);
+  text-decoration: none;
+  line-height: 1.35;
+}
+
+.topic-title-link:hover {
+  color: var(--accent);
+}
+
+.topic-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+
+.topic-meta-item {
+  font-size: 0.75rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.category-badge {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: var(--cream);
+}
+
+.badge-RESENHAS {
+  border-color: rgba(114, 47, 55, 0.35);
+  color: var(--accent);
+  background: rgba(114, 47, 55, 0.06);
+}
+.badge-DUVIDAS {
+  border-color: rgba(74, 93, 35, 0.35);
+  color: var(--forest);
+  background: rgba(74, 93, 35, 0.06);
+}
+.badge-RECOMENDACOES {
+  border-color: rgba(44, 36, 27, 0.3);
+  color: #5a4a3a;
+  background: rgba(44, 36, 27, 0.04);
+}
+.badge-GERAL {
+  border-color: var(--border);
+  color: var(--muted);
+  background: var(--cream);
+}
+
+.topic-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  min-width: 80px;
+}
+
+.stat-pill {
+  font-size: 0.72rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.badge-resolvido {
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  background: rgba(74, 93, 35, 0.1);
+  border: 1px solid rgba(74, 93, 35, 0.3);
+  color: var(--forest);
+}
+
+.topic-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--muted);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.topic-empty-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ── PAGINATION ─────────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--ink);
+  font-size: 0.8rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.page-btn:hover {
+  background: var(--cream);
+}
+.page-btn.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── MODAL: CRIAR TÓPICO ────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 36, 27, 0.5);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-title {
+  font-family: "Playfair Display", serif;
+  font-size: 1.3rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.modal-close:hover {
+  color: var(--ink);
+}
+
+/* ── FORMS ──────────────────────────────────────────────────── */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--paper);
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.9rem;
+  color: var(--ink);
+  outline: none;
+  resize: vertical;
+}
+
+.form-control:focus {
+  border-color: var(--ink);
+  background: var(--white);
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  background: var(--accent);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 0.5rem;
+}
+
+.btn-submit:hover {
+  background: #5a1f26;
+}
+
+.form-error {
+  color: var(--accent);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* ── TOPIC DETAIL PAGE ──────────────────────────────────────── */
+.topico-header {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.topico-meta-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.topico-titulo {
+  font-family: "Playfair Display", serif;
+  font-size: 1.6rem;
+  line-height: 1.3;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.badge-solved {
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  background: rgba(74, 93, 35, 0.1);
+  border: 1px solid rgba(74, 93, 35, 0.3);
+  color: var(--forest);
+  white-space: nowrap;
+  align-self: center;
+}
+
+.topico-conteudo {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.topico-stats-bar {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ── REPLY LIST ─────────────────────────────────────────────── */
+.respostas-section {
+  margin-bottom: 2rem;
+}
+
+.respostas-title {
+  font-family: "Playfair Display", serif;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.resposta-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 0.75rem;
+  position: relative;
+}
+
+.resposta-card.melhor-resposta {
+  border-left: 4px solid var(--forest);
+  background: rgba(74, 93, 35, 0.03);
+}
+
+.resposta-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.resposta-autor-avatar {
+  width: 72px;
+  height: 72px;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Playfair Display", serif;
+  font-size: 1.9rem;
+  color: var(--paper);
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.resposta-autor-avatar .forum-avatar-mini-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.forum-avatar-mini {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: "Playfair Display", serif;
+  font-size: 1.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.forum-avatar-mini-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.topic-meta-autor {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.resposta-autor-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.resposta-autor-nome {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.resposta-data {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.resposta-melhor-badge {
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  background: rgba(74, 93, 35, 0.12);
+  border: 1px solid rgba(74, 93, 35, 0.35);
+  color: var(--forest);
+  margin-left: auto;
+}
+
+.resposta-conteudo {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-bottom: 1rem;
+}
+
+.resposta-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn-curtir {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-curtir:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.btn-curtir.liked {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(114, 47, 55, 0.06);
+}
+
+.btn-melhor {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid rgba(74, 93, 35, 0.35);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--forest);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-melhor:hover {
+  background: rgba(74, 93, 35, 0.08);
+}
+.btn-melhor.marcado {
+  background: rgba(74, 93, 35, 0.12);
+}
+
+.btn-admin-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid rgba(114, 47, 55, 0.3);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: auto;
+}
+
+.btn-admin-delete:hover {
+  background: rgba(114, 47, 55, 0.08);
+}
+
+/* ── REPLY FORM ─────────────────────────────────────────────── */
+.reply-form-section {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.reply-form-title {
+  font-family: "Playfair Display", serif;
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+}
+
+.login-prompt {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.login-prompt a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.login-prompt a:hover {
+  text-decoration: underline;
+}
+
+/* ── BACK LINK ──────────────────────────────────────────────── */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+}
+
+.back-link:hover {
+  color: var(--ink);
+}
+
+/* ── RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .forum-wrapper {
+    padding: 1.25rem 4vw;
+  }
+  .topic-card {
+    grid-template-columns: 1fr;
+  }
+  .topic-stats {
+    flex-direction: row;
+    align-items: center;
+  }
+  .topico-titulo {
+    font-size: 1.3rem;
+  }
+  .forum-toolbar {
+    flex-direction: column;
+  }
+  .search-form {
+    width: 100%;
+  }
+  .btn-novo-topico {
+    width: 100%;
+    justify-content: center;
+  }
+  .modal-card {
+    padding: 1.25rem;
+  }
+}

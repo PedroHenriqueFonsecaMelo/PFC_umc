@@ -1,0 +1,472 @@
+/* === VARIÁVEIS DE COR — PALETA VINTAGE BIBLIOTROCA === */
+:root {
+  --ink: #2c241b;
+  --paper: #f9f6f0;
+  --cream: #ede8df;
+  --accent: #722f37;
+  --forest: #4a5d23;
+  --white: #ffffff;
+  --muted: #7a6e65;
+  --border: rgba(44, 36, 27, 0.15);
+}
+
+/* === RESET BÁSICO === */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* === FONTES GOOGLE === */
+/* Importadas via <link> no HTML para melhor performance */
+
+/* === BODY === */
+body {
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* === NAV DE RETORNO === */
+nav.page-nav {
+  background: var(--ink);
+  padding: 0.5rem 5vw;
+  margin-bottom: 0;
+}
+
+nav.page-nav a {
+  color: var(--paper);
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+nav.page-nav a:hover {
+  color: var(--cream);
+}
+
+/* === CONTAINER PRINCIPAL === */
+.container {
+  max-width: 680px;
+  width: 95%;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+/* === CABEÇALHO DA PÁGINA === */
+.page-header {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.page-header h1 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--ink);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.page-header p {
+  font-family: "IM Fell English", Georgia, serif;
+  font-style: italic;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+/* === TÍTULOS INTERNOS === */
+h1 {
+  font-family: "Playfair Display", Georgia, serif;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+/* === SEPARADOR === */
+hr {
+  border: none;
+  border-top: 1px solid rgba(44, 36, 27, 0.12);
+  margin: 1.5rem 0;
+}
+
+/* === MENSAGENS (SUCESSO / ERRO) === */
+.mensagem {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  border: 1px solid;
+}
+
+.mensagem.erro {
+  background: rgba(114, 47, 55, 0.08);
+  border-color: rgba(114, 47, 55, 0.3);
+  color: var(--accent);
+}
+
+.mensagem.sucesso {
+  background: rgba(74, 93, 35, 0.08);
+  border-color: rgba(74, 93, 35, 0.3);
+  color: var(--forest);
+}
+
+/* === FIELDSET / LEGEND === */
+fieldset {
+  border: 1px solid var(--border);
+  padding: 1.25rem;
+  margin: 0;
+}
+
+legend {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 0 0.5rem;
+  width: auto;
+}
+
+/* === GRUPOS DE FORMULÁRIO === */
+.form-group {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group-2 {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* === LABELS === */
+label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+
+/* Overrides para labels dentro de checkboxes */
+.form-group-checkboxes label {
+  font-size: 0.9rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+/* === INPUTS, SELECT, TEXTAREA === */
+input[type="text"],
+input[type="email"],
+input[type="date"],
+input[type="password"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid rgba(44, 36, 27, 0.18);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+  appearance: auto;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="date"]:focus,
+input[type="password"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+}
+
+input[readonly] {
+  background-color: var(--cream);
+  cursor: not-allowed;
+}
+
+/* Compatibilidade com seletores antigos dentro de .form-group e .form-group-2 */
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="date"],
+.form-group input[type="password"],
+.form-group-2 input[type="text"],
+.form-group-2 input[type="email"],
+.form-group-2 input[type="date"],
+.form-group-2 input[type="password"] {
+  width: 100%;
+}
+
+.form-group input:focus,
+.form-group-2 input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.form-group input[readonly],
+.form-group-2 input[readonly] {
+  background-color: var(--cream);
+  cursor: not-allowed;
+}
+
+/* === GRID DE FORMULÁRIO === */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+/* === CHECKBOXES === */
+.form-group-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* === ÁREA ROLÁVEL DE TERMOS === */
+.termos-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 8px;
+  border: 1px solid var(--border);
+  margin: 0.75rem 0;
+}
+
+/* === BOTÕES === */
+.btn {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  background: var(--ink);
+  color: var(--paper);
+  border: 2px solid var(--ink);
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.btn:hover {
+  background: transparent;
+  color: var(--ink);
+}
+
+.btn-primary {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  background: var(--ink);
+  color: var(--paper);
+  border: 2px solid var(--ink);
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: transparent;
+  color: var(--ink);
+}
+
+.btn-secondary {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  background: transparent;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* Links de perigo / ação textual */
+.btn-link-danger,
+.btn-link-danger-2 {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.9rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-link-danger:hover,
+.btn-link-danger-2:hover {
+  text-decoration: underline;
+}
+
+/* Link secundário bordô */
+.btn-link-secondary {
+  color: var(--accent);
+  font-size: 0.85rem;
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent);
+  font-family: "DM Sans", sans-serif;
+}
+
+.btn-link-secondary:hover {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+/* === GRUPOS DE AÇÕES === */
+.form-actions-top {
+  margin: 0.75rem 0 1.25rem 0;
+}
+
+.form-actions-bottom {
+  margin-top: 1.25rem;
+}
+
+.form-actions-main {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* === LINKS DE CONTA === */
+.account-links {
+  text-align: center;
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+/* === CARDS INTERNOS (endereços / cartões) === */
+.item-card {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.item-card fieldset {
+  border: none;
+  padding: 0;
+}
+
+.item-card legend {
+  font-size: 1rem;
+}
+
+.novo-item {
+  border-color: var(--accent);
+}
+
+/* === PÁGINAS SIMPLES (acesso negado, etc.) === */
+.content-card-simple {
+  text-align: center;
+  padding: 2.5rem 1.25rem;
+}
+
+.content-card-simple h1 {
+  margin-bottom: 1rem;
+}
+
+.content-card-simple p {
+  font-size: 1.05rem;
+  color: var(--muted);
+  margin-bottom: 1.75rem;
+}
+
+.content-card-simple .account-links {
+  gap: 1.75rem;
+}
+
+/* === DETALHES DE ATUALIZAÇÃO === */
+.update-details {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem auto;
+  max-width: 400px;
+  text-align: left;
+}
+
+.update-details p {
+  font-size: 0.95rem;
+  color: var(--ink);
+  margin-bottom: 0.6rem;
+}
+
+.update-details p:last-child {
+  margin-bottom: 0;
+}
+
+.update-details p strong {
+  color: var(--muted);
+}
+
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+    margin: 0;
+    padding: 1.5rem;
+    box-shadow: none;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-primary,
+  .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .form-actions-main {
+    flex-direction: column;
+  }
+}

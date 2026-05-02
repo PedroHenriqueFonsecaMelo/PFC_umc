@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard · Bibliotroca</title>
+    <link rel="stylesheet" th:href="@{/cliente/homepage.css}" />
+    <link rel="stylesheet" th:href="@{/cliente/nav.css}" />
+</head>
+<body>
+
+<!-- ============================================================
+     TOP BAR
+     ============================================================ -->
+<header class="client-nav">
+    <a th:href="@{/}" class="cn-brand">
+        <span class="cn-dot"></span>Bibliotroca
+    </a>
+    <nav class="cn-links">
+        <a th:href="@{/livros/vitrine}"          class="cn-btn">Vitrine</a>
+        <a th:href="@{/livros/vender}"           class="cn-btn">Vender</a>
+        <a th:href="@{/forum}"                   class="cn-btn">Fórum</a>
+        <a th:href="@{/clientes/lista-desejos}"  class="cn-btn">Lista de Desejos</a>
+        <a th:href="@{/clientes/minhas-compras}" class="cn-btn">Minha Estante</a>
+    </nav>
+    <div class="cn-right">
+        <span class="cn-saldo" id="navSaldo">T$ --</span>
+        <a th:href="@{/clientes/meu-perfil}"     class="cn-btn">Meu Perfil</a>
+        <a th:href="@{/clientes/sair}"           class="cn-btn">Sair</a>
+    </div>
+</header>
+
+<!-- ============================================================
+     MAIN WRAPPER
+     ============================================================ -->
+<div class="dash-wrapper">
+
+    <!-- PROFILE HERO -->
+    <section class="profile-hero">
+        <div class="avatar-wrapper">
+            <div class="avatar-ring" th:if="${cliente != null and cliente.fotoPerfil != null}">
+                <img class="avatar-foto" th:src="${cliente.fotoPerfil}" alt="Foto de perfil" />
+            </div>
+            <div class="avatar-ring" th:if="${cliente == null or cliente.fotoPerfil == null}">
+                <span class="avatar-initial"
+                      th:text="${cliente != null ? cliente.nome.substring(0,1) : '?'}">?</span>
+            </div>
+            <form th:action="@{/clientes/foto-perfil}" method="post"
+                  enctype="multipart/form-data" class="avatar-upload-form">
+                <label class="avatar-upload-btn" title="Alterar foto">
+                    📷
+                    <input type="file" name="foto" accept="image/*"
+                           onchange="this.form.submit()" style="display:none" />
+                </label>
+            </form>
+        </div>
+
+        <div class="profile-meta" style="min-width:160px;">
+            <h1 class="profile-name"
+                th:text="${cliente != null ? cliente.nome : 'Usuário'}">Usuário</h1>
+            <p class="profile-email"
+               th:text="${cliente != null ? cliente.email : ''}"></p>
+        </div>
+
+        <div class="profile-stats">
+            <!-- Token balance: rendered server-side -->
+            <div class="stat-chip stat-tokens">
+                <span class="stat-icon">◈</span>
+                <div>
+                    <span class="stat-label">Saldo</span>
+                    <span class="stat-value"
+                          th:text="${cliente != null ? 'T$ ' + #numbers.formatDecimal(cliente.saldoTokens, 1, 'POINT', 2, 'COMMA') : 'T$ 0,00'}">
+                        T$ 0,00
+                    </span>
+                </div>
+            </div>
+
+            <!-- XP: loaded async via JS -->
+            <div class="stat-chip stat-xp">
+                <span class="stat-icon">⚡</span>
+                <div>
+                    <span class="stat-label">XP Total</span>
+                    <span class="stat-value" id="hero-xp-value">—</span>
+                </div>
+            </div>
+
+            <!-- Level: loaded async via JS -->
+            <div class="stat-chip stat-nivel">
+                <span id="hero-badge" class="stat-icon">🔰</span>
+                <div>
+                    <span class="stat-label">Nível</span>
+                    <span class="stat-value" id="hero-nivel-value">—</span>
+                </div>
+            </div>
+
+            <!-- Wishlist count: loaded async via JS -->
+            <div class="stat-chip stat-desejos" style="cursor:pointer;"
+                 onclick="window.location.href='/clientes/lista-desejos'"
+                 title="Ver minha lista de desejos">
+                <span class="stat-icon">♡</span>
+                <div>
+                    <span class="stat-label">Desejos</span>
+                    <span class="stat-value" id="hero-desejos-value">—</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ALERT MESSAGES -->
+    <div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
+    <div th:if="${erro}"    class="alert alert-danger"  th:text="${erro}"></div>
+
+    <!-- ============================================================
+         TAB BAR
+         ============================================================ -->
+    <nav class="tab-bar">
+        <button class="tab-btn active" data-tab="perfil">
+            <span class="tab-icon">◉</span> Perfil
+        </button>
+        <button class="tab-btn" data-tab="enderecos">
+            <span class="tab-icon">⌖</span> Endereços
+        </button>
+        <button class="tab-btn" data-tab="cartoes">
+            <span class="tab-icon">▣</span> Cartões
+        </button>
+        <button class="tab-btn" data-tab="ranking">
+            <span class="tab-icon">▲</span> Ranking
+        </button>
+        <button class="tab-btn" data-tab="historico">
+            <span class="tab-icon">≡</span> Histórico
+        </button>
+    </nav>
+
+    <!-- ============================================================
+         FORM — wraps panels: Perfil, Endereços, Cartões
+         ============================================================ -->
+    <div th:if="${cliente != null}">
+        <form th:action="@{/clientes/atualizar}" method="post" th:object="${cliente}">
+            <input type="hidden" th:field="*{id}" />
+
+            <!-- ------------------------------------------------
+                 PANEL 1 · DADOS PESSOAIS
+                 ------------------------------------------------ -->
+            <div id="panel-perfil" class="tab-panel active">
+                <div class="panel-card">
+                    <h2 class="panel-title">
+                        <span class="panel-title-accent">◉</span> Dados Pessoais
+                    </h2>
+                    <div class="form-grid">
+                        <div class="form-group-2">
+                            <label>Nome</label>
+                            <input type="text" th:field="*{nome}" required />
+                        </div>
+                        <div class="form-group-2">
+                            <label>E-mail</label>
+                            <input type="email" th:field="*{email}" required />
+                        </div>
+                        <div class="form-group-2">
+                            <label>CPF</label>
+                            <input type="text" th:field="*{cpf}" readonly />
+                        </div>
+                        <div class="form-group-2">
+                            <label>Data de Nascimento</label>
+                            <input type="date" th:field="*{datanasc}" required />
+                        </div>
+                        <div class="form-group-2">
+                            <label>Gênero</label>
+                            <input type="text" th:field="*{gen}" />
+                        </div>
+                        <div class="form-group-2">
+                            <label>Nova Senha</label>
+                            <input type="password" th:field="*{senha}"
+                                   placeholder="Deixe em branco para manter" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-submit-row">
+                    <button type="submit" class="btn-tech-primary">▶ Salvar Alterações</button>
+                </div>
+            </div>
+
+            <!-- ------------------------------------------------
+                 PANEL 2 · ENDEREÇOS
+                 ------------------------------------------------ -->
+            <div id="panel-enderecos" class="tab-panel">
+                <div class="add-item-row">
+                    <button type="button" onclick="adicionarEndereco()" class="btn-tech-secondary">
+                        + Adicionar Endereço
+                    </button>
+                </div>
+
+                <div id="enderecos-list-container">
+                    <div th:each="endereco, iStat : *{enderecos}"
+                         class="endereco-item item-card">
+                        <fieldset>
+                            <legend th:text="'Endereço ' + (${iStat.index} + 1)">Endereço 1</legend>
+                            <input type="hidden"
+                                   th:field="*{enderecos[__${iStat.index}__].id}" />
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>CEP</label>
+                                    <input type="text" id="cep-${iStat.index}"
+                                           th:field="*{enderecos[__${iStat.index}__].cep}" onblur="buscarCep(${iStat.index})" />
+
+                                </div>
+                                <div class="form-group">
+                                    <label>Rua</label>
+                                    <input type="text" id="rua-${iStat.index}"th:field="*{enderecos[__${iStat.index}__].rua}" />                                 </div>
+                                <div class="form-group">
+                                    <label>Número</label>
+                                    <input type="text" id="numero-${iStat.index}"th:field="*{enderecos[__${iStat.index}__].numero}" /></div>
+                                <div class="form-group">
+                                    <label>Bairro</label>
+                                    <input type="text" id="bairro-${iStat.index}"th:field="*{enderecos[__${iStat.index}__].bairro}" /> </div>
+                                <div class="form-group">
+                                    <label>Cidade</label>
+                                    <input type="text" id="cidade-${iStat.index}"th:field="*{enderecos[__${iStat.index}__].cidade}" /></div>
+                                <div class="form-group">
+                                    <label>Estado</label>
+                                    <select id="estado-${iStat.index}" th:field="*{enderecos[__${iStat.index}__].estado}">
+                                        option value="">Selecione o estado</option>
+                                        <option value="AC">Acre - AC</option>
+                                        <option value="AL">Alagoas - AL</option>
+                                        <option value="AP">Amapá - AP</option>
+                                        <option value="AM">Amazonas - AM</option>
+                                        <option value="BA">Bahia - BA</option>
+                                        <option value="CE">Ceará - CE</option>
+                                        <option value="DF">Distrito Federal - DF</option>
+                                        <option value="ES">Espírito Santo - ES</option>
+                                        <option value="GO">Goiás - GO</option>
+                                        <option value="MA">Maranhão - MA</option>
+                                        <option value="MT">Mato Grosso - MT</option>
+                                        <option value="MS">Mato Grosso do Sul - MS</option>
+                                        <option value="MG">Minas Gerais - MG</option>
+                                        <option value="PA">Pará - PA</option>
+                                        <option value="PB">Paraíba - PB</option>
+                                        <option value="PR">Paraná - PR</option>
+                                        <option value="PE">Pernambuco - PE</option>
+                                        <option value="PI">Piauí - PI</option>
+                                        <option value="RJ">Rio de Janeiro - RJ</option>
+                                        <option value="RN">Rio Grande do Norte - RN</option>
+                                        <option value="RS">Rio Grande do Sul - RS</option>
+                                        <option value="RO">Rondônia - RO</option>
+                                        <option value="RR">Roraima - RR</option>
+                                        <option value="SC">Santa Catarina - SC</option>
+                                        <option value="SP">São Paulo - SP</option>
+                                        <option value="SE">Sergipe - SE</option>
+                                        <option value="TO">Tocantins - TO</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>País</label>
+                                    <input type="text" id="pais-${iStat.index}" th:field="*{enderecos[__${iStat.index}__].pais}" value="Brasil" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Complemento</label>
+                                    <input type="text" id="complemento-${iStat.index}" th:field="*{enderecos[__${iStat.index}__].complemento}" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Tipo de Residência</label>
+                                    <input type="text" id="tipoResidencia-${iStat.index}" th:field="*{enderecos[__${iStat.index}__].tipoResidencia}" />                                 </div>
+                            </div>
+                            <button type="submit"
+                                    formaction="/clientes/removerEndereco"
+                                    formmethod="post"
+                                    name="enderecoId"
+                                    th:value="${endereco.id}"
+                                    class="btn-remover-endereco">
+                                ✕ Remover
+                            </button>
+                        </fieldset>
+                    </div>
+                </div>
+
+                <div class="form-submit-row">
+                    <button type="submit" class="btn-tech-primary">▶ Salvar Alterações</button>
+                </div>
+            </div>
+
+            <!-- ------------------------------------------------
+                 PANEL 3 · CARTÕES
+                 ------------------------------------------------ -->
+            <div id="panel-cartoes" class="tab-panel">
+                <div class="add-item-row">
+                    <button type="button" onclick="adicionarCartao()" class="btn-tech-secondary">
+                        + Adicionar Cartão
+                    </button>
+                </div>
+
+                <div id="cartoes-list-container">
+                    <div th:each="cartao, iStat : *{cartoes}"
+                         class="cartao-item item-card">
+                        <fieldset>
+                            <legend th:text="'Cartão ' + (${iStat.index} + 1)">Cartão 1</legend>
+                            <input type="hidden"
+                                   th:field="*{cartoes[__${iStat.index}__].id}" />
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Número do Cartão</label>
+                                    <input type="text"
+                                           th:field="*{cartoes[__${iStat.index}__].numero}"
+                                           required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Nome no Cartão</label>
+                                    <input type="text"
+                                           th:field="*{cartoes[__${iStat.index}__].nomeTitular}"
+                                           required />
+                                </div>
+                                <div class="form-group">
+                                    <label>CPF do Titular</label>
+                                    <input type="text" readonly
+                                           th:field="*{cartoes[__${iStat.index}__].cpfTitular}" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Validade</label>
+                                    <input type="text"
+                                           th:field="*{cartoes[__${iStat.index}__].validade}"
+                                           placeholder="MM/AAAA" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Bandeira</label>
+                                    <input type="text"
+                                           th:field="*{cartoes[__${iStat.index}__].bandeira}" />
+                                </div>
+                                <div class="form-group">
+                                    <label>CVV</label>
+                                    <input type="text" value="***" readonly />
+                                </div>
+                            </div>
+                            <button type="submit"
+                                    formaction="/clientes/removerCartao"
+                                    formmethod="post"
+                                    name="cartaoId"
+                                    th:value="${cartao.id}"
+                                    class="btn-remover-cartao">
+                                ✕ Remover
+                            </button>
+                        </fieldset>
+                    </div>
+                </div>
+
+                <div class="form-submit-row">
+                    <button type="submit" class="btn-tech-primary">▶ Salvar Alterações</button>
+                </div>
+            </div>
+
+        </form><!-- /form -->
+
+        <!-- ------------------------------------------------
+             PANEL 4 · RANKING & XP (outside form)
+             ------------------------------------------------ -->
+        <div id="panel-ranking" class="tab-panel">
+            <div class="panel-card">
+                <div class="gami-section">
+                    <div class="gami-grid">
+                        <div>
+                            <h2 class="gami-section-title">◉ Meu Progresso</h2>
+                            <div id="gami-meu-perfil">
+                                <p class="gami-aviso">Carregando...</p>
+                            </div>
+                        </div>
+                        <div>
+                            <h2 class="gami-section-title">▲ Top 5 Global</h2>
+                            <ul class="gami-ranking-lista" id="gami-ranking-lista"></ul>
+                            <p id="gami-ranking-vazio" class="gami-aviso" style="display:none">
+                                Nenhum usuário no ranking ainda.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ------------------------------------------------
+             PANEL 5 · HISTÓRICO (outside form)
+             ------------------------------------------------ -->
+        <div id="panel-historico" class="tab-panel">
+            <div class="panel-card">
+                <h2 class="panel-title">
+                    <span class="panel-title-accent">≡</span> Links Rápidos
+                </h2>
+                <div class="historico-grid">
+                    <a th:href="@{/clientes/minhas-compras}" class="btn-nav-link">
+                        <span class="link-icon">▣</span>
+                        Minhas Compras
+                        <span class="link-arrow">→</span>
+                    </a>
+                    <a th:href="@{/historico/cliente}" class="btn-nav-link">
+                        <span class="link-icon">≡</span>
+                        Histórico de Atividades
+                        <span class="link-arrow">→</span>
+                    </a>
+                    <a th:href="@{/clientes/carteira}" class="btn-nav-link">
+                        <span class="link-icon">◈</span>
+                        Minha Carteira
+                        <span class="link-arrow">→</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /cliente not null -->
+
+    <!-- DANGER ZONE -->
+    <div class="danger-zone">
+        <a th:href="@{/clientes/deletar}" class="btn-danger-link">
+            Remover conta permanentemente
+        </a>
+    </div>
+
+</div><!-- /dash-wrapper -->
+
+<!-- ============================================================
+     SCRIPTS
+     ============================================================ -->
+<script th:src="@{/cliente/script.js}"></script>
+<script th:src="@{/cliente/correioAPI.js}"></script>
+<script th:src="@{/cliente/gamificacao.js}"></script>
+
+<script th:inline="javascript">
+    /* Contadores de índice para formulários dinâmicos */
+    let enderecoIndex = [[${cliente != null && !#lists.isEmpty(cliente.enderecos)} ? ${#lists.size(cliente.enderecos)} : 0]];
+    let cartaoIndex   = [[${cliente != null && !#lists.isEmpty(cliente.cartoes)}   ? ${#lists.size(cliente.cartoes)}   : 0]];
+
+    /* ── Tab switching ─────────────────────────────────────── */
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var tabId = this.dataset.tab;
+            document.querySelectorAll('.tab-btn').forEach(function(b) {
+                b.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-panel').forEach(function(p) {
+                p.classList.remove('active');
+            });
+            this.classList.add('active');
+            var panel = document.getElementById('panel-' + tabId);
+            if (panel) panel.classList.add('active');
+        });
+    });
+
+    /* ── Hero stats (async via gamification API) ───────────── */
+    (function() {
+        fetch('/api/gamificacao/meu-perfil', { credentials: 'include' })
+        .then(function(res) {
+            if (!res.ok) return null;
+            return res.json();
+        }).then(function(p) {
+            if (!p) return;
+            var xpEl    = document.getElementById('hero-xp-value');
+            var nivelEl = document.getElementById('hero-nivel-value');
+            var badgeEl = document.getElementById('hero-badge');
+            if (xpEl)    xpEl.textContent    = p.xpTotal + ' XP';
+            if (nivelEl) nivelEl.textContent  = p.nivel;
+            if (badgeEl) badgeEl.textContent  = p.badge;
+        }).catch(function() {});
+    })();
+
+    /* ── Saldo na navbar ────────────────────────────────────── */
+    (function() {
+        fetch('/clientes/meu-perfil-json', { credentials: 'include' })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(c) {
+            if (!c) return;
+            var el = document.getElementById('navSaldo');
+            if (el) el.textContent = 'T$ ' + (c.saldoTokens || 0).toFixed(2);
+        }).catch(function() {});
+    })();
+
+    /* ── Contador lista de desejos ──────────────────────────── */
+    (function() {
+        fetch('/api/lista-desejos', { credentials: 'include' })
+        .then(function(res) {
+            if (!res.ok) return null;
+            return res.json();
+        }).then(function(lista) {
+            if (!lista) return;
+            var el = document.getElementById('hero-desejos-value');
+            if (el) el.textContent = lista.length + (lista.length === 1 ? ' item' : ' itens');
+        }).catch(function() {
+            var el = document.getElementById('hero-desejos-value');
+            if (el) el.textContent = 'Ver lista';
+        });
+    })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,211 @@
+/* ==========================================================
+   gamificacao.css — Estilos do Widget de Ranking & XP
+   Segue a paleta existente do projeto (--cor-*)
+   ========================================================== */
+
+/* ---- Seção geral ---------------------------------------- */
+.gami-section {
+  margin: 32px 0;
+}
+
+.gami-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--cor-preto);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid #7c6bc9;
+  padding-bottom: 8px;
+}
+
+/* ---- Card do perfil do usuário logado ------------------- */
+.gami-perfil-card {
+  background: #f9f7ff;
+  border: 1px solid #e0d9f7;
+  border-radius: 12px;
+  padding: 20px 24px;
+}
+
+.gami-perfil-topo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.gami-badge-grande {
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.gami-perfil-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gami-perfil-nome {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #3b2d7e;
+}
+
+.gami-perfil-nivel {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #7c6bc9;
+}
+
+.gami-perfil-xp {
+  font-size: 0.82rem;
+  color: #888;
+}
+
+/* ---- Barra de progresso --------------------------------- */
+.gami-barra-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.gami-barra-track {
+  height: 10px;
+  background: #e0d9f7;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.gami-barra-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7c6bc9, #a78bfa);
+  border-radius: 999px;
+  transition: width 0.8s ease;
+}
+
+/* ---- Detalhes de XP por categoria ----------------------- */
+.gami-detalhes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gami-detalhe-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: #555;
+}
+
+.gami-detalhe-icone {
+  font-size: 1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.gami-detalhe-label {
+  flex: 1;
+}
+
+.gami-detalhe-xp {
+  font-weight: 700;
+  color: #7c6bc9;
+}
+
+/* ---- Ranking Top 5 ------------------------------------- */
+.gami-ranking-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gami-rank-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid #ebebeb;
+  border-radius: 10px;
+  padding: 12px 16px;
+  transition: box-shadow 0.15s;
+}
+
+.gami-rank-item:hover {
+  box-shadow: 0 2px 10px rgba(124, 107, 201, 0.12);
+}
+
+.gami-rank-medal {
+  font-size: 1.4rem;
+  min-width: 28px;
+  text-align: center;
+}
+
+.gami-rank-badge {
+  font-size: 1.2rem;
+  min-width: 24px;
+}
+
+.gami-rank-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.gami-rank-nome {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.gami-rank-barra-track {
+  height: 7px;
+  background: #ebebeb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.gami-rank-barra-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.8s ease;
+}
+
+.gami-rank-xp {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #555;
+  min-width: 64px;
+  text-align: right;
+}
+
+/* ---- Mensagens de aviso --------------------------------- */
+.gami-aviso {
+  font-size: 0.9rem;
+  color: #888;
+  text-align: center;
+  padding: 12px;
+}
+
+.gami-aviso a {
+  color: #7c6bc9;
+  font-weight: 600;
+}
+
+/* ---- Layout lado a lado em telas grandes ---------------- */
+@media (min-width: 700px) {
+  .gami-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+}
