@@ -16,3 +16,36 @@
   }
   container.innerHTML = html;
 })();
+
+// ── Hold to show senha ──────────────────────────────────────────
+(function () {
+  var btn = document.getElementById('btnOlho');
+  var input = document.getElementById('senha');
+  if (!btn || !input) return;
+
+  function mostrar() {
+    input.type = 'text';
+    btn.classList.add('ativo');
+  }
+
+  function ocultar() {
+    input.type = 'password';
+    btn.classList.remove('ativo');
+  }
+
+  // Mouse (desktop)
+  btn.addEventListener('mousedown', function (e) {
+    e.preventDefault(); // evita o input perder o foco
+    mostrar();
+  });
+  document.addEventListener('mouseup', ocultar);
+  btn.addEventListener('mouseleave', ocultar);
+
+  // Touch (mobile)
+  btn.addEventListener('touchstart', function (e) {
+    e.preventDefault();
+    mostrar();
+  }, { passive: false });
+  btn.addEventListener('touchend', ocultar);
+  btn.addEventListener('touchcancel', ocultar);
+})();

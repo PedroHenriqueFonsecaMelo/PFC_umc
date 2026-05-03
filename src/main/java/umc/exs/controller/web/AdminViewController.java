@@ -1,5 +1,8 @@
 package umc.exs.controller.web;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,13 +16,18 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import umc.exs.DTOs.auth.LoginDTO;
+import umc.exs.model.entidades.logic.LogAuditoria;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
 import umc.exs.service.log.LogAuditoriaService;
+
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -132,9 +140,46 @@ public class AdminViewController {
      * Redirect admin/login?logout.
      */
     @GetMapping("/audit")
-    public String auditoria(Model model) {
-        model.addAttribute("logs", logAuditoriaService.buscarTodosLogs());
+    public String auditoria(
+            @RequestParam(required = false) String emailUsuario,
+            @RequestParam(required = false) String acao,
+            @RequestParam(required = false) String dataInicio,
+            @RequestParam(required = false) String dataFim,
+            Model model) {
+
+        List<LogAuditoria> logs = logAuditoriaService.buscarComFiltros(emailUsuario, acao, dataInicio, dataFim);
+        List<String> acoes = logAuditoriaService.buscarAcoesDistintas();
+
+        model.addAttribute("logs", logs);
+        model.addAttribute("acoes", acoes);
+        model.addAttribute("filtroEmail", emailUsuario != null ? emailUsuario : "");
+        model.addAttribute("filtroAcao", acao != null ? acao : "");
+        model.addAttribute("filtroDataInicio", dataInicio != null ? dataInicio : "");
+        model.addAttribute("filtroDataFim", dataFim != null ? dataFim : "");
+        model.addAttribute("totalLogs", logs.size());
+
         return "admin/auditoria";
+    }
+
+    @GetMapping("/audit/exportar-csv")
+    @ResponseBody
+    public ResponseEntity<byte[]> exportarCSV(
+            @RequestParam(required = false) String emailUsuario,
+            @RequestParam(required = false) String acao,
+            @RequestParam(required = false) String dataInicio,
+            @RequestParam(required = false) String dataFim) {
+
+        List<LogAuditoria> logs = logAuditoriaService.buscarComFiltros(emailUsuario, acao, dataInicio, dataFim);
+        String csv = logAuditoriaService.exportarCSV(logs);
+        byte[] bytes = csv.getBytes(StandardCharsets.UTF_8);
+
+        logAuditoriaService.registrarLog("EXPORTACAO_CSV", null, "admin",
+            "Exportação CSV de auditoria — " + logs.size() + " registros");
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"auditoria.csv\"")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .body(bytes);
     }
 
     @GetMapping("/sair")
@@ -142,6 +187,6 @@ public class AdminViewController {
 
         jwtUtil.clearJwtCookie(response);
         SecurityContextHolder.clearContext();
-        return "redirect:/admin/login?logout";
+        return "redirect:/entrar?logout";
     }
 }

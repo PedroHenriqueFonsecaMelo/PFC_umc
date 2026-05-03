@@ -1,5 +1,7 @@
 package umc.exs.service.log;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -61,5 +63,39 @@ public class LogAuditoriaService {
     public List<LogAuditoria> buscarTodosLogs() {
 
         return repository.findAllByOrderByDataHoraDesc();
+    }
+
+    public List<LogAuditoria> buscarComFiltros(String emailUsuario, String acao, String dataInicio, String dataFim) {
+        String email = (emailUsuario == null || emailUsuario.isBlank()) ? null : emailUsuario.trim();
+        String acaoFiltro = (acao == null || acao.isBlank()) ? null : acao.trim();
+        String inicio = (dataInicio == null || dataInicio.isBlank()) ? null : dataInicio + " 00:00";
+        String fim = (dataFim == null || dataFim.isBlank()) ? null : dataFim + " 23:59";
+        return repository.buscarComFiltros(email, acaoFiltro, inicio, fim);
+    }
+
+    public List<String> buscarAcoesDistintas() {
+        return repository.findAcoesDistintas();
+    }
+
+    public String exportarCSV(List<LogAuditoria> logs) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        pw.println("ID,Acao,Email Usuario,ID Usuario,Detalhes,Data Hora");
+        for (LogAuditoria l : logs) {
+            pw.printf("%d,\"%s\",\"%s\",%s,\"%s\",\"%s\"%n",
+                l.getId(),
+                escape(l.getAcao()),
+                escape(l.getEmailUsuario()),
+                l.getIdUsuario() != null ? l.getIdUsuario().toString() : "",
+                escape(l.getDetalhes()),
+                escape(l.getDataHora())
+            );
+        }
+        return sw.toString();
+    }
+
+    private String escape(String s) {
+        if (s == null) return "";
+        return s.replace("\"", "\"\"");
     }
 }

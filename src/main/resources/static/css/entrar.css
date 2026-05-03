@@ -210,7 +210,7 @@ body::before {
 /* ── Campos ── */
 .field { margin-bottom: 16px; position: relative; z-index: 1; }
 .field label { display: block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(74, 93, 35, 0.65); margin-bottom: 6px; }
-.field input { width: 100%; padding: 11px 15px; background: #f9f6f0; border: 1px solid rgba(74, 93, 35, 0.2); border-radius: 4px; color: #2c241b; font-size: 0.9rem; font-family: "DM Sans", sans-serif; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+.field input { width: 100%; padding: 11px 15px; padding-right: 44px; background: #f9f6f0; border: 1px solid rgba(74, 93, 35, 0.2); border-radius: 4px; color: #2c241b; font-size: 0.9rem; font-family: "DM Sans", sans-serif; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; }
 .field input::placeholder { color: rgba(44, 36, 27, 0.3); }
 .field input:focus { border-color: #4a5d23; box-shadow: 0 0 0 3px rgba(74, 93, 35, 0.12); }
 
@@ -254,6 +254,49 @@ body::before {
 .panel-link { font-size: 0.77rem; color: rgba(74, 93, 35, 0.55); text-decoration: none; transition: color 0.2s; letter-spacing: 0.02em; }
 .panel-link:hover { color: #4a5d23; }
 .footnote { margin-top: 20px; font-size: 0.73rem; color: rgba(44, 36, 27, 0.4); text-align: center; letter-spacing: 0.03em; }
+
+/* ── Wrapper do campo senha com botão olhinho ── */
+.senha-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.senha-wrapper input {
+  flex: 1;
+}
+
+.btn-olho {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(74, 93, 35, 0.45);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.15s;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-olho:hover {
+  color: rgba(74, 93, 35, 0.8);
+}
+
+.btn-olho:focus {
+  outline: none;
+}
+
+.btn-olho.ativo {
+  color: #4a5d23;
+}
 
 /* ── Responsivo ── */
 @media (max-width: 680px) {

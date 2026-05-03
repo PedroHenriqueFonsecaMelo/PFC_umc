@@ -43,6 +43,10 @@
            th:classappend="${activeMenu == 'auditoria'} ? ' ativo'">
             <i class="fa-solid fa-shield-halved"></i> Auditoria
         </a>
+        <a href="/admin/notificacoes" class="nav-item"
+           th:classappend="${activeMenu == 'notificacoes'} ? ' ativo'">
+            <i class="fa-solid fa-envelope-open-text"></i> Notificações
+        </a>
     </nav>
     <div class="sidebar-footer">
         <a href="/admin/sair" class="nav-item nav-sair">
