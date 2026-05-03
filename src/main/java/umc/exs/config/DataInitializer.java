@@ -114,7 +114,7 @@ public class DataInitializer implements CommandLineRunner {
             topico.setTitulo("Dúvida sobre Capitu");
             topico.setConteudo("Afinal, traiu ou não traiu?");
             topico.setAutor(c1);
-            topico.setDataCriacao(LocalDateTime.now());
+            topico.setDataCriacao(LocalDateTime.now().minusDays(5));
             topico.setCategoria(CategoriaForum.GERAL);
             topico = topicoRepo.save(topico);
 
@@ -123,7 +123,7 @@ public class DataInitializer implements CommandLineRunner {
             resposta.setAutor(c2);
             resposta.setTopico(topico);
             resposta.setMelhorResposta(true);
-            resposta.setDataCriacao(LocalDateTime.now());
+            resposta.setDataCriacao(LocalDateTime.now().minusDays(2));
             respostaRepo.save(resposta);
 
             log.info("✨ CARGA DE DADOS FINALIZADA COM SUCESSO!");
