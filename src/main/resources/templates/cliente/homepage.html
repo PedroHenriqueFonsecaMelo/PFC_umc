@@ -377,42 +377,51 @@
                                 <div class="form-group">
                                     <label>CEP</label>
                                     <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].cep}" />
+                                           th:field="*{enderecos[__${iStat.index}__].cep}"
+                                           onblur="buscarCep(this)"
+                                           placeholder="00000-000" />
                                 </div>
                                 <div class="form-group">
                                     <label>Rua</label>
                                     <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].rua}" />
+                                           th:field="*{enderecos[__${iStat.index}__].rua}"
+                                           data-cep-field="rua" />
                                 </div>
                                 <div class="form-group">
                                     <label>Número</label>
                                     <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].numero}" />
+                                           th:field="*{enderecos[__${iStat.index}__].numero}"
+                                           data-cep-field="numero" />
                                 </div>
                                 <div class="form-group">
                                     <label>Bairro</label>
                                     <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].bairro}" />
+                                           th:field="*{enderecos[__${iStat.index}__].bairro}"
+                                           data-cep-field="bairro" />
                                 </div>
                                 <div class="form-group">
                                     <label>Cidade</label>
                                     <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].cidade}" />
+                                           th:field="*{enderecos[__${iStat.index}__].cidade}"
+                                           data-cep-field="cidade" />
                                 </div>
                                 <div class="form-group">
                                     <label>Estado</label>
                                     <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].estado}" />
+                                           th:field="*{enderecos[__${iStat.index}__].estado}"
+                                           data-cep-field="estado" />
                                 </div>
                                 <div class="form-group">
                                     <label>País</label>
                                     <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].pais}" />
+                                           th:field="*{enderecos[__${iStat.index}__].pais}"
+                                           data-cep-field="pais" />
                                 </div>
                                 <div class="form-group">
                                     <label>Complemento</label>
                                     <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].complemento}" />
+                                           th:field="*{enderecos[__${iStat.index}__].complemento}"
+                                           data-cep-field="complemento" />
                                 </div>
                                 <div class="form-group">
                                     <label>Tipo de Residência</label>

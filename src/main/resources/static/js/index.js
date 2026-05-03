@@ -128,24 +128,29 @@ async function carregarBlog() {
       setTimeout(() => section.scrollIntoView({ behavior: "smooth" }), 100);
     }
 
-    grid.innerHTML = posts.map((p) => {
+    grid.innerHTML = posts.slice(0, 3).map((p) => {
       const imgHTML = p.imagemUrl
         ? `<img src="${p.imagemUrl}" alt="${p.titulo}" loading="lazy" />`
-        : `📝`;
+        : `<span style="font-size:2rem;opacity:.4">📝</span>`;
       return `
-      <article class="blog-card">
-        <div class="blog-card-img">${imgHTML}</div>
-        <div class="blog-card-body">
-          <div class="blog-card-meta">
-            <span>✍️ ${p.autorNome}</span>
-            <span>·</span>
-            <span>${p.dataPublicacao}</span>
+      <a href="/blog/${p.id}" class="blog-card-link" style="text-decoration:none;color:inherit;display:block">
+        <article class="blog-card" style="cursor:pointer">
+          <div class="blog-card-img">${imgHTML}</div>
+          <div class="blog-card-body">
+            <div class="blog-card-meta">
+              <span>✍️ ${p.autorNome}</span>
+              <span>·</span>
+              <span>${p.dataPublicacao}</span>
+            </div>
+            <div class="blog-card-titulo">${p.titulo}</div>
+            <div class="blog-card-conteudo">${p.conteudo.length > 120 ? p.conteudo.slice(0, 120) + '…' : p.conteudo}</div>
           </div>
-          <div class="blog-card-titulo">${p.titulo}</div>
-          <div class="blog-card-conteudo">${p.conteudo}</div>
-        </div>
-      </article>`;
+        </article>
+      </a>`;
     }).join("");
+
+    const verTodosEl = document.getElementById("blogVerTodos");
+    if (verTodosEl) verTodosEl.style.display = "";
   } catch (_) {}
 }
 

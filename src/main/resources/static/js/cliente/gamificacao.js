@@ -11,10 +11,6 @@
      UTILITÁRIOS
   ------------------------------------------------------- */
 
-  function getToken() {
-    return localStorage.getItem("jwtToken") || sessionStorage.getItem("jwtToken") || null;
-  }
-
   function medalha(posicao) {
     return ["🥇", "🥈", "🥉"][posicao - 1] || posicao + "º";
   }
@@ -49,17 +45,15 @@
     const container = document.getElementById("gami-meu-perfil");
     if (!container) return;
 
-    const token = getToken();
-    if (!token) {
-      container.innerHTML = `<p class="gami-aviso">Faça <a href="/login">login</a> para ver seu progresso.</p>`;
-      return;
-    }
-
     try {
       const res = await fetch("/api/gamificacao/meu-perfil", {
-        headers: { Authorization: "Bearer " + token },
+        credentials: "include",
       });
-      if (!res.ok) throw new Error("não autenticado");
+      if (res.status === 401) {
+        container.innerHTML = `<p class="gami-aviso">Faça <a href="/entrar">login</a> para ver seu progresso.</p>`;
+        return;
+      }
+      if (!res.ok) throw new Error("erro");
       const p = await res.json();
 
       container.innerHTML = `

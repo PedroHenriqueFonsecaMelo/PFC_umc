@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog · Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/blog/blog.css}" />
+    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+    <script th:src="@{/js/blog/blog.js}" defer></script>
+</head>
+<body>
+
+    <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+    <div class="blog-wrapper">
+        <div class="blog-header">
+            <div class="blog-kicker">Novidades</div>
+            <h1 class="blog-page-title">Blog Bibliotroca</h1>
+            <p class="blog-page-sub">Dicas de leitura, resenhas e atualizações da plataforma.</p>
+        </div>
+
+        <div th:if="${posts != null and !posts.isEmpty()}" class="blog-grid">
+            <a th:each="p : ${posts}"
+               th:href="@{/blog/{id}(id=${p.id})}"
+               class="blog-card-link">
+                <article class="blog-card">
+                    <div class="blog-card-img">
+                        <img th:if="${p.imagemUrl != null and !p.imagemUrl.isEmpty()}"
+                             th:src="${p.imagemUrl}" th:alt="${p.titulo}" loading="lazy" />
+                        <div th:unless="${p.imagemUrl != null and !p.imagemUrl.isEmpty()}"
+                             class="blog-card-img-placeholder"><i class="fa-solid fa-pen-nib"></i></div>
+                    </div>
+                    <div class="blog-card-body">
+                        <div class="blog-card-meta">
+                            <span><i class="fa-solid fa-user-pen"></i> <span th:text="${p.autorNome}">Autor</span></span>
+                            <span>·</span>
+                            <span th:text="${#temporals.format(p.dataPublicacao, 'dd/MM/yyyy')}">Data</span>
+                        </div>
+                        <div class="blog-card-titulo" th:text="${p.titulo}">Título</div>
+                        <div class="blog-card-excerpt" th:text="${#strings.abbreviate(p.conteudo, 120)}">Conteúdo...</div>
+                        <div class="blog-card-footer">
+                            <span class="blog-card-curtidas">
+                                <i class="fa-solid fa-heart"></i>
+                                <span th:text="${p.curtidas}">0</span>
+                            </span>
+                            <span class="blog-card-lermais">Ler mais →</span>
+                        </div>
+                    </div>
+                </article>
+            </a>
+        </div>
+
+        <div th:if="${posts == null or posts.isEmpty()}" class="blog-vazio">
+            <div class="blog-vazio-icon"><i class="fa-solid fa-pen-nib"></i></div>
+            <p>Nenhuma publicação ainda. Fique ligado!</p>
+        </div>
+    </div>
+
+</body>
+</html>

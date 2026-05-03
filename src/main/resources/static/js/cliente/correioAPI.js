@@ -1,21 +1,30 @@
 // Função para buscar CEP usando a API ViaCEP
-async function buscarCep(index) {
-    const cep = document.getElementById(`cep-${index}`).value.replace(/\D/g, '');
+async function buscarCep(cepInput) {
+    const cep = cepInput.value.replace(/\D/g, '');
 
     if (cep.length !== 8) return;
+
+    const container = cepInput.closest('.endereco-item');
+    if (!container) return;
+
+    function preencherCampo(field, valor) {
+        const el = container.querySelector(`[data-cep-field="${field}"]`);
+        if (el && valor) el.value = valor;
+    }
 
     try {
         const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
         const data = await response.json();
 
         if (!data.erro) {
-            document.getElementById(`rua-${index}`).value = data.logradouro;
-            document.getElementById(`bairro-${index}`).value = data.bairro;
-            document.getElementById(`cidade-${index}`).value = data.localidade;
-            document.getElementById(`estado-${index}`).value = data.uf;
-            document.getElementById(`pais-${index}`).value = "Brasil";
-            // Foca no número após preencher
-            document.getElementById(`numero-${index}`).focus();
+            preencherCampo('rua', data.logradouro);
+            preencherCampo('bairro', data.bairro);
+            preencherCampo('cidade', data.localidade);
+            preencherCampo('estado', data.uf);
+            preencherCampo('pais', 'Brasil');
+            preencherCampo('complemento', data.complemento);
+            const numero = container.querySelector('[data-cep-field="numero"]');
+            if (numero) numero.focus();
         } else {
             alert("CEP não encontrado.");
         }
@@ -36,40 +45,44 @@ function adicionarEndereco() {
                 <div class="form-grid">
                     <div class="form-group">
                         <label>CEP:</label>
-                        <input type="text" id="cep-${index}" name="enderecos[${index}].cep" 
-                               onblur="buscarCep(${index})" placeholder="00000-000" required />
+                        <input type="text" name="enderecos[${index}].cep"
+                               onblur="buscarCep(this)" placeholder="00000-000" required />
                     </div>
                     <div class="form-group">
                         <label>Rua:</label>
-                        <input type="text" id="rua-${index}" name="enderecos[${index}].rua" required />
+                        <input type="text" name="enderecos[${index}].rua" data-cep-field="rua" required />
                     </div>
                     <div class="form-group">
                         <label>Número:</label>
-                        <input type="text" name="enderecos[${index}].numero" id="numero-${index}" required />
+                        <input type="text" name="enderecos[${index}].numero" data-cep-field="numero" required />
                     </div>
                     <div class="form-group">
                         <label>Bairro:</label>
-                        <input type="text" id="bairro-${index}" name="enderecos[${index}].bairro" required />
+                        <input type="text" name="enderecos[${index}].bairro" data-cep-field="bairro" required />
                     </div>
                     <div class="form-group">
                         <label>Cidade:</label>
-                        <input type="text" id="cidade-${index}" name="enderecos[${index}].cidade" required />
+                        <input type="text" name="enderecos[${index}].cidade" data-cep-field="cidade" required />
                     </div>
                     <div class="form-group">
                         <label>Estado:</label>
-                        <input type="text" id="estado-${index}" name="enderecos[${index}].estado" maxlength="2" required />
+                        <input type="text" name="enderecos[${index}].estado" data-cep-field="estado" maxlength="2" required />
                     </div>
                     <div class="form-group">
                         <label>País:</label>
-                        <input type="text" id="pais-${index}" name="enderecos[${index}].pais" value="Brasil" required />
+                        <input type="text" name="enderecos[${index}].pais" data-cep-field="pais" value="Brasil" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Complemento:</label>
+                        <input type="text" name="enderecos[${index}].complemento" data-cep-field="complemento" />
                     </div>
                     <div class="form-group">
                         <label>Tipo de residência:</label>
                         <input type="text" name="enderecos[${index}].tipoResidencia" placeholder="Ex: Casa, Apto" />
                     </div>
                 </div>
-                <button type="button" class="btn-remover-js" onclick="this.closest('.endereco-item').remove()">
-                    ❌ Cancelar Novo Endereço
+                <button type="button" class="btn-cancelar-js" onclick="this.closest('.endereco-item').remove()">
+                    ✕ Cancelar
                 </button>
             </fieldset>
         </div>
@@ -102,8 +115,8 @@ function adicionarCartao() {
                         <input type="text" name="cartoes[${index}].validade" placeholder="MM/AAAA" required />
                     </div>
                 </div>
-                <button type="button" class="btn-remover-js" onclick="this.closest('.cartao-item').remove()">
-                    ❌ Cancelar Novo Cartão
+                <button type="button" class="btn-cancelar-js" onclick="this.closest('.cartao-item').remove()">
+                    ✕ Cancelar
                 </button>
             </fieldset>
         </div>

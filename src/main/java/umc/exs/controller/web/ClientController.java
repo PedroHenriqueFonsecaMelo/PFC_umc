@@ -193,6 +193,12 @@ public class ClientController {
     // 🪙 CARTEIRA E FINANÇAS
     // ============================================================
 
+    @GetMapping("/lista-desejos")
+    public String exibirListaDesejos(@AuthenticationPrincipal UserDetails user) {
+        if (user == null) return "redirect:/clientes/login";
+        return "cliente/lista_desejos";
+    }
+
     @GetMapping("/carteira")
     public String exibirCarteira(@AuthenticationPrincipal UserDetails user, Model model) {
         ClienteDTO cliente = clienteService.buscarClientePorEmail(user.getUsername()).orElseThrow();

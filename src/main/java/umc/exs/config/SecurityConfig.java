@@ -55,7 +55,7 @@ public class SecurityConfig {
                                                                                 +
                                                                                 "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
                                                                                 +
-                                                                                "connect-src 'self' https://www.googleapis.com https://openlibrary.org; "
+                                                                                "connect-src 'self' https://www.googleapis.com https://openlibrary.org https://viacep.com.br; "
                                                                                 +
                                                                                 "img-src 'self' data: https:;"))
                                                 .frameOptions(frame -> frame.deny())
@@ -75,6 +75,8 @@ public class SecurityConfig {
 
                                                 // 3. Rotas de Blog e Fórum (Consulta pública, escrita protegida)
                                                 .requestMatchers(HttpMethod.GET, "/api/blog/**").permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/api/blog/*/curtir").authenticated()
+                                                .requestMatchers(HttpMethod.POST, "/api/blog/*/comentarios").authenticated()
                                                 .requestMatchers("/api/blog/**").hasAuthority("ADMIN")
                                                 .requestMatchers(HttpMethod.GET, "/forum/**", "/api/forum/topicos")
                                                 .permitAll()
@@ -127,7 +129,8 @@ public class SecurityConfig {
                         "/auth/**", "/debug", "/api/gamificacao/ranking",
                         "/api/livros/todos", "/api/avaliacoes/livro/**",
                         "/livros/vitrine", "/clientes/termo", "/clientes/politica", "/clientes/sobre",
-                        "/clientes/recuperar-senha/**", "/clientes/reset-senha/**", "/clientes/alterar-senha/**"
+                        "/clientes/recuperar-senha/**", "/clientes/reset-senha/**", "/clientes/alterar-senha/**",
+                        "/blog", "/blog/**"
         };
 
         // Recursos estáticos (CSS, JS, Imagens)

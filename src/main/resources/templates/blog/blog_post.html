@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${post.titulo} + ' · Blog · Bibliotroca'">Post · Blog · Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/blog/blog.css}" />
+    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+</head>
+<body>
+
+    <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+    <div class="post-wrapper">
+
+        <a href="/blog" class="post-voltar"><i class="fa-solid fa-arrow-left"></i> Voltar ao blog</a>
+
+        <article class="post-article">
+            <div th:if="${post.imagemUrl != null and !post.imagemUrl.isEmpty()}" class="post-imagem-wrapper">
+                <img th:src="${post.imagemUrl}" th:alt="${post.titulo}" class="post-imagem" />
+            </div>
+
+            <div class="post-meta">
+                <span><i class="fa-solid fa-user-pen"></i> <span th:text="${post.autorNome}">Autor</span></span>
+                <span>·</span>
+                <span th:text="${#temporals.format(post.dataPublicacao, 'dd/MM/yyyy HH:mm')}">Data</span>
+            </div>
+
+            <h1 class="post-titulo" th:text="${post.titulo}">Título</h1>
+
+            <div class="post-conteudo" th:text="${post.conteudo}">Conteúdo</div>
+
+            <div class="post-curtidas-bar">
+                <button class="btn-curtir" id="btnCurtir"
+                        th:attr="data-post-id=${post.id}"
+                        th:classappend="${!clienteLogado} ? ' btn-curtir-disabled' : ''"
+                        th:title="${!clienteLogado} ? 'Faça login para curtir' : 'Curtir post'">
+                    <i class="fa-solid fa-heart"></i>
+                    <span id="curtidas-count" th:text="${post.curtidas}">0</span>
+                    curtidas
+                </button>
+            </div>
+        </article>
+
+        <!-- SEÇÃO DE COMENTÁRIOS -->
+        <section class="comentarios-section">
+            <h2 class="comentarios-titulo"><i class="fa-regular fa-comments"></i> Comentários</h2>
+
+            <div id="comentarios-lista" class="comentarios-lista">
+                <div class="comentario-loading">Carregando comentários...</div>
+            </div>
+
+            <div th:if="${clienteLogado}" class="comentario-form-wrapper">
+                <h3 class="comentario-form-titulo">Deixe seu comentário</h3>
+                <form id="formComentario" th:attr="data-post-id=${post.id}">
+                    <textarea id="inputComentario" class="comentario-textarea"
+                              placeholder="Escreva seu comentário..." rows="4" maxlength="1000"></textarea>
+                    <button type="submit" class="btn-comentar" id="btnComentar">
+                        <i class="fa-solid fa-paper-plane"></i> Publicar
+                    </button>
+                </form>
+            </div>
+
+            <div th:unless="${clienteLogado}" class="comentario-login-aviso">
+                <a href="/clientes/login">Faça login</a> para deixar um comentário.
+            </div>
+        </section>
+
+    </div>
+
+    <script th:src="@{/js/blog/blog_post.js}"></script>
+</body>
+</html>

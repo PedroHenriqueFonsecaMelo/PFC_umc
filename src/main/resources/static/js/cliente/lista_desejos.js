@@ -2,11 +2,7 @@
    lista_desejos.js — Lista de Desejos · Bibliotroca
    ================================================================ */
 
-const token = localStorage.getItem('token');
-const authHeaders = {
-    'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': 'Bearer ' + token } : {})
-};
+const authHeaders = { 'Content-Type': 'application/json' };
 
 let isbnsSalvos = new Set();
 const metaCache = {};
@@ -20,7 +16,7 @@ function mostrarToast(msg, tipo) {
 
 async function carregarPerfil() {
     try {
-        const res = await fetch('/clientes/meu-perfil-json', { headers: authHeaders });
+        const res = await fetch('/clientes/meu-perfil-json', { headers: authHeaders, credentials: 'include' });
         if (res.ok) {
             const c = await res.json();
             const navSaldo = document.getElementById('navSaldo');
@@ -57,19 +53,14 @@ async function buscarLivros() {
     container.innerHTML = '';
 
     try {
-        const url = 'https://openlibrary.org/search.json?title=' + encodeURIComponent(query) + '&limit=10&fields=title,author_name,isbn,cover_i';
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Falha na API');
-        const data = await res.json();
+        const items = await buscarOpenLibrary(query);
 
-        const docs = (data.docs || []).filter(d => d.isbn && d.isbn.length > 0);
-
-        if (docs.length === 0) {
+        if (!items || items.length === 0) {
             container.innerHTML = '<p class="search-hint">Nenhum resultado encontrado para "' + escHtml(query) + '".</p>';
             return;
         }
 
-        container.innerHTML = docs.slice(0, 8).map(doc => buildResultadoItem(doc)).join('');
+        container.innerHTML = items.map(buildResultadoItem).join('');
 
     } catch (e) {
         container.innerHTML = '<p class="search-error"><i class="fa-solid fa-triangle-exclamation"></i> Erro ao buscar. Verifique a conexão e tente novamente.</p>';
@@ -79,40 +70,94 @@ async function buscarLivros() {
     }
 }
 
-function buildResultadoItem(doc) {
-    const titulo = doc.title || 'Sem título';
-    const autores = doc.author_name ? doc.author_name.slice(0, 2).join(', ') : 'Autor desconhecido';
+// Prefere ISBN de edição BR (97885) ou PT (978972), senão qualquer ISBN-13 ou ISBN-10
+function escolherMelhorIsbn(isbns) {
+    const norm = isbns.map(i => i.replace(/[^0-9X]/gi, ''));
+    return norm.find(i => i.startsWith('97885'))
+        || norm.find(i => i.startsWith('978972'))
+        || norm.find(i => i.length === 13)
+        || norm.find(i => i.length === 10)
+        || norm[0];
+}
 
-    const isbns = doc.isbn || [];
-    const isbn13 = isbns.find(i => i.replace(/[^0-9]/g,'').length === 13);
-    const isbn10 = isbns.find(i => i.replace(/[^0-9X]/gi,'').length === 10);
-    const isbnEscolhido = isbn13 || isbn10 || isbns[0];
-
-    if (!isbnEscolhido) return '';
-
-    let imgHtml;
-    if (doc.cover_i) {
-        imgHtml = `<img class="resultado-capa"
-            src="https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg"
-            alt="Capa" onerror="this.outerHTML='<div class=resultado-capa-placeholder>📚</div>'">`;
-    } else {
-        const capa = capaUrl(isbnEscolhido);
-        imgHtml = capa
-            ? `<img class="resultado-capa" src="${capa}" alt="Capa"
-                 onerror="this.outerHTML='<div class=resultado-capa-placeholder>📚</div>'">`
-            : `<div class="resultado-capa-placeholder">📚</div>`;
+// Busca título/autor da edição exata via Books API — igual ao venda_livro.js
+async function buscarTituloPorIsbn(isbn) {
+    try {
+        const res = await fetch(
+            `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`
+        );
+        const data = await res.json();
+        const info = data[`ISBN:${isbn}`];
+        if (!info) return null;
+        return {
+            titulo: info.title || null,
+            autores: info.authors ? info.authors.slice(0, 2).map(a => a.name).join(', ') : null
+        };
+    } catch (_) {
+        return null;
     }
+}
+
+async function buscarOpenLibrary(query) {
+    try {
+        const url = 'https://openlibrary.org/search.json?title=' +
+                    encodeURIComponent(query) + '&limit=10&fields=title,author_name,isbn,cover_i';
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const data = await res.json();
+
+        const docs = (data.docs || [])
+            .filter(d => d.isbn && d.isbn.length > 0)
+            .slice(0, 8);
+
+        // Busca título da edição correta em paralelo para todos os resultados
+        const items = await Promise.all(docs.map(async doc => {
+            const isbn = escolherMelhorIsbn(doc.isbn || []);
+            if (!isbn) return null;
+
+            const edicao = await buscarTituloPorIsbn(isbn);
+
+            const capa = doc.cover_i
+                ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`
+                : capaUrl(isbn);
+
+            return {
+                isbn,
+                titulo: (edicao && edicao.titulo) || doc.title || 'Sem título',
+                autores: (edicao && edicao.autores)
+                    || (doc.author_name ? doc.author_name.slice(0, 2).join(', ') : 'Autor desconhecido'),
+                capa
+            };
+        }));
+
+        return items.filter(Boolean);
+    } catch (_) {
+        return null;
+    }
+}
+
+function buildResultadoItem(item) {
+    const { isbn: isbnEscolhido, titulo, autores, capa } = item;
+
+    const imgHtml = capa
+        ? `<img class="resultado-capa" src="${capa}" alt="Capa" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+        : '';
+    const placeholderHtml = `<div class="resultado-capa-placeholder" style="${capa ? 'display:none' : ''}">📚</div>`;
 
     const jaAdicionado = isbnsSalvos.has(isbnEscolhido);
     const btnHtml = jaAdicionado
         ? `<span class="btn-ja-adicionado"><i class="fa-solid fa-check"></i> Salvo</span>`
-        : `<button class="btn-adicionar" onclick="adicionarDesejo('${escHtml(isbnEscolhido)}', '${escHtml(titulo)}', '${escHtml(autores)}', this)">
+        : `<button class="btn-adicionar"
+               data-isbn="${escHtml(isbnEscolhido)}"
+               data-titulo="${escHtml(titulo)}"
+               data-autores="${escHtml(autores)}"
+               onclick="adicionarDesejo(this.dataset.isbn, this.dataset.titulo, this.dataset.autores, this)">
              <i class="fa-solid fa-heart"></i> Salvar
            </button>`;
 
     return `
         <div class="resultado-item" id="res-${escHtml(isbnEscolhido)}">
-            ${imgHtml}
+            ${imgHtml}${placeholderHtml}
             <div class="resultado-info">
                 <div class="resultado-titulo">${escHtml(titulo)}</div>
                 <div class="resultado-autor">${escHtml(autores)}</div>
@@ -130,6 +175,7 @@ async function adicionarDesejo(isbn, titulo, autor, btn) {
         const res = await fetch('/api/lista-desejos', {
             method: 'POST',
             headers: authHeaders,
+            credentials: 'include',
             body: JSON.stringify({ isbn })
         });
 
@@ -158,7 +204,8 @@ async function removerDesejo(id, card) {
     try {
         const res = await fetch('/api/lista-desejos/' + id, {
             method: 'DELETE',
-            headers: authHeaders
+            headers: authHeaders,
+            credentials: 'include'
         });
         if (res.status === 401) { window.location.href = '/clientes/login'; return; }
         if (!res.ok) throw new Error('Erro ao remover');
@@ -179,7 +226,7 @@ async function removerDesejo(id, card) {
 async function carregarListaSalva() {
     const container = document.getElementById('wishlistContainer');
     try {
-        const res = await fetch('/api/lista-desejos', { headers: authHeaders });
+        const res = await fetch('/api/lista-desejos', { headers: authHeaders, credentials: 'include' });
         if (res.status === 401) { window.location.href = '/clientes/login'; return; }
         if (!res.ok) throw new Error('Falha na API');
 
@@ -212,21 +259,12 @@ async function enriquecerDesejo(desejo) {
     if (metaCache[desejo.isbn]) {
         return { ...desejo, ...metaCache[desejo.isbn] };
     }
-    try {
-        const url = 'https://openlibrary.org/search.json?isbn=' + encodeURIComponent(desejo.isbn) + '&limit=1&fields=title,author_name';
-        const res = await fetch(url);
-        if (!res.ok) return desejo;
-        const data = await res.json();
-        const doc = data.docs && data.docs[0];
-        if (doc) {
-            const meta = {
-                titulo: doc.title || null,
-                autor: doc.author_name ? doc.author_name.slice(0, 2).join(', ') : null
-            };
-            metaCache[desejo.isbn] = meta;
-            return { ...desejo, ...meta };
-        }
-    } catch (_) {}
+    const edicao = await buscarTituloPorIsbn(desejo.isbn);
+    if (edicao && (edicao.titulo || edicao.autores)) {
+        const meta = { titulo: edicao.titulo, autor: edicao.autores };
+        metaCache[desejo.isbn] = meta;
+        return { ...desejo, ...meta };
+    }
     return desejo;
 }
 
