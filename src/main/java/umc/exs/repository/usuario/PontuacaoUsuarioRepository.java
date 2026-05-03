@@ -32,4 +32,7 @@ public interface PontuacaoUsuarioRepository extends JpaRepository<PontuacaoUsuar
      */
     @Query("SELECT COUNT(p) FROM PontuacaoUsuario p WHERE p.xpTotal > :xp")
     long countByXpTotalGreaterThan(@Param("xp") int xp);
+
+    @Query("SELECT p FROM PontuacaoUsuario p JOIN FETCH p.cliente")
+    List<PontuacaoUsuario> findAllWithCliente();
 }

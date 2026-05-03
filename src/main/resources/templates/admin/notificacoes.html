@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Disparo de E-mails — Bibliotroca Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" th:href="@{/css/admin/layout.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/notificacoes.css}" />
+  </head>
+  <body>
+    <div class="layout">
+      <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('notificacoes')}"></th:block>
+
+      <div class="content">
+        <!-- TOPBAR igual às outras telas -->
+        <header class="topbar">
+          <div>
+            <div class="topbar-title">Disparo de E-mails</div>
+            <div class="topbar-date" id="dataHoje"></div>
+          </div>
+          <div class="topbar-right">
+            <span class="badge-online"><span class="dot"></span> Sistema Online</span>
+            <div class="avatar"><i class="fa-solid fa-user"></i></div>
+          </div>
+        </header>
+
+        <div class="main">
+          <div class="section-label">Filtrar usuários e compor mensagem</div>
+
+          <div class="notif-grid">
+
+            <!-- COLUNA ESQUERDA: filtros + composição -->
+            <div style="display:flex;flex-direction:column;gap:20px;">
+
+              <!-- Card: Filtros -->
+              <div class="notif-card">
+                <div class="notif-card-title">
+                  <i class="fa-solid fa-filter"></i> Destinatários
+                </div>
+
+                <label class="notif-label">Critério de filtro</label>
+                <select class="notif-select" id="filtro">
+                  <option value="todos">Todos os usuários</option>
+                  <option value="ranking_maior">Maior ranking (XP)</option>
+                  <option value="ranking_menor">Menor ranking (XP)</option>
+                  <option value="tokens_maior">Mais tokens na carteira</option>
+                  <option value="tokens_menor">Menos tokens na carteira</option>
+                  <option value="mais_antigos">Usuários mais antigos</option>
+                  <option value="mais_novos">Usuários mais recentes</option>
+                </select>
+
+                <label class="notif-label">Quantidade máxima</label>
+                <select class="notif-select" id="limite">
+                  <option value="0">Todos (sem limite)</option>
+                  <option value="10">Top 10</option>
+                  <option value="25">Top 25</option>
+                  <option value="50">Top 50</option>
+                  <option value="100">Top 100</option>
+                </select>
+
+                <button class="btn-notif-preview" style="width:100%;margin-top:14px;" onclick="carregarPreview()">
+                  <i class="fa-solid fa-eye"></i> Visualizar destinatários
+                </button>
+              </div>
+
+              <!-- Card: Composição do e-mail -->
+              <div class="notif-card">
+                <div class="notif-card-title">
+                  <i class="fa-solid fa-pen-nib"></i> Compor E-mail
+                </div>
+
+                <label class="notif-label">Assunto</label>
+                <input type="text" class="notif-input" id="assunto" placeholder="Ex: Novidades da Bibliotroca!" />
+
+                <label class="notif-label">Mensagem</label>
+                <textarea class="notif-textarea" id="corpo" placeholder="Escreva aqui o conteúdo do e-mail..."></textarea>
+
+                <label class="notif-label">Agendar envio (opcional)</label>
+                <input type="datetime-local" class="notif-input" id="agendamento" />
+                <span class="notif-hint">Deixe em branco para envio imediato.</span>
+
+                <div class="notif-actions">
+                  <button class="btn-notif-send" onclick="disparar(false)">
+                    <i class="fa-solid fa-paper-plane"></i> Enviar agora
+                  </button>
+                  <button class="btn-notif-schedule" onclick="disparar(true)">
+                    <i class="fa-solid fa-clock"></i> Agendar
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- COLUNA DIREITA: preview de destinatários -->
+            <div class="notif-card">
+              <div class="preview-header">
+                <div class="notif-card-title" style="margin-bottom:0;">
+                  <i class="fa-solid fa-users"></i> Pré-visualização
+                </div>
+                <span class="preview-badge" id="previewCount">0 usuários</span>
+              </div>
+
+              <div class="preview-table-wrap">
+                <table class="preview-table">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>E-mail</th>
+                      <th>XP</th>
+                      <th>Tokens</th>
+                      <th>Membro desde</th>
+                    </tr>
+                  </thead>
+                  <tbody id="previewBody">
+                    <tr>
+                      <td colspan="5" class="preview-empty">
+                        Clique em "Visualizar destinatários" para ver a lista.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div><!-- /notif-grid -->
+        </div><!-- /main -->
+      </div><!-- /content -->
+    </div><!-- /layout -->
+
+    <!-- Toast de feedback -->
+    <div class="notif-toast" id="toast"></div>
+
+    <script>
+      // Exibe data atual na topbar (padrão das outras telas)
+      const dataHoje = document.getElementById('dataHoje');
+      if (dataHoje) {
+        const now = new Date();
+        dataHoje.textContent = now.toLocaleDateString('pt-BR', {
+          weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+        });
+      }
+
+      function mostrarToast(msg, cor) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.style.display = 'block';
+        t.style.background = cor || '#2c241b';
+        setTimeout(() => { t.style.display = 'none'; }, 5000);
+      }
+
+      function carregarPreview() {
+        const filtro = document.getElementById('filtro').value;
+        const limite = document.getElementById('limite').value;
+        const tbody  = document.getElementById('previewBody');
+        const badge  = document.getElementById('previewCount');
+
+        tbody.innerHTML = '<tr><td colspan="5" class="preview-empty">Carregando...</td></tr>';
+
+        fetch(`/admin/notificacoes/preview?filtro=${filtro}&limite=${limite}`)
+          .then(r => r.json())
+          .then(data => {
+            badge.textContent = data.length + ' usuário(s)';
+            if (data.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="5" class="preview-empty">Nenhum usuário encontrado.</td></tr>';
+              return;
+            }
+            tbody.innerHTML = data.map(u => `
+              <tr>
+                <td>${u.nome}</td>
+                <td>${u.email}</td>
+                <td>${u.xpTotal ?? 0} XP</td>
+                <td>${(u.saldoTokens ?? 0).toFixed(1)}</td>
+                <td>${u.dataCriacao}</td>
+              </tr>
+            `).join('');
+          })
+          .catch(() => {
+            tbody.innerHTML = '<tr><td colspan="5" class="preview-empty">Erro ao carregar.</td></tr>';
+            mostrarToast('Erro ao buscar destinatários.', '#b91c1c');
+          });
+      }
+
+      function disparar(comAgendamento) {
+        const filtro     = document.getElementById('filtro').value;
+        const limite     = parseInt(document.getElementById('limite').value);
+        const assunto    = document.getElementById('assunto').value.trim();
+        const corpo      = document.getElementById('corpo').value.trim();
+        const agendamento = document.getElementById('agendamento').value;
+
+        if (!assunto) { mostrarToast('Preencha o assunto do e-mail.', '#b45309'); return; }
+        if (!corpo)   { mostrarToast('Preencha a mensagem do e-mail.', '#b45309'); return; }
+        if (comAgendamento && !agendamento) {
+          mostrarToast('Selecione a data e hora para agendamento.', '#b45309');
+          return;
+        }
+
+        const payload = {
+          filtro, limite, assunto, corpo,
+          agendamento: comAgendamento ? agendamento : ''
+        };
+
+        fetch('/admin/notificacoes/disparar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(data => mostrarToast(data.mensagem, '#2c6e49'))
+        .catch(() => mostrarToast('Erro ao processar o disparo.', '#b91c1c'));
+      }
+    </script>
+  </body>
+</html>

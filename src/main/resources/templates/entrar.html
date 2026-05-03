@@ -131,13 +131,27 @@
 
             <div class="field">
               <label for="senha">Senha</label>
-              <input
-                type="password"
-                id="senha"
-                name="senha"
-                required
-                placeholder="••••••••"
-              />
+              <div class="senha-wrapper">
+                <input
+                  type="password"
+                  id="senha"
+                  name="senha"
+                  required
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  class="btn-olho"
+                  id="btnOlho"
+                  aria-label="Segurar para ver senha"
+                  title="Segure para ver a senha"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <button type="submit" class="btn-entrar">Abrir a biblioteca</button>
