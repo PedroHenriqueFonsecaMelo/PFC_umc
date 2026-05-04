@@ -193,6 +193,12 @@ public class ClientController {
     // 🪙 CARTEIRA E FINANÇAS
     // ============================================================
 
+    @GetMapping("/minhas-compras")
+    public String exibirMinhasCompras(@AuthenticationPrincipal UserDetails user) {
+        if (user == null) return "redirect:/clientes/login";
+        return "cliente/minhas-compras";
+    }
+
     @GetMapping("/lista-desejos")
     public String exibirListaDesejos(@AuthenticationPrincipal UserDetails user) {
         if (user == null) return "redirect:/clientes/login";
