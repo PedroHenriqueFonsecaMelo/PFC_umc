@@ -1,9 +1,13 @@
 /* ================================================================
-   minhas-compras.js — Minhas Compras · Bibliotroca
+   minhas-compras.js — Minha Estante · Bibliotroca
    ================================================================ */
 
 const token = localStorage.getItem("token");
 const authHeader = token ? { "Authorization": `Bearer ${token}` } : {};
+
+const CARRINHO_KEY = "bibliotroca_carrinho";
+
+/* ── UTILS ──────────────────────────────────────────────────────── */
 
 function fmtData(iso) {
     if (!iso) return "—";
@@ -25,10 +29,128 @@ function primeiraFoto(fotosUrls) {
     return null;
 }
 
+/* ── ESTANTE (localStorage) ──────────────────────────────────────── */
+
+function getEstante() {
+    try { return JSON.parse(localStorage.getItem(CARRINHO_KEY)) || []; }
+    catch (_) { return []; }
+}
+
+function removerDaEstante(id) {
+    const itens = getEstante().filter(i => i.id !== id);
+    localStorage.setItem(CARRINHO_KEY, JSON.stringify(itens));
+    renderEstante();
+}
+
+async function finalizarCompraEstante() {
+    const itens = getEstante();
+    if (itens.length === 0) return;
+
+    const btn = document.getElementById("btnFinalizarEstante");
+    const toast = document.getElementById("toastEstante");
+    btn.disabled = true;
+    btn.textContent = "Processando...";
+
+    function mostrarToast(cls, msg) {
+        toast.className = "toast-estante " + cls;
+        toast.innerHTML = msg;
+        toast.style.display = "block";
+        setTimeout(() => { toast.style.display = "none"; }, 6000);
+    }
+
+    try {
+        const res = await fetch("/api/livros/carrinho/comprar", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ livroIds: itens.map(i => i.id) }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            mostrarToast("toast-estante-erro", "❌ " + (data.message || data.error || "Erro ao finalizar compra."));
+            btn.disabled = false;
+            btn.textContent = "Finalizar Compra";
+            return;
+        }
+
+        const ok   = data.totalComprados || 0;
+        const fail = (data.falhas || []).length;
+
+        if (ok > 0) {
+            const idsComprados = new Set(data.comprados.map(c => c.livroId));
+            localStorage.setItem(CARRINHO_KEY, JSON.stringify(getEstante().filter(i => !idsComprados.has(i.id))));
+            renderEstante();
+            carregarPerfil();
+        }
+
+        if (ok > 0 && fail === 0) {
+            mostrarToast("toast-estante-ok", `✅ ${ok} livro(s) comprado(s)! Saldo restante: T$ ${data.saldoRestante.toFixed(2)}`);
+        } else if (ok > 0 && fail > 0) {
+            mostrarToast("toast-estante-aviso", `⚠️ ${ok} comprado(s), ${fail} não concluído(s). Saldo: T$ ${data.saldoRestante.toFixed(2)}`);
+        } else {
+            const motivo = data.falhas?.[0]?.motivo || "Falha desconhecida.";
+            mostrarToast("toast-estante-erro", "❌ " + motivo);
+        }
+
+    } catch (_) {
+        mostrarToast("toast-estante-erro", "❌ Erro de conexão. Tente novamente.");
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Finalizar Compra";
+}
+
+function renderEstante() {
+    const itens = getEstante();
+    const lista   = document.getElementById("estanteLista");
+    const vazio   = document.getElementById("estanteVazio");
+    const acoes   = document.getElementById("estanteAcoes");
+    const badge   = document.getElementById("estanteBadge");
+    const totalEl = document.getElementById("estanteTotal");
+
+    if (!lista) return;
+
+    if (badge) {
+        badge.textContent = itens.length;
+        badge.style.display = itens.length > 0 ? "inline-flex" : "none";
+    }
+
+    if (itens.length === 0) {
+        lista.innerHTML = "";
+        if (vazio) vazio.style.display = "block";
+        if (acoes) acoes.style.display = "none";
+        return;
+    }
+
+    if (vazio) vazio.style.display = "none";
+    if (acoes) acoes.style.display = "block";
+
+    lista.innerHTML = itens.map(item => {
+        const foto = primeiraFoto(item.fotosUrls) || "https://via.placeholder.com/40x54?text=📚";
+        return `
+        <div class="estante-item">
+            <img class="estante-item-img" src="${foto}" alt="${item.titulo}"
+                 onerror="this.src='https://via.placeholder.com/40x54?text=📚'"/>
+            <div class="estante-item-info">
+                <div class="estante-item-titulo">${item.titulo}</div>
+                <div class="estante-item-autor">${item.autor}</div>
+                <div class="estante-item-preco">T$ ${(item.precoAprovado || 0).toFixed(2)}</div>
+            </div>
+            <button class="estante-item-remover" onclick="removerDaEstante(${item.id})" title="Remover">✕</button>
+        </div>`;
+    }).join("");
+
+    const total = itens.reduce((s, i) => s + (i.precoAprovado || 0), 0);
+    if (totalEl) totalEl.textContent = `T$ ${total.toFixed(2)}`;
+}
+
+/* ── HISTÓRICO DE COMPRAS ────────────────────────────────────────── */
+
 const PASSOS = [
     { key: "AGUARDANDO_ENVIO", label: "Aguardando" },
-    { key: "EM_TRANSITO", label: "Em trânsito" },
-    { key: "ENTREGUE", label: "Entregue" },
+    { key: "EM_TRANSITO",      label: "Em trânsito" },
+    { key: "ENTREGUE",         label: "Entregue"    },
 ];
 
 function buildTimeline(status) {
@@ -41,7 +163,7 @@ function buildTimeline(status) {
     return `
         <div class="timeline">
             ${PASSOS.map((p, i) => {
-                const cls = i < ordemAtual ? "done" : i === ordemAtual ? "active" : "";
+                const cls  = i < ordemAtual ? "done" : i === ordemAtual ? "active" : "";
                 const icon = i < ordemAtual ? "✓" : i + 1;
                 return `
                     <div class="tl-step ${cls}">
@@ -53,7 +175,7 @@ function buildTimeline(status) {
 }
 
 function buildCard(p) {
-    const foto = primeiraFoto(p.fotosUrls);
+    const foto   = primeiraFoto(p.fotosUrls);
     const imgSrc = foto || "https://via.placeholder.com/72x96?text=📚";
 
     const rastreio = (p.codigoRastreio && p.statusEnvio === "EM_TRANSITO")
@@ -142,18 +264,21 @@ function trocarTab(nome, btn) {
     document.getElementById("panel-" + nome).classList.add("active");
 }
 
+/* ── INIT ──────────────────────────────────────────────────────── */
+
 async function init() {
     carregarPerfil();
+    renderEstante();
 
     const [pendentes, concluidos, todos] = await Promise.all([
-        carregarLista("/api/pedidos/pendentes", "lista-pendentes"),
+        carregarLista("/api/pedidos/pendentes",  "lista-pendentes"),
         carregarLista("/api/pedidos/concluidos", "lista-concluidos"),
-        carregarLista("/api/pedidos/todos", "lista-todos"),
+        carregarLista("/api/pedidos/todos",      "lista-todos"),
     ]);
 
-    renderLista(pendentes, "lista-pendentes", "Nenhuma compra em andamento no momento.");
+    renderLista(pendentes,  "lista-pendentes",  "Nenhuma compra em andamento no momento.");
     renderLista(concluidos, "lista-concluidos", "Nenhuma compra concluída ainda.");
-    renderLista(todos, "lista-todos", "Você ainda não realizou nenhuma compra.");
+    renderLista(todos,      "lista-todos",      "Você ainda não realizou nenhuma compra.");
 
     if (pendentes.length > 0) {
         const b = document.getElementById("badgePendentes");

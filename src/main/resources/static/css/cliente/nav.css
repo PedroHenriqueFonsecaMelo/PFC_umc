@@ -95,6 +95,20 @@
   white-space: nowrap;
 }
 
+/* ── Link Minha Estante com ícone ── */
+.cn-estante {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.cn-estante-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 /* ── Responsivo ── */
 @media (max-width: 860px) {
   .cn-brand  { font-size: 1.35rem; margin-right: 0.4rem; }

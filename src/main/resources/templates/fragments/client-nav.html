@@ -16,10 +16,13 @@
         <a th:href="@{/forum}"                   class="cn-btn">Fórum</a>
         <a th:href="@{/blog}"                    class="cn-btn">Blog</a>
         <a th:href="@{/clientes/lista-desejos}"  class="cn-btn">Lista de Desejos</a>
-        <a th:href="@{/clientes/minhas-compras}" class="cn-btn">Minha Estante</a>
     </nav>
     <div class="cn-right">
         <span class="cn-saldo" id="navSaldo">T$ --</span>
+        <a th:href="@{/clientes/minhas-compras}" class="cn-btn cn-estante">
+            <img src="/favicon.ico" alt="Estante" class="cn-estante-icon"/>
+            Minha Estante
+        </a>
         <a th:href="@{/clientes/meu-perfil}"     class="cn-btn">Meu Perfil</a>
         <a th:href="@{/clientes/sair}"           class="cn-btn">Sair</a>
     </div>

@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import umc.exs.DTOs.user.ClienteDTO;
+import umc.exs.repository.livro.LivroRepository;
+import umc.exs.repository.negocios.PedidoRepository;
+import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
 import umc.exs.service.core.cliente.ClienteService;
@@ -31,9 +34,15 @@ public class IndexController {
     private final PasswordEncoder passwordEncoder;
     private final ClienteService clienteService;
     private final AuthHelper authHelper;
+    private final LivroRepository livroRepository;
+    private final ClienteRepository clienteRepository;
+    private final PedidoRepository pedidoRepository;
 
     @GetMapping({ "/", "/index", "/home" })
-    public String index() {
+    public String index(Model model) {
+        model.addAttribute("statLivros",   livroRepository.countByAprovadoTrue());
+        model.addAttribute("statLeitores", clienteRepository.count());
+        model.addAttribute("statTrocas",   pedidoRepository.count());
         return "index";
     }
 

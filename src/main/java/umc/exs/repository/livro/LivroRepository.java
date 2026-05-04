@@ -30,6 +30,8 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
 
     List<Livro> findByAprovadoTrue();
 
+    long countByAprovadoTrue();
+
     Optional<Livro> findByIdAndAprovadoTrue(Long id);
 
     List<Livro> findByDataAnuncioAfter(LocalDateTime data);
