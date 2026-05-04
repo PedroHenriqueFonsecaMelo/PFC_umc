@@ -39,6 +39,10 @@
            th:classappend="${activeMenu == 'forum'} ? ' ativo'">
             <i class="fa-solid fa-comments"></i> Fórum
         </a>
+        <a href="/admin/estoque" class="nav-item"
+           th:classappend="${activeMenu == 'estoque'} ? ' ativo'">
+            <i class="fa-solid fa-warehouse"></i> Estoque
+        </a>
         <a href="/admin/audit" class="nav-item"
            th:classappend="${activeMenu == 'auditoria'} ? ' ativo'">
             <i class="fa-solid fa-shield-halved"></i> Auditoria

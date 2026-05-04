@@ -565,6 +565,49 @@ public class LivroService {
                 .falhas(falhas)
                 .build();
     }
+
+    // ── CRUD Admin ────────────────────────────────────────────────
+
+    public Livro adicionarLivroAdmin(String titulo, String autor, String isbn,
+                                     Double preco, EstadoLivro estado, String resumo, Long adminId) {
+        Livro livro = Livro.builder()
+                .titulo(titulo)
+                .autor(autor)
+                .isbn(isbn != null ? isbn : "")
+                .precoAprovado(preco)
+                .estadoAprovado(estado)
+                .resumoOficial(resumo)
+                .aprovado(true)
+                .fotosUrls("[]")
+                .dataAnuncio(LocalDateTime.now())
+                .dataAprovacao(LocalDateTime.now())
+                .adminAprovadorId(adminId)
+                .build();
+        Livro salvo = livroRepository.save(livro);
+        logAuditoria.registrarLog("ADMIN_LIVRO_ADICIONADO", adminId, "admin",
+                "Livro adicionado: " + titulo + " (ID " + salvo.getId() + ")");
+        return salvo;
+    }
+
+    @Transactional
+    public Livro editarLivroAdmin(Long id, String titulo, String autor, String isbn,
+                                  Double preco, EstadoLivro estado, String resumo) {
+        Livro livro = livroRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Livro não encontrado."));
+        if (titulo != null && !titulo.isBlank())  livro.setTitulo(titulo);
+        if (autor  != null && !autor.isBlank())   livro.setAutor(autor);
+        if (isbn   != null && !isbn.isBlank())    livro.setIsbn(isbn);
+        if (preco  != null)                       livro.setPrecoAprovado(preco);
+        if (estado != null)                       livro.setEstadoAprovado(estado);
+        if (resumo != null)                       livro.setResumoOficial(resumo);
+        return livroRepository.save(livro);
+    }
+
+    public void deletarLivroAdmin(Long id) {
+        if (!livroRepository.existsById(id))
+            throw new RuntimeException("Livro não encontrado.");
+        livroRepository.deleteById(id);
+    }
 }
 
 /**

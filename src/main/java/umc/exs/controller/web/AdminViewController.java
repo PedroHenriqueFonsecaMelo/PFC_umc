@@ -182,6 +182,11 @@ public class AdminViewController {
                 .body(bytes);
     }
 
+    @GetMapping("/estoque")
+    public String estoque() {
+        return "admin/estoque";
+    }
+
     @GetMapping("/sair")
     public String logout(HttpServletResponse response) {
 

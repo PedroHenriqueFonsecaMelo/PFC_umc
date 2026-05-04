@@ -9,9 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -225,6 +227,96 @@ public class AdminControllerApi {
             return ResponseEntity.ok(atualizado);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // ==========================================================
+    // ESTOQUE — CRUD livros aprovados
+    // ==========================================================
+
+    @GetMapping("/livros/aprovados")
+    public ResponseEntity<List<Map<String, Object>>> listarLivrosAprovados() {
+        List<Map<String, Object>> lista = livroService.listarLivrosAprovados().stream()
+                .map(b -> {
+                    Map<String, Object> m = new java.util.HashMap<>();
+                    m.put("id",             b.getId());
+                    m.put("titulo",         b.getTitulo());
+                    m.put("autor",          b.getAutor());
+                    m.put("isbn",           b.getIsbn());
+                    m.put("precoAprovado",  b.getPrecoAprovado());
+                    m.put("estadoAprovado", b.getEstadoAprovado() != null ? b.getEstadoAprovado().name() : null);
+                    m.put("resumoOficial",  b.getResumoOficial());
+                    m.put("fotosUrls",      b.getFotosUrls() != null ? b.getFotosUrls() : "[]");
+                    String primeiraFoto = "";
+                    if (b.getFotosUrls() != null && b.getFotosUrls().contains("\"")) {
+                        primeiraFoto = b.getFotosUrls().split("\"")[1];
+                    }
+                    m.put("fotoUrl", primeiraFoto);
+                    return m;
+                })
+                .toList();
+        return ResponseEntity.ok(lista);
+    }
+
+    @PostMapping("/livros/novo")
+    public ResponseEntity<?> adicionarLivro(@RequestBody Map<String, Object> body,
+                                             @AuthenticationPrincipal UserDetails user) {
+        if (user == null) return ResponseEntity.status(401).body("Não autenticado.");
+        try {
+            Optional<Administrador> adminOpt = adminRepository.findByEmail(user.getUsername());
+            if (adminOpt.isEmpty()) return ResponseEntity.status(401).body("Admin não encontrado.");
+            Long adminId = adminOpt.get().getId();
+
+            String titulo  = (String) body.get("titulo");
+            String autor   = (String) body.get("autor");
+            String isbn    = (String) body.getOrDefault("isbn", "");
+            Double preco   = body.get("preco") != null ? ((Number) body.get("preco")).doubleValue() : 0.0;
+            String estado  = (String) body.getOrDefault("estado", "BOM");
+            String resumo  = (String) body.getOrDefault("resumo", "");
+
+            if (titulo == null || titulo.isBlank()) return ResponseEntity.badRequest().body("Título obrigatório.");
+            if (autor  == null || autor.isBlank())  return ResponseEntity.badRequest().body("Autor obrigatório.");
+
+            umc.exs.model.enums.EstadoLivro estadoEnum = umc.exs.model.enums.EstadoLivro.valueOf(estado);
+            var livro = livroService.adicionarLivroAdmin(titulo, autor, isbn, preco, estadoEnum, resumo, adminId);
+            return ResponseEntity.ok(Map.of("success", true, "id", livro.getId(), "message", "Livro adicionado com sucesso!"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/livros/{id}")
+    public ResponseEntity<?> editarLivro(@PathVariable Long id,
+                                          @RequestBody Map<String, Object> body,
+                                          @AuthenticationPrincipal UserDetails user) {
+        if (user == null) return ResponseEntity.status(401).body("Não autenticado.");
+        try {
+            String titulo = (String) body.get("titulo");
+            String autor  = (String) body.get("autor");
+            String isbn   = (String) body.get("isbn");
+            Double preco  = body.get("preco") != null ? ((Number) body.get("preco")).doubleValue() : null;
+            String estado = (String) body.get("estado");
+            String resumo = (String) body.get("resumo");
+
+            umc.exs.model.enums.EstadoLivro estadoEnum = estado != null
+                    ? umc.exs.model.enums.EstadoLivro.valueOf(estado) : null;
+
+            livroService.editarLivroAdmin(id, titulo, autor, isbn, preco, estadoEnum, resumo);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Livro atualizado com sucesso!"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/livros/{id}")
+    public ResponseEntity<?> deletarLivro(@PathVariable Long id,
+                                           @AuthenticationPrincipal UserDetails user) {
+        if (user == null) return ResponseEntity.status(401).body("Não autenticado.");
+        try {
+            livroService.deletarLivroAdmin(id);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Livro removido do estoque."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro: " + e.getMessage());
         }
     }
 
