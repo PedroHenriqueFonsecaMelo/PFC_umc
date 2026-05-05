@@ -1,186 +1,159 @@
-let userState = { saldo: 0.0, nome: "" };
+const TOKENS_POR_REAL = 2;
 
-// Ao carregar a página
+let intervaloCheck = null;
+
 document.addEventListener("DOMContentLoaded", () => {
-    loadUserProfile();
+    carregarSaldo();
     carregarHistorico();
-
-    const metodoSelect = document.getElementById('metodoPagamento');
-    const sectionCartao = document.getElementById('sectionCartao');
-
-    // Alternar campos de cartão
-    metodoSelect.addEventListener('change', (e) => {
-        sectionCartao.classList.toggle('hidden', e.target.value === 'PIX');
-    });
-
-    // Interceptar envio do formulário
     document.getElementById('formCompra').addEventListener('submit', efetuarCompra);
 });
 
-async function loadUserProfile() {
-    try {
-        const response = await fetch('/clientes/meu-perfil');
-        if (response.ok) {
-            const data = await response.json();
-            userState.saldo = data.saldoTokens || 0.0;
-            userState.nome = data.nome;
-            updateUI();
-        }
-    } catch (error) { console.error("Erro ao carregar perfil:", error); }
-}
-async function efetuarCompra(e) {
-    e.preventDefault();
-    const btn = document.getElementById('btnComprar');
-    const valor = document.getElementById('valor').value;
-    const metodo = document.getElementById('metodoPagamento').value;
-    const cartao = document.getElementById('numCartao').value;
+function atualizarPreview() {
+    const valor = parseFloat(document.getElementById('valor').value) || 0;
+    const preview = document.getElementById('tokensPreview');
+    const previewTokens = document.getElementById('previewTokens');
 
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin"></i> Processando...';
-
-    try {
-        const response = await fetch('/api/tokens/comprar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                valor: parseFloat(valor),
-                metodoPagamento: metodo,
-                numeroCartao: metodo === 'CARTAO' ? cartao : null
-            })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            // VERIFICA SE É PIX
-            if (data.qrCodeBase64) {
-                document.getElementById('imgQrCode').src = data.qrCodeBase64;
-                document.getElementById('textoCopiaECola').value = data.pixCopiaECola;
-                document.getElementById('modalPix').classList.remove('hidden');
-
-                iniciarVerificacao(data.pagamentoId);
-
-            } else {
-                // SUCESSO DIRETO (CARTÃO)
-                userState.saldo = data.saldoTokens;
-                updateUI();
-                carregarHistorico();
-                alert("Sucesso! Seus tokens já estão disponíveis.");
-                e.target.reset();
-            }
-        } else {
-            alert("Erro no pagamento: " + (data.message || "Verifique os dados."));
-        }
-    } catch (error) {
-        console.error(error);
-        alert("Erro técnico de conexão.");
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-check-double"></i> Confirmar e Pagar';
+    if (valor >= 1) {
+        previewTokens.textContent = (valor * TOKENS_POR_REAL).toFixed(0);
+        preview.style.display = 'flex';
+    } else {
+        preview.style.display = 'none';
     }
 }
 
-// Função para copiar o código PIX
+async function carregarSaldo() {
+    try {
+        const res = await fetch('/clientes/meu-perfil-json', { credentials: 'include' });
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById('displaySaldo').textContent = (data.saldoTokens || 0).toFixed(2);
+            const navSaldo = document.getElementById('navSaldo');
+            if (navSaldo) navSaldo.textContent = 'T$ ' + (data.saldoTokens || 0).toFixed(2);
+        }
+    } catch (e) {
+        console.error("Erro ao carregar saldo:", e);
+    }
+}
+
+async function efetuarCompra(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnComprar');
+    const valor = parseFloat(document.getElementById('valor').value);
+
+    if (!valor || valor < 1) {
+        alert("Informe um valor mínimo de R$ 1,00.");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Gerando PIX...';
+
+    try {
+        const res = await fetch('/api/tokens/comprar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ valor })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.message || data || "Erro ao gerar o PIX.");
+            return;
+        }
+
+        // Exibe modal com QR Code
+        const tokens = (valor * TOKENS_POR_REAL).toFixed(0);
+        document.getElementById('pixValorInfo').textContent =
+            `R$ ${valor.toFixed(2)} → T$ ${tokens} tokens`;
+        document.getElementById('imgQrCode').src = data.qrCodeBase64;
+        document.getElementById('textoCopiaECola').value = data.pixCopiaECola;
+        document.getElementById('pixStatus').innerHTML =
+            '<i class="fa-solid fa-circle-notch fa-spin"></i> Aguardando confirmação do pagamento...';
+        document.getElementById('modalPix').style.display = 'flex';
+
+        iniciarVerificacao(data.pagamentoId);
+
+    } catch (err) {
+        console.error(err);
+        alert("Erro de conexão. Tente novamente.");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-qrcode"></i> Gerar QR Code PIX';
+    }
+}
+
 function copyPix() {
     const input = document.getElementById('textoCopiaECola');
     input.select();
-    navigator.clipboard.writeText(input.value);
-    alert("Código copiado!");
+    navigator.clipboard.writeText(input.value)
+        .then(() => alert("Código copiado!"))
+        .catch(() => {
+            document.execCommand('copy');
+            alert("Código copiado!");
+        });
 }
 
 function fecharModalPix() {
-    document.getElementById('modalPix').classList.add('hidden');
-    loadUserProfile();
+    if (intervaloCheck) clearInterval(intervaloCheck);
+    document.getElementById('modalPix').style.display = 'none';
+    carregarSaldo();
     carregarHistorico();
+}
+
+function iniciarVerificacao(pagamentoId) {
+    if (intervaloCheck) clearInterval(intervaloCheck);
+
+    intervaloCheck = setInterval(async () => {
+        try {
+            const res = await fetch(`/api/tokens/verificar-pagamento/${pagamentoId}`, {
+                credentials: 'include'
+            });
+            const data = await res.json();
+
+            if (data.status === "APROVADO") {
+                clearInterval(intervaloCheck);
+                document.getElementById('pixStatus').innerHTML =
+                    '<i class="fa-solid fa-check-circle" style="color:#4a5d23"></i> Pagamento confirmado! Tokens creditados.';
+
+                setTimeout(() => {
+                    fecharModalPix();
+                }, 2500);
+            }
+        } catch (e) {
+            console.error("Erro ao verificar PIX:", e);
+        }
+    }, 4000);
 }
 
 async function carregarHistorico() {
     const tbody = document.getElementById('lista-transacoes');
     try {
-        const res = await fetch('/api/tokens/historico');
-        if (res.ok) {
-            const transacoes = await res.json();
-            tbody.innerHTML = transacoes.map(t => `
-                <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
-                    <td class="p-4">${new Date(t.dataHora).toLocaleString('pt-BR')}</td>
-                    <td class="p-4 font-bold text-indigo-600">T$ ${t.valor.toFixed(2)}</td>
-                    <td class="p-4"><span class="px-2 py-1 bg-slate-100 rounded text-xs">${t.metodoPagamento}</span></td>
-                    <td class="p-4 text-xs text-gray-400">${t.finalCartao ? 'Final ****' + t.finalCartao : '-'}</td>
-                </tr>
-            `).join('');
+        const res = await fetch('/api/tokens/historico', { credentials: 'include' });
+        if (!res.ok) return;
+
+        const transacoes = await res.json();
+
+        if (!transacoes.length) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;padding:1.5rem;">Nenhuma transação ainda.</td></tr>';
+            return;
         }
-    } catch (e) { console.error("Erro histórico:", e); }
-}
 
-let intervaloCheck; // Variável global para controlar o timer
-
-function iniciarVerificacao(pagamentoId) {
-    if (intervaloCheck) clearInterval(intervaloCheck);
-
-    console.log("Iniciando verificação do PIX: " + pagamentoId);
-
-    intervaloCheck = setInterval(async () => {
-        try {
-            const response = await fetch(`/api/tokens/verificar-pagamento/${pagamentoId}`);
-            const data = await response.json();
-
-            if (data.status === "APROVADO") {
-                console.log("Pagamento aprovado detectado!");
-
-                // 1. Para o cronômetro
-                clearInterval(intervaloCheck);
-
-                // 2. Fecha o modal (Garante que a classe 'hidden' seja adicionada)
-                const modal = document.getElementById('modalPix');
-                modal.classList.add('hidden');
-
-                // 3. Feedback para o usuário
-                alert("🚀 Sucesso! O pagamento foi compensado e seus tokens já estão disponíveis.");
-
-                // 4. Atualiza a tela sem dar F5
-                if (typeof loadUserProfile === "function") loadUserProfile();
-                if (typeof carregarHistorico === "function") carregarHistorico();
-            }
-        } catch (e) {
-            console.error("Erro ao verificar status do PIX:", e);
-        }
-    }, 3000); // Tenta a cada 3 segundos
-}
-
-function confirmarPagamentoSucesso() {
-    document.getElementById('modalPix').classList.add('hidden');
-    alert("🚀 Pagamento detectado com sucesso! Seus tokens foram adicionados.");
-    loadUserProfile();
-    carregarHistorico();
-}
-
-async function simularAvisoBanco() {
-    const fullCode = document.getElementById('textoCopiaECola').value;
-
-    const regex = /PX-\d+/;
-    const match = fullCode.match(regex);
-    const pagamentoId = match ? match[0] : null;
-
-    if (!pagamentoId) {
-        console.error("ID de pagamento não encontrado no código PIX");
-        return;
-    }
-
-    try {
-        const response = await fetch(`/api/tokens/simular-webhook/${pagamentoId}`);
-        if (response.ok) {
-            console.log("Comando de aprovação enviado para o ID: " + pagamentoId);
-        }
+        tbody.innerHTML = transacoes.map(t => {
+            const statusClass = t.status === 'CONCLUIDO' ? 'status-ok' : 'status-pendente';
+            const statusLabel = t.status === 'CONCLUIDO' ? 'Confirmado' : 'Pendente';
+            const data = new Date(t.dataHora).toLocaleString('pt-BR');
+            const id = t.pagamentoId ? t.pagamentoId.substring(0, 12) + '...' : '-';
+            return `
+                <tr>
+                    <td>${data}</td>
+                    <td class="valor-tokens">T$ ${t.valor.toFixed(2)}</td>
+                    <td><span class="badge-status ${statusClass}">${statusLabel}</span></td>
+                    <td class="ref-id" title="${t.pagamentoId || ''}">${id}</td>
+                </tr>`;
+        }).join('');
     } catch (e) {
-        console.error("Erro ao simular aprovação", e);
+        console.error("Erro ao carregar histórico:", e);
     }
-}
-
-function updateUI() {
-    var saldoEl = document.getElementById('displaySaldo');
-    if (saldoEl) saldoEl.innerText = userState.saldo.toFixed(2);
-    var nomeEl = document.getElementById('displayNome');
-    if (nomeEl) nomeEl.innerText = userState.nome;
-    var navSaldo = document.getElementById('navSaldo');
-    if (navSaldo) navSaldo.textContent = 'T$ ' + userState.saldo.toFixed(2);
 }

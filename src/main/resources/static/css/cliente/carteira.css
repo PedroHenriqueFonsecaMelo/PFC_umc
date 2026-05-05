@@ -133,3 +133,55 @@ td { padding: 0.75rem 1rem; font-size: 0.875rem; color: #2c241b; border-bottom: 
 .btn-fechar-pix:hover { background: #3a2e24; }
 .btn-debug { display: block; margin: 0.5rem auto 0; background: none; border: none; color: rgba(44, 36, 27, 0.3); font-size: 0.7rem; cursor: pointer; text-align: center; }
 .btn-debug:hover { color: rgba(44, 36, 27, 0.6); }
+
+/* ── TOKENS PREVIEW ── */
+.tokens-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #e8f0d8;
+  border: 1px solid #4a5d23;
+  color: #4a5d23;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+.tokens-preview i { font-size: 1rem; }
+
+/* ── PIX MODAL EXTRAS ── */
+.pix-valor-info {
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #4a5d23;
+  background: #e8f0d8;
+  padding: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.pix-status {
+  text-align: center;
+  font-size: 0.82rem;
+  color: #7a6e65;
+  margin: 1rem 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* ── BADGES HISTÓRICO ── */
+.valor-tokens { font-weight: 700; color: #4a5d23; }
+.ref-id { font-size: 0.75rem; color: #aaa; font-family: monospace; }
+
+.badge-status {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 3px;
+}
+.status-ok { background: #e8f0d8; color: #4a5d23; }
+.status-pendente { background: #fff3cd; color: #856404; }

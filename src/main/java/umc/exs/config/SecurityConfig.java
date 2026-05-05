@@ -44,7 +44,8 @@ public class SecurityConfig {
 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http, JwtRequestFilter jwtRequestFilter,
-                        RateLimitFilter rateLimitFilter) throws Exception {
+                        RateLimitFilter rateLimitFilter,
+                        umc.exs.security.JwtAuthenticationEntryPoint entryPoint) throws Exception {
                 http
                                 .headers(headers -> headers
                                                 .contentSecurityPolicy(csp -> csp
@@ -92,12 +93,18 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.PUT, "/api/avaliacoes/admin/**")
                                                 .hasAuthority("ADMIN")
 
-                                                // 5. Rotas de Admin e Rotas Autenticadas Genéricas
+                                                // 5. Webhook Mercado Pago e simulação de pagamento
+                                                .requestMatchers(HttpMethod.POST, "/api/tokens/webhook").permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/tokens/simular-webhook/**").permitAll()
+
+                                                // 6. Rotas de Admin e Rotas Autenticadas Genéricas
                                                 .requestMatchers(ADMIN_ROUTES).hasAuthority("ADMIN")
                                                 .requestMatchers(AUTHENTICATED_ROUTES).authenticated()
 
-                                                // 6. Qualquer outra rota exige login
+                                                // 7. Qualquer outra rota exige login
                                                 .anyRequest().authenticated())
+                                .exceptionHandling(ex -> ex
+                                                .authenticationEntryPoint(entryPoint))
                                 .logout(logout -> logout
                                                 .logoutUrl("/clientes/sair")
                                                 .deleteCookies("token")

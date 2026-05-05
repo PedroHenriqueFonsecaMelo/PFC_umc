@@ -355,96 +355,152 @@
              PANEL 2 · ENDEREÇOS
              ------------------------------------------------ -->
         <div id="panel-enderecos" class="tab-panel">
-            <form th:action="@{/clientes/atualizar}" method="post" th:object="${cliente}">
-                <input type="hidden" th:field="*{id}" />
-                <input type="hidden" th:field="*{nome}" />
-                <input type="hidden" th:field="*{datanasc}" />
 
-                <div class="add-item-row">
-                    <button type="button" onclick="adicionarEndereco()" class="btn-tech-secondary">
-                        + Adicionar Endereço
+            <!-- Sem endereço cadastrado -->
+            <div th:if="${#lists.isEmpty(cliente.enderecos)}">
+                <div id="sem-endereco-info" class="panel-card" style="text-align:center; padding:2rem;">
+                    <p style="margin-bottom:1rem; color:var(--text-muted);">Você ainda não tem um endereço de entrega cadastrado.</p>
+                    <button type="button" onclick="mostrarFormCadastrarEndereco()" class="btn-tech-secondary">
+                        + Cadastrar Endereço
                     </button>
                 </div>
-
-                <div id="enderecos-list-container">
-                    <div th:each="endereco, iStat : *{enderecos}"
-                         class="endereco-item item-card">
+                <div id="form-novo-endereco" class="endereco-item item-card" style="display:none;">
+                    <form th:action="@{/clientes/enderecos/novo}" method="post">
                         <fieldset>
-                            <legend th:text="'Endereço ' + (${iStat.index} + 1)">Endereço 1</legend>
-                            <input type="hidden"
-                                   th:field="*{enderecos[__${iStat.index}__].id}" />
+                            <legend>Novo Endereço</legend>
                             <div class="form-grid">
                                 <div class="form-group">
                                     <label>CEP</label>
-                                    <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].cep}"
-                                           onblur="buscarCep(this)"
-                                           placeholder="00000-000" />
+                                    <input type="text" name="cep" onblur="buscarCep(this)" placeholder="00000-000" required />
                                 </div>
                                 <div class="form-group">
                                     <label>Rua</label>
-                                    <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].rua}"
-                                           data-cep-field="rua" />
+                                    <input type="text" name="rua" data-cep-field="rua" required />
                                 </div>
                                 <div class="form-group">
                                     <label>Número</label>
-                                    <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].numero}"
-                                           data-cep-field="numero" />
+                                    <input type="text" name="numero" data-cep-field="numero" required />
                                 </div>
                                 <div class="form-group">
                                     <label>Bairro</label>
-                                    <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].bairro}"
-                                           data-cep-field="bairro" />
+                                    <input type="text" name="bairro" data-cep-field="bairro" required />
                                 </div>
                                 <div class="form-group">
                                     <label>Cidade</label>
-                                    <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].cidade}"
-                                           data-cep-field="cidade" />
+                                    <input type="text" name="cidade" data-cep-field="cidade" required />
                                 </div>
                                 <div class="form-group">
                                     <label>Estado</label>
-                                    <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].estado}"
-                                           data-cep-field="estado" />
+                                    <input type="text" name="estado" data-cep-field="estado" maxlength="2" required />
                                 </div>
                                 <div class="form-group">
                                     <label>País</label>
-                                    <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].pais}"
-                                           data-cep-field="pais" />
+                                    <input type="text" name="pais" data-cep-field="pais" value="Brasil" required />
                                 </div>
                                 <div class="form-group">
                                     <label>Complemento</label>
-                                    <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].complemento}"
-                                           data-cep-field="complemento" />
+                                    <input type="text" name="complemento" />
                                 </div>
                                 <div class="form-group">
                                     <label>Tipo de Residência</label>
-                                    <input type="text"
-                                           th:field="*{enderecos[__${iStat.index}__].tipoResidencia}" />
+                                    <input type="text" name="tipoResidencia" placeholder="Ex: Casa, Apto" />
                                 </div>
                             </div>
-                            <button type="submit"
-                                    formaction="/clientes/removerEndereco"
-                                    formmethod="post"
-                                    name="enderecoId"
-                                    th:value="${endereco.id}"
-                                    class="btn-remover-endereco">
-                                ✕ Remover
-                            </button>
+                            <div class="form-submit-row">
+                                <button type="button" onclick="ocultarFormCadastrarEndereco()" class="btn-cancelar-js">✕ Cancelar</button>
+                                <button type="submit" class="btn-tech-primary">▶ Salvar</button>
+                            </div>
                         </fieldset>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Endereço existente -->
+            <div th:unless="${#lists.isEmpty(cliente.enderecos)}"
+                 th:with="end=${cliente.enderecos[0]}">
+
+                <!-- Cartão de visualização -->
+                <div id="endereco-card" class="endereco-item item-card">
+                    <div class="endereco-readonly">
+                        <div class="endereco-linha"><strong>CEP:</strong> <span th:text="${end.cep}"></span></div>
+                        <div class="endereco-linha"><strong>Endereço:</strong>
+                            <span th:text="${end.rua} + ', ' + ${end.numero}"></span>
+                        </div>
+                        <div th:if="${end.complemento != null and !#strings.isEmpty(end.complemento)}" class="endereco-linha">
+                            <strong>Complemento:</strong> <span th:text="${end.complemento}"></span>
+                        </div>
+                        <div class="endereco-linha"><strong>Bairro:</strong> <span th:text="${end.bairro}"></span></div>
+                        <div class="endereco-linha"><strong>Cidade / Estado:</strong>
+                            <span th:text="${end.cidade} + ' - ' + ${end.estado}"></span>
+                        </div>
+                        <div class="endereco-linha"><strong>País:</strong> <span th:text="${end.pais}"></span></div>
+                        <div th:if="${end.tipoResidencia != null and !#strings.isEmpty(end.tipoResidencia)}" class="endereco-linha">
+                            <strong>Tipo:</strong> <span th:text="${end.tipoResidencia}"></span>
+                        </div>
+                    </div>
+                    <div class="endereco-acoes">
+                        <button type="button" onclick="mostrarFormEditarEndereco()" class="btn-tech-secondary">✎ Editar</button>
+                        <form th:action="@{/clientes/enderecos/remover}" method="post" style="display:inline;">
+                            <input type="hidden" name="enderecoId" th:value="${end.id}" />
+                            <button type="submit" class="btn-remover-endereco"
+                                    onclick="return confirm('Deseja remover este endereço?')">✕ Remover</button>
+                        </form>
                     </div>
                 </div>
 
-                <div class="form-submit-row">
-                    <button type="submit" class="btn-tech-primary">▶ Salvar Endereços</button>
+                <!-- Formulário de edição (oculto por padrão) -->
+                <div id="form-editar-endereco" class="endereco-item item-card" style="display:none;">
+                    <form th:action="@{/clientes/enderecos/editar}" method="post">
+                        <input type="hidden" name="id" th:value="${end.id}" />
+                        <fieldset>
+                            <legend>Editar Endereço</legend>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>CEP</label>
+                                    <input type="text" name="cep" th:value="${end.cep}" onblur="buscarCep(this)" placeholder="00000-000" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Rua</label>
+                                    <input type="text" name="rua" th:value="${end.rua}" data-cep-field="rua" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Número</label>
+                                    <input type="text" name="numero" th:value="${end.numero}" data-cep-field="numero" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Bairro</label>
+                                    <input type="text" name="bairro" th:value="${end.bairro}" data-cep-field="bairro" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Cidade</label>
+                                    <input type="text" name="cidade" th:value="${end.cidade}" data-cep-field="cidade" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Estado</label>
+                                    <input type="text" name="estado" th:value="${end.estado}" data-cep-field="estado" maxlength="2" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>País</label>
+                                    <input type="text" name="pais" th:value="${end.pais}" data-cep-field="pais" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Complemento</label>
+                                    <input type="text" name="complemento" th:value="${end.complemento}" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Tipo de Residência</label>
+                                    <input type="text" name="tipoResidencia" th:value="${end.tipoResidencia}" placeholder="Ex: Casa, Apto" />
+                                </div>
+                            </div>
+                            <div class="form-submit-row">
+                                <button type="button" onclick="ocultarFormEditarEndereco()" class="btn-cancelar-js">✕ Cancelar</button>
+                                <button type="submit" class="btn-tech-primary">▶ Salvar</button>
+                            </div>
+                        </fieldset>
+                    </form>
                 </div>
-            </form>
+            </div>
+
         </div>
 
         <!-- ------------------------------------------------
@@ -539,17 +595,6 @@
                         <label for="valor">Valor da Recarga (R$)</label>
                         <input type="number" id="valor" step="0.01" min="1" placeholder="0.00" />
 
-                        <label for="metodoPagamento">Forma de Pagamento</label>
-                        <select id="metodoPagamento">
-                            <option value="CARTAO">💳 Cartão de Crédito</option>
-                            <option value="PIX">⚡ PIX (Aprovação na hora)</option>
-                        </select>
-
-                        <div id="sectionCartao">
-                            <label for="numCartao">Número do Cartão</label>
-                            <input type="text" id="numCartao" placeholder="0000 0000 0000 0000" />
-                        </div>
-
                         <button id="btnComprar" class="cw-btn-pay" onclick="cwEfetuarCompra(event)">
                             <i class="fa-solid fa-check-double"></i> Confirmar e Pagar
                         </button>
@@ -612,8 +657,23 @@
 <script th:src="@{/js/cliente/gamificacao.js}"></script>
 
 <script th:inline="javascript">
-    /* Contadores de índice para formulários dinâmicos */
-    let enderecoIndex = [[${cliente != null && !#lists.isEmpty(cliente.enderecos)} ? ${#lists.size(cliente.enderecos)} : 0]];
+    /* ── Endereço: toggle formulários ─────────────────────── */
+    function mostrarFormCadastrarEndereco() {
+        document.getElementById('sem-endereco-info').style.display = 'none';
+        document.getElementById('form-novo-endereco').style.display = 'block';
+    }
+    function ocultarFormCadastrarEndereco() {
+        document.getElementById('sem-endereco-info').style.display = 'block';
+        document.getElementById('form-novo-endereco').style.display = 'none';
+    }
+    function mostrarFormEditarEndereco() {
+        document.getElementById('endereco-card').style.display = 'none';
+        document.getElementById('form-editar-endereco').style.display = 'block';
+    }
+    function ocultarFormEditarEndereco() {
+        document.getElementById('endereco-card').style.display = 'block';
+        document.getElementById('form-editar-endereco').style.display = 'none';
+    }
 
     /* ── Lazy-load flags ───────────────────────────────────── */
     var comprasLoaded = false, historicoLoaded = false, carteiraLoaded = false;
@@ -801,18 +861,11 @@
        CARTEIRA — inline (replaces wallet.js)
        ============================================================ */
     var cwInterval;
+    var cwPagamentoId;
 
     function initCarteira() {
         cwCarregarSaldo();
         cwCarregarHistorico();
-
-        var metodo = document.getElementById('metodoPagamento');
-        var secCartao = document.getElementById('sectionCartao');
-        if (metodo && secCartao) {
-            metodo.addEventListener('change', function() {
-                secCartao.style.display = this.value === 'PIX' ? 'none' : '';
-            });
-        }
     }
 
     async function cwCarregarSaldo() {
@@ -850,23 +903,22 @@
         e.preventDefault();
         var btn = document.getElementById('btnComprar');
         var valor = document.getElementById('valor').value;
-        var metodo = document.getElementById('metodoPagamento').value;
-        var cartao = document.getElementById('numCartao').value;
         if (!valor || parseFloat(valor) <= 0) { alert('Informe um valor válido.'); return; }
         btn.disabled = true; btn.innerHTML = 'Processando...';
         try {
             var res = await fetch('/api/tokens/comprar', {
                 method:'POST', credentials:'include',
                 headers:{ 'Content-Type':'application/json' },
-                body: JSON.stringify({ valor: parseFloat(valor), metodoPagamento: metodo, numeroCartao: metodo === 'CARTAO' ? cartao : null })
+                body: JSON.stringify({ valor: parseFloat(valor) })
             });
             var data = await res.json();
             if (res.ok) {
                 if (data.qrCodeBase64) {
+                    cwPagamentoId = data.pagamentoId;
                     document.getElementById('cwImgQrCode').src = data.qrCodeBase64;
                     document.getElementById('cwTextoPix').value = data.pixCopiaECola || '';
                     document.getElementById('cwModalPix').classList.add('active');
-                    cwIniciarVerificacao(data.pagamentoId);
+                    cwIniciarVerificacao(cwPagamentoId);
                 } else {
                     await cwCarregarSaldo();
                     await cwCarregarHistorico();
@@ -914,13 +966,12 @@
     }
 
     async function cwSimularWebhook() {
-        var fullCode = document.getElementById('cwTextoPix').value;
-        var match = fullCode.match(/PX-\d+/);
-        var pagId = match ? match[0] : null;
-        if (!pagId) { alert('ID de pagamento não encontrado.'); return; }
+        if (!cwPagamentoId) { alert('Nenhum pagamento pendente.'); return; }
         try {
-            await fetch('/api/tokens/simular-webhook/' + pagId, { credentials:'include' });
-        } catch(_) {}
+            var res = await fetch('/api/tokens/simular-webhook/' + cwPagamentoId, { credentials:'include' });
+            var data = await res.json();
+            if (data.mensagem) alert(data.mensagem);
+        } catch(_) { alert('Erro ao simular pagamento.'); }
     }
 </script>
 

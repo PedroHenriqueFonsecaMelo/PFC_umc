@@ -33,6 +33,7 @@ public class PedidoDTO {
     // Dados do comprador (populados para a visão admin)
     private String compradorNome;
     private String compradorEmail;
+    private String compradorEndereco;
 
     // Preenchido apenas quando o pedido é cancelado com estorno
     private Double saldoAposEstorno;

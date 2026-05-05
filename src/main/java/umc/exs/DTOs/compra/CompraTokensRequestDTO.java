@@ -1,7 +1,6 @@
 package umc.exs.DTOs.compra;
 
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
@@ -13,19 +12,11 @@ public class CompraTokensRequestDTO {
     @Min(value = 1, message = "O valor mínimo para compra é R$ 1,00.")
     private Double valor;
 
-    @NotBlank(message = "O método de pagamento deve ser informado.")
-    private String metodoPagamento;
-
-    private Long clienteId;
-
-    // Dados de entrada (Cartão)
-    private String numeroCartao;
-    private String nomeCartao;
+    // Preenchido pelo servidor antes de chamar a strategy
     @JsonIgnore
-    private String cvv;
-    private String validade;
+    private String emailPagador;
 
-    // --- NOVOS CAMPOS PARA RESPOSTA (PIX) ---
+    // Campos de resposta — preenchidos pela strategy e retornados ao cliente
     private String pixCopiaECola;
     private String qrCodeBase64;
     private String pagamentoId;

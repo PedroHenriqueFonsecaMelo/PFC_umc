@@ -64,9 +64,16 @@ jwt:
 app:
   allowed-origin: "${ALLOWED_ORIGIN:https://localhost:8443}"
   base-url: "https://localhost:8443"
+  # URL pública do webhook do Mercado Pago.
+  # Deixe vazio para usar polling ativo (sem ngrok).
+  # Com ngrok: "https://SEU-ID.ngrok-free.app/api/tokens/webhook"
+  notification-url: "${MP_NOTIFICATION_URL:}"
 
 mail:
   from: "${MAIL_FROM:noreply@umc.exs.local}"
+
+mercadopago:
+  access-token: "${MP_ACCESS_TOKEN:APP_USR-896232806247217-050415-3526eeb645e7bafbf92fc24135a6ff67-833555716}"
 
 server:
   servlet:

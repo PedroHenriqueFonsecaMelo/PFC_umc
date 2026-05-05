@@ -487,6 +487,33 @@ legend {
   border-color: #9a8f82;
 }
 
+.endereco-readonly {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.endereco-linha {
+  font-size: 0.88rem;
+  color: #3d3228;
+}
+
+.endereco-acoes {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.endereco-acoes .btn-remover-endereco,
+.endereco-acoes .btn-cancelar-js,
+.endereco-acoes button {
+  margin-top: 0;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.75rem;
+}
+
 .btn-remover-endereco,
 .btn-remover-cartao {
   background: transparent;

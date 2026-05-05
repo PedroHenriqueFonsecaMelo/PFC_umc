@@ -13,6 +13,7 @@ import umc.exs.model.entidades.logic.RecuperacaoSenha;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.repository.usuario.EnderecoRepository;
 import umc.exs.repository.usuario.RecuperacaoSenhaRepository;
 
 import java.util.Optional;
@@ -24,6 +25,7 @@ public class ClienteRepositoryService {
 
     private final ClienteRepository clienteRepository;
     private final RecuperacaoSenhaRepository tokenRepository;
+    private final EnderecoRepository enderecoRepository;
     private final EnderecoMapper enderecoMapper;
 
     // --- Buscas ---
@@ -128,5 +130,26 @@ public class ClienteRepositoryService {
 
         clienteRepository.save(cliente);
         log.info("Cartão ID {} removido com sucesso do cliente {}", cartaoId, cliente.getEmail());
+    }
+
+    @Transactional
+    public void atualizarEnderecoDoCliente(@NonNull Long clienteId, @NonNull EnderecoDTO dto) {
+
+        Cliente cliente = clienteRepository.findById(clienteId)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado com ID: " + clienteId));
+
+        boolean pertence = cliente.getEnderecos().stream()
+                .anyMatch(e -> e.getId().equals(dto.getId()));
+
+        if (!pertence) {
+            throw new IllegalArgumentException("Endereço não pertence a este cliente.");
+        }
+
+        Endereco endereco = enderecoRepository.findById(dto.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Endereço não encontrado: " + dto.getId()));
+
+        enderecoMapper.atualizarEntidadeDeDto(dto, endereco);
+        enderecoRepository.save(endereco);
+        log.info("Endereço ID {} atualizado para o cliente {}", dto.getId(), cliente.getEmail());
     }
 }

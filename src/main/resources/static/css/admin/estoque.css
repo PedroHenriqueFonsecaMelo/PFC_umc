@@ -1,0 +1,344 @@
+/* ================================================================
+   estoque.css — Gestão de Estoque · Admin Bibliotroca
+   ================================================================ */
+
+/* ── TOOLBAR ── */
+.estoque-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 2rem 0;
+  flex-wrap: wrap;
+}
+
+.estoque-search-wrap {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  background: #fff;
+  border: 1px solid #e0d9d0;
+  border-radius: 6px;
+  padding: .45rem .85rem;
+  color: #9c968f;
+}
+
+.estoque-search-wrap i { font-size: .85rem; flex-shrink: 0; }
+
+.estoque-search-wrap input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: .875rem;
+  color: #2c241b;
+  background: transparent;
+  font-family: "DM Sans", sans-serif;
+}
+
+.estoque-contador {
+  font-size: .8rem;
+  color: #7a6e65;
+  white-space: nowrap;
+}
+
+.btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .5rem 1.1rem;
+  background: #4a5d23;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: "DM Sans", sans-serif;
+  transition: background .2s;
+}
+.btn-add:hover { background: #3a4a1b; }
+
+/* ── GRID ── */
+.estoque-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+  padding: 1.5rem 2rem 2rem;
+}
+
+/* ── SKELETON ── */
+.skeleton-card {
+  height: 320px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #ede8df 25%, #d5cfc6 50%, #ede8df 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* ── CARD ── */
+.livro-card-admin {
+  background: #fff;
+  border: 1px solid #e8e2d9;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow .2s, transform .15s;
+}
+.livro-card-admin:hover {
+  box-shadow: 0 4px 16px rgba(44,36,27,.12);
+  transform: translateY(-2px);
+}
+
+.livro-card-admin .card-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  background: #ede8df;
+  display: block;
+}
+
+.livro-card-admin .card-body {
+  padding: .85rem 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+
+.card-estado {
+  display: inline-flex;
+  align-items: center;
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: .15rem .55rem;
+  border-radius: 3px;
+  align-self: flex-start;
+}
+.estado-NOVO      { background: #d1fae5; color: #065f46; }
+.estado-OTIMO     { background: rgba(74,93,35,.12); color: #4a5d23; }
+.estado-BOM       { background: rgba(74,93,35,.08); color: #4a5d23; }
+.estado-DESGASTADO{ background: #fef9c3; color: #a16207; }
+.estado-RUIM      { background: rgba(114,47,55,.1); color: #722f37; }
+
+.card-titulo {
+  font-size: .88rem;
+  font-weight: 700;
+  color: #2c241b;
+  line-height: 1.3;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.card-autor {
+  font-size: .75rem;
+  color: #7a6e65;
+}
+
+.card-isbn {
+  font-size: .7rem;
+  color: #9c968f;
+  font-family: monospace;
+}
+
+.card-preco {
+  font-size: .92rem;
+  font-weight: 700;
+  color: #722f37;
+  margin-top: auto;
+  padding-top: .35rem;
+}
+
+.card-actions {
+  display: flex;
+  gap: .5rem;
+  padding: .65rem 1rem;
+  border-top: 1px solid #f0ebe3;
+}
+
+.btn-editar, .btn-excluir {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  padding: .42rem .5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: .75rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
+  transition: background .15s;
+}
+
+.btn-editar  { background: #f0ebe3; color: #2c241b; }
+.btn-editar:hover  { background: #e0d9d0; }
+.btn-excluir { background: rgba(114,47,55,.1); color: #722f37; }
+.btn-excluir:hover { background: rgba(114,47,55,.2); }
+
+/* ── VAZIO ── */
+.estoque-vazio {
+  text-align: center;
+  padding: 5rem 1rem;
+  color: #9c968f;
+}
+.estoque-vazio i { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+.estoque-vazio p { font-size: .95rem; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 900;
+}
+.modal-overlay.open { display: block; }
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 10px;
+  width: min(560px, 95vw);
+  z-index: 901;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal.open { display: block; }
+.modal-sm { width: min(380px, 95vw); }
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e8e2d9;
+}
+.modal-header h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 1.1rem;
+  color: #2c241b;
+  margin: 0;
+}
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #7a6e65;
+  cursor: pointer;
+  padding: .25rem;
+}
+.modal-close:hover { color: #2c241b; }
+
+/* ── FORM ── */
+#modalForm { padding: 1.25rem 1.5rem; }
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+.form-row .form-group { flex: 1; }
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  margin-bottom: 1rem;
+}
+.form-group label {
+  font-size: .78rem;
+  font-weight: 600;
+  color: #4b4540;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  border: 1px solid #d5cfc6;
+  border-radius: 5px;
+  padding: .5rem .75rem;
+  font-size: .875rem;
+  color: #2c241b;
+  font-family: "DM Sans", sans-serif;
+  outline: none;
+  transition: border-color .15s;
+  background: #fff;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus { border-color: #722f37; }
+.form-group textarea { resize: vertical; }
+
+.modal-erro {
+  background: rgba(114,47,55,.08);
+  border: 1px solid rgba(114,47,55,.25);
+  color: #722f37;
+  padding: .5rem .75rem;
+  border-radius: 4px;
+  font-size: .8rem;
+  margin-bottom: .75rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e8e2d9;
+}
+
+.btn-cancel {
+  padding: .48rem 1.1rem;
+  background: #f0ebe3;
+  color: #2c241b;
+  border: none;
+  border-radius: 5px;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
+}
+.btn-cancel:hover { background: #e0d9d0; }
+
+.btn-save {
+  padding: .48rem 1.4rem;
+  background: #4a5d23;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
+  transition: background .2s;
+}
+.btn-save:hover { background: #3a4a1b; }
+.btn-save:disabled { opacity: .6; cursor: not-allowed; }
+
+.btn-delete {
+  padding: .48rem 1.4rem;
+  background: #722f37;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
+  transition: background .2s;
+}
+.btn-delete:hover { background: #5d252d; }

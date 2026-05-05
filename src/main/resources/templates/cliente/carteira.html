@@ -6,23 +6,17 @@
         <title>Minha Carteira | Bibliotroca</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link
-            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
-            rel="stylesheet"
-        >
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-        >
-        <link rel="stylesheet" th:href="@{/cliente/nav.css}" />
-    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
-    <link rel="stylesheet" th:href="@{/css/cliente/carteira.css}" />
-  </head>
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+        <link rel="stylesheet" th:href="@{/css/cliente/carteira.css}" />
+    </head>
     <body>
         <header th:replace="~{fragments/client-nav :: clientNav}"></header>
 
         <main>
             <div class="grid-layout">
+
                 <!-- Saldo -->
                 <div class="card-saldo">
                     <div class="saldo-icon-wrap">
@@ -34,68 +28,43 @@
                         <span id="displaySaldo">0.00</span>
                     </div>
                     <p class="saldo-nota">
-                        * Os tokens são creditados instantaneamente após a
-                        confirmação do pagamento.
+                        * Tokens são creditados automaticamente após a confirmação do PIX.
+                        Taxa: <strong>R$ 1,00 = T$ 2,00</strong>
                     </p>
                 </div>
 
-                <!-- Comprar Tokens -->
+                <!-- Comprar Tokens via PIX -->
                 <div class="card-comprar">
                     <div class="card-comprar-title">
-                        <i class="fa-solid fa-cart-shopping"></i>
-                        Comprar Novos Tokens
+                        <i class="fa-solid fa-pix" style="color:#32bcad"></i>
+                        Recarregar via PIX
                     </div>
 
                     <form id="formCompra">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="valor">Valor da Recarga (R$)</label>
-                                <div class="input-wrap">
-                                    <span class="input-prefix">R$</span>
-                                    <input
-                                        type="number"
-                                        id="valor"
-                                        step="0.01"
-                                        min="1"
-                                        required
-                                        placeholder="0.00"
-                                        class="with-prefix"
-                                    >
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="metodoPagamento"
-                                >Forma de Pagamento</label>
-                                <select id="metodoPagamento">
-                                    <option value="CARTAO">
-                                        💳 Cartão de Crédito
-                                    </option>
-                                    <option value="PIX">
-                                        ⚡ PIX (Aprovação na hora)
-                                    </option>
-                                </select>
+                        <div class="form-group">
+                            <label for="valor">Valor da Recarga (R$)</label>
+                            <div class="input-wrap">
+                                <span class="input-prefix">R$</span>
+                                <input
+                                    type="number"
+                                    id="valor"
+                                    step="1"
+                                    min="1"
+                                    required
+                                    placeholder="0"
+                                    class="with-prefix"
+                                    oninput="atualizarPreview()"
+                                >
                             </div>
                         </div>
 
-                        <div id="sectionCartao">
-                            <label for="numCartao">Dados do Cartão</label>
-                            <div class="input-wrap">
-                                <input
-                                    type="text"
-                                    id="numCartao"
-                                    placeholder="0000 0000 0000 0000"
-                                    class="with-icon"
-                                >
-                                <i
-                                    class="fa-solid fa-credit-card input-icon"
-                                ></i>
-                            </div>
+                        <div class="tokens-preview" id="tokensPreview" style="display:none;">
+                            <i class="fa-solid fa-coins"></i>
+                            Você receberá <strong id="previewTokens">0</strong> tokens
                         </div>
 
                         <button type="submit" id="btnComprar">
-                            <i class="fa-solid fa-check-double"></i> Confirmar e
-                            Pagar
+                            <i class="fa-solid fa-qrcode"></i> Gerar QR Code PIX
                         </button>
                     </form>
                 </div>
@@ -105,19 +74,18 @@
                     <div class="historico-header">
                         <span class="historico-header-title">
                             <i class="fa-solid fa-clock-rotate-left"></i>
-                            Histórico Recente
+                            Histórico de Recargas
                         </span>
-                        <span class="historico-header-sub"
-                        >Últimas transações</span>
+                        <span class="historico-header-sub">Últimas transações</span>
                     </div>
                     <div class="table-wrap">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Data e Hora</th>
-                                    <th>Crédito (Tokens)</th>
-                                    <th>Método</th>
-                                    <th>Referência</th>
+                                    <th>Tokens</th>
+                                    <th>Status</th>
+                                    <th>ID</th>
                                 </tr>
                             </thead>
                             <tbody id="lista-transacoes"></tbody>
@@ -128,23 +96,20 @@
         </main>
 
         <!-- MODAL PIX -->
-        <div
-            id="modalPix"
-            style="display: none; position: fixed; inset: 0; background: rgba(44, 36, 27, 0.8); z-index: 50; align-items: center; justify-content: center; padding: 1rem"
-        >
+        <div id="modalPix" style="display:none; position:fixed; inset:0; background:rgba(44,36,27,0.85); z-index:50; align-items:center; justify-content:center; padding:1rem;">
             <div class="modal-box">
                 <div class="modal-header">
                     <div class="modal-icon-wrap">
                         <i class="fa-solid fa-qrcode"></i>
                     </div>
                     <div class="modal-title">Pagamento via PIX</div>
-                    <p class="modal-sub">
-                        Escaneie o código abaixo para finalizar a compra
-                    </p>
+                    <p class="modal-sub">Escaneie o código ou use o PIX Copia e Cola</p>
                 </div>
 
+                <div class="pix-valor-info" id="pixValorInfo"></div>
+
                 <div class="qr-container">
-                    <img id="imgQrCode" src alt="QR Code PIX">
+                    <img id="imgQrCode" src="" alt="QR Code PIX">
                 </div>
 
                 <div>
@@ -157,16 +122,18 @@
                     </div>
                 </div>
 
+                <div class="pix-status" id="pixStatus">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    Aguardando confirmação do pagamento...
+                </div>
+
                 <button class="btn-fechar-pix" onclick="fecharModalPix()">
-                    Já realizei o pagamento
-                </button>
-                <button class="btn-debug" onclick="simularAvisoBanco()">
-                    [ DEBUG: Simular Webhook Banco ]
+                    Fechar
                 </button>
             </div>
         </div>
 
-        <script th:src="@{/cliente/script.js}"></script>
-        <script th:src="@{/cliente/wallet.js}"></script>
+        <script th:src="@{/js/cliente/script.js}"></script>
+        <script th:src="@{/js/cliente/wallet.js}"></script>
     </body>
 </html>

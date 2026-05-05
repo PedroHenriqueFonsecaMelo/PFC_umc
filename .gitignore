@@ -30,3 +30,6 @@ data.sql
 TODO.md
 /.classpath
 /.project
+/src/main/resources/application-local.yml
+/src/main/resources/application-render.yml
+/src/main/resources/application-gmail.yml

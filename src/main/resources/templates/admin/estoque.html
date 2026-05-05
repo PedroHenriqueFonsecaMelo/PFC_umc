@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Estoque — Bibliotroca Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link rel="stylesheet" th:href="@{/css/admin/layout.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/estoque.css}" />
+  </head>
+  <body>
+    <div class="layout">
+      <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('estoque')}"></th:block>
+
+      <div class="overlay" id="overlay" onclick="fecharMenu()"></div>
+
+      <div class="content">
+        <header class="topbar">
+          <div style="display:flex;align-items:center;gap:14px">
+            <button class="menu-btn" onclick="abrirMenu()">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div>
+              <div class="topbar-title">Estoque</div>
+              <div class="topbar-date" id="dataHoje"></div>
+            </div>
+          </div>
+          <div class="topbar-right">
+            <span class="badge-online"><span class="dot"></span> Sistema Online</span>
+            <div class="avatar"><i class="fa-solid fa-user"></i></div>
+          </div>
+        </header>
+
+        <!-- BARRA DE AÇÕES -->
+        <div class="estoque-toolbar">
+          <div class="estoque-search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchInput" placeholder="Buscar por título, autor ou ISBN..."
+                   oninput="filtrar()" />
+          </div>
+          <div class="estoque-contador" id="contadorLivros">— livros</div>
+          <button class="btn-add" onclick="abrirModalAdd()">
+            <i class="fa-solid fa-plus"></i> Adicionar Livro
+          </button>
+        </div>
+
+        <!-- GRID DE LIVROS -->
+        <div class="estoque-grid" id="estoqueGrid">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+
+        <div id="estoqueVazio" class="estoque-vazio" style="display:none">
+          <i class="fa-solid fa-box-open"></i>
+          <p>Nenhum livro no estoque.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ MODAL ADD / EDIT ════ -->
+    <div class="modal-overlay" id="modalOverlay" onclick="fecharModal()"></div>
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <h2 id="modalTitulo">Adicionar Livro</h2>
+        <button class="modal-close" onclick="fecharModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="modalForm" onsubmit="salvarLivro(event)">
+        <input type="hidden" id="livroId" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Título *</label>
+            <input type="text" id="fTitulo" required placeholder="Ex: Dom Casmurro" />
+          </div>
+          <div class="form-group">
+            <label>Autor *</label>
+            <input type="text" id="fAutor" required placeholder="Ex: Machado de Assis" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>ISBN</label>
+            <input type="text" id="fIsbn" placeholder="Ex: 978-3-16-148410-0" />
+          </div>
+          <div class="form-group">
+            <label>Preço (T$) *</label>
+            <input type="number" id="fPreco" required min="0" step="0.01" placeholder="Ex: 30.00" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Estado *</label>
+            <select id="fEstado" required>
+              <option value="NOVO">Novo</option>
+              <option value="OTIMO">Ótimo</option>
+              <option value="BOM" selected>Bom</option>
+              <option value="DESGASTADO">Desgastado</option>
+              <option value="RUIM">Ruim</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Resumo / Descrição</label>
+          <textarea id="fResumo" rows="3" placeholder="Breve descrição do livro..."></textarea>
+        </div>
+        <div id="modalErro" class="modal-erro" style="display:none"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+          <button type="submit" class="btn-save" id="btnSalvar">Salvar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ════ MODAL CONFIRMAR EXCLUSÃO ════ -->
+    <div class="modal-overlay" id="confirmOverlay" onclick="fecharConfirm()"></div>
+    <div class="modal modal-sm" id="confirmModal">
+      <div class="modal-header">
+        <h2>Confirmar exclusão</h2>
+        <button class="modal-close" onclick="fecharConfirm()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p id="confirmMsg" style="padding:0 1.5rem 1rem;color:#4b4540;font-size:.9rem"></p>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="fecharConfirm()">Cancelar</button>
+        <button class="btn-delete" id="btnConfirmDelete">Excluir</button>
+      </div>
+    </div>
+
+    <script th:src="@{/js/admin/estoque.js}"></script>
+  </body>
+</html>

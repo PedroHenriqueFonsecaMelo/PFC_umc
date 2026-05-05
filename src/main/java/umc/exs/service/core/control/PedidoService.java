@@ -199,8 +199,27 @@ public class PedidoService {
 
         private PedidoDTO toDTO(Pedido p) {
                 Double saldoApos = null;
-                if (p.getStatusEnvio() == StatusEnvio.CANCELADO && p.getComprador() != null) {
-                        saldoApos = p.getComprador().getSaldoTokens();
+                String enderecoFormatado = null;
+
+                if (p.getComprador() != null) {
+                        if (p.getStatusEnvio() == StatusEnvio.CANCELADO) {
+                                saldoApos = p.getComprador().getSaldoTokens();
+                        }
+                        enderecoFormatado = p.getComprador().getEnderecos().stream()
+                                        .findFirst()
+                                        .map(e -> {
+                                                StringBuilder sb = new StringBuilder();
+                                                if (e.getRua()    != null) sb.append(e.getRua());
+                                                if (e.getNumero() != null) sb.append(", ").append(e.getNumero());
+                                                if (e.getComplemento() != null && !e.getComplemento().isBlank())
+                                                        sb.append(" - ").append(e.getComplemento());
+                                                if (e.getBairro() != null) sb.append(", ").append(e.getBairro());
+                                                if (e.getCidade() != null) sb.append(", ").append(e.getCidade());
+                                                if (e.getEstado() != null) sb.append(" - ").append(e.getEstado());
+                                                if (e.getCep()    != null) sb.append(" · CEP: ").append(e.getCep());
+                                                return sb.toString();
+                                        })
+                                        .orElse(null);
                 }
 
                 return PedidoDTO.builder()
@@ -218,6 +237,7 @@ public class PedidoService {
                                 .codigoRastreio(p.getCodigoRastreio())
                                 .compradorNome(p.getComprador() != null ? p.getComprador().getNome() : null)
                                 .compradorEmail(p.getComprador() != null ? p.getComprador().getEmail() : null)
+                                .compradorEndereco(enderecoFormatado)
                                 .saldoAposEstorno(saldoApos)
                                 .build();
         }

@@ -268,6 +268,15 @@ function buildPedidoRow(p) {
         ${p.compradorNome ? `<span>·</span><span>👤 ${p.compradorNome}</span>` : ""}
         ${p.compradorEmail ? `<span style="font-family:monospace">(${p.compradorEmail})</span>` : ""}
       </div>
+      ${p.compradorEndereco ? `
+      <div style="display:inline-flex;align-items:center;gap:.4rem;font-size:.75rem;color:#4A5D23;background:rgba(74,93,35,.07);border:1px solid rgba(74,93,35,.2);padding:.25rem .65rem;margin-top:.35rem;max-width:100%">
+        <i class="fa-solid fa-location-dot" style="flex-shrink:0"></i>
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.compradorEndereco}</span>
+      </div>` : `
+      <div style="display:inline-flex;align-items:center;gap:.4rem;font-size:.75rem;color:#9C968F;background:#F5F2ED;border:1px solid #E0D9D0;padding:.25rem .65rem;margin-top:.35rem">
+        <i class="fa-solid fa-location-dot" style="flex-shrink:0"></i>
+        <span>Endereço não cadastrado</span>
+      </div>`}
       ${rastreioInfo}
       <div style="margin-top:.6rem">${acoesHtml}</div>
     </div>

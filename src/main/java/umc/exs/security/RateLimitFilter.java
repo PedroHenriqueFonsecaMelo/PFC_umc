@@ -30,6 +30,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private static final String[] PROTECTED_PATHS = { "/auth/", "/clientes/login", "/api/login" };
 
     private boolean isProtected(HttpServletRequest request) {
+        if (!"POST".equalsIgnoreCase(request.getMethod())) return false;
         String path = request.getRequestURI();
         for (String p : PROTECTED_PATHS) {
             if (path.startsWith(p))

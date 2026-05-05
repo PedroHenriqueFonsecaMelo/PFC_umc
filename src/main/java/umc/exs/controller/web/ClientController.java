@@ -165,18 +165,9 @@ public class ClientController {
 
     @PostMapping("/enderecos/novo")
     public String cadastrarEndereco(
-            @Valid @ModelAttribute("endereco") EnderecoDTO enderecoDTO,
-            BindingResult result,
+            @ModelAttribute("endereco") EnderecoDTO enderecoDTO,
             @AuthenticationPrincipal UserDetails user,
             RedirectAttributes ra) {
-
-        if (result.hasErrors()) {
-            // Se houver erro, precisamos voltar para o perfil mantendo os dados
-            ra.addFlashAttribute("org.springframework.validation.BindingResult.endereco", result);
-            ra.addFlashAttribute("endereco", enderecoDTO);
-            ra.addFlashAttribute("erro", "Verifique os dados do endereço.");
-            return "redirect:/clientes/meu-perfil?aba=enderecos";
-        }
 
         try {
             clienteService.adicionarEnderecoParaUsuarioLogado(user.getUsername(), enderecoDTO);
@@ -185,7 +176,40 @@ public class ClientController {
             ra.addFlashAttribute("erro", "Erro ao salvar: " + e.getMessage());
         }
 
-        // Redireciona para o perfil com o parâmetro da aba
+        return "redirect:/clientes/meu-perfil?aba=enderecos";
+    }
+
+    @PostMapping("/enderecos/editar")
+    public String editarEndereco(
+            @ModelAttribute EnderecoDTO enderecoDTO,
+            @AuthenticationPrincipal UserDetails user,
+            RedirectAttributes ra) {
+
+        try {
+            ClienteDTO cliente = clienteService.buscarClientePorEmail(user.getUsername()).orElseThrow();
+            clienteService.atualizarEnderecoDoCliente(cliente.getId(), enderecoDTO);
+            ra.addFlashAttribute("sucesso", "Endereço atualizado com sucesso!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("erro", "Erro ao atualizar: " + e.getMessage());
+        }
+
+        return "redirect:/clientes/meu-perfil?aba=enderecos";
+    }
+
+    @PostMapping("/enderecos/remover")
+    public String removerEndereco(
+            @RequestParam Long enderecoId,
+            @AuthenticationPrincipal UserDetails user,
+            RedirectAttributes ra) {
+
+        try {
+            ClienteDTO cliente = clienteService.buscarClientePorEmail(user.getUsername()).orElseThrow();
+            clienteService.deletarEnderecoDoCliente(cliente.getId(), enderecoId);
+            ra.addFlashAttribute("sucesso", "Endereço removido com sucesso!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("erro", "Erro ao remover: " + e.getMessage());
+        }
+
         return "redirect:/clientes/meu-perfil?aba=enderecos";
     }
 
@@ -216,10 +240,9 @@ public class ClientController {
     }
 
     @PostMapping("/comprar-tokens")
-    public String comprarTokens(@RequestParam Double valor, @RequestParam String metodo,
-            @RequestParam(required = false) String numCartao,
+    public String comprarTokens(@RequestParam Double valor,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
-        clienteService.adicionarTokensParaUsuarioLogado(user.getUsername(), valor, metodo, numCartao);
+        clienteService.adicionarTokensParaUsuarioLogado(user.getUsername(), valor);
         ra.addFlashAttribute("sucesso", "Recarga solicitada com sucesso!");
         return "redirect:/clientes/carteira";
     }

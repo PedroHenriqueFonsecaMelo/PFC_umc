@@ -22,7 +22,7 @@ async function buscarCep(cepInput) {
             preencherCampo('cidade', data.localidade);
             preencherCampo('estado', data.uf);
             preencherCampo('pais', 'Brasil');
-            preencherCampo('complemento', data.complemento);
+            // data.complemento do ViaCEP é um intervalo técnico de numeração, não o complemento do usuário
             const numero = container.querySelector('[data-cep-field="numero"]');
             if (numero) numero.focus();
         } else {

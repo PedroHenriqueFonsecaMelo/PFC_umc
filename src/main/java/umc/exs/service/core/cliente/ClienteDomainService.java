@@ -112,7 +112,7 @@ public class ClienteDomainService {
     }
 
     @Transactional
-    public ClienteDTO adicionarTokens(@NonNull Long clienteId, Double valor, String metodo, String numCartao) {
+    public ClienteDTO adicionarTokens(@NonNull Long clienteId, Double valor) {
         Cliente cliente = repositoryService.buscarPorId(clienteId);
 
         if (valor <= 0) {
@@ -122,11 +122,7 @@ public class ClienteDomainService {
         Double saldoAtual = cliente.getSaldoTokens() != null ? cliente.getSaldoTokens() : 0.0;
         cliente.setSaldoTokens(saldoAtual + valor);
 
-        String finalCartao = (numCartao != null && numCartao.length() >= 4)
-                ? numCartao.substring(numCartao.length() - 4)
-                : "N/A";
-
-        carteiraService.adicionarTokens(cliente, valor, metodo, finalCartao);
+        carteiraService.adicionarTokens(cliente, valor, "PIX", null);
 
         return clienteMapper.paraDTO(repositoryService.salvar(cliente));
     }

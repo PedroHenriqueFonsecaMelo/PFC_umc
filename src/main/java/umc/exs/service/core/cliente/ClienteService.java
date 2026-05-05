@@ -155,17 +155,17 @@ public class ClienteService {
     }
 
     @Transactional
-    public ClienteDTO adicionarTokens(Long clienteId, Double valor, String metodo, String numCartao) {
-        ClienteDTO dto = domainService.adicionarTokens(clienteId, valor, metodo, numCartao);
+    public ClienteDTO adicionarTokens(Long clienteId, Double valor) {
+        ClienteDTO dto = domainService.adicionarTokens(clienteId, valor);
         auditoria.registrarLog("RECARGA_TOKENS", clienteId, dto.getEmail(),
-                String.format("Recarga de %.2f via %s", valor, metodo));
+                String.format("Recarga de %.2f via PIX", valor));
         return dto;
     }
 
     @Transactional
-    public void adicionarTokensParaUsuarioLogado(String email, Double valor, String metodo, String numCartao) {
+    public void adicionarTokensParaUsuarioLogado(String email, Double valor) {
         Cliente cliente = buscarEntidadePorEmail(email);
-        this.adicionarTokens(cliente.getId(), valor, metodo, numCartao);
+        this.adicionarTokens(cliente.getId(), valor);
     }
 
     @Transactional
@@ -244,6 +244,11 @@ public class ClienteService {
 
     public void deletarEnderecoDoCliente(@NonNull Long clienteId, @NonNull Long enderecoId) {
         repositoryService.deletarEnderecoDoCliente(clienteId, enderecoId);
+    }
+
+    @Transactional
+    public void atualizarEnderecoDoCliente(@NonNull Long clienteId, EnderecoDTO dto) {
+        repositoryService.atualizarEnderecoDoCliente(clienteId, dto);
     }
 
     public void deletarCartaoDoCliente(@NonNull Long clienteId, @NonNull Long enderecoId) {
