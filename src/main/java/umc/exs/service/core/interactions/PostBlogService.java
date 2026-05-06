@@ -29,7 +29,7 @@ public class PostBlogService {
         return postBlogRepository.findAllByOrderByDataPublicacaoDesc();
     }
 
-    public Optional<PostBlog> buscarPorId(Long id) {
+    public Optional<PostBlog> buscarPorId(@lombok.NonNull Long id) {
         return postBlogRepository.findById(id);
     }
 
@@ -66,6 +66,7 @@ public class PostBlogService {
         postBlogRepository.deleteById(id);
     }
 
+    @SuppressWarnings("null")
     @Transactional
     public int curtirPost(Long postId) {
         PostBlog post = postBlogRepository.findById(postId)
@@ -74,6 +75,7 @@ public class PostBlogService {
         return postBlogRepository.save(post).getCurtidas();
     }
 
+    @SuppressWarnings("null")
     @Transactional
     public ComentarioBlog comentar(Long postId, String autorNome, String conteudo) {
         PostBlog post = postBlogRepository.findById(postId)

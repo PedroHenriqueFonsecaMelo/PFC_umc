@@ -63,7 +63,7 @@ public final class FieldValidation {
         String sanitizedEmail = email.replaceAll("[^A-Za-z0-9@._]", "").trim();
 
         if (sanitizedEmail.matches("^[A-Za-z0-9._]+@[A-Za-z0-9.]+\\.[A-Za-z]{2,}$")) {
-            return sanitizedEmail;
+            return sanitizedEmail.toLowerCase();
         }
 
         throw new IllegalArgumentException("Invalid email format after sanitization");

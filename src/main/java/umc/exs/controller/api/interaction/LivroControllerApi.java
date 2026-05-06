@@ -23,7 +23,7 @@ import umc.exs.DTOs.compra.LoteRequestDTO;
 import umc.exs.DTOs.livro.LivroRequestDTO;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.livro.Livro;
-import umc.exs.service.core.cliente.LivroService;
+import umc.exs.service.core.bussiness.LivroService;
 
 @RestController
 @RequestMapping("/api/livros")
@@ -133,9 +133,8 @@ public class LivroControllerApi {
     public ResponseEntity<?> comprarCarrinho(
             @AuthenticationPrincipal UserDetails user,
             @Valid @RequestBody CarrinhoCompraRequestDTO request) {
-
         if (user == null) {
-            return ResponseEntity.status(401).body("Usuário precisa estar logado para comprar.");
+            return ResponseEntity.status(401).body("Usuário precisa estar logado.");
         }
 
         try {
