@@ -36,6 +36,7 @@ class LivroStoryControllerUnitTest {
 
     @Test
     void deveRetornarViewTeste() {
-        assertEquals("historia_livro", controller.teste());
+        assertEquals("produto/historia_livro", controller.teste());
     }
 }
+

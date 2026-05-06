@@ -1,30 +1,31 @@
 package umc.exs.service.core.interactions;
 
-import java.time.LocalDate;
-
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
-import umc.exs.model.entidades.foundation.VisitaSite;
-import umc.exs.repository.logic.VisitaSiteRepository;
+import lombok.extern.slf4j.Slf4j;
+import umc.exs.service.log.LogAuditoriaService;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VisitaSiteService {
 
-    private final VisitaSiteRepository visitaSiteRepository;
+    private final LogAuditoriaService logAuditoria;
 
     /**
-     * Incrementa o contador de visitas do dia atual.
-     * Cria o registro do dia se ainda não existir.
+     * Registra uma visita à homepage no log de auditoria.
+     * Usado pelo VisitaInterceptor.
      */
-    @Transactional
     public void registrarVisita() {
-        LocalDate hoje = LocalDate.now();
-        VisitaSite visita = visitaSiteRepository.findByData(hoje)
-                .orElseGet(() -> VisitaSite.builder().data(hoje).total(0L).build());
-        visita.setTotal(visita.getTotal() + 1);
-        visitaSiteRepository.save(visita);
+        // IP do cliente via header
+        String ip = "127.0.0.1"; // Default para testes/local
+
+        logAuditoria.registrarLog(
+                "SITE_VISITA",
+                0L, // Sem user ID para visitantes anônimos
+                ip,
+                "Visita à homepage");
+
+        log.debug("Visita registrada do IP: {}", ip);
     }
 }

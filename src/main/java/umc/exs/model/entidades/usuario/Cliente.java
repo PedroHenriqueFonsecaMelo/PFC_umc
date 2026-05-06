@@ -59,7 +59,7 @@ public class Cliente {
     @Column(nullable = true)
     private Genero gen;
 
-    @Column(nullable = true, unique = true, length = 14)
+    @Column(nullable = true, length = 14)
     private String cpf;
 
     @Column(nullable = false, unique = true)

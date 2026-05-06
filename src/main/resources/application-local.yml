@@ -48,6 +48,8 @@ spring:
   devtools:
     restart:
       additional-paths: src/main/java
+  thymeleaf:
+    cache: false
 
 # ===============================
 # 🔐 JWT Security Configuration

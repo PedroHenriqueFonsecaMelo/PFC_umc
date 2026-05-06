@@ -7,6 +7,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import umc.exs.DTOs.user.ClienteDTO;
 import umc.exs.DTOs.user.EnderecoDTO;
 import umc.exs.mappers.EnderecoMapper;
 import umc.exs.model.entidades.logic.RecuperacaoSenha;
@@ -132,6 +133,7 @@ public class ClienteRepositoryService {
         log.info("Cartão ID {} removido com sucesso do cliente {}", cartaoId, cliente.getEmail());
     }
 
+    @SuppressWarnings("null")
     @Transactional
     public void atualizarEnderecoDoCliente(@NonNull Long clienteId, @NonNull EnderecoDTO dto) {
 
@@ -151,5 +153,9 @@ public class ClienteRepositoryService {
         enderecoMapper.atualizarEntidadeDeDto(dto, endereco);
         enderecoRepository.save(endereco);
         log.info("Endereço ID {} atualizado para o cliente {}", dto.getId(), cliente.getEmail());
+    }
+
+    public boolean encontrarPorCPF(String cpf) {
+        return clienteRepository.existsByCpf(cpf);
     }
 }

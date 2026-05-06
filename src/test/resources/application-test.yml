@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    # Removido MVCC=TRUE que causava o erro
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=10000
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        # Define explicitamente o isolamento para evitar snapshots antigos
+        connection.isolation: 2
+
+mail:
+  from: teste@sistema.com
+
+mercadopago:
+  access-token: "${MP_ACCESS_TOKEN:1234567890abcdef}"

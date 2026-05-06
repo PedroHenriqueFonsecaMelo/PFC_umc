@@ -24,7 +24,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final JwtUserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(
+    public void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain chain)

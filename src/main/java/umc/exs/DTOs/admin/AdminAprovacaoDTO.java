@@ -16,5 +16,6 @@ public class AdminAprovacaoDTO {
     private EstadoLivro estadoAprovado;
     private String comentario;
     private String fotosUrls;
+    private Double precoSugerido;
 
 }
