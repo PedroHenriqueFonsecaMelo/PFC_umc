@@ -145,6 +145,7 @@ public class DataInitializer implements CommandLineRunner {
         c.setGen(Genero.M);
         c.setBloqueada(false);
         c.setDataCriacao(LocalDateTime.now());
+        c.setEmailVerificado(true); // Clientes de teste já verificados para facilitar testes
         return clienteRepo.save(c);
     }
 

@@ -29,7 +29,7 @@ import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.logic.Administrador;
 import umc.exs.model.enums.EstadoLivro;
 import umc.exs.repository.logic.AdminRepository;
-import umc.exs.service.core.bussiness.LivroService;
+import umc.exs.service.core.cliente.LivroService;
 import umc.exs.service.core.control.DashboardService;
 import umc.exs.service.core.control.LoteService;
 import umc.exs.service.core.control.PedidoService;
@@ -258,7 +258,6 @@ public class AdminControllerApi {
         return ResponseEntity.ok(lista);
     }
 
-    @SuppressWarnings("null")
     @PostMapping("/livros/novo")
     public ResponseEntity<?> adicionarLivro(@RequestBody Map<String, Object> body,
                                              @AuthenticationPrincipal UserDetails user) {

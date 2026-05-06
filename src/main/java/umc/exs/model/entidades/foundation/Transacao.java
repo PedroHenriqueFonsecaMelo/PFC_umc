@@ -1,5 +1,6 @@
 package umc.exs.model.entidades.foundation;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -9,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,4 +52,15 @@ public class Transacao {
     @Column(nullable = false)
     @Builder.Default
     private String status = "PENDENTE";
+
+    // LGPD Art. 16 — retenção obrigatória por 5 anos
+    @Column(name = "data_retencao_expira")
+    private LocalDate dataRetencaoExpira;
+
+    @PrePersist
+    public void definirDataRetencao() {
+        if (this.dataHora != null && this.dataRetencaoExpira == null) {
+            this.dataRetencaoExpira = this.dataHora.toLocalDate().plusYears(5);
+        }
+    }
 }

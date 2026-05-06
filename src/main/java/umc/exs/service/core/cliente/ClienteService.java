@@ -2,10 +2,13 @@ package umc.exs.service.core.cliente;
 
 import java.security.SecureRandom;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,9 +21,12 @@ import umc.exs.DTOs.auth.SignupDTO;
 import umc.exs.DTOs.user.CartaoDTO;
 import umc.exs.DTOs.user.ClienteDTO;
 import umc.exs.DTOs.user.EnderecoDTO;
-
+import umc.exs.mappers.ClienteMapper;
+import umc.exs.model.entidades.foundation.EmailVerificacao;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.repository.foundation.EmailVerificacaoRepository;
+import umc.exs.service.email.EmailService;
 import umc.exs.service.log.LogAuditoriaService;
 import umc.exs.service.senha.FieldValidation;
 
@@ -34,13 +40,49 @@ public class ClienteService {
     private final LogAuditoriaService auditoria;
 
     private final PasswordEncoder passwordEncoder;
+    private final ClienteMapper clienteMapper;
+    private final EmailVerificacaoRepository emailVerificacaoRepository;
+    private final EmailService emailService;
+
+    @Value("${app.base-url:http://localhost:8080}")
+    private String baseUrl;
 
     @Transactional
     public ClienteDTO salvarCliente(SignupDTO signupDTO) {
         validarNovoCliente(signupDTO);
         ClienteDTO dto = domainService.cadastrarCliente(signupDTO);
         auditoria.registrarLog("CADASTRO_USUARIO", dto.getId(), dto.getEmail(), "Cadastro inicial realizado.");
+        enviarEmailVerificacao(dto.getId(), dto.getNome(), dto.getEmail());
         return dto;
+    }
+
+    private void enviarEmailVerificacao(Long clienteId, String nome, String email) {
+        try {
+            // Remove token anterior se existir
+            emailVerificacaoRepository.deleteByClienteId(clienteId);
+
+            Cliente cliente = repositoryService.buscarPorId(clienteId);
+            String token = UUID.randomUUID().toString();
+
+            EmailVerificacao verificacao = EmailVerificacao.builder()
+                    .cliente(cliente)
+                    .token(token)
+                    .expiracao(LocalDateTime.now().plusHours(24))
+                    .build();
+            emailVerificacaoRepository.save(verificacao);
+
+            String link = baseUrl + "/auth/verificar-email?token=" + token;
+            emailService.enviar(
+                    email,
+                    "Confirme seu e-mail — Bookstore",
+                    "Olá, " + nome + "!\n\n" +
+                            "Obrigado por se cadastrar. Clique no link abaixo para confirmar seu e-mail:\n\n" +
+                            link + "\n\n" +
+                            "O link expira em 24 horas.\n\n" +
+                            "Equipe Bookstore");
+        } catch (Exception e) {
+            log.error("Falha ao enviar e-mail de verificação para {}: {}", email, e.getMessage());
+        }
     }
 
     @Transactional
@@ -71,8 +113,9 @@ public class ClienteService {
     public void deletarClientePorId(@NonNull Long clienteId) {
         Cliente cliente = repositoryService.buscarPorId(clienteId);
         String email = cliente.getEmail();
+        // Soft delete — dados financeiros são preservados (LGPD Art. 16)
         repositoryService.deletarPorId(clienteId);
-        auditoria.registrarLog("EXCLUSAO_CONTA", clienteId, email, "Conta removida.");
+        auditoria.registrarLog("EXCLUSAO_CONTA", clienteId, email, "Conta marcada como inativa (soft delete).");
     }
 
     @Transactional
@@ -102,10 +145,13 @@ public class ClienteService {
         cliente.setNome("Usuário Excluído");
         cliente.setCpf("000.000.000-00");
         cliente.setFotoPerfil(null);
-
+        cliente.setSaldoTokens(0.0);
         cliente.setSenha(passwordEncoder.encode(senhaAleatoria));
         cliente.setTentativas(10);
         cliente.setBloqueada(true);
+        // Soft delete com anonimização — dados financeiros são preservados (LGPD Art. 16)
+        cliente.setAtivo(false);
+        cliente.setDeletedAt(LocalDateTime.now());
 
         if (cliente.getCartoes() != null) {
             cliente.getCartoes().clear();
@@ -118,10 +164,14 @@ public class ClienteService {
         log.info("Conta do cliente ID {} anonimizada com sucesso por solicitação do usuário.", id);
     }
 
+    /**
+     * Autentica o cliente. Lança {@link IllegalArgumentException} com mensagem
+     * específica em caso de falha (e-mail não encontrado, senha errada, bloqueado).
+     */
     @Transactional
-    public Optional<ClienteDTO> autenticarCliente(String email, String senha) {
-        Optional<ClienteDTO> resultado = domainService.processarAutenticacao(email, senha);
-        resultado.ifPresent(c -> auditoria.registrarLog("LOGIN_SUCESSO", c.getId(), c.getEmail(), "Sessão iniciada."));
+    public ClienteDTO autenticarCliente(String email, String senha) {
+        ClienteDTO resultado = domainService.processarAutenticacao(email, senha);
+        auditoria.registrarLog("LOGIN_SUCESSO", resultado.getId(), resultado.getEmail(), "Sessão iniciada.");
         return resultado;
     }
 
@@ -196,17 +246,23 @@ public class ClienteService {
     }
 
     public void validarNovoCliente(SignupDTO dto) {
-        if (!FieldValidation.validarCampos(dto))
-            throw new IllegalArgumentException("Campos obrigatórios ausentes.");
+        if (!Boolean.TRUE.equals(dto.getTermsAccepted()))
+            throw new IllegalArgumentException("Você deve aceitar os Termos de Uso para se cadastrar.");
+        if (!Boolean.TRUE.equals(dto.getPrivacyAccepted()))
+            throw new IllegalArgumentException("Você deve aceitar a Política de Privacidade para se cadastrar.");
 
         String safeEmail = FieldValidation.sanitizeEmail(dto.getEmail());
-        if (repositoryService.encontrarPorEmail(safeEmail).isPresent())
+        if (repositoryService.existeEmailAtivo(safeEmail))
             throw new IllegalArgumentException("E-mail já cadastrado.");
         dto.setEmail(safeEmail);
 
-        if (!FieldValidation.isValidCPF(dto.getCpf())
-                || repositoryService.encontrarPorCPF(dto.getCpf()))
-             throw new IllegalArgumentException("CPF inválido.");
+        // Validação de CPF (dígitos verificadores + unicidade entre contas ativas)
+        if (dto.getCpf() != null && !dto.getCpf().trim().isEmpty()) {
+            if (!FieldValidation.isValidCPF(dto.getCpf()))
+                throw new IllegalArgumentException("CPF inválido.");
+            if (repositoryService.existeCpfAtivo(dto.getCpf()))
+                throw new IllegalArgumentException("CPF já cadastrado para outro usuário ativo.");
+        }
 
         LocalDate dataNasc = FieldValidation.isValidBirthDate(dto.getDatanasc());
         if (dataNasc == null || !FieldValidation.isOver18(dataNasc))
@@ -247,7 +303,7 @@ public class ClienteService {
     }
 
     @Transactional
-    public void atualizarEnderecoDoCliente(@NonNull Long clienteId,@NonNull EnderecoDTO dto) {
+    public void atualizarEnderecoDoCliente(@NonNull Long clienteId, EnderecoDTO dto) {
         repositoryService.atualizarEnderecoDoCliente(clienteId, dto);
     }
 

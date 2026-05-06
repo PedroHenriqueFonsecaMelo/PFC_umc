@@ -1,7 +1,6 @@
 package umc.exs.service.core.cliente;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -72,6 +71,7 @@ public class ClienteDomainService {
 
         cliente.setNome(FieldValidation.sanitize(dto.getNome()));
         cliente.setDatanasc(dto.getDatanasc());
+        // CPF nunca é alterado após o cadastro (@Column updatable=false garante no BD)
 
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
             cliente.setSenha(passwordEncoder.encode(dto.getSenha()));
@@ -95,20 +95,30 @@ public class ClienteDomainService {
     }
 
     @Transactional
-    public Optional<ClienteDTO> processarAutenticacao(String email, String senha) {
-        return repositoryService.encontrarPorEmail(email).map(cliente -> {
+    public ClienteDTO processarAutenticacao(String email, String senha) {
+        Cliente cliente = repositoryService.encontrarPorEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("E-mail ou senha inválidos."));
+
+        if (!cliente.isEmailVerificado()) {
+            throw new IllegalArgumentException("E-mail não verificado. Verifique sua caixa de entrada.");
+        }
+
+        if (cliente.isBloqueada()) {
+            throw new IllegalArgumentException("Conta bloqueada. Entre em contato com o suporte.");
+        }
+
+        if (!passwordEncoder.matches(senha, cliente.getSenha())) {
+            repositoryService.registrarFalhaLogin(cliente);
             if (cliente.isBloqueada()) {
-                throw new IllegalArgumentException("Conta bloqueada por excesso de tentativas.");
+                throw new IllegalArgumentException("Conta bloqueada. Entre em contato com o suporte.");
             }
+            int restantes = Math.max(0, 5 - cliente.getTentativas());
+            throw new IllegalArgumentException(
+                    "Senha incorreta. Você tem " + restantes + " tentativa(s) restantes.");
+        }
 
-            if (!passwordEncoder.matches(senha, cliente.getSenha())) {
-                repositoryService.registrarFalhaLogin(cliente);
-                return null;
-            }
-
-            repositoryService.resetarTentativasLogin(cliente);
-            return clienteMapper.paraDTO(cliente);
-        });
+        repositoryService.resetarTentativasLogin(cliente);
+        return clienteMapper.paraDTO(cliente);
     }
 
     @Transactional

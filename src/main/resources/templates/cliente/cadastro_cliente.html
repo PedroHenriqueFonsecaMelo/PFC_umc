@@ -92,8 +92,6 @@
                     </div>
                     -->
 
-                    <!--
-                    CPF REMOVIDO DO CADASTRO — campo comentado para referência futura
                     <div class="form-group-2">
                         <label for="cpf">CPF:</label>
                         <input
@@ -101,10 +99,11 @@
                             id="cpf"
                             name="cpf"
                             required
-                            placeholder="Apenas números, 11 dígitos"
+                            maxlength="14"
+                            placeholder="000.000.000-00"
+                            autocomplete="off"
                         />
                     </div>
-                    -->
 
                     <div class="form-group-2">
                         <label for="senha">Senha:</label>
@@ -711,11 +710,24 @@
                 </div>
 
                 <div class="form-actions-main">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="btnCadastrar">
                         Cadastrar
                     </button>
                 </div>
             </form>
+            <script>
+                document.getElementById('cadastroForm').addEventListener('submit', function(e) {
+                    var terms   = document.getElementById('termsAccepted');
+                    var privacy = document.getElementById('privacyAccepted');
+                    if (!terms.checked || !privacy.checked) {
+                        e.preventDefault();
+                        var msg = document.getElementById('senhaErro');
+                        msg.textContent = 'Você deve aceitar os Termos de Uso e a Política de Privacidade.';
+                        msg.style.display = 'block';
+                        return false;
+                    }
+                });
+            </script>
         </div>
         <script th:src="@{/js/cliente/script.js}"></script>
     </body>

@@ -3,6 +3,7 @@ package umc.exs.DTOs.auth;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,8 +20,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class SignupDTO {
 
-    // @NotBlank(message = "O CPF é obrigatório.")
-    // @Pattern(regexp = "\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}", message = "CPF inválido. Use 000.000.000-00 ou apenas números.")
+    @NotBlank(message = "O CPF é obrigatório.")
+    @Pattern(regexp = "\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}", message = "CPF inválido. Use 000.000.000-00 ou apenas números.")
     private String cpf;
 
     @NotBlank(message = "O e-mail é obrigatório.")

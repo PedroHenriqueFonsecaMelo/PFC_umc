@@ -11,6 +11,7 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.NivelUsuario;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.repository.usuario.PontuacaoUsuarioRepository;
+import umc.exs.service.cupom.CupomService;
 import umc.exs.service.log.LogAuditoriaService;
 
 import java.time.LocalDateTime;
@@ -40,9 +41,12 @@ public class GamificacaoService {
     public static final int XP_COMPRA = 30;
     public static final int XP_AVALIACAO = 10;
 
+    private static final int XP_THRESHOLD_CUPOM = 500;
+
     private final PontuacaoUsuarioRepository pontuacaoRepository;
     private final ClienteRepository clienteRepository;
     private final LogAuditoriaService logAuditoria;
+    private final CupomService cupomService;
 
     // -------------------------------------------------------
     // ADICIONAR XP
@@ -66,15 +70,28 @@ public class GamificacaoService {
         pontuacao.adicionarXp(xp, categoria);
         pontuacaoRepository.save(pontuacao);
 
+        int xpDepois = pontuacao.getXpTotal();
+
+        // Gera cupom ao cruzar múltiplos de 500 XP
+        int thresholdAntes = xpAntes / XP_THRESHOLD_CUPOM;
+        int thresholdDepois = xpDepois / XP_THRESHOLD_CUPOM;
+        if (thresholdDepois > thresholdAntes) {
+            try {
+                cupomService.gerarCupomPorPontuacao(clienteId);
+            } catch (Exception e) {
+                // Não bloqueia a adição de XP por falha na geração de cupom
+            }
+        }
+
         // Log se subiu de nível
         NivelUsuario nivelAntes = NivelUsuario.calcular(xpAntes);
-        NivelUsuario nivelDepois = NivelUsuario.calcular(pontuacao.getXpTotal());
+        NivelUsuario nivelDepois = NivelUsuario.calcular(xpDepois);
         if (!nivelAntes.equals(nivelDepois)) {
             logAuditoria.registrarLog(
                     "NIVEL_SUBIU",
                     clienteId,
                     pontuacao.getCliente().getEmail(),
-                    "Subiu para " + nivelDepois.getDescricao() + " (" + pontuacao.getXpTotal() + " XP)");
+                    "Subiu para " + nivelDepois.getDescricao() + " (" + xpDepois + " XP)");
         }
     }
 

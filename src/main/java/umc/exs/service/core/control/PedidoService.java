@@ -1,5 +1,6 @@
 package umc.exs.service.core.control;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,10 +40,12 @@ public class PedidoService {
         /**
          * Registra um novo pedido no momento da compra.
          * Preserva todos os dados do livro antes de ele ser deletado da vitrine.
+         * LGPD Art. 16 — retenção obrigatória por 5 anos.
          */
         @SuppressWarnings("null")
         @Transactional
         public Pedido registrarPedido(Cliente comprador, Livro livro) {
+                LocalDateTime agora = LocalDateTime.now();
                 Pedido pedido = Pedido.builder()
                                 .comprador(comprador)
                                 .livroId(livro.getId())
@@ -52,7 +55,8 @@ public class PedidoService {
                                 .fotosUrls(livro.getFotosUrls())
                                 .precoLivro(livro.getPrecoAprovado())
                                 .statusEnvio(StatusEnvio.AGUARDANDO_ENVIO)
-                                .dataCompra(LocalDateTime.now())
+                                .dataCompra(agora)
+                                .dataRetencaoExpira(agora.toLocalDate().plusYears(5))
                                 .build();
 
                 Pedido salvo = pedidoRepository.save(pedido);

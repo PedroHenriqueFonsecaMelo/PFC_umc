@@ -75,7 +75,6 @@ public class NotificacaoEmailService {
                 .collect(Collectors.toList());
     }
 
-    @SuppressWarnings("null")
     public String dispararOuAgendar(EmailDisparoDTO dto) {
         List<EmailDestinatarioDTO> destinatarios = filtrarDestinatarios(dto.getFiltro(), dto.getLimite());
 

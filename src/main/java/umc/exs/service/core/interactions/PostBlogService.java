@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import umc.exs.model.entidades.social.ComentarioBlog;
 import umc.exs.model.entidades.social.PostBlog;
+import umc.exs.model.enums.StatusPost;
 import umc.exs.repository.negocios.ComentarioBlogRepository;
 import umc.exs.repository.negocios.PostBlogRepository;
 
@@ -29,11 +31,51 @@ public class PostBlogService {
         return postBlogRepository.findAllByOrderByDataPublicacaoDesc();
     }
 
-    public Optional<PostBlog> buscarPorId(@lombok.NonNull Long id) {
+    public Optional<PostBlog> buscarPorId(Long id) {
         return postBlogRepository.findById(id);
     }
 
     @SuppressWarnings("null")
+    public List<PostBlog> listarPublicados() {
+        return postBlogRepository.findByStatusOrderByDataPublicacaoDesc(StatusPost.PUBLICADO);
+    }
+
+    public List<PostBlog> listarPorStatus(StatusPost status) {
+        return postBlogRepository.findByStatusOrderByDataPublicacaoDesc(status);
+    }
+
+    @Transactional
+    public PostBlog submeterParaRevisao(Long id) {
+        PostBlog post = postBlogRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post não encontrado"));
+        if (post.getStatus() != StatusPost.RASCUNHO) {
+            throw new IllegalStateException("Apenas rascunhos podem ser submetidos para revisão.");
+        }
+        post.setStatus(StatusPost.EM_REVISAO);
+        return postBlogRepository.save(post);
+    }
+
+    @Transactional
+    public PostBlog publicar(Long id) {
+        PostBlog post = postBlogRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post não encontrado"));
+        post.setStatus(StatusPost.PUBLICADO);
+        post.setDataPublicacao(LocalDateTime.now());
+        return postBlogRepository.save(post);
+    }
+
+    @Transactional
+    public PostBlog agendar(Long id, LocalDateTime dataAgendada) {
+        PostBlog post = postBlogRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post não encontrado"));
+        if (dataAgendada == null || dataAgendada.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Data de agendamento deve ser futura.");
+        }
+        post.setStatus(StatusPost.AGENDADO);
+        post.setDataPublicacaoAgendada(dataAgendada);
+        return postBlogRepository.save(post);
+    }
+
     public PostBlog criarPost(String titulo, String conteudo, String autorNome, MultipartFile imagem)
             throws IOException {
         String imagemUrl = null;
@@ -66,7 +108,6 @@ public class PostBlogService {
         postBlogRepository.deleteById(id);
     }
 
-    @SuppressWarnings("null")
     @Transactional
     public int curtirPost(Long postId) {
         PostBlog post = postBlogRepository.findById(postId)
@@ -75,7 +116,6 @@ public class PostBlogService {
         return postBlogRepository.save(post).getCurtidas();
     }
 
-    @SuppressWarnings("null")
     @Transactional
     public ComentarioBlog comentar(Long postId, String autorNome, String conteudo) {
         PostBlog post = postBlogRepository.findById(postId)

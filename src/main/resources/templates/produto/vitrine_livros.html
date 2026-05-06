@@ -22,9 +22,20 @@
 
         <!-- MAIN -->
         <main class="main-vitrine">
-            <div style="margin-bottom: 1.5rem">
-                <h2>Livros Disponíveis</h2>
-                <p>Adicione à sua estante e finalize sua compra.</p>
+            <div style="margin-bottom: 1.5rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.75rem;">
+                <div>
+                    <h2 id="vitrineTitulo">Livros Disponíveis</h2>
+                    <p>Adicione à sua estante e finalize sua compra.</p>
+                </div>
+                <button id="btnPromo"
+                        onclick="togglePromo()"
+                        style="display:flex;align-items:center;gap:.4rem;
+                               padding:.5rem 1.1rem;border-radius:20px;
+                               border:2px solid #722f37;background:#fff;color:#722f37;
+                               font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;
+                               cursor:pointer;transition:all .18s;">
+                    🏷 Ver Promoções
+                </button>
             </div>
             <div id="gridLivros"></div>
         </main>

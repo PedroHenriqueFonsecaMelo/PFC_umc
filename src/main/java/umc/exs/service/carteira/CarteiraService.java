@@ -14,7 +14,9 @@ import umc.exs.repository.negocios.TransacaoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.log.LogAuditoriaService;
+import umc.exs.service.notificacao.NotificacaoService;
 
+// LGPD Art. 16 — retenção obrigatória por 5 anos: nunca chamar delete() em Transacao.
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ public class CarteiraService {
     private final ClienteRepository clienteRepository;
     private final LogAuditoriaService logAuditoriaService;
     private final EmailService emailService;
+    private final NotificacaoService notificacaoService;
 
     @SuppressWarnings("null")
     @Transactional
@@ -42,6 +45,10 @@ public class CarteiraService {
 
         transacaoRepository.save(t);
         clienteRepository.save(cliente);
+
+        // Notificação em tempo real via WebSocket
+        notificacaoService.notificarSaldo(cliente.getId(), cliente.getSaldoTokens(),
+                "Recarga de T$ " + String.format("%.2f", valor) + " via " + metodo);
 
         logAuditoriaService.registrarLog("TOKENS_ADICIONADOS", cliente.getId(), cliente.getEmail(),
                 String.format("Método: %s | Valor: T$%.2f | Info: %s", metodo, valor, infoAdicional));
@@ -65,6 +72,38 @@ public class CarteiraService {
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de recarga de tokens para {}: {}", cliente.getEmail(), e.getMessage());
         }
+    }
+
+    /**
+     * Debita tokens do saldo do cliente.
+     * Lança {@link IllegalArgumentException} se saldo insuficiente.
+     */
+    @Transactional
+    public void debitarTokens(Cliente cliente, Double valor, String descricao) {
+        double saldoAtual = (cliente.getSaldoTokens() != null) ? cliente.getSaldoTokens() : 0.0;
+        if (saldoAtual < valor) {
+            throw new IllegalArgumentException("Saldo insuficiente. Saldo atual: T$ " +
+                    String.format("%.2f", saldoAtual) + ", necessário: T$ " + String.format("%.2f", valor));
+        }
+        cliente.setSaldoTokens(saldoAtual - valor);
+
+        Transacao t = Transacao.builder()
+                .cliente(cliente)
+                .valor(-valor)
+                .dataHora(LocalDateTime.now())
+                .metodoPagamento("DEBITO_TOKENS")
+                .status("CONCLUIDO")
+                .finalCartao(descricao)
+                .build();
+
+        transacaoRepository.save(t);
+        clienteRepository.save(cliente);
+
+        notificacaoService.notificarSaldo(cliente.getId(), cliente.getSaldoTokens(),
+                "Débito de T$ " + String.format("%.2f", valor) + ": " + descricao);
+
+        logAuditoriaService.registrarLog("TOKENS_DEBITADOS", cliente.getId(), cliente.getEmail(),
+                String.format("Valor: T$%.2f | Descrição: %s", valor, descricao));
     }
 
     @Transactional(readOnly = true)

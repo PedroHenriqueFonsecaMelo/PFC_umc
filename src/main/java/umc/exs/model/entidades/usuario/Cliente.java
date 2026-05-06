@@ -23,6 +23,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -59,7 +60,8 @@ public class Cliente {
     @Column(nullable = true)
     private Genero gen;
 
-    @Column(nullable = true, length = 14)
+    // CPF imutável após cadastro — LGPD
+    @Column(nullable = true, unique = true, length = 14, updatable = false)
     private String cpf;
 
     @Column(nullable = false, unique = true)
@@ -80,6 +82,17 @@ public class Cliente {
 
     @Column
     private String fotoPerfil;
+
+    // Soft delete — LGPD: dados financeiros são preservados
+    @Column(nullable = false)
+    private boolean ativo = true;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    /** Verificação de e-mail — false até o usuário clicar no link de confirmação. */
+    @Column(nullable = false)
+    private boolean emailVerificado = false;
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, cascade = {

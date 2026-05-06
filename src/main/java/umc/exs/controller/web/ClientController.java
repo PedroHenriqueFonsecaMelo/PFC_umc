@@ -1,7 +1,6 @@
 package umc.exs.controller.web;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -69,9 +68,9 @@ public class ClientController {
         }
 
         try {
-            ClienteDTO salvo = clienteService.salvarCliente(signupDTO);
-            authHelper.authenticateAndSetCookie(salvo.getEmail(), salvo.getId(), response, "CADASTRO_SUCESSO");
-            return "redirect:/clientes/meu-perfil";
+            clienteService.salvarCliente(signupDTO);
+            // Não faz login automático — o cliente deve verificar o e-mail primeiro
+            return "redirect:/clientes/login?cadastro=ok";
         } catch (Exception e) {
             model.addAttribute("erro", e.getMessage());
             return "cliente/cadastro_cliente";
@@ -92,16 +91,14 @@ public class ClientController {
         if (result.hasErrors())
             return "cliente/login_cliente";
 
-        Optional<ClienteDTO> clienteOpt = clienteService.autenticarCliente(loginDTO.getEmail(), loginDTO.getSenha());
-
-        if (clienteOpt.isEmpty()) {
-            model.addAttribute("erro", "E-mail ou senha inválidos.");
+        try {
+            ClienteDTO cliente = clienteService.autenticarCliente(loginDTO.getEmail(), loginDTO.getSenha());
+            authHelper.authenticateAndSetCookie(cliente.getEmail(), cliente.getId(), response, "LOGIN_SUCESSO");
+            return "redirect:/clientes/meu-perfil";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("erro", e.getMessage());
             return "cliente/login_cliente";
         }
-
-        ClienteDTO cliente = clienteOpt.get();
-        authHelper.authenticateAndSetCookie(cliente.getEmail(), cliente.getId(), response, "LOGIN_SUCESSO");
-        return "redirect:/clientes/meu-perfil";
     }
 
     @GetMapping("/sair")

@@ -522,3 +522,21 @@ function reorganizarIndices(selectorContainer, itemSelector, arrayName) {
         });
     });
 }
+
+/* ============================================================
+   CONFIRMAÇÃO DE AÇÕES DESTRUTIVAS — data-confirm
+   Padrão para todos os botões/links com atributo [data-confirm].
+   Uso nos templates: <button data-confirm="Mensagem aqui?">Excluir</button>
+   ============================================================ */
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('[data-confirm]').forEach(function (el) {
+        el.addEventListener('click', function (e) {
+            const msg = this.dataset.confirm || 'Tem certeza? Esta operação não pode ser desfeita.';
+            if (!confirm(msg)) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
+    });
+});

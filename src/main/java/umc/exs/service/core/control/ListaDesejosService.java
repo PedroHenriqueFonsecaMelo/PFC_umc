@@ -94,15 +94,30 @@ public class ListaDesejosService {
         for (ListaDesejos desejo : interessados) {
             try {
                 Cliente cliente = desejo.getCliente();
-                emailService.enviar(
-                        cliente.getEmail(),
-                        "Livro da sua lista de desejos disponível!",
-                        "Olá, " + cliente.getNome() + "!\n\n" +
-                                "O livro \"" + titulo + "\" (ISBN: " + isbn + ") que você adicionou à sua lista " +
-                                "de desejos está disponível na vitrine.\n\n" +
-                                "Acesse agora e garanta o seu exemplar antes que esgote!\n\n" +
-                                "Equipe Bookstore");
-                log.info("Notificação enviada para {} sobre ISBN {}", cliente.getEmail(), isbn);
+                String assunto;
+                String corpo;
+
+                if (desejo.isPreReservaAtiva()) {
+                    // Pré-reserva ativa: e-mail com aviso de reserva automática
+                    assunto = "Pré-reserva ativada — Livro disponível!";
+                    corpo = "Olá, " + cliente.getNome() + "!\n\n" +
+                            "O livro \"" + titulo + "\" (ISBN: " + isbn + ") que você adicionou à lista de desejos " +
+                            "com pré-reserva ativa está disponível na vitrine.\n\n" +
+                            "Sua pré-reserva está ativa. Acesse a vitrine agora para confirmar a compra " +
+                            "e garantir seu exemplar!\n\n" +
+                            "Equipe Bookstore";
+                } else {
+                    assunto = "Livro da sua lista de desejos disponível!";
+                    corpo = "Olá, " + cliente.getNome() + "!\n\n" +
+                            "O livro \"" + titulo + "\" (ISBN: " + isbn + ") que você adicionou à sua lista " +
+                            "de desejos está disponível na vitrine.\n\n" +
+                            "Acesse agora e garanta o seu exemplar antes que esgote!\n\n" +
+                            "Equipe Bookstore";
+                }
+
+                emailService.enviar(cliente.getEmail(), assunto, corpo);
+                log.info("Notificação enviada para {} sobre ISBN {} (pré-reserva: {})",
+                        cliente.getEmail(), isbn, desejo.isPreReservaAtiva());
             } catch (Exception e) {
                 log.error("Falha ao notificar cliente {} sobre ISBN {}: {}", desejo.getCliente().getEmail(), isbn,
                         e.getMessage());
@@ -110,11 +125,28 @@ public class ListaDesejosService {
         }
     }
 
+    @Transactional
+    public ListaDesejosDTO togglePreReserva(String emailCliente, Long desejoId) {
+        Cliente cliente = clienteRepository.findByEmail(emailCliente)
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+
+        ListaDesejos desejo = listaDesejosRepository.findById(desejoId)
+                .orElseThrow(() -> new RuntimeException("Item não encontrado na lista de desejos"));
+
+        if (!desejo.getCliente().getId().equals(cliente.getId())) {
+            throw new RuntimeException("Acesso negado: este item não pertence ao seu perfil");
+        }
+
+        desejo.setPreReservaAtiva(!desejo.isPreReservaAtiva());
+        return toDTO(listaDesejosRepository.save(desejo));
+    }
+
     private ListaDesejosDTO toDTO(ListaDesejos l) {
         return ListaDesejosDTO.builder()
                 .id(l.getId())
                 .isbn(l.getIsbn())
                 .dataAdicao(l.getDataAdicao())
+                .preReservaAtiva(l.isPreReservaAtiva())
                 .build();
     }
 }

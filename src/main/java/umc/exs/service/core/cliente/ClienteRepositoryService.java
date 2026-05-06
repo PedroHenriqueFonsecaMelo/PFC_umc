@@ -7,7 +7,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import umc.exs.DTOs.user.ClienteDTO;
 import umc.exs.DTOs.user.EnderecoDTO;
 import umc.exs.mappers.EnderecoMapper;
 import umc.exs.model.entidades.logic.RecuperacaoSenha;
@@ -17,6 +16,7 @@ import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.repository.usuario.EnderecoRepository;
 import umc.exs.repository.usuario.RecuperacaoSenhaRepository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -37,12 +37,20 @@ public class ClienteRepositoryService {
     }
 
     public Cliente buscarPorEmailOuFalhar(String email) {
-        return clienteRepository.findByEmail(email)
+        return clienteRepository.findByEmailAndAtivoTrue(email)
                 .orElseThrow(() -> new IllegalArgumentException("Nenhum cliente vinculado ao e-mail: " + email));
     }
 
     public Optional<Cliente> encontrarPorEmail(String email) {
-        return clienteRepository.findByEmail(email);
+        return clienteRepository.findByEmailAndAtivoTrue(email);
+    }
+
+    public boolean existeEmailAtivo(String email) {
+        return clienteRepository.existsByEmailAndAtivoTrue(email);
+    }
+
+    public boolean existeCpfAtivo(String cpf) {
+        return clienteRepository.existsByCpfAndAtivoTrue(cpf);
     }
 
     // --- Persistência ---
@@ -55,10 +63,13 @@ public class ClienteRepositoryService {
 
     @Transactional
     public void deletarPorId(@NonNull Long id) {
-        if (!clienteRepository.existsById(id)) {
-            throw new IllegalArgumentException("Tentativa de deletar cliente inexistente.");
-        }
-        clienteRepository.deleteById(id);
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Tentativa de deletar cliente inexistente."));
+        // Soft delete — nunca remove fisicamente para preservar dados financeiros (LGPD)
+        cliente.setAtivo(false);
+        cliente.setDeletedAt(LocalDateTime.now());
+        clienteRepository.save(cliente);
+        log.info("Soft delete aplicado ao cliente ID {}.", id);
     }
 
     // --- Gerenciamento de Estado de Segurança (Movido do Domain) ---
@@ -133,7 +144,6 @@ public class ClienteRepositoryService {
         log.info("Cartão ID {} removido com sucesso do cliente {}", cartaoId, cliente.getEmail());
     }
 
-    @SuppressWarnings("null")
     @Transactional
     public void atualizarEnderecoDoCliente(@NonNull Long clienteId, @NonNull EnderecoDTO dto) {
 
@@ -153,9 +163,5 @@ public class ClienteRepositoryService {
         enderecoMapper.atualizarEntidadeDeDto(dto, endereco);
         enderecoRepository.save(endereco);
         log.info("Endereço ID {} atualizado para o cliente {}", dto.getId(), cliente.getEmail());
-    }
-
-    public boolean encontrarPorCPF(String cpf) {
-        return clienteRepository.existsByCpf(cpf);
     }
 }

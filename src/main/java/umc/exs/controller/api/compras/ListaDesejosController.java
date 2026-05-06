@@ -47,4 +47,18 @@ public class ListaDesejosController {
         listaDesejosService.removerDesejo(user.getUsername(), id);
         return ResponseEntity.noContent().build();
     }
+
+    /** Ativa ou desativa a pré-reserva automática para um item da lista de desejos. */
+    @PatchMapping("/{id}/pre-reserva")
+    public ResponseEntity<?> togglePreReserva(
+            @AuthenticationPrincipal UserDetails user,
+            @PathVariable Long id) {
+        if (user == null) return ResponseEntity.status(401).build();
+        try {
+            ListaDesejosDTO atualizado = listaDesejosService.togglePreReserva(user.getUsername(), id);
+            return ResponseEntity.ok(atualizado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("erro", e.getMessage()));
+        }
+    }
 }

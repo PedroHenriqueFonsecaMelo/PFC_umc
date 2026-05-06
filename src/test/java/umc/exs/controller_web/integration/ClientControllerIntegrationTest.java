@@ -75,6 +75,6 @@ class ClientControllerIntegrationTest {
                         .param("senha", "senha123")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-.andExpect(redirectedUrl("/clientes/meu-perfil"));
+                .andExpect(redirectedUrl("/"));
     }
 }

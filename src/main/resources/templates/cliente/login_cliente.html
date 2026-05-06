@@ -113,8 +113,13 @@
           <div th:if="${param.error}" class="alert alert-erro">
             E-mail ou senha inválidos.
           </div>
+          <div th:if="${erro}" th:text="${erro}" id="erro-login" class="alert alert-erro">
+          </div>
           <div th:if="${param.logout}" class="alert alert-sucesso">
             Você saiu com sucesso.
+          </div>
+          <div th:if="${param.cadastro}" class="alert alert-sucesso">
+            Cadastro realizado! Verifique seu e-mail antes de entrar.
           </div>
 
           <!-- Formulário -->

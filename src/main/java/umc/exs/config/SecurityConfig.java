@@ -14,7 +14,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -69,17 +68,10 @@ public class SecurityConfig {
                                 .csrf(csrf -> csrf.disable())
                                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
-                                                // 1. RECURSOS ESTÁTICOS
+                                                // 1. Recursos Estáticos (CSS, JS, Imagens)
                                                 .requestMatchers(STATIC_RESOURCES).permitAll()
 
-                                                // 2. EXCEÇÃO DE BLOQUEIO (Específicos da API)
-                                                .requestMatchers(HttpMethod.POST, "/api/livros/carrinho/comprar")
-                                                .authenticated()
-                                                .requestMatchers("/api/livros/carrinho/**").authenticated()
-                                                .requestMatchers("/api/livros/vender").authenticated()
-                                                .requestMatchers("/api/livros/lotes/**").authenticated()
-                                                
-                                                // 3. AGORA AS ROTAS PÚBLICAS
+                                                // 2. Rotas Públicas (Páginas Web e APIs de consulta)
                                                 .requestMatchers(PUBLIC_ROUTES).permitAll()
 
                                                 // 3. Rotas de Blog e Fórum (Consulta pública, escrita protegida)
@@ -137,10 +129,10 @@ public class SecurityConfig {
 
         // Rotas que qualquer um pode acessar
         private static final String[] PUBLIC_ROUTES = {
-                        "/", "/index", "/home",  "/livros/**", "/entrar", "/favicon.ico",
+                        "/", "/index", "/home", "/entrar", "/error", "/favicon.ico",
                         "/clientes/login", "/clientes/novo-cadastro",
                         "/vender", "/vitrine", "/admin/login",
-                        "/livros/*/historia", "/api/tokens",
+                        "/livros/*/historia", "/livros/**", "/api/tokens",
                         "/auth/**", "/debug", "/api/gamificacao/ranking",
                         "/api/livros/todos", "/api/avaliacoes/livro/**",
                         "/livros/vitrine", "/clientes/termo", "/clientes/politica", "/clientes/sobre",

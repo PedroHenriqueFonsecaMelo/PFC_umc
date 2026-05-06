@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import umc.exs.repository.livro.LivroRepository;
 import jakarta.validation.Valid;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,7 +25,7 @@ import umc.exs.DTOs.compra.LoteRequestDTO;
 import umc.exs.DTOs.livro.LivroRequestDTO;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.livro.Livro;
-import umc.exs.service.core.bussiness.LivroService;
+import umc.exs.service.core.cliente.LivroService;
 
 @RestController
 @RequestMapping("/api/livros")
@@ -31,6 +33,7 @@ import umc.exs.service.core.bussiness.LivroService;
 public class LivroControllerApi {
 
     private final LivroService livroService;
+    private final LivroRepository livroRepository;
 
     /**
      * Cria lote venda múltiplos livros com fotos.
@@ -91,9 +94,11 @@ public class LivroControllerApi {
      * Sem auth, apenas aprovados.
      */
     @GetMapping("/todos")
-
-    public ResponseEntity<List<Livro>> listarTodos() {
-        // Retorna apenas livros aprovados para a vitrine
+    public ResponseEntity<List<Livro>> listarTodos(
+            @RequestParam(required = false) Boolean emPromocao) {
+        if (Boolean.TRUE.equals(emPromocao)) {
+            return ResponseEntity.ok(livroRepository.findByAprovadoTrueAndEmPromocaoTrue());
+        }
         return ResponseEntity.ok(livroService.listarLivrosAprovados());
     }
 
@@ -133,8 +138,9 @@ public class LivroControllerApi {
     public ResponseEntity<?> comprarCarrinho(
             @AuthenticationPrincipal UserDetails user,
             @Valid @RequestBody CarrinhoCompraRequestDTO request) {
+
         if (user == null) {
-            return ResponseEntity.status(401).body("Usuário precisa estar logado.");
+            return ResponseEntity.status(401).body("Usuário precisa estar logado para comprar.");
         }
 
         try {

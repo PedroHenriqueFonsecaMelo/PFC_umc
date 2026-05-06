@@ -41,7 +41,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     @SuppressWarnings("null")
     @Override
-    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         if (!isProtected(request)) {
             filterChain.doFilter(request, response);

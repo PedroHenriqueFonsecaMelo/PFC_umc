@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import umc.exs.service.core.cliente.SessaoService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,9 +23,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final JwtUserDetailsService userDetailsService;
+    private final SessaoService sessaoService;
 
     @Override
-    public void doFilterInternal(
+    protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain chain)
@@ -56,9 +58,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails ud = userDetailsService.loadUserByUsername(username);
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(ud, null,
-                        ud.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(auth);
+
+                // Admins não têm sessão registrada na tabela sessao_ativa —
+                // a validação de sessão aplica-se apenas a clientes.
+                boolean isAdmin = ud.getAuthorities().stream()
+                        .anyMatch(a -> "ADMIN".equals(a.getAuthority()) || "ROLE_ADMIN".equals(a.getAuthority()));
+
+                if (isAdmin || sessaoService.isSessaoValida(token)) {
+                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(ud, null,
+                            ud.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
             }
         }
 

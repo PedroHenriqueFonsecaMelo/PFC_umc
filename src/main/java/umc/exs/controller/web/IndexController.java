@@ -1,7 +1,5 @@
 package umc.exs.controller.web;
 
-import java.util.Optional;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -85,16 +83,15 @@ public class IndexController {
             // usuário não encontrado — trata como credenciais inválidas abaixo
         }
 
-        Optional<ClienteDTO> clienteOpt = clienteService.autenticarCliente(email, senha);
-        if (clienteOpt.isEmpty()) {
-            model.addAttribute("erro", "E-mail ou senha inválidos.");
+        try {
+            ClienteDTO cliente = clienteService.autenticarCliente(email, senha);
+            authHelper.authenticateAndSetCookie(cliente.getEmail(), cliente.getId(), response, "LOGIN_SUCESSO");
+            return "redirect:/clientes/meu-perfil";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("erro", e.getMessage());
             model.addAttribute("emailAnterior", email);
             return "entrar";
         }
-
-        ClienteDTO cliente = clienteOpt.get();
-        authHelper.authenticateAndSetCookie(cliente.getEmail(), cliente.getId(), response, "LOGIN_SUCESSO");
-        return "redirect:/clientes/meu-perfil";
     }
 
     @GetMapping("/shop")
