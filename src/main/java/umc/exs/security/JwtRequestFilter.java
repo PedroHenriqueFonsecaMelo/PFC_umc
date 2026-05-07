@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import umc.exs.service.core.cliente.SessaoService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -23,7 +22,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final JwtUserDetailsService userDetailsService;
-    private final SessaoService sessaoService;
 
     @Override
     protected void doFilterInternal(
@@ -34,7 +32,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         String requestURI = request.getRequestURI();
 
-        // Ignora recursos estáticos — evita N queries ao banco por asset
         if (requestURI.startsWith("/images/") ||
                 requestURI.startsWith("/css/") ||
                 requestURI.startsWith("/js/") ||
@@ -58,17 +55,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails ud = userDetailsService.loadUserByUsername(username);
-
-                // Admins não têm sessão registrada na tabela sessao_ativa —
-                // a validação de sessão aplica-se apenas a clientes.
-                boolean isAdmin = ud.getAuthorities().stream()
-                        .anyMatch(a -> "ADMIN".equals(a.getAuthority()) || "ROLE_ADMIN".equals(a.getAuthority()));
-
-                if (isAdmin || sessaoService.isSessaoValida(token)) {
-                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(ud, null,
-                            ud.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                }
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(ud, null,
+                        ud.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
         }
 
@@ -76,7 +65,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
-        // 1. Cookie (navegador / Thymeleaf)
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
@@ -85,7 +73,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 }
             }
         }
-        // 2. Header Authorization (API / Postman)
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);

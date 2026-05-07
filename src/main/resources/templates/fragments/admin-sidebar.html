@@ -43,6 +43,10 @@
            th:classappend="${activeMenu == 'estoque'} ? ' ativo'">
             <i class="fa-solid fa-warehouse"></i> Estoque
         </a>
+        <a href="/admin/cupons" class="nav-item"
+           th:classappend="${activeMenu == 'cupons'} ? ' ativo'">
+            <i class="fa-solid fa-ticket"></i> Cupons
+        </a>
         <a href="/admin/audit" class="nav-item"
            th:classappend="${activeMenu == 'auditoria'} ? ' ativo'">
             <i class="fa-solid fa-shield-halved"></i> Auditoria

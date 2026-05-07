@@ -155,7 +155,7 @@ public class SecurityConfig {
         private static final String[] AUTHENTICATED_ROUTES = {
                         "/api/livros/carrinho/comprar", "/api/gamificacao/meu-perfil",
                         "/clientes/meu-perfil", "/clientes/meu-perfil-json",
-                        "/clientes/minhas-compras", "/clientes/sair",
+                        "/clientes/homepage", "/clientes/minhas-compras", "/clientes/sair",
                         "/api/tokens/comprar", "/api/tokens/historico", "/api/tokens/**",
                         "/api/pedidos/**", "/api/forum/respostas/*/curtir", "/api/forum/respostas/*/melhor",
                         "/api/lista-desejos", "/api/lista-desejos/**",

@@ -38,7 +38,7 @@ import umc.exs.service.log.LogAuditoriaService;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
-@Service
+@Service("livroClienteService")
 @RequiredArgsConstructor
 public class LivroService {
 

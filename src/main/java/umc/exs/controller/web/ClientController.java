@@ -3,9 +3,13 @@ package umc.exs.controller.web;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,6 +26,7 @@ import umc.exs.DTOs.user.ClienteDTO;
 import umc.exs.DTOs.user.EnderecoDTO;
 import umc.exs.DTOs.user.SenhaResetDTO;
 import umc.exs.model.entidades.foundation.Transacao;
+import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
 import umc.exs.service.core.cliente.ClienteService;
 import umc.exs.service.core.control.AuthHelper;
@@ -34,6 +39,8 @@ public class ClientController {
     private final ClienteService clienteService;
     private final AuthHelper authHelper;
     private final JwtUtil jwtUtil;
+    private final JwtUserDetailsService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
 
     // ============================================================
     // 🔹 AUTENTICAÇÃO (CADASTRO / LOGIN / SAIR)
@@ -85,20 +92,59 @@ public class ClientController {
         return "cliente/login_cliente";
     }
 
+    /**
+     * Login unificado: detecta admin ou cliente pelo e-mail.
+     * Admin (tabela admins) → loga direto, sem verificar email_verificado.
+     * Cliente (tabela users) → verifica email_verificado antes de permitir login.
+     */
     @PostMapping("/login")
-    public String realizarLogin(@Valid @ModelAttribute("loginData") LoginDTO loginDTO,
-            BindingResult result, Model model, HttpServletResponse response) {
-        if (result.hasErrors())
-            return "cliente/login_cliente";
+    public String realizarLogin(
+            @RequestParam String email,
+            @RequestParam String senha,
+            Model model,
+            HttpServletResponse response) {
 
+        // 1. Tenta admin primeiro
         try {
-            ClienteDTO cliente = clienteService.autenticarCliente(loginDTO.getEmail(), loginDTO.getSenha());
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            boolean isAdmin = userDetails.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ADMIN"));
+
+            if (isAdmin) {
+                if (!passwordEncoder.matches(senha, userDetails.getPassword())) {
+                    model.addAttribute("erro", "E-mail ou senha inválidos.");
+                    return "cliente/login_cliente";
+                }
+                String token = jwtUtil.generateToken(email);
+                jwtUtil.addTokenCookie(response, token);
+                Authentication auth = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                return "redirect:/admin/dashboard";
+            }
+        } catch (UsernameNotFoundException ignored) {
+            // e-mail não é admin — tenta como cliente abaixo
+        }
+
+        // 2. Tenta cliente (verifica email_verificado internamente)
+        try {
+            ClienteDTO cliente = clienteService.autenticarCliente(email, senha);
             authHelper.authenticateAndSetCookie(cliente.getEmail(), cliente.getId(), response, "LOGIN_SUCESSO");
-            return "redirect:/clientes/meu-perfil";
+            return "redirect:/clientes/homepage";
         } catch (IllegalArgumentException e) {
             model.addAttribute("erro", e.getMessage());
             return "cliente/login_cliente";
         }
+    }
+
+    @GetMapping("/homepage")
+    public String exibirHomepage(@AuthenticationPrincipal UserDetails user, Model model) {
+        if (user == null)
+            return "redirect:/clientes/login";
+        ClienteDTO clienteDTO = clienteService.buscarClientePorEmail(user.getUsername())
+                .orElseThrow(() -> new RuntimeException("Perfil não encontrado."));
+        model.addAttribute("cliente", clienteDTO);
+        return "cliente/homepage";
     }
 
     @GetMapping("/sair")

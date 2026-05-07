@@ -16,7 +16,6 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
-import umc.exs.service.core.cliente.SessaoService;
 import umc.exs.service.log.LogAuditoriaService;
 
 @Service
@@ -26,7 +25,6 @@ public class AuthHelper {
     private final JwtUserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
     private final LogAuditoriaService logAuditoriaService;
-    private final SessaoService sessaoService;
     private final ClienteRepository clienteRepository;
 
     /**
@@ -65,7 +63,6 @@ public class AuthHelper {
                         ip = req.getRemoteAddr();
                         ua = req.getHeader("User-Agent");
                     }
-                    sessaoService.registrarSessao(cliente, token, ip, ua);
                 }
             } catch (Exception ex) {
                 // Não bloqueia o login por falha no registro de sessão

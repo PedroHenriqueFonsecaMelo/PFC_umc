@@ -34,4 +34,7 @@ public interface CupomRepository extends JpaRepository<Cupom, Long> {
     List<Cupom> findByUsadoFalseAndExpiracaoBetween(
             @Param("inicio") LocalDateTime inicio,
             @Param("fim") LocalDateTime fim);
+
+    /** Todos os cupons ordenados do mais recente para o mais antigo (visão admin). */
+    List<Cupom> findAllByOrderByDataCriacaoDesc();
 }

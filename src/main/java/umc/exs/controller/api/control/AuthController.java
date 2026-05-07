@@ -18,7 +18,6 @@ import umc.exs.repository.foundation.EmailVerificacaoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.security.JwtUtil;
 import umc.exs.service.core.cliente.ClienteService;
-import umc.exs.service.core.cliente.SessaoService;
 import umc.exs.service.core.control.AuthHelper;
 
 @Slf4j
@@ -32,7 +31,6 @@ public class AuthController {
     private final AuthHelper authHelper;
     private final EmailVerificacaoRepository emailVerificacaoRepository;
     private final ClienteRepository clienteRepository;
-    private final SessaoService sessaoService;
 
     // ── LOGIN ────────────────────────────────────────────────────────
     @PostMapping("/login")
@@ -49,7 +47,6 @@ public class AuthController {
             if (entidade != null) {
                 String ip = request.getRemoteAddr();
                 String ua = request.getHeader("User-Agent");
-                sessaoService.registrarSessao(entidade, token, ip, ua);
             }
 
             log.info("Login API: {}", cliente.getEmail());
@@ -66,7 +63,6 @@ public class AuthController {
             HttpServletResponse response) {
         String token = resolveToken(request);
         if (token != null) {
-            sessaoService.encerrarSessao(token);
         }
         // Remove cookie
         jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("token", "");

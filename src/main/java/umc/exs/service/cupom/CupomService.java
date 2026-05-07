@@ -130,6 +130,25 @@ public class CupomService {
                 .stream().map(this::toDTO).toList();
     }
 
+    /** Lista todos os cupons do sistema, do mais recente ao mais antigo (visão admin). */
+    public List<CupomDTO> listarTodosCupons() {
+        return cupomRepository.findAllByOrderByDataCriacaoDesc()
+                .stream().map(this::toDTOAdmin).toList();
+    }
+
+    /** Invalida manualmente um cupom, marcando-o como usado sem creditar tokens. */
+    @Transactional
+    public void invalidarCupom(Long id) {
+        Cupom cupom = cupomRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cupom não encontrado: " + id));
+        if (cupom.isUsado()) {
+            throw new IllegalArgumentException("Cupom já está invalidado.");
+        }
+        cupom.setUsado(true);
+        cupomRepository.save(cupom);
+        log.info("Cupom '{}' (ID {}) invalidado manualmente pelo admin.", cupom.getCodigo(), id);
+    }
+
     private String gerarCodigoUnico(String prefixo) {
         String codigo;
         int tentativas = 0;
@@ -150,5 +169,15 @@ public class CupomService {
                 .tipo(c.getTipo())
                 .dataCriacao(c.getDataCriacao())
                 .build();
+    }
+
+    /** Versão admin do DTO: inclui nome e e-mail do cliente quando disponível. */
+    private CupomDTO toDTOAdmin(Cupom c) {
+        CupomDTO dto = toDTO(c);
+        if (c.getCliente() != null) {
+            dto.setClienteNome(c.getCliente().getNome());
+            dto.setClienteEmail(c.getCliente().getEmail());
+        }
+        return dto;
     }
 }

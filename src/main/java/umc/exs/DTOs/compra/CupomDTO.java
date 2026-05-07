@@ -20,4 +20,9 @@ public class CupomDTO {
     private boolean usado;
     private String tipo;
     private LocalDateTime dataCriacao;
+
+    /** Preenchido apenas na visão admin — nome do dono do cupom (null = público). */
+    private String clienteNome;
+    /** Preenchido apenas na visão admin — e-mail do dono do cupom (null = público). */
+    private String clienteEmail;
 }

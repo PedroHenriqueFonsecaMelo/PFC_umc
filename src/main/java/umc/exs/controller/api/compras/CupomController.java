@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import umc.exs.DTOs.compra.CupomDTO;
-import umc.exs.model.entidades.foundation.Cupom;
 import umc.exs.service.cupom.CupomService;
 
 @RestController
@@ -53,25 +52,4 @@ public class CupomController {
         }
     }
 
-    /** Admin: cria cupom promocional. */
-    @PostMapping("/admin")
-    public ResponseEntity<?> criarCupomPromocional(@RequestBody Map<String, Object> body) {
-        Double valor = body.get("valorTokens") instanceof Number n ? n.doubleValue() : null;
-        if (valor == null || valor <= 0) {
-            return ResponseEntity.badRequest().body(Map.of("erro", "valorTokens deve ser positivo."));
-        }
-
-        Long clienteId = body.get("clienteId") instanceof Number n ? n.longValue() : null;
-
-        try {
-            Cupom cupom = cupomService.criarCupomPromocional(valor, clienteId);
-            return ResponseEntity.status(201).body(Map.of(
-                    "mensagem", "Cupom promocional criado.",
-                    "codigo", cupom.getCodigo(),
-                    "valorTokens", cupom.getValorTokens(),
-                    "expiracao", cupom.getExpiracao().toString()));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
-        }
-    }
 }

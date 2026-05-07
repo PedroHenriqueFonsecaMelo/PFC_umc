@@ -28,11 +28,14 @@ import umc.exs.DTOs.compra.PedidoDTO;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.logic.Administrador;
 import umc.exs.model.enums.EstadoLivro;
+import umc.exs.DTOs.compra.CupomDTO;
+import umc.exs.model.entidades.foundation.Cupom;
 import umc.exs.repository.logic.AdminRepository;
 import umc.exs.service.core.cliente.LivroService;
 import umc.exs.service.core.control.DashboardService;
 import umc.exs.service.core.control.LoteService;
 import umc.exs.service.core.control.PedidoService;
+import umc.exs.service.cupom.CupomService;
 
 @Slf4j
 @RestController
@@ -45,6 +48,7 @@ public class AdminControllerApi {
     private final LoteService loteService;
     private final PedidoService pedidoService;
     private final DashboardService dashboardService;
+    private final CupomService cupomService;
 
     /**
      * Lista lotes de livros pendentes de aprovação.
@@ -317,6 +321,49 @@ public class AdminControllerApi {
             return ResponseEntity.ok(Map.of("success", true, "message", "Livro removido do estoque."));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro: " + e.getMessage());
+        }
+    }
+
+    // ==========================================================
+    // CUPONS — Criação promocional
+    // ==========================================================
+
+    /** Lista todos os cupons do sistema (mais recentes primeiro). */
+    @GetMapping("/cupons")
+    public ResponseEntity<List<CupomDTO>> listarTodosCupons() {
+        return ResponseEntity.ok(cupomService.listarTodosCupons());
+    }
+
+    /** Invalida manualmente um cupom sem creditar tokens. */
+    @DeleteMapping("/cupons/{id}")
+    public ResponseEntity<?> invalidarCupom(@PathVariable Long id) {
+        try {
+            cupomService.invalidarCupom(id);
+            return ResponseEntity.ok(Map.of("mensagem", "Cupom invalidado com sucesso."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
+        }
+    }
+
+    /** Cria um cupom promocional. clienteId null = cupom público. */
+    @PostMapping("/cupons")
+    public ResponseEntity<?> criarCupomPromocional(@RequestBody Map<String, Object> body) {
+        Double valor = body.get("valorTokens") instanceof Number n ? n.doubleValue() : null;
+        if (valor == null || valor <= 0) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "valorTokens deve ser positivo."));
+        }
+
+        Long clienteId = body.get("clienteId") instanceof Number n ? n.longValue() : null;
+
+        try {
+            Cupom cupom = cupomService.criarCupomPromocional(valor, clienteId);
+            return ResponseEntity.status(201).body(Map.of(
+                    "mensagem", "Cupom promocional criado.",
+                    "codigo", cupom.getCodigo(),
+                    "valorTokens", cupom.getValorTokens(),
+                    "expiracao", cupom.getExpiracao().toString()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
     }
 

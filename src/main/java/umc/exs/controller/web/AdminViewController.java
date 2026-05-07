@@ -187,11 +187,16 @@ public class AdminViewController {
         return "admin/estoque";
     }
 
+    @GetMapping("/cupons")
+    public String cupons() {
+        return "admin/cupons";
+    }
+
     @GetMapping("/sair")
     public String logout(HttpServletResponse response) {
 
         jwtUtil.clearJwtCookie(response);
         SecurityContextHolder.clearContext();
-        return "redirect:/entrar?logout";
+        return "redirect:/clientes/login?logout";
     }
 }
