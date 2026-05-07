@@ -67,7 +67,7 @@
     </div>
 
     <!-- Voltar -->
-    <a th:href="@{/}" href="/" class="back-link">← Início</a>
+    <a th:href="@{/entrar}" href="/entrar" class="back-link">← Voltar</a>
 
     <!-- Livro aberto -->
     <main class="page-content">
@@ -141,13 +141,18 @@
 
             <div class="field">
               <label for="senha">Senha</label>
-              <input
-                type="password"
-                id="senha"
-                name="senha"
-                required
-                placeholder="••••••••"
-              />
+              <div class="input-senha-wrapper">
+                <input
+                  type="password"
+                  id="senha"
+                  name="senha"
+                  required
+                  placeholder="••••••••"
+                />
+                <button type="button" class="btn-toggle-senha" aria-label="Mostrar senha" onclick="toggleSenhaLogin('senha', this)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
             </div>
 
             <button type="submit" class="btn-entrar">Abrir a biblioteca</button>
