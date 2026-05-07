@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import umc.exs.model.entidades.social.PontuacaoUsuario;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,4 +36,21 @@ public interface PontuacaoUsuarioRepository extends JpaRepository<PontuacaoUsuar
 
     @Query("SELECT p FROM PontuacaoUsuario p JOIN FETCH p.cliente")
     List<PontuacaoUsuario> findAllWithCliente();
+
+    /**
+     * Pontuações com XP > 0 cujo prazo de expiração já passou (para limpeza).
+     */
+    @Query("SELECT p FROM PontuacaoUsuario p JOIN FETCH p.cliente " +
+           "WHERE p.xpTotal > 0 AND p.dataExpiracao IS NOT NULL AND p.dataExpiracao < :agora")
+    List<PontuacaoUsuario> findExpirados(@Param("agora") LocalDateTime agora);
+
+    /**
+     * Pontuações com XP > 0 que vencem entre agora e um limite (aviso prévio).
+     */
+    @Query("SELECT p FROM PontuacaoUsuario p JOIN FETCH p.cliente " +
+           "WHERE p.xpTotal > 0 AND p.dataExpiracao IS NOT NULL " +
+           "AND p.dataExpiracao BETWEEN :inicio AND :fim")
+    List<PontuacaoUsuario> findAVencer(
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fim") LocalDateTime fim);
 }

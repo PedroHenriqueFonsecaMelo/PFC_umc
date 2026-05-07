@@ -196,6 +196,7 @@ public class GamificacaoService {
                 .xpCompras(0)
                 .xpAvaliacoes(0)
                 .ultimaAtualizacao(LocalDateTime.now())
+                .dataExpiracao(LocalDateTime.now().plusYears(1))
                 .build();
     }
 
