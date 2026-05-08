@@ -124,6 +124,8 @@
           <div th:if="${param.emailVerificado}" class="alert alert-sucesso">
             E-mail verificado com sucesso! Agora você pode fazer login.
           </div>
+          <div th:if="${sucesso}" th:text="${sucesso}" class="alert alert-sucesso">
+          </div>
 
           <!-- Formulário -->
           <form

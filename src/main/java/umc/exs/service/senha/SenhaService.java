@@ -57,8 +57,16 @@ public class SenhaService {
         String link = baseUrl + "/clientes/reset-senha?token=" + token;
 
         try {
-            emailService.enviar(cliente.getEmail(), "Recuperação de Senha",
-                    "Olá, utilize o link a seguir para redefinir sua senha: " + link);
+            emailService.enviar(
+                    cliente.getEmail(),
+                    "Redefinição de senha — Bibliotroca",
+                    "Olá, " + cliente.getNome() + "!\n\n" +
+                    "Recebemos uma solicitação para redefinir a senha da sua conta na Bibliotroca.\n\n" +
+                    "Clique no link abaixo para criar uma nova senha:\n\n" +
+                    link + "\n\n" +
+                    "Este link é válido por 30 minutos. Se você não solicitou a redefinição, " +
+                    "ignore este e-mail — sua senha permanece a mesma.\n\n" +
+                    "Equipe Bibliotroca");
             log.info("E-mail de recuperação enviado com sucesso para {}", cliente.getEmail());
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de recuperação para {}: {}", cliente.getEmail(), e.getMessage());

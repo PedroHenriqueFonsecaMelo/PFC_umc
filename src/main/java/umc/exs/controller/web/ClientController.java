@@ -303,10 +303,10 @@ public class ClientController {
     public String iniciarRecuperacaoSenha(@RequestParam String email, RedirectAttributes ra) {
         try {
             clienteService.iniciarRecuperacaoSenha(email);
-            ra.addFlashAttribute("sucesso", "Se o e-mail existir, um link foi enviado.");
-        } catch (Exception e) {
-            ra.addFlashAttribute("sucesso", "Verifique sua caixa de entrada.");
+        } catch (Exception ignored) {
+            // Sempre exibe a mesma mensagem para não expor se o e-mail existe ou não
         }
+        ra.addFlashAttribute("sucesso", "E-mail de recuperação enviado! Verifique sua caixa de entrada.");
         return "redirect:/clientes/login";
     }
 
