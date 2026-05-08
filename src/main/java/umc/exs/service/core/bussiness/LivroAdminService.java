@@ -17,6 +17,7 @@ import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.negocios.LoteRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.core.control.ListaDesejosService;
+import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.gamificacao.GamificacaoService;
 import umc.exs.service.log.LogAuditoriaService;
@@ -97,14 +98,10 @@ public class LivroAdminService {
 
             // E-mail de confirmação ao vendedor
             try {
-                emailService.enviar(
+                emailService.enviarHtml(
                         vendedor.getEmail(),
-                        "Seu livro foi aprovado!",
-                        "Olá, " + vendedor.getNome() + "!\n\n" +
-                                "Seu livro \"" + anuncio.getTitulo() + "\" foi aprovado e está disponível na vitrine.\n" +
-                                "Você recebeu T$ " + TOKEN_REWARD + " como recompensa.\n\n" +
-                                "Equipe Bookstore"
-                );
+                        "Seu livro foi aprovado! — Bibliotroca",
+                        EmailHtmlBuilder.livroAprovado(vendedor.getNome(), anuncio.getTitulo(), TOKEN_REWARD));
             } catch (Exception e) {
                 log.error("Falha ao enviar e-mail de aprovação para vendedor {}: {}", vendedor.getEmail(), e.getMessage());
             }
@@ -112,7 +109,7 @@ public class LivroAdminService {
 
         if (anuncio.getLote() != null) {
             Long loteId = anuncio.getLote().getId();
-            long pendingCount = livroRepository.countPendingByLoteId(loteId);
+            long pendingCount = livroRepository.countByLoteIdAndAprovadoFalse(loteId);
             if (pendingCount == 0) {
                 Lote lote = loteRepository.findById(loteId).orElseThrow();
                 lote.setStatus(Lote.LoteStatus.TOTAL_APROVADO);
@@ -149,17 +146,10 @@ public class LivroAdminService {
             final String nomeVendedor = vendedorRejeicao.getNome();
             final String tituloLivro = anuncio.getTitulo();
             try {
-                emailService.enviar(
+                emailService.enviarHtml(
                         emailVendedor,
-                        "Seu livro não foi aprovado",
-                        "Olá, " + nomeVendedor + "!\n\n" +
-                                "Infelizmente, o livro \"" + tituloLivro + "\" não foi aprovado.\n" +
-                                (comentario != null && !comentario.isBlank()
-                                        ? "Motivo: " + comentario + "\n\n"
-                                        : "\n") +
-                                "Você pode enviar novos livros para avaliação a qualquer momento.\n\n" +
-                                "Equipe Bookstore"
-                );
+                        "Livro não aprovado — Bibliotroca",
+                        EmailHtmlBuilder.livroRejeitado(nomeVendedor, tituloLivro, comentario));
             } catch (Exception e) {
                 log.error("Falha ao enviar e-mail de rejeição para vendedor {}: {}", emailVendedor, e.getMessage());
             }

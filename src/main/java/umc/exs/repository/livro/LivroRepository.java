@@ -18,39 +18,84 @@ import umc.exs.model.entidades.livro.Livro;
 @Repository
 public interface LivroRepository extends JpaRepository<Livro, Long> {
 
+    // =========================================================
+    // ISBN
+    // =========================================================
 
     Optional<Livro> findByIsbn(String isbn);
 
-    Optional<Livro> findFirstByIsbnAndAprovadoTrueOrderByDataAprovacaoDesc(String isbn); 
-    
     Optional<Livro> findFirstByIsbnOrderByDataAprovacaoDesc(String isbn);
+
+    Optional<Livro> findFirstByIsbnAndAprovadoTrueOrderByDataAprovacaoDesc(String isbn);
+
+    // =========================================================
+    // ID + APROVAÇÃO
+    // =========================================================
 
     Optional<Livro> findByIdAndAprovadoTrue(Long id);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")})
+    @QueryHints({
+            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")
+    })
     @Query("SELECT l FROM Livro l WHERE l.id = :id AND l.aprovado = true")
     Optional<Livro> findByIdAndAprovadoTrueWithLock(@Param("id") Long id);
+
+    // =========================================================
+    // LOTE
+    // =========================================================
 
     List<Livro> findByLoteId(Long loteId);
 
     List<Livro> findByLoteIdAndAprovadoFalse(Long loteId);
-    
-    List<Livro> findByDataAnuncioAfter(LocalDateTime data);
+
+    long countByLoteIdAndAprovadoFalse(Long loteId);
+
+    // =========================================================
+    // OBRA
+    // =========================================================
 
     List<Livro> findByObraId(Long obraId);
+
+    // =========================================================
+    // APROVAÇÃO (STATUS GERAL)
+    // =========================================================
 
     List<Livro> findByAprovadoTrue();
 
     List<Livro> findByAprovadoFalse();
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT l FROM Livro l WHERE l.id IN :ids AND l.aprovado = true")
-    List<Livro> findAllByIdInAndAprovadoTrueWithLock (@Param("ids") List<Long> ids);
-
-    @Query("SELECT COUNT(l) FROM Livro l WHERE l.lote.id = :loteId AND l.aprovado = false")
-    long countPendingByLoteId(@Param("loteId") Long loteId);
-
     long countByAprovadoTrue();
 
+    // =========================================================
+    // ANÚNCIO / DATA
+    // =========================================================
+
+    List<Livro> findByDataAnuncioAfter(LocalDateTime data);
+
+    // =========================================================
+    // PROMOÇÕES
+    // =========================================================
+
+    List<Livro> findByAprovadoTrueAndEmPromocaoTrue();
+
+    /** Promoções ativas (sem expiração ou ainda válidas) */
+    @Query("""
+                SELECT l
+                FROM Livro l
+                WHERE l.aprovado = true
+                  AND l.emPromocao = true
+                  AND (l.promocaoExpira IS NULL OR l.promocaoExpira > :agora)
+            """)
+    List<Livro> findPromocoesAtivas(@Param("agora") LocalDateTime agora);
+
+    /** Promoções expiradas */
+    @Query("""
+                SELECT l
+                FROM Livro l
+                WHERE l.emPromocao = true
+                  AND l.promocaoExpira IS NOT NULL
+                  AND l.promocaoExpira < :agora
+            """)
+    List<Livro> findPromocoesExpiradas(@Param("agora") LocalDateTime agora);
 }

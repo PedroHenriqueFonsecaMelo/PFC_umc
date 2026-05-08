@@ -5,10 +5,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
 import umc.exs.service.log.LogAuditoriaService;
@@ -20,6 +25,7 @@ public class AuthHelper {
     private final JwtUserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
     private final LogAuditoriaService logAuditoriaService;
+    private final ClienteRepository clienteRepository;
 
     /**
      * Autentica usuário e define cookie JWT.
@@ -44,7 +50,25 @@ public class AuthHelper {
             Authentication auth = new UsernamePasswordAuthenticationToken(ud, null, ud.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-            // 4. Auditoria
+            // 4. Registra sessão ativa
+            try {
+                Cliente cliente = clienteRepository.findById(id).orElse(null);
+                if (cliente != null) {
+                    String ip = null;
+                    String ua = null;
+                    ServletRequestAttributes attrs =
+                            (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+                    if (attrs != null) {
+                        HttpServletRequest req = attrs.getRequest();
+                        ip = req.getRemoteAddr();
+                        ua = req.getHeader("User-Agent");
+                    }
+                }
+            } catch (Exception ex) {
+                // Não bloqueia o login por falha no registro de sessão
+            }
+
+            // 5. Auditoria
             logAuditoriaService.registrarLog(logAction, id, email, "Autenticação via JWT concluída com sucesso.");
 
         } catch (UsernameNotFoundException e) {

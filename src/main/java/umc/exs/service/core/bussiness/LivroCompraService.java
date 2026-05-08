@@ -16,6 +16,8 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.core.control.PedidoService;
+import org.springframework.beans.factory.annotation.Value;
+import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.gamificacao.GamificacaoService;
 import umc.exs.service.log.LogAuditoriaService;
@@ -24,6 +26,9 @@ import umc.exs.service.log.LogAuditoriaService;
 @Service
 @RequiredArgsConstructor
 public class LivroCompraService {
+
+    @Value("${app.base-url:https://localhost:8443}")
+    private String baseUrl;
 
     private final LivroRepository livroRepository;
     private final ClienteRepository clienteRepository;
@@ -55,7 +60,15 @@ public class LivroCompraService {
         livroRepository.delete(livro);
         clienteRepository.save(comprador);
 
-        emailService.enviar(comprador.getEmail(), "Compra Realizada", "Você adquiriu o livro: " + livro.getTitulo());
+        try {
+            emailService.enviarHtml(
+                    comprador.getEmail(),
+                    "Compra realizada com sucesso! — Bibliotroca",
+                    EmailHtmlBuilder.compraSucesso(comprador.getNome(), livro.getTitulo(),
+                            livro.getPrecoAprovado(), comprador.getSaldoTokens(), baseUrl));
+        } catch (Exception e) {
+            log.error("Falha ao enviar e-mail de compra para {}: {}", comprador.getEmail(), e.getMessage());
+        }
         
         logAuditoria.registrarLog("COMPRA_LIVRO_SUCESSO", comprador.getId(), comprador.getEmail(),
                 "Livro " + livroId + " T$" + livro.getPrecoAprovado());
@@ -165,21 +178,14 @@ public class LivroCompraService {
         // E-mail de confirmação do carrinho ao comprador
         if (!comprados.isEmpty()) {
             try {
-                StringBuilder itensMsg = new StringBuilder();
-                comprados.forEach(item -> itensMsg
-                        .append("• ").append(item.getTitulo())
-                        .append(" — T$ ").append(String.format("%.2f", item.getPreco()))
-                        .append("\n"));
-                emailService.enviar(
+                List<String[]> itensHtml = new java.util.ArrayList<>();
+                comprados.forEach(item -> itensHtml.add(
+                        new String[]{ item.getTitulo(), String.format("%.2f", item.getPreco()) }));
+                emailService.enviarHtml(
                         comprador.getEmail(),
-                        "Compra do carrinho confirmada!",
-                        "Olá, " + comprador.getNome() + "!\n\n" +
-                                "Sua compra foi confirmada com sucesso.\n\n" +
-                                "Itens adquiridos:\n" + itensMsg +
-                                "\nTotal debitado: T$ " + String.format("%.2f", totalGasto) + "\n" +
-                                "Saldo atual: T$ " + String.format("%.2f", comprador.getSaldoTokens()) + "\n\n" +
-                                "Acompanhe o status dos envios em 'Minhas Compras'.\n\n" +
-                                "Equipe Bookstore");
+                        "Compra do carrinho confirmada! — Bibliotroca",
+                        EmailHtmlBuilder.carrinhoConfirmado(comprador.getNome(), itensHtml, totalGasto,
+                                comprador.getSaldoTokens(), baseUrl));
             } catch (Exception e) {
                 log.error("Falha ao enviar e-mail de carrinho para {}: {}", comprador.getEmail(), e.getMessage());
             }

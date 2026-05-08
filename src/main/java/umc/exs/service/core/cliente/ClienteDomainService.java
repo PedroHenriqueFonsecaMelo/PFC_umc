@@ -1,7 +1,6 @@
 package umc.exs.service.core.cliente;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import umc.exs.DTOs.auth.SignupDTO;
 import umc.exs.DTOs.user.CartaoDTO;
 import umc.exs.DTOs.user.ClienteDTO;
+import umc.exs.DTOs.user.ClienteUpdateDTO;
 import umc.exs.DTOs.user.EnderecoDTO;
 import umc.exs.mappers.ClienteMapper;
 import umc.exs.model.entidades.foundation.Transacao;
@@ -67,11 +67,12 @@ public class ClienteDomainService {
     }
 
     @Transactional
-    public ClienteDTO atualizarDados(@NonNull Long id, ClienteDTO dto) {
+    public ClienteDTO atualizarDados(@NonNull Long id, ClienteUpdateDTO dto) {
         Cliente cliente = repositoryService.buscarPorId(id);
 
         cliente.setNome(FieldValidation.sanitize(dto.getNome()));
         cliente.setDatanasc(dto.getDatanasc());
+        // CPF nunca é alterado após o cadastro (@Column updatable=false garante no BD)
 
         if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()) {
             cliente.setSenha(passwordEncoder.encode(dto.getSenha()));
@@ -95,20 +96,30 @@ public class ClienteDomainService {
     }
 
     @Transactional
-    public Optional<ClienteDTO> processarAutenticacao(String email, String senha) {
-        return repositoryService.encontrarPorEmail(email).map(cliente -> {
+    public ClienteDTO processarAutenticacao(String email, String senha) {
+        Cliente cliente = repositoryService.encontrarPorEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("E-mail ou senha inválidos."));
+
+        if (!cliente.isEmailVerificado()) {
+            throw new IllegalArgumentException("E-mail não verificado. Verifique sua caixa de entrada.");
+        }
+
+        if (cliente.isBloqueada()) {
+            throw new IllegalArgumentException("Conta bloqueada. Entre em contato com o suporte.");
+        }
+
+        if (!passwordEncoder.matches(senha, cliente.getSenha())) {
+            repositoryService.registrarFalhaLogin(cliente);
             if (cliente.isBloqueada()) {
-                throw new IllegalArgumentException("Conta bloqueada por excesso de tentativas.");
+                throw new IllegalArgumentException("Conta bloqueada. Entre em contato com o suporte.");
             }
+            int restantes = Math.max(0, 5 - cliente.getTentativas());
+            throw new IllegalArgumentException(
+                    "Senha incorreta. Você tem " + restantes + " tentativa(s) restantes.");
+        }
 
-            if (!passwordEncoder.matches(senha, cliente.getSenha())) {
-                repositoryService.registrarFalhaLogin(cliente);
-                return null;
-            }
-
-            repositoryService.resetarTentativasLogin(cliente);
-            return clienteMapper.paraDTO(cliente);
-        });
+        repositoryService.resetarTentativasLogin(cliente);
+        return clienteMapper.paraDTO(cliente);
     }
 
     @Transactional
@@ -128,7 +139,7 @@ public class ClienteDomainService {
     }
 
     @Transactional
-    public void redefinirSenha(String token, String novaSenha) {
+    public Cliente redefinirSenha(String token, String novaSenha) {
         RecuperacaoSenha registro = tokenRepository.findByToken(token)
                 .orElseThrow(() -> new IllegalArgumentException("Token inválido ou inexistente."));
 
@@ -140,10 +151,14 @@ public class ClienteDomainService {
         Cliente cliente = registro.getCliente();
         cliente.setSenha(passwordEncoder.encode(novaSenha));
 
+        cliente.setBloqueada(false);
+        cliente.setTentativas(0);
+
         repositoryService.salvar(cliente);
         tokenRepository.delete(registro);
 
         log.info("Senha redefinida com sucesso para: {}", cliente.getEmail());
+        return cliente;
     }
     
     @Transactional

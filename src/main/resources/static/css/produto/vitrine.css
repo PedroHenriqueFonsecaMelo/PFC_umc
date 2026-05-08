@@ -29,19 +29,19 @@ main.main-vitrine > p { font-style: italic; color: var(--muted); font-family: "I
 }
 
 /* ── Livro Cards ── */
-.livro-card { background: var(--white); border: 1px solid rgba(44, 36, 27, 0.12); cursor: pointer; transition: box-shadow 0.2s; overflow: hidden; }
+.livro-card { background: var(--white); border: 1px solid rgba(44, 36, 27, 0.12); cursor: pointer; transition: box-shadow 0.2s; overflow: hidden; display: flex; flex-direction: column; }
 .livro-card:hover { box-shadow: 4px 4px 0 var(--ink); }
-.livro-card-img { height: 220px; background: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 3rem; border-bottom: 1px solid rgba(44, 36, 27, 0.1); overflow: hidden; }
+.livro-card-img { height: 220px; background: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 3rem; border-bottom: 1px solid rgba(44, 36, 27, 0.1); overflow: hidden; flex-shrink: 0; }
 .livro-card-img img { width: 100%; height: 100%; object-fit: cover; }
-.livro-card-body { padding: 1rem; }
+.livro-card-body { padding: 1rem; display: flex; flex-direction: column; flex: 1; }
 .livro-titulo { font-family: "Playfair Display", serif; font-size: 0.9rem; font-weight: 700; margin-bottom: 0.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .livro-autor { font-size: 0.78rem; color: var(--muted); font-style: italic; margin-bottom: 0.5rem; }
 .livro-preco { font-family: "Playfair Display", serif; font-size: 1rem; font-weight: 700; color: var(--ink); }
 .livro-estado { display: inline-block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--border); padding: 0.15rem 0.5rem; margin-bottom: 0.5rem; }
-.btn-carrinho { width: 100%; margin-top: 0.75rem; padding: 0.6rem; background: var(--ink); color: var(--paper); border: 2px solid var(--ink); border-radius: 8px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.2s, color 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+.btn-carrinho { width: 100%; margin-top: auto; padding: 0.6rem; background: var(--ink); color: var(--paper); border: 2px solid var(--ink); border-radius: 8px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.2s, color 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
 .btn-carrinho:hover:not(:disabled) { background: transparent; color: var(--ink); }
 .btn-carrinho.no-carrinho { background: var(--forest); border-color: var(--forest); cursor: default; }
-.livro-rodape { font-size: 0.7rem; color: var(--muted); margin-top: 0.5rem; }
+.livro-rodape { font-size: 0.7rem; color: var(--muted); margin-top: 0.4rem; }
 
 /* ── Carrinho Overlay ── */
 #carrinhoOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 40; backdrop-filter: blur(2px); }
@@ -49,7 +49,7 @@ main.main-vitrine > p { font-style: italic; color: var(--muted); font-family: "I
 /* ── Carrinho Sidebar ── */
 #carrinhoSidebar {
   position: fixed;
-  top: 0; right: 0; bottom: 0;
+  top: 20px; right: 0; bottom: 0;
   width: 380px;
   max-width: 95vw;
   background: var(--paper);

@@ -8,31 +8,51 @@ import org.springframework.stereotype.Repository;
 
 import umc.exs.model.entidades.social.PontuacaoUsuario;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface PontuacaoUsuarioRepository extends JpaRepository<PontuacaoUsuario, Long> {
 
-    Optional<PontuacaoUsuario> findByClienteId(Long clienteId);
+       Optional<PontuacaoUsuario> findByClienteId(Long clienteId);
 
-    Optional<PontuacaoUsuario> findByClienteEmail(String email);
+       Optional<PontuacaoUsuario> findByClienteEmail(String email);
 
-    /**
-     * Top N usuários por XP — usa Pageable para ser compatível com
-     * SQLite (dev) e PostgreSQL (produção). Evita LIMIT hardcoded no JPQL.
-     * Uso: findTopByOrderByXpTotalDesc(PageRequest.of(0, 5))
-     */
-    @Query("SELECT p FROM PontuacaoUsuario p ORDER BY p.xpTotal DESC")
-    List<PontuacaoUsuario> findTopByOrderByXpTotalDesc(Pageable pageable);
+       /**
+        * Top N usuários por XP — usa Pageable para ser compatível com
+        * SQLite (dev) e PostgreSQL (produção). Evita LIMIT hardcoded no JPQL.
+        * Uso: findTopByOrderByXpTotalDesc(PageRequest.of(0, 5))
+        */
+       @Query("SELECT p FROM PontuacaoUsuario p ORDER BY p.xpTotal DESC")
+       List<PontuacaoUsuario> findTopByOrderByXpTotalDesc(Pageable pageable);
 
-    /**
-     * Conta quantos usuários têm XP estritamente maior que o valor informado.
-     * Posição do usuário = countByXpTotalGreaterThan(xpDoUsuario) + 1.
-     */
-    @Query("SELECT COUNT(p) FROM PontuacaoUsuario p WHERE p.xpTotal > :xp")
-    long countByXpTotalGreaterThan(@Param("xp") int xp);
+       /**
+        * Conta quantos usuários têm XP estritamente maior que o valor informado.
+        * Posição do usuário = countByXpTotalGreaterThan(xpDoUsuario) + 1.
+        */
+       @Query("SELECT COUNT(p) FROM PontuacaoUsuario p WHERE p.xpTotal > :xp")
+       long countByXpTotalGreaterThan(@Param("xp") int xp);
 
-    @Query("SELECT p FROM PontuacaoUsuario p JOIN FETCH p.cliente")
-    List<PontuacaoUsuario> findAllWithCliente();
+       @Query("SELECT p FROM PontuacaoUsuario p JOIN FETCH p.cliente")
+       List<PontuacaoUsuario> findAllWithCliente();
+
+       /**
+        * Pontuações com XP > 0 cujo prazo de expiração já passou (para limpeza).
+        */
+       @Query("SELECT p FROM PontuacaoUsuario p JOIN FETCH p.cliente " +
+                     "WHERE p.xpTotal > 0 AND p.dataExpiracao IS NOT NULL AND p.dataExpiracao < :agora")
+       List<PontuacaoUsuario> findExpirados(@Param("agora") LocalDateTime agora);
+
+       /**
+        * Pontuações com XP > 0 que vencem entre agora e um limite (aviso prévio).
+        */
+       @Query("SELECT p FROM PontuacaoUsuario p JOIN FETCH p.cliente " +
+                     "WHERE p.xpTotal > 0 AND p.dataExpiracao IS NOT NULL " +
+                     "AND p.dataExpiracao BETWEEN :inicio AND :fim")
+       List<PontuacaoUsuario> findAVencer(
+                     @Param("inicio") LocalDateTime inicio,
+                     @Param("fim") LocalDateTime fim);
+
+       List<PontuacaoUsuario> findByUltimaAtualizacaoBefore(LocalDateTime data);
 }

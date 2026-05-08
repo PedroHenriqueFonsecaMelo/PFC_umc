@@ -95,7 +95,7 @@ class IndexControllerIntegrationTest {
                 .thenThrow(new UsernameNotFoundException("Usuário não encontrado"));
 
         when(clienteService.autenticarCliente(anyString(), anyString()))
-                .thenReturn(Optional.empty());
+        .thenThrow(new IllegalArgumentException("Usuário ou senha inválidos"));
 
         mockMvc.perform(post("/entrar")
                 .param("email", "client@example.com")

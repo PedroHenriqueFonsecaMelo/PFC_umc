@@ -1,12 +1,16 @@
 package umc.exs.controller.web;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,13 +23,18 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import umc.exs.DTOs.auth.LoginDTO;
 import umc.exs.DTOs.auth.SignupDTO;
+import umc.exs.DTOs.gamificacao.MeuPerfilGamificacaoDTO;
 import umc.exs.DTOs.user.ClienteDTO;
+import umc.exs.DTOs.user.ClienteUpdateDTO;
 import umc.exs.DTOs.user.EnderecoDTO;
 import umc.exs.DTOs.user.SenhaResetDTO;
 import umc.exs.model.entidades.foundation.Transacao;
+import umc.exs.model.entidades.social.PontuacaoUsuario;
+import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
 import umc.exs.service.core.cliente.ClienteService;
 import umc.exs.service.core.control.AuthHelper;
+import umc.exs.service.gamificacao.GamificacaoService;
 
 @Controller
 @RequestMapping("/clientes")
@@ -35,9 +44,12 @@ public class ClientController {
     private final ClienteService clienteService;
     private final AuthHelper authHelper;
     private final JwtUtil jwtUtil;
+    private final JwtUserDetailsService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
+    private final GamificacaoService gamificacaoService;
 
     // ============================================================
-    // 🔹 AUTENTICAÇÃO (CADASTRO / LOGIN / SAIR)
+    // AUTENTICAÇÃO (CADASTRO / LOGIN / SAIR)
     // ============================================================
 
     @GetMapping("/novo-cadastro")
@@ -69,9 +81,9 @@ public class ClientController {
         }
 
         try {
-            ClienteDTO salvo = clienteService.salvarCliente(signupDTO);
-            authHelper.authenticateAndSetCookie(salvo.getEmail(), salvo.getId(), response, "CADASTRO_SUCESSO");
-            return "redirect:/clientes/meu-perfil";
+            clienteService.salvarCliente(signupDTO);
+            // Não faz login automático — o cliente deve verificar o e-mail primeiro
+            return "redirect:/clientes/login?cadastro=ok";
         } catch (Exception e) {
             model.addAttribute("erro", e.getMessage());
             return "cliente/cadastro_cliente";
@@ -86,22 +98,59 @@ public class ClientController {
         return "cliente/login_cliente";
     }
 
+    /**
+     * Login unificado: detecta admin ou cliente pelo e-mail.
+     * Admin (tabela admins) → loga direto, sem verificar email_verificado.
+     * Cliente (tabela users) → verifica email_verificado antes de permitir login.
+     */
     @PostMapping("/login")
-    public String realizarLogin(@Valid @ModelAttribute("loginData") LoginDTO loginDTO,
-            BindingResult result, Model model, HttpServletResponse response) {
-        if (result.hasErrors())
-            return "cliente/login_cliente";
+    public String realizarLogin(
+            @RequestParam String email,
+            @RequestParam String senha,
+            Model model,
+            HttpServletResponse response) {
 
-        Optional<ClienteDTO> clienteOpt = clienteService.autenticarCliente(loginDTO.getEmail(), loginDTO.getSenha());
+        // 1. Tenta admin primeiro
+        try {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            boolean isAdmin = userDetails.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ADMIN"));
 
-        if (clienteOpt.isEmpty()) {
-            model.addAttribute("erro", "E-mail ou senha inválidos.");
-            return "cliente/login_cliente";
+            if (isAdmin) {
+                if (!passwordEncoder.matches(senha, userDetails.getPassword())) {
+                    model.addAttribute("erro", "E-mail ou senha inválidos.");
+                    return "cliente/login_cliente";
+                }
+                String token = jwtUtil.generateToken(email);
+                jwtUtil.addTokenCookie(response, token);
+                Authentication auth = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                return "redirect:/admin/dashboard";
+            }
+        } catch (UsernameNotFoundException ignored) {
+            // e-mail não é admin — tenta como cliente abaixo
         }
 
-        ClienteDTO cliente = clienteOpt.get();
-        authHelper.authenticateAndSetCookie(cliente.getEmail(), cliente.getId(), response, "LOGIN_SUCESSO");
-        return "redirect:/clientes/meu-perfil";
+        // 2. Tenta cliente (verifica email_verificado internamente)
+        try {
+            ClienteDTO cliente = clienteService.autenticarCliente(email, senha);
+            authHelper.authenticateAndSetCookie(cliente.getEmail(), cliente.getId(), response, "LOGIN_SUCESSO");
+            return "redirect:/clientes/homepage";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("erro", e.getMessage());
+            return "cliente/login_cliente";
+        }
+    }
+
+    @GetMapping("/homepage")
+    public String exibirHomepage(@AuthenticationPrincipal UserDetails user, Model model) {
+        if (user == null)
+            return "redirect:/clientes/login";
+        ClienteDTO clienteDTO = clienteService.buscarClientePorEmail(user.getUsername())
+                .orElseThrow(() -> new RuntimeException("Perfil não encontrado."));
+        model.addAttribute("cliente", clienteDTO);
+        return "cliente/homepage";
     }
 
     @GetMapping("/sair")
@@ -117,13 +166,53 @@ public class ClientController {
 
     @GetMapping("/meu-perfil")
     public String exibirPerfil(@AuthenticationPrincipal UserDetails user, Model model) {
+
         if (user == null)
             return "redirect:/clientes/login";
 
         ClienteDTO clienteDTO = clienteService.buscarClientePorEmail(user.getUsername())
                 .orElseThrow(() -> new RuntimeException("Perfil não encontrado."));
 
+        MeuPerfilGamificacaoDTO perfilGamificacao = gamificacaoService.obterMeuPerfil(user.getUsername());
+
         model.addAttribute("cliente", clienteDTO);
+        model.addAttribute("perfilGamificacao", perfilGamificacao);
+
+        // 🔥 NOVA REGRA DE INATIVIDADE
+        try {
+
+            PontuacaoUsuario pontuacao = gamificacaoService
+                    .buscarPontuacaoPorEmail(user.getUsername());
+
+            if (pontuacao != null && pontuacao.getUltimaAtualizacao() != null) {
+
+                LocalDateTime agora = LocalDateTime.now();
+
+                long diasSemXp = java.time.temporal.ChronoUnit.DAYS.between(
+                        pontuacao.getUltimaAtualizacao(), agora);
+
+                if (diasSemXp > 30) {
+
+                    if (diasSemXp >= 45) {
+
+                        model.addAttribute("aviso",
+                                "Seu XP foi zerado por inatividade prolongada.");
+
+                    } else {
+
+                        model.addAttribute("aviso",
+                                "Você está perdendo XP por inatividade. Volte a interagir para evitar perda total.");
+                    }
+
+                    // 🔥 aplica penalidade
+                    gamificacaoService.aplicarPenalidadeXpExpirada(user.getUsername());
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return "cliente/homepage";
     }
 
@@ -146,7 +235,7 @@ public class ClientController {
     }
 
     @PostMapping("/atualizar")
-    public String atualizarCliente(@ModelAttribute("cliente") ClienteDTO dto,
+    public String atualizarCliente(@ModelAttribute("cliente") ClienteUpdateDTO dto,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
         clienteService.atualizarDadosLogados(user.getUsername(), dto);
         ra.addFlashAttribute("sucesso", "Informações atualizadas!");
@@ -219,13 +308,15 @@ public class ClientController {
 
     @GetMapping("/minhas-compras")
     public String exibirMinhasCompras(@AuthenticationPrincipal UserDetails user) {
-        if (user == null) return "redirect:/clientes/login";
+        if (user == null)
+            return "redirect:/clientes/login";
         return "cliente/minhas-compras";
     }
 
     @GetMapping("/lista-desejos")
     public String exibirListaDesejos(@AuthenticationPrincipal UserDetails user) {
-        if (user == null) return "redirect:/clientes/login";
+        if (user == null)
+            return "redirect:/clientes/login";
         return "cliente/lista_desejos";
     }
 
@@ -260,10 +351,10 @@ public class ClientController {
     public String iniciarRecuperacaoSenha(@RequestParam String email, RedirectAttributes ra) {
         try {
             clienteService.iniciarRecuperacaoSenha(email);
-            ra.addFlashAttribute("sucesso", "Se o e-mail existir, um link foi enviado.");
-        } catch (Exception e) {
-            ra.addFlashAttribute("sucesso", "Verifique sua caixa de entrada.");
+        } catch (Exception ignored) {
+            // Sempre exibe a mesma mensagem para não expor se o e-mail existe ou não
         }
+        ra.addFlashAttribute("sucesso", "E-mail de recuperação enviado! Verifique sua caixa de entrada.");
         return "redirect:/clientes/login";
     }
 

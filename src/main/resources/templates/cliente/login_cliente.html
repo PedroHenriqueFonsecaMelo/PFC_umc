@@ -67,7 +67,7 @@
     </div>
 
     <!-- Voltar -->
-    <a th:href="@{/entrar}" href="/entrar" class="back-link">← Voltar</a>
+    <a th:href="@{/}" href="/" class="back-link">← Início</a>
 
     <!-- Livro aberto -->
     <main class="page-content">
@@ -113,8 +113,18 @@
           <div th:if="${param.error}" class="alert alert-erro">
             E-mail ou senha inválidos.
           </div>
+          <div th:if="${erro}" th:text="${erro}" id="erro-login" class="alert alert-erro">
+          </div>
           <div th:if="${param.logout}" class="alert alert-sucesso">
             Você saiu com sucesso.
+          </div>
+          <div th:if="${param.cadastro}" class="alert alert-sucesso">
+            Cadastro realizado! Verifique seu e-mail antes de entrar.
+          </div>
+          <div th:if="${param.emailVerificado}" class="alert alert-sucesso">
+            E-mail verificado com sucesso! Agora você pode fazer login.
+          </div>
+          <div th:if="${sucesso}" th:text="${sucesso}" class="alert alert-sucesso">
           </div>
 
           <!-- Formulário -->
@@ -136,13 +146,18 @@
 
             <div class="field">
               <label for="senha">Senha</label>
-              <input
-                type="password"
-                id="senha"
-                name="senha"
-                required
-                placeholder="••••••••"
-              />
+              <div class="input-senha-wrapper">
+                <input
+                  type="password"
+                  id="senha"
+                  name="senha"
+                  required
+                  placeholder="••••••••"
+                />
+                <button type="button" class="btn-toggle-senha" aria-label="Mostrar senha" onclick="toggleSenhaLogin('senha', this)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
             </div>
 
             <button type="submit" class="btn-entrar">Abrir a biblioteca</button>

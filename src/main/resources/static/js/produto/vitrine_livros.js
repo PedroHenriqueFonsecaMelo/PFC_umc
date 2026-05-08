@@ -132,20 +132,20 @@ async function finalizarCompra() {
     try {
         const res = await fetch('/api/livros/carrinho/comprar', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ livroIds: carrinho.map(i => i.id) })
         });
 
         const data = await res.json();
 
         if (!res.ok) {
-            // Erro geral (saldo insuficiente, conta bloqueada etc.)
-            mostrarToast([], [data]);
-            btn.disabled = false;
-            btn.textContent = 'Finalizar Compra';
+            const toast = document.getElementById('toastCompra');
+            if (toast) {
+                toast.className = 'toast toast-erro';
+                toast.innerHTML = `❌ ${typeof data === 'string' ? data : (data.falhas?.[0]?.motivo || 'Erro ao processar a compra.')}`;
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 6000);
+            }
             return;
         }
 
@@ -160,12 +160,32 @@ async function finalizarCompra() {
 
         mostrarToastResultado(data);
 
-    } catch (_) {
-        mostrarToast([], ['Erro de conexão. Tente novamente.']);
+    } catch (err) {
+        console.error('Erro ao finalizar compra:', err);
+        const toast = document.getElementById('toastCompra');
+        if (toast) {
+            toast.className = 'toast toast-erro';
+            toast.innerHTML = '❌ Erro de conexão. Tente novamente.';
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 6000);
+        }
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Finalizar Compra';
     }
+}
 
-    btn.disabled = false;
-    btn.textContent = 'Finalizar Compra';
+function limparCarrinho() {
+    saveCarrinho([]);
+    renderCarrinho();
+    atualizarBotoes();
+    const toast = document.getElementById('toastCompra');
+    if (toast) {
+        toast.className = 'toast toast-info';
+        toast.innerHTML = 'Estante limpa.';
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2500);
+    }
 }
 
 function mostrarToastResultado(data) {
@@ -206,15 +226,80 @@ async function carregarSaldo() {
     } catch (_) { }
 }
 
+/* ── CONTADOR REGRESSIVO ─────────────────────────────────────── */
+
+let contadorInterval = null;
+
+function iniciarContadores() {
+    if (contadorInterval) clearInterval(contadorInterval);
+
+    const atualizar = () => {
+        const agora = Date.now();
+        document.querySelectorAll('.promo-countdown').forEach(el => {
+            const expira = new Date(el.dataset.expira).getTime();
+            const diff   = expira - agora;
+            const id     = el.dataset.livroId;
+
+            if (diff <= 0) {
+                // Promoção expirou — oculta badge e restaura preço normal
+                el.style.display = 'none';
+                const badge = document.getElementById('badge-' + id);
+                if (badge) badge.style.display = 'none';
+                const precoEl = document.getElementById('preco-' + id);
+                if (precoEl) {
+                    const precoOriginal = parseFloat(el.dataset.precoOriginal) || 0;
+                    precoEl.innerHTML = `T$ ${precoOriginal.toFixed(2)}`;
+                    precoEl.style.color = '';
+                }
+            } else {
+                const h = Math.floor(diff / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                const timerEl = document.getElementById('timer-' + id);
+                if (timerEl) timerEl.textContent = `${h}h ${m}m ${s}s`;
+            }
+        });
+    };
+
+    atualizar(); // executa imediatamente
+    contadorInterval = setInterval(atualizar, 1000);
+}
+
+/* ── PROMOÇÃO TOGGLE ─────────────────────────────────────────── */
+
+let modoPromo = false;
+
+function togglePromo() {
+    modoPromo = !modoPromo;
+    const btn = document.getElementById('btnPromo');
+    const titulo = document.getElementById('vitrineTitulo');
+    if (modoPromo) {
+        btn.style.background = '#722f37';
+        btn.style.color = '#fff';
+        btn.textContent = '✕ Ver Todos';
+        if (titulo) titulo.textContent = 'Promoções';
+    } else {
+        btn.style.background = '#fff';
+        btn.style.color = '#722f37';
+        btn.textContent = '🏷 Ver Promoções';
+        if (titulo) titulo.textContent = 'Livros Disponíveis';
+    }
+    carregarLivros();
+}
+
 /* ── CARREGAR LIVROS ─────────────────────────────────────────── */
 
 async function carregarLivros() {
     const grid = document.getElementById('gridLivros');
     try {
-        const livros = await fetch('/api/livros/todos').then(r => r.json());
+        const url = modoPromo ? '/api/livros/todos?emPromocao=true' : '/api/livros/todos';
+        const livros = await fetch(url).then(r => r.json());
 
         if (!livros.length) {
-            grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#7A6E65;padding:2.5rem 0;font-family:'IM Fell English',serif;font-style:italic">Nenhum livro disponível ainda.</p>`;
+            const msg = modoPromo
+                ? 'Nenhum livro em promoção no momento.'
+                : 'Nenhum livro disponível ainda.';
+            grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#7A6E65;padding:2.5rem 0;font-family:'IM Fell English',serif;font-style:italic">${msg}</p>`;
             return;
         }
 
@@ -227,8 +312,38 @@ async function carregarLivros() {
 
             const livroJson = JSON.stringify(livro).replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
+            // Badge de promoção (com ID para poder ocultar ao expirar)
+            const badgePromo = livro.emPromocao
+                ? `<span id="badge-${livro.id}" style="position:absolute;top:.5rem;left:.5rem;background:#e11d48;color:#fff;
+                               font-size:.7rem;font-weight:700;padding:.2rem .55rem;border-radius:20px;
+                               text-transform:uppercase;letter-spacing:.04em;">PROMOÇÃO</span>`
+                : '';
+
+            // Preço: se emPromocao e precoOriginal, exibir original riscado
+            let precoHtml;
+            if (livro.emPromocao && livro.precoOriginal) {
+                precoHtml = `<div class="livro-preco" id="preco-${livro.id}">
+                    <span style="text-decoration:line-through;color:#9a8a80;font-size:.85rem;margin-right:.4rem;">T$ ${(livro.precoOriginal).toFixed(2)}</span>
+                    <span style="color:#e11d48;font-weight:700;">T$ ${(livro.precoAprovado || 0).toFixed(2)}</span>
+                </div>`;
+            } else {
+                precoHtml = `<div class="livro-preco" id="preco-${livro.id}">T$ ${(livro.precoAprovado || 0).toFixed(2)}</div>`;
+            }
+
+            // Contador regressivo (só para promoções com data de expiração)
+            const countdownHtml = (livro.emPromocao && livro.promocaoExpira)
+                ? `<div class="promo-countdown"
+                        data-livro-id="${livro.id}"
+                        data-expira="${livro.promocaoExpira}"
+                        data-preco-original="${livro.precoOriginal || livro.precoAprovado || 0}"
+                        style="margin-top:.45rem;font-size:.85rem;font-weight:700;color:#e11d48;">
+                       🔥 Oferta expira em: <span id="timer-${livro.id}">...</span>
+                   </div>`
+                : '';
+
             return `
-            <div class="livro-card">
+            <div class="livro-card" id="card-${livro.id}" style="position:relative;">
+                ${badgePromo}
                 <div class="livro-card-img">
                     <img src="${foto}"
                          onerror="this.src='https://via.placeholder.com/300x400?text=📚'">
@@ -237,7 +352,8 @@ async function carregarLivros() {
                     <span class="livro-estado">${livro.estadoAprovado || 'BOM'}</span>
                     <h3 class="livro-titulo">${livro.titulo}</h3>
                     <p class="livro-autor">por ${livro.autor}</p>
-                    <div class="livro-preco">T$ ${(livro.precoAprovado || 0).toFixed(2)}</div>
+                    ${precoHtml}
+                    ${countdownHtml}
                     <button
                         class="btn-carrinho"
                         data-id="${livro.id}"
@@ -250,6 +366,7 @@ async function carregarLivros() {
         }).join('');
 
         atualizarBotoes();
+        iniciarContadores();
 
     } catch (err) {
         console.error(err);

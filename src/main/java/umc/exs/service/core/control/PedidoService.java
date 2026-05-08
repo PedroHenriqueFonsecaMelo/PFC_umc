@@ -1,5 +1,6 @@
 package umc.exs.service.core.control;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,6 +16,8 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.StatusEnvio;
 import umc.exs.repository.negocios.PedidoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import org.springframework.beans.factory.annotation.Value;
+import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.log.LogAuditoriaService;
 
@@ -26,6 +29,9 @@ import umc.exs.service.log.LogAuditoriaService;
 @Service
 @RequiredArgsConstructor
 public class PedidoService {
+
+        @Value("${app.base-url:https://localhost:8443}")
+        private String baseUrl;
 
         private final PedidoRepository pedidoRepository;
         private final ClienteRepository clienteRepository;
@@ -39,10 +45,12 @@ public class PedidoService {
         /**
          * Registra um novo pedido no momento da compra.
          * Preserva todos os dados do livro antes de ele ser deletado da vitrine.
+         * LGPD Art. 16 — retenção obrigatória por 5 anos.
          */
         @SuppressWarnings("null")
         @Transactional
         public Pedido registrarPedido(Cliente comprador, Livro livro) {
+                LocalDateTime agora = LocalDateTime.now();
                 Pedido pedido = Pedido.builder()
                                 .comprador(comprador)
                                 .livroId(livro.getId())
@@ -52,7 +60,8 @@ public class PedidoService {
                                 .fotosUrls(livro.getFotosUrls())
                                 .precoLivro(livro.getPrecoAprovado())
                                 .statusEnvio(StatusEnvio.AGUARDANDO_ENVIO)
-                                .dataCompra(LocalDateTime.now())
+                                .dataCompra(agora)
+                                .dataRetencaoExpira(agora.toLocalDate().plusYears(5))
                                 .build();
 
                 Pedido salvo = pedidoRepository.save(pedido);
@@ -148,6 +157,22 @@ public class PedidoService {
                                         String.format("Pedido #%d cancelado — T$ %.2f estornados. Saldo: T$ %.2f → T$ %.2f",
                                                         pedidoId, valorEstorno, saldoAnterior,
                                                         comprador.getSaldoTokens()));
+
+                        // E-mail dedicado de atualização de saldo pelo estorno
+                        try {
+                                emailService.enviarHtml(
+                                        comprador.getEmail(),
+                                        "Atualização de saldo — Bibliotroca",
+                                        EmailHtmlBuilder.atualizacaoSaldo(
+                                                comprador.getNome(),
+                                                saldoAnterior,
+                                                valorEstorno,
+                                                comprador.getSaldoTokens(),
+                                                "Estorno — pedido #" + pedidoId + " cancelado",
+                                                true));
+                        } catch (Exception e) {
+                                log.error("Falha ao enviar e-mail de estorno para {}: {}", comprador.getEmail(), e.getMessage());
+                        }
                 }
 
                 pedido.setStatusEnvio(novoStatus);
@@ -168,23 +193,17 @@ public class PedidoService {
                 if (pedido.getComprador() != null) {
                         try {
                                 Cliente compradorPedido = pedido.getComprador();
-                                String mensagemExtra = novoStatus == StatusEnvio.CANCELADO && pedido.getPrecoLivro() != null
-                                        ? "\nValor de T$ " + String.format("%.2f", pedido.getPrecoLivro()) + " foi estornado ao seu saldo.\n"
-                                        : "";
-                                String rastreioInfo = (codigoRastreio != null && !codigoRastreio.isBlank())
-                                        ? "\nCódigo de rastreio: " + codigoRastreio + "\n"
-                                        : "";
-                                emailService.enviar(
+                                boolean cancelado = novoStatus == StatusEnvio.CANCELADO
+                                        && pedido.getPrecoLivro() != null;
+                                emailService.enviarHtml(
                                         compradorPedido.getEmail(),
-                                        "Atualização do pedido #" + pedidoId,
-                                        "Olá, " + compradorPedido.getNome() + "!\n\n" +
-                                                "O status do seu pedido #" + pedidoId + " foi atualizado para: " +
-                                                novoStatus.getDescricao() + ".\n" +
-                                                "Livro: " + pedido.getTituloLivro() + "\n" +
-                                                rastreioInfo + mensagemExtra + "\n" +
-                                                "Acompanhe seus pedidos em 'Minhas Compras'.\n\n" +
-                                                "Equipe Bookstore"
-                                );
+                                        "Atualização do pedido #" + pedidoId + " — Bibliotroca",
+                                        EmailHtmlBuilder.atualizacaoPedido(
+                                                compradorPedido.getNome(), pedidoId,
+                                                novoStatus.getDescricao(), pedido.getTituloLivro(),
+                                                codigoRastreio, cancelado,
+                                                cancelado ? pedido.getPrecoLivro() : 0.0,
+                                                baseUrl));
                         } catch (Exception e) {
                                 log.error("Falha ao enviar e-mail de status do pedido #{}: {}", pedidoId, e.getMessage());
                         }

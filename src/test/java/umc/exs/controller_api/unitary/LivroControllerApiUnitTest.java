@@ -2,9 +2,7 @@ package umc.exs.controller_api.unitary;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*; 
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,19 +17,21 @@ import org.springframework.security.core.userdetails.UserDetails;
 import umc.exs.DTOs.compra.CarrinhoCompraRequestDTO;
 import umc.exs.DTOs.compra.CarrinhoCompraResponseDTO;
 import umc.exs.controller.api.interaction.LivroControllerApi;
+import umc.exs.repository.livro.LivroRepository;
 import umc.exs.service.core.bussiness.LivroService;
-
 
 class LivroControllerApiUnitTest {
 
     private LivroService livroService;
+    private LivroRepository livroRepository;
     private LivroControllerApi controller;
     private UserDetails mockUser;
 
     @BeforeEach
     void setUp() {
         livroService = mock(LivroService.class);
-        controller = new LivroControllerApi(livroService);
+        livroRepository = mock(LivroRepository.class);
+        controller = new LivroControllerApi(livroService, livroRepository);
         mockUser = User.withUsername("test@example.com")
                 .password("pass")
                 .authorities("USER")

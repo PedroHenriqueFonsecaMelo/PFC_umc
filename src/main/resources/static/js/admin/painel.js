@@ -287,6 +287,12 @@ async function salvarEnvio(pedidoId) {
   const novoStatus = document.getElementById(`status-${pedidoId}`).value;
   const codigoRastreio = document.getElementById(`rastreio-${pedidoId}`).value.trim();
 
+  if (novoStatus === "CANCELADO") {
+    if (!confirm("Tem certeza que deseja CANCELAR este pedido? O valor será estornado ao comprador. Esta operação não pode ser desfeita.")) {
+      return;
+    }
+  }
+
   const btn = document.querySelector(`#row-${pedidoId} .btn-salvar-envio`);
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';

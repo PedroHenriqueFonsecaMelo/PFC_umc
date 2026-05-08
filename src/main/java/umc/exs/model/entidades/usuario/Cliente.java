@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -29,6 +30,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import umc.exs.handler.CpfConverter;
 import umc.exs.model.entidades.livro.AvaliacaoLivro;
 import umc.exs.model.enums.Genero;
 
@@ -59,7 +61,8 @@ public class Cliente {
     @Column(nullable = true)
     private Genero gen;
 
-    @Column(nullable = true, length = 14)
+    @Column(nullable = true)
+    @Convert(converter = CpfConverter.class)
     private String cpf;
 
     @Column(nullable = false, unique = true)
@@ -80,6 +83,16 @@ public class Cliente {
 
     @Column
     private String fotoPerfil;
+
+    @Column(nullable = false)
+    private boolean ativo = true;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    /** Verificação de e-mail — false até o usuário clicar no link de confirmação. */
+    @Column(nullable = false)
+    private boolean emailVerificado = false;
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, cascade = {

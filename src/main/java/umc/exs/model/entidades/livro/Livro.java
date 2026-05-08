@@ -72,6 +72,14 @@ public class Livro {
 
     private Long adminAprovadorId;
 
+    /** Promoção — exibe badge "PROMOÇÃO" e preço original riscado na vitrine. */
+    @Builder.Default
+    private Boolean emPromocao = false;
+
+    private Double precoOriginal;
+
+    private LocalDateTime promocaoExpira;
+
     // Relacionamento com as avaliações da história
     @OneToMany(mappedBy = "isbnOriginalNoAto", targetEntity = AvaliacaoLivro.class)
     @JsonIgnore

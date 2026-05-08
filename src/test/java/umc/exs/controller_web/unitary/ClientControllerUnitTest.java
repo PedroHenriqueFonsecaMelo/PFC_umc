@@ -1,7 +1,5 @@
 package umc.exs.controller_web.unitary;
 
-import java.util.Optional;
-
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,13 +7,17 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
-import umc.exs.DTOs.auth.LoginDTO;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import umc.exs.DTOs.auth.SignupDTO;
 import umc.exs.DTOs.user.ClienteDTO;
 import umc.exs.controller.web.ClientController;
 import umc.exs.security.JwtUtil;
+import umc.exs.security.JwtUserDetailsService;
 import umc.exs.service.core.cliente.ClienteService;
 import umc.exs.service.core.control.AuthHelper;
+import umc.exs.service.gamificacao.GamificacaoService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -25,6 +27,10 @@ class ClientControllerUnitTest {
     private ClienteService clienteService;
     private AuthHelper authHelper;
     private JwtUtil jwtUtil;
+    private JwtUserDetailsService userDetailsService;
+    private PasswordEncoder passwordEncoder;
+    private GamificacaoService gamificacaoService;
+
     private ClientController controller;
 
     @BeforeEach
@@ -32,7 +38,18 @@ class ClientControllerUnitTest {
         clienteService = mock(ClienteService.class);
         authHelper = mock(AuthHelper.class);
         jwtUtil = mock(JwtUtil.class);
-        controller = new ClientController(clienteService, authHelper, jwtUtil);
+        userDetailsService = mock(JwtUserDetailsService.class);
+        passwordEncoder = mock(PasswordEncoder.class);
+        gamificacaoService = mock(GamificacaoService.class);
+
+        controller = new ClientController(
+                clienteService,
+                authHelper,
+                jwtUtil,
+                userDetailsService,
+                passwordEncoder,
+                gamificacaoService
+        );
     }
 
     @Test
@@ -44,6 +61,7 @@ class ClientControllerUnitTest {
 
         assertEquals("cliente/cadastro_cliente", view);
         assertTrue(model.containsAttribute("cliente"));
+
         verify(jwtUtil).clearJwtCookie(response);
     }
 
@@ -58,31 +76,68 @@ class ClientControllerUnitTest {
         Model model = new ExtendedModelMap();
         HttpServletResponse response = mock(HttpServletResponse.class);
 
-        ClienteDTO salvo = new ClienteDTO(1L, null, "client@example.com", null, null, null, null, 0.0, null, null, null);
+        ClienteDTO salvo = new ClienteDTO();
+        salvo.setId(1L);
+        salvo.setEmail("client@example.com");
+
         when(clienteService.salvarCliente(dto)).thenReturn(salvo);
 
         String view = controller.registrarCliente(dto, result, "senha123", model, response);
 
-        assertEquals("redirect:/clientes/meu-perfil", view);
-        verify(authHelper).authenticateAndSetCookie("client@example.com", 1L, response, "CADASTRO_SUCESSO");
+        assertEquals("redirect:/clientes/login?cadastro=ok", view);
     }
 
     @Test
     void deveRetornarLoginQuandoCredenciaisInvalidas() {
-        LoginDTO loginDTO = new LoginDTO();
-        loginDTO.setEmail("client@example.com");
-        loginDTO.setSenha("senha123");
-
-        BindingResult result = new BeanPropertyBindingResult(loginDTO, "loginData");
         Model model = new ExtendedModelMap();
         HttpServletResponse response = mock(HttpServletResponse.class);
 
-        when(clienteService.autenticarCliente("client@example.com", "senha123"))
-                .thenReturn(Optional.empty());
+        when(userDetailsService.loadUserByUsername("client@example.com"))
+                .thenThrow(new UsernameNotFoundException("not found"));
 
-        String view = controller.realizarLogin(loginDTO, result, model, response);
+        when(clienteService.autenticarCliente("client@example.com", "senha123"))
+                .thenThrow(new IllegalArgumentException("E-mail ou senha inválidos."));
+
+        String view = controller.realizarLogin(
+                "client@example.com",
+                "senha123",
+                model,
+                response
+        );
 
         assertEquals("cliente/login_cliente", view);
         assertEquals("E-mail ou senha inválidos.", model.asMap().get("erro"));
+    }
+
+    @Test
+    void deveFazerLoginClienteComSucesso() {
+        ClienteDTO cliente = new ClienteDTO();
+        cliente.setId(1L);
+        cliente.setEmail("client@example.com");
+
+        Model model = new ExtendedModelMap();
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        when(userDetailsService.loadUserByUsername("client@example.com"))
+                .thenThrow(new UsernameNotFoundException("not admin"));
+
+        when(clienteService.autenticarCliente("client@example.com", "senha123"))
+                .thenReturn(cliente);
+
+        String view = controller.realizarLogin(
+                "client@example.com",
+                "senha123",
+                model,
+                response
+        );
+
+        assertEquals("redirect:/clientes/homepage", view);
+
+        verify(authHelper).authenticateAndSetCookie(
+                "client@example.com",
+                1L,
+                response,
+                "LOGIN_SUCESSO"
+        );
     }
 }

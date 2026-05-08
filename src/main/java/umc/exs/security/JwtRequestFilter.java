@@ -32,7 +32,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         String requestURI = request.getRequestURI();
 
-        // Ignora recursos estáticos — evita N queries ao banco por asset
         if (requestURI.startsWith("/images/") ||
                 requestURI.startsWith("/css/") ||
                 requestURI.startsWith("/js/") ||
@@ -66,7 +65,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
-        // 1. Cookie (navegador / Thymeleaf)
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
@@ -75,7 +73,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 }
             }
         }
-        // 2. Header Authorization (API / Postman)
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);

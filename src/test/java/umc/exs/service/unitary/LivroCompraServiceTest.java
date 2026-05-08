@@ -24,10 +24,7 @@ class LivroCompraServiceTest {
     private LivroRepository livroRepository;
     private ClienteRepository clienteRepository;
     private PedidoService pedidoService;
-    
-    @MockitoBean
     private EmailService emailService;
-    
     private GamificacaoService gamificacaoService;
     private LogAuditoriaService logAuditoriaService;
     private LivroCompraService service;

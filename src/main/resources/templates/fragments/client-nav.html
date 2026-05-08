@@ -19,6 +19,35 @@
     </nav>
     <div class="cn-right">
         <span class="cn-saldo" id="navSaldo">T$ --</span>
+
+        <!-- Sininho de Notificações -->
+        <div class="cn-notif-wrapper" id="cnNotifWrapper" style="position:relative;display:inline-block;">
+            <button class="cn-btn cn-notif-btn" id="cnNotifBtn"
+                    onclick="cnToggleNotif(event)"
+                    style="background:none;border:none;cursor:pointer;padding:.25rem .4rem;position:relative;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                <span id="cnNotifBadge" style="display:none;position:absolute;top:0;right:0;
+                    background:#722f37;color:#fff;border-radius:50%;
+                    width:17px;height:17px;font-size:.65rem;font-weight:700;
+                    display:none;align-items:center;justify-content:center;line-height:1;">0</span>
+            </button>
+            <div id="cnNotifDropdown" style="display:none;position:absolute;right:0;top:110%;
+                min-width:280px;max-width:340px;background:#fff;border:1px solid rgba(44,36,27,.15);
+                border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;overflow:hidden;">
+                <div style="padding:.6rem 1rem;border-bottom:1px solid rgba(44,36,27,.1);
+                    font-size:.8rem;font-weight:600;color:#2c241b;">Notificações</div>
+                <ul id="cnNotifLista" style="list-style:none;margin:0;padding:0;max-height:320px;overflow-y:auto;"></ul>
+                <div id="cnNotifVazia" style="padding:1rem;text-align:center;font-size:.82rem;color:#7a6e65;">
+                    Nenhuma notificação.
+                </div>
+            </div>
+        </div>
+
         <a th:href="@{/clientes/minhas-compras}" class="cn-btn cn-estante">
             <img src="/favicon.ico" alt="Estante" class="cn-estante-icon"/>
             Minha Estante
@@ -27,6 +56,76 @@
         <a th:href="@{/clientes/sair}"           class="cn-btn">Sair</a>
     </div>
 </header>
+
+<script>
+(function() {
+    function cnCarregarNotificacoes() {
+        fetch('/api/notificacoes/nao-lidas', { credentials: 'include' })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(data) {
+            if (!data) return;
+            var badge = document.getElementById('cnNotifBadge');
+            if (data.total > 0) {
+                badge.textContent = data.total > 99 ? '99+' : data.total;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }).catch(function(){});
+    }
+
+    window.cnToggleNotif = function(e) {
+        e.stopPropagation();
+        var dd = document.getElementById('cnNotifDropdown');
+        var aberto = dd.style.display === 'block';
+        dd.style.display = aberto ? 'none' : 'block';
+        if (!aberto) cnPopularDropdown();
+    };
+
+    function cnPopularDropdown() {
+        fetch('/api/notificacoes/nao-lidas', { credentials: 'include' })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(data) {
+            var lista = document.getElementById('cnNotifLista');
+            var vazia = document.getElementById('cnNotifVazia');
+            if (!data || !data.notificacoes || data.notificacoes.length === 0) {
+                lista.innerHTML = '';
+                vazia.style.display = 'block';
+                return;
+            }
+            vazia.style.display = 'none';
+            lista.innerHTML = data.notificacoes.map(function(n) {
+                return '<li style="padding:.65rem 1rem;border-bottom:1px solid rgba(44,36,27,.07);cursor:pointer;font-size:.82rem;color:#2c241b;" ' +
+                    'onclick="cnMarcarLida(' + n.id + ',' + JSON.stringify(n.link || '') + ')">' +
+                    '<span style="display:block;">' + n.mensagem + '</span>' +
+                    '<span style="font-size:.72rem;color:#7a6e65;">' + n.dataCriacao.substring(0,16).replace('T',' ') + '</span>' +
+                    '</li>';
+            }).join('');
+        }).catch(function(){});
+    }
+
+    window.cnMarcarLida = function(id, link) {
+        fetch('/api/notificacoes/' + id + '/lida', { method: 'PATCH', credentials: 'include' })
+        .then(function() {
+            cnCarregarNotificacoes();
+            document.getElementById('cnNotifDropdown').style.display = 'none';
+            if (link) window.location.href = link;
+        }).catch(function(){});
+    };
+
+    // Fecha dropdown ao clicar fora
+    document.addEventListener('click', function(e) {
+        var wrapper = document.getElementById('cnNotifWrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            var dd = document.getElementById('cnNotifDropdown');
+            if (dd) dd.style.display = 'none';
+        }
+    });
+
+    // Carrega contagem ao iniciar
+    cnCarregarNotificacoes();
+})();
+</script>
 
 </body>
 </html>

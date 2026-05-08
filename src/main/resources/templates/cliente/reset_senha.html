@@ -2,9 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
     <head>
         <meta charset="UTF-8">
-        <title>Redefinir Senha</title>
+        <title>Redefinir Senha — Bibliotroca</title>
 
-        <link rel="stylesheet" th:href="@{/cliente/styles.css}">
+        <link rel="stylesheet" th:href="@{/css/cliente/styles.css}">
         <link
             href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
             rel="stylesheet"
@@ -28,50 +28,111 @@
                 <p>Insira uma nova senha para sua conta.</p>
             </div>
 
-            <!-- Mensagem de erro (token inválido) -->
+            <!-- Mensagem de erro (token inválido / senhas não conferem) -->
             <p th:if="${erro}" th:text="${erro}" class="mensagem erro"></p>
 
             <!-- Formulário somente se o token for válido -->
             <form
-                th:if="${tokenValido}"
+                th:if="${resetData != null}"
                 th:action="@{/clientes/alterar-senha}"
                 method="post"
                 th:object="${resetData}"
+                id="form-reset"
             >
                 <input type="hidden" th:field="*{token}">
 
+                <!-- Nova senha -->
                 <div class="form-group">
                     <label for="novaSenha">Nova senha</label>
-                    <input
-                        type="password"
-                        id="novaSenha"
-                        th:field="*{novaSenha}"
-                        placeholder="Digite a nova senha"
-                        required
-                    >
+                    <div class="input-senha-wrapper">
+                        <input
+                            type="password"
+                            id="novaSenha"
+                            th:field="*{novaSenha}"
+                            placeholder="Mínimo 8 caracteres"
+                            required
+                            autocomplete="new-password"
+                        >
+                        <button type="button" class="btn-toggle-senha" aria-label="Mostrar senha" onclick="toggleSenha('novaSenha', this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <ul id="senha-requisitos" style="display:none; list-style:none; padding:6px 0 0; margin:0; font-size:0.82rem; font-family:'DM Sans',sans-serif">
+                        <li id="req-tamanho">✗ 8 a 20 caracteres</li>
+                        <li id="req-maiuscula">✗ Uma letra maiúscula (A-Z)</li>
+                        <li id="req-minuscula">✗ Uma letra minúscula (a-z)</li>
+                        <li id="req-numero">✗ Um número (0-9)</li>
+                        <li id="req-especial">✗ Um caractere especial (@#$%^&amp;+=!)</li>
+                        <li id="req-espaco">✗ Sem espaços</li>
+                    </ul>
                 </div>
+
+                <!-- Confirmar nova senha -->
                 <div class="form-group">
                     <label for="confirmarSenha">Confirmar nova senha</label>
-                    <input
-                        type="password"
-                        id="confirmarSenha"
-                        th:field="*{confirmarSenha}"
-                        placeholder="Confirme a nova senha"
-                        required
-                    >
+                    <div class="input-senha-wrapper">
+                        <input
+                            type="password"
+                            id="confirmarSenha"
+                            th:field="*{confirmarSenha}"
+                            placeholder="Repita a nova senha"
+                            required
+                            autocomplete="new-password"
+                        >
+                        <button type="button" class="btn-toggle-senha" aria-label="Mostrar confirmar senha" onclick="toggleSenha('confirmarSenha', this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p id="erro-confirmacao" style="display:none; color:#c62828; font-size:0.82rem; margin:4px 0 0; font-family:'DM Sans',sans-serif">
+                        As senhas não coincidem.
+                    </p>
                 </div>
 
                 <div class="form-actions-main">
-                    <button type="submit" class="btn btn-primary">
-                        Alterar senha
+                    <button type="submit" class="btn btn-primary" id="btn-redefinir">
+                        Redefinir senha
                     </button>
                 </div>
             </form>
 
             <div class="account-links">
-                <a th:href="@{/clientes/login}" class="btn-link-secondary"
-                >Voltar ao login</a>
+                <a th:href="@{/clientes/login}" class="btn-link-secondary">Voltar ao login</a>
             </div>
         </div>
+
+        <script th:src="@{/js/cliente/script.js}"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Inicializa validação de requisitos de senha (usa initValidacaoSenha de script.js)
+                if (typeof initValidacaoSenha === 'function') initValidacaoSenha();
+
+                const novaSenha     = document.getElementById('novaSenha');
+                const confirmar     = document.getElementById('confirmarSenha');
+                const erroConf      = document.getElementById('erro-confirmacao');
+                const btnRedefinir  = document.getElementById('btn-redefinir');
+
+                function validarConfirmacao() {
+                    const diverge = confirmar.value.length > 0 && novaSenha.value !== confirmar.value;
+                    erroConf.style.display = diverge ? 'block' : 'none';
+                }
+
+                if (confirmar) confirmar.addEventListener('input', validarConfirmacao);
+                if (novaSenha) novaSenha.addEventListener('input', validarConfirmacao);
+
+                if (btnRedefinir) {
+                    btnRedefinir.closest('form').addEventListener('submit', function (e) {
+                        if (novaSenha.value !== confirmar.value) {
+                            e.preventDefault();
+                            erroConf.style.display = 'block';
+                            confirmar.focus();
+                        }
+                    });
+                }
+            });
+        </script>
     </body>
 </html>

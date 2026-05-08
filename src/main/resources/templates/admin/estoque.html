@@ -94,7 +94,7 @@
           </div>
           <div class="form-group">
             <label>Preço (T$) *</label>
-            <input type="number" id="fPreco" required min="0" step="0.01" placeholder="Ex: 30.00" />
+            <input type="number" id="fPreco" required min="0" step="0.01" placeholder="Ex: 30.00" oninput="calcularPrecoPromo()" />
           </div>
         </div>
         <div class="form-row">
@@ -113,6 +113,34 @@
           <label>Resumo / Descrição</label>
           <textarea id="fResumo" rows="3" placeholder="Breve descrição do livro..."></textarea>
         </div>
+
+        <!-- ── PROMOÇÃO ── -->
+        <div class="form-divider">Promoção</div>
+        <div class="form-group form-check-inline">
+          <label class="check-label">
+            <input type="checkbox" id="fEmPromocao" onchange="togglePromo()" />
+            Em promoção
+          </label>
+        </div>
+        <div id="promoSection" style="display:none">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Desconto (%)</label>
+              <input type="number" id="fDesconto" min="1" max="99" step="1"
+                     placeholder="Ex: 20" oninput="calcularPrecoPromo()" />
+            </div>
+            <div class="form-group">
+              <label>Preço promocional (T$)</label>
+              <input type="text" id="fPrecoPromo" readonly placeholder="Calculado automaticamente"
+                     style="background:#f5f1eb;color:#722f37;font-weight:600" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Validade da promoção</label>
+            <input type="datetime-local" id="fPromoExpira" />
+          </div>
+        </div>
+
         <div id="modalErro" class="modal-erro" style="display:none"></div>
         <div class="modal-actions">
           <button type="button" class="btn-cancel" onclick="fecharModal()">Cancelar</button>
