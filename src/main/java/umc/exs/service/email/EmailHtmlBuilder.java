@@ -263,6 +263,26 @@ public final class EmailHtmlBuilder {
         return base("Seu cupom vai expirar em breve! — Bibliotroca", corpo);
     }
 
+    /**
+     * Comunicado em massa disparado pelo admin.
+     * Converte quebras de linha do textarea em parágrafos HTML.
+     */
+    public static String comunicadoAdmin(String nome, String corpo) {
+        StringBuilder paragrafos = new StringBuilder();
+        paragrafos.append(saudacao(nome));
+        for (String linha : corpo.split("\\n")) {
+            String l = linha.trim();
+            if (!l.isEmpty()) {
+                paragrafos.append(paragrafo(l));
+            }
+        }
+        paragrafos.append(
+            "<p style='margin:24px 0 0;font-size:12px;color:" + COR_MUTED + ";border-top:1px solid #e8e0d5;" +
+            "padding-top:16px;'>Este é um comunicado oficial da Bibliotroca. " +
+            "Não responda a este e-mail.</p>");
+        return base("Comunicado — Bibliotroca", paragrafos.toString());
+    }
+
     /** Aviso de pontos XP próximos ao vencimento. */
     public static String xpExpirando(String nome, long xpTotal, String dataExpiracao) {
         String corpo =
