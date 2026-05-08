@@ -109,7 +109,7 @@ public class PontosSchedulerService {
                                 "expirar em " + dataExpiracao + ".\n\n" +
                                 "Para renovar seu prazo, basta realizar uma compra, " +
                                 "avaliar um livro ou enviar um livro para aprovação.\n\n" +
-                                "Equipe Bookstore");
+                                "Equipe Bibliotroca");
 
                 notificacaoService.criarNotificacaoDashboard(
                         cliente,

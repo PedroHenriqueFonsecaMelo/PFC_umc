@@ -67,7 +67,7 @@
     </div>
 
     <!-- Voltar -->
-    <a th:href="@{/entrar}" href="/entrar" class="back-link">← Voltar</a>
+    <a th:href="@{/}" href="/" class="back-link">← Início</a>
 
     <!-- Livro aberto -->
     <main class="page-content">
@@ -120,6 +120,9 @@
           </div>
           <div th:if="${param.cadastro}" class="alert alert-sucesso">
             Cadastro realizado! Verifique seu e-mail antes de entrar.
+          </div>
+          <div th:if="${param.emailVerificado}" class="alert alert-sucesso">
+            E-mail verificado com sucesso! Agora você pode fazer login.
           </div>
 
           <!-- Formulário -->

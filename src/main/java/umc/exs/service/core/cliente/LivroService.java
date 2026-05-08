@@ -300,7 +300,7 @@ public class LivroService {
                         "Olá, " + vendedor.getNome() + "!\n\n" +
                                 "Seu livro \"" + anuncio.getTitulo() + "\" foi aprovado e está disponível na vitrine.\n" +
                                 "Você recebeu T$ " + TOKEN_REWARD + " como recompensa.\n\n" +
-                                "Equipe Bookstore"
+                                "Equipe Bibliotroca"
                 );
             } catch (Exception e) {
                 log.error("Falha ao enviar e-mail de aprovação para vendedor {}: {}", vendedor.getEmail(), e.getMessage());
@@ -355,7 +355,7 @@ public class LivroService {
                                         ? "Motivo: " + comentario + "\n\n"
                                         : "\n") +
                                 "Você pode enviar novos livros para avaliação a qualquer momento.\n\n" +
-                                "Equipe Bookstore"
+                                "Equipe Bibliotroca"
                 );
             } catch (Exception e) {
                 log.error("Falha ao enviar e-mail de rejeição para vendedor {}: {}", emailVendedor, e.getMessage());
@@ -406,7 +406,7 @@ public class LivroService {
                             "Valor debitado: T$ " + preco + "\n" +
                             "Saldo atual: T$ " + comprador.getSaldoTokens() + "\n\n" +
                             "Acompanhe o status do envio em 'Minhas Compras'.\n\n" +
-                            "Equipe Bookstore"
+                            "Equipe Bibliotroca"
             );
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de compra para {}: {}", comprador.getEmail(), e.getMessage());
@@ -549,7 +549,7 @@ public class LivroService {
                                 "\nTotal debitado: T$ " + String.format("%.2f", totalGasto) + "\n" +
                                 "Saldo atual: T$ " + String.format("%.2f", comprador.getSaldoTokens()) + "\n\n" +
                                 "Acompanhe o status dos envios em 'Minhas Compras'.\n\n" +
-                                "Equipe Bookstore"
+                                "Equipe Bibliotroca"
                 );
             } catch (Exception e) {
                 log.error("Falha ao enviar e-mail de carrinho para {}: {}", comprador.getEmail(), e.getMessage());

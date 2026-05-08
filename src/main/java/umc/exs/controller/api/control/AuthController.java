@@ -105,7 +105,9 @@ public class AuthController {
         emailVerificacaoRepository.save(verificacao);
 
         log.info("E-mail verificado com sucesso para: {}", cliente.getEmail());
-        return ResponseEntity.ok(Map.of("mensagem", "E-mail verificado com sucesso. Você já pode fazer login."));
+        return ResponseEntity.status(302)
+                .header("Location", "/clientes/login?emailVerificado=ok")
+                .build();
     }
 
     // ── DEV: verificar e-mail diretamente (apenas profile local) ─────

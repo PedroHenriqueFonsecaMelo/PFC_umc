@@ -179,7 +179,7 @@ public class LivroCompraService {
                                 "\nTotal debitado: T$ " + String.format("%.2f", totalGasto) + "\n" +
                                 "Saldo atual: T$ " + String.format("%.2f", comprador.getSaldoTokens()) + "\n\n" +
                                 "Acompanhe o status dos envios em 'Minhas Compras'.\n\n" +
-                                "Equipe Bookstore");
+                                "Equipe Bibliotroca");
             } catch (Exception e) {
                 log.error("Falha ao enviar e-mail de carrinho para {}: {}", comprador.getEmail(), e.getMessage());
             }

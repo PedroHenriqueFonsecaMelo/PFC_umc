@@ -78,7 +78,7 @@ public class CupomSchedulerService {
                                 String.format("%.2f", cupom.getValorTokens()) +
                                 ") vence em " + cupom.getExpiracao().toLocalDate() + ".\n\n" +
                                 "Resgate agora em /api/cupons/resgatar antes que expire!\n\n" +
-                                "Equipe Bookstore");
+                                "Equipe Bibliotroca");
 
                 notificacaoService.criarNotificacaoDashboard(
                         cliente,

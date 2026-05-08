@@ -67,7 +67,7 @@ public class CarteiraService {
                             "Método: " + metodo + "\n" +
                             "Saldo anterior: T$ " + String.format("%.2f", saldoAnterior) + "\n" +
                             "Saldo atual: T$ " + String.format("%.2f", cliente.getSaldoTokens()) + "\n\n" +
-                            "Equipe Bookstore"
+                            "Equipe Bibliotroca"
             );
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de recarga de tokens para {}: {}", cliente.getEmail(), e.getMessage());

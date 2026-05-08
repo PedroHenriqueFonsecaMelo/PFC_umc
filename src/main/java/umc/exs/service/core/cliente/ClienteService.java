@@ -74,12 +74,12 @@ public class ClienteService {
             String link = baseUrl + "/auth/verificar-email?token=" + token;
             emailService.enviar(
                     email,
-                    "Confirme seu e-mail — Bookstore",
+                    "Confirme seu e-mail — Bibliotroca",
                     "Olá, " + nome + "!\n\n" +
                             "Obrigado por se cadastrar. Clique no link abaixo para confirmar seu e-mail:\n\n" +
                             link + "\n\n" +
                             "O link expira em 24 horas.\n\n" +
-                            "Equipe Bookstore");
+                            "Equipe Bibliotroca");
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de verificação para {}: {}", email, e.getMessage());
         }

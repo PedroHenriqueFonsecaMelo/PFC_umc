@@ -187,7 +187,7 @@ public class PedidoService {
                                                 "Livro: " + pedido.getTituloLivro() + "\n" +
                                                 rastreioInfo + mensagemExtra + "\n" +
                                                 "Acompanhe seus pedidos em 'Minhas Compras'.\n\n" +
-                                                "Equipe Bookstore"
+                                                "Equipe Bibliotroca"
                                 );
                         } catch (Exception e) {
                                 log.error("Falha ao enviar e-mail de status do pedido #{}: {}", pedidoId, e.getMessage());

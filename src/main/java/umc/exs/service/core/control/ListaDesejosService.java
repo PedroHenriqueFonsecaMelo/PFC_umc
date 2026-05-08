@@ -105,14 +105,14 @@ public class ListaDesejosService {
                             "com pré-reserva ativa está disponível na vitrine.\n\n" +
                             "Sua pré-reserva está ativa. Acesse a vitrine agora para confirmar a compra " +
                             "e garantir seu exemplar!\n\n" +
-                            "Equipe Bookstore";
+                            "Equipe Bibliotroca";
                 } else {
                     assunto = "Livro da sua lista de desejos disponível!";
                     corpo = "Olá, " + cliente.getNome() + "!\n\n" +
                             "O livro \"" + titulo + "\" (ISBN: " + isbn + ") que você adicionou à sua lista " +
                             "de desejos está disponível na vitrine.\n\n" +
                             "Acesse agora e garanta o seu exemplar antes que esgote!\n\n" +
-                            "Equipe Bookstore";
+                            "Equipe Bibliotroca";
                 }
 
                 emailService.enviar(cliente.getEmail(), assunto, corpo);

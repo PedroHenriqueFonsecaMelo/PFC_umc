@@ -110,7 +110,7 @@ public class LivroService {
                             "Valor debitado: T$ " + preco + "\n" +
                             "Saldo atual: T$ " + comprador.getSaldoTokens() + "\n\n" +
                             "Acompanhe o status do envio em 'Minhas Compras'.\n\n" +
-                            "Equipe Bookstore"
+                            "Equipe Bibliotroca"
             );
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de compra para {}: {}", comprador.getEmail(), e.getMessage());

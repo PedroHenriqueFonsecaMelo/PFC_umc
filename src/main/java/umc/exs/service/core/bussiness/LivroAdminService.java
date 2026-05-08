@@ -103,7 +103,7 @@ public class LivroAdminService {
                         "Olá, " + vendedor.getNome() + "!\n\n" +
                                 "Seu livro \"" + anuncio.getTitulo() + "\" foi aprovado e está disponível na vitrine.\n" +
                                 "Você recebeu T$ " + TOKEN_REWARD + " como recompensa.\n\n" +
-                                "Equipe Bookstore"
+                                "Equipe Bibliotroca"
                 );
             } catch (Exception e) {
                 log.error("Falha ao enviar e-mail de aprovação para vendedor {}: {}", vendedor.getEmail(), e.getMessage());
@@ -158,7 +158,7 @@ public class LivroAdminService {
                                         ? "Motivo: " + comentario + "\n\n"
                                         : "\n") +
                                 "Você pode enviar novos livros para avaliação a qualquer momento.\n\n" +
-                                "Equipe Bookstore"
+                                "Equipe Bibliotroca"
                 );
             } catch (Exception e) {
                 log.error("Falha ao enviar e-mail de rejeição para vendedor {}: {}", emailVendedor, e.getMessage());
