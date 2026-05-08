@@ -26,15 +26,20 @@ import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.core.control.ArquivosService;
 import umc.exs.service.core.control.PedidoService;
+import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.gamificacao.GamificacaoService;
 import umc.exs.service.log.LogAuditoriaService;
+import org.springframework.beans.factory.annotation.Value;
 import umc.exs.service.core.control.LoteService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class LivroService {
+
+    @Value("${app.base-url:https://localhost:8443}")
+    private String baseUrl;
 
     private final LivroRepository livroRepository;
     private final ClienteRepository clienteRepository;
@@ -102,16 +107,10 @@ public class LivroService {
 
         // E-mail de confirmação de compra ao comprador
         try {
-            emailService.enviar(
+            emailService.enviarHtml(
                     comprador.getEmail(),
-                    "Compra realizada com sucesso!",
-                    "Olá, " + comprador.getNome() + "!\n\n" +
-                            "Sua compra do livro \"" + livro.getTitulo() + "\" foi confirmada.\n" +
-                            "Valor debitado: T$ " + preco + "\n" +
-                            "Saldo atual: T$ " + comprador.getSaldoTokens() + "\n\n" +
-                            "Acompanhe o status do envio em 'Minhas Compras'.\n\n" +
-                            "Equipe Bibliotroca"
-            );
+                    "Compra realizada com sucesso! — Bibliotroca",
+                    EmailHtmlBuilder.compraSucesso(comprador.getNome(), livro.getTitulo(), preco, comprador.getSaldoTokens(), baseUrl));
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de compra para {}: {}", comprador.getEmail(), e.getMessage());
         }

@@ -16,6 +16,8 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.StatusEnvio;
 import umc.exs.repository.negocios.PedidoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import org.springframework.beans.factory.annotation.Value;
+import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.log.LogAuditoriaService;
 
@@ -27,6 +29,9 @@ import umc.exs.service.log.LogAuditoriaService;
 @Service
 @RequiredArgsConstructor
 public class PedidoService {
+
+        @Value("${app.base-url:https://localhost:8443}")
+        private String baseUrl;
 
         private final PedidoRepository pedidoRepository;
         private final ClienteRepository clienteRepository;
@@ -172,23 +177,17 @@ public class PedidoService {
                 if (pedido.getComprador() != null) {
                         try {
                                 Cliente compradorPedido = pedido.getComprador();
-                                String mensagemExtra = novoStatus == StatusEnvio.CANCELADO && pedido.getPrecoLivro() != null
-                                        ? "\nValor de T$ " + String.format("%.2f", pedido.getPrecoLivro()) + " foi estornado ao seu saldo.\n"
-                                        : "";
-                                String rastreioInfo = (codigoRastreio != null && !codigoRastreio.isBlank())
-                                        ? "\nCódigo de rastreio: " + codigoRastreio + "\n"
-                                        : "";
-                                emailService.enviar(
+                                boolean cancelado = novoStatus == StatusEnvio.CANCELADO
+                                        && pedido.getPrecoLivro() != null;
+                                emailService.enviarHtml(
                                         compradorPedido.getEmail(),
-                                        "Atualização do pedido #" + pedidoId,
-                                        "Olá, " + compradorPedido.getNome() + "!\n\n" +
-                                                "O status do seu pedido #" + pedidoId + " foi atualizado para: " +
-                                                novoStatus.getDescricao() + ".\n" +
-                                                "Livro: " + pedido.getTituloLivro() + "\n" +
-                                                rastreioInfo + mensagemExtra + "\n" +
-                                                "Acompanhe seus pedidos em 'Minhas Compras'.\n\n" +
-                                                "Equipe Bibliotroca"
-                                );
+                                        "Atualização do pedido #" + pedidoId + " — Bibliotroca",
+                                        EmailHtmlBuilder.atualizacaoPedido(
+                                                compradorPedido.getNome(), pedidoId,
+                                                novoStatus.getDescricao(), pedido.getTituloLivro(),
+                                                codigoRastreio, cancelado,
+                                                cancelado ? pedido.getPrecoLivro() : 0.0,
+                                                baseUrl));
                         } catch (Exception e) {
                                 log.error("Falha ao enviar e-mail de status do pedido #{}: {}", pedidoId, e.getMessage());
                         }

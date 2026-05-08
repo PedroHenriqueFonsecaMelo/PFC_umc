@@ -26,6 +26,7 @@ import umc.exs.model.entidades.foundation.EmailVerificacao;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.foundation.EmailVerificacaoRepository;
+import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.log.LogAuditoriaService;
 import umc.exs.service.senha.FieldValidation;
@@ -72,14 +73,10 @@ public class ClienteService {
             emailVerificacaoRepository.save(verificacao);
 
             String link = baseUrl + "/auth/verificar-email?token=" + token;
-            emailService.enviar(
+            emailService.enviarHtml(
                     email,
                     "Confirme seu e-mail — Bibliotroca",
-                    "Olá, " + nome + "!\n\n" +
-                            "Obrigado por se cadastrar. Clique no link abaixo para confirmar seu e-mail:\n\n" +
-                            link + "\n\n" +
-                            "O link expira em 24 horas.\n\n" +
-                            "Equipe Bibliotroca");
+                    EmailHtmlBuilder.verificacaoEmail(nome, link));
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de verificação para {}: {}", email, e.getMessage());
         }
@@ -203,16 +200,10 @@ public class ClienteService {
         String dataHora = LocalDateTime.now()
                 .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm"));
         try {
-            emailService.enviar(
+            emailService.enviarHtml(
                     cliente.getEmail(),
                     "Sua senha foi redefinida — Bibliotroca",
-                    "Olá, " + cliente.getNome() + "!\n\n" +
-                    "Sua senha foi redefinida com sucesso em " + dataHora + ".\n\n" +
-                    "Se você realizou essa alteração, pode ignorar este e-mail.\n\n" +
-                    "Se você não reconhece essa atividade, sua conta pode estar comprometida. " +
-                    "Entre em contato com nossa equipe imediatamente pelo e-mail " +
-                    "bibliotroca.noreply@gmail.com para que possamos proteger sua conta.\n\n" +
-                    "Equipe Bibliotroca");
+                    EmailHtmlBuilder.senhaRedefinida(cliente.getNome(), dataHora));
             log.info("E-mail de confirmação de redefinição enviado para: {}", cliente.getEmail());
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de confirmação de redefinição para {}: {}",

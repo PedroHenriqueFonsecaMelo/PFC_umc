@@ -11,6 +11,7 @@ import umc.exs.model.entidades.logic.RecuperacaoSenha;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.repository.usuario.RecuperacaoSenhaRepository;
+import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.log.LogAuditoriaService;
 
@@ -57,16 +58,10 @@ public class SenhaService {
         String link = baseUrl + "/clientes/reset-senha?token=" + token;
 
         try {
-            emailService.enviar(
+            emailService.enviarHtml(
                     cliente.getEmail(),
                     "Redefinição de senha — Bibliotroca",
-                    "Olá, " + cliente.getNome() + "!\n\n" +
-                    "Recebemos uma solicitação para redefinir a senha da sua conta na Bibliotroca.\n\n" +
-                    "Clique no link abaixo para criar uma nova senha:\n\n" +
-                    link + "\n\n" +
-                    "Este link é válido por 30 minutos. Se você não solicitou a redefinição, " +
-                    "ignore este e-mail — sua senha permanece a mesma.\n\n" +
-                    "Equipe Bibliotroca");
+                    EmailHtmlBuilder.recuperacaoSenha(cliente.getNome(), link));
             log.info("E-mail de recuperação enviado com sucesso para {}", cliente.getEmail());
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de recuperação para {}: {}", cliente.getEmail(), e.getMessage());

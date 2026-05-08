@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import umc.exs.model.entidades.social.PontuacaoUsuario;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.usuario.PontuacaoUsuarioRepository;
+import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.log.LogAuditoriaService;
 import umc.exs.service.notificacao.NotificacaoService;
@@ -101,15 +102,11 @@ public class PontosSchedulerService {
             try {
                 String dataExpiracao = pontuacao.getDataExpiracao().toLocalDate().toString();
 
-                emailService.enviar(
+                emailService.enviarHtml(
                         cliente.getEmail(),
-                        "Seus pontos XP vão expirar em breve!",
-                        "Olá, " + cliente.getNome() + "!\n\n" +
-                                "Você tem " + pontuacao.getXpTotal() + " pontos XP que irão " +
-                                "expirar em " + dataExpiracao + ".\n\n" +
-                                "Para renovar seu prazo, basta realizar uma compra, " +
-                                "avaliar um livro ou enviar um livro para aprovação.\n\n" +
-                                "Equipe Bibliotroca");
+                        "Seus pontos XP vão expirar em breve! — Bibliotroca",
+                        EmailHtmlBuilder.xpExpirando(
+                                cliente.getNome(), pontuacao.getXpTotal(), dataExpiracao));
 
                 notificacaoService.criarNotificacaoDashboard(
                         cliente,

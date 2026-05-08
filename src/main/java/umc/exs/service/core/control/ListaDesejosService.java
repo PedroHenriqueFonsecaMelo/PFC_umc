@@ -3,6 +3,7 @@ package umc.exs.service.core.control;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.exs.DTOs.compra.ListaDesejosDTO;
@@ -10,6 +11,7 @@ import umc.exs.model.entidades.foundation.ListaDesejos;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.negocios.ListaDesejosRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 
 import java.time.LocalDateTime;
@@ -19,6 +21,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ListaDesejosService {
+
+    @Value("${app.base-url:https://localhost:8443}")
+    private String baseUrl;
 
     private final ListaDesejosRepository listaDesejosRepository;
     private final ClienteRepository clienteRepository;
@@ -94,28 +99,14 @@ public class ListaDesejosService {
         for (ListaDesejos desejo : interessados) {
             try {
                 Cliente cliente = desejo.getCliente();
-                String assunto;
-                String corpo;
+                String assunto = desejo.isPreReservaAtiva()
+                        ? "Pré-reserva ativada — Livro disponível! — Bibliotroca"
+                        : "Livro da sua lista de desejos disponível! — Bibliotroca";
 
-                if (desejo.isPreReservaAtiva()) {
-                    // Pré-reserva ativa: e-mail com aviso de reserva automática
-                    assunto = "Pré-reserva ativada — Livro disponível!";
-                    corpo = "Olá, " + cliente.getNome() + "!\n\n" +
-                            "O livro \"" + titulo + "\" (ISBN: " + isbn + ") que você adicionou à lista de desejos " +
-                            "com pré-reserva ativa está disponível na vitrine.\n\n" +
-                            "Sua pré-reserva está ativa. Acesse a vitrine agora para confirmar a compra " +
-                            "e garantir seu exemplar!\n\n" +
-                            "Equipe Bibliotroca";
-                } else {
-                    assunto = "Livro da sua lista de desejos disponível!";
-                    corpo = "Olá, " + cliente.getNome() + "!\n\n" +
-                            "O livro \"" + titulo + "\" (ISBN: " + isbn + ") que você adicionou à sua lista " +
-                            "de desejos está disponível na vitrine.\n\n" +
-                            "Acesse agora e garanta o seu exemplar antes que esgote!\n\n" +
-                            "Equipe Bibliotroca";
-                }
-
-                emailService.enviar(cliente.getEmail(), assunto, corpo);
+                emailService.enviarHtml(
+                        cliente.getEmail(), assunto,
+                        EmailHtmlBuilder.listaDesejosDisponivel(
+                                cliente.getNome(), titulo, isbn, desejo.isPreReservaAtiva(), baseUrl));
                 log.info("Notificação enviada para {} sobre ISBN {} (pré-reserva: {})",
                         cliente.getEmail(), isbn, desejo.isPreReservaAtiva());
             } catch (Exception e) {

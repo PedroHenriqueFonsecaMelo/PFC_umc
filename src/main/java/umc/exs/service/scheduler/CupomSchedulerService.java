@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import umc.exs.model.entidades.foundation.Cupom;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.negocios.CupomRepository;
+import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.notificacao.NotificacaoService;
 
@@ -70,15 +71,13 @@ public class CupomSchedulerService {
             if (cliente == null) continue;
 
             try {
-                emailService.enviar(
+                emailService.enviarHtml(
                         cliente.getEmail(),
-                        "Seu cupom vai expirar em breve!",
-                        "Olá, " + cliente.getNome() + "!\n\n" +
-                                "Seu cupom " + cupom.getCodigo() + " (T$ " +
-                                String.format("%.2f", cupom.getValorTokens()) +
-                                ") vence em " + cupom.getExpiracao().toLocalDate() + ".\n\n" +
-                                "Resgate agora em /api/cupons/resgatar antes que expire!\n\n" +
-                                "Equipe Bibliotroca");
+                        "Seu cupom vai expirar em breve! — Bibliotroca",
+                        EmailHtmlBuilder.cupomExpirando(
+                                cliente.getNome(), cupom.getCodigo(),
+                                cupom.getValorTokens(),
+                                cupom.getExpiracao().toLocalDate().toString()));
 
                 notificacaoService.criarNotificacaoDashboard(
                         cliente,
