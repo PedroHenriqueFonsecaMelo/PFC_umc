@@ -53,18 +53,37 @@ function renderGrid(livros) {
         const foto  = l.fotoUrl || primeiraFoto(l.fotosUrls) || "";
         const imgSrc = foto || "https://via.placeholder.com/300x180?text=📚";
         const estado = l.estadoAprovado || "BOM";
-        const preco  = l.precoAprovado != null ? `T$ ${Number(l.precoAprovado).toFixed(2)}` : "—";
+
+        let precoHtml;
+        if (l.emPromocao && l.precoOriginal != null) {
+            const desconto = Math.round((1 - l.precoAprovado / l.precoOriginal) * 100);
+            precoHtml = `
+                <div class="card-preco">
+                    <span class="preco-original">T$ ${Number(l.precoOriginal).toFixed(2)}</span>
+                    <span class="preco-promo">T$ ${Number(l.precoAprovado).toFixed(2)}</span>
+                </div>`;
+        } else {
+            const preco = l.precoAprovado != null ? `T$ ${Number(l.precoAprovado).toFixed(2)}` : "—";
+            precoHtml = `<div class="card-preco">${preco}</div>`;
+        }
+
+        const promoBadge = l.emPromocao && l.precoOriginal != null
+            ? `<span class="card-promo-badge">${Math.round((1 - l.precoAprovado / l.precoOriginal) * 100)}% OFF</span>`
+            : "";
 
         return `
         <div class="livro-card-admin">
             <img class="card-img" src="${imgSrc}" alt="${l.titulo}"
                  onerror="this.src='https://via.placeholder.com/300x180?text=📚'"/>
             <div class="card-body">
-                <span class="card-estado estado-${estado}">${ESTADO_LABEL[estado] || estado}</span>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                    <span class="card-estado estado-${estado}">${ESTADO_LABEL[estado] || estado}</span>
+                    ${promoBadge}
+                </div>
                 <div class="card-titulo">${l.titulo}</div>
                 <div class="card-autor">${l.autor}</div>
                 ${l.isbn ? `<div class="card-isbn">${l.isbn}</div>` : ""}
-                <div class="card-preco">${preco}</div>
+                ${precoHtml}
             </div>
             <div class="card-actions">
                 <button class="btn-editar" onclick='abrirModalEdit(${JSON.stringify(l)})'>
@@ -89,6 +108,36 @@ function filtrar() {
     ));
 }
 
+/* ── PROMO HELPERS ── */
+function togglePromo() {
+    const ativo = document.getElementById("fEmPromocao").checked;
+    document.getElementById("promoSection").style.display = ativo ? "block" : "none";
+    if (!ativo) {
+        document.getElementById("fDesconto").value   = "";
+        document.getElementById("fPrecoPromo").value = "";
+        document.getElementById("fPromoExpira").value = "";
+    }
+}
+
+function calcularPrecoPromo() {
+    const preco    = parseFloat(document.getElementById("fPreco").value) || 0;
+    const desconto = parseFloat(document.getElementById("fDesconto").value) || 0;
+    const promoEl  = document.getElementById("fPrecoPromo");
+    if (preco > 0 && desconto > 0 && desconto < 100) {
+        promoEl.value = (preco * (1 - desconto / 100)).toFixed(2);
+    } else {
+        promoEl.value = "";
+    }
+}
+
+function limparCamposPromo() {
+    document.getElementById("fEmPromocao").checked  = false;
+    document.getElementById("promoSection").style.display = "none";
+    document.getElementById("fDesconto").value      = "";
+    document.getElementById("fPrecoPromo").value    = "";
+    document.getElementById("fPromoExpira").value   = "";
+}
+
 /* ── MODAL ADD ── */
 function abrirModalAdd() {
     modoEdicao = false;
@@ -100,6 +149,7 @@ function abrirModalAdd() {
     document.getElementById("fPreco").value  = "";
     document.getElementById("fEstado").value = "BOM";
     document.getElementById("fResumo").value = "";
+    limparCamposPromo();
     document.getElementById("btnSalvar").textContent = "Adicionar";
     esconderErro();
     abrirModal();
@@ -113,9 +163,27 @@ function abrirModalEdit(livro) {
     document.getElementById("fTitulo").value = livro.titulo || "";
     document.getElementById("fAutor").value  = livro.autor  || "";
     document.getElementById("fIsbn").value   = livro.isbn   || "";
-    document.getElementById("fPreco").value  = livro.precoAprovado != null ? livro.precoAprovado : "";
     document.getElementById("fEstado").value = livro.estadoAprovado || "BOM";
     document.getElementById("fResumo").value = livro.resumoOficial  || "";
+
+    // Preço: se em promoção, mostra o preço original no campo
+    const precoBase = livro.emPromocao && livro.precoOriginal != null
+        ? livro.precoOriginal : (livro.precoAprovado != null ? livro.precoAprovado : "");
+    document.getElementById("fPreco").value = precoBase;
+
+    // Promo fields
+    if (livro.emPromocao && livro.precoOriginal != null) {
+        const desconto = Math.round((1 - livro.precoAprovado / livro.precoOriginal) * 100);
+        document.getElementById("fEmPromocao").checked           = true;
+        document.getElementById("promoSection").style.display   = "block";
+        document.getElementById("fDesconto").value              = desconto;
+        document.getElementById("fPrecoPromo").value            = Number(livro.precoAprovado).toFixed(2);
+        document.getElementById("fPromoExpira").value           = livro.promocaoExpira
+            ? livro.promocaoExpira.substring(0, 16) : "";
+    } else {
+        limparCamposPromo();
+    }
+
     document.getElementById("btnSalvar").textContent = "Salvar alterações";
     esconderErro();
     abrirModal();
@@ -150,13 +218,22 @@ async function salvarLivro(e) {
     btn.disabled = true;
     btn.textContent = "Salvando...";
 
+    const emPromocao = document.getElementById("fEmPromocao").checked;
+    const desconto   = parseFloat(document.getElementById("fDesconto").value) || 0;
+    const promoExpiraRaw = document.getElementById("fPromoExpira").value;
+    // datetime-local gives "YYYY-MM-DDTHH:mm", backend expects "YYYY-MM-DDTHH:mm:ss"
+    const promocaoExpira = promoExpiraRaw ? promoExpiraRaw + ":00" : null;
+
     const payload = {
-        titulo: document.getElementById("fTitulo").value.trim(),
-        autor:  document.getElementById("fAutor").value.trim(),
-        isbn:   document.getElementById("fIsbn").value.trim(),
-        preco:  parseFloat(document.getElementById("fPreco").value),
-        estado: document.getElementById("fEstado").value,
-        resumo: document.getElementById("fResumo").value.trim(),
+        titulo:              document.getElementById("fTitulo").value.trim(),
+        autor:               document.getElementById("fAutor").value.trim(),
+        isbn:                document.getElementById("fIsbn").value.trim(),
+        preco:               parseFloat(document.getElementById("fPreco").value),
+        estado:              document.getElementById("fEstado").value,
+        resumo:              document.getElementById("fResumo").value.trim(),
+        emPromocao:          emPromocao,
+        percentualDesconto:  emPromocao ? desconto : null,
+        promocaoExpira:      emPromocao ? promocaoExpira : null,
     };
 
     try {

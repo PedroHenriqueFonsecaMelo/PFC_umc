@@ -571,15 +571,31 @@ public class LivroService {
 
     @Transactional
     public Livro editarLivroAdmin(Long id, String titulo, String autor, String isbn,
-                                  Double preco, EstadoLivro estado, String resumo) {
+                                  Double preco, EstadoLivro estado, String resumo,
+                                  Boolean emPromocao, Double percentualDesconto,
+                                  java.time.LocalDateTime promocaoExpira) {
         Livro livro = livroRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado."));
         if (titulo != null && !titulo.isBlank())  livro.setTitulo(titulo);
         if (autor  != null && !autor.isBlank())   livro.setAutor(autor);
         if (isbn   != null && !isbn.isBlank())    livro.setIsbn(isbn);
-        if (preco  != null)                       livro.setPrecoAprovado(preco);
         if (estado != null)                       livro.setEstadoAprovado(estado);
         if (resumo != null)                       livro.setResumoOficial(resumo);
+
+        boolean promoAtiva = Boolean.TRUE.equals(emPromocao)
+                && percentualDesconto != null && percentualDesconto > 0 && preco != null;
+        if (promoAtiva) {
+            livro.setEmPromocao(true);
+            livro.setPrecoOriginal(preco);
+            livro.setPrecoAprovado(preco * (1.0 - percentualDesconto / 100.0));
+            livro.setPromocaoExpira(promocaoExpira);
+        } else {
+            livro.setEmPromocao(false);
+            livro.setPrecoOriginal(null);
+            if (preco != null) livro.setPrecoAprovado(preco);
+            livro.setPromocaoExpira(null);
+        }
+
         return livroRepository.save(livro);
     }
 

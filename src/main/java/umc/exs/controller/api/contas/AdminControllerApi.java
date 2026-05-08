@@ -255,7 +255,11 @@ public class AdminControllerApi {
                     if (b.getFotosUrls() != null && b.getFotosUrls().contains("\"")) {
                         primeiraFoto = b.getFotosUrls().split("\"")[1];
                     }
-                    m.put("fotoUrl", primeiraFoto);
+                    m.put("fotoUrl",        primeiraFoto);
+                    m.put("emPromocao",     b.getEmPromocao() != null ? b.getEmPromocao() : false);
+                    m.put("precoOriginal",  b.getPrecoOriginal());
+                    m.put("promocaoExpira", b.getPromocaoExpira() != null
+                            ? b.getPromocaoExpira().toString() : null);
                     return m;
                 })
                 .toList();
@@ -302,10 +306,20 @@ public class AdminControllerApi {
             String estado = (String) body.get("estado");
             String resumo = (String) body.get("resumo");
 
+            Boolean emPromocao = body.get("emPromocao") instanceof Boolean b2 ? b2 : false;
+            Double percentualDesconto = body.get("percentualDesconto") != null
+                    ? ((Number) body.get("percentualDesconto")).doubleValue() : null;
+            String promocaoExpiraStr = (String) body.get("promocaoExpira");
+            java.time.LocalDateTime promocaoExpira = null;
+            if (promocaoExpiraStr != null && !promocaoExpiraStr.isBlank()) {
+                try { promocaoExpira = java.time.LocalDateTime.parse(promocaoExpiraStr); } catch (Exception ignored) {}
+            }
+
             umc.exs.model.enums.EstadoLivro estadoEnum = estado != null
                     ? umc.exs.model.enums.EstadoLivro.valueOf(estado) : null;
 
-            livroService.editarLivroAdmin(id, titulo, autor, isbn, preco, estadoEnum, resumo);
+            livroService.editarLivroAdmin(id, titulo, autor, isbn, preco, estadoEnum, resumo,
+                    emPromocao, percentualDesconto, promocaoExpira);
             return ResponseEntity.ok(Map.of("success", true, "message", "Livro atualizado com sucesso!"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro: " + e.getMessage());
