@@ -10,6 +10,11 @@ document.getElementById("dataHoje").textContent =
     new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
 
 /* ── UTILS ── */
+function promoValida(promocaoExpira) {
+    if (!promocaoExpira) return true; // sem expiração = válida indefinidamente
+    return new Date(promocaoExpira).getTime() > Date.now();
+}
+
 function primeiraFoto(fotosUrls) {
     try {
         const arr = JSON.parse(fotosUrls);
@@ -50,29 +55,48 @@ function renderGrid(livros) {
     vazio.style.display = "none";
 
     grid.innerHTML = livros.map(l => {
+
         const foto  = l.fotoUrl || primeiraFoto(l.fotosUrls) || "";
         const imgSrc = foto || "https://via.placeholder.com/300x180?text=📚";
         const estado = l.estadoAprovado || "BOM";
 
+        const promoAtiva = l.emPromocao && l.precoOriginal != null && promoValida(l.promocaoExpira);
+
         let precoHtml;
-        if (l.emPromocao && l.precoOriginal != null) {
+        if (promoAtiva) {
             const desconto = Math.round((1 - l.precoAprovado / l.precoOriginal) * 100);
             precoHtml = `
-                <div class="card-preco">
+                <div class="card-preco" id="adm-preco-${l.id}">
                     <span class="preco-original">T$ ${Number(l.precoOriginal).toFixed(2)}</span>
                     <span class="preco-promo">T$ ${Number(l.precoAprovado).toFixed(2)}</span>
                 </div>`;
         } else {
             const preco = l.precoAprovado != null ? `T$ ${Number(l.precoAprovado).toFixed(2)}` : "—";
-            precoHtml = `<div class="card-preco">${preco}</div>`;
+            precoHtml = `<div class="card-preco" id="adm-preco-${l.id}">${preco}</div>`;
         }
 
-        const promoBadge = l.emPromocao && l.precoOriginal != null
-            ? `<span class="card-promo-badge">${Math.round((1 - l.precoAprovado / l.precoOriginal) * 100)}% OFF</span>`
+        const promoBadge = promoAtiva
+            ? `<span class="card-promo-badge" id="adm-badge-${l.id}">${Math.round((1 - l.precoAprovado / l.precoOriginal) * 100)}% OFF</span>`
+            : "";
+
+        const countdownHtml = (promoAtiva && l.promocaoExpira)
+            ? `<div class="promo-countdown"
+                    data-livro-id="${l.id}"
+                    data-expira="${l.promocaoExpira}"
+                    data-preco-original="${l.precoOriginal}"
+                    style="display:flex;align-items:center;gap:.35rem;
+                           margin-top:.4rem;padding:.25rem .5rem;
+                           background:#fff0f3;border:1.5px solid #e11d48;
+                           border-radius:8px;line-height:1.3;">
+                   <span style="font-size:.9rem;">🔥</span>
+                   <span style="font-size:.7rem;color:#e11d48;font-weight:700;">
+                       Expira em: <span id="adm-timer-${l.id}" style="font-weight:800;">...</span>
+                   </span>
+               </div>`
             : "";
 
         return `
-        <div class="livro-card-admin">
+        <div class="livro-card-admin" id="adm-card-${l.id}">
             <img class="card-img" src="${imgSrc}" alt="${l.titulo}"
                  onerror="this.src='https://via.placeholder.com/300x180?text=📚'"/>
             <div class="card-body">
@@ -84,6 +108,7 @@ function renderGrid(livros) {
                 <div class="card-autor">${l.autor}</div>
                 ${l.isbn ? `<div class="card-isbn">${l.isbn}</div>` : ""}
                 ${precoHtml}
+                ${countdownHtml}
             </div>
             <div class="card-actions">
                 <button class="btn-editar" onclick='abrirModalEdit(${JSON.stringify(l)})'>
@@ -95,6 +120,8 @@ function renderGrid(livros) {
             </div>
         </div>`;
     }).join("");
+
+    iniciarContadoresAdmin();
 }
 
 /* ── FILTRO ── */
@@ -256,6 +283,8 @@ async function salvarLivro(e) {
             return;
         }
 
+        btn.disabled = false;
+        btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
         fecharModal();
         await carregarEstoque();
 
@@ -289,6 +318,42 @@ async function excluirLivro(id) {
             renderGrid(todosLivros);
         }
     } catch (_) {}
+}
+
+/* ── CONTADOR REGRESSIVO (ADMIN) ── */
+let admContadorInterval = null;
+
+function iniciarContadoresAdmin() {
+    if (admContadorInterval) clearInterval(admContadorInterval);
+
+    const atualizar = () => {
+        const agora = Date.now();
+        document.querySelectorAll('.promo-countdown').forEach(el => {
+            const expira = new Date(el.dataset.expira).getTime();
+            const diff   = expira - agora;
+            const id     = el.dataset.livroId;
+
+            if (diff <= 0) {
+                el.style.display = 'none';
+                const badge = document.getElementById('adm-badge-' + id);
+                if (badge) badge.style.display = 'none';
+                const precoEl = document.getElementById('adm-preco-' + id);
+                if (precoEl) {
+                    const precoOriginal = parseFloat(el.dataset.precoOriginal) || 0;
+                    precoEl.innerHTML = `T$ ${precoOriginal.toFixed(2)}`;
+                }
+            } else {
+                const h = Math.floor(diff / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                const timerEl = document.getElementById('adm-timer-' + id);
+                if (timerEl) timerEl.textContent = `${h}h ${m}m ${s}s`;
+            }
+        });
+    };
+
+    atualizar();
+    admContadorInterval = setInterval(atualizar, 1000);
 }
 
 /* ── SIDEBAR MOBILE ── */

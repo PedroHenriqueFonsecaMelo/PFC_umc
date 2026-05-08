@@ -47,4 +47,11 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
     Optional<Livro> findFirstByIsbnOrderByDataAprovacaoDesc(String isbn);
 
     List<Livro> findByAprovadoTrueAndEmPromocaoTrue();
+
+    /** Retorna apenas promoções ainda válidas (sem expiração ou expiração futura). */
+    @Query("SELECT l FROM Livro l WHERE l.aprovado = true AND l.emPromocao = true AND (l.promocaoExpira IS NULL OR l.promocaoExpira > :agora)")
+    List<Livro> findPromocoesAtivas(@Param("agora") LocalDateTime agora);
+
+    @Query("SELECT l FROM Livro l WHERE l.emPromocao = true AND l.promocaoExpira IS NOT NULL AND l.promocaoExpira < :agora")
+    List<Livro> findPromocoesExpiradas(@Param("agora") LocalDateTime agora);
 }

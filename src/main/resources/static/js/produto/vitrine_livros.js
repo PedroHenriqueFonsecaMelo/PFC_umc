@@ -226,6 +226,45 @@ async function carregarSaldo() {
     } catch (_) { }
 }
 
+/* ── CONTADOR REGRESSIVO ─────────────────────────────────────── */
+
+let contadorInterval = null;
+
+function iniciarContadores() {
+    if (contadorInterval) clearInterval(contadorInterval);
+
+    const atualizar = () => {
+        const agora = Date.now();
+        document.querySelectorAll('.promo-countdown').forEach(el => {
+            const expira = new Date(el.dataset.expira).getTime();
+            const diff   = expira - agora;
+            const id     = el.dataset.livroId;
+
+            if (diff <= 0) {
+                // Promoção expirou — oculta badge e restaura preço normal
+                el.style.display = 'none';
+                const badge = document.getElementById('badge-' + id);
+                if (badge) badge.style.display = 'none';
+                const precoEl = document.getElementById('preco-' + id);
+                if (precoEl) {
+                    const precoOriginal = parseFloat(el.dataset.precoOriginal) || 0;
+                    precoEl.innerHTML = `T$ ${precoOriginal.toFixed(2)}`;
+                    precoEl.style.color = '';
+                }
+            } else {
+                const h = Math.floor(diff / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                const timerEl = document.getElementById('timer-' + id);
+                if (timerEl) timerEl.textContent = `${h}h ${m}m ${s}s`;
+            }
+        });
+    };
+
+    atualizar(); // executa imediatamente
+    contadorInterval = setInterval(atualizar, 1000);
+}
+
 /* ── PROMOÇÃO TOGGLE ─────────────────────────────────────────── */
 
 let modoPromo = false;
@@ -273,9 +312,9 @@ async function carregarLivros() {
 
             const livroJson = JSON.stringify(livro).replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
-            // Badge de promoção
+            // Badge de promoção (com ID para poder ocultar ao expirar)
             const badgePromo = livro.emPromocao
-                ? `<span style="position:absolute;top:.5rem;left:.5rem;background:#e11d48;color:#fff;
+                ? `<span id="badge-${livro.id}" style="position:absolute;top:.5rem;left:.5rem;background:#e11d48;color:#fff;
                                font-size:.7rem;font-weight:700;padding:.2rem .55rem;border-radius:20px;
                                text-transform:uppercase;letter-spacing:.04em;">PROMOÇÃO</span>`
                 : '';
@@ -283,16 +322,27 @@ async function carregarLivros() {
             // Preço: se emPromocao e precoOriginal, exibir original riscado
             let precoHtml;
             if (livro.emPromocao && livro.precoOriginal) {
-                precoHtml = `<div class="livro-preco">
+                precoHtml = `<div class="livro-preco" id="preco-${livro.id}">
                     <span style="text-decoration:line-through;color:#9a8a80;font-size:.85rem;margin-right:.4rem;">T$ ${(livro.precoOriginal).toFixed(2)}</span>
                     <span style="color:#e11d48;font-weight:700;">T$ ${(livro.precoAprovado || 0).toFixed(2)}</span>
                 </div>`;
             } else {
-                precoHtml = `<div class="livro-preco">T$ ${(livro.precoAprovado || 0).toFixed(2)}</div>`;
+                precoHtml = `<div class="livro-preco" id="preco-${livro.id}">T$ ${(livro.precoAprovado || 0).toFixed(2)}</div>`;
             }
 
+            // Contador regressivo (só para promoções com data de expiração)
+            const countdownHtml = (livro.emPromocao && livro.promocaoExpira)
+                ? `<div class="promo-countdown"
+                        data-livro-id="${livro.id}"
+                        data-expira="${livro.promocaoExpira}"
+                        data-preco-original="${livro.precoOriginal || livro.precoAprovado || 0}"
+                        style="margin-top:.45rem;font-size:.85rem;font-weight:700;color:#e11d48;">
+                       🔥 Oferta expira em: <span id="timer-${livro.id}">...</span>
+                   </div>`
+                : '';
+
             return `
-            <div class="livro-card" style="position:relative;">
+            <div class="livro-card" id="card-${livro.id}" style="position:relative;">
                 ${badgePromo}
                 <div class="livro-card-img">
                     <img src="${foto}"
@@ -303,6 +353,7 @@ async function carregarLivros() {
                     <h3 class="livro-titulo">${livro.titulo}</h3>
                     <p class="livro-autor">por ${livro.autor}</p>
                     ${precoHtml}
+                    ${countdownHtml}
                     <button
                         class="btn-carrinho"
                         data-id="${livro.id}"
@@ -315,6 +366,7 @@ async function carregarLivros() {
         }).join('');
 
         atualizarBotoes();
+        iniciarContadores();
 
     } catch (err) {
         console.error(err);

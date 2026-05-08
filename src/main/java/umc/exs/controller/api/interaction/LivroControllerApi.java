@@ -97,7 +97,7 @@ public class LivroControllerApi {
     public ResponseEntity<List<Livro>> listarTodos(
             @RequestParam(required = false) Boolean emPromocao) {
         if (Boolean.TRUE.equals(emPromocao)) {
-            return ResponseEntity.ok(livroRepository.findByAprovadoTrueAndEmPromocaoTrue());
+            return ResponseEntity.ok(livroRepository.findPromocoesAtivas(java.time.LocalDateTime.now()));
         }
         return ResponseEntity.ok(livroService.listarLivrosAprovados());
     }
