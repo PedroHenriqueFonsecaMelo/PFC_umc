@@ -15,14 +15,16 @@ public class CupomDTO {
 
     private Long id;
     private String codigo;
-    private Double valorTokens;
+    private Double percentualDesconto;
     private LocalDateTime expiracao;
     private boolean usado;
     private String tipo;
     private LocalDateTime dataCriacao;
+    private Integer quantidadeMaxima;
+    private Integer quantidadeUsada;
 
-    /** Preenchido apenas na visão admin — nome do dono do cupom (null = público). */
+    /** Preenchido apenas na visão admin. */
     private String clienteNome;
-    /** Preenchido apenas na visão admin — e-mail do dono do cupom (null = público). */
+    /** Preenchido apenas na visão admin. */
     private String clienteEmail;
 }

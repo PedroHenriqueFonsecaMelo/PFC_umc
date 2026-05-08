@@ -359,23 +359,42 @@ public class AdminControllerApi {
         }
     }
 
-    /** Cria um cupom promocional. clienteId null = cupom público. */
+    /**
+     * Cria um cupom promocional.
+     * Body: percentualDesconto (obrigatório), dataValidade (obrigatório, ISO-8601),
+     *       codigo (opcional), quantidadeMaxima (opcional), clienteId (opcional).
+     */
     @PostMapping("/cupons")
     public ResponseEntity<?> criarCupomPromocional(@RequestBody Map<String, Object> body) {
-        Double valor = body.get("valorTokens") instanceof Number n ? n.doubleValue() : null;
-        if (valor == null || valor <= 0) {
-            return ResponseEntity.badRequest().body(Map.of("erro", "valorTokens deve ser positivo."));
-        }
-
+        Double percentual = body.get("percentualDesconto") instanceof Number n ? n.doubleValue() : null;
+        String dataValidadeStr = body.get("dataValidade") instanceof String s ? s : null;
+        String codigoInput = body.get("codigo") instanceof String s ? s : null;
+        Integer qtdMaxima = body.get("quantidadeMaxima") instanceof Number n ? n.intValue() : null;
         Long clienteId = body.get("clienteId") instanceof Number n ? n.longValue() : null;
 
+        if (percentual == null || percentual <= 0 || percentual > 100) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "percentualDesconto deve estar entre 1 e 100."));
+        }
+        if (dataValidadeStr == null || dataValidadeStr.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "dataValidade é obrigatória."));
+        }
+
+        java.time.LocalDateTime dataValidade;
         try {
-            Cupom cupom = cupomService.criarCupomPromocional(valor, clienteId);
+            dataValidade = java.time.LocalDateTime.parse(dataValidadeStr);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Formato de dataValidade inválido. Use ISO-8601 (yyyy-MM-ddTHH:mm:ss)."));
+        }
+
+        try {
+            Cupom cupom = cupomService.criarCupom(codigoInput, percentual, dataValidade, qtdMaxima, clienteId);
             return ResponseEntity.status(201).body(Map.of(
-                    "mensagem", "Cupom promocional criado.",
+                    "mensagem", "Cupom criado com sucesso.",
                     "codigo", cupom.getCodigo(),
-                    "valorTokens", cupom.getValorTokens(),
+                    "percentualDesconto", cupom.getPercentualDesconto(),
                     "expiracao", cupom.getExpiracao().toString()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }

@@ -282,17 +282,17 @@ public final class EmailHtmlBuilder {
     }
 
     /** Aviso de cupom próximo ao vencimento. */
-    public static String cupomExpirando(String nome, String codigo, double valor, String dataExpiracao) {
+    public static String cupomExpirando(String nome, String codigo, double percentualDesconto, String dataExpiracao) {
         String corpo =
             saudacao(nome) +
             paragrafo("Seu cupom está prestes a vencer. Não deixe ele expirar!") +
             tabelaFinanceira(
                 linhaSaldo("Código do cupom", codigo, COR_PRIMARIA),
-                linhaSaldo("Valor", String.format("T$ %.2f", valor), COR_SUCESSO),
+                linhaSaldo("Desconto", String.format("%.0f%% de desconto", percentualDesconto), COR_SUCESSO),
                 linhaSaldo("Vencimento", dataExpiracao, COR_ALERTA)
             ) +
             aviso("Use seu cupom antes que expire!") +
-            paragrafo("Resgate agora na vitrine da Bibliotroca e aproveite seu desconto.");
+            paragrafo("Aplique na vitrine da Bibliotroca durante o checkout e aproveite seu desconto.");
         return base("Seu cupom vai expirar em breve! — Bibliotroca", corpo);
     }
 
