@@ -196,7 +196,28 @@ public class ClienteService {
         if (!FieldValidation.isValidPassword(novaSenha)) {
             throw new IllegalArgumentException("Senha não atende aos requisitos.");
         }
-        domainService.redefinirSenha(token, novaSenha);
+
+        var cliente = domainService.redefinirSenha(token, novaSenha);
+
+        log.debug("Iniciando envio de e-mail de confirmação de redefinição para: {}", cliente.getEmail());
+        String dataHora = LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm"));
+        try {
+            emailService.enviar(
+                    cliente.getEmail(),
+                    "Sua senha foi redefinida — Bibliotroca",
+                    "Olá, " + cliente.getNome() + "!\n\n" +
+                    "Sua senha foi redefinida com sucesso em " + dataHora + ".\n\n" +
+                    "Se você realizou essa alteração, pode ignorar este e-mail.\n\n" +
+                    "Se você não reconhece essa atividade, sua conta pode estar comprometida. " +
+                    "Entre em contato com nossa equipe imediatamente pelo e-mail " +
+                    "bibliotroca.noreply@gmail.com para que possamos proteger sua conta.\n\n" +
+                    "Equipe Bibliotroca");
+            log.info("E-mail de confirmação de redefinição enviado para: {}", cliente.getEmail());
+        } catch (Exception e) {
+            log.error("Falha ao enviar e-mail de confirmação de redefinição para {}: {}",
+                    cliente.getEmail(), e.getMessage());
+        }
     }
 
     public ClienteDTO buscarPorId(@NonNull Long id) {

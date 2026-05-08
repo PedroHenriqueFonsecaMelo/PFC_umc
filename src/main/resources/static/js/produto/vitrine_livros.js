@@ -132,20 +132,20 @@ async function finalizarCompra() {
     try {
         const res = await fetch('/api/livros/carrinho/comprar', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ livroIds: carrinho.map(i => i.id) })
         });
 
         const data = await res.json();
 
         if (!res.ok) {
-            // Erro geral (saldo insuficiente, conta bloqueada etc.)
-            mostrarToast([], [data]);
-            btn.disabled = false;
-            btn.textContent = 'Finalizar Compra';
+            const toast = document.getElementById('toastCompra');
+            if (toast) {
+                toast.className = 'toast toast-erro';
+                toast.innerHTML = `❌ ${typeof data === 'string' ? data : (data.falhas?.[0]?.motivo || 'Erro ao processar a compra.')}`;
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 6000);
+            }
             return;
         }
 
@@ -160,12 +160,32 @@ async function finalizarCompra() {
 
         mostrarToastResultado(data);
 
-    } catch (_) {
-        mostrarToast([], ['Erro de conexão. Tente novamente.']);
+    } catch (err) {
+        console.error('Erro ao finalizar compra:', err);
+        const toast = document.getElementById('toastCompra');
+        if (toast) {
+            toast.className = 'toast toast-erro';
+            toast.innerHTML = '❌ Erro de conexão. Tente novamente.';
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 6000);
+        }
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Finalizar Compra';
     }
+}
 
-    btn.disabled = false;
-    btn.textContent = 'Finalizar Compra';
+function limparCarrinho() {
+    saveCarrinho([]);
+    renderCarrinho();
+    atualizarBotoes();
+    const toast = document.getElementById('toastCompra');
+    if (toast) {
+        toast.className = 'toast toast-info';
+        toast.innerHTML = 'Estante limpa.';
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2500);
+    }
 }
 
 function mostrarToastResultado(data) {

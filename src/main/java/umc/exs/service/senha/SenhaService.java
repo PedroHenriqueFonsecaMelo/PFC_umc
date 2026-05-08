@@ -15,7 +15,6 @@ import umc.exs.service.email.EmailService;
 import umc.exs.service.log.LogAuditoriaService;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 /**
@@ -102,25 +101,6 @@ public class SenhaService {
         recuperacaoSenhaRepository.delete(rec);
 
         log.info("Senha alterada com sucesso para o cliente: {}", cliente.getEmail());
-
-        // E-mail de confirmação de redefinição
-        String dataHora = LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm"));
-        try {
-            emailService.enviar(
-                    cliente.getEmail(),
-                    "Sua senha foi redefinida — Bibliotroca",
-                    "Olá, " + cliente.getNome() + "!\n\n" +
-                    "Sua senha foi redefinida com sucesso em " + dataHora + ".\n\n" +
-                    "Se você realizou essa alteração, pode ignorar este e-mail.\n\n" +
-                    "Se você não reconhece essa atividade, sua conta pode estar comprometida. " +
-                    "Entre em contato com nossa equipe imediatamente através do e-mail " +
-                    "bibliotroca.noreply@gmail.com para que possamos proteger sua conta.\n\n" +
-                    "Equipe Bibliotroca");
-        } catch (Exception e) {
-            log.error("Falha ao enviar e-mail de confirmação de redefinição para {}: {}",
-                    cliente.getEmail(), e.getMessage());
-        }
     }
 
     /**

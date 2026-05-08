@@ -138,7 +138,7 @@ public class ClienteDomainService {
     }
 
     @Transactional
-    public void redefinirSenha(String token, String novaSenha) {
+    public Cliente redefinirSenha(String token, String novaSenha) {
         RecuperacaoSenha registro = tokenRepository.findByToken(token)
                 .orElseThrow(() -> new IllegalArgumentException("Token inválido ou inexistente."));
 
@@ -154,6 +154,7 @@ public class ClienteDomainService {
         tokenRepository.delete(registro);
 
         log.info("Senha redefinida com sucesso para: {}", cliente.getEmail());
+        return cliente;
     }
     
     @Transactional
