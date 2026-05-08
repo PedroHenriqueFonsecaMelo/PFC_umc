@@ -161,6 +161,39 @@ public final class EmailHtmlBuilder {
         return base("Compra do carrinho confirmada! — Bibliotroca", corpo);
     }
 
+    /**
+     * Notificação genérica de atualização de saldo — crédito ou débito.
+     *
+     * @param nome          Nome do cliente
+     * @param saldoAnterior Saldo antes da operação
+     * @param movimentacao  Valor absoluto da movimentação
+     * @param saldoAtual    Saldo após a operação
+     * @param motivo        Descrição curta (ex.: "Resgate de cupom XP-A1B2", "Estorno — pedido #42")
+     * @param ehCredito     true = crédito (verde/+), false = débito (vermelho/−)
+     */
+    public static String atualizacaoSaldo(String nome, double saldoAnterior, double movimentacao,
+                                          double saldoAtual, String motivo, boolean ehCredito) {
+        String corMov   = ehCredito ? COR_SUCESSO : COR_PRIMARIA;
+        String sinal    = ehCredito ? "+" : "−";
+        String tituloCor = ehCredito ? COR_SUCESSO : COR_PRIMARIA;
+        String tituloTxt = ehCredito ? "Crédito de tokens" : "Débito de tokens";
+
+        String corpo =
+            saudacao(nome) +
+            paragrafo("Seu saldo de tokens foi atualizado. Veja os detalhes abaixo.") +
+            "<h3 style='margin:20px 0 8px;font-size:15px;color:" + tituloCor + ";text-transform:uppercase;" +
+            "letter-spacing:.05em;'>" + tituloTxt + "</h3>" +
+            tabelaFinanceira(
+                linhaSaldo("Motivo",         motivo,                                              COR_TEXTO),
+                linhaSaldo("Saldo anterior", String.format("T$ %.2f", saldoAnterior),             COR_MUTED),
+                linhaSaldo("Movimentação",   sinal + String.format("T$ %.2f", movimentacao),      corMov),
+                linhaSaldo("Saldo atual",    String.format("T$ %.2f", saldoAtual),                COR_PRIMARIA)
+            ) +
+            paragrafo("Qualquer dúvida, entre em contato pelo e-mail " +
+                "<strong>bibliotroca.noreply@gmail.com</strong>.");
+        return base("Atualização de saldo — Bibliotroca", corpo);
+    }
+
     /** Confirmação de recarga de tokens na carteira. */
     public static String recargaTokens(String nome, double valor, String metodo, double saldoAnterior, double saldoAtual) {
         String corpo =

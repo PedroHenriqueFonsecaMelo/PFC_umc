@@ -198,8 +198,8 @@ function abrirModalEdit(livro) {
         ? livro.precoOriginal : (livro.precoAprovado != null ? livro.precoAprovado : "");
     document.getElementById("fPreco").value = precoBase;
 
-    // Promo fields
-    if (livro.emPromocao && livro.precoOriginal != null) {
+    // Promo fields — só preenche se a promoção ainda estiver válida
+    if (livro.emPromocao && livro.precoOriginal != null && promoValida(livro.promocaoExpira)) {
         const desconto = Math.round((1 - livro.precoAprovado / livro.precoOriginal) * 100);
         document.getElementById("fEmPromocao").checked           = true;
         document.getElementById("promoSection").style.display   = "block";

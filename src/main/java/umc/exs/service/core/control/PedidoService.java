@@ -157,6 +157,22 @@ public class PedidoService {
                                         String.format("Pedido #%d cancelado — T$ %.2f estornados. Saldo: T$ %.2f → T$ %.2f",
                                                         pedidoId, valorEstorno, saldoAnterior,
                                                         comprador.getSaldoTokens()));
+
+                        // E-mail dedicado de atualização de saldo pelo estorno
+                        try {
+                                emailService.enviarHtml(
+                                        comprador.getEmail(),
+                                        "Atualização de saldo — Bibliotroca",
+                                        EmailHtmlBuilder.atualizacaoSaldo(
+                                                comprador.getNome(),
+                                                saldoAnterior,
+                                                valorEstorno,
+                                                comprador.getSaldoTokens(),
+                                                "Estorno — pedido #" + pedidoId + " cancelado",
+                                                true));
+                        } catch (Exception e) {
+                                log.error("Falha ao enviar e-mail de estorno para {}: {}", comprador.getEmail(), e.getMessage());
+                        }
                 }
 
                 pedido.setStatusEnvio(novoStatus);

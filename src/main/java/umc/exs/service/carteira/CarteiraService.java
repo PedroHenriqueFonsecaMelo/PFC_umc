@@ -57,14 +57,23 @@ public class CarteiraService {
         log.info("Crédito de {} tokens via {} para cliente ID {}. Saldo: {} → {}",
                 valor, metodo, cliente.getId(), saldoAnterior, cliente.getSaldoTokens());
 
-        // E-mail de confirmação de recarga ao cliente
+        // E-mail de atualização de saldo ao cliente
         try {
+            String motivoEmail = switch (metodo.toUpperCase()) {
+                case "PIX"   -> "Recarga via PIX";
+                case "CUPOM" -> "Resgate de cupom" +
+                        (infoAdicional != null && !infoAdicional.isBlank() ? ": " + infoAdicional : "");
+                case "ADMIN" -> "Crédito administrativo";
+                default      -> "Crédito — " + metodo;
+            };
             emailService.enviarHtml(
                     cliente.getEmail(),
-                    "Recarga de tokens confirmada! — Bibliotroca",
-                    EmailHtmlBuilder.recargaTokens(cliente.getNome(), valor, metodo, saldoAnterior, cliente.getSaldoTokens()));
+                    "Atualização de saldo — Bibliotroca",
+                    EmailHtmlBuilder.atualizacaoSaldo(
+                            cliente.getNome(), saldoAnterior, valor,
+                            cliente.getSaldoTokens(), motivoEmail, true));
         } catch (Exception e) {
-            log.error("Falha ao enviar e-mail de recarga de tokens para {}: {}", cliente.getEmail(), e.getMessage());
+            log.error("Falha ao enviar e-mail de atualização de saldo para {}: {}", cliente.getEmail(), e.getMessage());
         }
     }
 
@@ -98,6 +107,18 @@ public class CarteiraService {
 
         logAuditoriaService.registrarLog("TOKENS_DEBITADOS", cliente.getId(), cliente.getEmail(),
                 String.format("Valor: T$%.2f | Descrição: %s", valor, descricao));
+
+        // E-mail de atualização de saldo (débito)
+        try {
+            emailService.enviarHtml(
+                    cliente.getEmail(),
+                    "Atualização de saldo — Bibliotroca",
+                    EmailHtmlBuilder.atualizacaoSaldo(
+                            cliente.getNome(), saldoAtual, valor,
+                            cliente.getSaldoTokens(), descricao, false));
+        } catch (Exception e) {
+            log.error("Falha ao enviar e-mail de débito de tokens para {}: {}", cliente.getEmail(), e.getMessage());
+        }
     }
 
     @Transactional(readOnly = true)
@@ -134,17 +155,30 @@ public class CarteiraService {
         if ("PENDENTE".equals(transacao.getStatus())) {
             transacao.setStatus("CONCLUIDO");
             Cliente cliente = transacao.getCliente();
-            double saldoAtual = (cliente.getSaldoTokens() != null) ? cliente.getSaldoTokens() : 0.0;
-            cliente.setSaldoTokens(saldoAtual + transacao.getValor());
+            double saldoAnterior = (cliente.getSaldoTokens() != null) ? cliente.getSaldoTokens() : 0.0;
+            double valorPix = transacao.getValor();
+            cliente.setSaldoTokens(saldoAnterior + valorPix);
 
             transacaoRepository.save(transacao);
             clienteRepository.save(cliente);
 
             logAuditoriaService.registrarLog("TOKENS_PIX_SUCESSO", cliente.getId(), cliente.getEmail(),
-                    String.format("PagamentoId: %s | Valor: T$%.2f", pagamentoId, transacao.getValor()));
+                    String.format("PagamentoId: %s | Valor: T$%.2f", pagamentoId, valorPix));
 
             log.info("PIX confirmado! PagamentoId: {} | Cliente: {} | Tokens: {}",
-                    pagamentoId, cliente.getEmail(), transacao.getValor());
+                    pagamentoId, cliente.getEmail(), valorPix);
+
+            // E-mail de atualização de saldo (PIX confirmado)
+            try {
+                emailService.enviarHtml(
+                        cliente.getEmail(),
+                        "Atualização de saldo — Bibliotroca",
+                        EmailHtmlBuilder.atualizacaoSaldo(
+                                cliente.getNome(), saldoAnterior, valorPix,
+                                cliente.getSaldoTokens(), "Recarga via PIX confirmada", true));
+            } catch (Exception e) {
+                log.error("Falha ao enviar e-mail de PIX confirmado para {}: {}", cliente.getEmail(), e.getMessage());
+            }
         }
     }
 
