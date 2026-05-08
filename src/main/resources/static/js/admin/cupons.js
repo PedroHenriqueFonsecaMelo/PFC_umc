@@ -36,7 +36,7 @@ async function carregarCupons() {
         filtrar();
     } catch (_) {
         document.getElementById("cuponsBody").innerHTML =
-            `<tr><td colspan="8" class="loading-row" style="color:#722f37">Erro ao carregar cupons.</td></tr>`;
+            `<tr><td colspan="9" class="loading-row" style="color:#722f37">Erro ao carregar cupons.</td></tr>`;
     }
 }
 
@@ -92,8 +92,6 @@ function renderTabela(lista) {
     document.getElementById("cuponsTable").style.display = "";
     vazio.style.display = "none";
 
-    const agora = new Date();
-
     tbody.innerHTML = lista.map(c => {
         const st = statusCupom(c);
 
@@ -114,6 +112,10 @@ function renderTabela(lista) {
 
         const expClass = st === "expirado" ? "expirada" : (venceBreve(c.expiracao) ? "vence-breve" : "");
 
+        const usosHtml = c.quantidadeMaxima != null
+            ? `${c.quantidadeUsada || 0}/${c.quantidadeMaxima}`
+            : `${c.quantidadeUsada || 0}/∞`;
+
         const acaoHtml = st === "ativo"
             ? `<button class="btn-invalidar" onclick="confirmarInvalidacao(${c.id}, '${esc(c.codigo)}')">
                  <i class="fa-solid fa-ban"></i> Invalidar
@@ -123,7 +125,8 @@ function renderTabela(lista) {
         return `<tr>
           <td><span class="codigo-cell">${esc(c.codigo)}</span></td>
           <td>${badgeTipo}</td>
-          <td><span class="valor-cell">T$ ${Number(c.valorTokens).toFixed(2)}</span></td>
+          <td><span class="valor-cell">${Number(c.percentualDesconto).toFixed(0)}% off</span></td>
+          <td><span style="font-size:.82rem;color:#4b4540">${usosHtml}</span></td>
           <td>${clienteHtml}</td>
           <td><span class="data-cell">${formatarData(c.dataCriacao)}</span></td>
           <td><span class="data-cell ${expClass}">${formatarData(c.expiracao)}</span></td>
@@ -144,14 +147,17 @@ function esc(s) {
 
 /* ── MODAL NOVO CUPOM ── */
 function abrirModalNovo() {
-    document.getElementById("fValor").value = "";
-    document.getElementById("fClienteId").value = "";
+    document.getElementById("fPercentual").value   = "";
+    document.getElementById("fDataValidade").value = "";
+    document.getElementById("fCodigo").value       = "";
+    document.getElementById("fQtdMaxima").value    = "";
+    document.getElementById("fClienteId").value    = "";
     document.getElementById("modalErro").style.display = "none";
-    document.getElementById("btnSalvar").disabled = false;
+    document.getElementById("btnSalvar").disabled  = false;
     document.getElementById("btnSalvar").textContent = "Gerar Cupom";
     document.getElementById("modal").classList.add("open");
     document.getElementById("modalOverlay").classList.add("open");
-    document.getElementById("fValor").focus();
+    document.getElementById("fPercentual").focus();
 }
 
 function fecharModal() {
@@ -166,11 +172,19 @@ async function criarCupom(e) {
     btn.textContent = "Gerando...";
     document.getElementById("modalErro").style.display = "none";
 
-    const valor     = parseFloat(document.getElementById("fValor").value);
-    const clienteId = document.getElementById("fClienteId").value.trim();
+    const percentual    = parseFloat(document.getElementById("fPercentual").value);
+    const dataValidade  = document.getElementById("fDataValidade").value; // "yyyy-MM-ddTHH:mm"
+    const codigo        = document.getElementById("fCodigo").value.trim().toUpperCase();
+    const qtdMaxima     = document.getElementById("fQtdMaxima").value.trim();
+    const clienteId     = document.getElementById("fClienteId").value.trim();
 
-    const payload = { valorTokens: valor };
-    if (clienteId) payload.clienteId = parseInt(clienteId, 10);
+    const payload = {
+        percentualDesconto: percentual,
+        dataValidade: dataValidade + ":00"  // adiciona segundos para ISO-8601 completo
+    };
+    if (codigo)     payload.codigo          = codigo;
+    if (qtdMaxima)  payload.quantidadeMaxima = parseInt(qtdMaxima, 10);
+    if (clienteId)  payload.clienteId       = parseInt(clienteId, 10);
 
     try {
         const res = await fetch("/api/admin/cupons", {
@@ -188,7 +202,7 @@ async function criarCupom(e) {
         }
 
         fecharModal();
-        mostrarToast(`Cupom ${data.codigo} criado — T$ ${Number(data.valorTokens).toFixed(2)}`, "ok");
+        mostrarToast(`Cupom ${data.codigo} criado — ${Number(data.percentualDesconto).toFixed(0)}% off`, "ok");
         await carregarCupons();
     } catch (_) {
         mostrarErroModal("Erro de conexão. Tente novamente.");
@@ -206,7 +220,7 @@ function mostrarErroModal(msg) {
 /* ── CONFIRMAR INVALIDAÇÃO ── */
 function confirmarInvalidacao(id, codigo) {
     document.getElementById("confirmMsg").textContent =
-        `Tem certeza que deseja invalidar o cupom "${codigo}"? Ele não poderá mais ser resgatado.`;
+        `Tem certeza que deseja invalidar o cupom "${codigo}"? Ele não poderá mais ser utilizado.`;
     document.getElementById("btnConfirmDelete").onclick = () => invalidarCupom(id, codigo);
     document.getElementById("confirmModal").classList.add("open");
     document.getElementById("confirmOverlay").classList.add("open");

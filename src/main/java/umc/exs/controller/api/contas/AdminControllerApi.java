@@ -23,8 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 import umc.exs.DTOs.admin.AdminAprovacaoDTO;
 import umc.exs.DTOs.admin.DashboardMetricasDTO;
 import umc.exs.DTOs.compra.AtualizarEnvioDTO;
+import umc.exs.DTOs.compra.CupomDTO;
 import umc.exs.DTOs.compra.LoteExibicaoDTO;
 import umc.exs.DTOs.compra.PedidoDTO;
+import umc.exs.model.entidades.foundation.Cupom;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.logic.Administrador;
 import umc.exs.model.enums.EstadoLivro;
@@ -33,6 +35,7 @@ import umc.exs.service.core.bussiness.LivroService;
 import umc.exs.service.core.control.DashboardService;
 import umc.exs.service.core.control.LoteService;
 import umc.exs.service.core.control.PedidoService;
+import umc.exs.service.cupom.CupomService;
 
 @Slf4j
 @RestController
@@ -45,6 +48,7 @@ public class AdminControllerApi {
     private final LoteService loteService;
     private final PedidoService pedidoService;
     private final DashboardService dashboardService;
+    private final CupomService cupomService;
 
     /**
      * Lista lotes de livros pendentes de aprovação.
@@ -318,6 +322,68 @@ public class AdminControllerApi {
             return ResponseEntity.ok(Map.of("success", true, "message", "Livro removido do estoque."));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro: " + e.getMessage());
+        }
+    }
+
+    // ==========================================================
+    // CUPONS — Criação promocional
+    // ==========================================================
+
+    /** Lista todos os cupons do sistema (mais recentes primeiro). */
+    @GetMapping("/cupons")
+    public ResponseEntity<List<CupomDTO>> listarTodosCupons() {
+        return ResponseEntity.ok(cupomService.listarTodosCupons());
+    }
+
+    /** Invalida manualmente um cupom sem creditar tokens. */
+    @DeleteMapping("/cupons/{id}")
+    public ResponseEntity<?> invalidarCupom(@PathVariable Long id) {
+        try {
+            cupomService.invalidarCupom(id);
+            return ResponseEntity.ok(Map.of("mensagem", "Cupom invalidado com sucesso."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
+        }
+    }
+
+    /**
+     * Cria um cupom promocional.
+     * Body: percentualDesconto (obrigatório), dataValidade (obrigatório, ISO-8601),
+     *       codigo (opcional), quantidadeMaxima (opcional), clienteId (opcional).
+     */
+    @PostMapping("/cupons")
+    public ResponseEntity<?> criarCupomPromocional(@RequestBody Map<String, Object> body) {
+        Double percentual = body.get("percentualDesconto") instanceof Number n ? n.doubleValue() : null;
+        String dataValidadeStr = body.get("dataValidade") instanceof String s ? s : null;
+        String codigoInput = body.get("codigo") instanceof String s ? s : null;
+        Integer qtdMaxima = body.get("quantidadeMaxima") instanceof Number n ? n.intValue() : null;
+        Long clienteId = body.get("clienteId") instanceof Number n ? n.longValue() : null;
+
+        if (percentual == null || percentual <= 0 || percentual > 100) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "percentualDesconto deve estar entre 1 e 100."));
+        }
+        if (dataValidadeStr == null || dataValidadeStr.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "dataValidade é obrigatória."));
+        }
+
+        java.time.LocalDateTime dataValidade;
+        try {
+            dataValidade = java.time.LocalDateTime.parse(dataValidadeStr);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Formato de dataValidade inválido. Use ISO-8601 (yyyy-MM-ddTHH:mm:ss)."));
+        }
+
+        try {
+            Cupom cupom = cupomService.criarCupom(codigoInput, percentual, dataValidade, qtdMaxima, clienteId);
+            return ResponseEntity.status(201).body(Map.of(
+                    "mensagem", "Cupom criado com sucesso.",
+                    "codigo", cupom.getCodigo(),
+                    "percentualDesconto", cupom.getPercentualDesconto(),
+                    "expiracao", cupom.getExpiracao().toString()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }
     }
 

@@ -35,6 +35,7 @@ import umc.exs.service.core.control.PedidoService;
 import org.springframework.beans.factory.annotation.Value;
 import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
+import umc.exs.service.cupom.CupomService;
 import umc.exs.service.log.LogAuditoriaService;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -55,6 +56,7 @@ public class LivroService {
     private final PedidoService pedidoService;
     private final EmailService emailService;
     private final ListaDesejosService listaDesejosService;
+    private final CupomService cupomService;
 
     private static final double TOKEN_REWARD = 10.0;
 
@@ -457,9 +459,32 @@ public class LivroService {
             }
         }
 
+        // Mapa de cupons por livroId (pode ser null/vazio)
+        java.util.Map<Long, String> cupomPorLivro = new java.util.HashMap<>();
+        if (request.getCupons() != null) {
+            for (umc.exs.DTOs.compra.CarrinhoCompraRequestDTO.CupomAplicado ca : request.getCupons()) {
+                if (ca.getLivroId() != null && ca.getCodigo() != null && !ca.getCodigo().isBlank()) {
+                    cupomPorLivro.put(ca.getLivroId(), ca.getCodigo().trim().toUpperCase());
+                }
+            }
+        }
+
         // 3. Verifica saldo total antes de debitar qualquer valor
+        // Para itens com cupom, aplica o desconto no cálculo de saldo necessário
         double totalNecessario = livrosEncontrados.stream()
-                .mapToDouble(l -> l.getPrecoAprovado() != null ? l.getPrecoAprovado() : 0.0)
+                .mapToDouble(l -> {
+                    double preco = l.getPrecoAprovado() != null ? l.getPrecoAprovado() : 0.0;
+                    String codigo = cupomPorLivro.get(l.getId());
+                    if (codigo != null) {
+                        try {
+                            var validacao = cupomService.validarCupom(codigo, comprador.getEmail(), l.getId());
+                            if (Boolean.TRUE.equals(validacao.get("valido"))) {
+                                return ((Number) validacao.get("precoComDesconto")).doubleValue();
+                            }
+                        } catch (Exception ignored) { }
+                    }
+                    return preco;
+                })
                 .sum();
 
         if (comprador.getSaldoTokens() < totalNecessario) {
@@ -482,6 +507,17 @@ public class LivroService {
                             .motivo("Livro sem preço definido.")
                             .build());
                     continue;
+                }
+
+                // Aplica cupom se houver para este livro
+                String codigoCupom = cupomPorLivro.get(livro.getId());
+                if (codigoCupom != null) {
+                    try {
+                        preco = cupomService.aplicarCupom(codigoCupom, comprador, livro.getId(), preco);
+                    } catch (IllegalArgumentException e) {
+                        log.warn("Cupom '{}' inválido para livro {}: {}", codigoCupom, livro.getId(), e.getMessage());
+                        // Prossegue com preço cheio se cupom inválido
+                    }
                 }
 
                 // Registra pedido ANTES de deletar o livro

@@ -101,7 +101,8 @@
               <tr>
                 <th>Código</th>
                 <th>Tipo</th>
-                <th>Valor</th>
+                <th>Desconto</th>
+                <th>Usos</th>
                 <th>Cliente</th>
                 <th>Criado em</th>
                 <th>Válido até</th>
@@ -110,7 +111,7 @@
               </tr>
             </thead>
             <tbody id="cuponsBody">
-              <tr><td colspan="8" class="loading-row"><i class="fa-solid fa-spinner fa-spin"></i> Carregando...</td></tr>
+              <tr><td colspan="9" class="loading-row"><i class="fa-solid fa-spinner fa-spin"></i> Carregando...</td></tr>
             </tbody>
           </table>
         </div>
@@ -132,8 +133,20 @@
       </div>
       <form id="modalForm" onsubmit="criarCupom(event)">
         <div class="form-group">
-          <label>Valor em Tokens (T$) *</label>
-          <input type="number" id="fValor" min="0.01" step="0.01" required placeholder="Ex: 25.00" />
+          <label>% de Desconto *</label>
+          <input type="number" id="fPercentual" min="1" max="100" step="1" required placeholder="Ex: 10" />
+        </div>
+        <div class="form-group">
+          <label>Data de Validade *</label>
+          <input type="datetime-local" id="fDataValidade" required />
+        </div>
+        <div class="form-group">
+          <label>Código <span style="font-weight:400;color:#9c968f">(gerado automaticamente se vazio)</span></label>
+          <input type="text" id="fCodigo" maxlength="40" placeholder="Ex: VERAO25" style="text-transform:uppercase;" />
+        </div>
+        <div class="form-group">
+          <label>Qtd. Máxima de Usos <span style="font-weight:400;color:#9c968f">(vazio = ilimitado)</span></label>
+          <input type="number" id="fQtdMaxima" min="1" step="1" placeholder="Ex: 100" />
         </div>
         <div class="form-group">
           <label>ID do Cliente <span style="font-weight:400;color:#9c968f">(deixe vazio para cupom público)</span></label>

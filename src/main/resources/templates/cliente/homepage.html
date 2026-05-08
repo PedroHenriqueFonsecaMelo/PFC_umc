@@ -619,29 +619,6 @@
                     </div>
                 </div>
 
-                <!-- ── Seção de Cupons ──────────────────────────────── -->
-                <div style="margin-top:1.5rem;border-top:1px solid rgba(44,36,27,.1);padding-top:1.25rem;">
-                    <div class="cw-historico-header" style="margin-bottom:.85rem;">
-                        <i class="fa-solid fa-ticket"></i> Meus Cupons
-                    </div>
-
-                    <!-- Resgate de cupom -->
-                    <div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap;">
-                        <input type="text" id="cwCupomInput" placeholder="Código do cupom"
-                               style="flex:1;min-width:160px;padding:.5rem .75rem;border:1.5px solid rgba(44,36,27,.15);
-                                      border-radius:6px;font-size:.88rem;text-transform:uppercase;" />
-                        <button class="cw-btn-pay" style="width:auto;padding:.5rem 1.25rem;"
-                                onclick="cwResgatarCupom()">
-                            <i class="fa-solid fa-gift"></i> Resgatar
-                        </button>
-                    </div>
-                    <div id="cwCupomMsg" style="font-size:.82rem;margin-bottom:.75rem;display:none;"></div>
-
-                    <!-- Lista de cupons -->
-                    <div id="cwCupomLista">
-                        <p style="font-size:.83rem;color:#7a6e65;">Carregando cupons...</p>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -891,7 +868,6 @@
     function initCarteira() {
         cwCarregarSaldo();
         cwCarregarHistorico();
-        cwCarregarCupons();
     }
 
     async function cwCarregarSaldo() {
@@ -1000,71 +976,6 @@
         } catch(_) { alert('Erro ao simular pagamento.'); }
     }
 
-    /* ── Cupons ─────────────────────────────────────────────── */
-
-    async function cwCarregarCupons() {
-        var container = document.getElementById('cwCupomLista');
-        if (!container) return;
-        try {
-            var res = await fetch('/api/cupons/meus', { credentials:'include' });
-            if (!res.ok) { container.innerHTML = '<p style="font-size:.83rem;color:#7a6e65;">Sem cupons disponíveis.</p>'; return; }
-            var cupons = await res.json();
-            if (!cupons.length) {
-                container.innerHTML = '<p style="font-size:.83rem;color:#7a6e65;">Nenhum cupom disponível no momento.</p>';
-                return;
-            }
-            container.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:.5rem;">' +
-                cupons.map(function(c) {
-                    var expDate = new Date(c.expiracao);
-                    var hoje    = new Date();
-                    var expirado = expDate < hoje;
-                    var statusCor   = expirado ? '#991b1b' : '#065f46';
-                    var statusBg    = expirado ? '#fee2e2' : '#d1fae5';
-                    var statusLabel = expirado ? 'Expirado' : 'Disponível';
-                    var dataFmt = expDate.toLocaleDateString('pt-BR');
-                    return '<div style="border:1.5px dashed rgba(44,36,27,.2);border-radius:8px;padding:.75rem 1rem;min-width:180px;background:#fdfaf7;">' +
-                        '<div style="font-family:monospace;font-size:.92rem;font-weight:700;color:#722f37;letter-spacing:.05em;">' + c.codigo + '</div>' +
-                        '<div style="font-size:.8rem;color:#2c241b;margin:.2rem 0;">T$ ' + (c.valorTokens||0).toFixed(2) + '</div>' +
-                        '<div style="font-size:.73rem;color:#7a6e65;">Expira: ' + dataFmt + '</div>' +
-                        '<span style="display:inline-block;margin-top:.35rem;padding:.15rem .5rem;border-radius:20px;font-size:.7rem;font-weight:600;background:' + statusBg + ';color:' + statusCor + ';">' + statusLabel + '</span>' +
-                        '</div>';
-                }).join('') + '</div>';
-        } catch(e) {
-            container.innerHTML = '<p style="font-size:.83rem;color:#722f37;">Erro ao carregar cupons.</p>';
-        }
-    }
-
-    async function cwResgatarCupom() {
-        var input = document.getElementById('cwCupomInput');
-        var msg   = document.getElementById('cwCupomMsg');
-        var codigo = (input.value || '').trim().toUpperCase();
-        if (!codigo) { msg.textContent = 'Digite o código do cupom.'; msg.style.color='#722f37'; msg.style.display='block'; return; }
-
-        try {
-            var res = await fetch('/api/cupons/resgatar', {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ codigo: codigo })
-            });
-            var data = await res.json();
-            if (res.ok) {
-                msg.textContent = data.mensagem || 'Cupom resgatado com sucesso!';
-                msg.style.color = '#065f46';
-                input.value = '';
-                cwCarregarSaldo();
-                cwCarregarHistorico();
-                cwCarregarCupons();
-            } else {
-                msg.textContent = data.erro || 'Erro ao resgatar cupom.';
-                msg.style.color = '#722f37';
-            }
-        } catch(_) {
-            msg.textContent = 'Erro de conexão. Tente novamente.';
-            msg.style.color = '#722f37';
-        }
-        msg.style.display = 'block';
-    }
 </script>
 
 </body>

@@ -76,7 +76,7 @@ public class CupomSchedulerService {
                         "Seu cupom vai expirar em breve! — Bibliotroca",
                         EmailHtmlBuilder.cupomExpirando(
                                 cliente.getNome(), cupom.getCodigo(),
-                                cupom.getValorTokens(),
+                                cupom.getPercentualDesconto(),
                                 cupom.getExpiracao().toLocalDate().toString()));
 
                 notificacaoService.criarNotificacaoDashboard(

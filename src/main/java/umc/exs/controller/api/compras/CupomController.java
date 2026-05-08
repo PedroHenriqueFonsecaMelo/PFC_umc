@@ -7,9 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -30,26 +29,22 @@ public class CupomController {
         return ResponseEntity.ok(cupomService.listarCuponsDisponiveis(user.getUsername()));
     }
 
-    /** Resgata um cupom pelo código. */
-    @PostMapping("/resgatar")
-    public ResponseEntity<?> resgatar(
-            @AuthenticationPrincipal UserDetails user,
-            @RequestBody Map<String, String> body) {
+    /**
+     * Valida um cupom para um item específico do carrinho (preview do desconto).
+     * Não registra uso — apenas calcula o desconto.
+     *
+     * @param codigo  código do cupom
+     * @param livroId ID do livro ao qual o desconto seria aplicado
+     * @param user    usuário autenticado
+     * @return mapa com: valido, percentual, precoOriginal, precoComDesconto, economia, mensagem
+     */
+    @GetMapping("/validar")
+    public ResponseEntity<Map<String, Object>> validar(
+            @RequestParam String codigo,
+            @RequestParam Long livroId,
+            @AuthenticationPrincipal UserDetails user) {
         if (user == null) return ResponseEntity.status(401).build();
-
-        String codigo = body.get("codigo");
-        if (codigo == null || codigo.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("erro", "Código do cupom é obrigatório."));
-        }
-
-        try {
-            CupomDTO dto = cupomService.resgatarCupom(user.getUsername(), codigo.trim().toUpperCase());
-            return ResponseEntity.ok(Map.of(
-                    "mensagem", "Cupom resgatado com sucesso! T$ " + dto.getValorTokens() + " creditados.",
-                    "cupom", dto));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
-        }
+        Map<String, Object> result = cupomService.validarCupom(codigo, user.getUsername(), livroId);
+        return ResponseEntity.ok(result);
     }
-
 }

@@ -7,6 +7,9 @@
 
 const CARRINHO_KEY = 'bibliotroca_carrinho';
 
+// Mapa livroId → { codigo, desconto, precoFinal } para cupons aplicados
+let cuponsPorItem = {};
+
 function getCarrinho() {
     try { return JSON.parse(localStorage.getItem(CARRINHO_KEY)) || []; }
     catch (_) { return []; }
@@ -27,12 +30,17 @@ function adicionarAoCarrinho(livro) {
 
 function removerDoCarrinho(id) {
     saveCarrinho(getCarrinho().filter(item => item.id !== id));
+    delete cuponsPorItem[id];
     renderCarrinho();
     atualizarBotoes();
 }
 
 function totalCarrinho() {
-    return getCarrinho().reduce((sum, item) => sum + (item.precoAprovado || 0), 0);
+    return getCarrinho().reduce((sum, item) => {
+        const cupom = cuponsPorItem[item.id];
+        const preco = cupom ? cupom.precoFinal : (item.precoAprovado || 0);
+        return sum + preco;
+    }, 0);
 }
 
 /* ── RENDER CARRINHO SIDEBAR ─────────────────────────────────── */
@@ -70,14 +78,41 @@ function renderCarrinho() {
             if (Array.isArray(arr) && arr.length > 0) foto = arr[0];
         } catch (_) { }
 
+        const cupom = cuponsPorItem[item.id];
+        const precoFinal = cupom ? cupom.precoFinal : (item.precoAprovado || 0);
+        const precoHtml = cupom
+            ? `<div class="carr-item-preco">
+                   <span style="text-decoration:line-through;color:#9a8a80;font-size:.78rem;margin-right:.3rem;">T$ ${(item.precoAprovado || 0).toFixed(2)}</span>
+                   <span style="color:#e11d48;font-weight:700;">T$ ${precoFinal.toFixed(2)}</span>
+                   <span style="font-size:.72rem;color:#065f46;margin-left:.3rem;">(${cupom.codigo} −${cupom.desconto}%)</span>
+               </div>`
+            : `<div class="carr-item-preco">T$ ${precoFinal.toFixed(2)}</div>`;
+
+        const cupomInputHtml = cupom
+            ? `<div style="display:flex;align-items:center;gap:.3rem;margin-top:.4rem;">
+                   <span style="font-size:.75rem;color:#065f46;"><i class="fa-solid fa-tag"></i> ${cupom.codigo} aplicado</span>
+                   <button onclick="removerCupomItem(${item.id})" title="Remover cupom"
+                           style="background:none;border:none;cursor:pointer;color:#9a8a80;font-size:.75rem;padding:0;">✕</button>
+               </div>`
+            : `<div style="display:flex;gap:.3rem;margin-top:.4rem;">
+                   <input id="cupom-input-${item.id}" type="text" placeholder="Código cupom"
+                          style="flex:1;font-size:.75rem;padding:.25rem .45rem;border:1px solid rgba(44,36,27,.2);
+                                 border-radius:4px;text-transform:uppercase;min-width:0;"
+                          onkeydown="if(event.key==='Enter'){aplicarCupomItem(${item.id},this.closest('.carr-item').querySelector('.carr-cupom-btn'))}" />
+                   <button class="carr-cupom-btn" onclick="aplicarCupomItem(${item.id},this)"
+                           style="font-size:.72rem;padding:.25rem .5rem;background:#4a5d23;color:#fff;border:none;
+                                  border-radius:4px;cursor:pointer;white-space:nowrap;">Aplicar</button>
+               </div>`;
+
         return `
         <div class="carr-item" id="carr-item-${item.id}">
             <img class="carr-item-img" src="${foto}" alt="${item.titulo}"
                  onerror="this.src='https://via.placeholder.com/48x64?text=📚'"/>
-            <div class="carr-item-info">
+            <div class="carr-item-info" style="flex:1;min-width:0;">
                 <div class="carr-item-titulo">${item.titulo}</div>
                 <div class="carr-item-autor">${item.autor}</div>
-                <div class="carr-item-preco">T$ ${(item.precoAprovado || 0).toFixed(2)}</div>
+                ${precoHtml}
+                ${cupomInputHtml}
             </div>
             <button class="carr-item-remover" onclick="removerDoCarrinho(${item.id})" title="Remover">✕</button>
         </div>`;
@@ -119,6 +154,69 @@ function fecharCarrinho() {
     document.getElementById('carrinhoOverlay').style.display = 'none';
 }
 
+/* ── CUPOM POR ITEM ──────────────────────────────────────────── */
+
+async function aplicarCupomItem(livroId, btn) {
+    const input = document.getElementById(`cupom-input-${livroId}`);
+    if (!input) return;
+    const codigo = input.value.trim().toUpperCase();
+    if (!codigo) return;
+
+    // Impede aplicar o mesmo cupom em mais de um item do carrinho
+    const jaUsado = Object.entries(cuponsPorItem).some(
+        ([id, c]) => c.codigo === codigo && parseInt(id, 10) !== livroId
+    );
+    if (jaUsado) {
+        input.style.borderColor = '#e11d48';
+        input.title = 'Este cupom já foi aplicado em outro item do carrinho.';
+        const msgId = `cupom-msg-${livroId}`;
+        let msg = document.getElementById(msgId);
+        if (!msg) {
+            msg = document.createElement('div');
+            msg.id = msgId;
+            msg.style.cssText = 'font-size:.72rem;color:#e11d48;margin-top:.2rem;';
+            input.parentElement.appendChild(msg);
+        }
+        msg.textContent = 'Este cupom já foi aplicado em outro item.';
+        setTimeout(() => { input.style.borderColor = ''; if (msg) msg.remove(); }, 3000);
+        return;
+    }
+
+    const origText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '...';
+
+    try {
+        const res = await fetch(`/api/cupons/validar?codigo=${encodeURIComponent(codigo)}&livroId=${livroId}`);
+        const data = await res.json();
+
+        if (!res.ok || !data.valido) {
+            input.style.borderColor = '#e11d48';
+            input.title = data.mensagem || 'Cupom inválido';
+            setTimeout(() => { input.style.borderColor = ''; }, 2000);
+            btn.disabled = false;
+            btn.textContent = origText;
+            return;
+        }
+
+        cuponsPorItem[livroId] = {
+            codigo: codigo,
+            desconto: data.percentual,
+            precoFinal: data.precoComDesconto
+        };
+        renderCarrinho();
+
+    } catch (_) {
+        btn.disabled = false;
+        btn.textContent = origText;
+    }
+}
+
+function removerCupomItem(livroId) {
+    delete cuponsPorItem[livroId];
+    renderCarrinho();
+}
+
 /* ── FINALIZAR COMPRA ────────────────────────────────────────── */
 
 async function finalizarCompra() {
@@ -129,11 +227,17 @@ async function finalizarCompra() {
     btn.disabled = true;
     btn.textContent = 'Processando...';
 
+    // Monta array de cupons aplicados
+    const cupons = Object.entries(cuponsPorItem).map(([livroId, c]) => ({
+        livroId: parseInt(livroId, 10),
+        codigo: c.codigo
+    }));
+
     try {
         const res = await fetch('/api/livros/carrinho/comprar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ livroIds: carrinho.map(i => i.id) })
+            body: JSON.stringify({ livroIds: carrinho.map(i => i.id), cupons: cupons.length > 0 ? cupons : undefined })
         });
 
         const data = await res.json();
@@ -153,6 +257,7 @@ async function finalizarCompra() {
         if (data.comprados && data.comprados.length > 0) {
             const idsComprados = new Set(data.comprados.map(c => c.livroId));
             saveCarrinho(getCarrinho().filter(i => !idsComprados.has(i.id)));
+            idsComprados.forEach(id => delete cuponsPorItem[id]);
             renderCarrinho();
             atualizarBotoes();
             carregarSaldo();
@@ -177,6 +282,7 @@ async function finalizarCompra() {
 
 function limparCarrinho() {
     saveCarrinho([]);
+    cuponsPorItem = {};
     renderCarrinho();
     atualizarBotoes();
     const toast = document.getElementById('toastCompra');
