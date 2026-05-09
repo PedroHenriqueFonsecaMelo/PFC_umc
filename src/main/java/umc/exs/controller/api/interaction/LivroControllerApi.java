@@ -46,10 +46,14 @@ public class LivroControllerApi {
 
             @AuthenticationPrincipal UserDetails user,
             @RequestPart("loteDados") LoteRequestDTO loteDados,
-            @RequestPart("fotos") List<MultipartFile> fotos) {
+            @RequestPart(value = "fotos", required = false) List<MultipartFile> fotos) {
 
         if (user == null) {
             return ResponseEntity.status(401).body("Usuário precisa estar logado.");
+        }
+
+        if (fotos == null || fotos.isEmpty() || fotos.stream().allMatch(f -> f == null || f.isEmpty())) {
+            return ResponseEntity.badRequest().body("É necessário adicionar pelo menos uma foto do livro.");
         }
 
         try {

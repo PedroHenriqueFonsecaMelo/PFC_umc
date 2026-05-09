@@ -155,11 +155,14 @@ function handleFotos(id, files) {
     const previews = document.getElementById(`upload-previews-${id}`);
     if (selecionados.length > 0) {
         placeholder.style.display = "none";
+        previews.innerHTML = "";
+        selecionados.forEach((f) => {
+            const img = document.createElement("img");
+            img.src = URL.createObjectURL(f);
+            img.alt = "";
+            previews.appendChild(img);
+        });
         previews.style.display = "flex";
-        previews.innerHTML = selecionados.map((f) => {
-            const url = URL.createObjectURL(f);
-            return `<img src="${url}" alt="preview"/>`;
-        }).join("");
     } else {
         placeholder.style.display = "";
         previews.style.display = "none";
@@ -202,6 +205,12 @@ document.getElementById("formVenda").addEventListener("submit", async (e) => {
         return;
     }
 
+    const semFoto = livros.find((l) => l.arquivos.length === 0);
+    if (semFoto) {
+        mostrarErro("Adicione pelo menos uma foto do livro antes de enviar.");
+        return;
+    }
+
     const btnSubmit = document.getElementById("btnSubmit");
     btnSubmit.disabled = true;
     btnSubmit.textContent = "Enviando…";
@@ -222,7 +231,7 @@ document.getElementById("formVenda").addEventListener("submit", async (e) => {
         const res = await fetch("/api/livros/lotes/vender", { method: "POST", body: formData });
         if (res.ok) {
             mostrarOk("Lote enviado! Nossa curadoria avaliará em breve.");
-            setTimeout(() => window.location.href = "/", 2000);
+            setTimeout(() => window.location.href = "/?enviado=1", 2000);
         } else {
             const msg = await res.text();
             mostrarErro(msg || "Erro ao enviar o lote. Tente novamente.");

@@ -154,6 +154,24 @@ async function carregarBlog() {
   } catch (_) {}
 }
 
+/* ── Flash: lote enviado ── */
+(function () {
+    if (new URLSearchParams(window.location.search).get("enviado") === "1") {
+        const banner = document.getElementById("flashEnviado");
+        if (banner) {
+            banner.style.display = "flex";
+            // limpa o param da URL sem recarregar a página
+            history.replaceState(null, "", window.location.pathname);
+            // fecha automaticamente após 8 s
+            const timer = setTimeout(() => banner.style.display = "none", 8000);
+            document.getElementById("flashClose").addEventListener("click", () => {
+                clearTimeout(timer);
+                banner.style.display = "none";
+            });
+        }
+    }
+})();
+
 /* ── Init ── */
 carregarNavUsuario();
 carregarLivrosDestaque();

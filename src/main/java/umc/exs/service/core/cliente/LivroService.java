@@ -350,10 +350,6 @@ public class LivroService {
         Livro anuncio = livroRepository.findById(livroId)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
 
-        if (!estado.equalsIgnoreCase(EstadoLivro.RUIM.name())) {
-            throw new RuntimeException("Apenas livros com estado RUIM ou pior podem ser rejeitados");
-        }
-
         // E-mail de rejeição ao vendedor (antes de deletar)
         Cliente vendedorRejeicao = anuncio.getVendedor();
         if (vendedorRejeicao == null && anuncio.getLote() != null) {
@@ -373,7 +369,23 @@ public class LivroService {
             }
         }
 
+        // Captura o lote antes de deletar o livro
+        Lote lotePendente = anuncio.getLote();
+
         livroRepository.delete(anuncio);
+
+        // Atualiza status do lote se não houver mais livros pendentes de revisão
+        if (lotePendente != null) {
+            long pendingCount = livroRepository.countByLoteIdAndAprovadoFalse(lotePendente.getId());
+            if (pendingCount == 0) {
+                long approvedCount = livroRepository.findByLoteId(lotePendente.getId()).size();
+                Lote.LoteStatus novoStatus = (approvedCount == 0)
+                        ? Lote.LoteStatus.REJEITADO
+                        : Lote.LoteStatus.PARCIAL_APROVADO;
+                lotePendente.setStatus(novoStatus);
+                loteRepository.save(lotePendente);
+            }
+        }
 
         logAuditoria.registrarLog("LIVRO_REJEITADO", adminId, "admin#" + adminId,
                 "Livro ID " + livroId + " rejeitado pelo administrador.");
