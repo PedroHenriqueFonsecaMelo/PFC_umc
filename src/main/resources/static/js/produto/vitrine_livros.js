@@ -393,6 +393,18 @@ function togglePromo() {
     carregarLivros();
 }
 
+/* ── ESTADO → CLASSE CSS ─────────────────────────────────────── */
+
+function classeEstado(estado) {
+    const mapa = {
+        'ÓTIMO': 'otimo', 'OTIMO': 'otimo',
+        'BOM':   'bom',
+        'REGULAR': 'regular',
+        'RUIM':  'ruim'
+    };
+    return mapa[(estado || '').toUpperCase()] || 'bom';
+}
+
 /* ── CARREGAR LIVROS ─────────────────────────────────────────── */
 
 async function carregarLivros() {
@@ -447,6 +459,8 @@ async function carregarLivros() {
                    </div>`
                 : '';
 
+            const estadoLabel = livro.estadoAprovado || 'BOM';
+
             return `
             <div class="livro-card" id="card-${livro.id}" style="position:relative;">
                 ${badgePromo}
@@ -455,7 +469,7 @@ async function carregarLivros() {
                          onerror="this.src='https://via.placeholder.com/300x400?text=📚'">
                 </div>
                 <div class="livro-card-body">
-                    <span class="livro-estado">${livro.estadoAprovado || 'BOM'}</span>
+                    <span class="livro-estado estado-${classeEstado(estadoLabel)}">${estadoLabel}</span>
                     <h3 class="livro-titulo">${livro.titulo}</h3>
                     <p class="livro-autor">por ${livro.autor}</p>
                     ${precoHtml}
@@ -464,9 +478,8 @@ async function carregarLivros() {
                         class="btn-carrinho"
                         data-id="${livro.id}"
                         onclick="handleAdicionarCarrinho(this, ${livroJson})">
-                        <img src="/imagens/estante.png" style="width:20px;height:20px;object-fit:contain"> Colocar na estante
+                        <img src="/imagens/estante.png" style="width:18px;height:18px;object-fit:contain;opacity:.9"> Colocar na estante
                     </button>
-                    <p class="livro-rodape">Bibliotroca</p>
                 </div>
             </div>`;
         }).join('');
