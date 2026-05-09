@@ -1,5 +1,7 @@
 package umc.exs.service.email;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -170,13 +172,18 @@ public final class EmailHtmlBuilder {
      * @param saldoAtual    Saldo após a operação
      * @param motivo        Descrição curta (ex.: "Resgate de cupom XP-A1B2", "Estorno — pedido #42")
      * @param ehCredito     true = crédito (verde/+), false = débito (vermelho/−)
+     * @param dataHora      Momento em que a operação ocorreu
      */
     public static String atualizacaoSaldo(String nome, double saldoAnterior, double movimentacao,
-                                          double saldoAtual, String motivo, boolean ehCredito) {
-        String corMov   = ehCredito ? COR_SUCESSO : COR_PRIMARIA;
-        String sinal    = ehCredito ? "+" : "−";
+                                          double saldoAtual, String motivo, boolean ehCredito,
+                                          LocalDateTime dataHora) {
+        String corMov    = ehCredito ? COR_SUCESSO : COR_PRIMARIA;
+        String sinal     = ehCredito ? "+" : "−";
         String tituloCor = ehCredito ? COR_SUCESSO : COR_PRIMARIA;
         String tituloTxt = ehCredito ? "Crédito de tokens" : "Débito de tokens";
+        String dataFmt   = dataHora != null
+                ? dataHora.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+                : "—";
 
         String corpo =
             saudacao(nome) +
@@ -184,10 +191,11 @@ public final class EmailHtmlBuilder {
             "<h3 style='margin:20px 0 8px;font-size:15px;color:" + tituloCor + ";text-transform:uppercase;" +
             "letter-spacing:.05em;'>" + tituloTxt + "</h3>" +
             tabelaFinanceira(
-                linhaSaldo("Motivo",         motivo,                                              COR_TEXTO),
-                linhaSaldo("Saldo anterior", String.format("T$ %.2f", saldoAnterior),             COR_MUTED),
-                linhaSaldo("Movimentação",   sinal + String.format("T$ %.2f", movimentacao),      corMov),
-                linhaSaldo("Saldo atual",    String.format("T$ %.2f", saldoAtual),                COR_PRIMARIA)
+                linhaSaldo("Tipo de movimentação", motivo,                                         COR_TEXTO),
+                linhaSaldo("Saldo anterior",       String.format("T$ %.2f", saldoAnterior),        COR_MUTED),
+                linhaSaldo("Movimentação",          sinal + String.format(" T$ %.2f", movimentacao), corMov),
+                linhaSaldo("Saldo atual",           String.format("T$ %.2f", saldoAtual),          COR_PRIMARIA),
+                linhaSaldo("Data e hora",           dataFmt,                                       COR_MUTED)
             ) +
             paragrafo("Qualquer dúvida, entre em contato pelo e-mail " +
                 "<strong>bibliotroca.noreply@gmail.com</strong>.");

@@ -94,7 +94,8 @@ public class LivroService {
             throw new RuntimeException("Saldo insuficiente T$" + preco);
         }
 
-        comprador.setSaldoTokens(comprador.getSaldoTokens() - preco);
+        double saldoAntes = comprador.getSaldoTokens();
+        comprador.setSaldoTokens(saldoAntes - preco);
 
         pedidoService.registrarPedido(comprador, livro);
 
@@ -116,6 +117,19 @@ public class LivroService {
             log.error("Falha ao enviar e-mail de compra para {}: {}", comprador.getEmail(), e.getMessage());
         }
 
+        // E-mail de atualização de saldo (débito da compra)
+        try {
+            emailService.enviarHtml(
+                    comprador.getEmail(),
+                    "Atualização de saldo — Bibliotroca",
+                    EmailHtmlBuilder.atualizacaoSaldo(
+                            comprador.getNome(), saldoAntes, preco,
+                            comprador.getSaldoTokens(), "Compra: " + livro.getTitulo(),
+                            false, LocalDateTime.now()));
+        } catch (Exception e) {
+            log.error("Falha ao enviar e-mail de saldo para {}: {}", comprador.getEmail(), e.getMessage());
+        }
+
         gamificacaoService.xpCompra(comprador.getId());
     }
 
@@ -129,9 +143,24 @@ public class LivroService {
 
         Cliente vendedor = livro.getVendedor();
         if (vendedor != null) {
-            vendedor.setSaldoTokens(vendedor.getSaldoTokens() + TOKEN_REWARD_VENDEDOR);
+            double saldoAntes = vendedor.getSaldoTokens() != null ? vendedor.getSaldoTokens() : 0.0;
+            vendedor.setSaldoTokens(saldoAntes + TOKEN_REWARD_VENDEDOR);
             clienteRepository.save(vendedor);
             gamificacaoService.xpLivroAprovado(vendedor.getId());
+
+            // E-mail de atualização de saldo (crédito da recompensa)
+            try {
+                emailService.enviarHtml(
+                        vendedor.getEmail(),
+                        "Atualização de saldo — Bibliotroca",
+                        EmailHtmlBuilder.atualizacaoSaldo(
+                                vendedor.getNome(), saldoAntes, TOKEN_REWARD_VENDEDOR,
+                                vendedor.getSaldoTokens(),
+                                "Recompensa pela aprovação do livro: " + livro.getTitulo(),
+                                true, LocalDateTime.now()));
+            } catch (Exception e) {
+                log.error("Falha ao enviar e-mail de saldo para vendedor {}: {}", vendedor.getEmail(), e.getMessage());
+            }
         }
 
         return livroRepository.save(livro);

@@ -87,7 +87,8 @@ public class LivroAdminService {
 
         if (vendedor != null) {
             // Creditar tokens ao vendedor apenas na aprovação
-            vendedor.setSaldoTokens(vendedor.getSaldoTokens() + TOKEN_REWARD);
+            double saldoAntes = vendedor.getSaldoTokens() != null ? vendedor.getSaldoTokens() : 0.0;
+            vendedor.setSaldoTokens(saldoAntes + TOKEN_REWARD);
             clienteRepository.save(vendedor);
 
             // Gamificação: XP ao vendedor
@@ -104,6 +105,20 @@ public class LivroAdminService {
                         EmailHtmlBuilder.livroAprovado(vendedor.getNome(), anuncio.getTitulo(), TOKEN_REWARD));
             } catch (Exception e) {
                 log.error("Falha ao enviar e-mail de aprovação para vendedor {}: {}", vendedor.getEmail(), e.getMessage());
+            }
+
+            // E-mail de atualização de saldo (crédito da recompensa de aprovação)
+            try {
+                emailService.enviarHtml(
+                        vendedor.getEmail(),
+                        "Atualização de saldo — Bibliotroca",
+                        EmailHtmlBuilder.atualizacaoSaldo(
+                                vendedor.getNome(), saldoAntes, TOKEN_REWARD,
+                                vendedor.getSaldoTokens(),
+                                "Recompensa pela aprovação do livro: " + anuncio.getTitulo(),
+                                true, LocalDateTime.now()));
+            } catch (Exception e) {
+                log.error("Falha ao enviar e-mail de saldo para vendedor {}: {}", vendedor.getEmail(), e.getMessage());
             }
         }
 

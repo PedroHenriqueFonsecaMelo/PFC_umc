@@ -1,5 +1,6 @@
 package umc.exs.service.core.bussiness;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +52,8 @@ public class LivroCompraService {
             throw new RuntimeException("Saldo insuficiente");
         }
 
-        comprador.setSaldoTokens(comprador.getSaldoTokens() - livro.getPrecoAprovado());
+        double saldoAntes = comprador.getSaldoTokens();
+        comprador.setSaldoTokens(saldoAntes - livro.getPrecoAprovado());
 
         // Registra pedido ANTES de deletar o livro
         pedidoService.registrarPedido(comprador, livro);
@@ -69,10 +71,23 @@ public class LivroCompraService {
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de compra para {}: {}", comprador.getEmail(), e.getMessage());
         }
-        
+
+        // E-mail de atualização de saldo (débito da compra)
+        try {
+            emailService.enviarHtml(
+                    comprador.getEmail(),
+                    "Atualização de saldo — Bibliotroca",
+                    EmailHtmlBuilder.atualizacaoSaldo(
+                            comprador.getNome(), saldoAntes, livro.getPrecoAprovado(),
+                            comprador.getSaldoTokens(), "Compra: " + livro.getTitulo(),
+                            false, LocalDateTime.now()));
+        } catch (Exception e) {
+            log.error("Falha ao enviar e-mail de saldo para {}: {}", comprador.getEmail(), e.getMessage());
+        }
+
         logAuditoria.registrarLog("COMPRA_LIVRO_SUCESSO", comprador.getId(), comprador.getEmail(),
                 "Livro " + livroId + " T$" + livro.getPrecoAprovado());
-        
+
         gamificacaoService.xpCompra(comprador.getId());
     }
 
@@ -124,6 +139,7 @@ public class LivroCompraService {
         }
 
         // 4. Executa as compras
+        double saldoAnteriorCarrinho = comprador.getSaldoTokens();
         List<CarrinhoCompraResponseDTO.ItemResultado> comprados = new ArrayList<>();
         double totalGasto = 0.0;
 
@@ -188,6 +204,20 @@ public class LivroCompraService {
                                 comprador.getSaldoTokens(), baseUrl));
             } catch (Exception e) {
                 log.error("Falha ao enviar e-mail de carrinho para {}: {}", comprador.getEmail(), e.getMessage());
+            }
+
+            // E-mail de atualização de saldo (débito consolidado do carrinho)
+            try {
+                emailService.enviarHtml(
+                        comprador.getEmail(),
+                        "Atualização de saldo — Bibliotroca",
+                        EmailHtmlBuilder.atualizacaoSaldo(
+                                comprador.getNome(), saldoAnteriorCarrinho, totalGasto,
+                                comprador.getSaldoTokens(),
+                                "Compra de " + comprados.size() + " livro(s) via carrinho",
+                                false, LocalDateTime.now()));
+            } catch (Exception e) {
+                log.error("Falha ao enviar e-mail de saldo para {}: {}", comprador.getEmail(), e.getMessage());
             }
         }
 

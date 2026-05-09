@@ -169,7 +169,7 @@ public class PedidoService {
                                                 valorEstorno,
                                                 comprador.getSaldoTokens(),
                                                 "Estorno — pedido #" + pedidoId + " cancelado",
-                                                true));
+                                                true, LocalDateTime.now()));
                         } catch (Exception e) {
                                 log.error("Falha ao enviar e-mail de estorno para {}: {}", comprador.getEmail(), e.getMessage());
                         }

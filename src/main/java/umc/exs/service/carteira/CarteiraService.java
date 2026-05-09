@@ -71,7 +71,7 @@ public class CarteiraService {
                     "Atualização de saldo — Bibliotroca",
                     EmailHtmlBuilder.atualizacaoSaldo(
                             cliente.getNome(), saldoAnterior, valor,
-                            cliente.getSaldoTokens(), motivoEmail, true));
+                            cliente.getSaldoTokens(), motivoEmail, true, LocalDateTime.now()));
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de atualização de saldo para {}: {}", cliente.getEmail(), e.getMessage());
         }
@@ -115,7 +115,7 @@ public class CarteiraService {
                     "Atualização de saldo — Bibliotroca",
                     EmailHtmlBuilder.atualizacaoSaldo(
                             cliente.getNome(), saldoAtual, valor,
-                            cliente.getSaldoTokens(), descricao, false));
+                            cliente.getSaldoTokens(), descricao, false, LocalDateTime.now()));
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de débito de tokens para {}: {}", cliente.getEmail(), e.getMessage());
         }
@@ -175,7 +175,8 @@ public class CarteiraService {
                         "Atualização de saldo — Bibliotroca",
                         EmailHtmlBuilder.atualizacaoSaldo(
                                 cliente.getNome(), saldoAnterior, valorPix,
-                                cliente.getSaldoTokens(), "Recarga via PIX confirmada", true));
+                                cliente.getSaldoTokens(), "Recarga via PIX confirmada", true,
+                                LocalDateTime.now()));
             } catch (Exception e) {
                 log.error("Falha ao enviar e-mail de PIX confirmado para {}: {}", cliente.getEmail(), e.getMessage());
             }

@@ -290,7 +290,8 @@ public class LivroService {
 
         if (vendedor != null) {
             // Creditar tokens ao vendedor apenas na aprovação
-            vendedor.setSaldoTokens(vendedor.getSaldoTokens() + TOKEN_REWARD);
+            double saldoAntes = vendedor.getSaldoTokens() != null ? vendedor.getSaldoTokens() : 0.0;
+            vendedor.setSaldoTokens(saldoAntes + TOKEN_REWARD);
             clienteRepository.save(vendedor);
 
             // Gamificação: XP ao vendedor
@@ -307,6 +308,20 @@ public class LivroService {
                         EmailHtmlBuilder.livroAprovado(vendedor.getNome(), anuncio.getTitulo(), TOKEN_REWARD));
             } catch (Exception e) {
                 log.error("Falha ao enviar e-mail de aprovação para vendedor {}: {}", vendedor.getEmail(), e.getMessage());
+            }
+
+            // E-mail de atualização de saldo (crédito da recompensa de aprovação)
+            try {
+                emailService.enviarHtml(
+                        vendedor.getEmail(),
+                        "Atualização de saldo — Bibliotroca",
+                        EmailHtmlBuilder.atualizacaoSaldo(
+                                vendedor.getNome(), saldoAntes, TOKEN_REWARD,
+                                vendedor.getSaldoTokens(),
+                                "Recompensa pela aprovação do livro: " + anuncio.getTitulo(),
+                                true, LocalDateTime.now()));
+            } catch (Exception e) {
+                log.error("Falha ao enviar e-mail de saldo para vendedor {}: {}", vendedor.getEmail(), e.getMessage());
             }
         }
 
@@ -385,7 +400,8 @@ public class LivroService {
         // Registra pedido ANTES de deletar o livro
         pedidoService.registrarPedido(comprador, anuncio);
 
-        comprador.setSaldoTokens(comprador.getSaldoTokens() - preco);
+        double saldoAntes = comprador.getSaldoTokens();
+        comprador.setSaldoTokens(saldoAntes - preco);
         livroRepository.delete(anuncio);
         clienteRepository.save(comprador);
 
@@ -400,6 +416,19 @@ public class LivroService {
                     EmailHtmlBuilder.compraSucesso(comprador.getNome(), anuncio.getTitulo(), preco, comprador.getSaldoTokens(), baseUrl));
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de compra para {}: {}", comprador.getEmail(), e.getMessage());
+        }
+
+        // E-mail de atualização de saldo (débito da compra)
+        try {
+            emailService.enviarHtml(
+                    comprador.getEmail(),
+                    "Atualização de saldo — Bibliotroca",
+                    EmailHtmlBuilder.atualizacaoSaldo(
+                            comprador.getNome(), saldoAntes, preco,
+                            comprador.getSaldoTokens(), "Compra: " + anuncio.getTitulo(),
+                            false, LocalDateTime.now()));
+        } catch (Exception e) {
+            log.error("Falha ao enviar e-mail de saldo para {}: {}", comprador.getEmail(), e.getMessage());
         }
 
         // Gamificação: XP para o comprador
@@ -494,6 +523,7 @@ public class LivroService {
         }
 
         // 4. Executa as compras
+        double saldoAnteriorCarrinho = comprador.getSaldoTokens();
         List<CarrinhoCompraResponseDTO.ItemResultado> comprados = new ArrayList<>();
         double totalGasto = 0.0;
 
@@ -569,6 +599,20 @@ public class LivroService {
                                 comprador.getSaldoTokens(), baseUrl));
             } catch (Exception e) {
                 log.error("Falha ao enviar e-mail de carrinho para {}: {}", comprador.getEmail(), e.getMessage());
+            }
+
+            // E-mail de atualização de saldo (débito consolidado do carrinho)
+            try {
+                emailService.enviarHtml(
+                        comprador.getEmail(),
+                        "Atualização de saldo — Bibliotroca",
+                        EmailHtmlBuilder.atualizacaoSaldo(
+                                comprador.getNome(), saldoAnteriorCarrinho, totalGasto,
+                                comprador.getSaldoTokens(),
+                                "Compra de " + comprados.size() + " livro(s) via carrinho",
+                                false, LocalDateTime.now()));
+            } catch (Exception e) {
+                log.error("Falha ao enviar e-mail de saldo para {}: {}", comprador.getEmail(), e.getMessage());
             }
         }
 
