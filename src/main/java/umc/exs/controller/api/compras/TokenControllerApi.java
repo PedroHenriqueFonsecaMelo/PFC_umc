@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,8 +17,8 @@ import com.mercadopago.resources.payment.Payment;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.DTOs.compra.CompraTokensRequestDTO;
 import umc.exs.design.strategy.impl.PagamentoPixStrategy;
+import umc.exs.dtos.compra.CompraTokensRequestDTO;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.service.core.cliente.ClienteService;
@@ -39,18 +40,17 @@ public class TokenControllerApi {
     private String accessToken;
 
     @PostMapping("/comprar")
-    public ResponseEntity<?> comprar(
+    public ResponseEntity<CompraTokensRequestDTO> comprar(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody @Valid CompraTokensRequestDTO request) {
 
         if (userDetails == null) {
-            return ResponseEntity.status(401).body("Você precisa estar logado.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         try {
             Cliente cliente = clienteService.buscarEntidadePorEmail(userDetails.getUsername());
 
-            // Injeta o e-mail do pagador (necessário para o MP)
             request.setEmailPagador(cliente.getEmail());
 
             boolean sucesso = pixStrategy.processar(request.getValor(), request);
@@ -58,37 +58,45 @@ public class TokenControllerApi {
             if (!sucesso) {
                 logAuditoriaService.registrarLog("PIX_FALHA", cliente.getId(),
                         cliente.getEmail(), "Geração de PIX falhou.");
-                return ResponseEntity.badRequest().body("Não foi possível gerar o PIX. Tente novamente.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
 
-            // Armazena o valor em TOKENS (R$ × 2) na transação pendente
             double tokens = request.getValor() * TOKENS_POR_REAL;
+
             clienteService.registrarTransacaoPendente(
                     cliente.getId(), tokens, request.getPagamentoId());
 
             log.info("PIX pendente — cliente {} | R$ {} → T$ {} | ID {}",
                     cliente.getEmail(), request.getValor(), tokens, request.getPagamentoId());
 
-            return ResponseEntity.ok(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(request);
 
         } catch (Exception e) {
             log.error("Erro ao processar compra PIX: ", e);
-            return ResponseEntity.internalServerError().body("Erro interno ao gerar o PIX.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/historico")
-    public ResponseEntity<List<Transacao>> buscarHistorico(@AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) return ResponseEntity.status(401).build();
-        return ResponseEntity.ok(clienteService.listarHistoricoTransacoes(userDetails.getUsername()));
+    public ResponseEntity<List<Transacao>> buscarHistorico(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<Transacao> historico =
+                clienteService.listarHistoricoTransacoes(userDetails.getUsername());
+
+        return ResponseEntity.ok(historico);
     }
 
     @GetMapping("/verificar-pagamento/{pagamentoId}")
-    public ResponseEntity<?> verificarPagamento(@PathVariable String pagamentoId) {
+    public ResponseEntity<Map<String, String>> verificarPagamento(
+            @PathVariable String pagamentoId) {
+
         boolean pago = clienteService.verificarSeFoiPago(pagamentoId);
 
-        // Para pagamentos reais do MP ainda pendentes: consulta a API diretamente.
-        // Isso elimina a necessidade de webhook em ambiente de desenvolvimento.
         if (!pago && !pagamentoId.startsWith("SIM-")) {
             try {
                 MercadoPagoConfig.setAccessToken(accessToken);
@@ -105,20 +113,21 @@ public class TokenControllerApi {
             }
         }
 
-        return ResponseEntity.ok(Map.of("status", pago ? "APROVADO" : "PENDENTE"));
+        return ResponseEntity.ok(
+                Map.of("status", pago ? "APROVADO" : "PENDENTE"));
     }
 
-    // ── Webhook do Mercado Pago ──────────────────────────────────────
-    // Configure esta URL no painel do MP: https://seu-dominio.com/api/tokens/webhook
     @PostMapping("/webhook")
-    public ResponseEntity<?> webhookMercadoPago(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<Void> webhookMercadoPago(
+            @RequestBody Map<String, Object> body) {
+
         try {
             String type = (String) body.get("type");
+
             if (!"payment".equals(type)) {
                 return ResponseEntity.ok().build();
             }
 
-            @SuppressWarnings("unchecked")
             Map<String, Object> data = (Map<String, Object>) body.get("data");
             String paymentId = String.valueOf(data.get("id"));
 
@@ -137,19 +146,25 @@ public class TokenControllerApi {
 
         } catch (Exception e) {
             log.error("Erro ao processar webhook do Mercado Pago: {}", e.getMessage());
-            return ResponseEntity.ok().build(); // sempre 200 para o MP não reenviar
+            return ResponseEntity.ok().build();
         }
     }
 
-    // Mantido apenas para testes em desenvolvimento (sem webhook acessível)
     @GetMapping("/simular-webhook/{pagamentoId}")
-    public ResponseEntity<?> simularWebhook(@PathVariable String pagamentoId) {
+    public ResponseEntity<Map<String, String>> simularWebhook(
+            @PathVariable String pagamentoId) {
+
         log.info("Simulação de aprovação PIX: {}", pagamentoId);
+
         try {
             clienteService.aprovarPagamento(pagamentoId);
-            return ResponseEntity.ok(Map.of("mensagem", "Pagamento aprovado via simulação!"));
+
+            return ResponseEntity.ok(
+                    Map.of("mensagem", "Pagamento aprovado via simulação!"));
+
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("erro", e.getMessage()));
         }
     }
 }

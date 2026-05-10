@@ -2,9 +2,11 @@ package umc.exs.controller.api.control;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,53 +29,65 @@ public class NotificacaoController {
     private final NotificacaoDashboardRepository notificacaoRepository;
     private final ClienteRepository clienteRepository;
 
+    // Constante para evitar duplicação de literais
+    private static final String CLIENTE_NAO_ENCONTRADO = "Cliente não encontrado";
+
     /** Lista todas as notificações do usuário (não lidas primeiro). */
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> listar(@AuthenticationPrincipal UserDetails user) {
-        if (user == null) return ResponseEntity.status(401).build();
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        
         Cliente cliente = clienteRepository.findByEmail(user.getUsername())
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+                .orElseThrow(() -> new RuntimeException(CLIENTE_NAO_ENCONTRADO));
 
+        // Uso de .toList() para Java 16+ (Lista imutável)
         List<Map<String, Object>> notificacoes = notificacaoRepository
                 .findByClienteIdOrderByDataCriacaoDesc(cliente.getId())
                 .stream()
                 .map(this::toMap)
-                .collect(Collectors.toList());
+                .toList();
 
         return ResponseEntity.ok(notificacoes);
     }
 
     /** Lista notificações não lidas + total. */
     @GetMapping("/nao-lidas")
-    public ResponseEntity<?> naoLidas(@AuthenticationPrincipal UserDetails user) {
-        if (user == null) return ResponseEntity.status(401).build();
+    public ResponseEntity<Map<String, Object>> naoLidas(@AuthenticationPrincipal UserDetails user) {
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        
         Cliente cliente = clienteRepository.findByEmail(user.getUsername())
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+                .orElseThrow(() -> new RuntimeException(CLIENTE_NAO_ENCONTRADO));
 
         long total = notificacaoRepository.countByClienteIdAndLidaFalse(cliente.getId());
+        
         List<Map<String, Object>> lista = notificacaoRepository
                 .findByClienteIdAndLidaFalseOrderByDataCriacaoDesc(cliente.getId())
                 .stream()
                 .map(this::toMap)
-                .collect(Collectors.toList());
+                .toList();
 
         return ResponseEntity.ok(Map.of("total", total, "notificacoes", lista));
     }
 
     /** Marca uma notificação como lida. */
     @PatchMapping("/{id}/lida")
-    public ResponseEntity<?> marcarLida(
-            @PathVariable Long id,
+    public ResponseEntity<Map<String, String>> marcarLida(
+            @PathVariable @NonNull Long id,
             @AuthenticationPrincipal UserDetails user) {
-        if (user == null) return ResponseEntity.status(401).build();
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        
         Cliente cliente = clienteRepository.findByEmail(user.getUsername())
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+                .orElseThrow(() -> new RuntimeException(CLIENTE_NAO_ENCONTRADO));
 
         NotificacaoDashboard notificacao = notificacaoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notificação não encontrada"));
 
-        if (!notificacao.getCliente().getId().equals(cliente.getId())) {
-            return ResponseEntity.status(403).body(Map.of("erro", "Acesso negado."));
+        // Null Safety: Garantindo que o ID do cliente não é nulo antes da comparação
+        Long clienteIdLogado = Objects.requireNonNull(cliente.getId(), "ID do cliente logado está nulo");
+        Long clienteIdNotificacao = Objects.requireNonNull(notificacao.getCliente().getId(), "ID do dono da notificação está nulo");
+
+        if (!clienteIdNotificacao.equals(clienteIdLogado)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("erro", "Acesso negado."));
         }
 
         notificacao.setLida(true);

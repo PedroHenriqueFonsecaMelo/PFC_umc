@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.DTOs.user.CartaoDTO;
+import umc.exs.dtos.user.CartaoDTO;
 import umc.exs.mappers.CartaoMapper;
 import umc.exs.mappers.DateMapper;
 import umc.exs.model.entidades.usuario.Cartao;

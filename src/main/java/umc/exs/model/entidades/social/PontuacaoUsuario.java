@@ -88,6 +88,9 @@ public class PontuacaoUsuario {
                     this.xpAvaliacoes = 0;
                 this.xpAvaliacoes += quantidade;
             }
+            default -> {
+                // Categoria desconhecida, não adiciona XP
+            }
         }
     }
 }

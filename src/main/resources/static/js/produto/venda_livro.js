@@ -4,7 +4,9 @@
 
 (async function () {
     try {
-        const res = await fetch("/clientes/meu-perfil-json", { credentials: "include" });
+        const res = await fetch("/clientes/meu-perfil-json", {
+            credentials: "include",
+        });
         if (!res.ok) return;
         const c = await res.json();
         const el = document.getElementById("navSaldo");
@@ -70,7 +72,14 @@ function criarCard(id, index) {
 function adicionarLivro() {
     if (livros.length >= MAX) return;
     const id = nextId++;
-    livros.push({ id, isbn: "", titulo: "", autor: "", arquivos: [], quantidadedeFotos: 0 });
+    livros.push({
+        id,
+        isbn: "",
+        titulo: "",
+        autor: "",
+        arquivos: [],
+        quantidadedeFotos: 0,
+    });
     const index = livros.length;
     const card = criarCard(id, index);
     document.getElementById("livrosContainer").appendChild(card);
@@ -183,8 +192,38 @@ document.getElementById("livrosContainer").addEventListener("input", (e) => {
     if (!el.dataset.field) return;
     const id = Number(el.dataset.id);
     setField(id, el.dataset.field, el.value);
-    if (el.dataset.field === "isbn") buscarIsbn(id, el.value);
+    if (el.dataset.field === "isbn") {
+        debounce(() => {
+            if (el.value.length >= 10) {
+                consultarBackendIsbn(id, el.value);
+            }
+        }, 500);
+    }
 });
+
+async function consultarBackendIsbn(id, isbnBruto) {
+    const isbn = isbnBruto.replace(/\D/g, "");
+    if (isbn.length < 10) return;
+
+    const spinner = document.getElementById(`spinner-${id}`);
+    spinner.classList.add("active");
+
+    try {
+        const res = await fetch(`/api/livros/isbn?isbn=${isbn}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        document.getElementById(`titulo-${id}`).value = data.titulo;
+        document.getElementById(`autor-${id}`).value = data.autor;
+
+        setField(id, "titulo", data.titulo);
+        setField(id, "autor", data.autor);
+        setField(id, "idioma", data.idioma);
+    } finally {
+        spinner.classList.remove("active");
+    }
+}
 
 document.getElementById("livrosContainer").addEventListener("change", (e) => {
     const el = e.target;
@@ -193,7 +232,10 @@ document.getElementById("livrosContainer").addEventListener("change", (e) => {
     handleFotos(id, el.files);
 });
 
-document.getElementById("btnAdicionar").addEventListener("click", adicionarLivro);
+document.getElementById("btnAdicionar").addEventListener(
+    "click",
+    adicionarLivro,
+);
 
 document.getElementById("formVenda").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -221,14 +263,23 @@ document.getElementById("formVenda").addEventListener("submit", async (e) => {
             titulo: l.titulo.trim(),
             autor: l.autor.trim(),
             isbn: l.isbn.replace(/\D/g, ""),
+            idioma: null,
             quantidadedeFotos: l.quantidadedeFotos,
         })),
     };
-    formData.append("loteDados", new Blob([JSON.stringify(loteJson)], { type: "application/json" }));
-    livros.forEach((l) => l.arquivos.forEach((f) => formData.append("fotos", f)));
+    formData.append(
+        "loteDados",
+        new Blob([JSON.stringify(loteJson)], { type: "application/json" }),
+    );
+    livros.forEach((l) =>
+        l.arquivos.forEach((f) => formData.append("fotos", f))
+    );
 
     try {
-        const res = await fetch("/api/livros/lotes/vender", { method: "POST", body: formData });
+        const res = await fetch("/api/livros/lotes/vender", {
+            method: "POST",
+            body: formData,
+        });
         if (res.ok) {
             mostrarOk("Lote enviado! Nossa curadoria avaliará em breve.");
             setTimeout(() => window.location.href = "/?enviado=1", 2000);
@@ -239,7 +290,9 @@ document.getElementById("formVenda").addEventListener("submit", async (e) => {
             btnSubmit.textContent = "Enviar para avaliação";
         }
     } catch (_) {
-        mostrarErro("Erro de conexão. Verifique sua internet e tente novamente.");
+        mostrarErro(
+            "Erro de conexão. Verifique sua internet e tente novamente.",
+        );
         btnSubmit.disabled = false;
         btnSubmit.textContent = "Enviar para avaliação";
     }

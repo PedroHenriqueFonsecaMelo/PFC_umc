@@ -1,4 +1,4 @@
-package umc.exs.DTOs.user;
+package umc.exs.dtos.user;
 
 import java.time.YearMonth;
 import org.springframework.format.annotation.DateTimeFormat;

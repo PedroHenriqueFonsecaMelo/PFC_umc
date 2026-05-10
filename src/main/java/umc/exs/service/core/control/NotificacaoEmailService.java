@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
-import umc.exs.DTOs.admin.EmailDestinatarioDTO;
-import umc.exs.DTOs.admin.EmailDisparoDTO;
+
+import umc.exs.dtos.admin.EmailDestinatarioDTO;
+import umc.exs.dtos.admin.EmailDisparoDTO;
 import umc.exs.model.entidades.social.PontuacaoUsuario;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.usuario.ClienteRepository;
@@ -90,7 +91,8 @@ public class NotificacaoEmailService {
 
     // ── Disparar ou agendar ──────────────────────────────────────────────────
 
-    public String dispararOuAgendar(EmailDisparoDTO dto) {
+    @SuppressWarnings("null")
+public String dispararOuAgendar(EmailDisparoDTO dto) {
         log.info("dispararOuAgendar — filtro='{}', limite={}, assunto='{}'",
                 dto.getFiltro(), dto.getLimite(), dto.getAssunto());
 

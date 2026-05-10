@@ -1,6 +1,7 @@
 package umc.exs.service.email;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -32,7 +33,8 @@ public class EmailService {
     }
 
     /** Envia e-mail com corpo HTML. */
-    public void enviarHtml(String destino, String assunto, String html) throws MessagingException {
+    @SuppressWarnings("null")
+    public void enviarHtml(@NonNull String destino, @NonNull String assunto, @NonNull String html) throws MessagingException {
         MimeMessage mensagem = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mensagem, "UTF-8");
         helper.setTo(destino);

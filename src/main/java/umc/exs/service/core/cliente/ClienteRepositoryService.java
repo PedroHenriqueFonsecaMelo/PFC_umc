@@ -7,7 +7,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import umc.exs.DTOs.user.EnderecoDTO;
+import umc.exs.dtos.user.EnderecoDTO;
 import umc.exs.mappers.EnderecoMapper;
 import umc.exs.model.entidades.logic.RecuperacaoSenha;
 import umc.exs.model.entidades.usuario.Cliente;

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import umc.exs.DTOs.auth.LoginDTO;
+import umc.exs.dtos.auth.LoginDTO;
 import umc.exs.model.entidades.logic.LogAuditoria;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
@@ -29,6 +29,12 @@ import umc.exs.service.log.LogAuditoriaService;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+/**
+ * Controller web painel admin (login/logout/painel).
+ * Gerencia /admin/login, /painel, /sair com JWT + SecurityContext.
+ * Valida ROLE_ADMIN, PasswordEncoder, retorna templates Thymeleaf.
+ * Cookie JWT HTTP-only para sessões admin.
+ */
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/admin")
@@ -38,6 +44,7 @@ public class AdminViewController {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final LogAuditoriaService logAuditoriaService;
+    private static final String ADMIN_LOGIN = "admin/admin_login";
 
     /**
      * Exibe página login admin.
@@ -48,11 +55,10 @@ public class AdminViewController {
      */
     @GetMapping("/login")
     public String loginPage(Model model) {
-
         if (!model.containsAttribute("loginData")) {
             model.addAttribute("loginData", new LoginDTO());
         }
-        return "admin/admin_login";
+        return ADMIN_LOGIN;
     }
 
     /**
@@ -63,7 +69,6 @@ public class AdminViewController {
      */
     @PostMapping("/login")
     public String processLogin(
-
             @ModelAttribute("loginData") LoginDTO loginDTO,
             @RequestParam String email,
             @RequestParam String senha,
@@ -71,73 +76,57 @@ public class AdminViewController {
             HttpServletResponse response) {
 
         try {
-            // Tenta carregar o usuário pelo email
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            // Verifica se é um admin
-            if (!userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+            // CORREÇÃO SONARLINT: Substituição de !anyMatch por noneMatch
+            if (userDetails.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ADMIN"))) {
                 model.addAttribute("erro", "Acesso restrito a administradores.");
-                return "admin/admin_login";
+                return ADMIN_LOGIN;
             }
 
-            // Verifica a senha
             if (!passwordEncoder.matches(senha, userDetails.getPassword())) {
                 model.addAttribute("erro", "E-mail ou senha inválidos.");
-                return "admin/admin_login";
+                return ADMIN_LOGIN;
             }
 
-            // Gera o token JWT
             String token = jwtUtil.generateToken(email);
             jwtUtil.addTokenCookie(response, token);
 
-            // Configura a autenticação no contexto de segurança
             Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null,
                     userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-            // Armazena o token no modelo para ser usado pelo JavaScript
             model.addAttribute("token", token);
             return "redirect:/admin/painel";
 
         } catch (UsernameNotFoundException e) {
             model.addAttribute("erro", "E-mail ou senha inválidos.");
-            return "admin/admin_login";
-
+            return ADMIN_LOGIN;
         }
     }
 
     /**
-     * DESCRIÇÃO DO ARQUIVO:
-     * Controller web painel admin (login/logout/painel).
-     * Gerencia /admin/login, /painel, /sair com JWT + SecurityContext.
-     * Valida ROLE_ADMIN, PasswordEncoder, retorna templates Thymeleaf.
-     * Cookie JWT HTTP-only para sessões admin.
-     */
-
-    /**
-     * Exibe painel admin HTML.
-     * Apenas template painel_admin.html.
-     * Sem lógica adicional.
+     * Exibe painel admin HTML básico.
+     * 
+     * @return admin/painel_admin.html
      */
     @GetMapping("/painel")
     public String painelAdmin() {
-
         return "admin/painel_admin";
     }
 
     /**
      * Exibe dashboard administrativa com métricas e gráficos.
+     * 
+     * @return admin/dashboard.html
      */
     @GetMapping("/dashboard")
     public String dashboard() {
-
         return "admin/dashboard";
     }
 
     /**
-     * Logout admin.
-     * Clear JWT cookie + SecurityContext.
-     * Redirect admin/login?logout.
+     * Exibe página de auditoria com filtros.
      */
     @GetMapping("/audit")
     public String auditoria(
@@ -161,6 +150,9 @@ public class AdminViewController {
         return "admin/auditoria";
     }
 
+    /**
+     * Exporta logs de auditoria para formato CSV.
+     */
     @GetMapping("/audit/exportar-csv")
     @ResponseBody
     public ResponseEntity<byte[]> exportarCSV(
@@ -174,7 +166,7 @@ public class AdminViewController {
         byte[] bytes = csv.getBytes(StandardCharsets.UTF_8);
 
         logAuditoriaService.registrarLog("EXPORTACAO_CSV", null, "admin",
-            "Exportação CSV de auditoria — " + logs.size() + " registros");
+                "Exportação CSV de auditoria — " + logs.size() + " registros");
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"auditoria.csv\"")
@@ -192,9 +184,11 @@ public class AdminViewController {
         return "admin/cupons";
     }
 
+    /**
+     * Logout admin: limpa cookie JWT e SecurityContext.
+     */
     @GetMapping("/sair")
     public String logout(HttpServletResponse response) {
-
         jwtUtil.clearJwtCookie(response);
         SecurityContextHolder.clearContext();
         return "redirect:/clientes/login?logout";

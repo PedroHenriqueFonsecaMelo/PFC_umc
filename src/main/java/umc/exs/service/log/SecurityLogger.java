@@ -9,15 +9,15 @@ public class SecurityLogger {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityLogger.class);
 
-    public void Slogin(String username) {
+    public void loginSuccess(String username) {
         logger.info("AUDIT: LOGIN SUCESSO - Usuário '{}' logado com sucesso.", username);
     }
 
-    public void Flogin(String username, String reason) {
+    public void loginFailure(String username, String reason) {
         logger.warn("AUDIT: LOGIN FALHA - Usuário '{}'. Motivo: {}", username, reason);
     }
 
-    public void CBloqueada(String username) {
+    public void accountBlocked(String username) {
         logger.error("AUDIT: CONTA BLOQUEADA - A conta do usuário '{}' foi bloqueada após falhas.", username);
     }
 }

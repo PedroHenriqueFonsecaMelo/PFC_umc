@@ -50,6 +50,7 @@ public class CupomSchedulerService {
 
     // ── Feature 8: Aviso diário às 09h — cupons a vencer em 7 dias ─────
 
+    @SuppressWarnings("null")
     @Transactional
     @Scheduled(cron = "0 0 9 * * *")
     public void avisarCuponsAVencer() {

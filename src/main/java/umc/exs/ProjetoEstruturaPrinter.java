@@ -4,7 +4,12 @@ import java.io.File;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ProjetoEstruturaPrinter {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProjetoEstruturaPrinter.class);
 
     public static void main(String[] args) {
 
@@ -12,25 +17,27 @@ public class ProjetoEstruturaPrinter {
 
         File raiz = new File("src/main/java/umc/exs");
 
-        System.out.println("DIAGRAMA DE CLASSES E PASTAS DO PROJETO");
-        System.out.println("========================================");
+        logger.info("DIAGRAMA DE CLASSES E PASTAS DO PROJETO");
+        logger.info("========================================");
 
         if (raiz.exists() && raiz.isDirectory()) {
             imprimirNo(raiz, 0, true);
         } else {
-            System.out.println("Erro: Diretorio 'src/main/java/umc/exs' nao encontrado.");
+            logger.error("Erro: Diretorio 'src/main/java/umc/exs' nao encontrado.");
         }
     }
 
     private static void imprimirNo(File arquivo, int nivel, boolean ultimo) {
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < nivel; i++) {
-            System.out.print("│   ");
+            sb.append("│   ");
         }
 
-        System.out.print(ultimo ? "└── " : "├── ");
+        sb.append(ultimo ? "└── " : "├── ");
 
         if (arquivo.isDirectory()) {
-            System.out.println(arquivo.getName() + "/");
+            sb.append(arquivo.getName()).append("/");
+            logger.info(sb.toString());
 
             File[] filhos = arquivo.listFiles();
             if (filhos != null) {
@@ -39,7 +46,8 @@ public class ProjetoEstruturaPrinter {
                 }
             }
         } else {
-            System.out.println(arquivo.getName());
+            sb.append(arquivo.getName());
+            logger.info(sb.toString());
         }
     }
 }

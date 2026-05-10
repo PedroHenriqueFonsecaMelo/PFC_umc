@@ -19,8 +19,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import umc.exs.DTOs.compra.CarrinhoCompraRequestDTO;
-import umc.exs.DTOs.compra.CarrinhoCompraResponseDTO;
+import umc.exs.dtos.compra.carrinho.CarrinhoCompraRequestDTO;
+import umc.exs.dtos.compra.carrinho.CarrinhoCompraResponseDTO;
 import umc.exs.service.core.bussiness.LivroService;
 
 @SpringBootTest
@@ -31,7 +31,7 @@ class LivroControllerApiIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean 
+    @MockitoBean
     private LivroService livroService;
 
     @MockitoBean
@@ -55,11 +55,16 @@ class LivroControllerApiIntegrationTest {
     @SuppressWarnings("null")
     @Test
     void comprarCarrinho_ComAuth_ReturnsOk() throws Exception {
+
         CarrinhoCompraRequestDTO request = new CarrinhoCompraRequestDTO();
         request.setLivroIds(List.of(1L));
 
+        CarrinhoCompraResponseDTO response = new CarrinhoCompraResponseDTO();
+        response.setComprados(List.of());
+        response.setFalhas(List.of());
+
         when(livroService.comprarCarrinho(anyString(), any()))
-                .thenReturn(new CarrinhoCompraResponseDTO());
+                .thenReturn(response);
 
         mockMvc.perform(post("/api/livros/carrinho/comprar")
                 .with(user("user@test.com"))

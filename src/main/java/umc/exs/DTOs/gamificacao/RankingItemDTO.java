@@ -1,4 +1,4 @@
-package umc.exs.DTOs.gamificacao;
+package umc.exs.dtos.gamificacao;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

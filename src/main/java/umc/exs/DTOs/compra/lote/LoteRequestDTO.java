@@ -1,9 +1,9 @@
-package umc.exs.DTOs.compra;
+package umc.exs.dtos.compra.lote;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import umc.exs.DTOs.livro.LivroItemDTO;
+import umc.exs.dtos.livro.LivroItemDTO;
 
 import java.util.List;
 

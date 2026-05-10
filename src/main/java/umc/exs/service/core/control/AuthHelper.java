@@ -1,5 +1,6 @@
 package umc.exs.service.core.control;
 
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,7 +38,8 @@ public class AuthHelper {
      * @param response  cookie
      * @param logAction tipo log
      */
-    public void authenticateAndSetCookie(String email, Long id, HttpServletResponse response, String logAction) {
+    @SuppressWarnings("unused")
+    public void authenticateAndSetCookie(String email, @NonNull Long id, HttpServletResponse response, String logAction) {
         try {
             // 1. Carrega as permissões (Roles/Authorities) do banco
             UserDetails ud = userDetailsService.loadUserByUsername(email);
@@ -51,28 +53,32 @@ public class AuthHelper {
             SecurityContextHolder.getContext().setAuthentication(auth);
 
             // 4. Registra sessão ativa
-            try {
-                Cliente cliente = clienteRepository.findById(id).orElse(null);
-                if (cliente != null) {
-                    String ip = null;
-                    String ua = null;
-                    ServletRequestAttributes attrs =
-                            (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-                    if (attrs != null) {
-                        HttpServletRequest req = attrs.getRequest();
-                        ip = req.getRemoteAddr();
-                        ua = req.getHeader("User-Agent");
-                    }
-                }
-            } catch (Exception ex) {
-                // Não bloqueia o login por falha no registro de sessão
-            }
+            registrarSessaoAtiva(id);
 
             // 5. Auditoria
             logAuditoriaService.registrarLog(logAction, id, email, "Autenticação via JWT concluída com sucesso.");
 
         } catch (UsernameNotFoundException e) {
             logAuditoriaService.registrarLog("AUTENT_FALHA", id, email, "Falha ao carregar detalhes do usuário: " + e.getMessage());
+        }
+    }
+
+    private void registrarSessaoAtiva(Long id) {
+        try {
+            Cliente cliente = clienteRepository.findById(id).orElse(null);
+            if (cliente != null) {
+                // String ip = null;
+                // String ua = null;
+                ServletRequestAttributes attrs =
+                        (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+                if (attrs != null) {
+                    HttpServletRequest req = attrs.getRequest();
+                    // ip = req.getRemoteAddr();
+                    // ua = req.getHeader("User-Agent");
+                }
+            }
+        } catch (Exception ex) {
+            // Não bloqueia o login por falha no registro de sessão
         }
     }
     public void addTokenCookie(HttpServletResponse response, String token) {

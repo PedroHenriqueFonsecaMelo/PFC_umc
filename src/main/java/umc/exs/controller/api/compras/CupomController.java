@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.DTOs.compra.CupomDTO;
+import umc.exs.dtos.compra.cupom.CupomDTO;
 import umc.exs.service.cupom.CupomService;
 
 @RestController
@@ -43,8 +43,14 @@ public class CupomController {
             @RequestParam String codigo,
             @RequestParam Long livroId,
             @AuthenticationPrincipal UserDetails user) {
+
         if (user == null) return ResponseEntity.status(401).build();
-        Map<String, Object> result = cupomService.validarCupom(codigo, user.getUsername(), livroId);
-        return ResponseEntity.ok(result);
+
+        var precoFinal = cupomService.validarCupom(codigo, user.getUsername(), livroId);
+        return ResponseEntity.ok(Map.of(
+                "valido", true,
+                "precoComDesconto", precoFinal
+        ));
     }
+
 }

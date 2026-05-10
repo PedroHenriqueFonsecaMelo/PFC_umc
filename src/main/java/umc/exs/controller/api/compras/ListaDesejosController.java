@@ -5,8 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import umc.exs.DTOs.compra.ListaDesejosDTO;
-import umc.exs.DTOs.compra.ListaDesejosRequestDTO;
+
+import umc.exs.dtos.compra.lote.ListaDesejosDTO;
+import umc.exs.dtos.compra.lote.ListaDesejosRequestDTO;
 import umc.exs.service.core.control.ListaDesejosService;
 
 import java.util.List;

@@ -6,7 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import umc.exs.DTOs.compra.ListaDesejosDTO;
+
+import umc.exs.dtos.compra.lote.ListaDesejosDTO;
 import umc.exs.model.entidades.foundation.ListaDesejos;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.negocios.ListaDesejosRepository;
@@ -83,6 +84,7 @@ public class ListaDesejosService {
      * Notifica via e-mail todos os clientes que têm o ISBN na lista de desejos
      * quando um livro com esse ISBN é aprovado e fica disponível na vitrine.
      */
+    @SuppressWarnings("null")
     @Transactional(readOnly = true)
     public void notificarClientesSeDisponivel(String isbn, String titulo) {
         if (isbn == null || isbn.isBlank()) {
@@ -117,7 +119,7 @@ public class ListaDesejosService {
     }
 
     @Transactional
-    public ListaDesejosDTO togglePreReserva(String emailCliente, Long desejoId) {
+    public ListaDesejosDTO togglePreReserva(String emailCliente, @NonNull Long desejoId) {
         Cliente cliente = clienteRepository.findByEmail(emailCliente)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 

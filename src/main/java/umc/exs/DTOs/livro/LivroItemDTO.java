@@ -1,4 +1,4 @@
-package umc.exs.DTOs.livro;
+package umc.exs.dtos.livro;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,8 +8,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LivroItemDTO {
+
     private String titulo;
     private String autor;
     private String isbn;
+    private String idioma;
     private int quantidadedeFotos;
 }

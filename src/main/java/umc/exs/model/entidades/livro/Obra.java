@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,8 +25,14 @@ public class Obra {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String tituloOriginal; // Ex: "The Hobbit"
+    private String titulo; // Ex: "The Hobbit"
+
     private String autor;
+
+    private String idioma;
+
+    @Column(columnDefinition = "TEXT")
+    private String imageLinksJson;
 
     @OneToMany(mappedBy = "obra")
     @JsonIgnore
@@ -34,4 +41,5 @@ public class Obra {
     @OneToMany(mappedBy = "obra")
     @JsonIgnore
     private List<AvaliacaoLivro> avaliacoes;
+
 }

@@ -37,7 +37,11 @@ public class NotificacaoService {
                     "novoSaldo", novoSaldo,
                     "descricao", descricao != null ? descricao : "",
                     "timestamp", LocalDateTime.now().toString());
-
+                    
+            if (payload.get("clienteId") == null || payload.get("novoSaldo") == null) {
+                log.error("Dados insuficientes para notificação de saldo: clienteId ou novoSaldo nulos.");
+                return;
+            }
             messagingTemplate.convertAndSend("/topic/saldo/" + clienteId, payload);
             log.debug("Notificação de saldo enviada para cliente ID {}: T$ {}", clienteId, novoSaldo);
         } catch (Exception e) {
@@ -56,6 +60,17 @@ public class NotificacaoService {
                 .dataCriacao(LocalDateTime.now())
                 .link(link)
                 .build();
-        return notificacaoDashboardRepository.save(notificacao);
+
+        if (notificacao.getCliente() == null || notificacao.getMensagem() == null) {
+            log.error("Dados insuficientes para criar notificação de dashboard: cliente ou mensagem nulos.");
+            return null;
+        }
+
+        try {
+            return notificacaoDashboardRepository.save(notificacao);
+        } catch (Exception e) {
+            log.error("Falha ao salvar notificação de dashboard para cliente {}: {}", cliente.getId(), e.getMessage());
+            return null;
+        }
     }
 }

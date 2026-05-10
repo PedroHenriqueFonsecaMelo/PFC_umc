@@ -1,4 +1,4 @@
-package umc.exs.DTOs.compra;
+package umc.exs.dtos.compra;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

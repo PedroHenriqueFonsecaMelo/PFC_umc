@@ -1,21 +1,29 @@
 package umc.exs.controller.api.control;
 
 import java.util.Map;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
-import umc.exs.DTOs.auth.LoginDTO;
-import umc.exs.DTOs.auth.SignupDTO;
-import umc.exs.DTOs.user.ClienteDTO;
+import umc.exs.dtos.auth.LoginDTO;
+import umc.exs.dtos.auth.SignupDTO;
+import umc.exs.dtos.user.ClienteDTO;
 import umc.exs.model.entidades.foundation.EmailVerificacao;
 import umc.exs.model.entidades.usuario.Cliente;
+
 import umc.exs.repository.foundation.EmailVerificacaoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+
 import umc.exs.security.JwtUtil;
 import umc.exs.service.core.cliente.ClienteService;
 import umc.exs.service.core.control.AuthHelper;
@@ -32,69 +40,103 @@ public class AuthController {
     private final EmailVerificacaoRepository emailVerificacaoRepository;
     private final ClienteRepository clienteRepository;
 
-    // ── LOGIN ────────────────────────────────────────────────────────
+    private static final String COOKIE_TOKEN = "token";
+
+    // ───────────────────────── LOGIN ─────────────────────────
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginDTO loginDto,
+    public ResponseEntity<Map<String, Object>> login(
+            @Valid @RequestBody LoginDTO loginDto,
             HttpServletResponse response,
-            jakarta.servlet.http.HttpServletRequest request) {
+            HttpServletRequest request) {
+
         try {
-            ClienteDTO cliente = clienteService.autenticarCliente(loginDto.getEmail(), loginDto.getSenha());
+            ClienteDTO cliente = clienteService.autenticarCliente(
+                    loginDto.getEmail(),
+                    loginDto.getSenha());
+
             String token = jwtUtil.generateToken(cliente.getEmail());
             authHelper.addTokenCookie(response, token);
 
-            // Registra sessão ativa (SHA-256 do token)
-            Cliente entidade = clienteRepository.findById(cliente.getId()).orElse(null);
-            if (entidade != null) {
-                String ip = request.getRemoteAddr();
-                String ua = request.getHeader("User-Agent");
-            }
+            String ip = request.getRemoteAddr();
+            String ua = request.getHeader("User-Agent");
 
-            log.info("Login API: {}", cliente.getEmail());
-            return ResponseEntity.ok(Map.of("message", "Login bem-sucedido", "token", token));
+            log.info("Login realizado: email={}, ip={}, userAgent={}",
+                    cliente.getEmail(), ip, ua);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Login bem-sucedido",
+                    COOKIE_TOKEN, token));
+
         } catch (IllegalArgumentException e) {
-            // Mensagem genérica na rota pública — evita enumeração de e-mails
-            return ResponseEntity.status(401).body(Map.of("error", "E-mail ou senha inválidos."));
+            return ResponseEntity.status(401)
+                    .body(Map.of("error", "E-mail ou senha inválidos."));
         }
     }
 
-    // ── LOGOUT ───────────────────────────────────────────────────────
+    // ───────────────────────── LOGOUT ─────────────────────────
+
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(jakarta.servlet.http.HttpServletRequest request,
+    public ResponseEntity<Map<String, Object>> logout(
+            HttpServletRequest request,
             HttpServletResponse response) {
+
         String token = resolveToken(request);
+
         if (token != null) {
+            log.info("Logout executado");
         }
-        // Remove cookie
-        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("token", "");
+
+        Cookie cookie = new Cookie(COOKIE_TOKEN, "");
         cookie.setMaxAge(0);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+
         response.addCookie(cookie);
-        return ResponseEntity.ok(Map.of("mensagem", "Logout realizado com sucesso."));
+
+        return ResponseEntity.ok(Map.of(
+                "mensagem", "Logout realizado com sucesso."));
     }
 
-    private String resolveToken(jakarta.servlet.http.HttpServletRequest request) {
-        jakarta.servlet.http.Cookie[] cookies = request.getCookies();
+    // ───────────────────────── HELPERS ─────────────────────────
+
+    private String resolveToken(HttpServletRequest request) {
+
+        Cookie[] cookies = request.getCookies();
+
         if (cookies != null) {
-            for (jakarta.servlet.http.Cookie c : cookies) {
-                if ("token".equalsIgnoreCase(c.getName())) return c.getValue();
+            for (Cookie c : cookies) {
+                if (COOKIE_TOKEN.equalsIgnoreCase(c.getName())) {
+                    return c.getValue();
+                }
             }
         }
+
         String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")) return header.substring(7);
+
+        if (header != null && header.startsWith("Bearer ")) {
+            return header.substring(7);
+        }
+
         return null;
     }
 
-    // ── VERIFICAR E-MAIL ─────────────────────────────────────────────
+    // ───────────────────────── VERIFICAR EMAIL ─────────────────────────
+
     @GetMapping("/verificar-email")
-    public ResponseEntity<?> verificarEmail(@RequestParam String token) {
+    public ResponseEntity<Map<String, Object>> verificarEmail(@RequestParam String token) {
+
         EmailVerificacao verificacao = emailVerificacaoRepository.findByToken(token).orElse(null);
 
         if (verificacao == null || verificacao.isUsado()) {
-            return ResponseEntity.badRequest().body(Map.of("erro", "Token inválido ou já utilizado."));
+            return ResponseEntity.badRequest().body(Map.of(
+                    "erro", "Token inválido ou já utilizado."));
         }
+
         if (verificacao.isExpirado()) {
-            return ResponseEntity.badRequest().body(Map.of("erro", "Token expirado. Solicite um novo link."));
+            return ResponseEntity.badRequest().body(Map.of(
+                    "erro", "Token expirado. Solicite novo link."));
         }
 
         Cliente cliente = verificacao.getCliente();
@@ -104,42 +146,53 @@ public class AuthController {
         verificacao.setUsado(true);
         emailVerificacaoRepository.save(verificacao);
 
-        log.info("E-mail verificado com sucesso para: {}", cliente.getEmail());
+        log.info("Email verificado: {}", cliente.getEmail());
+
         return ResponseEntity.status(302)
                 .header("Location", "/clientes/login?emailVerificado=ok")
                 .build();
     }
 
-    // ── DEV: verificar e-mail diretamente (apenas profile local) ─────
+    // ───────────────────────── DEV ONLY ─────────────────────────
+
     @Profile("local")
     @GetMapping("/dev/verificar-email/{clienteId}")
-    public ResponseEntity<?> devVerificarEmail(@PathVariable Long clienteId) {
+    public ResponseEntity<Map<String, Object>> devVerificarEmail(@PathVariable @NonNull Long clienteId) {
+
         Cliente cliente = clienteRepository.findById(clienteId).orElse(null);
+
         if (cliente == null) {
             return ResponseEntity.notFound().build();
         }
+
         cliente.setEmailVerificado(true);
         clienteRepository.save(cliente);
-        log.info("[DEV] E-mail do cliente ID {} marcado como verificado.", clienteId);
+
+        log.info("[DEV] Email verificado cliente ID={}", clienteId);
+
         return ResponseEntity.ok(Map.of(
-                "mensagem", "E-mail verificado com sucesso (modo desenvolvimento).",
+                "mensagem", "Email verificado (modo dev)",
                 "clienteId", clienteId,
                 "email", cliente.getEmail()));
     }
 
-    // ── REGISTER ─────────────────────────────────────────────────────
+    // ───────────────────────── REGISTER ─────────────────────────
+
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody SignupDTO signupDTO, HttpServletResponse response) {
+    public ResponseEntity<Map<String, Object>> register(
+            @Valid @RequestBody SignupDTO signupDTO,
+            HttpServletResponse response) {
 
         ClienteDTO clienteSalvo = clienteService.salvarCliente(signupDTO);
 
         String token = jwtUtil.generateToken(clienteSalvo.getEmail());
         authHelper.addTokenCookie(response, token);
 
-        log.info("Novo cliente API: {}", clienteSalvo.getEmail());
+        log.info("Novo cliente registrado: {}", clienteSalvo.getEmail());
+
         return ResponseEntity.status(201).body(Map.of(
                 "message", "Cliente registrado com sucesso",
-                "token", token,
+                COOKIE_TOKEN, token,
                 "cliente", clienteSalvo));
     }
 }

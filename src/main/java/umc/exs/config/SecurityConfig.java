@@ -24,6 +24,8 @@ import umc.exs.security.RateLimitFilter;
 @Configuration
 public class SecurityConfig {
 
+        private static final String ROLE_ADMIN = "ADMIN";
+
         @Value("${app.allowed-origin:http://localhost:5173}")
         private String allowedOrigin;
 
@@ -51,26 +53,39 @@ public class SecurityConfig {
                                                 .contentSecurityPolicy(csp -> csp
                                                                 .policyDirectives(
                                                                                 "default-src 'self'; " +
-                                                                                "style-src 'self' 'unsafe-inline' " +
-                                                                                "https://fonts.googleapis.com " +
-                                                                                "https://cdnjs.cloudflare.com; " +
+                                                                                                "style-src 'self' 'unsafe-inline' "
+                                                                                                +
+                                                                                                "https://fonts.googleapis.com "
+                                                                                                +
+                                                                                                "https://cdnjs.cloudflare.com; "
+                                                                                                +
 
-                                                                                "font-src 'self' " +
-                                                                                "https://fonts.gstatic.com " +
-                                                                                "https://cdnjs.cloudflare.com; " +
+                                                                                                "font-src 'self' " +
+                                                                                                "https://fonts.gstatic.com "
+                                                                                                +
+                                                                                                "https://cdnjs.cloudflare.com; "
+                                                                                                +
 
-                                                                                "script-src 'self' 'unsafe-inline' " +
-                                                                                "https://cdn.jsdelivr.net; " +
+                                                                                                "script-src 'self' 'unsafe-inline' "
+                                                                                                +
+                                                                                                "https://cdn.jsdelivr.net; "
+                                                                                                +
 
-                                                                                "connect-src 'self' " +
-                                                                                "https://www.googleapis.com " +
-                                                                                "https://openlibrary.org " +
-                                                                                "https://viacep.com.br; " +
+                                                                                                "connect-src 'self' " +
+                                                                                                "https://www.googleapis.com "
+                                                                                                +
+                                                                                                "https://openlibrary.org "
+                                                                                                +
+                                                                                                "https://viacep.com.br; "
+                                                                                                +
 
-                                                                                "img-src 'self' data: " +
-                                                                                "https://via.placeholder.com " +
-                                                                                "https://placehold.co " +
-                                                                                "https://images.unsplash.com https:;"))
+                                                                                                "img-src 'self' data: "
+                                                                                                +
+                                                                                                "https://via.placeholder.com "
+                                                                                                +
+                                                                                                "https://placehold.co "
+                                                                                                +
+                                                                                                "https://images.unsplash.com https:;"))
                                                 .frameOptions(frame -> frame.deny())
                                                 .httpStrictTransportSecurity(hsts -> hsts.maxAgeInSeconds(31536000)
                                                                 .includeSubDomains(true))
@@ -98,12 +113,12 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.POST, "/api/blog/*/curtir").authenticated()
                                                 .requestMatchers(HttpMethod.POST, "/api/blog/*/comentarios")
                                                 .authenticated()
-                                                .requestMatchers("/api/blog/**").hasAuthority("ADMIN")
+                                                .requestMatchers("/api/blog/**").hasAuthority(ROLE_ADMIN)
                                                 .requestMatchers(HttpMethod.GET, "/forum/**", "/api/forum/topicos")
                                                 .permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/forum/topicos/**").authenticated()
                                                 .requestMatchers(HttpMethod.DELETE, "/api/forum/**")
-                                                .hasAuthority("ADMIN")
+                                                .hasAuthority(ROLE_ADMIN)
 
                                                 // 4. Rotas da Central de Opiniões (Consulta pública, Salvar
                                                 // autenticado)
@@ -111,7 +126,7 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.POST, "/api/avaliacoes/salvar")
                                                 .authenticated()
                                                 .requestMatchers(HttpMethod.PUT, "/api/avaliacoes/admin/**")
-                                                .hasAuthority("ADMIN")
+                                                .hasAuthority(ROLE_ADMIN)
 
                                                 // 5. Webhook Mercado Pago e simulação de pagamento
                                                 .requestMatchers(HttpMethod.POST, "/api/tokens/webhook").permitAll()
@@ -119,7 +134,7 @@ public class SecurityConfig {
                                                 .permitAll()
 
                                                 // 6. Rotas de Admin e Rotas Autenticadas Genéricas
-                                                .requestMatchers(ADMIN_ROUTES).hasAuthority("ADMIN")
+                                                .requestMatchers(ADMIN_ROUTES).hasAuthority(ROLE_ADMIN)
                                                 .requestMatchers(AUTHENTICATED_ROUTES).authenticated()
 
                                                 // 7. Qualquer outra rota exige login

@@ -54,5 +54,5 @@ public interface PontuacaoUsuarioRepository extends JpaRepository<PontuacaoUsuar
                      @Param("inicio") LocalDateTime inicio,
                      @Param("fim") LocalDateTime fim);
 
-       List<PontuacaoUsuario> findByUltimaAtualizacaoBefore(LocalDateTime data);
+       List<PontuacaoUsuario> findAllByUltimaAtualizacaoBefore(LocalDateTime data);
 }

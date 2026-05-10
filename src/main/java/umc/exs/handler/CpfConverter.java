@@ -22,6 +22,8 @@ public class CpfConverter implements AttributeConverter<String, String> {
     private static final int IV_SIZE = 12;
     private static final int TAG_LENGTH = 128;
 
+    private final SecureRandom random = new SecureRandom();
+
     @Value("${jwt.secret:changeitchangeitchangeitchangeit}")
     private String secretKey;
 
@@ -42,7 +44,7 @@ public class CpfConverter implements AttributeConverter<String, String> {
 
         try {
             byte[] iv = new byte[IV_SIZE];
-            new SecureRandom().nextBytes(iv);
+            random.nextBytes(iv);
 
             Cipher cipher = Cipher.getInstance(ALGORITMO);
             cipher.init(Cipher.ENCRYPT_MODE, getKey(),
@@ -57,7 +59,7 @@ public class CpfConverter implements AttributeConverter<String, String> {
                     + Base64.getEncoder().encodeToString(encrypted);
 
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao criptografar CPF", e);
+            throw new IllegalStateException("Erro ao criptografar CPF", e);
         }
     }
 
@@ -83,7 +85,7 @@ public class CpfConverter implements AttributeConverter<String, String> {
             );
 
         } catch (Exception e) {
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     "Erro ao descriptografar CPF",
                     e
             );

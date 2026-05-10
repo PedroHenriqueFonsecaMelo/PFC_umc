@@ -1,14 +1,18 @@
 package umc.exs.service.core.bussiness;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.DTOs.admin.AdminAprovacaoDTO;
+import umc.exs.dtos.admin.AdminAprovacaoDTO;
+import umc.exs.dtos.livro.LivroDTO;
+import umc.exs.mappers.LivroMapper;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.usuario.Cliente;
@@ -35,174 +39,176 @@ public class LivroAdminService {
     private final ListaDesejosService listaDesejosService;
     private final GamificacaoService gamificacaoService;
 
+    private final LivroMapper livroMapper;
+
     private static final double TOKEN_REWARD = 10.0;
+    private String message = "Livro não encontrado";
 
-    public List<Livro> listarLivrosPendentes() {
-        return livroRepository.findByAprovadoFalse();
+    // ========================= LISTAGENS =========================
+
+    public List<LivroDTO> listarLivrosPendentes() {
+        List<Livro> livros = livroRepository.findByAprovadoFalse();
+        return converterLista(livros);
     }
 
-    public List<Livro> listarLivrosPorLote(Long loteId) {
-        return livroRepository.findByLoteId(loteId);
+    public List<LivroDTO> listarLivrosAprovados() {
+        List<Livro> livros = livroRepository.findByAprovadoTrue();
+        return converterLista(livros);
     }
 
-    /**
-     * Aprova livro admin define preço/estado.
-     * Transfer system, update lote status se completo.
-     * 
-     * @param livroId ID
-     * @param adminId aprovador
-     * @param dto     aprovação
-     */
+    public List<LivroDTO> listarLivrosPorLote(Long loteId) {
+        List<Livro> livros = livroRepository.findByLoteId(loteId);
+        return converterLista(livros);
+    }
+
+    // ========================= APROVAÇÃO =========================
+
     @SuppressWarnings("null")
     @Transactional
-    public Livro aprovarLivro(Long livroId, Long adminId, AdminAprovacaoDTO dto) {
+    public LivroDTO aprovarLivro(Long livroId, Long adminId, AdminAprovacaoDTO dto) {
 
         Livro anuncio = livroRepository.findById(livroId)
-                .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
+                .orElseThrow(() -> new RuntimeException(message));
 
         EstadoLivro estado = EstadoLivro.valueOf(dto.getEstadoAprovado().toString().toUpperCase());
+
         anuncio.setAprovado(true);
         anuncio.setEstadoAprovado(estado);
         anuncio.setPrecoAprovado((double) estado.getPreco());
         anuncio.setAdminAprovadorId(adminId);
         anuncio.setDataAprovacao(LocalDateTime.now());
+
         if (dto.getFotosUrls() != null && !dto.getFotosUrls().isBlank()) {
             anuncio.setFotosUrls(dto.getFotosUrls());
         }
 
         Livro saved = livroRepository.save(anuncio);
 
-        // Notificar clientes interessados via lista de desejos
+        // NOTIFICAÇÕES
         try {
             listaDesejosService.notificarClientesSeDisponivel(anuncio.getIsbn(), anuncio.getTitulo());
         } catch (Exception e) {
-            log.error("Falha ao notificar lista de desejos para ISBN {}: {}", anuncio.getIsbn(), e.getMessage());
+            log.error("Erro wishlist: {}", e.getMessage());
         }
 
-        // Identificar o vendedor: campo direto ou via lote
         Cliente vendedor = anuncio.getVendedor();
         if (vendedor == null && anuncio.getLote() != null) {
             vendedor = anuncio.getLote().getCliente();
         }
 
         if (vendedor != null) {
-            // Creditar tokens ao vendedor apenas na aprovação
             double saldoAntes = vendedor.getSaldoTokens() != null ? vendedor.getSaldoTokens() : 0.0;
+
             vendedor.setSaldoTokens(saldoAntes + TOKEN_REWARD);
             clienteRepository.save(vendedor);
 
-            // Gamificação: XP ao vendedor
             gamificacaoService.xpLivroAprovado(vendedor.getId());
 
-            logAuditoria.registrarLog("LIVRO_APROVADO_RECOMPENSA", vendedor.getId(), vendedor.getEmail(),
-                    "Livro " + livroId + " aprovado - T$" + TOKEN_REWARD + " creditados");
+            logAuditoria.registrarLog("LIVRO_APROVADO", vendedor.getId(), vendedor.getEmail(),
+                    "Livro " + livroId);
 
-            // E-mail de confirmação ao vendedor
             try {
                 emailService.enviarHtml(
                         vendedor.getEmail(),
-                        "Seu livro foi aprovado! — Bibliotroca",
+                        "Livro aprovado",
                         EmailHtmlBuilder.livroAprovado(vendedor.getNome(), anuncio.getTitulo(), TOKEN_REWARD));
             } catch (Exception e) {
-                log.error("Falha ao enviar e-mail de aprovação para vendedor {}: {}", vendedor.getEmail(), e.getMessage());
+                log.error("Erro ao enviar email de livro aprovado: {}", e.getMessage(), e);
             }
 
-            // E-mail de atualização de saldo (crédito da recompensa de aprovação)
             try {
                 emailService.enviarHtml(
                         vendedor.getEmail(),
-                        "Atualização de saldo — Bibliotroca",
+                        "Saldo atualizado",
                         EmailHtmlBuilder.atualizacaoSaldo(
-                                vendedor.getNome(), saldoAntes, TOKEN_REWARD,
+                                vendedor.getNome(),
+                                saldoAntes,
+                                TOKEN_REWARD,
                                 vendedor.getSaldoTokens(),
-                                "Recompensa pela aprovação do livro: " + anuncio.getTitulo(),
-                                true, LocalDateTime.now()));
+                                "Aprovação livro",
+                                true,
+                                LocalDateTime.now()));
             } catch (Exception e) {
-                log.error("Falha ao enviar e-mail de saldo para vendedor {}: {}", vendedor.getEmail(), e.getMessage());
+                log.error("Erro ao enviar email de livro aprovado: {}", e.getMessage(), e);
             }
         }
 
         if (anuncio.getLote() != null) {
             Long loteId = anuncio.getLote().getId();
-            long pendingCount = livroRepository.countByLoteIdAndAprovadoFalse(loteId);
-            if (pendingCount == 0) {
+
+            long pending = livroRepository.countByLoteIdAndAprovadoFalse(loteId);
+
+            if (pending == 0) {
                 Lote lote = loteRepository.findById(loteId).orElseThrow();
                 lote.setStatus(Lote.LoteStatus.TOTAL_APROVADO);
                 loteRepository.save(lote);
             }
         }
 
-        return saved;
+        return livroMapper.paraDTO(saved);
     }
 
-    /**
-     * Rejeita livro com comentário admin.
-     * Set aprovado=false, comentarioAprovacao.
-     * Log LIVRO_REJEITADO.
-     */
+    // ========================= REJEIÇÃO =========================
+
     @SuppressWarnings("null")
     @Transactional
     public void rejeitarLivro(Long livroId, Long adminId, String estado, String comentario) {
 
         Livro anuncio = livroRepository.findById(livroId)
-                .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
+                .orElseThrow(() -> new RuntimeException(message));
 
-        // E-mail de rejeição ao vendedor (antes de deletar)
-        Cliente vendedorRejeicao = anuncio.getVendedor();
-        if (vendedorRejeicao == null && anuncio.getLote() != null) {
-            vendedorRejeicao = anuncio.getLote().getCliente();
+        Cliente vendedor = anuncio.getVendedor();
+        if (vendedor == null && anuncio.getLote() != null) {
+            vendedor = anuncio.getLote().getCliente();
         }
-        if (vendedorRejeicao != null) {
-            final String emailVendedor = vendedorRejeicao.getEmail();
-            final String nomeVendedor = vendedorRejeicao.getNome();
-            final String tituloLivro = anuncio.getTitulo();
+
+        if (vendedor != null) {
             try {
                 emailService.enviarHtml(
-                        emailVendedor,
-                        "Livro não aprovado — Bibliotroca",
-                        EmailHtmlBuilder.livroRejeitado(nomeVendedor, tituloLivro, comentario));
+                        vendedor.getEmail(),
+                        "Livro rejeitado",
+                        EmailHtmlBuilder.livroRejeitado(
+                                vendedor.getNome(),
+                                anuncio.getTitulo(),
+                                comentario));
             } catch (Exception e) {
-                log.error("Falha ao enviar e-mail de rejeição para vendedor {}: {}", emailVendedor, e.getMessage());
+                log.error("Erro ao enviar email de livro rejeitado: {}", e.getMessage(), e);
             }
         }
 
-        // Captura o lote antes de deletar o livro
-        Lote lotePendente = anuncio.getLote();
+        Lote lote = anuncio.getLote();
 
         livroRepository.delete(anuncio);
 
-        // Atualiza status do lote se não houver mais livros pendentes de revisão
-        if (lotePendente != null) {
-            long pendingCount = livroRepository.countByLoteIdAndAprovadoFalse(lotePendente.getId());
-            if (pendingCount == 0) {
-                long approvedCount = livroRepository.findByLoteId(lotePendente.getId()).size();
-                Lote.LoteStatus novoStatus = (approvedCount == 0)
+        if (lote != null) {
+            long pending = livroRepository.countByLoteIdAndAprovadoFalse(lote.getId());
+
+            if (pending == 0) {
+                long aprovados = livroRepository.findByLoteId(lote.getId()).size();
+
+                lote.setStatus(aprovados == 0
                         ? Lote.LoteStatus.REJEITADO
-                        : Lote.LoteStatus.PARCIAL_APROVADO;
-                lotePendente.setStatus(novoStatus);
-                loteRepository.save(lotePendente);
+                        : Lote.LoteStatus.PARCIAL_APROVADO);
+
+                loteRepository.save(lote);
             }
         }
 
-        logAuditoria.registrarLog("LIVRO_REJEITADO", adminId, "admin#" + adminId,
-                "Livro ID " + livroId + " rejeitado pelo administrador.");
+        logAuditoria.registrarLog("LIVRO_REJEITADO", adminId, "admin",
+                "Livro " + livroId);
     }
 
-    @Transactional
-    public void deletarLivroAdmin(@NonNull Long id) {
-        livroRepository.deleteById(id);
-    }
+    // ========================= CRUD ADMIN =========================
 
-    /**
-     * Adiciona um livro diretamente via painel administrativo
-     */
     @SuppressWarnings("null")
     @Transactional
-    public Livro adicionarLivroAdmin(String titulo, String autor, String isbn, Double preco, EstadoLivro estado, String capa, @NonNull Long vendedorId) {
+    public LivroDTO adicionarLivroAdmin(String titulo, String autor, String isbn,
+            Double preco, EstadoLivro estado, String capa, @NonNull Long vendedorId) {
+
         Cliente vendedor = clienteRepository.findById(vendedorId)
                 .orElseThrow(() -> new RuntimeException("Vendedor não encontrado"));
 
-        Livro novoLivro = Livro.builder()
+        Livro livro = Livro.builder()
                 .titulo(titulo)
                 .autor(autor)
                 .isbn(isbn)
@@ -213,16 +219,15 @@ public class LivroAdminService {
                 .aprovado(false)
                 .build();
 
-        return livroRepository.save(novoLivro);
+        return livroMapper.paraDTO(livroRepository.save(livro));
     }
 
-    /**
-     * Edita um livro existente via painel administrativo
-     */
     @Transactional
-    public Livro editarLivroAdmin(@NonNull Long id, String titulo, String autor, String isbn, Double preco, EstadoLivro estado, String capa) {
+    public LivroDTO editarLivroAdmin(@NonNull Long id, String titulo, String autor,
+            String isbn, Double preco, EstadoLivro estado, String capa) {
+
         Livro livro = livroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
+                .orElseThrow(() -> new RuntimeException(message));
 
         livro.setTitulo(titulo);
         livro.setAutor(autor);
@@ -231,6 +236,23 @@ public class LivroAdminService {
         livro.setEstadoAprovado(estado);
         livro.setFotosUrls(capa);
 
-        return livroRepository.save(livro);
+        return livroMapper.paraDTO(livroRepository.save(livro));
+    }
+
+    @Transactional
+    public void deletarLivroAdmin(@NonNull Long id) {
+        livroRepository.deleteById(id);
+    }
+
+    // ========================= CONVERSÃO =========================
+
+    private List<LivroDTO> converterLista(List<Livro> livros) {
+        List<LivroDTO> lista = new ArrayList<>();
+
+        for (Livro livro : livros) {
+            lista.add(livroMapper.paraDTO(livro));
+        }
+
+        return lista;
     }
 }

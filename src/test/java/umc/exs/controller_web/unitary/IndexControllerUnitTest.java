@@ -17,6 +17,7 @@ import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
 import umc.exs.service.core.cliente.ClienteService;
 import umc.exs.service.core.control.AuthHelper;
+import umc.exs.service.core.interactions.VisitaSiteService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -50,6 +51,9 @@ class IndexControllerUnitTest {
 
     @MockitoBean
     private PedidoRepository pedidoRepository;
+
+    @MockitoBean
+    private VisitaSiteService visitaSiteService;
 
     @AfterEach
     void tearDown() {

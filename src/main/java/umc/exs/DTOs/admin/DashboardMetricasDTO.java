@@ -1,4 +1,4 @@
-package umc.exs.DTOs.admin;
+package umc.exs.dtos.admin;
 
 import java.util.List;
 

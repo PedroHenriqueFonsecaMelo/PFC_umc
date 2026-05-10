@@ -10,12 +10,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.DTOs.user.ClienteDTO;
+import umc.exs.dtos.user.ClienteDTO;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.service.core.cliente.ClienteService;
 
@@ -23,6 +22,8 @@ import umc.exs.service.core.cliente.ClienteService;
 @RequestMapping("/api/clientes")
 @RequiredArgsConstructor
 public class ClientControllerApi {
+
+    private static final String CLIENTE_NAO_ENCONTRADO = "Cliente não encontrado.";
 
     private final ClienteService clienteService;
 
@@ -55,13 +56,15 @@ public class ClientControllerApi {
      * Usado pelo frontend para exibir saldo e nome sem recarregar a página.
      */
     @GetMapping("/meu-perfil-json")
-    @ResponseBody
-    public ResponseEntity<?> perfilJson(@AuthenticationPrincipal UserDetails user) {
-        if (user == null)
-            return ResponseEntity.status(401).body("Não autenticado.");
+    public ResponseEntity<ClienteDTO> perfilJson(@AuthenticationPrincipal UserDetails user) {
+
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+
         return clienteService.buscarClientePorEmail(user.getUsername())
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(404).body("Cliente não encontrado."));
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(404).build());
     }
 
     @GetMapping("/removerEndereco/{id}")
@@ -71,7 +74,7 @@ public class ClientControllerApi {
             String emailDoClienteLogado = principal.getName();
             Long clienteId = clienteService.buscarClientePorEmail(emailDoClienteLogado)
                     .map(ClienteDTO::getId)
-                    .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
+                    .orElseThrow(() -> new RuntimeException(CLIENTE_NAO_ENCONTRADO));
 
             clienteService.deletarEnderecoDoCliente(clienteId, enderecoId);
 
@@ -93,7 +96,7 @@ public class ClientControllerApi {
             // Busca o ID do cliente ou lança exceção se não encontrar
             Long clienteId = clienteService.buscarClientePorEmail(emailDoClienteLogado)
                     .map(ClienteDTO::getId)
-                    .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
+                    .orElseThrow(() -> new RuntimeException(CLIENTE_NAO_ENCONTRADO));
 
             // Chama o serviço para deletar o cartão específico do cliente
             clienteService.deletarCartaoDoCliente(clienteId, cartaoId);

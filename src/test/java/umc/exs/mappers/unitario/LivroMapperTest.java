@@ -2,15 +2,16 @@ package umc.exs.mappers.unitario;
 
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-import umc.exs.DTOs.livro.LivroRequestDTO;
-import umc.exs.mappers.LivroMapper;
+
+import umc.exs.dtos.livro.LivroRequestDTO;
+import umc.exs.mappers.LivroRequestMapper;
 import umc.exs.model.entidades.livro.Livro;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class LivroMapperTest {
 
-    private final LivroMapper livroMapper = Mappers.getMapper(LivroMapper.class);
+    private final LivroRequestMapper livroMapper = Mappers.getMapper(LivroRequestMapper.class);
 
     @Test
     void deveMapearDTOparaEntidade() {

@@ -1,4 +1,4 @@
-package umc.exs.DTOs.admin;
+package umc.exs.dtos.admin;
 
 import lombok.Data;
 

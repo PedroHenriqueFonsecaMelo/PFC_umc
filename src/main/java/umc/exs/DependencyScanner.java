@@ -2,12 +2,15 @@ package umc.exs;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.TreeSet;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 public class DependencyScanner {
 
@@ -59,7 +62,7 @@ public class DependencyScanner {
     }
 
     private static void extrairNomes(File arquivo, TreeSet<String> lista) {
-        try (BufferedReader br = new BufferedReader(new FileReader(arquivo))) {
+        try (BufferedReader br = Files.newBufferedReader(arquivo.toPath(), StandardCharsets.UTF_8)) {
             String linha;
             while ((linha = br.readLine()) != null) {
                 // Procura por @Value
@@ -74,8 +77,8 @@ public class DependencyScanner {
                     lista.add(mEnv.group(1));
                 }
             }
-        } catch (Exception e) {
-            // Silencia erros de leitura
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao ler arquivo: " + arquivo.getAbsolutePath(), e);
         }
     }
 }

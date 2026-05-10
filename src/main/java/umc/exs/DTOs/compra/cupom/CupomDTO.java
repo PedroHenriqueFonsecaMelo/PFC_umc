@@ -1,13 +1,16 @@
-package umc.exs.DTOs.compra;
+package umc.exs.dtos.compra.cupom;
 
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import umc.exs.model.entidades.foundation.Cupom;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,8 +26,6 @@ public class CupomDTO {
     private Integer quantidadeMaxima;
     private Integer quantidadeUsada;
 
-    /** Preenchido apenas na visão admin. */
     private String clienteNome;
-    /** Preenchido apenas na visão admin. */
     private String clienteEmail;
 }

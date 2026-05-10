@@ -5,8 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import umc.exs.DTOs.admin.EmailDestinatarioDTO;
-import umc.exs.DTOs.admin.EmailDisparoDTO;
+
+import umc.exs.dtos.admin.EmailDestinatarioDTO;
+import umc.exs.dtos.admin.EmailDisparoDTO;
 import umc.exs.service.core.control.NotificacaoEmailService;
 
 import java.util.List;

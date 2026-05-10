@@ -41,6 +41,7 @@ public class SenhaService {
      * Inicia o fluxo de esqueci minha senha.
      * Remove tokens antigos para evitar duplicidade e envia o link por e-mail.
      */
+    @SuppressWarnings("null")
     @Transactional
     public void iniciarRecuperacao(Cliente cliente) {
 
@@ -65,7 +66,7 @@ public class SenhaService {
             log.info("E-mail de recuperação enviado com sucesso para {}", cliente.getEmail());
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de recuperação para {}: {}", cliente.getEmail(), e.getMessage());
-            throw new RuntimeException("Erro ao enviar e-mail de recuperação. Tente novamente mais tarde.");
+            throw new IllegalStateException("Erro ao enviar e-mail de recuperação. Tente novamente mais tarde.", e);
         }
     }
 

@@ -1,6 +1,5 @@
 package umc.exs.service.core.control;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -9,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.DTOs.compra.PedidoDTO;
+import umc.exs.dtos.compra.PedidoDTO;
 import umc.exs.model.entidades.foundation.Pedido;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.usuario.Cliente;

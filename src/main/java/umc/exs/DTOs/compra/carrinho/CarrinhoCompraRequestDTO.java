@@ -1,4 +1,4 @@
-package umc.exs.DTOs.compra;
+package umc.exs.dtos.compra.carrinho;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;

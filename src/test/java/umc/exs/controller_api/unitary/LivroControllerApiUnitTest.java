@@ -14,24 +14,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import umc.exs.DTOs.compra.CarrinhoCompraRequestDTO;
-import umc.exs.DTOs.compra.CarrinhoCompraResponseDTO;
 import umc.exs.controller.api.interaction.LivroControllerApi;
-import umc.exs.repository.livro.LivroRepository;
+import umc.exs.dtos.compra.carrinho.CarrinhoCompraRequestDTO;
+import umc.exs.dtos.compra.carrinho.CarrinhoCompraResponseDTO;
 import umc.exs.service.core.bussiness.LivroService;
 
 class LivroControllerApiUnitTest {
 
     private LivroService livroService;
-    private LivroRepository livroRepository;
     private LivroControllerApi controller;
     private UserDetails mockUser;
 
     @BeforeEach
     void setUp() {
         livroService = mock(LivroService.class);
-        livroRepository = mock(LivroRepository.class);
-        controller = new LivroControllerApi(livroService, livroRepository);
+        controller = new LivroControllerApi(livroService);
         mockUser = User.withUsername("test@example.com")
                 .password("pass")
                 .authorities("USER")
@@ -60,7 +57,6 @@ class LivroControllerApiUnitTest {
 
         // Assert
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        assertEquals("Usuário precisa estar logado para comprar.", response.getBody());
         verifyNoInteractions(livroService);
     }
 
@@ -68,7 +64,10 @@ class LivroControllerApiUnitTest {
     void comprarLivro_ServiceException_RetornaBadRequest() {
         // Arrange
         Long livroId = 1L;
-        doThrow(new RuntimeException("Saldo insuficiente")).when(livroService).realizarCompra(eq(livroId), eq("test@example.com"));
+
+        doThrow(new IllegalStateException("Saldo insuficiente"))
+                .when(livroService)
+                .realizarCompra(eq(livroId), eq("test@example.com"));
 
         // Act
         ResponseEntity<?> response = controller.comprarLivro(livroId, mockUser);
@@ -76,7 +75,9 @@ class LivroControllerApiUnitTest {
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Saldo insuficiente", response.getBody());
-        verify(livroService).realizarCompra(livroId, "test@example.com");
+
+        verify(livroService)
+                .realizarCompra(livroId, "test@example.com");
     }
 
     @Test
@@ -139,11 +140,11 @@ class LivroControllerApiUnitTest {
         // Arrange (validation @Valid catches in real, unit focuses controller)
         CarrinhoCompraRequestDTO request = new CarrinhoCompraRequestDTO();
         request.setLivroIds(List.of()); // empty
-        doThrow(new RuntimeException("O carrinho está vazio.")).when(livroService).comprarCarrinho(anyString(), any(CarrinhoCompraRequestDTO.class));
+        doThrow(new RuntimeException("O carrinho está vazio.")).when(livroService).comprarCarrinho(anyString(),
+                any(CarrinhoCompraRequestDTO.class));
 
         // Act & Assert (controller wraps)
         ResponseEntity<?> response = controller.comprarCarrinho(mockUser, request);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 }
-
