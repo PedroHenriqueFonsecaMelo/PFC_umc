@@ -1,6 +1,7 @@
 package umc.exs.service.core.bussiness;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -55,14 +56,17 @@ public class LivroService {
 
     // ========================= ADMIN =========================
 
+    @Transactional
     public List<LivroDTO> listarLivrosPendentes() {
         return livroAdminService.listarLivrosPendentes();
     }
 
+    @Transactional
     public List<LivroDTO> listarLivrosAprovados() {
         return livroAdminService.listarLivrosAprovados();
     }
 
+    @Transactional
     public List<LivroDTO> listarLivrosPorLote(Long loteId) {
         return livroAdminService.listarLivrosPorLote(loteId);
     }
@@ -83,11 +87,6 @@ public class LivroService {
     }
 
     @Transactional
-    public LivroDTO cadastrarPorIsbn(String isbn) {
-        return livroCompraService.cadastrarPorIsbn(isbn);
-    }
-
-    @Transactional
     public LivroDTO adicionarLivroAdmin(LivroAdminRequest req) {
 
         return livroAdminService.adicionarLivroAdmin(req);
@@ -99,7 +98,13 @@ public class LivroService {
         return livroAdminService.editarLivroAdmin(id, req);
     }
 
+    @Transactional
     public LivroDTO buscarPorIdAtivo(Long id) {
         return livroAnuncioService.buscarPorIdAtivo(id);
+    }
+
+    @Transactional
+    public LivroDTO cadastrarPorIsbn(String isbn) {
+        return livroAnuncioService.cadastrarPorIsbn(isbn);
     }
 }

@@ -29,7 +29,7 @@ import umc.exs.service.core.bussiness.LivroService;
 public class LivroControllerApi {
 
     private final LivroService livroService;
-    
+
     private static final String MSG_USUARIO_NAO_LOGADO = "Usuário precisa estar logado.";
 
     /**
@@ -133,6 +133,28 @@ public class LivroControllerApi {
             return ResponseEntity.ok(resultado);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro ao processar o carrinho: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Cadastro automático de livro via ISBN utilizando a API do Google Books.
+     */
+    @GetMapping("/cadastrar-isbn/{isbn}")
+    public ResponseEntity<Object> cadastrarPorIsbn(
+            @AuthenticationPrincipal UserDetails user,
+            @PathVariable String isbn) {
+
+        if (user == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MSG_USUARIO_NAO_LOGADO);
+
+        try {
+            // Apenas busca e retorna os dados, sem salvar nada ainda
+            LivroDTO livro = livroService.cadastrarPorIsbn(isbn);
+            return ResponseEntity.ok(livro);
+        } catch (Exception e) {
+            // Se o Google cair (503), retornamos um erro limpo para o JS
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body("Serviço do Google temporariamente fora do ar.");
         }
     }
 }

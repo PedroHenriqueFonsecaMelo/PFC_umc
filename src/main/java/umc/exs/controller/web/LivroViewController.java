@@ -57,4 +57,13 @@ public class LivroViewController {
     public String paginaCheckout() {
         return "produto/checkout";
     }
+
+    /**
+     * Página de confirmação exibida após uma compra bem-sucedida.
+     * Os dados do pedido são lidos via sessionStorage no frontend.
+     */
+    @GetMapping("/pedido-confirmado")
+    public String paginaPedidoConfirmado() {
+        return "produto/pedido_confirmado";
+    }
 }

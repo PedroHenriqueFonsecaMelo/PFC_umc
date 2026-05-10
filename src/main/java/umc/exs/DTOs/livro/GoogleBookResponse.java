@@ -20,7 +20,14 @@ public class GoogleBookResponse {
         private List<String> authors;
         private String language;
         private String description;
+        private ImageLinks imageLinks;
     }
 
-    
+    @Data
+    public static class ImageLinks {
+        private String thumbnail;
+        private String smallThumbnail;
+
+    }
+
 }

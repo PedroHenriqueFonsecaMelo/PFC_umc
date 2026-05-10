@@ -176,25 +176,42 @@ window.confirmarCompra = async function() {
                 : _itensSelecionados.map(i => i.id)
         );
 
-        if (_compraViaEstante) {
-            // Veio da estante → remove do localStorage apenas os livros comprados
-            saveCarrinho(getCarrinho().filter(i => !idsComprados.has(i.id)));
-        }
-        // Compra direta → não toca no localStorage; apenas limpa o sessionStorage
+        // Remove os livros comprados do localStorage em qualquer fluxo de compra
+        saveCarrinho(getCarrinho().filter(i => !idsComprados.has(i.id)));
 
         // Limpa sessão de checkout
         sessionStorage.removeItem(CHECKOUT_KEY);
         sessionStorage.removeItem(CHECKOUT_KEY + '_direto');
 
-        mostrarToast(
-            `✅ ${data.totalComprados} livro(s) comprado(s) com sucesso! Redirecionando…`,
-            'sucesso'
-        );
+        // Monta dados completos para a página de confirmação
+        const agora      = new Date();
+        const dataCompra = agora.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+                         + ' às ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-        // Redireciona para Minhas Compras após breve delay
-        setTimeout(() => {
-            window.location.href = '/clientes/minhas-compras';
-        }, 1800);
+        const confirmacaoData = {
+            comprados: (data.comprados || []).map(c => {
+                const itemLocal = _itensSelecionados.find(i => i.id === c.livroId) || {};
+                let foto = null;
+                try {
+                    const arr = JSON.parse(itemLocal.fotosUrls);
+                    if (Array.isArray(arr) && arr.length > 0) foto = arr[0];
+                } catch (_) {}
+                return {
+                    pedidoId: c.pedidoId,
+                    livroId:  c.livroId,
+                    titulo:   c.titulo || itemLocal.titulo || '',
+                    autor:    itemLocal.autor || '',
+                    preco:    c.preco,
+                    foto
+                };
+            }),
+            totalGasto:    data.totalGasto,
+            saldoRestante: data.saldoRestante,
+            dataCompra
+        };
+        sessionStorage.setItem('bibliotroca_confirmacao', JSON.stringify(confirmacaoData));
+
+        window.location.href = '/livros/pedido-confirmado';
 
     } catch (err) {
         console.error('Erro ao confirmar compra:', err);

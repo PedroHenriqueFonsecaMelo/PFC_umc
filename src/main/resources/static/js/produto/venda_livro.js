@@ -1,6 +1,11 @@
 /* ================================================================
    venda_livro.js — Vender Livros · Bibliotroca
    ================================================================ */
+let debounceTimer;
+function debounce(func, delay) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(func, delay);
+}
 
 (async function () {
     try {
@@ -191,37 +196,48 @@ document.getElementById("livrosContainer").addEventListener("input", (e) => {
     const el = e.target;
     if (!el.dataset.field) return;
     const id = Number(el.dataset.id);
+
+    // Atualiza o valor no array local imediatamente
     setField(id, el.dataset.field, el.value);
+
+    // Se for o campo ISBN, dispara a busca automática com debounce
     if (el.dataset.field === "isbn") {
-        debounce(() => {
-            if (el.value.length >= 10) {
-                consultarBackendIsbn(id, el.value);
-            }
-        }, 500);
+        const isbnLimpo = el.value.replace(/\D/g, "");
+        if (isbnLimpo.length >= 10) {
+            debounce(() => {
+                consultarBackendIsbn(id, isbnLimpo);
+            }, 600); // 600ms de espera após parar de digitar
+        }
     }
 });
 
-async function consultarBackendIsbn(id, isbnBruto) {
-    const isbn = isbnBruto.replace(/\D/g, "");
-    if (isbn.length < 10) return;
-
+async function consultarBackendIsbn(id, isbn) {
     const spinner = document.getElementById(`spinner-${id}`);
-    spinner.classList.add("active");
+    if (spinner) spinner.classList.add("active");
 
     try {
-        const res = await fetch(`/api/livros/isbn?isbn=${isbn}`);
-        if (!res.ok) return;
+        // Ajuste a URL para bater com o seu @PostMapping do Java
+        const res = await fetch(`/api/livros/cadastrar-isbn/${isbn}`, {
+            method: "GET",
+        });
+
+        if (!res.ok) throw new Error("ISBN não encontrado");
 
         const data = await res.json();
 
-        document.getElementById(`titulo-${id}`).value = data.titulo;
-        document.getElementById(`autor-${id}`).value = data.autor;
+        // Preenche os inputs na tela
+        const inputTitulo = document.getElementById(`titulo-${id}`);
+        const inputAutor = document.getElementById(`autor-${id}`);
+
+        if (inputTitulo) inputTitulo.value = data.titulo;
+        if (inputAutor) inputAutor.value = data.autor;
 
         setField(id, "titulo", data.titulo);
         setField(id, "autor", data.autor);
-        setField(id, "idioma", data.idioma);
+    } catch (err) {
+        console.warn("Não foi possível auto-preencher os dados:", err);
     } finally {
-        spinner.classList.remove("active");
+        if (spinner) spinner.classList.remove("active");
     }
 }
 
@@ -281,8 +297,8 @@ document.getElementById("formVenda").addEventListener("submit", async (e) => {
             body: formData,
         });
         if (res.ok) {
-            mostrarOk("Lote enviado! Nossa curadoria avaliará em breve.");
-            setTimeout(() => window.location.href = "/?enviado=1", 2000);
+            const lote = await res.json();
+            mostrarModalConfirmacao(lote);
         } else {
             const msg = await res.text();
             mostrarErro(msg || "Erro ao enviar o lote. Tente novamente.");
@@ -313,5 +329,59 @@ function esconderAlertas() {
     document.getElementById("alertErro").classList.remove("show");
     document.getElementById("alertOk").classList.remove("show");
 }
+
+/* ── Comprovante do lote ── */
+
+function escHtml(str) {
+    return String(str || "")
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function mostrarModalConfirmacao(lote) {
+    const protocolo = lote.codigoProtocolo || String(lote.id || "—");
+    const numLote = lote.id ? "Lote #" + lote.id : "";
+    const data = new Date().toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+    });
+
+    document.getElementById("recProtocolo").textContent = protocolo;
+    document.getElementById("recNumLote").textContent = numLote;
+    document.getElementById("recData").textContent = data;
+
+    document.getElementById("recLivros").innerHTML = livros.map((l, i) => {
+        const sub = [
+            l.autor ? escHtml(l.autor) : null,
+            l.isbn ? "ISBN: " + l.isbn.replace(/\D/g, "") : null,
+        ].filter(Boolean).join(" · ");
+        return `<div class="rec-livro-item">
+            <span class="rec-livro-num">${String(i + 1).padStart(2, "0")}</span>
+            <div>
+                <div class="rec-livro-titulo">${escHtml(l.titulo || "—")}</div>
+                ${sub ? `<div class="rec-livro-sub">${sub}</div>` : ""}
+            </div>
+        </div>`;
+    }).join("");
+
+    // Espelha o recibo na área de impressão
+    document.getElementById("printArea").innerHTML =
+        document.getElementById("recibo").innerHTML;
+
+    document.getElementById("modalConfirmacao").style.display = "flex";
+    document.body.style.overflow = "hidden";
+}
+
+document.getElementById("btnPdf").addEventListener(
+    "click",
+    () => window.print(),
+);
+
+document.getElementById("btnConcluir").addEventListener("click", () => {
+    window.location.href = "/?enviado=1";
+});
+
+/* ─────────────────────────────────────────────────────────── */
 
 adicionarLivro();

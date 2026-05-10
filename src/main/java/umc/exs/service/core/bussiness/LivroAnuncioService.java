@@ -20,6 +20,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import umc.exs.dtos.compra.lote.LoteRequestDTO;
+import umc.exs.dtos.livro.GoogleBookResponse;
 import umc.exs.dtos.livro.LivroDTO;
 import umc.exs.dtos.livro.LivroItemDTO;
 import umc.exs.dtos.livro.LivroRequestDTO;
@@ -49,6 +50,7 @@ public class LivroAnuncioService {
 
     private final LogAuditoriaService logAuditoria;
     private final LoteService loteService;
+    private final GoogleBooksService googleBooksService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final LivroMapper livroMapper;
@@ -68,7 +70,28 @@ public class LivroAnuncioService {
 
         String jsonFotos = converterParaJson(List.of(urlFoto));
 
-        Obra obra = obterOuCriarObra(dto.getTitulo(), dto.getAutor());
+        GoogleBookResponse response = googleBooksService.buscarPorIsbnAsync(dto.getIsbn()).join();
+
+        if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
+            throw new IllegalArgumentException("Livro não encontrado na API externa para o ISBN: " + dto.getIsbn());
+        }
+
+        var info = response.getItems().get(0).getVolumeInfo();
+
+        String primeiroAutor = (info.getAuthors() != null && !info.getAuthors().isEmpty())
+                ? info.getAuthors().get(0)
+                : "Autor Desconhecido";
+
+        String capaUrl = "";
+
+        if (info.getImageLinks() != null &&
+                info.getImageLinks().getThumbnail() != null) {
+
+            capaUrl = info.getImageLinks().getThumbnail();
+        }
+
+        Obra obra = obterOuCriarObra(info.getTitle(), primeiroAutor,
+                info.getLanguage(), capaUrl);
 
         Livro anuncio = Livro.builder()
                 .titulo(dto.getTitulo())
@@ -130,6 +153,29 @@ public class LivroAnuncioService {
 
             String jsonFotos = converterParaJson(urls);
 
+            GoogleBookResponse response = googleBooksService.buscarPorIsbnAsync(item.getIsbn()).join();
+
+            if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
+                throw new IllegalArgumentException("Livro não encontrado na API externa para o ISBN: " + item.getIsbn());
+            }
+
+            var info = response.getItems().get(0).getVolumeInfo();
+
+            String primeiroAutor = (info.getAuthors() != null && !info.getAuthors().isEmpty())
+                    ? info.getAuthors().get(0)
+                    : "Autor Desconhecido";
+
+            String capaUrl = "";
+
+            if (info.getImageLinks() != null &&
+                    info.getImageLinks().getThumbnail() != null) {
+
+                capaUrl = info.getImageLinks().getThumbnail();
+            }
+
+            Obra obra = obterOuCriarObra(info.getTitle(), primeiroAutor,
+                    info.getLanguage(), capaUrl);
+
             Livro anuncio = Livro.builder()
                     .titulo(item.getTitulo())
                     .autor(item.getAutor())
@@ -138,6 +184,7 @@ public class LivroAnuncioService {
                     .lote(lote)
                     .dataAnuncio(LocalDateTime.now())
                     .aprovado(false)
+                    .obra(obra)
                     .build();
 
             livroRepository.save(anuncio);
@@ -149,6 +196,39 @@ public class LivroAnuncioService {
                 "Lote " + lote.getId() + " - aguardando aprovação");
 
         return lote;
+    }
+
+    @SuppressWarnings("null")
+    @Transactional
+    public LivroDTO cadastrarPorIsbn(String isbn) {
+        // 1. Chama a API e TRAVA a execução até o Google responder (.join())
+        GoogleBookResponse response = googleBooksService.buscarPorIsbnAsync(isbn).join();
+
+        // 2. Valida se a API trouxe algo
+        if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
+            throw new IllegalArgumentException("Livro não encontrado na API externa para o ISBN: " + isbn);
+        }
+
+        var info = response.getItems().get(0).getVolumeInfo();
+
+        // 3. Cria ou recupera a Obra (usando seu método já existente)
+        String primeiroAutor = (info.getAuthors() != null && !info.getAuthors().isEmpty())
+                ? info.getAuthors().get(0)
+                : "Autor Desconhecido";
+
+        // 4. Monta a entidade Livro com os dados da API
+        Livro anuncio = Livro.builder()
+                .titulo(info.getTitle())
+                .autor(primeiroAutor)
+                .isbn(isbn)
+                .idioma(info.getLanguage())
+                .resumoOficial(info.getDescription())
+                .dataAnuncio(LocalDateTime.now())
+                .aprovado(false)
+                .obra(null)
+                .build();
+
+        return livroMapper.paraDTO(anuncio);
     }
 
     // ========================= MÉTODOS AUXILIARES =========================
@@ -213,7 +293,7 @@ public class LivroAnuncioService {
     }
 
     @SuppressWarnings("null")
-    private Obra obterOuCriarObra(String titulo, String autor) {
+    private Obra obterOuCriarObra(String titulo, String autor, String idioma, String capa) {
 
         return obraRepository
                 .findByTituloAndAutor(titulo, autor)
@@ -222,6 +302,8 @@ public class LivroAnuncioService {
                     Obra nova = Obra.builder()
                             .titulo(titulo)
                             .autor(autor)
+                            .idioma(idioma)
+                            .imageLinksJson(capa)
                             .build();
 
                     return obraRepository.save(nova);

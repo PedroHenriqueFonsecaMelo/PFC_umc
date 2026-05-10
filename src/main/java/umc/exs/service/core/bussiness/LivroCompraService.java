@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
@@ -45,9 +46,6 @@ public class LivroCompraService {
     private final PedidoService pedidoService;
     private final GamificacaoService gamificacaoService;
     private final LogAuditoriaService logAuditoria;
-    private final GoogleBooksService googleBooksService;
-
-    private final LivroMapper livroMapper;
 
     private static final String ASSUNTO_SALDO = "Atualização de saldo — Bibliotroca";
 
@@ -205,39 +203,6 @@ public class LivroCompraService {
         } catch (Exception e) {
             log.error("Erro ao enviar e-mail carrinho: {}", e.getMessage());
         }
-    }
-
-    @SuppressWarnings("null")
-    @Transactional
-    public LivroDTO cadastrarPorIsbn(String isbn) {
-
-        GoogleBookResponse response = googleBooksService.buscarPorIsbn(isbn);
-
-        if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
-            throw new IllegalArgumentException("Livro não encontrado na API externa");
-        }
-
-        GoogleBookResponse.VolumeInfo info = response.getItems().get(0).getVolumeInfo();
-
-        String titulo = info.getTitle();
-
-        String autor = (info.getAuthors() != null && !info.getAuthors().isEmpty())
-                ? info.getAuthors().get(0)
-                : "Autor desconhecido";
-
-        String idioma = info.getLanguage();
-
-        Livro livro = Livro.builder()
-                .titulo(titulo)
-                .autor(autor)
-                .isbn(isbn)
-                .idioma(idioma)
-                .resumoOficial(info.getDescription())
-                .build();
-
-        Livro salvo = livroRepository.save(livro);
-
-        return livroMapper.paraDTO(salvo);
     }
 
 }

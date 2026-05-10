@@ -109,6 +109,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/livros/estante", "/livros/checkout").authenticated()
                                                 // Endpoint público para detalhes de livro via API (GET /api/livros/{id})
                                                 .requestMatchers(HttpMethod.GET, "/api/livros/*").permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/uploads/**").authenticated()
 
                                                 // 4. AGORA AS ROTAS PÚBLICAS
                                                 .requestMatchers(PUBLIC_ROUTES).permitAll()

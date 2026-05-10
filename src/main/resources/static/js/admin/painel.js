@@ -315,10 +315,14 @@ async function carregarPedidos() {
 
     const pendentes = todosPedidos.filter((p) => p.statusEnvio === "AGUARDANDO_ENVIO").length;
     const badge = document.getElementById("badgePedidos");
-    if (pendentes > 0) {
-      badge.textContent = pendentes;
-      badge.style.display = "inline";
-    } else badge.style.display = "none";
+    if (badge) {
+      if (pendentes > 0) {
+        badge.textContent = pendentes;
+        badge.style.display = "inline";
+      } else {
+        badge.style.display = "none";
+      }
+    }
 
     renderPedidos();
   } catch (e) {
@@ -555,7 +559,9 @@ async function carregarBlogAdmin() {
         <div style="font-size:.75rem;color:#7A6E65;margin-bottom:.5rem">Por ${p.autorNome} · ${p.dataPublicacao}</div>
         <div style="font-size:.85rem;color:#7A6E65;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${p.conteudo}</div>
       </div>
-      <button onclick="deletarPost(${p.id})" class="btn-remover-post">Remover</button>
+      <button onclick="blogConfirmarDel(${p.id}, this)" class="btn-remover-post" title="Remover post">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>
     </div>`).join("");
   } catch (e) {
     lista.innerHTML = '<p style="font-size:.875rem;color:#722F37">Erro ao carregar posts.</p>';
@@ -583,8 +589,26 @@ async function publicarPost(e) {
   }
 }
 
+function blogCancelarDel(naoBtn) {
+  const item = naoBtn.closest('.blog-post-item');
+  naoBtn.closest('.blog-confirm-del').remove();
+  item.querySelector('.btn-remover-post').style.display = '';
+}
+
+function blogConfirmarDel(id, btn) {
+  const item = btn.closest('.blog-post-item');
+  btn.style.display = 'none';
+  const div = document.createElement('div');
+  div.className = 'blog-confirm-del';
+  div.innerHTML = `
+    <span>Remover?</span>
+    <button class="blog-confirm-sim" onclick="deletarPost(${id})">Sim</button>
+    <button class="blog-confirm-nao" onclick="blogCancelarDel(this)">✕</button>
+  `;
+  item.appendChild(div);
+}
+
 async function deletarPost(id) {
-  if (!confirm("Remover este post?")) return;
   try {
     const res = await fetch("/api/blog/" + id, { method: "DELETE", credentials: "include" });
     if (!res.ok) throw new Error();

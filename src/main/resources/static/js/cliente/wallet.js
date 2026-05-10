@@ -1,3 +1,4 @@
+console.log('[wallet.js] VERSÃO NOVA — sem alerts');
 const TOKENS_POR_REAL = 2;
 
 let intervaloCheck = null;
@@ -8,7 +9,20 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('formCompra').addEventListener('submit', efetuarCompra);
 });
 
+function mostrarErroForm(msg) {
+    const el = document.getElementById('formErro');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.display = 'flex';
+}
+
+function ocultarErroForm() {
+    const el = document.getElementById('formErro');
+    if (el) el.style.display = 'none';
+}
+
 function atualizarPreview() {
+    ocultarErroForm();
     const valor = parseFloat(document.getElementById('valor').value) || 0;
     const preview = document.getElementById('tokensPreview');
     const previewTokens = document.getElementById('previewTokens');
@@ -37,11 +51,12 @@ async function carregarSaldo() {
 
 async function efetuarCompra(e) {
     e.preventDefault();
+    ocultarErroForm();
     const btn = document.getElementById('btnComprar');
     const valor = parseFloat(document.getElementById('valor').value);
 
     if (!valor || valor < 1) {
-        alert("Informe um valor mínimo de R$ 1,00.");
+        mostrarErroForm("Informe um valor mínimo de R$ 1,00.");
         return;
     }
 
@@ -59,7 +74,7 @@ async function efetuarCompra(e) {
         const data = await res.json();
 
         if (!res.ok) {
-            alert(data.message || data || "Erro ao gerar o PIX.");
+            mostrarErroForm(data.message || data || "Erro ao gerar o PIX.");
             return;
         }
 
@@ -77,7 +92,7 @@ async function efetuarCompra(e) {
 
     } catch (err) {
         console.error(err);
-        alert("Erro de conexão. Tente novamente.");
+        mostrarErroForm("Erro de conexão. Tente novamente.");
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-qrcode"></i> Gerar QR Code PIX';
@@ -87,12 +102,21 @@ async function efetuarCompra(e) {
 function copyPix() {
     const input = document.getElementById('textoCopiaECola');
     input.select();
+
+    const btn = document.querySelector('.btn-copiar');
+    const feedback = () => {
+        if (!btn) return;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+        btn.classList.add('btn-copiar--copiado');
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fa-solid fa-copy"></i>';
+            btn.classList.remove('btn-copiar--copiado');
+        }, 2000);
+    };
+
     navigator.clipboard.writeText(input.value)
-        .then(() => alert("Código copiado!"))
-        .catch(() => {
-            document.execCommand('copy');
-            alert("Código copiado!");
-        });
+        .then(feedback)
+        .catch(() => { document.execCommand('copy'); feedback(); });
 }
 
 function fecharModalPix() {

@@ -139,6 +139,35 @@
             border:1px dashed var(--border,rgba(44,36,27,.15));
             border-radius:6px; font-size:.75rem; color:var(--muted,#7a6e65); cursor:pointer;
         }
+        .cw-taxa-info {
+            display:flex; align-items:center; gap:.45rem;
+            background:rgba(74,93,35,.07); border-left:3px solid var(--forest,#4a5d23);
+            padding:.5rem .75rem; font-size:.8rem; color:var(--ink,#2c241b); margin-bottom:.75rem;
+        }
+        .cw-taxa-info i { color:var(--forest,#4a5d23); font-size:.8rem; }
+        .cw-tokens-preview {
+            display:flex; align-items:center; gap:.4rem;
+            background:#e8f0d8; border:1px solid #4a5d23; color:#4a5d23;
+            padding:.5rem .75rem; border-radius:6px; font-size:.82rem; margin-bottom:.75rem;
+        }
+        .cw-form-msg {
+            padding:.5rem .75rem; border-radius:6px; font-size:.8rem;
+            font-weight:500; margin-bottom:.75rem;
+        }
+        .cw-form-msg--erro { background:rgba(114,47,55,.07); border-left:3px solid var(--accent,#722f37); color:var(--accent,#722f37); }
+        .cw-form-msg--erro::before { content:"⚠  "; }
+        .cw-form-msg--sucesso { background:rgba(74,93,35,.07); border-left:3px solid var(--forest,#4a5d23); color:var(--forest,#4a5d23); }
+        .cw-form-msg--sucesso::before { content:"✓  "; }
+        .pix-status { text-align:center; margin:.75rem 0 0; font-size:.85rem; color:var(--muted,#7a6e65); }
+        .pix-copy-btn--copiado { background:var(--forest,#4a5d23) !important; }
+        .pix-sucesso-icone {
+            width:60px; height:60px; border-radius:50%;
+            background:var(--forest,#4a5d23); color:#fff;
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.5rem; margin:0 auto 1rem;
+        }
+        .pix-sucesso-titulo { font-size:1.15rem; font-weight:700; color:var(--forest,#4a5d23); margin-bottom:.4rem; }
+        .pix-sucesso-sub { font-size:.85rem; color:var(--muted,#7a6e65); margin-bottom:1.25rem; }
     </style>
 </head>
 <body>
@@ -593,9 +622,17 @@
                     </div>
 
                     <div class="cw-form">
+                        <div class="cw-taxa-info">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span>Cada <strong>R$&nbsp;1,00</strong> equivale a <strong>T$&nbsp;2,00</strong> de tokens</span>
+                        </div>
                         <label for="valor">Valor da Recarga (R$)</label>
-                        <input type="number" id="valor" step="0.01" min="1" placeholder="0.00" />
-
+                        <input type="number" id="valor" step="0.01" min="1" placeholder="0.00" oninput="cwAtualizarPreview()" />
+                        <div class="cw-tokens-preview" id="cwTokensPreview" style="display:none">
+                            <i class="fa-solid fa-coins"></i>
+                            Você receberá <strong id="cwPreviewTokens">0</strong> tokens
+                        </div>
+                        <div class="cw-form-msg" id="cwFormMsg" style="display:none"></div>
                         <button id="btnComprar" class="cw-btn-pay" onclick="cwEfetuarCompra(event)">
                             <i class="fa-solid fa-check-double"></i> Confirmar e Pagar
                         </button>
@@ -627,14 +664,25 @@
     <!-- PIX MODAL -->
     <div id="cwModalPix" class="pix-modal-overlay">
         <div class="pix-modal-box">
-            <div class="pix-modal-title">Pagamento via PIX</div>
-            <p class="pix-modal-sub">Escaneie o código abaixo para finalizar a compra</p>
-            <div class="pix-qr"><img id="cwImgQrCode" src="" alt="QR Code PIX" /></div>
-            <div class="pix-copy-row">
-                <input type="text" id="cwTextoPix" readonly />
-                <button class="pix-copy-btn" onclick="cwCopyPix()"><i class="fa-solid fa-copy"></i></button>
+            <!-- View: aguardando pagamento -->
+            <div id="cwPixQrArea">
+                <div class="pix-modal-title">Pagamento via PIX</div>
+                <p class="pix-modal-sub">Escaneie o código abaixo para finalizar a compra</p>
+                <div class="pix-qr"><img id="cwImgQrCode" src="" alt="QR Code PIX" /></div>
+                <div class="pix-copy-row">
+                    <input type="text" id="cwTextoPix" readonly />
+                    <button class="pix-copy-btn" onclick="cwCopyPix()"><i class="fa-solid fa-copy"></i></button>
+                </div>
             </div>
-            <button class="pix-close-btn" onclick="cwFecharModal()">Já realizei o pagamento</button>
+            <!-- View: pagamento confirmado -->
+            <div id="cwPixSucesso" style="display:none; text-align:center;">
+                <div class="pix-sucesso-icone">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <div class="pix-sucesso-titulo">Pagamento confirmado!</div>
+                <p class="pix-sucesso-sub">Seus tokens já estão disponíveis no seu saldo.</p>
+            </div>
+            <button class="pix-close-btn" onclick="cwFecharModal()">Fechar</button>
             <button class="pix-debug-btn" onclick="cwSimularWebhook()">[ DEBUG: Simular Webhook Banco ]</button>
         </div>
     </div>
@@ -860,10 +908,36 @@
     }
 
     /* ============================================================
-       CARTEIRA — inline (replaces wallet.js)
+       CARTEIRA — inline
        ============================================================ */
     var cwInterval;
     var cwPagamentoId;
+
+    function cwMostrarMsg(msg, tipo) {
+        var el = document.getElementById('cwFormMsg');
+        if (!el) return;
+        el.textContent = msg;
+        el.className = 'cw-form-msg cw-form-msg--' + tipo;
+        el.style.display = 'block';
+    }
+
+    function cwOcultarMsg() {
+        var el = document.getElementById('cwFormMsg');
+        if (el) el.style.display = 'none';
+    }
+
+    function cwAtualizarPreview() {
+        cwOcultarMsg();
+        var valor = parseFloat(document.getElementById('valor').value) || 0;
+        var preview = document.getElementById('cwTokensPreview');
+        var previewTokens = document.getElementById('cwPreviewTokens');
+        if (valor >= 1) {
+            if (previewTokens) previewTokens.textContent = (valor * 2).toFixed(0);
+            if (preview) preview.style.display = 'flex';
+        } else {
+            if (preview) preview.style.display = 'none';
+        }
+    }
 
     function initCarteira() {
         cwCarregarSaldo();
@@ -903,9 +977,13 @@
 
     async function cwEfetuarCompra(e) {
         e.preventDefault();
+        cwOcultarMsg();
         var btn = document.getElementById('btnComprar');
         var valor = document.getElementById('valor').value;
-        if (!valor || parseFloat(valor) <= 0) { alert('Informe um valor válido.'); return; }
+        if (!valor || parseFloat(valor) < 1) {
+            cwMostrarMsg('Informe um valor mínimo de R$ 1,00.', 'erro');
+            return;
+        }
         btn.disabled = true; btn.innerHTML = 'Processando...';
         try {
             var res = await fetch('/api/tokens/comprar', {
@@ -924,14 +1002,16 @@
                 } else {
                     await cwCarregarSaldo();
                     await cwCarregarHistorico();
-                    alert('Sucesso! Tokens adicionados ao seu saldo.');
                     document.getElementById('valor').value = '';
+                    var preview = document.getElementById('cwTokensPreview');
+                    if (preview) preview.style.display = 'none';
+                    cwMostrarMsg('Tokens adicionados ao seu saldo com sucesso!', 'sucesso');
                 }
             } else {
-                alert('Erro: ' + (data.message || 'Verifique os dados e tente novamente.'));
+                cwMostrarMsg('Erro: ' + (data.message || 'Verifique os dados e tente novamente.'), 'erro');
             }
         } catch(err) {
-            alert('Erro de conexão. Tente novamente.');
+            cwMostrarMsg('Erro de conexão. Tente novamente.', 'erro');
         } finally {
             btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check-double"></i> Confirmar e Pagar';
         }
@@ -940,12 +1020,30 @@
     function cwCopyPix() {
         var inp = document.getElementById('cwTextoPix');
         inp.select();
-        navigator.clipboard.writeText(inp.value).then(function(){ alert('Código PIX copiado!'); }).catch(function(){ alert('Copie manualmente: ' + inp.value); });
+        var btn = document.querySelector('.pix-copy-btn');
+        var feedback = function() {
+            if (!btn) return;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+            btn.classList.add('pix-copy-btn--copiado');
+            setTimeout(function() {
+                btn.innerHTML = '<i class="fa-solid fa-copy"></i>';
+                btn.classList.remove('pix-copy-btn--copiado');
+            }, 2000);
+        };
+        navigator.clipboard.writeText(inp.value).then(feedback).catch(function() {
+            document.execCommand('copy');
+            feedback();
+        });
     }
 
     function cwFecharModal() {
         document.getElementById('cwModalPix').classList.remove('active');
         if (cwInterval) clearInterval(cwInterval);
+        // Reseta a view para o próximo uso
+        var qrArea = document.getElementById('cwPixQrArea');
+        var sucesso = document.getElementById('cwPixSucesso');
+        if (qrArea) qrArea.style.display = 'block';
+        if (sucesso) sucesso.style.display = 'none';
         cwCarregarSaldo();
         cwCarregarHistorico();
     }
@@ -958,8 +1056,11 @@
                 var data = await res.json();
                 if (data.status === 'APROVADO') {
                     clearInterval(cwInterval);
-                    document.getElementById('cwModalPix').classList.remove('active');
-                    alert('Pagamento confirmado! Seus tokens já estão disponíveis.');
+                    // Troca a view dentro do modal — usuário vê a confirmação e fecha manualmente
+                    var qrArea = document.getElementById('cwPixQrArea');
+                    var sucesso = document.getElementById('cwPixSucesso');
+                    if (qrArea) qrArea.style.display = 'none';
+                    if (sucesso) sucesso.style.display = 'block';
                     cwCarregarSaldo();
                     cwCarregarHistorico();
                 }
@@ -968,12 +1069,12 @@
     }
 
     async function cwSimularWebhook() {
-        if (!cwPagamentoId) { alert('Nenhum pagamento pendente.'); return; }
+        if (!cwPagamentoId) return;
         try {
             var res = await fetch('/api/tokens/simular-webhook/' + cwPagamentoId, { credentials:'include' });
             var data = await res.json();
-            if (data.mensagem) alert(data.mensagem);
-        } catch(_) { alert('Erro ao simular pagamento.'); }
+            if (data.mensagem) cwMostrarMsg(data.mensagem, 'sucesso');
+        } catch(_) {}
     }
 
 </script>
