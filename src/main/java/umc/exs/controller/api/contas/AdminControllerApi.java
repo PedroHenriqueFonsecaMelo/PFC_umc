@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -262,7 +261,6 @@ public class AdminControllerApi {
         return ResponseEntity.ok(lista);
     }
 
-    @SuppressWarnings("null")
     @PostMapping("/livros/novo")
     public ResponseEntity<?> adicionarLivro(@RequestBody Map<String, Object> body,
                                              @AuthenticationPrincipal UserDetails user) {
@@ -275,17 +273,30 @@ public class AdminControllerApi {
             String titulo  = (String) body.get("titulo");
             String autor   = (String) body.get("autor");
             String isbn    = (String) body.getOrDefault("isbn", "");
-            Double preco   = body.get("preco") != null ? ((Number) body.get("preco")).doubleValue() : 0.0;
+            Double preco   = body.get("preco") instanceof Number n ? n.doubleValue() : 0.0;
             String estado  = (String) body.getOrDefault("estado", "BOM");
             String resumo  = (String) body.getOrDefault("resumo", "");
+
+            // Campos de promoção
+            Boolean emPromocao        = body.get("emPromocao") instanceof Boolean b ? b : false;
+            Double percentualDesconto = body.get("percentualDesconto") instanceof Number n ? n.doubleValue() : null;
+            String promocaoExpiraStr  = body.get("promocaoExpira") instanceof String s ? s : null;
+            java.time.LocalDateTime promocaoExpira = null;
+            if (promocaoExpiraStr != null && !promocaoExpiraStr.isBlank()) {
+                try { promocaoExpira = java.time.LocalDateTime.parse(promocaoExpiraStr); } catch (Exception ignored) {}
+            }
 
             if (titulo == null || titulo.isBlank()) return ResponseEntity.badRequest().body("Título obrigatório.");
             if (autor  == null || autor.isBlank())  return ResponseEntity.badRequest().body("Autor obrigatório.");
 
+            log.info("POST /api/admin/livros/novo — titulo='{}', adminId={}", titulo, adminId);
+
             umc.exs.model.enums.EstadoLivro estadoEnum = umc.exs.model.enums.EstadoLivro.valueOf(estado);
-            var livro = livroService.adicionarLivroAdmin(titulo, autor, isbn, preco, estadoEnum, resumo, adminId);
+            var livro = livroService.adicionarLivroAdmin(titulo, autor, isbn, preco, estadoEnum,
+                    resumo, adminId, emPromocao, percentualDesconto, promocaoExpira);
             return ResponseEntity.ok(Map.of("success", true, "id", livro.getId(), "message", "Livro adicionado com sucesso!"));
         } catch (Exception e) {
+            log.error("Erro ao adicionar livro admin: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body("Erro: " + e.getMessage());
         }
     }
@@ -299,16 +310,29 @@ public class AdminControllerApi {
             String titulo = (String) body.get("titulo");
             String autor  = (String) body.get("autor");
             String isbn   = (String) body.get("isbn");
-            Double preco  = body.get("preco") != null ? ((Number) body.get("preco")).doubleValue() : null;
+            Double preco  = body.get("preco") instanceof Number n ? n.doubleValue() : null;
             String estado = (String) body.get("estado");
-            String resumo = (String) body.get("resumo");
+            String resumo = (String) body.getOrDefault("resumo", "");
+
+            // Campos de promoção
+            Boolean emPromocao        = body.get("emPromocao") instanceof Boolean b ? b : false;
+            Double percentualDesconto = body.get("percentualDesconto") instanceof Number n ? n.doubleValue() : null;
+            String promocaoExpiraStr  = body.get("promocaoExpira") instanceof String s ? s : null;
+            java.time.LocalDateTime promocaoExpira = null;
+            if (promocaoExpiraStr != null && !promocaoExpiraStr.isBlank()) {
+                try { promocaoExpira = java.time.LocalDateTime.parse(promocaoExpiraStr); } catch (Exception ignored) {}
+            }
 
             umc.exs.model.enums.EstadoLivro estadoEnum = estado != null
                     ? umc.exs.model.enums.EstadoLivro.valueOf(estado) : null;
 
-            livroService.editarLivroAdmin(id, titulo, autor, isbn, preco, estadoEnum, resumo);
+            log.info("PUT /api/admin/livros/{} — titulo='{}'", id, titulo);
+
+            livroService.editarLivroAdmin(id, titulo, autor, isbn, preco, estadoEnum, resumo,
+                    emPromocao, percentualDesconto, promocaoExpira);
             return ResponseEntity.ok(Map.of("success", true, "message", "Livro atualizado com sucesso!"));
         } catch (Exception e) {
+            log.error("Erro ao editar livro id={}: {}", id, e.getMessage(), e);
             return ResponseEntity.badRequest().body("Erro: " + e.getMessage());
         }
     }
@@ -397,10 +421,7 @@ public class AdminControllerApi {
      * e séries mensais dos últimos 12 meses para os gráficos.
      */
     @GetMapping("/dashboard/metricas")
-    public ResponseEntity<DashboardMetricasDTO> getMetricas(Model model) {
-
-        model.addAttribute("metrics", dashboardService.getMetricas());
-        
+    public ResponseEntity<DashboardMetricasDTO> getMetricas() {
         return ResponseEntity.ok(dashboardService.getMetricas());
     }
 }

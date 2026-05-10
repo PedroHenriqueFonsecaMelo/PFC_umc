@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Estante — Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}"/>
+    <link rel="stylesheet" th:href="@{/css/produto/estante.css}"/>
+</head>
+<body>
+
+    <!-- NAV -->
+    <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+    <main class="estante-main">
+
+        <!-- Cabeçalho da página -->
+        <div class="estante-header">
+            <div>
+                <h1>Minha Estante</h1>
+                <p>Selecione os livros que deseja comprar agora.</p>
+            </div>
+            <a href="/livros/vitrine" class="btn-voltar">← Continuar explorando</a>
+        </div>
+
+        <!-- Estado: estante vazia -->
+        <div id="estanteVazia" class="estante-vazia" style="display:none;">
+            <img src="/imagens/estante.png" alt="Estante vazia"
+                 onerror="this.style.display='none'"
+                 style="width:100px;height:100px;object-fit:contain;opacity:.5;margin-bottom:1.2rem;">
+            <p>Sua estante está vazia.</p>
+            <a href="/livros/vitrine" class="btn-primario" style="margin-top:1rem;">Explorar Vitrine</a>
+        </div>
+
+        <!-- Conteúdo da estante (com itens) -->
+        <div id="estanteConteudo" style="display:none;">
+
+            <!-- Barra de ações em lote -->
+            <div class="estante-acoes-lote">
+                <label class="checkbox-wrapper">
+                    <input type="checkbox" id="chkSelecionarTodos" onchange="toggleSelecionarTodos(this)">
+                    <span>Selecionar todos</span>
+                </label>
+                <button class="btn-remover-selecionados" onclick="removerSelecionados()"
+                        id="btnRemoverSelecionados" disabled>
+                    Remover selecionados
+                </button>
+            </div>
+
+            <!-- Lista de livros -->
+            <div id="listaEstante" class="estante-lista"></div>
+
+            <!-- Rodapé com subtotal e ação -->
+            <div class="estante-footer">
+                <div class="estante-subtotal">
+                    <span class="subtotal-label">Subtotal (<span id="qtdSelecionados">0</span> livro(s) selecionado(s))</span>
+                    <span class="subtotal-valor" id="subtotalValor">T$ 0,00</span>
+                </div>
+                <button class="btn-prosseguir" id="btnProsseguir"
+                        onclick="prosseguirCheckout()" disabled>
+                    Prosseguir com selecionados →
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script th:src="@{/js/produto/estante.js}"></script>
+</body>
+</html>

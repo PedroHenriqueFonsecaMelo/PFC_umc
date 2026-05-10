@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout — Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}"/>
+    <link rel="stylesheet" th:href="@{/css/produto/checkout.css}"/>
+</head>
+<body>
+
+    <!-- NAV -->
+    <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+    <!-- Toast de feedback -->
+    <div class="toast" id="toastCheckout"></div>
+
+    <main class="checkout-main">
+
+        <!-- Indicador de etapas -->
+        <div class="checkout-steps">
+            <div class="step done">
+                <span class="step-num">✓</span>
+                <span class="step-label">Estante</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step active">
+                <span class="step-num">2</span>
+                <span class="step-label">Checkout</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <span class="step-num">3</span>
+                <span class="step-label">Concluído</span>
+            </div>
+        </div>
+
+        <!-- Estado: sem itens / redirecionando -->
+        <div id="estadoVazio" class="estado-msg" style="display:none;">
+            <p style="font-family:'IM Fell English',serif;font-style:italic;">
+                Nenhum livro selecionado para checkout.
+            </p>
+            <a href="/livros/estante" class="btn-primario" style="margin-top:1rem;">← Voltar para a Estante</a>
+        </div>
+
+        <!-- Layout do checkout -->
+        <div id="checkoutLayout" style="display:none;" class="checkout-layout">
+
+            <!-- Coluna esquerda: resumo dos itens -->
+            <section class="checkout-resumo">
+                <h2>Resumo do pedido</h2>
+                <div id="listaCheckout" class="checkout-lista"></div>
+
+                <!-- Link para voltar e ajustar seleção -->
+                <a href="/livros/estante" class="link-voltar-estante">← Alterar seleção</a>
+            </section>
+
+            <!-- Coluna direita: pagamento -->
+            <section class="checkout-pagamento">
+                <h2>Pagamento em tokens</h2>
+
+                <div class="pagamento-card">
+                    <div class="pagamento-linha">
+                        <span>Saldo atual</span>
+                        <span id="saldoAtual" class="pagamento-saldo">T$ —</span>
+                    </div>
+                    <div class="pagamento-linha">
+                        <span>Total a debitar</span>
+                        <span id="totalDebitar" class="pagamento-total">T$ —</span>
+                    </div>
+                    <div class="pagamento-linha pagamento-linha-saldo-pos">
+                        <span>Saldo após compra</span>
+                        <span id="saldoApos" class="pagamento-saldo-pos">T$ —</span>
+                    </div>
+                </div>
+
+                <!-- Alerta de saldo insuficiente -->
+                <div id="alertaSaldo" class="alerta-saldo" style="display:none;">
+                    <strong>Saldo insuficiente.</strong>
+                    <span id="alertaSaldoMsg"></span>
+                    <a href="/clientes/carteira" class="link-carregar">Recarregar tokens →</a>
+                </div>
+
+                <!-- Alerta genérico de erro -->
+                <div id="alertaErro" class="alerta-erro" style="display:none;">
+                    <span id="alertaErroMsg"></span>
+                </div>
+
+                <!-- Botão de confirmação -->
+                <button id="btnConfirmar" class="btn-confirmar" onclick="confirmarCompra()">
+                    Confirmar compra
+                </button>
+
+                <p class="checkout-disclaimer">
+                    Os tokens serão debitados imediatamente. Em caso de falha, o
+                    saldo não é alterado.
+                </p>
+            </section>
+        </div>
+
+    </main>
+
+    <script th:src="@{/js/produto/checkout.js}"></script>
+</body>
+</html>

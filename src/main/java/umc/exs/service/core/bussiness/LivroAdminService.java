@@ -194,43 +194,86 @@ public class LivroAdminService {
     }
 
     /**
-     * Adiciona um livro diretamente via painel administrativo
+     * Adiciona um livro diretamente via painel administrativo.
+     * O livro já nasce aprovado (aprovado=true) pois o próprio admin o está inserindo.
      */
-    @SuppressWarnings("null")
     @Transactional
-    public Livro adicionarLivroAdmin(String titulo, String autor, String isbn, Double preco, EstadoLivro estado, String capa, @NonNull Long vendedorId) {
-        Cliente vendedor = clienteRepository.findById(vendedorId)
-                .orElseThrow(() -> new RuntimeException("Vendedor não encontrado"));
+    public Livro adicionarLivroAdmin(String titulo, String autor, String isbn, Double preco,
+            EstadoLivro estado, String resumo, Long adminId,
+            Boolean emPromocao, Double percentualDesconto, LocalDateTime promocaoExpira) {
+
+        log.info("Admin [id={}] adicionando livro: titulo='{}', autor='{}', isbn='{}'",
+                adminId, titulo, autor, isbn);
+
+        boolean promoAtiva = Boolean.TRUE.equals(emPromocao)
+                && percentualDesconto != null && percentualDesconto > 0;
+
+        Double precoFinal    = preco;
+        Double precoOriginal = null;
+
+        if (promoAtiva) {
+            precoOriginal = preco;
+            precoFinal    = preco * (1.0 - percentualDesconto / 100.0);
+        }
 
         Livro novoLivro = Livro.builder()
                 .titulo(titulo)
                 .autor(autor)
                 .isbn(isbn)
-                .precoAprovado(preco)
+                .precoAprovado(precoFinal)
+                .precoOriginal(precoOriginal)
                 .estadoAprovado(estado)
-                .fotosUrls(capa)
-                .vendedor(vendedor)
-                .aprovado(false)
+                .resumoOficial(resumo)
+                .fotosUrls("[]")
+                .aprovado(true)
+                .dataAprovacao(LocalDateTime.now())
+                .adminAprovadorId(adminId)
+                .emPromocao(promoAtiva)
+                .promocaoExpira(promoAtiva ? promocaoExpira : null)
                 .build();
 
-        return livroRepository.save(novoLivro);
+        Livro saved = livroRepository.save(novoLivro);
+        log.info("Livro salvo com sucesso: id={}, aprovado={}, preco={}",
+                saved.getId(), saved.getAprovado(), saved.getPrecoAprovado());
+        return saved;
     }
 
     /**
-     * Edita um livro existente via painel administrativo
+     * Edita um livro existente via painel administrativo.
      */
     @Transactional
-    public Livro editarLivroAdmin(@NonNull Long id, String titulo, String autor, String isbn, Double preco, EstadoLivro estado, String capa) {
+    public Livro editarLivroAdmin(@NonNull Long id, String titulo, String autor, String isbn,
+            Double preco, EstadoLivro estado, String resumo,
+            Boolean emPromocao, Double percentualDesconto, LocalDateTime promocaoExpira) {
+
+        log.info("Admin editando livro id={}", id);
+
         Livro livro = livroRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
 
         livro.setTitulo(titulo);
         livro.setAutor(autor);
         livro.setIsbn(isbn);
-        livro.setPrecoAprovado(preco);
         livro.setEstadoAprovado(estado);
-        livro.setFotosUrls(capa);
+        livro.setResumoOficial(resumo);
 
-        return livroRepository.save(livro);
+        boolean promoAtiva = Boolean.TRUE.equals(emPromocao)
+                && percentualDesconto != null && percentualDesconto > 0;
+
+        livro.setEmPromocao(promoAtiva);
+
+        if (promoAtiva) {
+            livro.setPrecoOriginal(preco);
+            livro.setPrecoAprovado(preco * (1.0 - percentualDesconto / 100.0));
+            livro.setPromocaoExpira(promocaoExpira);
+        } else {
+            livro.setPrecoAprovado(preco);
+            livro.setPrecoOriginal(null);
+            livro.setPromocaoExpira(null);
+        }
+
+        Livro saved = livroRepository.save(livro);
+        log.info("Livro id={} atualizado com sucesso, preco={}", id, saved.getPrecoAprovado());
+        return saved;
     }
 }

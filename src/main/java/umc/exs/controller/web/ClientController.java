@@ -310,7 +310,8 @@ public class ClientController {
     public String exibirMinhasCompras(@AuthenticationPrincipal UserDetails user) {
         if (user == null)
             return "redirect:/clientes/login";
-        return "cliente/minhas-compras";
+        // Histórico de compras está consolidado em Meu Perfil
+        return "redirect:/clientes/meu-perfil";
     }
 
     @GetMapping("/lista-desejos")

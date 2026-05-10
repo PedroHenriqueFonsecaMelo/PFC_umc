@@ -20,7 +20,8 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
 
     /**
      * Soma de tokens de todas as transações confirmadas (tokens disponibilizados).
+     * Retorna null quando não há registros; o service trata com orElse(0.0).
      */
-    @Query("SELECT COALESCE(SUM(t.valor), 0) FROM Transacao t WHERE t.status = :status")
+    @Query("SELECT SUM(t.valor) FROM Transacao t WHERE t.status = :status")
     Double sumValorByStatus(@Param("status") String status);
 }

@@ -196,14 +196,17 @@ public class LivroService {
     }
 
     public Livro adicionarLivroAdmin(String titulo, String autor, String isbn, Double preco, EstadoLivro estado,
-            String capa, @NonNull Long vendedorId) {
-        return adminService.adicionarLivroAdmin(titulo, autor, isbn, preco, estado, capa, vendedorId);
+            String resumo, Long adminId, Boolean emPromocao, Double percentualDesconto,
+            java.time.LocalDateTime promocaoExpira) {
+        return adminService.adicionarLivroAdmin(titulo, autor, isbn, preco, estado, resumo, adminId,
+                emPromocao, percentualDesconto, promocaoExpira);
     }
 
     public Livro editarLivroAdmin(@lombok.NonNull Long id, String titulo, String autor, String isbn, Double preco,
-            EstadoLivro estado,
-            String capa) {
-        return adminService.editarLivroAdmin(id, titulo, autor, isbn, preco, estado, capa);
+            EstadoLivro estado, String resumo, Boolean emPromocao, Double percentualDesconto,
+            java.time.LocalDateTime promocaoExpira) {
+        return adminService.editarLivroAdmin(id, titulo, autor, isbn, preco, estado, resumo,
+                emPromocao, percentualDesconto, promocaoExpira);
     }
 
     public void deletarLivroAdmin(@lombok.NonNull Long id) {

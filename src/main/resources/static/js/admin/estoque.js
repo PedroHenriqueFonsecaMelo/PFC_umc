@@ -165,17 +165,82 @@ function limparCamposPromo() {
     document.getElementById("fPromoExpira").value   = "";
 }
 
+/* ── BUSCA ISBN VIA OPEN LIBRARY (mesmo padrão de venda_livro.js) ── */
+// Guarda o último ISBN enviado à API para evitar sobrescrever com resposta desatualizada
+let _isbnUltimoBuscado = "";
+
+async function buscarIsbnModal() {
+    const isbn = document.getElementById("fIsbn").value.replace(/\D/g, "");
+
+    // Mesma condição que venda_livro.js: só busca com pelo menos 10 dígitos
+    if (isbn.length < 10) return;
+
+    // Evita buscar o mesmo ISBN repetidamente (ex.: oninput dispara em cada tecla)
+    if (isbn === _isbnUltimoBuscado) return;
+    _isbnUltimoBuscado = isbn;
+
+    const statusEl = document.getElementById("fIsbnStatus");
+    const tituloEl = document.getElementById("fTitulo");
+    const autorEl  = document.getElementById("fAutor");
+
+    // Mostra "Buscando..." como placeholder no campo Título enquanto aguarda
+    const placeholderOriginal = tituloEl.placeholder;
+    tituloEl.placeholder = "Buscando...";
+    if (statusEl) statusEl.style.display = "none";
+
+    try {
+        // Mesmo endpoint e parâmetros usados em venda_livro.js
+        const res  = await fetch(
+            `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        const info = data[`ISBN:${isbn}`];
+
+        if (info) {
+            const titulo = info.title || "";
+            // Mesmo mapeamento de venda_livro.js: authors[0].name
+            const autor  = (info.authors && info.authors.length > 0) ? info.authors[0].name : "";
+
+            if (!modoEdicao) {
+                // Modo Adicionar: sempre preenche título e autor
+                tituloEl.value = titulo;
+                autorEl.value  = autor;
+            } else {
+                // Modo Editar: preenche apenas campos ainda vazios
+                if (!tituloEl.value.trim()) tituloEl.value = titulo;
+                if (!autorEl.value.trim())  autorEl.value  = autor;
+            }
+
+            if (statusEl && titulo) {
+                statusEl.textContent = "✓ Informações encontradas automaticamente";
+                statusEl.style.color = "#4a5d23";
+                statusEl.style.display = "inline";
+                setTimeout(() => { if (statusEl) statusEl.style.display = "none"; }, 2500);
+            }
+        }
+        // Não encontrado → campos ficam em branco; sem mensagem de erro
+    } catch (_) {
+        // Falha de conexão ou API → silencioso, usuário preenche manualmente
+    } finally {
+        tituloEl.placeholder = placeholderOriginal;
+    }
+}
+
 /* ── MODAL ADD ── */
 function abrirModalAdd() {
     modoEdicao = false;
     document.getElementById("modalTitulo").textContent = "Adicionar Livro";
     document.getElementById("livroId").value = "";
+    document.getElementById("fIsbn").value   = "";
     document.getElementById("fTitulo").value = "";
     document.getElementById("fAutor").value  = "";
-    document.getElementById("fIsbn").value   = "";
     document.getElementById("fPreco").value  = "";
     document.getElementById("fEstado").value = "BOM";
     document.getElementById("fResumo").value = "";
+    const statusEl = document.getElementById("fIsbnStatus");
+    if (statusEl) statusEl.style.display = "none";
     limparCamposPromo();
     document.getElementById("btnSalvar").textContent = "Adicionar";
     esconderErro();

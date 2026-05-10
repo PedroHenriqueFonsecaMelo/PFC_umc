@@ -133,6 +133,17 @@ public class LivroControllerApi {
     }
 
     /**
+     * Busca livro aprovado por ID — endpoint público para a página de detalhes.
+     * Retorna 404 se o livro não existir ou ainda não estiver aprovado.
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
+        return livroRepository.findByIdAndAprovadoTrue(id)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
      * Compra todos os livros do carrinho em uma única transação.
      * Valida saldo total antes de debitar qualquer valor.
      * Retorna resumo com comprados, falhas e saldo restante.
