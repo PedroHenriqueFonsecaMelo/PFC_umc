@@ -105,7 +105,12 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/livros/vender").authenticated()
                                                 .requestMatchers("/api/livros/lotes/**").authenticated()
 
-                                                // 3. AGORA AS ROTAS PÚBLICAS
+                                                // 3. Páginas da loja que exigem autenticação (antes do catch-all /livros/**)
+                                                .requestMatchers("/livros/estante", "/livros/checkout").authenticated()
+                                                // Endpoint público para detalhes de livro via API (GET /api/livros/{id})
+                                                .requestMatchers(HttpMethod.GET, "/api/livros/*").permitAll()
+
+                                                // 4. AGORA AS ROTAS PÚBLICAS
                                                 .requestMatchers(PUBLIC_ROUTES).permitAll()
 
                                                 // 3. Rotas de Blog e Fórum (Consulta pública, escrita protegida)

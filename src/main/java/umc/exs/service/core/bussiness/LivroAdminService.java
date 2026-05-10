@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import umc.exs.dtos.admin.AdminAprovacaoDTO;
+import umc.exs.dtos.admin.LivroAdminRequest;
 import umc.exs.dtos.livro.LivroDTO;
 import umc.exs.mappers.LivroMapper;
 import umc.exs.model.entidades.foundation.Lote;
@@ -32,6 +33,7 @@ import umc.exs.service.log.LogAuditoriaService;
 public class LivroAdminService {
 
     private final LivroRepository livroRepository;
+
     private final ClienteRepository clienteRepository;
     private final LoteRepository loteRepository;
     private final LogAuditoriaService logAuditoria;
@@ -202,41 +204,88 @@ public class LivroAdminService {
 
     @SuppressWarnings("null")
     @Transactional
-    public LivroDTO adicionarLivroAdmin(String titulo, String autor, String isbn,
-            Double preco, EstadoLivro estado, String capa, @NonNull Long vendedorId) {
+    public LivroDTO adicionarLivroAdmin(LivroAdminRequest req) {
 
-        Cliente vendedor = clienteRepository.findById(vendedorId)
-                .orElseThrow(() -> new RuntimeException("Vendedor não encontrado"));
+        // ===== buscar vendedor =====
+        Cliente vendedor = null;
 
+        if (req.getVendedorId() != null) {
+            vendedor = clienteRepository.findById(req.getVendedorId())
+                    .orElseThrow(() -> new RuntimeException("Vendedor não encontrado"));
+        }
+
+        // ===== regra de promoção =====
+        boolean promoAtiva = Boolean.TRUE.equals(req.getEmPromocao())
+                && req.getPercentualDesconto() != null
+                && req.getPercentualDesconto() > 0;
+
+        Double precoFinal = req.getPreco();
+        Double precoOriginal = null;
+
+        if (promoAtiva) {
+            precoOriginal = req.getPreco();
+            precoFinal = req.getPreco() * (1.0 - req.getPercentualDesconto() / 100.0);
+        }
+
+        // ===== criação =====
         Livro livro = Livro.builder()
-                .titulo(titulo)
-                .autor(autor)
-                .isbn(isbn)
-                .precoAprovado(preco)
-                .estadoAprovado(estado)
-                .fotosUrls(capa)
+                .titulo(req.getTitulo())
+                .autor(req.getAutor())
+                .isbn(req.getIsbn())
+                .precoAprovado(precoFinal)
+                .precoOriginal(precoOriginal)
+                .estadoAprovado(req.getEstado())
+                .resumoOficial(req.getResumo())
+                .fotosUrls(req.getCapa())
                 .vendedor(vendedor)
-                .aprovado(false)
+                .aprovado(true)
+                .dataAprovacao(LocalDateTime.now())
+                .adminAprovadorId(req.getAdminId())
+                .emPromocao(promoAtiva)
+                .promocaoExpira(promoAtiva ? req.getPromocaoExpira() : null)
                 .build();
 
-        return livroMapper.paraDTO(livroRepository.save(livro));
+        Livro salvo = livroRepository.save(livro);
+
+        return livroMapper.paraDTO(salvo);
     }
 
     @Transactional
-    public LivroDTO editarLivroAdmin(@NonNull Long id, String titulo, String autor,
-            String isbn, Double preco, EstadoLivro estado, String capa) {
+    public LivroDTO editarLivroAdmin(@NonNull Long id, LivroAdminRequest req) {
 
         Livro livro = livroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException(message));
+                .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
 
-        livro.setTitulo(titulo);
-        livro.setAutor(autor);
-        livro.setIsbn(isbn);
-        livro.setPrecoAprovado(preco);
-        livro.setEstadoAprovado(estado);
-        livro.setFotosUrls(capa);
+        // ===== dados básicos =====
+        livro.setTitulo(req.getTitulo());
+        livro.setAutor(req.getAutor());
+        livro.setIsbn(req.getIsbn());
+        livro.setEstadoAprovado(req.getEstado());
+        livro.setResumoOficial(req.getResumo());
+        livro.setFotosUrls(req.getCapa());
 
-        return livroMapper.paraDTO(livroRepository.save(livro));
+        // ===== regra de promoção =====
+        boolean promoAtiva = Boolean.TRUE.equals(req.getEmPromocao())
+                && req.getPercentualDesconto() != null
+                && req.getPercentualDesconto() > 0;
+
+        livro.setEmPromocao(promoAtiva);
+
+        if (promoAtiva) {
+            
+            livro.setPrecoOriginal(req.getPreco());
+            livro.setPrecoAprovado(req.getPreco() * (1.0 - req.getPercentualDesconto() / 100.0));
+            livro.setPromocaoExpira(req.getPromocaoExpira());
+        } else {
+
+            livro.setPrecoAprovado(req.getPreco());
+            livro.setPrecoOriginal(null);
+            livro.setPromocaoExpira(null);
+        }
+
+        Livro salvo = livroRepository.save(livro);
+
+        return livroMapper.paraDTO(salvo);
     }
 
     @Transactional

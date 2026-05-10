@@ -288,7 +288,8 @@ public class ClientController {
     public String exibirMinhasCompras(@AuthenticationPrincipal UserDetails user) {
         if (user == null)
             return REDIRECT_LOGIN;
-        return "cliente/minhas-compras";
+        // Histórico de compras está consolidado em Meu Perfil
+        return REDIRECT_PERFIL;
     }
 
     @GetMapping("/lista-desejos")

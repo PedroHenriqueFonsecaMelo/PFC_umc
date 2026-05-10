@@ -77,6 +77,18 @@
       </div>
       <form id="modalForm" onsubmit="salvarLivro(event)">
         <input type="hidden" id="livroId" />
+
+        <!-- ISBN é o PRIMEIRO campo: busca automática ao digitar (≥10 dígitos) -->
+        <div class="form-group">
+          <label>ISBN</label>
+          <input type="text" id="fIsbn" placeholder="Ex: 978-3-16-148410-0"
+                 oninput="buscarIsbnModal()"
+                 onkeydown="if(event.key==='Enter'){event.preventDefault();buscarIsbnModal();}" />
+          <span id="fIsbnStatus"
+                style="display:none;font-size:.76rem;color:#7a6e65;margin-top:.3rem;">
+          </span>
+        </div>
+
         <div class="form-row">
           <div class="form-group">
             <label>Título *</label>
@@ -89,15 +101,9 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>ISBN</label>
-            <input type="text" id="fIsbn" placeholder="Ex: 978-3-16-148410-0" />
-          </div>
-          <div class="form-group">
             <label>Preço (T$) *</label>
             <input type="number" id="fPreco" required min="0" step="0.01" placeholder="Ex: 30.00" oninput="calcularPrecoPromo()" />
           </div>
-        </div>
-        <div class="form-row">
           <div class="form-group">
             <label>Estado *</label>
             <select id="fEstado" required>

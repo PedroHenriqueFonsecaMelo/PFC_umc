@@ -20,25 +20,78 @@
     <div class="cn-right">
         <span class="cn-saldo" id="navSaldo">T$ --</span>
 
-        <!-- Ícone da Estante (carrinho) -->
-        <button class="cn-btn" id="cnCartBtn"
-                onclick="cnAbrirEstante()"
-                title="Minha Estante"
-                style="background:none;border:none;cursor:pointer;padding:.25rem .4rem;
-                       position:relative;display:inline-flex;align-items:center;">
-            <!-- SVG: livro aberto -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-            </svg>
-            <span id="cnCartBadge"
-                  style="display:none;position:absolute;top:-3px;right:-5px;
-                         background:#722f37;color:#fff;border-radius:50%;
-                         min-width:17px;height:17px;font-size:.62rem;font-weight:700;
-                         align-items:center;justify-content:center;line-height:1;padding:0 3px;">0</span>
-        </button>
+        <!-- ── Mini Carrinho (estante) ── -->
+        <div style="position:relative;display:inline-block;" id="cnMiniCartWrapper">
+            <button class="cn-btn" id="cnCartBtn"
+                    onclick="cnToggleMiniCart()"
+                    title="Minha Estante"
+                    style="background:none;border:none;cursor:pointer;padding:.25rem .4rem;
+                           position:relative;display:inline-flex;align-items:center;">
+                <!-- SVG: livro aberto -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                </svg>
+                <span id="cnCartBadge"
+                      style="display:none;position:absolute;top:-3px;right:-5px;
+                             background:#722f37;color:#fff;border-radius:50%;
+                             min-width:17px;height:17px;font-size:.62rem;font-weight:700;
+                             align-items:center;justify-content:center;line-height:1;padding:0 3px;">0</span>
+            </button>
+
+            <!-- Dropdown mini carrinho -->
+            <div id="cnMiniCart"
+                 style="display:none;position:absolute;right:0;top:calc(100% + 8px);
+                        width:300px;background:#f9f6f0;border:1.5px solid #2c241b;
+                        box-shadow:4px 4px 0 rgba(44,36,27,.15);z-index:999;">
+                <!-- Cabeçalho do dropdown -->
+                <div style="padding:.65rem 1rem;border-bottom:1px solid rgba(44,36,27,.12);
+                            display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-family:'Playfair Display',serif;font-size:.88rem;
+                                 font-weight:700;color:#2c241b;">Minha Estante</span>
+                    <button onclick="cnFecharMiniCart()"
+                            style="background:none;border:none;cursor:pointer;
+                                   color:#7a6e65;font-size:.85rem;line-height:1;padding:0;">✕</button>
+                </div>
+                <!-- Lista de itens -->
+                <div id="cnMiniCartLista"
+                     style="max-height:230px;overflow-y:auto;padding:.4rem .8rem;"></div>
+                <!-- Estado vazio -->
+                <div id="cnMiniCartVazio"
+                     style="padding:1.2rem;text-align:center;font-size:.82rem;
+                            color:#7a6e65;font-family:'IM Fell English',serif;font-style:italic;">
+                    Sua estante está vazia.
+                </div>
+                <!-- Rodapé com total e ações -->
+                <div id="cnMiniCartFooter"
+                     style="display:none;padding:.65rem 1rem;
+                            border-top:1px solid rgba(44,36,27,.12);background:#ede8df;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;">
+                        <span style="font-size:.78rem;color:#7a6e65;">Total</span>
+                        <span id="cnMiniCartTotal"
+                              style="font-family:'Playfair Display',serif;font-weight:800;
+                                     color:#2c241b;font-size:.98rem;">T$ 0,00</span>
+                    </div>
+                    <!-- Único botão de ação: Ver Estante -->
+                    <a href="/livros/estante"
+                       style="display:block;width:100%;padding:.6rem;background:#722f37;color:#f9f6f0;
+                              text-align:center;font-size:.78rem;font-weight:700;letter-spacing:.07em;
+                              text-transform:uppercase;text-decoration:none;font-family:'DM Sans',sans-serif;
+                              margin-bottom:.4rem;box-sizing:border-box;">
+                        Ver Estante →
+                    </a>
+                    <button onclick="cnLimparEstante()"
+                            style="width:100%;background:transparent;
+                                   border:1px solid rgba(44,36,27,.2);color:#7a6e65;
+                                   padding:.38rem;font-size:.75rem;cursor:pointer;
+                                   font-family:'DM Sans',sans-serif;">
+                        Limpar estante
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Sininho de Notificações -->
         <div class="cn-notif-wrapper" id="cnNotifWrapper" style="position:relative;display:inline-block;">
@@ -68,7 +121,7 @@
             </div>
         </div>
 
-        <a th:href="@{/clientes/minhas-compras}" class="cn-btn cn-estante">
+        <a th:href="@{/livros/estante}" class="cn-btn cn-estante">
             <img src="/favicon.ico" alt="Estante" class="cn-estante-icon"/>
             Minha Estante
         </a>
@@ -99,19 +152,139 @@
             }
         }
 
-        window.cnAbrirEstante = function() {
-            if (typeof toggleCarrinho === 'function') {
-                toggleCarrinho();
+        /* ── Mini Carrinho: toggle ── */
+        window.cnToggleMiniCart = function() {
+            var cart = document.getElementById('cnMiniCart');
+            if (!cart) return;
+            var aberto = cart.style.display !== 'none';
+            if (aberto) {
+                cart.style.display = 'none';
             } else {
-                window.location.href = '/livros/vitrine';
+                cnPopularMiniCart();
+                cart.style.display = 'block';
             }
         };
 
+        window.cnFecharMiniCart = function() {
+            var cart = document.getElementById('cnMiniCart');
+            if (cart) cart.style.display = 'none';
+        };
+
+        /* ── Mini Carrinho: limpar estante ── */
+        window.cnLimparEstante = function() {
+            localStorage.removeItem(CART_KEY);
+            cnAtualizarBadgeEstante();
+            cnPopularMiniCart();
+        };
+
+        /* ── Mini Carrinho: popular com itens do localStorage ── */
+        function cnPopularMiniCart() {
+            var itens, lista, vazio, footer, totalEl;
+            try {
+                itens = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+            } catch(_) {
+                itens = [];
+            }
+
+            lista   = document.getElementById('cnMiniCartLista');
+            vazio   = document.getElementById('cnMiniCartVazio');
+            footer  = document.getElementById('cnMiniCartFooter');
+            totalEl = document.getElementById('cnMiniCartTotal');
+
+            if (!lista) return;
+
+            if (itens.length === 0) {
+                lista.innerHTML = '';
+                if (vazio)  vazio.style.display  = 'block';
+                if (footer) footer.style.display = 'none';
+                return;
+            }
+
+            if (vazio)  vazio.style.display  = 'none';
+            if (footer) footer.style.display = 'block';
+
+            var total = 0;
+            lista.innerHTML = itens.map(function(item) {
+                var foto = 'https://via.placeholder.com/40x54?text=📚';
+                try {
+                    var arr = JSON.parse(item.fotosUrls);
+                    if (Array.isArray(arr) && arr.length > 0) foto = arr[0];
+                } catch(_) {}
+                var preco = item.precoAprovado || 0;
+                total += preco;
+                return '<div style="display:flex;align-items:center;gap:.55rem;' +
+                       'padding:.45rem 0;border-bottom:1px solid rgba(44,36,27,.07);">' +
+                       '<img src="' + foto + '" ' +
+                       'style="width:34px;height:46px;object-fit:cover;' +
+                       'border:1px solid rgba(44,36,27,.15);flex-shrink:0;" ' +
+                       'onerror="this.src=\'https://via.placeholder.com/40x54?text=📚\'">' +
+                       '<div style="flex:1;min-width:0;">' +
+                       '<div style="font-size:.77rem;font-family:\'Playfair Display\',serif;' +
+                       'font-weight:600;color:#2c241b;overflow:hidden;text-overflow:ellipsis;' +
+                       'white-space:nowrap;">' + cnEscHtml(item.titulo) + '</div>' +
+                       '<div style="font-size:.7rem;color:#7a6e65;font-style:italic;">' +
+                       cnEscHtml(item.autor || '') + '</div>' +
+                       '</div>' +
+                       '<div style="font-size:.8rem;font-weight:700;color:#722f37;flex-shrink:0;">' +
+                       'T$ ' + preco.toFixed(2) + '</div>' +
+                       '</div>';
+            }).join('');
+
+            if (totalEl) totalEl.textContent = 'T$ ' + total.toFixed(2);
+        }
+
+        /* Escapa HTML para evitar XSS no conteúdo do localStorage */
+        function cnEscHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        /* ── Expõe badge globalmente para páginas de produto atualizarem ── */
+        window.cnAtualizarBadgeEstante = cnAtualizarBadgeEstante;
+
+        /* ── Hover no mini carrinho (mouseenter/mouseleave com delay) ── */
+        document.addEventListener('DOMContentLoaded', function() {
+            var wrapper = document.getElementById('cnMiniCartWrapper');
+            var cartEl  = document.getElementById('cnMiniCart');
+            var _timer  = null;
+
+            if (wrapper && cartEl) {
+                wrapper.addEventListener('mouseenter', function() {
+                    if (_timer) { clearTimeout(_timer); _timer = null; }
+                    cnPopularMiniCart();
+                    cartEl.style.display = 'block';
+                });
+                wrapper.addEventListener('mouseleave', function() {
+                    _timer = setTimeout(function() {
+                        cartEl.style.display = 'none';
+                    }, 180);
+                });
+            }
+
+            /* Fecha ao clicar fora (fallback para touch) */
+            document.addEventListener('click', function(e) {
+                if (wrapper && !wrapper.contains(e.target)) cnFecharMiniCart();
+            });
+        });
+
+        /* Inicia badge e atualiza a cada 1,5s (pega mudanças de outras abas) */
         cnAtualizarBadgeEstante();
         window.addEventListener('storage', function(e) {
             if (e.key === CART_KEY) cnAtualizarBadgeEstante();
         });
         setInterval(cnAtualizarBadgeEstante, 1500);
+
+        /* ── Saldo na navbar ── */
+        fetch('/clientes/meu-perfil-json', { credentials: 'include' })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(c) {
+                if (!c) return;
+                var el = document.getElementById('navSaldo');
+                if (el) el.textContent = 'T$ ' + (c.saldoTokens || 0).toFixed(2);
+            }).catch(function(){});
 
         /* ── Notificações ── */
         function cnCarregarNotificacoes() {
@@ -150,10 +323,12 @@
                 }
                 vazia.style.display = 'none';
                 lista.innerHTML = data.notificacoes.map(function(n) {
-                    return '<li style="padding:.65rem 1rem;border-bottom:1px solid rgba(44,36,27,.07);cursor:pointer;font-size:.82rem;color:#2c241b;" ' +
+                    return '<li style="padding:.65rem 1rem;border-bottom:1px solid rgba(44,36,27,.07);' +
+                        'cursor:pointer;font-size:.82rem;color:#2c241b;" ' +
                         'onclick="cnMarcarLida(' + n.id + ',' + JSON.stringify(n.link || '') + ')">' +
-                        '<span style="display:block;">' + n.mensagem + '</span>' +
-                        '<span style="font-size:.72rem;color:#7a6e65;">' + n.dataCriacao.substring(0,16).replace('T',' ') + '</span>' +
+                        '<span style="display:block;">' + cnEscHtml(n.mensagem) + '</span>' +
+                        '<span style="font-size:.72rem;color:#7a6e65;">' +
+                        n.dataCriacao.substring(0,16).replace('T',' ') + '</span>' +
                         '</li>';
                 }).join('');
             }).catch(function(){});

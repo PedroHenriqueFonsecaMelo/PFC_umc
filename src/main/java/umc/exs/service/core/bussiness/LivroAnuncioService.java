@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import umc.exs.dtos.compra.lote.LoteRequestDTO;
@@ -39,7 +40,6 @@ import umc.exs.service.log.LogAuditoriaService;
 @RequiredArgsConstructor
 public class LivroAnuncioService {
 
-    private static final String PATH_UPLOAD = "uploads/livros/";
     private static final String URL_UPLOAD = "/uploads/livros/";
 
     private final LivroRepository livroRepository;
@@ -69,7 +69,7 @@ public class LivroAnuncioService {
         String jsonFotos = converterParaJson(List.of(urlFoto));
 
         Obra obra = obterOuCriarObra(dto.getTitulo(), dto.getAutor());
-        
+
         Livro anuncio = Livro.builder()
                 .titulo(dto.getTitulo())
                 .autor(dto.getAutor())
@@ -155,7 +155,7 @@ public class LivroAnuncioService {
 
     private String salvarFoto(MultipartFile foto) {
         String nome = UUID.randomUUID() + "_" + foto.getOriginalFilename();
-        Path caminho = Paths.get(PATH_UPLOAD + nome);
+        Path caminho = Paths.get(URL_UPLOAD + nome);
 
         try {
             Files.createDirectories(caminho.getParent());
@@ -204,6 +204,12 @@ public class LivroAnuncioService {
         }
 
         return lista;
+    }
+
+    public LivroDTO buscarPorIdAtivo(Long id) {
+        return livroRepository.findByIdAndAprovadoTrue(id)
+                .map(livro -> livroMapper.paraDTO(livro))
+                .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado"));
     }
 
     @SuppressWarnings("null")

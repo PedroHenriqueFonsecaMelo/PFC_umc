@@ -8,13 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
+import umc.exs.dtos.admin.LivroAdminRequest;
 import umc.exs.dtos.compra.carrinho.CarrinhoCompraRequestDTO;
 import umc.exs.dtos.compra.carrinho.CarrinhoCompraResponseDTO;
 import umc.exs.dtos.compra.lote.LoteRequestDTO;
 import umc.exs.dtos.livro.LivroDTO;
 import umc.exs.dtos.livro.LivroRequestDTO;
 import umc.exs.model.entidades.foundation.Lote;
-import umc.exs.model.enums.EstadoLivro;
 
 @Service("livroService")
 @RequiredArgsConstructor
@@ -78,28 +78,28 @@ public class LivroService {
     }
 
     @Transactional
-    public LivroDTO adicionarLivroAdmin(String titulo, String autor, String isbn,
-            Double preco, EstadoLivro estado,
-            String capa, Long vendedorId) {
-        return livroAdminService.adicionarLivroAdmin(
-                titulo, autor, isbn, preco, estado, capa, vendedorId);
-    }
-
-    @Transactional
-    public LivroDTO editarLivroAdmin(Long id, String titulo, String autor,
-            String isbn, Double preco,
-            EstadoLivro estado, String capa) {
-        return livroAdminService.editarLivroAdmin(
-                id, titulo, autor, isbn, preco, estado, capa);
-    }
-
-    @Transactional
-    public void deletarLivroAdmin(Long id) {
+    public void deletarLivroAdmin(@NonNull Long id) {
         livroAdminService.deletarLivroAdmin(id);
     }
 
     @Transactional
     public LivroDTO cadastrarPorIsbn(String isbn) {
         return livroCompraService.cadastrarPorIsbn(isbn);
+    }
+
+    @Transactional
+    public LivroDTO adicionarLivroAdmin(LivroAdminRequest req) {
+
+        return livroAdminService.adicionarLivroAdmin(req);
+    }
+
+    @Transactional
+    public LivroDTO editarLivroAdmin(@NonNull Long id, LivroAdminRequest req) {
+
+        return livroAdminService.editarLivroAdmin(id, req);
+    }
+
+    public LivroDTO buscarPorIdAtivo(Long id) {
+        return livroAnuncioService.buscarPorIdAtivo(id);
     }
 }

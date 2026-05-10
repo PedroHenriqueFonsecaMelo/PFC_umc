@@ -37,39 +37,40 @@ public class DashboardService {
         public DashboardMetricasDTO getMetricas() {
 
                 // ── Cards ────────────────────────────────────────────────
-                long totalClientes = clienteRepository.count();
-                long totalLivros = livroRepository.count();
-                long totalVisitas = visitaSiteRepository.sumTotalVisitas();
+                long totalClientes   = clienteRepository.count();
+                long totalLivros     = livroRepository.count();
+                // sumTotalVisitas() retorna null quando a tabela está vazia → defaulta para 0
+                Long visitasRaw      = visitaSiteRepository.sumTotalVisitas();
+                long totalVisitas    = visitasRaw != null ? visitasRaw : 0L;
                 long totalAdquiridos = pedidoRepository.count();
 
                 Double tokensDisp = transacaoRepository.sumValorByStatus("CONFIRMADO");
                 Double tokensUtil = pedidoRepository.sumTokensUtilizados();
                 double tokensDisponibilizados = tokensDisp != null ? tokensDisp : 0.0;
-                double tokensUtilizados = tokensUtil != null ? tokensUtil : 0.0;
+                double tokensUtilizados       = tokensUtil != null ? tokensUtil : 0.0;
 
                 // ── Gráficos: últimos 12 meses ────────────────────────────
                 // Início = primeiro dia do mês de 11 meses atrás, à meia-noite
                 LocalDateTime inicio = YearMonth.now().minusMonths(11)
                                 .atDay(1).atStartOfDay();
 
-                // Busca registros dos últimos 12 meses
+                // Busca registros dos últimos 12 meses.
+                // Usa projeções (só a data) para evitar EntityNotFoundException quando
+                // o Cliente referenciado em Pedido.comprador ou Livro.vendedor foi deletado.
                 var clientes = clienteRepository.findByDataCriacaoAfter(inicio);
-                var pedidos = pedidoRepository.findByDataCompraAfter(inicio);
-                var livros = livroRepository.findByDataAnuncioAfter(inicio);
+                var datasCompra  = pedidoRepository.findDataCompraAfterProjection(inicio);
+                var datasAnuncio = livroRepository.findDataAnuncioAfterProjection(inicio);
 
                 // Agrupa por YearMonth em Java (compatível com SQLite e PostgreSQL)
                 Map<YearMonth, Long> clientesMap = clientes.stream()
                                 .collect(Collectors.groupingBy(
                                                 c -> YearMonth.from(c.getDataCriacao()), Collectors.counting()));
 
-                Map<YearMonth, Long> vendasMap = pedidos.stream()
-                                .collect(Collectors.groupingBy(
-                                                p -> YearMonth.from(p.getDataCompra()), Collectors.counting()));
+                Map<YearMonth, Long> vendasMap = datasCompra.stream()
+                                .collect(Collectors.groupingBy(YearMonth::from, Collectors.counting()));
 
-                Map<YearMonth, Long> postagensMap = livros.stream()
-                                .filter(l -> l.getDataAnuncio() != null)
-                                .collect(Collectors.groupingBy(
-                                                l -> YearMonth.from(l.getDataAnuncio()), Collectors.counting()));
+                Map<YearMonth, Long> postagensMap = datasAnuncio.stream()
+                                .collect(Collectors.groupingBy(YearMonth::from, Collectors.counting()));
 
                 // Monta arrays de 12 posições (mês mais antigo → mais recente)
                 List<String> rotulos = new ArrayList<>();

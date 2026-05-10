@@ -73,6 +73,14 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
 
     List<Livro> findByDataAnuncioAfter(LocalDateTime data);
 
+    /**
+     * Projeção usada pelo dashboard: retorna apenas as datas de anúncio,
+     * sem carregar as entidades relacionadas (vendedor, lote, etc.).
+     * Evita EntityNotFoundException quando o Cliente/vendedor foi deletado do banco.
+     */
+    @Query("SELECT l.dataAnuncio FROM Livro l WHERE l.dataAnuncio > :data AND l.dataAnuncio IS NOT NULL")
+    List<LocalDateTime> findDataAnuncioAfterProjection(@Param("data") LocalDateTime data);
+
     // =========================================================
     // PROMOÇÕES
     // =========================================================

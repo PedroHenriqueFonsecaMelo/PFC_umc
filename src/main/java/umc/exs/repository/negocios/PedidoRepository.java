@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import umc.exs.model.entidades.foundation.Pedido;
@@ -29,7 +30,16 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
      */
     List<Pedido> findByDataCompraAfter(LocalDateTime data);
 
-    /** Soma total de tokens gastos em pedidos (tokens utilizados). */
-    @Query("SELECT COALESCE(SUM(p.precoLivro), 0) FROM Pedido p")
+    /**
+     * Projeção usada pelo dashboard: retorna apenas as datas de compra,
+     * sem carregar as entidades relacionadas (comprador, etc.).
+     * Evita EntityNotFoundException quando o Cliente foi deletado do banco.
+     */
+    @Query("SELECT p.dataCompra FROM Pedido p WHERE p.dataCompra > :data")
+    List<LocalDateTime> findDataCompraAfterProjection(@Param("data") LocalDateTime data);
+
+    /** Soma total de tokens gastos em pedidos (tokens utilizados).
+     *  Retorna null quando não há pedidos; o service trata com orElse(0.0). */
+    @Query("SELECT SUM(p.precoLivro) FROM Pedido p")
     Double sumTokensUtilizados();
 }
