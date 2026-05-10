@@ -230,8 +230,8 @@ document.getElementById("formVenda").addEventListener("submit", async (e) => {
     try {
         const res = await fetch("/api/livros/lotes/vender", { method: "POST", body: formData });
         if (res.ok) {
-            mostrarOk("Lote enviado! Nossa curadoria avaliará em breve.");
-            setTimeout(() => window.location.href = "/?enviado=1", 2000);
+            const lote = await res.json();
+            mostrarModalConfirmacao(lote);
         } else {
             const msg = await res.text();
             mostrarErro(msg || "Erro ao enviar o lote. Tente novamente.");
@@ -260,5 +260,54 @@ function esconderAlertas() {
     document.getElementById("alertErro").classList.remove("show");
     document.getElementById("alertOk").classList.remove("show");
 }
+
+/* ── Comprovante do lote ── */
+
+function escHtml(str) {
+    return String(str || "")
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function mostrarModalConfirmacao(lote) {
+    const protocolo = lote.codigoProtocolo || String(lote.id || "—");
+    const numLote   = lote.id ? "Lote #" + lote.id : "";
+    const data      = new Date().toLocaleDateString("pt-BR", {
+        day: "2-digit", month: "long", year: "numeric"
+    });
+
+    document.getElementById("recProtocolo").textContent = protocolo;
+    document.getElementById("recNumLote").textContent   = numLote;
+    document.getElementById("recData").textContent      = data;
+
+    document.getElementById("recLivros").innerHTML = livros.map((l, i) => {
+        const sub = [
+            l.autor ? escHtml(l.autor) : null,
+            l.isbn  ? "ISBN: " + l.isbn.replace(/\D/g, "") : null
+        ].filter(Boolean).join(" · ");
+        return `<div class="rec-livro-item">
+            <span class="rec-livro-num">${String(i + 1).padStart(2, "0")}</span>
+            <div>
+                <div class="rec-livro-titulo">${escHtml(l.titulo || "—")}</div>
+                ${sub ? `<div class="rec-livro-sub">${sub}</div>` : ""}
+            </div>
+        </div>`;
+    }).join("");
+
+    // Espelha o recibo na área de impressão
+    document.getElementById("printArea").innerHTML =
+        document.getElementById("recibo").innerHTML;
+
+    document.getElementById("modalConfirmacao").style.display = "flex";
+    document.body.style.overflow = "hidden";
+}
+
+document.getElementById("btnPdf").addEventListener("click", () => window.print());
+
+document.getElementById("btnConcluir").addEventListener("click", () => {
+    window.location.href = "/?enviado=1";
+});
+
+/* ─────────────────────────────────────────────────────────── */
 
 adicionarLivro();

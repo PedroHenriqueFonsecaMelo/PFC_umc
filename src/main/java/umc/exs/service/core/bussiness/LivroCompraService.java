@@ -156,7 +156,8 @@ public class LivroCompraService {
                 }
 
                 // Registra pedido ANTES de deletar o livro
-                pedidoService.registrarPedido(comprador, livro);
+                umc.exs.model.entidades.foundation.Pedido pedidoSalvo =
+                        pedidoService.registrarPedido(comprador, livro);
 
                 comprador.setSaldoTokens(comprador.getSaldoTokens() - preco);
                 totalGasto += preco;
@@ -164,6 +165,7 @@ public class LivroCompraService {
                 livroRepository.delete(livro);
 
                 comprados.add(CarrinhoCompraResponseDTO.ItemResultado.builder()
+                        .pedidoId(pedidoSalvo.getId())
                         .livroId(livro.getId())
                         .titulo(livro.getTitulo())
                         .preco(preco)

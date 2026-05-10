@@ -114,7 +114,7 @@
 }
 
 select,
-button:not(.nav-item):not(.tab-btn):not(.filter-btn):not(.btn-salvar-envio):not(.btn-publicar) {
+button:not(.nav-item):not(.tab-btn):not(.filter-btn):not(.btn-salvar-envio):not(.btn-publicar):not(.btn-remover-post):not(.blog-confirm-sim):not(.blog-confirm-nao) {
   width: 100%;
   margin-top: 10px;
   padding: 12px;
@@ -340,11 +340,16 @@ input[type="text"].search-input:focus { border-color: #722f37; }
 .blog-post-item {
   background: #ffffff;
   border: 1px solid rgba(44, 36, 27, 0.1);
-  padding: 1rem 1.25rem;
+  padding: 1rem 2.5rem 1rem 1.25rem;
   display: flex;
   gap: 1rem;
   align-items: flex-start;
   margin-bottom: 0.75rem;
+  position: relative;
+  transition: border-color 0.2s;
+}
+.blog-post-item:hover {
+  border-color: rgba(44, 36, 27, 0.25);
 }
 .blog-post-img {
   width: 72px;
@@ -355,21 +360,66 @@ input[type="text"].search-input:focus { border-color: #722f37; }
   background: #ede8df;
 }
 .btn-remover-post {
-  font-size: 0.72rem;
-  color: #722f37;
-  border: 1px solid rgba(114, 47, 55, 0.3);
-  padding: 0.35rem 0.75rem;
-  background: transparent;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: #d0c9c4;
   cursor: pointer;
-  flex-shrink: 0;
-  transition: all 0.2s;
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 3px;
   border-radius: 2px;
+  transition: color 0.15s, background 0.15s;
 }
 .btn-remover-post:hover {
+  color: #722f37;
+  background: rgba(114, 47, 55, 0.08);
+}
+
+/* ── mini confirmação inline de remoção de post ── */
+.blog-confirm-del {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #fff;
+  border: 1px solid rgba(114, 47, 55, 0.25);
+  padding: 0.18rem 0.4rem;
+  border-radius: 2px;
+  box-shadow: 2px 2px 0 rgba(44, 36, 27, 0.08);
+}
+.blog-confirm-del span {
+  font-size: 0.65rem;
+  color: #7a6e65;
+  white-space: nowrap;
+}
+.blog-confirm-sim {
   background: #722f37;
   color: #f9f6f0;
-  border-color: #722f37;
+  border: none;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 1px;
+  transition: background 0.15s;
 }
+.blog-confirm-sim:hover { background: #5a2329; }
+.blog-confirm-nao {
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 0 2px;
+  transition: color 0.15s;
+}
+.blog-confirm-nao:hover { color: #555; }
 
 /* ── Pedidos heading ── */
 .pedidos-heading {

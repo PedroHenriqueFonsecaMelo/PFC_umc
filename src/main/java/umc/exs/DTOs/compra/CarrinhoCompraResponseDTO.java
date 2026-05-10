@@ -30,6 +30,7 @@ public class CarrinhoCompraResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ItemResultado {
+        private Long pedidoId; // preenchido apenas em compras bem-sucedidas
         private Long livroId;
         private String titulo;
         private Double preco;

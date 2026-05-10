@@ -41,6 +41,11 @@
                     </div>
 
                     <form id="formCompra">
+                        <div class="taxa-info">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span>Cada <strong>R$ 1,00</strong> equivale a <strong>T$ 2,00</strong> de tokens</span>
+                        </div>
+
                         <div class="form-group">
                             <label for="valor">Valor da Recarga (R$)</label>
                             <div class="input-wrap">
@@ -56,6 +61,7 @@
                                     oninput="atualizarPreview()"
                                 >
                             </div>
+                            <div class="form-erro" id="formErro" style="display:none"></div>
                         </div>
 
                         <div class="tokens-preview" id="tokensPreview" style="display:none;">

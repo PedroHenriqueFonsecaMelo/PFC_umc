@@ -60,6 +60,72 @@
       </p>
     </footer>
 
+    <!-- MODAL: COMPROVANTE DO LOTE ─────────────────────────── -->
+    <div class="modal-overlay" id="modalConfirmacao" role="dialog" aria-modal="true">
+      <div class="modal-box">
+
+        <section class="recibo" id="recibo">
+
+          <!-- cabeçalho escuro -->
+          <div class="rec-header">
+            <div class="rec-logo">Biblio<em>troca</em></div>
+            <p class="rec-kicker">Comprovante de envio para avaliação</p>
+            <div class="rec-ornamento">◆&ensp;◆&ensp;◆</div>
+            <p class="rec-label">Código do lote</p>
+            <strong class="rec-protocolo" id="recProtocolo">—</strong>
+            <div class="rec-meta">
+              <span id="recNumLote"></span>
+              <span class="rec-meta-sep">·</span>
+              <span id="recData"></span>
+            </div>
+          </div>
+
+          <!-- corpo branco -->
+          <div class="rec-body">
+            <div class="rec-aviso">
+              <div class="rec-aviso-icone">!</div>
+              <p>
+                Escreva ou imprima este código e
+                <strong>envie junto com os livros físicos</strong>.
+                Sem ele, não conseguimos identificar de qual cliente é este lote.
+              </p>
+            </div>
+
+            <p class="rec-secao-label">Livros neste lote</p>
+            <div class="rec-livros" id="recLivros"></div>
+
+            <p class="rec-rodape">
+              Após recebermos os livros, a curadoria avalia cada título em até
+              <strong>5 dias úteis</strong>. Você receberá um e-mail assim que a
+              avaliação for concluída.
+            </p>
+          </div>
+
+        </section>
+
+        <div class="modal-acoes">
+          <button class="btn-imprimir" id="btnPdf" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Baixar / Imprimir PDF
+          </button>
+          <button class="btn-concluir" id="btnConcluir" type="button">
+            Entendi — ir para minha conta
+          </button>
+        </div>
+
+      </div>
+    </div>
+    <!-- ─────────────────────────────────────────────────────── -->
+
+    <!-- Área exclusiva para impressão (oculta na tela) -->
+    <div class="print-area" id="printArea" aria-hidden="true"></div>
+
     <script th:src="@{/js/produto/venda_livro.js}"></script>
   </body>
 </html>

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
@@ -21,7 +22,8 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    /** Envia e-mail em texto puro (mantido para compatibilidade). */
+    /** Envia e-mail em texto puro de forma assíncrona. */
+    @Async("emailExecutor")
     public void enviar(String destino, String assunto, String texto) {
         SimpleMailMessage mensagem = new SimpleMailMessage();
         mensagem.setTo(destino);
@@ -31,7 +33,8 @@ public class EmailService {
         mailSender.send(mensagem);
     }
 
-    /** Envia e-mail com corpo HTML. */
+    /** Envia e-mail com corpo HTML de forma assíncrona. */
+    @Async("emailExecutor")
     public void enviarHtml(String destino, String assunto, String html) throws MessagingException {
         MimeMessage mensagem = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mensagem, "UTF-8");

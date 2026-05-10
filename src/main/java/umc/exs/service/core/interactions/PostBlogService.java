@@ -98,6 +98,8 @@ public class PostBlogService {
                 .conteudo(conteudo)
                 .autorNome(autorNome)
                 .imagemUrl(imagemUrl)
+                .status(StatusPost.PUBLICADO)
+                .dataPublicacao(LocalDateTime.now())
                 .build();
 
         return postBlogRepository.save(post);

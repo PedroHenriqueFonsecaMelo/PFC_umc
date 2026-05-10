@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compra confirmada — Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+    <link rel="stylesheet" th:href="@{/css/produto/pedido_confirmado.css}" />
+  </head>
+  <body>
+    <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+    <div class="page-wrap">
+
+      <!-- Estado vazio: sessão expirou ou acesso direto à URL -->
+      <div class="estado-vazio" id="estadoVazio" style="display:none">
+        <p>Nenhum pedido encontrado.</p>
+        <a href="/livros/vitrine" class="btn-vitrine">Ver vitrine</a>
+      </div>
+
+      <!-- Conteúdo principal -->
+      <div id="conteudo" style="display:none">
+
+        <!-- Hero de sucesso -->
+        <div class="hero-sucesso">
+          <div class="hero-icone">
+            <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <h1 class="hero-titulo">Compra <em>confirmada!</em></h1>
+          <p class="hero-data" id="heroData"></p>
+        </div>
+
+        <!-- Lista de pedidos -->
+        <section class="secao">
+          <h2 class="secao-titulo">Seus pedidos</h2>
+          <div id="listaPedidos"></div>
+        </section>
+
+        <!-- Resumo financeiro -->
+        <div class="resumo-box">
+          <div class="resumo-linha">
+            <span class="resumo-label">Total gasto</span>
+            <span class="resumo-valor" id="resumoTotal"></span>
+          </div>
+          <div class="resumo-linha resumo-linha--destaque">
+            <span class="resumo-label">Saldo restante</span>
+            <strong class="resumo-valor resumo-valor--saldo" id="resumoSaldo"></strong>
+          </div>
+        </div>
+
+        <!-- Aviso de envio -->
+        <div class="aviso-envio">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p>Um e-mail de confirmação foi enviado para você. Acompanhe o status
+             do envio em <a href="/clientes/minhas-compras">Minhas Compras</a>.</p>
+        </div>
+
+        <!-- Ações -->
+        <div class="acoes">
+          <a href="/livros/vitrine" class="btn-vitrine">Voltar para a vitrine</a>
+          <a href="/clientes/minhas-compras" class="btn-pedidos">Ver todos os meus pedidos</a>
+        </div>
+
+      </div>
+    </div>
+
+    <footer>
+      <div class="footer-logo">Biblio<em>troca</em></div>
+      <p class="footer-copy">© 2025 Bibliotroca — Todos os direitos reservados</p>
+    </footer>
+
+    <script th:src="@{/js/produto/pedido_confirmado.js}"></script>
+  </body>
+</html>

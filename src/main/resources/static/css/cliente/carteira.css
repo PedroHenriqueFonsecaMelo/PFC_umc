@@ -129,10 +129,39 @@ td { padding: 0.75rem 1rem; font-size: 0.875rem; color: #2c241b; border-bottom: 
 #textoCopiaECola { flex: 1; background: #ede8df; border: none; padding: 0.75rem; font-family: monospace; font-size: 0.8rem; color: #2c241b; outline: none; }
 .btn-copiar { background: #722f37; color: #f9f6f0; border: none; padding: 0.75rem 1rem; cursor: pointer; transition: background 0.2s; }
 .btn-copiar:hover { background: #5a2329; }
+.btn-copiar--copiado { background: #4a5d23 !important; }
 .btn-fechar-pix { background: #2c241b; color: #f9f6f0; border: none; width: 100%; padding: 0.85rem; font-family: "DM Sans", sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; margin-top: 1rem; transition: background 0.2s; }
 .btn-fechar-pix:hover { background: #3a2e24; }
 .btn-debug { display: block; margin: 0.5rem auto 0; background: none; border: none; color: rgba(44, 36, 27, 0.3); font-size: 0.7rem; cursor: pointer; text-align: center; }
 .btn-debug:hover { color: rgba(44, 36, 27, 0.6); }
+
+/* ── TAXA INFO ── */
+.taxa-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(74, 93, 35, 0.06);
+  border-left: 3px solid var(--forest);
+  padding: 0.6rem 0.85rem;
+  font-size: 0.82rem;
+  color: var(--ink);
+  margin-bottom: 1rem;
+}
+.taxa-info i { color: var(--forest); flex-shrink: 0; font-size: 0.85rem; }
+
+/* ── FORM ERRO ── */
+.form-erro {
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(114, 47, 55, 0.06);
+  border-left: 3px solid var(--accent);
+  color: var(--accent);
+  padding: 0.55rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+.form-erro::before { content: "⚠ "; }
 
 /* ── TOKENS PREVIEW ── */
 .tokens-preview {
