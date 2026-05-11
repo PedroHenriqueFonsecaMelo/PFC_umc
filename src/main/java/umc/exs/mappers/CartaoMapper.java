@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-import umc.exs.DTOs.user.CartaoDTO;
+import umc.exs.dtos.user.CartaoDTO;
 import umc.exs.model.entidades.usuario.Cartao;
 
 @Mapper(componentModel = "spring", uses = { DateMapper.class })

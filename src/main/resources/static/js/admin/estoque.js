@@ -10,6 +10,11 @@ document.getElementById("dataHoje").textContent =
     new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
 
 /* ── UTILS ── */
+function promoValida(promocaoExpira) {
+    if (!promocaoExpira) return true; // sem expiração = válida indefinidamente
+    return new Date(promocaoExpira).getTime() > Date.now();
+}
+
 function primeiraFoto(fotosUrls) {
     try {
         const arr = JSON.parse(fotosUrls);
@@ -50,21 +55,60 @@ function renderGrid(livros) {
     vazio.style.display = "none";
 
     grid.innerHTML = livros.map(l => {
+
         const foto  = l.fotoUrl || primeiraFoto(l.fotosUrls) || "";
         const imgSrc = foto || "https://via.placeholder.com/300x180?text=📚";
         const estado = l.estadoAprovado || "BOM";
-        const preco  = l.precoAprovado != null ? `T$ ${Number(l.precoAprovado).toFixed(2)}` : "—";
+
+        const promoAtiva = l.emPromocao && l.precoOriginal != null && promoValida(l.promocaoExpira);
+
+        let precoHtml;
+        if (promoAtiva) {
+            const desconto = Math.round((1 - l.precoAprovado / l.precoOriginal) * 100);
+            precoHtml = `
+                <div class="card-preco" id="adm-preco-${l.id}">
+                    <span class="preco-original">T$ ${Number(l.precoOriginal).toFixed(2)}</span>
+                    <span class="preco-promo">T$ ${Number(l.precoAprovado).toFixed(2)}</span>
+                </div>`;
+        } else {
+            const preco = l.precoAprovado != null ? `T$ ${Number(l.precoAprovado).toFixed(2)}` : "—";
+            precoHtml = `<div class="card-preco" id="adm-preco-${l.id}">${preco}</div>`;
+        }
+
+        const promoBadge = promoAtiva
+            ? `<span class="card-promo-badge" id="adm-badge-${l.id}">${Math.round((1 - l.precoAprovado / l.precoOriginal) * 100)}% OFF</span>`
+            : "";
+
+        const countdownHtml = (promoAtiva && l.promocaoExpira)
+            ? `<div class="promo-countdown"
+                    data-livro-id="${l.id}"
+                    data-expira="${l.promocaoExpira}"
+                    data-preco-original="${l.precoOriginal}"
+                    style="display:flex;align-items:center;gap:.35rem;
+                           margin-top:.4rem;padding:.25rem .5rem;
+                           background:#fff0f3;border:1.5px solid #e11d48;
+                           border-radius:8px;line-height:1.3;">
+                   <span style="font-size:.9rem;">🔥</span>
+                   <span style="font-size:.7rem;color:#e11d48;font-weight:700;">
+                       Expira em: <span id="adm-timer-${l.id}" style="font-weight:800;">...</span>
+                   </span>
+               </div>`
+            : "";
 
         return `
-        <div class="livro-card-admin">
+        <div class="livro-card-admin" id="adm-card-${l.id}">
             <img class="card-img" src="${imgSrc}" alt="${l.titulo}"
                  onerror="this.src='https://via.placeholder.com/300x180?text=📚'"/>
             <div class="card-body">
-                <span class="card-estado estado-${estado}">${ESTADO_LABEL[estado] || estado}</span>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                    <span class="card-estado estado-${estado}">${ESTADO_LABEL[estado] || estado}</span>
+                    ${promoBadge}
+                </div>
                 <div class="card-titulo">${l.titulo}</div>
                 <div class="card-autor">${l.autor}</div>
                 ${l.isbn ? `<div class="card-isbn">${l.isbn}</div>` : ""}
-                <div class="card-preco">${preco}</div>
+                ${precoHtml}
+                ${countdownHtml}
             </div>
             <div class="card-actions">
                 <button class="btn-editar" onclick='abrirModalEdit(${JSON.stringify(l)})'>
@@ -76,6 +120,8 @@ function renderGrid(livros) {
             </div>
         </div>`;
     }).join("");
+
+    iniciarContadoresAdmin();
 }
 
 /* ── FILTRO ── */
@@ -89,17 +135,113 @@ function filtrar() {
     ));
 }
 
+/* ── PROMO HELPERS ── */
+function togglePromo() {
+    const ativo = document.getElementById("fEmPromocao").checked;
+    document.getElementById("promoSection").style.display = ativo ? "block" : "none";
+    if (!ativo) {
+        document.getElementById("fDesconto").value   = "";
+        document.getElementById("fPrecoPromo").value = "";
+        document.getElementById("fPromoExpira").value = "";
+    }
+}
+
+function calcularPrecoPromo() {
+    const preco    = parseFloat(document.getElementById("fPreco").value) || 0;
+    const desconto = parseFloat(document.getElementById("fDesconto").value) || 0;
+    const promoEl  = document.getElementById("fPrecoPromo");
+    if (preco > 0 && desconto > 0 && desconto < 100) {
+        promoEl.value = (preco * (1 - desconto / 100)).toFixed(2);
+    } else {
+        promoEl.value = "";
+    }
+}
+
+function limparCamposPromo() {
+    document.getElementById("fEmPromocao").checked  = false;
+    document.getElementById("promoSection").style.display = "none";
+    document.getElementById("fDesconto").value      = "";
+    document.getElementById("fPrecoPromo").value    = "";
+    document.getElementById("fPromoExpira").value   = "";
+}
+
+/* ── BUSCA ISBN VIA OPEN LIBRARY (mesmo padrão de venda_livro.js) ── */
+// Guarda o último ISBN enviado à API para evitar sobrescrever com resposta desatualizada
+let _isbnUltimoBuscado = "";
+
+async function buscarIsbnModal() {
+    const isbn = document.getElementById("fIsbn").value.replace(/\D/g, "");
+
+    // Mesma condição que venda_livro.js: só busca com pelo menos 10 dígitos
+    if (isbn.length < 10) return;
+
+    // Evita buscar o mesmo ISBN repetidamente (ex.: oninput dispara em cada tecla)
+    if (isbn === _isbnUltimoBuscado) return;
+    _isbnUltimoBuscado = isbn;
+
+    const statusEl = document.getElementById("fIsbnStatus");
+    const tituloEl = document.getElementById("fTitulo");
+    const autorEl  = document.getElementById("fAutor");
+
+    // Mostra "Buscando..." como placeholder no campo Título enquanto aguarda
+    const placeholderOriginal = tituloEl.placeholder;
+    tituloEl.placeholder = "Buscando...";
+    if (statusEl) statusEl.style.display = "none";
+
+    try {
+        // Mesmo endpoint e parâmetros usados em venda_livro.js
+        const res  = await fetch(
+            `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        const info = data[`ISBN:${isbn}`];
+
+        if (info) {
+            const titulo = info.title || "";
+            // Mesmo mapeamento de venda_livro.js: authors[0].name
+            const autor  = (info.authors && info.authors.length > 0) ? info.authors[0].name : "";
+
+            if (!modoEdicao) {
+                // Modo Adicionar: sempre preenche título e autor
+                tituloEl.value = titulo;
+                autorEl.value  = autor;
+            } else {
+                // Modo Editar: preenche apenas campos ainda vazios
+                if (!tituloEl.value.trim()) tituloEl.value = titulo;
+                if (!autorEl.value.trim())  autorEl.value  = autor;
+            }
+
+            if (statusEl && titulo) {
+                statusEl.textContent = "✓ Informações encontradas automaticamente";
+                statusEl.style.color = "#4a5d23";
+                statusEl.style.display = "inline";
+                setTimeout(() => { if (statusEl) statusEl.style.display = "none"; }, 2500);
+            }
+        }
+        // Não encontrado → campos ficam em branco; sem mensagem de erro
+    } catch (_) {
+        // Falha de conexão ou API → silencioso, usuário preenche manualmente
+    } finally {
+        tituloEl.placeholder = placeholderOriginal;
+    }
+}
+
 /* ── MODAL ADD ── */
 function abrirModalAdd() {
     modoEdicao = false;
     document.getElementById("modalTitulo").textContent = "Adicionar Livro";
     document.getElementById("livroId").value = "";
+    document.getElementById("fIsbn").value   = "";
     document.getElementById("fTitulo").value = "";
     document.getElementById("fAutor").value  = "";
-    document.getElementById("fIsbn").value   = "";
     document.getElementById("fPreco").value  = "";
     document.getElementById("fEstado").value = "BOM";
     document.getElementById("fResumo").value = "";
+    const statusEl = document.getElementById("fIsbnStatus");
+    if (statusEl) statusEl.style.display = "none";
+    limparCamposPromo();
     document.getElementById("btnSalvar").textContent = "Adicionar";
     esconderErro();
     abrirModal();
@@ -113,9 +255,27 @@ function abrirModalEdit(livro) {
     document.getElementById("fTitulo").value = livro.titulo || "";
     document.getElementById("fAutor").value  = livro.autor  || "";
     document.getElementById("fIsbn").value   = livro.isbn   || "";
-    document.getElementById("fPreco").value  = livro.precoAprovado != null ? livro.precoAprovado : "";
     document.getElementById("fEstado").value = livro.estadoAprovado || "BOM";
     document.getElementById("fResumo").value = livro.resumoOficial  || "";
+
+    // Preço: se em promoção, mostra o preço original no campo
+    const precoBase = livro.emPromocao && livro.precoOriginal != null
+        ? livro.precoOriginal : (livro.precoAprovado != null ? livro.precoAprovado : "");
+    document.getElementById("fPreco").value = precoBase;
+
+    // Promo fields — só preenche se a promoção ainda estiver válida
+    if (livro.emPromocao && livro.precoOriginal != null && promoValida(livro.promocaoExpira)) {
+        const desconto = Math.round((1 - livro.precoAprovado / livro.precoOriginal) * 100);
+        document.getElementById("fEmPromocao").checked           = true;
+        document.getElementById("promoSection").style.display   = "block";
+        document.getElementById("fDesconto").value              = desconto;
+        document.getElementById("fPrecoPromo").value            = Number(livro.precoAprovado).toFixed(2);
+        document.getElementById("fPromoExpira").value           = livro.promocaoExpira
+            ? livro.promocaoExpira.substring(0, 16) : "";
+    } else {
+        limparCamposPromo();
+    }
+
     document.getElementById("btnSalvar").textContent = "Salvar alterações";
     esconderErro();
     abrirModal();
@@ -150,13 +310,22 @@ async function salvarLivro(e) {
     btn.disabled = true;
     btn.textContent = "Salvando...";
 
+    const emPromocao = document.getElementById("fEmPromocao").checked;
+    const desconto   = parseFloat(document.getElementById("fDesconto").value) || 0;
+    const promoExpiraRaw = document.getElementById("fPromoExpira").value;
+    // datetime-local gives "YYYY-MM-DDTHH:mm", backend expects "YYYY-MM-DDTHH:mm:ss"
+    const promocaoExpira = promoExpiraRaw ? promoExpiraRaw + ":00" : null;
+
     const payload = {
-        titulo: document.getElementById("fTitulo").value.trim(),
-        autor:  document.getElementById("fAutor").value.trim(),
-        isbn:   document.getElementById("fIsbn").value.trim(),
-        preco:  parseFloat(document.getElementById("fPreco").value),
-        estado: document.getElementById("fEstado").value,
-        resumo: document.getElementById("fResumo").value.trim(),
+        titulo:              document.getElementById("fTitulo").value.trim(),
+        autor:               document.getElementById("fAutor").value.trim(),
+        isbn:                document.getElementById("fIsbn").value.trim(),
+        preco:               parseFloat(document.getElementById("fPreco").value),
+        estado:              document.getElementById("fEstado").value,
+        resumo:              document.getElementById("fResumo").value.trim(),
+        emPromocao:          emPromocao,
+        percentualDesconto:  emPromocao ? desconto : null,
+        promocaoExpira:      emPromocao ? promocaoExpira : null,
     };
 
     try {
@@ -179,6 +348,8 @@ async function salvarLivro(e) {
             return;
         }
 
+        btn.disabled = false;
+        btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
         fecharModal();
         await carregarEstoque();
 
@@ -212,6 +383,42 @@ async function excluirLivro(id) {
             renderGrid(todosLivros);
         }
     } catch (_) {}
+}
+
+/* ── CONTADOR REGRESSIVO (ADMIN) ── */
+let admContadorInterval = null;
+
+function iniciarContadoresAdmin() {
+    if (admContadorInterval) clearInterval(admContadorInterval);
+
+    const atualizar = () => {
+        const agora = Date.now();
+        document.querySelectorAll('.promo-countdown').forEach(el => {
+            const expira = new Date(el.dataset.expira).getTime();
+            const diff   = expira - agora;
+            const id     = el.dataset.livroId;
+
+            if (diff <= 0) {
+                el.style.display = 'none';
+                const badge = document.getElementById('adm-badge-' + id);
+                if (badge) badge.style.display = 'none';
+                const precoEl = document.getElementById('adm-preco-' + id);
+                if (precoEl) {
+                    const precoOriginal = parseFloat(el.dataset.precoOriginal) || 0;
+                    precoEl.innerHTML = `T$ ${precoOriginal.toFixed(2)}`;
+                }
+            } else {
+                const h = Math.floor(diff / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                const timerEl = document.getElementById('adm-timer-' + id);
+                if (timerEl) timerEl.textContent = `${h}h ${m}m ${s}s`;
+            }
+        });
+    };
+
+    atualizar();
+    admContadorInterval = setInterval(atualizar, 1000);
 }
 
 /* ── SIDEBAR MOBILE ── */

@@ -20,10 +20,19 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     @EntityGraph(attributePaths = { "enderecos", "cartoes" })
     Optional<Cliente> findByEmail(String email);
 
+    // Busca apenas clientes ativos (soft delete)
+    @EntityGraph(attributePaths = { "enderecos", "cartoes" })
+    Optional<Cliente> findByEmailAndAtivoTrue(String email);
+
     // Se o email não for único, este método é o correto para listagens
     List<Cliente> findAllByEmail(String email);
 
     Optional<Cliente> findByCpf(String cpf);
+
+    // Verifica unicidade apenas entre usuários ativos (soft delete)
+    boolean existsByEmailAndAtivoTrue(String email);
+
+    boolean existsByCpfAndAtivoTrue(String cpf);
 
     // Query para verificar se o ID pertence àquele e-mail (Segurança extra em
     // filtros)

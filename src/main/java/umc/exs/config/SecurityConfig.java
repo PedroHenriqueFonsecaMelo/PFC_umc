@@ -14,7 +14,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -24,6 +23,8 @@ import umc.exs.security.RateLimitFilter;
 
 @Configuration
 public class SecurityConfig {
+
+        private static final String ROLE_ADMIN = "ADMIN";
 
         @Value("${app.allowed-origin:http://localhost:5173}")
         private String allowedOrigin;
@@ -50,16 +51,41 @@ public class SecurityConfig {
                 http
                                 .headers(headers -> headers
                                                 .contentSecurityPolicy(csp -> csp
-                                                                .policyDirectives("default-src 'self'; " +
-                                                                                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
-                                                                                +
-                                                                                "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
-                                                                                +
-                                                                                "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; https://via.placeholder.com"
-                                                                                +
-                                                                                "connect-src 'self' https://www.googleapis.com https://openlibrary.org https://viacep.com.br;  https://via.placeholder.com "
-                                                                                +
-                                                                                "img-src 'self' data: https://via.placeholder.com https://images.unsplash.com https:;"))
+                                                                .policyDirectives(
+                                                                                "default-src 'self'; " +
+                                                                                                "style-src 'self' 'unsafe-inline' "
+                                                                                                +
+                                                                                                "https://fonts.googleapis.com "
+                                                                                                +
+                                                                                                "https://cdnjs.cloudflare.com; "
+                                                                                                +
+
+                                                                                                "font-src 'self' " +
+                                                                                                "https://fonts.gstatic.com "
+                                                                                                +
+                                                                                                "https://cdnjs.cloudflare.com; "
+                                                                                                +
+
+                                                                                                "script-src 'self' 'unsafe-inline' "
+                                                                                                +
+                                                                                                "https://cdn.jsdelivr.net; "
+                                                                                                +
+
+                                                                                                "connect-src 'self' " +
+                                                                                                "https://www.googleapis.com "
+                                                                                                +
+                                                                                                "https://openlibrary.org "
+                                                                                                +
+                                                                                                "https://viacep.com.br; "
+                                                                                                +
+
+                                                                                                "img-src 'self' data: "
+                                                                                                +
+                                                                                                "https://via.placeholder.com "
+                                                                                                +
+                                                                                                "https://placehold.co "
+                                                                                                +
+                                                                                                "https://images.unsplash.com https:;"))
                                                 .frameOptions(frame -> frame.deny())
                                                 .httpStrictTransportSecurity(hsts -> hsts.maxAgeInSeconds(31536000)
                                                                 .includeSubDomains(true))
@@ -78,20 +104,27 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/livros/carrinho/**").authenticated()
                                                 .requestMatchers("/api/livros/vender").authenticated()
                                                 .requestMatchers("/api/livros/lotes/**").authenticated()
-                                                
-                                                // 3. AGORA AS ROTAS PÚBLICAS
+
+                                                // 3. Páginas da loja que exigem autenticação (antes do catch-all /livros/**)
+                                                .requestMatchers("/livros/estante", "/livros/checkout").authenticated()
+                                                // Endpoint público para detalhes de livro via API (GET /api/livros/{id})
+                                                .requestMatchers(HttpMethod.GET, "/api/livros/*").permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/uploads/**").authenticated()
+
+                                                // 4. AGORA AS ROTAS PÚBLICAS
                                                 .requestMatchers(PUBLIC_ROUTES).permitAll()
 
                                                 // 3. Rotas de Blog e Fórum (Consulta pública, escrita protegida)
                                                 .requestMatchers(HttpMethod.GET, "/api/blog/**").permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/api/blog/*/curtir").authenticated()
-                                                .requestMatchers(HttpMethod.POST, "/api/blog/*/comentarios").authenticated()
-                                                .requestMatchers("/api/blog/**").hasAuthority("ADMIN")
+                                                .requestMatchers(HttpMethod.POST, "/api/blog/*/comentarios")
+                                                .authenticated()
+                                                .requestMatchers("/api/blog/**").hasAuthority(ROLE_ADMIN)
                                                 .requestMatchers(HttpMethod.GET, "/forum/**", "/api/forum/topicos")
                                                 .permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/forum/topicos/**").authenticated()
                                                 .requestMatchers(HttpMethod.DELETE, "/api/forum/**")
-                                                .hasAuthority("ADMIN")
+                                                .hasAuthority(ROLE_ADMIN)
 
                                                 // 4. Rotas da Central de Opiniões (Consulta pública, Salvar
                                                 // autenticado)
@@ -99,14 +132,15 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.POST, "/api/avaliacoes/salvar")
                                                 .authenticated()
                                                 .requestMatchers(HttpMethod.PUT, "/api/avaliacoes/admin/**")
-                                                .hasAuthority("ADMIN")
+                                                .hasAuthority(ROLE_ADMIN)
 
                                                 // 5. Webhook Mercado Pago e simulação de pagamento
                                                 .requestMatchers(HttpMethod.POST, "/api/tokens/webhook").permitAll()
-                                                .requestMatchers(HttpMethod.GET, "/api/tokens/simular-webhook/**").permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/tokens/simular-webhook/**")
+                                                .permitAll()
 
                                                 // 6. Rotas de Admin e Rotas Autenticadas Genéricas
-                                                .requestMatchers(ADMIN_ROUTES).hasAuthority("ADMIN")
+                                                .requestMatchers(ADMIN_ROUTES).hasAuthority(ROLE_ADMIN)
                                                 .requestMatchers(AUTHENTICATED_ROUTES).authenticated()
 
                                                 // 7. Qualquer outra rota exige login
@@ -137,7 +171,7 @@ public class SecurityConfig {
 
         // Rotas que qualquer um pode acessar
         private static final String[] PUBLIC_ROUTES = {
-                        "/", "/index", "/home",  "/livros/**", "/entrar", "/favicon.ico",
+                        "/", "/index", "/home", "/livros/**", "/entrar", "/favicon.ico",
                         "/clientes/login", "/clientes/novo-cadastro",
                         "/vender", "/vitrine", "/admin/login",
                         "/livros/*/historia", "/api/tokens",
@@ -163,7 +197,7 @@ public class SecurityConfig {
         private static final String[] AUTHENTICATED_ROUTES = {
                         "/api/livros/carrinho/comprar", "/api/gamificacao/meu-perfil",
                         "/clientes/meu-perfil", "/clientes/meu-perfil-json",
-                        "/clientes/minhas-compras", "/clientes/sair",
+                        "/clientes/homepage", "/clientes/minhas-compras", "/clientes/sair",
                         "/api/tokens/comprar", "/api/tokens/historico", "/api/tokens/**",
                         "/api/pedidos/**", "/api/forum/respostas/*/curtir", "/api/forum/respostas/*/melhor",
                         "/api/lista-desejos", "/api/lista-desejos/**",

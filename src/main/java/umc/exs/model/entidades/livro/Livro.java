@@ -19,7 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import umc.exs.DTOs.livro.LivroExibicaoDTO;
+import umc.exs.dtos.livro.LivroExibicaoDTO;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.EstadoLivro;
@@ -40,6 +40,8 @@ public class Livro {
     private String autor;
 
     private String isbn;
+
+    private String idioma;
 
     @Column(name = "fotos_urls", columnDefinition = "TEXT")
     @Builder.Default
@@ -71,6 +73,14 @@ public class Livro {
     private LocalDateTime dataAprovacao;
 
     private Long adminAprovadorId;
+
+    /** Promoção — exibe badge "PROMOÇÃO" e preço original riscado na vitrine. */
+    @Builder.Default
+    private Boolean emPromocao = false;
+
+    private Double precoOriginal;
+
+    private LocalDateTime promocaoExpira;
 
     // Relacionamento com as avaliações da história
     @OneToMany(mappedBy = "isbnOriginalNoAto", targetEntity = AvaliacaoLivro.class)

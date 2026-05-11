@@ -1,4 +1,4 @@
-package umc.exs.DTOs.forum;
+package umc.exs.dtos.forum;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

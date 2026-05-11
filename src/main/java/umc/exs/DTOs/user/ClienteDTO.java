@@ -1,5 +1,7 @@
-package umc.exs.DTOs.user;
+package umc.exs.dtos.user;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +13,7 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = { "senha" })
+@ToString
 public class ClienteDTO {
 
     /**
@@ -30,50 +32,60 @@ public class ClienteDTO {
     private String email;
 
     /**
-     * Data nascimento formato string.
+     * Data de nascimento (tipo correto).
      */
-    private String datanasc;
+    private LocalDate datanasc;
 
     /**
-     * Gênero M/F/outros.
-     */
-    private String gen;
-
-    /**
-     * Senha criptografada (não exposta).
+     * Senha.
      */
     private String senha;
 
     /**
-     * CPF para validação fiscal.
+     * CPF.
      */
     private String cpf;
 
     /**
-     * Saldo atual tokens T$.
+     * Saldo atual de tokens.
      */
     private Double saldoTokens = 0.0;
 
     /**
-     * URL da foto de perfil do cliente.
+     * URL da foto de perfil.
      */
     private String fotoPerfil;
 
     /**
-     * Lista endereços associados.
+     * Data de criação da conta.
+     */
+    private LocalDateTime dataCriacao;
+
+    /**
+     * Lista de endereços.
      */
     private List<EnderecoDTO> enderecos = new ArrayList<>();
 
     /**
-     * Lista cartões cadastrados.
+     * Lista de cartões.
      */
     private List<CartaoDTO> cartoes = new ArrayList<>();
-}
 
-/**
- * DESCRIÇÃO DO ARQUIVO:
- * DTO transferência dados Cliente (perfil, listagem).
- * Lombok Data, ToString exclude senha.
- * Campos essenciais + listas endereços/cartões.
- * SaldoTokens default 0, usada frontend/backend.
- */
+    /**
+     * Construtor para criação (sem ID e data automática).
+     */
+    public ClienteDTO(String nome, String email, LocalDate datanasc, String senha,
+                      String cpf, String fotoPerfil,
+                      List<EnderecoDTO> enderecos,
+                      List<CartaoDTO> cartoes) {
+
+        this.nome = nome;
+        this.email = email;
+        this.datanasc = datanasc;
+        this.senha = senha;
+        this.cpf = cpf;
+        this.fotoPerfil = fotoPerfil;
+        this.enderecos = enderecos;
+        this.cartoes = cartoes;
+    }
+}

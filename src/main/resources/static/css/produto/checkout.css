@@ -1,0 +1,268 @@
+/* ================================================================
+   checkout.css — Página de Checkout · Bibliotroca
+   ================================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:    #2c241b;
+  --paper:  #f9f6f0;
+  --cream:  #ede8df;
+  --accent: #722f37;
+  --forest: #4a5d23;
+  --white:  #ffffff;
+  --muted:  #7a6e65;
+  --border: rgba(44, 36, 27, 0.15);
+}
+
+body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(--ink); }
+
+/* ── Toast ── */
+.toast { display: none; position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+  padding: .75rem 1.5rem; font-size: .875rem; font-weight: 500; z-index: 99;
+  text-align: center; max-width: 90vw; box-shadow: 4px 4px 0 rgba(44,36,27,.15); }
+.toast-sucesso { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.toast-erro    { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+/* ── Layout ── */
+.checkout-main { max-width: 1000px; margin: 0 auto; padding: 2rem 5vw 5rem; }
+
+/* ── Indicador de etapas ── */
+.checkout-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 2.5rem;
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+}
+.step-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--cream);
+  border: 2px solid var(--border);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .78rem;
+  font-weight: 700;
+}
+.step.active .step-num {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+.step.done .step-num {
+  background: var(--forest);
+  border-color: var(--forest);
+  color: var(--paper);
+}
+.step-label {
+  font-size: .7rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.step.active .step-label { color: var(--accent); }
+.step.done .step-label   { color: var(--forest); }
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  min-width: 60px;
+  margin: 0 .5rem;
+  margin-bottom: 1.1rem;
+}
+
+/* Estado vazio */
+.estado-msg {
+  text-align: center;
+  padding: 5rem 1rem;
+  font-family: "IM Fell English", serif;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ── Grid de 2 colunas ── */
+.checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+/* ── Coluna de Resumo ── */
+.checkout-resumo h2,
+.checkout-pagamento h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  padding-bottom: .6rem;
+  border-bottom: 2px solid var(--ink);
+}
+
+.checkout-lista { display: flex; flex-direction: column; gap: .8rem; margin-bottom: 1rem; }
+
+.checkout-item {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  padding: .9rem 1rem;
+  background: var(--white);
+  border: 1px solid var(--border);
+}
+.checkout-item-img {
+  width: 50px;
+  height: 66px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.checkout-item-info { flex: 1; min-width: 0; }
+.checkout-item-titulo {
+  font-family: "Playfair Display", serif;
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.checkout-item-autor {
+  font-size: .75rem;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: .1rem;
+}
+.checkout-item-preco {
+  font-family: "Playfair Display", serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.link-voltar-estante {
+  display: inline-block;
+  margin-top: .4rem;
+  font-size: .78rem;
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--muted);
+  transition: color .18s;
+}
+.link-voltar-estante:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ── Coluna de Pagamento ── */
+.pagamento-card {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1.2rem;
+}
+.pagamento-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .5rem 0;
+  border-bottom: 1px solid rgba(44,36,27,.08);
+  font-size: .88rem;
+}
+.pagamento-linha:last-child { border-bottom: none; }
+.pagamento-saldo { font-weight: 700; color: var(--ink); }
+.pagamento-total {
+  font-family: "Playfair Display", serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+.pagamento-linha-saldo-pos { border-top: 1.5px solid var(--ink); margin-top: .3rem; padding-top: .8rem; }
+.pagamento-saldo-pos { font-weight: 700; color: var(--forest); }
+.pagamento-saldo-pos.negativo { color: var(--accent); }
+
+/* ── Alertas ── */
+.alerta-saldo, .alerta-erro {
+  padding: .9rem 1.1rem;
+  margin-bottom: 1rem;
+  font-size: .85rem;
+  line-height: 1.5;
+}
+.alerta-saldo {
+  background: #fef9c3;
+  border: 1px solid #fde68a;
+  color: #78350f;
+}
+.alerta-erro {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+.link-carregar {
+  display: inline-block;
+  margin-top: .35rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+}
+.link-carregar:hover { text-decoration: underline; }
+
+/* ── Botão confirmar ── */
+.btn-confirmar {
+  width: 100%;
+  padding: 1rem;
+  background: var(--accent);
+  color: var(--paper);
+  border: 2px solid var(--accent);
+  font-family: "DM Sans", sans-serif;
+  font-size: .95rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .18s;
+  margin-bottom: .8rem;
+}
+.btn-confirmar:hover:not(:disabled) { background: #5a2229; border-color: #5a2229; }
+.btn-confirmar:disabled { opacity: .5; cursor: not-allowed; }
+
+.checkout-disclaimer {
+  font-size: .76rem;
+  color: var(--muted);
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* ── Botão genérico ── */
+.btn-primario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .7rem 1.4rem;
+  background: var(--accent);
+  color: var(--paper);
+  border: none;
+  font-family: "DM Sans", sans-serif;
+  font-size: .85rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .18s;
+}
+.btn-primario:hover { background: #5a2229; }
+
+/* ── Responsivo ── */
+@media (max-width: 720px) {
+  .checkout-layout { grid-template-columns: 1fr; }
+  .checkout-pagamento { border-top: 2px solid var(--ink); padding-top: 1.5rem; }
+}

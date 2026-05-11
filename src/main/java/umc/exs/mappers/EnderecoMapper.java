@@ -3,7 +3,8 @@ package umc.exs.mappers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import umc.exs.DTOs.user.EnderecoDTO;
+
+import umc.exs.dtos.user.EnderecoDTO;
 import umc.exs.model.entidades.usuario.Endereco;
 
 @Mapper(componentModel = "spring")

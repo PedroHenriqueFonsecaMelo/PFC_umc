@@ -11,6 +11,7 @@ import umc.exs.model.entidades.logic.RecuperacaoSenha;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.repository.usuario.RecuperacaoSenhaRepository;
+import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.log.LogAuditoriaService;
 
@@ -40,6 +41,7 @@ public class SenhaService {
      * Inicia o fluxo de esqueci minha senha.
      * Remove tokens antigos para evitar duplicidade e envia o link por e-mail.
      */
+    @SuppressWarnings("null")
     @Transactional
     public void iniciarRecuperacao(Cliente cliente) {
 
@@ -57,12 +59,14 @@ public class SenhaService {
         String link = baseUrl + "/clientes/reset-senha?token=" + token;
 
         try {
-            emailService.enviar(cliente.getEmail(), "Recuperação de Senha",
-                    "Olá, utilize o link a seguir para redefinir sua senha: " + link);
+            emailService.enviarHtml(
+                    cliente.getEmail(),
+                    "Redefinição de senha — Bibliotroca",
+                    EmailHtmlBuilder.recuperacaoSenha(cliente.getNome(), link));
             log.info("E-mail de recuperação enviado com sucesso para {}", cliente.getEmail());
         } catch (Exception e) {
             log.error("Falha ao enviar e-mail de recuperação para {}: {}", cliente.getEmail(), e.getMessage());
-            throw new RuntimeException("Erro ao enviar e-mail de recuperação. Tente novamente mais tarde.");
+            throw new IllegalStateException("Erro ao enviar e-mail de recuperação. Tente novamente mais tarde.", e);
         }
     }
 

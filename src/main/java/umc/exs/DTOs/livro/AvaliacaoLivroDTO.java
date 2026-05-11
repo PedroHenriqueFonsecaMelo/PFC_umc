@@ -1,4 +1,4 @@
-package umc.exs.DTOs.livro;
+package umc.exs.dtos.livro;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

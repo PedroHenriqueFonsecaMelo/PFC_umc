@@ -14,66 +14,30 @@
         <link rel="stylesheet" th:href="@{/css/produto/vitrine.css}" />
     </head>
     <body>
-        <div id="carrinhoOverlay"></div>
-        <div class="toast" id="toastCompra"></div>
+        <div class="toast" id="toastVitrine"></div>
 
         <!-- NAV -->
         <header th:replace="~{fragments/client-nav :: clientNav}"></header>
 
         <!-- MAIN -->
         <main class="main-vitrine">
-            <div style="margin-bottom: 1.5rem">
-                <h2>Livros Disponíveis</h2>
-                <p>Adicione à sua estante e finalize sua compra.</p>
+            <div style="margin-bottom: 1.5rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.75rem;">
+                <div>
+                    <h2 id="vitrineTitulo">Livros Disponíveis</h2>
+                    <p>Clique em um livro para ver detalhes e adicioná-lo à sua estante.</p>
+                </div>
+                <button id="btnPromo"
+                        onclick="togglePromo()"
+                        style="display:flex;align-items:center;gap:.4rem;
+                               padding:.5rem 1.1rem;border-radius:20px;
+                               border:2px solid #722f37;background:#fff;color:#722f37;
+                               font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;
+                               cursor:pointer;transition:all .18s;">
+                    🏷 Ver Promoções
+                </button>
             </div>
             <div id="gridLivros"></div>
         </main>
-
-        <!-- ESTANTE SIDEBAR -->
-        <div id="carrinhoSidebar">
-            <div class="carr-header">
-                <h2>
-                    <img
-                        src="/imagens/estante.png" onerror="this.style.display='none'"
-                        alt="Estante"
-                        style="width: 72px; height: 72px; object-fit: contain; vertical-align: middle; margin-right: 0.4rem"
-                    > Minha Estante
-                </h2>
-                <button class="carr-fechar" onclick="fecharCarrinho()">
-                    ✕
-                </button>
-            </div>
-            <div class="carr-lista" id="carrinhoLista">
-                <div id="carrinhoVazio">
-                    <div class="vazio-icon">
-                        <img
-                            src="/imagens/estante.png" onerror="this.style.display='none'"
-                            alt="Estante vazia"
-                            style="width: 144px; height: 144px; object-fit: contain; opacity: 0.6"
-                        >
-                    </div>
-                    <p>
-                        Sua estante está vazia.<br>Explore a vitrine e adicione
-                        livros!
-                    </p>
-                </div>
-            </div>
-            <div class="carr-footer">
-                <div class="carr-total-row">
-                    <span class="carr-total-label">Total</span>
-                    <span class="carr-total-valor" id="carrinhoTotal"
-                    >T$ 0,00</span>
-                </div>
-                <div id="carrinhoAcoes">
-                    <button id="btnFinalizar" onclick="finalizarCompra()">
-                        Finalizar Compra
-                    </button>
-                    <button id="btnLimpar" onclick="limparCarrinho()">
-                        Limpar estante
-                    </button>
-                </div>
-            </div>
-        </div>
 
         <script th:src="@{/js/produto/vitrine_livros.js}"></script>
     </body>

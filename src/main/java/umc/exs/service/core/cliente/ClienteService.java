@@ -1,11 +1,13 @@
 package umc.exs.service.core.cliente;
 
 import java.security.SecureRandom;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,13 +16,17 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.DTOs.auth.SignupDTO;
-import umc.exs.DTOs.user.CartaoDTO;
-import umc.exs.DTOs.user.ClienteDTO;
-import umc.exs.DTOs.user.EnderecoDTO;
-
+import umc.exs.dtos.auth.SignupDTO;
+import umc.exs.dtos.user.CartaoDTO;
+import umc.exs.dtos.user.ClienteDTO;
+import umc.exs.dtos.user.ClienteUpdateDTO;
+import umc.exs.dtos.user.EnderecoDTO;
+import umc.exs.model.entidades.foundation.EmailVerificacao;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.repository.foundation.EmailVerificacaoRepository;
+import umc.exs.service.email.EmailHtmlBuilder;
+import umc.exs.service.email.EmailService;
 import umc.exs.service.log.LogAuditoriaService;
 import umc.exs.service.senha.FieldValidation;
 
@@ -32,15 +38,52 @@ public class ClienteService {
     private final ClienteDomainService domainService;
     private final ClienteRepositoryService repositoryService;
     private final LogAuditoriaService auditoria;
-
     private final PasswordEncoder passwordEncoder;
+    private final EmailVerificacaoRepository emailVerificacaoRepository;
+    private final EmailService emailService;
+
+    private final ClienteOperacaoService operacaoService;
+
+    private final SecureRandom secureRandom = new SecureRandom();
+
+    @Value("${app.base-url:http://localhost:8443}")
+    private String baseUrl;
 
     @Transactional
     public ClienteDTO salvarCliente(SignupDTO signupDTO) {
         validarNovoCliente(signupDTO);
         ClienteDTO dto = domainService.cadastrarCliente(signupDTO);
         auditoria.registrarLog("CADASTRO_USUARIO", dto.getId(), dto.getEmail(), "Cadastro inicial realizado.");
+        enviarEmailVerificacao(dto.getId(), dto.getNome(), dto.getEmail());
         return dto;
+    }
+
+    @SuppressWarnings("null")
+    private void enviarEmailVerificacao(@NonNull Long clienteId, String nome, String email) {
+        try {
+            emailVerificacaoRepository.deleteByClienteId(clienteId);
+
+            Cliente cliente = repositoryService.buscarPorId(clienteId);
+            String token = UUID.randomUUID().toString();
+
+            EmailVerificacao verificacao = EmailVerificacao.builder()
+                    .cliente(cliente)
+                    .token(token)
+                    .expiracao(LocalDateTime.now().plusHours(24))
+                    .build();
+
+            emailVerificacaoRepository.save(verificacao);
+
+            String link = baseUrl + "/auth/verificar-email?token=" + token;
+
+            emailService.enviarHtml(
+                    email,
+                    "Confirme seu e-mail — Bibliotroca",
+                    EmailHtmlBuilder.verificacaoEmail(nome, link));
+
+        } catch (Exception e) {
+            log.error("Falha ao enviar e-mail de verificação para {}: {}", email, e.getMessage());
+        }
     }
 
     @Transactional
@@ -51,40 +94,43 @@ public class ClienteService {
         return dto;
     }
 
-    @Transactional
-    public ClienteDTO atualizarClienteEAssociacoes(Long clienteId, ClienteDTO dto) {
-        validarAtualizacao(dto.getNome(), dto.getSenha());
-        ClienteDTO atualizado = domainService.atualizarDados(clienteId, dto);
-        auditoria.registrarLog("ATUALIZACAO_DADOS", clienteId, atualizado.getEmail(), "Dados atualizados.");
-        return atualizado;
-    }
 
     @Transactional
     public String uploadFotoPerfil(@NonNull Long clienteId, MultipartFile foto) {
         String url = domainService.gerenciarUploadFoto(clienteId, foto);
         Cliente c = repositoryService.buscarPorId(clienteId);
-        auditoria.registrarLog("UPLOAD_FOTO", clienteId, c.getEmail(), "Foto de perfil atualizada.");
+        auditoria.registrarLog("UPLOAD_FOTO", clienteId, c.getEmail(), "Foto atualizada.");
         return url;
-    }
-
-    @Transactional
-    public void deletarClientePorId(@NonNull Long clienteId) {
-        Cliente cliente = repositoryService.buscarPorId(clienteId);
-        String email = cliente.getEmail();
-        repositoryService.deletarPorId(clienteId);
-        auditoria.registrarLog("EXCLUSAO_CONTA", clienteId, email, "Conta removida.");
     }
 
     @Transactional
     public void uploadFotoPerfilParaUsuarioLogado(String email, MultipartFile foto) {
         Cliente cliente = buscarEntidadePorEmail(email);
-        this.uploadFotoPerfil(cliente.getId(), foto);
+        operacaoService.uploadFotoPerfil(cliente.getId(), foto);
     }
 
     @Transactional
-    public void atualizarDadosLogados(String email, ClienteDTO dto) {
+    public void atualizarDadosLogados(String email, ClienteUpdateDTO dto) {
         Cliente cliente = buscarEntidadePorEmail(email);
-        this.atualizarClienteEAssociacoes(cliente.getId(), dto);
+        operacaoService.atualizarCliente(cliente.getId(), dto);
+    }
+
+    @Transactional
+    public void adicionarTokensParaUsuarioLogado(String email, Double valor) {
+        Cliente cliente = buscarEntidadePorEmail(email);
+        operacaoService.adicionarTokens(cliente.getId(), valor);
+    }
+
+    @Transactional
+    public ClienteDTO adicionarTokens(Long clienteId, Double valor) {
+        ClienteDTO dto = domainService.adicionarTokens(clienteId, valor);
+        auditoria.registrarLog("RECARGA_TOKENS", clienteId, dto.getEmail(),
+                String.format("Recarga de %.2f via PIX", valor));
+        return dto;
+    }
+
+    public Cliente buscarEntidadePorEmail(String email) {
+        return repositoryService.buscarPorEmailOuFalhar(email);
     }
 
     @Transactional
@@ -94,7 +140,8 @@ public class ClienteService {
         Long id = cliente.getId();
 
         String charPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%*.";
-        String senhaAleatoria = new SecureRandom().ints(50, 0, charPool.length())
+
+        String senhaAleatoria = secureRandom.ints(50, 0, charPool.length())
                 .mapToObj(i -> String.valueOf(charPool.charAt(i)))
                 .collect(Collectors.joining());
 
@@ -106,6 +153,8 @@ public class ClienteService {
         cliente.setSenha(passwordEncoder.encode(senhaAleatoria));
         cliente.setTentativas(10);
         cliente.setBloqueada(true);
+        cliente.setAtivo(false);
+        cliente.setDeletedAt(LocalDateTime.now());
 
         if (cliente.getCartoes() != null) {
             cliente.getCartoes().clear();
@@ -115,24 +164,78 @@ public class ClienteService {
         }
 
         repositoryService.salvar(cliente);
-        log.info("Conta do cliente ID {} anonimizada com sucesso por solicitação do usuário.", id);
+
+        log.info("Conta {} anonimizada.", id);
+    }
+
+    public Optional<ClienteDTO> buscarClientePorEmail(String email) {
+        return repositoryService.encontrarPorEmail(email)
+                .map(domainService::converterParaDTO);
+    }
+
+    public ClienteDTO buscarPorId(@NonNull Long id) {
+        return domainService.converterParaDTO(repositoryService.buscarPorId(id));
+    }
+
+    public void validarNovoCliente(SignupDTO dto) {
+
+        if (!Boolean.TRUE.equals(dto.getTermsAccepted()))
+            throw new IllegalArgumentException("Aceite os termos.");
+
+        if (!Boolean.TRUE.equals(dto.getPrivacyAccepted()))
+            throw new IllegalArgumentException("Aceite a política.");
+
+        String email = FieldValidation.sanitizeEmail(dto.getEmail());
+
+        if (repositoryService.existeEmailAtivo(email))
+            throw new IllegalArgumentException("Email já cadastrado.");
+
+        dto.setEmail(email);
+    }
+
+    public void validarAtualizacao(String nome, String senha) {
+
+        if (nome == null || nome.trim().isEmpty())
+            throw new IllegalArgumentException("Nome obrigatório.");
+
+        if (senha != null && !senha.trim().isEmpty()
+                && !FieldValidation.isValidPassword(senha)) {
+
+            throw new IllegalArgumentException("Senha inválida.");
+        }
     }
 
     @Transactional
-    public Optional<ClienteDTO> autenticarCliente(String email, String senha) {
-        Optional<ClienteDTO> resultado = domainService.processarAutenticacao(email, senha);
-        resultado.ifPresent(c -> auditoria.registrarLog("LOGIN_SUCESSO", c.getId(), c.getEmail(), "Sessão iniciada."));
+    public void registrarTransacaoPendente(@NonNull Long clienteId, double valor, String pagamentoId) {
+        Cliente cliente = repositoryService.buscarPorId(clienteId);
+        domainService.registrarTransacaoPendente(cliente, valor, pagamentoId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Transacao> listarHistoricoTransacoes(String email) {
+        Cliente cliente = buscarEntidadePorEmail(email);
+        return domainService.listarHistoricoTransacoes(cliente);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Transacao> listarHistoricoTransacoes(@NonNull Long id) {
+        Cliente cliente = repositoryService.buscarPorId(id);
+        return domainService.listarHistoricoTransacoes(cliente);
+    }
+
+    public boolean verificarSeFoiPago(String pagamentoId) {
+        return domainService.verificarSeFoiPago(pagamentoId);
+    }
+
+    public void aprovarPagamento(String pagamentoId) {
+        domainService.aprovarPagamento(pagamentoId);
+    }
+
+    @Transactional
+    public ClienteDTO autenticarCliente(String email, String senha) {
+        ClienteDTO resultado = domainService.processarAutenticacao(email, senha);
+        auditoria.registrarLog("LOGIN_SUCESSO", resultado.getId(), resultado.getEmail(), "Sessão iniciada.");
         return resultado;
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<ClienteDTO> buscarClientePorEmail(String email) {
-        return repositoryService.encontrarPorEmail(email).map(domainService::converterParaDTO);
-    }
-
-    @Transactional(readOnly = true)
-    public Cliente buscarEntidadePorEmail(String email) {
-        return repositoryService.buscarPorEmailOuFalhar(email);
     }
 
     @Transactional
@@ -141,89 +244,8 @@ public class ClienteService {
         domainService.gerarTokenRecuperacao(cliente);
     }
 
-    @Transactional
-    public void alterarSenhaComToken(String token, String novaSenha) {
-        if (!FieldValidation.isValidPassword(novaSenha)) {
-            throw new IllegalArgumentException("Senha não atende aos requisitos.");
-        }
-        domainService.redefinirSenha(token, novaSenha);
-    }
-
-    public ClienteDTO buscarPorId(@NonNull Long id) {
-        return domainService.converterParaDTO(repositoryService.buscarPorId(id));
-    }
-
-    @Transactional
-    public ClienteDTO adicionarTokens(Long clienteId, Double valor) {
-        ClienteDTO dto = domainService.adicionarTokens(clienteId, valor);
-        auditoria.registrarLog("RECARGA_TOKENS", clienteId, dto.getEmail(),
-                String.format("Recarga de %.2f via PIX", valor));
-        return dto;
-    }
-
-    @Transactional
-    public void adicionarTokensParaUsuarioLogado(String email, Double valor) {
-        Cliente cliente = buscarEntidadePorEmail(email);
-        this.adicionarTokens(cliente.getId(), valor);
-    }
-
-    @Transactional
-    public void adicionarEnderecoParaUsuarioLogado(String email, EnderecoDTO enderecoDTO) {
-        repositoryService.adicionarEnderecoParaUsuarioLogado(email, enderecoDTO);
-    }
-
-    public void aprovarPagamento(String pagamentoId) {
-        domainService.aprovarPagamento(pagamentoId);
-    }
-
-    public boolean verificarSeFoiPago(String pagamentoId) {
-        return domainService.verificarSeFoiPago(pagamentoId);
-    }
-
-    public void registrarTransacaoPendente(@NonNull Long clienteId, Double valor, String pagamentoId) {
-        Cliente cliente = repositoryService.buscarPorId(clienteId);
-        domainService.registrarTransacaoPendente(cliente, valor, pagamentoId);
-    }
-
-    public List<Transacao> listarHistoricoTransacoes(String email) {
-        Cliente cliente = buscarEntidadePorEmail(email);
-        return domainService.listarHistoricoTransacoes(cliente);
-    }
-
-    public List<Transacao> listarHistoricoTransacoes(@NonNull Long id) {
-        Cliente cliente = repositoryService.buscarPorId(id);
-        return domainService.listarHistoricoTransacoes(cliente);
-    }
-
-    public void validarNovoCliente(SignupDTO dto) {
-        if (!FieldValidation.validarCampos(dto))
-            throw new IllegalArgumentException("Campos obrigatórios ausentes.");
-
-        String safeEmail = FieldValidation.sanitizeEmail(dto.getEmail());
-        if (repositoryService.encontrarPorEmail(safeEmail).isPresent())
-            throw new IllegalArgumentException("E-mail já cadastrado.");
-        dto.setEmail(safeEmail);
-
-        if (!FieldValidation.isValidCPF(dto.getCpf())
-                || repositoryService.encontrarPorCPF(dto.getCpf()))
-             throw new IllegalArgumentException("CPF inválido.");
-
-        LocalDate dataNasc = FieldValidation.isValidBirthDate(dto.getDatanasc());
-        if (dataNasc == null || !FieldValidation.isOver18(dataNasc))
-            throw new IllegalArgumentException("Cliente deve ser maior de 18 anos.");
-
-        if (dto.getSenha() != null && !dto.getSenha().trim().isEmpty()
-                && !FieldValidation.isValidPassword(dto.getSenha())) {
-            throw new IllegalArgumentException("Senha não atende aos requisitos de segurança.");
-        }
-    }
-
-    public void validarAtualizacao(String nome, String senha) {
-        if (nome == null || nome.trim().isEmpty())
-            throw new IllegalArgumentException("Nome é obrigatório.");
-        if (senha != null && !senha.trim().isEmpty() && !FieldValidation.isValidPassword(senha)) {
-            throw new IllegalArgumentException("Nova senha inválida.");
-        }
+    public boolean validarTokenRecuperacao(String token) {
+        return domainService.validarToken(token);
     }
 
     @Transactional
@@ -232,26 +254,37 @@ public class ClienteService {
             throw new IllegalArgumentException("As novas senhas não conferem.");
         }
         if (!FieldValidation.isValidPassword(novaSenha)) {
-            throw new IllegalArgumentException("A nova senha não atende aos requisitos de segurança.");
+            throw new IllegalArgumentException("A nova senha não atende aos requisitos.");
         }
         domainService.alterarSenhaComVerificacao(email, senhaAtual, novaSenha);
-        auditoria.registrarLog("ALTERACAO_SENHA", null, email, "Senha alterada pelo usuário logado.");
+        auditoria.registrarLog("ALTERACAO_SENHA", null, email, "Senha alterada.");
     }
 
-    public boolean validarTokenRecuperacao(String token) {
-        return domainService.validarToken(token);
+    @Transactional
+    public void alterarSenhaComToken(String token, String novaSenha) {
+        if (!FieldValidation.isValidPassword(novaSenha)) {
+            throw new IllegalArgumentException("Senha inválida.");
+        }
+        domainService.redefinirSenha(token, novaSenha);
     }
 
+    @Transactional
+    public void adicionarEnderecoParaUsuarioLogado(String email, EnderecoDTO enderecoDTO) {
+        repositoryService.adicionarEnderecoParaUsuarioLogado(email, enderecoDTO);
+    }
+
+    @Transactional
+    public void atualizarEnderecoDoCliente(@NonNull Long clienteId, @NonNull EnderecoDTO dto) {
+        repositoryService.atualizarEnderecoDoCliente(clienteId, dto);
+    }
+
+    @Transactional
     public void deletarEnderecoDoCliente(@NonNull Long clienteId, @NonNull Long enderecoId) {
         repositoryService.deletarEnderecoDoCliente(clienteId, enderecoId);
     }
 
     @Transactional
-    public void atualizarEnderecoDoCliente(@NonNull Long clienteId,@NonNull EnderecoDTO dto) {
-        repositoryService.atualizarEnderecoDoCliente(clienteId, dto);
-    }
-
-    public void deletarCartaoDoCliente(@NonNull Long clienteId, @NonNull Long enderecoId) {
-        repositoryService.deletarCartaoDoCliente(clienteId, enderecoId);
+    public void deletarCartaoDoCliente(@NonNull Long clienteId, @NonNull Long cartaoId) {
+        repositoryService.deletarCartaoDoCliente(clienteId, cartaoId);
     }
 }

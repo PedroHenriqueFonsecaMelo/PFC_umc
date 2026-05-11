@@ -1,21 +1,32 @@
 package umc.exs.service.core.bussiness;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.DTOs.compra.CarrinhoCompraRequestDTO;
-import umc.exs.DTOs.compra.CarrinhoCompraResponseDTO;
+import umc.exs.dtos.compra.ItemResultadoDTO;
+import umc.exs.dtos.compra.carrinho.CarrinhoCompraRequestDTO;
+import umc.exs.dtos.compra.carrinho.CarrinhoCompraResponseDTO;
+import umc.exs.dtos.livro.GoogleBookResponse;
+import umc.exs.dtos.livro.LivroDTO;
+import umc.exs.mappers.LivroMapper;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.core.control.PedidoService;
+import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.gamificacao.GamificacaoService;
 import umc.exs.service.log.LogAuditoriaService;
@@ -25,6 +36,9 @@ import umc.exs.service.log.LogAuditoriaService;
 @RequiredArgsConstructor
 public class LivroCompraService {
 
+    @Value("${app.base-url:https://localhost:8443}")
+    private String baseUrl;
+
     private final LivroRepository livroRepository;
     private final ClienteRepository clienteRepository;
 
@@ -33,165 +47,162 @@ public class LivroCompraService {
     private final GamificacaoService gamificacaoService;
     private final LogAuditoriaService logAuditoria;
 
+    private static final String ASSUNTO_SALDO = "Atualização de saldo — Bibliotroca";
+
     @Transactional
     public void realizarCompra(@NonNull Long livroId, String emailComprador) {
-        
         Livro livro = livroRepository.findByIdAndAprovadoTrueWithLock(livroId)
-                .orElseThrow(() -> new RuntimeException("Livro indisponível"));
+                .orElseThrow(() -> new IllegalArgumentException("Livro indisponível ou não encontrado."));
 
         Cliente comprador = clienteRepository.findByEmail(emailComprador)
-                .orElseThrow(() -> new RuntimeException("Comprador não encontrado"));
+                .orElseThrow(() -> new IllegalStateException("Comprador não encontrado."));
 
         if (comprador.getSaldoTokens() < livro.getPrecoAprovado()) {
-            throw new RuntimeException("Saldo insuficiente");
+            throw new IllegalStateException("Saldo insuficiente para completar a compra.");
         }
 
-        comprador.setSaldoTokens(comprador.getSaldoTokens() - livro.getPrecoAprovado());
+        double saldoAntes = comprador.getSaldoTokens();
+        processarBaixaLivro(comprador, livro);
 
-        // Registra pedido ANTES de deletar o livro
-        pedidoService.registrarPedido(comprador, livro);
+        enviarEmailsCompraUnica(comprador, livro, saldoAntes);
 
-        // O livro sai do sistema
-        livroRepository.delete(livro);
-        clienteRepository.save(comprador);
-
-        emailService.enviar(comprador.getEmail(), "Compra Realizada", "Você adquiriu o livro: " + livro.getTitulo());
-        
         logAuditoria.registrarLog("COMPRA_LIVRO_SUCESSO", comprador.getId(), comprador.getEmail(),
                 "Livro " + livroId + " T$" + livro.getPrecoAprovado());
-        
+
         gamificacaoService.xpCompra(comprador.getId());
+
+        emailService.enviar(
+                comprador.getEmail(),
+                "Compra realizada",
+                "Seu livro foi comprado com sucesso");
     }
 
     @Transactional
     public CarrinhoCompraResponseDTO comprarCarrinho(String emailComprador, CarrinhoCompraRequestDTO request) {
+        Cliente comprador = validarCompradorCarrinho(emailComprador);
 
-        // 1. Valida comprador
-        Cliente comprador = clienteRepository.findByEmail(emailComprador)
-                .orElseThrow(() -> new RuntimeException("Comprador não encontrado."));
+        List<Long> ids = Objects.requireNonNull(request.getLivroIds(), "Lista de IDs não pode ser nula");
+        if (ids.isEmpty())
+            throw new IllegalArgumentException("O carrinho está vazio.");
 
-        if (comprador.isBloqueada()) {
-            throw new RuntimeException("Sua conta está bloqueada. Entre em contato com o suporte.");
-        }
-
-        List<Long> ids = request.getLivroIds();
-        if (ids == null || ids.isEmpty()) {
-            throw new RuntimeException("O carrinho está vazio.");
-        }
-
-        // 2. Busca todos os livros aprovados de uma vez
-        List<Livro> livrosEncontrados = livroRepository.findAllById(ids)
-                .stream()
+        List<Livro> livrosParaComprar = livroRepository.findAllById(ids).stream()
                 .filter(l -> Boolean.TRUE.equals(l.getAprovado()))
                 .toList();
 
-        // Detecta IDs que não foram encontrados ou não estão aprovados
-        java.util.Set<Long> idsEncontrados = new java.util.HashSet<>();
-        livrosEncontrados.forEach(l -> idsEncontrados.add(l.getId()));
+        List<ItemResultadoDTO> falhas = identificarFalhas(ids, livrosParaComprar);
+        validarSaldoTotal(comprador, livrosParaComprar);
 
-        List<CarrinhoCompraResponseDTO.ItemResultado> falhas = new ArrayList<>();
-        for (Long id : ids) {
-            if (!idsEncontrados.contains(id)) {
-                falhas.add(CarrinhoCompraResponseDTO.ItemResultado.builder()
-                        .livroId(id)
-                        .motivo("Livro não encontrado ou indisponível.")
-                        .build());
-            }
-        }
+        double saldoAnterior = comprador.getSaldoTokens();
+        List<ItemResultadoDTO> comprados = processarItensCarrinho(comprador, livrosParaComprar, falhas);
 
-        // 3. Verifica saldo total antes de debitar qualquer valor
-        double totalNecessario = livrosEncontrados.stream()
-                .mapToDouble(l -> l.getPrecoAprovado() != null ? l.getPrecoAprovado() : 0.0)
-                .sum();
-
-        if (comprador.getSaldoTokens() < totalNecessario) {
-            throw new RuntimeException(String.format(
-                    "Saldo insuficiente. Necessário: T$ %.2f | Disponível: T$ %.2f",
-                    totalNecessario, comprador.getSaldoTokens()));
-        }
-
-        // 4. Executa as compras
-        List<CarrinhoCompraResponseDTO.ItemResultado> comprados = new ArrayList<>();
-        double totalGasto = 0.0;
-
-        for (Livro livro : livrosEncontrados) {
-            try {
-                Double preco = livro.getPrecoAprovado();
-                if (preco == null) {
-                    falhas.add(CarrinhoCompraResponseDTO.ItemResultado.builder()
-                            .livroId(livro.getId())
-                            .titulo(livro.getTitulo())
-                            .motivo("Livro sem preço definido.")
-                            .build());
-                    continue;
-                }
-
-                // Registra pedido ANTES de deletar o livro
-                pedidoService.registrarPedido(comprador, livro);
-
-                comprador.setSaldoTokens(comprador.getSaldoTokens() - preco);
-                totalGasto += preco;
-
-                livroRepository.delete(livro);
-
-                comprados.add(CarrinhoCompraResponseDTO.ItemResultado.builder()
-                        .livroId(livro.getId())
-                        .titulo(livro.getTitulo())
-                        .preco(preco)
-                        .build());
-
-                // XP por compra
-                gamificacaoService.xpCompra(comprador.getId());
-
-            } catch (Exception e) {
-                falhas.add(CarrinhoCompraResponseDTO.ItemResultado.builder()
-                        .livroId(livro.getId())
-                        .titulo(livro.getTitulo())
-                        .motivo("Erro ao processar: " + e.getMessage())
-                        .build());
-            }
-        }
-
-        // 5. Persiste saldo atualizado e loga
         clienteRepository.save(comprador);
-
-        logAuditoria.registrarLog(
-                "COMPRA_CARRINHO",
-                comprador.getId(),
-                comprador.getEmail(),
-                String.format("%d livro(s) comprado(s), %d falha(s), T$ %.2f debitados.",
-                        comprados.size(), falhas.size(), totalGasto));
-
-        // E-mail de confirmação do carrinho ao comprador
-        if (!comprados.isEmpty()) {
-            try {
-                StringBuilder itensMsg = new StringBuilder();
-                comprados.forEach(item -> itensMsg
-                        .append("• ").append(item.getTitulo())
-                        .append(" — T$ ").append(String.format("%.2f", item.getPreco()))
-                        .append("\n"));
-                emailService.enviar(
-                        comprador.getEmail(),
-                        "Compra do carrinho confirmada!",
-                        "Olá, " + comprador.getNome() + "!\n\n" +
-                                "Sua compra foi confirmada com sucesso.\n\n" +
-                                "Itens adquiridos:\n" + itensMsg +
-                                "\nTotal debitado: T$ " + String.format("%.2f", totalGasto) + "\n" +
-                                "Saldo atual: T$ " + String.format("%.2f", comprador.getSaldoTokens()) + "\n\n" +
-                                "Acompanhe o status dos envios em 'Minhas Compras'.\n\n" +
-                                "Equipe Bookstore");
-            } catch (Exception e) {
-                log.error("Falha ao enviar e-mail de carrinho para {}: {}", comprador.getEmail(), e.getMessage());
-            }
-        }
+        registrarLogECoordenarEmails(comprador, comprados, falhas, saldoAnterior);
 
         return CarrinhoCompraResponseDTO.builder()
                 .totalSolicitados(ids.size())
                 .totalComprados(comprados.size())
-                .totalGasto(totalGasto)
+                .totalGasto(saldoAnterior - comprador.getSaldoTokens())
                 .saldoRestante(comprador.getSaldoTokens())
                 .comprados(comprados)
                 .falhas(falhas)
                 .build();
     }
+
+    private Cliente validarCompradorCarrinho(String email) {
+        Cliente c = clienteRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("Comprador não encontrado."));
+        if (c.isBloqueada()) {
+            throw new IllegalStateException("Sua conta está bloqueada.");
+        }
+        return c;
+    }
+
+    private List<ItemResultadoDTO> identificarFalhas(List<Long> idsSolicitados, List<Livro> encontrados) {
+        Set<Long> encontradosIds = encontrados.stream().map(Livro::getId).collect(Collectors.toSet());
+        return idsSolicitados.stream()
+                .filter(id -> !encontradosIds.contains(id))
+                .map(id -> ItemResultadoDTO.builder().livroId(id).motivo("Indisponível.").build())
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private void validarSaldoTotal(Cliente comprador, List<Livro> livros) {
+        double total = livros.stream().mapToDouble(l -> l.getPrecoAprovado() != null ? l.getPrecoAprovado() : 0.0)
+                .sum();
+        if (comprador.getSaldoTokens() < total) {
+            throw new IllegalStateException(String.format("Saldo insuficiente. Necessário: T$ %.2f", total));
+        }
+    }
+
+    private List<ItemResultadoDTO> processarItensCarrinho(Cliente comprador, List<Livro> livros,
+            List<ItemResultadoDTO> falhas) {
+        List<ItemResultadoDTO> sucesso = new ArrayList<>();
+        for (Livro livro : livros) {
+            try {
+                processarBaixaLivro(comprador, livro);
+                sucesso.add(ItemResultadoDTO.builder()
+                        .livroId(livro.getId()).titulo(livro.getTitulo()).preco(livro.getPrecoAprovado()).build());
+                gamificacaoService.xpCompra(comprador.getId());
+            } catch (Exception e) {
+                falhas.add(ItemResultadoDTO.builder().livroId(livro.getId()).motivo("Erro: " + e.getMessage()).build());
+            }
+        }
+        return sucesso;
+    }
+
+    private void processarBaixaLivro(Cliente comprador, Livro livro) {
+        pedidoService.registrarPedido(comprador, livro);
+        comprador.setSaldoTokens(comprador.getSaldoTokens() - livro.getPrecoAprovado());
+        livroRepository.delete(livro);
+    }
+
+    private void registrarLogECoordenarEmails(Cliente comprador, List<ItemResultadoDTO> comprados,
+            List<ItemResultadoDTO> falhas, double saldoAnterior) {
+        double totalGasto = saldoAnterior - comprador.getSaldoTokens();
+        logAuditoria.registrarLog("COMPRA_CARRINHO", comprador.getId(), comprador.getEmail(),
+                String.format("%d comprados, %d falhas.", comprados.size(), falhas.size()));
+
+        if (!comprados.isEmpty()) {
+            enviarEmailsSucessoCarrinho(comprador, comprados, totalGasto, saldoAnterior);
+        }
+    }
+
+    @SuppressWarnings("null")
+    private void enviarEmailsCompraUnica(Cliente comprador, Livro livro, double saldoAntes) {
+        try {
+            String email = Objects.requireNonNull(comprador.getEmail());
+            String nome = Objects.requireNonNull(comprador.getNome());
+
+            emailService.enviarHtml(email, "Compra realizada com sucesso! — Bibliotroca",
+                    EmailHtmlBuilder.compraSucesso(nome, livro.getTitulo(), livro.getPrecoAprovado(),
+                            comprador.getSaldoTokens(), baseUrl));
+
+            emailService.enviarHtml(email, ASSUNTO_SALDO,
+                    EmailHtmlBuilder.atualizacaoSaldo(nome, saldoAntes, livro.getPrecoAprovado(),
+                            comprador.getSaldoTokens(), "Compra: " + livro.getTitulo(), false, LocalDateTime.now()));
+        } catch (Exception e) {
+            log.error("Erro ao enviar e-mail: {}", e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("null")
+    private void enviarEmailsSucessoCarrinho(Cliente comprador, List<ItemResultadoDTO> comprados, double totalGasto,
+            double saldoAnterior) {
+        try {
+            String email = Objects.requireNonNull(comprador.getEmail());
+            String nome = Objects.requireNonNull(comprador.getNome());
+
+            List<String[]> itens = comprados.stream()
+                    .map(i -> new String[] { i.getTitulo(), String.format("%.2f", i.getPreco()) }).toList();
+
+            emailService.enviarHtml(email, "Compra do carrinho confirmada! — Bibliotroca",
+                    EmailHtmlBuilder.carrinhoConfirmado(nome, itens, totalGasto, comprador.getSaldoTokens(), baseUrl));
+
+            emailService.enviarHtml(email, ASSUNTO_SALDO,
+                    EmailHtmlBuilder.atualizacaoSaldo(nome, saldoAnterior, totalGasto,
+                            comprador.getSaldoTokens(), "Compra via carrinho", false, LocalDateTime.now()));
+        } catch (Exception e) {
+            log.error("Erro ao enviar e-mail carrinho: {}", e.getMessage());
+        }
+    }
+
 }

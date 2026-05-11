@@ -278,3 +278,27 @@ body::before {
     .book-page { border-radius: 0 0 8px 8px; padding: 28px 24px 24px; border: 1px solid rgba(74,93,35,0.15); border-top: none; }
     .bg-books { display: none; }
 }
+
+/* ── Toggle mostrar/ocultar senha ──────────────────────────── */
+.input-senha-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.input-senha-wrapper input {
+    width: 100%;
+    padding-right: 2.8rem;
+}
+.btn-toggle-senha {
+    position: absolute;
+    right: 0.7rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted, #888);
+    padding: 0;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+.btn-toggle-senha:hover { color: var(--ink, #2C241B); }

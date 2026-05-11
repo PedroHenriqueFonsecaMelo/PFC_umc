@@ -1,26 +1,30 @@
-package umc.exs.DTOs.auth;
+package umc.exs.dtos.auth;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
+import org.springframework.format.annotation.DateTimeFormat;
 
-/**
- * DTO para captura de dados no registro de novos clientes.
- * Focado apenas no transporte e validação básica de campos.
- */
+import java.time.LocalDate;
+
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class SignupDTO {
 
-    // @NotBlank(message = "O CPF é obrigatório.")
-    // @Pattern(regexp = "\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}", message = "CPF inválido. Use 000.000.000-00 ou apenas números.")
+    @NotBlank(message = "O CPF é obrigatório.")
+    @Pattern(regexp = "\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}",
+             message = "CPF inválido. Use 000.000.000-00 ou apenas números.")
     private String cpf;
 
     @NotBlank(message = "O e-mail é obrigatório.")
@@ -36,10 +40,10 @@ public class SignupDTO {
     @NotBlank(message = "O nome é obrigatório.")
     private String nome;
 
-    @NotBlank(message = "A data de nascimento é obrigatória.")
-    private String datanasc;
+    @NotNull(message = "A data de nascimento é obrigatória.")
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
+    private LocalDate datanasc;
 
-    // @NotBlank(message = "O gênero deve ser informado.")
     private String gen;
 
     @AssertTrue(message = "Você deve aceitar os termos de uso.")
@@ -53,5 +57,4 @@ public class SignupDTO {
         if (senha == null || confirmPassword == null) return false;
         return senha.equals(confirmPassword);
     }
-
 }

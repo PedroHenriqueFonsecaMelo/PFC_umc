@@ -13,6 +13,16 @@
     <link rel="stylesheet" th:href="@{/css/index.css}" />
   </head>
   <body>
+    <!-- FLASH: lote enviado -->
+    <div id="flashEnviado" class="flash-enviado" role="alert" aria-live="polite" style="display:none">
+      <span class="flash-icon">✓</span>
+      <div class="flash-text">
+        <strong>Lote enviado para avaliação!</strong>
+        Você receberá uma notificação quando seus livros forem aprovados.
+      </div>
+      <button class="flash-close" id="flashClose" aria-label="Fechar">&times;</button>
+    </div>
+
     <!-- MASTHEAD -->
     <header class="masthead">
       <div class="masthead-top">

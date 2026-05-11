@@ -1,4 +1,4 @@
-package umc.exs.DTOs.auth;
+package umc.exs.dtos.auth;
 
 public class LogDTO {
     private String acao;

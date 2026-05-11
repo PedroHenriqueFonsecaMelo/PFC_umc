@@ -8,43 +8,26 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import umc.exs.model.entidades.foundation.*;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.logic.Administrador;
 import umc.exs.model.entidades.social.PontuacaoUsuario;
 import umc.exs.model.entidades.social.RespostaForum;
 import umc.exs.model.entidades.social.TopicoForum;
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.entidades.foundation.Cupom;
+import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.enums.CategoriaForum;
 import umc.exs.model.enums.EstadoLivro;
 import umc.exs.model.enums.Genero;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.logic.AdminRepository;
+import umc.exs.repository.negocios.CupomRepository;
 import umc.exs.repository.negocios.LoteRepository;
 import umc.exs.repository.negocios.RespostaForumRepository;
 import umc.exs.repository.negocios.TopicoForumRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.repository.usuario.PontuacaoUsuarioRepository;
-
-/*
- * ========================================================================
- * 🔑 CREDENCIAIS DE ACESSO (CRIADAS NESTE INICIALIZADOR)
- * ========================================================================
- * * 🛠️ ADMINISTRADOR (Acesso total via /admin/login):
- * - E-mail: admin@admin.com
- * - Senha:  admin123
- *
- * * 👤 CLIENTES (Acesso via /clientes/login):
- * * 1. Cliente Teste
- * - E-mail: cliente@teste.com
- * - Senha:  admin123
- * - Saldo:  5000.0 Tokens
- * * 2. Maria Leitora
- * - E-mail: maria@teste.com
- * - Senha:  admin123
- * - Saldo:  200.0 Tokens
- * * ========================================================================
- */
+import umc.exs.service.scheduler.PontosSchedulerService;
 
 @Component
 @RequiredArgsConstructor
@@ -58,121 +41,147 @@ public class DataInitializer implements CommandLineRunner {
     private final TopicoForumRepository topicoRepo;
     private final LivroRepository livroRepo;
     private final RespostaForumRepository respostaRepo;
+    private final CupomRepository cupomRepo;
     private final PasswordEncoder encoder;
+    private final PontosSchedulerService pontosSchedulerService;
 
-    @SuppressWarnings("null")
     @Override
     public void run(String... args) {
         log.info("🔍 Verificando integridade dos dados iniciais...");
 
         try {
-            // Se já tiver admin, assumimos que o banco já está pronto
             if (adminRepo.count() > 0) {
-                log.info("ℹ️ Banco de dados já populado. Ignorando DataInitializer.");
+                log.info("Banco de dados já populado.");
                 return;
             }
 
-            log.info("🚀 Iniciando carga massiva de dados...");
-
-            // 1. Criar Administrador
+            // 1. Administrador
             Administrador admin = new Administrador();
             admin.setNome("Admin Master");
             admin.setEmail("admin@admin.com");
             admin.setPassword(encoder.encode("admin123"));
             admin = adminRepo.save(admin);
-            log.info("✅ Admin criado.");
 
-            // 2. Criar Clientes (Garante campos que costumam dar erro de NULL)
-            Cliente c1 = createAndSaveClient("Cliente Teste", "cliente@teste.com", "12345678900", 5000.0);
-            Cliente c2 = createAndSaveClient("Maria Leitora", "maria@teste.com", "98765432100", 200.0);
-            log.info("✅ Clientes criados.");
+            // 2. Clientes
+            Cliente c1 = createAndSaveClient("Cliente Teste", "cliente@teste.com", "12345678900");
+            Cliente c2 = createAndSaveClient("Maria Leitora", "maria@teste.com", "98765432100");
+            Cliente c5 = createAndSaveClient("Ana Decaimento", "ana@teste.com", "22233344455");
+            Cliente c6 = createAndSaveClient("Carlos Zerado", "carlos@teste.com", "33344455566");
+            Cliente c7 = createAndSaveClient("Lucia Penalidade", "lucia@teste.com", "44455566677");
 
-            // 3. Criar Pontuações (Gamificação)
-            savePontuacao(c1, 150);
-            savePontuacao(c2, 90);
+            // 3. Pontuações (Cenários para Decay de XP)
+            savePontuacaoCompleta(c1, 50, 60, 40, LocalDateTime.now());
+            savePontuacaoCompleta(c2, 30, 40, 20, LocalDateTime.now().minusDays(15));
+            savePontuacaoCompleta(c5, 700, 650, 650, LocalDateTime.now().minusDays(35));
+            savePontuacaoCompleta(c7, 500, 500, 500, LocalDateTime.now().minusDays(40));
+            savePontuacaoCompleta(c6, 300, 300, 200, LocalDateTime.now().minusDays(46));
 
-            // 4. Criar Lote de Livros (Necessário para LivroAnuncio que não é vitrine)
-            Lote lote = Lote.builder()
-                    .codigoProtocolo("PROT-2024-001")
-                    .status(Lote.LoteStatus.PENDENTE)
-                    .cliente(c1)
-                    .dataCriacao(LocalDateTime.now())
-                    .build();
-            lote = loteRepo.save(lote);
+            log.info("🎫 Criando cupons de teste...");
 
-            // 5. Salvar Livros
-            // Livros em análise (com lote)
-            saveLivro("1984", "George Orwell", "9780060918111", lote, false, null, null);
+            saveCupom("BEMVINDO10", null, 10.0, 100, "PROMOCIONAL");
 
-            // Livros já na Vitrine (aprovados por admin)
-            saveLivro("Dom Casmurro", "Machado de Assis", "9788535902778", null, true, 30.0, admin.getId());
-            saveLivro("Sapiens", "Yuval Noah Harari", "9780062316097", null, true, 50.0, admin.getId());
-            log.info("✅ Livros e Vitrine prontos.");
+            saveCupom("PRESENTE50", c1, 50.0, 1, "PROMOCIONAL");
 
-            // 6. Fórum (Tópico e Resposta)
+            saveCupom("XP-LOYALTY", c2, 15.0, 1, "PONTUACAO");
+
+            // 4. Fórum
             TopicoForum topico = new TopicoForum();
-            topico.setTitulo("Dúvida sobre Capitu");
-            topico.setConteudo("Afinal, traiu ou não traiu?");
+            topico.setTitulo("Dúvida sobre Machado de Assis");
+            topico.setConteudo("Qual a melhor obra para começar?");
             topico.setAutor(c1);
             topico.setDataCriacao(LocalDateTime.now().minusDays(5));
             topico.setCategoria(CategoriaForum.GERAL);
-            topico = topicoRepo.save(topico);
+            topicoRepo.save(topico);
 
             RespostaForum resposta = new RespostaForum();
-            resposta.setConteudo("O mistério é a melhor parte do livro!");
+            resposta.setConteudo("Recomendo 'Dom Casmurro'!");
             resposta.setAutor(c2);
             resposta.setTopico(topico);
             resposta.setMelhorResposta(true);
             resposta.setDataCriacao(LocalDateTime.now().minusDays(2));
             respostaRepo.save(resposta);
 
-            log.info("✨ CARGA DE DADOS FINALIZADA COM SUCESSO!");
+            // 5. Lote e Livros (Restaurados)
+            Lote lote = Lote.builder()
+                    .codigoProtocolo("PROT-2026-X")
+                    .status(Lote.LoteStatus.PENDENTE)
+                    .cliente(c1)
+                    .dataCriacao(LocalDateTime.now())
+                    .build();
+            loteRepo.save(lote);
+
+            // Salvando livros em análise e aprovados
+            saveLivro("1984", "George Orwell", "9780060918111", lote, false, null, null);
+            saveLivro("Dom Casmurro", "Machado de Assis", "9788535902778", null, true, 30.0, admin.getId());
+            saveLivro("O Hobbit", "J.R.R. Tolkien", "9780547928227", null, true, 45.0, admin.getId());
+
+            // 6. Forçar Processamento do Decay
+            log.info("⏳ Processando decaimento de XP (Ana, Lucia e Carlos)...");
+            pontosSchedulerService.processarDecayXp();
+
+            log.info("✨ CARGA COMPLETA: Admin, Clientes, Fórum, Livros e XP Decay processados.");
 
         } catch (Exception e) {
-            log.error("❌ Erro durante o DataInitializer: ", e);
-            log.error("Causa do erro: {}", (e.getCause() != null ? e.getCause().getMessage() : "Desconhecida"));
+            log.error("❌ Falha no DataInitializer: ", e);
         }
     }
 
-    private Cliente createAndSaveClient(String nome, String email, String cpf, Double saldo) {
+    private Cliente createAndSaveClient(String nome, String email, String cpf) {
         Cliente c = new Cliente();
         c.setNome(nome);
         c.setEmail(email);
         c.setSenha(encoder.encode("admin123"));
-        c.setSaldoTokens(saldo);
+        c.setSaldoTokens(100.0);
         c.setCpf(cpf);
-        c.setDatanasc("1990-01-01");
+        c.setDatanasc("1995-05-10");
         c.setGen(Genero.M);
         c.setBloqueada(false);
         c.setDataCriacao(LocalDateTime.now());
+        c.setEmailVerificado(true);
         return clienteRepo.save(c);
     }
 
-    private void savePontuacao(Cliente c, int xp) {
+    private void savePontuacaoCompleta(Cliente c, int xpAprov, int xpComp, int xpAval, LocalDateTime ultAtiv) {
         PontuacaoUsuario p = new PontuacaoUsuario();
         p.setCliente(c);
-        p.setXpTotal(xp);
-        p.setUltimaAtualizacao(LocalDateTime.now());
+        p.setXpLivrosAprovados(xpAprov);
+        p.setXpCompras(xpComp);
+        p.setXpAvaliacoes(xpAval);
+        p.setXpTotal(xpAprov + xpComp + xpAval);
+        p.setUltimaAtualizacao(ultAtiv);
+        p.setDataExpiracao(ultAtiv.plusDays(45));
         pontuacaoRepo.save(p);
     }
 
-    private void saveLivro(String titulo, String autor, String isbn, Lote lote, boolean aprovado, Double preco,
-            Long adminId) {
+    private void saveLivro(String tit, String aut, String isbn, Lote lote, boolean aprov, Double preco, Long adminId) {
         Livro livro = new Livro();
-        livro.setTitulo(titulo);
-        livro.setAutor(autor);
+        livro.setTitulo(tit);
+        livro.setAutor(aut);
         livro.setIsbn(isbn);
         livro.setLote(lote);
-        livro.setAprovado(aprovado);
+        livro.setAprovado(aprov);
         livro.setDataAnuncio(LocalDateTime.now());
-
-        if (aprovado) {
+        if (aprov) {
             livro.setPrecoAprovado(preco);
             livro.setEstadoAprovado(EstadoLivro.BOM);
             livro.setAdminAprovadorId(adminId);
             livro.setDataAprovacao(LocalDateTime.now());
         }
-
         livroRepo.save(livro);
+    }
+
+    private void saveCupom(String codigo, Cliente cliente, Double desconto, Integer max, String tipo) {
+        Cupom cupom = Cupom.builder()
+                .codigo(codigo)
+                .cliente(cliente) // Se null, é público
+                .percentualDesconto(desconto)
+                .quantidadeMaxima(max)
+                .quantidadeUsada(0)
+                .tipo(tipo)
+                .usado(false)
+                .dataCriacao(LocalDateTime.now())
+                .expiracao(LocalDateTime.now().plusDays(30))
+                .build();
+        cupomRepo.save(cupom);
     }
 }

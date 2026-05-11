@@ -1,0 +1,257 @@
+/* ================================================================
+   estante.css — Página da Estante · Bibliotroca
+   ================================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:    #2c241b;
+  --paper:  #f9f6f0;
+  --cream:  #ede8df;
+  --accent: #722f37;
+  --forest: #4a5d23;
+  --white:  #ffffff;
+  --muted:  #7a6e65;
+  --border: rgba(44, 36, 27, 0.15);
+}
+
+body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(--ink); }
+
+/* ── Layout ── */
+.estante-main { max-width: 860px; margin: 0 auto; padding: 2rem 5vw 5rem; }
+
+/* ── Cabeçalho ── */
+.estante-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid var(--ink);
+}
+.estante-header h1 {
+  font-family: "Playfair Display", serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: .25rem;
+}
+.estante-header p {
+  font-family: "IM Fell English", serif;
+  font-style: italic;
+  color: var(--muted);
+  font-size: .95rem;
+}
+
+.btn-voltar {
+  display: inline-flex;
+  align-items: center;
+  padding: .5rem 1rem;
+  border: 1.5px solid var(--border);
+  color: var(--muted);
+  text-decoration: none;
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: border-color .18s, color .18s;
+}
+.btn-voltar:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Estado vazio ── */
+.estante-vazia {
+  text-align: center;
+  padding: 5rem 1rem;
+}
+.estante-vazia p {
+  font-family: "IM Fell English", serif;
+  font-style: italic;
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+/* ── Ações em lote ── */
+.estante-acoes-lote {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .7rem 1rem;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+}
+
+.checkbox-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  cursor: pointer;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.checkbox-wrapper input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.btn-remover-selecionados {
+  background: transparent;
+  border: 1px solid rgba(114, 47, 55, .35);
+  color: var(--accent);
+  padding: .35rem .8rem;
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .18s, color .18s;
+}
+.btn-remover-selecionados:hover:not(:disabled) { background: var(--accent); color: #fff; }
+.btn-remover-selecionados:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ── Lista de livros ── */
+.estante-lista { display: flex; flex-direction: column; gap: .7rem; margin-bottom: 2rem; }
+
+.estante-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  background: var(--white);
+  border: 1px solid var(--border);
+  transition: border-color .18s;
+}
+.estante-item.selecionado { border-color: var(--accent); background: rgba(114,47,55,.04); }
+
+.estante-item-check {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.estante-item-img {
+  width: 54px;
+  height: 72px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.estante-item-info { flex: 1; min-width: 0; }
+.estante-item-titulo {
+  font-family: "Playfair Display", serif;
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: .15rem;
+}
+.estante-item-autor {
+  font-size: .78rem;
+  color: var(--muted);
+  font-style: italic;
+  margin-bottom: .2rem;
+}
+.estante-item-estado {
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: .12rem .5rem;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  display: inline-block;
+}
+.estado-otimo   { background: #dcfce7; color: #166534; border-color: #86efac; }
+.estado-bom     { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+.estado-regular { background: #fef9c3; color: #92400e; border-color: #fde68a; }
+.estado-ruim    { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+
+.estante-item-preco {
+  font-family: "Playfair Display", serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.estante-item-remover {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: .8rem;
+  flex-shrink: 0;
+  padding: .3rem;
+  transition: color .18s;
+}
+.estante-item-remover:hover { color: var(--accent); }
+
+/* ── Rodapé ── */
+.estante-footer {
+  position: sticky;
+  bottom: 0;
+  background: var(--cream);
+  border: 1.5px solid var(--ink);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.estante-subtotal { display: flex; flex-direction: column; gap: .15rem; }
+.subtotal-label { font-size: .8rem; color: var(--muted); }
+.subtotal-valor {
+  font-family: "Playfair Display", serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.btn-prosseguir {
+  padding: .85rem 1.8rem;
+  background: var(--accent);
+  color: var(--paper);
+  border: 2px solid var(--accent);
+  font-family: "DM Sans", sans-serif;
+  font-size: .9rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .18s;
+  white-space: nowrap;
+}
+.btn-prosseguir:hover:not(:disabled) { background: #5a2229; border-color: #5a2229; }
+.btn-prosseguir:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ── Botão genérico ── */
+.btn-primario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .7rem 1.4rem;
+  background: var(--accent);
+  color: var(--paper);
+  border: none;
+  font-family: "DM Sans", sans-serif;
+  font-size: .85rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .18s;
+}
+.btn-primario:hover { background: #5a2229; }
+
+@media (max-width: 600px) {
+  .estante-footer { flex-direction: column; align-items: stretch; }
+  .btn-prosseguir { width: 100%; }
+}

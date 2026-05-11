@@ -1,4 +1,4 @@
-package umc.exs.DTOs.user;
+package umc.exs.dtos.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

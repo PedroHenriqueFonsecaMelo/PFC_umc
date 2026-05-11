@@ -3,13 +3,16 @@ package umc.exs.service.core.control;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import umc.exs.DTOs.compra.ListaDesejosDTO;
+
+import umc.exs.dtos.compra.lote.ListaDesejosDTO;
 import umc.exs.model.entidades.foundation.ListaDesejos;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.negocios.ListaDesejosRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 
 import java.time.LocalDateTime;
@@ -19,6 +22,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ListaDesejosService {
+
+    @Value("${app.base-url:https://localhost:8443}")
+    private String baseUrl;
 
     private final ListaDesejosRepository listaDesejosRepository;
     private final ClienteRepository clienteRepository;
@@ -78,6 +84,7 @@ public class ListaDesejosService {
      * Notifica via e-mail todos os clientes que têm o ISBN na lista de desejos
      * quando um livro com esse ISBN é aprovado e fica disponível na vitrine.
      */
+    @SuppressWarnings("null")
     @Transactional(readOnly = true)
     public void notificarClientesSeDisponivel(String isbn, String titulo) {
         if (isbn == null || isbn.isBlank()) {
@@ -94,15 +101,16 @@ public class ListaDesejosService {
         for (ListaDesejos desejo : interessados) {
             try {
                 Cliente cliente = desejo.getCliente();
-                emailService.enviar(
-                        cliente.getEmail(),
-                        "Livro da sua lista de desejos disponível!",
-                        "Olá, " + cliente.getNome() + "!\n\n" +
-                                "O livro \"" + titulo + "\" (ISBN: " + isbn + ") que você adicionou à sua lista " +
-                                "de desejos está disponível na vitrine.\n\n" +
-                                "Acesse agora e garanta o seu exemplar antes que esgote!\n\n" +
-                                "Equipe Bookstore");
-                log.info("Notificação enviada para {} sobre ISBN {}", cliente.getEmail(), isbn);
+                String assunto = desejo.isPreReservaAtiva()
+                        ? "Pré-reserva ativada — Livro disponível! — Bibliotroca"
+                        : "Livro da sua lista de desejos disponível! — Bibliotroca";
+
+                emailService.enviarHtml(
+                        cliente.getEmail(), assunto,
+                        EmailHtmlBuilder.listaDesejosDisponivel(
+                                cliente.getNome(), titulo, isbn, desejo.isPreReservaAtiva(), baseUrl));
+                log.info("Notificação enviada para {} sobre ISBN {} (pré-reserva: {})",
+                        cliente.getEmail(), isbn, desejo.isPreReservaAtiva());
             } catch (Exception e) {
                 log.error("Falha ao notificar cliente {} sobre ISBN {}: {}", desejo.getCliente().getEmail(), isbn,
                         e.getMessage());
@@ -110,11 +118,28 @@ public class ListaDesejosService {
         }
     }
 
+    @Transactional
+    public ListaDesejosDTO togglePreReserva(String emailCliente, @NonNull Long desejoId) {
+        Cliente cliente = clienteRepository.findByEmail(emailCliente)
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+
+        ListaDesejos desejo = listaDesejosRepository.findById(desejoId)
+                .orElseThrow(() -> new RuntimeException("Item não encontrado na lista de desejos"));
+
+        if (!desejo.getCliente().getId().equals(cliente.getId())) {
+            throw new RuntimeException("Acesso negado: este item não pertence ao seu perfil");
+        }
+
+        desejo.setPreReservaAtiva(!desejo.isPreReservaAtiva());
+        return toDTO(listaDesejosRepository.save(desejo));
+    }
+
     private ListaDesejosDTO toDTO(ListaDesejos l) {
         return ListaDesejosDTO.builder()
                 .id(l.getId())
                 .isbn(l.getIsbn())
                 .dataAdicao(l.getDataAdicao())
+                .preReservaAtiva(l.isPreReservaAtiva())
                 .build();
     }
 }

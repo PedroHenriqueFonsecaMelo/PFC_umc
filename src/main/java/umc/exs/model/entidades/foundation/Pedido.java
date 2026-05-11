@@ -1,5 +1,6 @@
 package umc.exs.model.entidades.foundation;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -75,4 +76,8 @@ public class Pedido {
 
     // Código de rastreio (preenchido quando EM_TRANSITO)
     private String codigoRastreio;
+
+    // LGPD Art. 16 — retenção obrigatória por 5 anos
+    @Column(name = "data_retencao_expira")
+    private LocalDate dataRetencaoExpira;
 }

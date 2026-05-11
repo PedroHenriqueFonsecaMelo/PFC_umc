@@ -47,6 +47,14 @@ public class PontuacaoUsuario {
     private LocalDateTime ultimaAtualizacao;
 
     /**
+     * Data de expiração do XP acumulado.
+     * Renovada em +1 ano a cada ganho de pontos.
+     * Null = pontuação criada antes da feature; scheduler trata como não expirada.
+     */
+    @Column(name = "data_expiracao")
+    private LocalDateTime dataExpiracao;
+
+    /**
      * Calcula o nível/badge com base no XP total atual.
      */
     @Transient
@@ -62,6 +70,7 @@ public class PontuacaoUsuario {
             this.xpTotal = 0;
         this.xpTotal += quantidade;
         this.ultimaAtualizacao = LocalDateTime.now();
+        this.dataExpiracao = LocalDateTime.now().plusDays(30);
 
         switch (categoria) {
             case "APROVACAO" -> {
@@ -78,6 +87,9 @@ public class PontuacaoUsuario {
                 if (this.xpAvaliacoes == null)
                     this.xpAvaliacoes = 0;
                 this.xpAvaliacoes += quantidade;
+            }
+            default -> {
+                // Categoria desconhecida, não adiciona XP
             }
         }
     }

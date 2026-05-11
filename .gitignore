@@ -33,3 +33,4 @@ TODO.md
 /src/main/resources/application-local.yml
 /src/main/resources/application-render.yml
 /src/main/resources/application-gmail.yml
+/.problems

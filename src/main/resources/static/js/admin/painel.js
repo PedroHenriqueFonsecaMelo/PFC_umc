@@ -10,24 +10,57 @@ async function loadLotes() {
   try {
     const res = await fetch("/api/admin/lotes/pendentes");
     const lotes = await res.json();
+
     if (lotes.length === 0) {
-      container.innerHTML = '<div class="bcard"><h3>Nenhum lote pendente para avaliação no momento.</h3></div>';
+      container.innerHTML = `
+        <div class="lotes-empty">
+          <i class="fa-solid fa-box-open"></i>
+          <h3>Nenhum lote aguardando revisão</h3>
+          <p>Todos os lotes foram avaliados. Novas submissões aparecerão aqui.</p>
+        </div>`;
       return;
     }
-    let html = '<h3 style="font-family:\'Playfair Display\',serif;font-size:1.1rem;margin-bottom:.75rem">Lotes Aguardando Revisão</h3><div class="book-grid">';
+
+    let html = `
+      <div class="lotes-section-header">
+        <h3 class="lotes-section-title">Lotes Aguardando Revisão</h3>
+        <span class="lotes-count">${lotes.length} lote(s)</span>
+      </div>
+      <div class="lotes-grid">`;
+
     lotes.forEach((lote) => {
+      const data = lote.dataCriacao
+        ? new Date(lote.dataCriacao).toLocaleDateString("pt-BR", {
+            day: "2-digit", month: "long", year: "numeric"
+          })
+        : "—";
+      const qtdLivros = (lote.livros && lote.livros.length > 0)
+        ? `<div class="lote-info-row"><i class="fa-solid fa-book"></i> ${lote.livros.length} livro(s) no lote</div>`
+        : "";
+
       html += `
-      <div class="bcard">
-        <div style="color:#7A6E65;font-size:12px;">Protocolo: ${lote.codigoProtocolo}</div>
-        <h3 style="margin:10px 0;">Lote #${lote.id}</h3>
-        <p><strong>Data de Envio:</strong> ${new Date(lote.dataCriacao).toLocaleDateString("pt-BR")}</p>
-        <button class="btn-aprovar" onclick="loadLivrosLote(${lote.id})">Abrir Lote para Auditoria</button>
+      <div class="lote-card">
+        <div class="lote-card-header">
+          <i class="fa-solid fa-box-open lote-icon"></i>
+          <span class="lote-badge-aguardando">Aguardando Revisão</span>
+        </div>
+        <div class="lote-numero">Lote #${lote.id}</div>
+        <div class="lote-protocolo">${lote.codigoProtocolo}</div>
+        <div class="lote-info-row">
+          <i class="fa-regular fa-calendar"></i>
+          ${data}
+        </div>
+        ${qtdLivros}
+        <button class="btn-abrir-lote" onclick="loadLivrosLote(${lote.id})">
+          <i class="fa-solid fa-magnifying-glass"></i> Abrir Lote para Auditoria
+        </button>
       </div>`;
     });
+
     html += "</div>";
     container.innerHTML = html;
   } catch (e) {
-    container.innerHTML = '<p style="color:#722F37;">Erro ao conectar com o servidor.</p>';
+    container.innerHTML = '<p style="color:#722F37;padding:1rem">Erro ao conectar com o servidor.</p>';
   }
 }
 
@@ -41,38 +74,182 @@ async function loadLivrosLote(loteId) {
   }
 }
 
+const ESTADO_BADGE = {
+  NOVO:       { label: "Novo",       bg: "rgba(74,93,35,.12)",    color: "#4a5d23" },
+  OTIMO:      { label: "Ótimo",      bg: "rgba(74,93,35,.12)",    color: "#4a5d23" },
+  BOM:        { label: "Bom",        bg: "rgba(37,99,235,.1)",    color: "#1d4ed8" },
+  DESGASTADO: { label: "Desgastado", bg: "rgba(217,119,6,.12)",   color: "#b45309" },
+  RUIM:       { label: "Ruim",       bg: "rgba(185,28,28,.1)",    color: "#b91c1c" },
+};
+
 function renderLivros() {
+  garantirModalRejeicao();
   const container = document.getElementById("contentArea");
-  let html = `<h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:.75rem">Auditando Livros</h3><div class="book-grid">`;
+
+  let html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid rgba(44,36,27,.1)">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:#2c241b">
+        Auditando Livros <span style="font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:400;color:#7a6e65">${livrosCache.length} livro(s) neste lote</span>
+      </h3>
+      <button onclick="loadLotes()" style="background:none;border:none;cursor:pointer;font-size:.78rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#7a6e65;display:flex;align-items:center;gap:.35rem;padding:0">
+        <i class="fa-solid fa-arrow-left" style="font-size:.7rem"></i> Voltar
+      </button>
+    </div>
+    <div class="book-grid">`;
+
   livrosCache.forEach((b, bookIdx) => {
     const fotos = JSON.parse(b.fotosUrls || "[]");
-    let fotosHtml = '<div class="fotos-wrapper">';
+    const estadoAtual = (b.estadoFisico || "BOM").toUpperCase();
+    const badge = ESTADO_BADGE[estadoAtual] || ESTADO_BADGE.BOM;
+
+    let fotosHtml = `<div class="fotos-wrapper">`;
     fotos.forEach((url, fotoIdx) => {
-      fotosHtml += `<div class="foto-item"><img src="${url}" alt="Foto">
-        <button class="btn-del-foto" onclick="removerFoto(${bookIdx},${fotoIdx})">×</button></div>`;
+      fotosHtml += `
+        <div class="foto-item">
+          <img src="${url}" alt="Foto ${fotoIdx + 1}" style="width:88px;height:88px;object-fit:cover;border-radius:2px;border:1px solid rgba(44,36,27,.12);cursor:pointer" onclick="ampliarFoto('${url}')">
+          <button class="btn-del-foto" onclick="removerFoto(${bookIdx},${fotoIdx})" title="Remover foto">×</button>
+        </div>`;
     });
-    fotosHtml += `<label class="btn-add-foto" for="upload-${bookIdx}">+</label>
-      <input type="file" id="upload-${bookIdx}" style="display:none" accept="image/*" onchange="subirFoto(event,${bookIdx})"></div>`;
+    fotosHtml += `
+      <label class="btn-add-foto" for="upload-${bookIdx}" title="Adicionar foto">
+        <i class="fa-solid fa-plus" style="font-size:.85rem"></i>
+      </label>
+      <input type="file" id="upload-${bookIdx}" style="display:none" accept="image/*" onchange="subirFoto(event,${bookIdx})">
+    </div>`;
+
     html += `
-    <div class="bcard" id="card-${b.id}">
+    <div class="bcard audit-card" id="card-${b.id}">
       ${fotosHtml}
-      <h3 style="margin-bottom:5px;">${b.titulo}</h3>
-      <p style="font-size:13px;color:#7A6E65;margin:0;">Autor: ${b.autor} | ISBN: ${b.isbn}</p>
-      <div style="margin-top:15px;">
-        <label style="font-size:12px;font-weight:bold;color:#2C241B;">AVALIAÇÃO DO ESTADO:</label>
-        <select id="sel-${b.id}" onchange="updatePrice(${b.id})">
-          <option value="NOVO">Novo</option><option value="OTIMO">Ótimo</option>
-          <option value="BOM" selected>Bom</option><option value="DESGASTADO">Desgastado</option>
+
+      <div class="audit-info">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.6rem">
+          <h3 style="font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:#2c241b;line-height:1.25;margin:0;flex:1">${b.titulo}</h3>
+          <span style="flex-shrink:0;font-size:.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.2rem .65rem;border-radius:999px;background:${badge.bg};color:${badge.color};border:1px solid ${badge.color}22;white-space:nowrap">${badge.label}</span>
+        </div>
+        <p style="font-family:'DM Sans',sans-serif;font-size:.82rem;font-style:italic;color:#7a6e65;margin:0 0 .3rem">por ${b.autor}</p>
+        ${b.isbn ? `<p style="font-family:'Courier New',monospace;font-size:.72rem;color:rgba(44,36,27,.45);margin:0">ISBN ${b.isbn}</p>` : ""}
+      </div>
+
+      <div class="audit-divider"></div>
+
+      <div class="audit-avaliacao">
+        <label style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(74,93,35,.7);display:block;margin-bottom:.4rem">Estado físico avaliado</label>
+        <select id="sel-${b.id}" onchange="updatePrice(${b.id})" style="width:100%;margin:0;padding:.55rem .75rem;font-size:.85rem;font-family:'DM Sans',sans-serif;border:1.5px solid rgba(74,93,35,.25);border-radius:2px;background:#f9f6f0;color:#2c241b;cursor:pointer">
+          <option value="NOVO">Novo</option>
+          <option value="OTIMO">Ótimo</option>
+          <option value="BOM" selected>Bom</option>
+          <option value="DESGASTADO">Desgastado</option>
           <option value="RUIM">Ruim (Inviável)</option>
         </select>
+        <div class="price-display" id="price-${b.id}" style="font-size:.9rem;font-weight:700;color:#4a5d23;background:rgba(74,93,35,.07);border:1px solid rgba(74,93,35,.15);padding:.4rem .75rem;margin-top:.5rem;text-align:center;border-radius:2px">Sugestão: T$ 30</div>
       </div>
-      <div class="price-display" id="price-${b.id}">Sugestão: T$ 30</div>
-      <button class="btn-aprovar" onclick="finalizarAprovacao(${bookIdx})">Confirmar e Publicar</button>
-      <button class="btn-rejeitar" onclick="rejeitar(${b.id})">Rejeitar este Livro</button>
+
+      <div class="audit-divider"></div>
+
+      <div class="audit-actions">
+        <button class="btn-publicar-livro" onclick="finalizarAprovacao(${bookIdx})">
+          <i class="fa-solid fa-check"></i> Confirmar e Publicar
+        </button>
+        <button class="btn-rejeitar-livro" onclick="abrirModalRejeicao(${b.id}, ${bookIdx})">
+          <i class="fa-solid fa-xmark"></i> Rejeitar este Livro
+        </button>
+      </div>
     </div>`;
   });
-  html += `</div><br><button onclick="loadLotes()" style="background:none;color:#7A6E65;border:none;text-decoration:underline;cursor:pointer;">← Voltar para a lista de lotes</button>`;
+
+  html += `</div>`;
   container.innerHTML = html;
+}
+
+function ampliarFoto(url) {
+  const overlay = document.createElement("div");
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:10000;display:flex;align-items:center;justify-content:center;cursor:zoom-out";
+  overlay.innerHTML = `<img src="${url}" style="max-width:90vw;max-height:90vh;object-fit:contain;border:2px solid rgba(255,255,255,.15)">`;
+  overlay.addEventListener("click", () => overlay.remove());
+  document.body.appendChild(overlay);
+}
+
+/* ── Modal de Rejeição ── */
+function garantirModalRejeicao() {
+  if (document.getElementById("modalRejeicao")) return;
+  const el = document.createElement("div");
+  el.id = "modalRejeicao";
+  el.style.cssText = "display:none;position:fixed;inset:0;background:rgba(44,36,27,.55);z-index:9998;align-items:center;justify-content:center;padding:1rem";
+  el.innerHTML = `
+    <div style="background:#fff;border:1.5px solid rgba(44,36,27,.12);border-top:3px solid #722f37;padding:2rem;max-width:480px;width:100%;position:relative;box-shadow:0 12px 40px rgba(44,36,27,.2)">
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+        <span style="width:2rem;height:2rem;border-radius:50%;background:rgba(185,28,28,.1);color:#b91c1c;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0"><i class="fa-solid fa-xmark"></i></span>
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:#2c241b">Rejeitar Livro</div>
+          <div id="modalRejeicaoSubtitle" style="font-size:.78rem;color:#7a6e65;margin-top:.1rem"></div>
+        </div>
+      </div>
+      <label style="font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#7a6e65;display:block;margin-bottom:.4rem">Motivo da rejeição <span style="color:#b91c1c">*</span></label>
+      <textarea id="modalRejeicaoMotivo" rows="4" placeholder="Descreva o motivo da rejeição (será enviado por e-mail ao vendedor)…"
+        style="width:100%;border:1.5px solid rgba(44,36,27,.18);border-radius:2px;padding:.65rem .85rem;font-size:.875rem;font-family:'DM Sans',sans-serif;background:#f9f6f0;color:#2c241b;resize:vertical;outline:none;margin:0"></textarea>
+      <div id="modalRejeicaoErro" style="display:none;font-size:.78rem;color:#b91c1c;margin-top:.35rem"><i class="fa-solid fa-circle-exclamation"></i> O motivo é obrigatório.</div>
+      <div style="display:flex;gap:.75rem;margin-top:1.25rem">
+        <button onclick="fecharModalRejeicao()" style="flex:1;padding:.65rem;background:#fff;border:1.5px solid rgba(44,36,27,.2);color:#7a6e65;font-size:.78rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;border-radius:2px">Cancelar</button>
+        <button id="btnConfirmarRejeicao" onclick="confirmarRejeicao()" style="flex:1;padding:.65rem;background:#b91c1c;border:2px solid #b91c1c;color:#fff;font-size:.78rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;border-radius:2px">
+          <i class="fa-solid fa-xmark"></i> Confirmar Rejeição
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+}
+
+let _rejeicaoPendente = null;
+
+function abrirModalRejeicao(livroId, bookIdx) {
+  const livro = livrosCache[bookIdx];
+  _rejeicaoPendente = { livroId, bookIdx };
+  document.getElementById("modalRejeicaoSubtitle").textContent = livro ? `"${livro.titulo}"` : "";
+  document.getElementById("modalRejeicaoMotivo").value = "";
+  document.getElementById("modalRejeicaoErro").style.display = "none";
+  const modal = document.getElementById("modalRejeicao");
+  modal.style.display = "flex";
+  setTimeout(() => document.getElementById("modalRejeicaoMotivo").focus(), 80);
+}
+
+function fecharModalRejeicao() {
+  document.getElementById("modalRejeicao").style.display = "none";
+  _rejeicaoPendente = null;
+}
+
+async function confirmarRejeicao() {
+  const motivo = document.getElementById("modalRejeicaoMotivo").value.trim();
+  if (!motivo) {
+    document.getElementById("modalRejeicaoErro").style.display = "block";
+    return;
+  }
+  document.getElementById("modalRejeicaoErro").style.display = "none";
+
+  const { livroId, bookIdx } = _rejeicaoPendente;
+  const estado = document.getElementById(`sel-${livroId}`) ? document.getElementById(`sel-${livroId}`).value : "BOM";
+
+  const btn = document.getElementById("btnConfirmarRejeicao");
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Rejeitando…';
+
+  const res = await fetch(`/api/admin/livros/${livroId}/rejeitar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ estado, comentario: motivo }),
+  });
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fa-solid fa-xmark"></i> Confirmar Rejeição';
+  fecharModalRejeicao();
+
+  if (res.ok) {
+    mostrarToast("Livro rejeitado. E-mail de notificação enviado ao vendedor.", "aviso");
+    livrosCache.splice(bookIdx, 1);
+    if (livrosCache.length === 0) loadLotes();
+    else renderLivros();
+  } else {
+    const t = await res.text();
+    mostrarToast("Erro: " + t, "erro");
+  }
 }
 
 function updatePrice(id) {
@@ -121,24 +298,6 @@ async function finalizarAprovacao(bookIdx) {
   } else mostrarToast("❌ Erro ao aprovar livro.", "erro");
 }
 
-async function rejeitar(id) {
-  if (!confirm("Tem certeza que deseja rejeitar este livro?")) return;
-  const estado = document.getElementById(`sel-${id}`).value;
-  const res = await fetch(`/api/admin/livros/${id}/rejeitar`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ estado }),
-  });
-  if (res.ok) {
-    mostrarToast("Livro rejeitado.", "aviso");
-    livrosCache = livrosCache.filter((l) => l.id !== id);
-    if (livrosCache.length === 0) loadLotes();
-    else renderLivros();
-  } else {
-    const t = await res.text();
-    mostrarToast("Erro: " + t, "erro");
-  }
-}
 
 /* ════════════════════════════════════════
    PEDIDOS
@@ -156,10 +315,14 @@ async function carregarPedidos() {
 
     const pendentes = todosPedidos.filter((p) => p.statusEnvio === "AGUARDANDO_ENVIO").length;
     const badge = document.getElementById("badgePedidos");
-    if (pendentes > 0) {
-      badge.textContent = pendentes;
-      badge.style.display = "inline";
-    } else badge.style.display = "none";
+    if (badge) {
+      if (pendentes > 0) {
+        badge.textContent = pendentes;
+        badge.style.display = "inline";
+      } else {
+        badge.style.display = "none";
+      }
+    }
 
     renderPedidos();
   } catch (e) {
@@ -287,6 +450,12 @@ async function salvarEnvio(pedidoId) {
   const novoStatus = document.getElementById(`status-${pedidoId}`).value;
   const codigoRastreio = document.getElementById(`rastreio-${pedidoId}`).value.trim();
 
+  if (novoStatus === "CANCELADO") {
+    if (!confirm("Tem certeza que deseja CANCELAR este pedido? O valor será estornado ao comprador. Esta operação não pode ser desfeita.")) {
+      return;
+    }
+  }
+
   const btn = document.querySelector(`#row-${pedidoId} .btn-salvar-envio`);
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
@@ -390,7 +559,9 @@ async function carregarBlogAdmin() {
         <div style="font-size:.75rem;color:#7A6E65;margin-bottom:.5rem">Por ${p.autorNome} · ${p.dataPublicacao}</div>
         <div style="font-size:.85rem;color:#7A6E65;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${p.conteudo}</div>
       </div>
-      <button onclick="deletarPost(${p.id})" class="btn-remover-post">Remover</button>
+      <button onclick="blogConfirmarDel(${p.id}, this)" class="btn-remover-post" title="Remover post">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>
     </div>`).join("");
   } catch (e) {
     lista.innerHTML = '<p style="font-size:.875rem;color:#722F37">Erro ao carregar posts.</p>';
@@ -418,8 +589,26 @@ async function publicarPost(e) {
   }
 }
 
+function blogCancelarDel(naoBtn) {
+  const item = naoBtn.closest('.blog-post-item');
+  naoBtn.closest('.blog-confirm-del').remove();
+  item.querySelector('.btn-remover-post').style.display = '';
+}
+
+function blogConfirmarDel(id, btn) {
+  const item = btn.closest('.blog-post-item');
+  btn.style.display = 'none';
+  const div = document.createElement('div');
+  div.className = 'blog-confirm-del';
+  div.innerHTML = `
+    <span>Remover?</span>
+    <button class="blog-confirm-sim" onclick="deletarPost(${id})">Sim</button>
+    <button class="blog-confirm-nao" onclick="blogCancelarDel(this)">✕</button>
+  `;
+  item.appendChild(div);
+}
+
 async function deletarPost(id) {
-  if (!confirm("Remover este post?")) return;
   try {
     const res = await fetch("/api/blog/" + id, { method: "DELETE", credentials: "include" });
     if (!res.ok) throw new Error();

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Livro — Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}"/>
+    <link rel="stylesheet" th:href="@{/css/produto/livro_detalhe.css}"/>
+</head>
+<body>
+
+    <!-- NAV -->
+    <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+    <!-- Toast de feedback -->
+    <div class="toast" id="toastDetalhe"></div>
+
+    <!-- BREADCRUMB -->
+    <div class="detalhe-breadcrumb">
+        <a href="/livros/vitrine">← Vitrine</a>
+        <span id="bcrTitulo">…</span>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="detalhe-main" id="detalheMain">
+
+        <!-- Estado: carregando -->
+        <div id="estadoCarregando" class="estado-msg">
+            <p>Carregando livro…</p>
+        </div>
+
+        <!-- Estado: não encontrado -->
+        <div id="estadoNaoEncontrado" class="estado-msg" style="display:none;">
+            <p style="font-family:'IM Fell English',serif;font-style:italic;color:#722f37;font-size:1.2rem;">
+                Este livro não está mais disponível.
+            </p>
+            <a href="/livros/vitrine" class="btn-primario" style="margin-top:1.5rem;">← Voltar para a Vitrine</a>
+        </div>
+
+        <!-- Conteúdo do livro (mostrado após o carregamento) -->
+        <div id="conteudoLivro" style="display:none;">
+
+            <!-- GALERIA -->
+            <section class="detalhe-galeria">
+                <div class="galeria-main">
+                    <img id="fotoMain" src="" alt="Foto do livro" class="galeria-main-img">
+                    <!-- Badge de promoção -->
+                    <span id="badgePromo" class="badge-promo" style="display:none;">PROMOÇÃO</span>
+                </div>
+                <!-- Miniaturas (exibidas quando há mais de 1 foto) -->
+                <div id="galeriaThumbs" class="galeria-thumbs"></div>
+            </section>
+
+            <!-- INFORMAÇÕES -->
+            <section class="detalhe-info">
+
+                <!-- Estado do livro -->
+                <span id="badgeEstado" class="livro-estado-badge"></span>
+
+                <h1 id="livroTitulo" class="detalhe-titulo"></h1>
+                <p id="livroAutor" class="detalhe-autor"></p>
+                <p id="livroIsbn" class="detalhe-isbn"></p>
+
+                <!-- Preço -->
+                <div class="detalhe-preco-bloco">
+                    <div id="precoHtml" class="detalhe-preco"></div>
+                    <!-- Contador regressivo de promoção -->
+                    <div id="promoCountdown" class="promo-countdown" style="display:none;">
+                        🔥 Oferta expira em: <span id="promoTimer">…</span>
+                    </div>
+                </div>
+
+                <!-- Descrição/Resumo -->
+                <div id="livroResumo" class="detalhe-resumo" style="display:none;">
+                    <h3>Sobre o livro</h3>
+                    <p id="livroResumoTexto"></p>
+                </div>
+
+                <!-- Ações -->
+                <div class="detalhe-acoes">
+                    <button id="btnEstante" class="btn-estante" onclick="handleAdicionarEstante()">
+                        <img src="/imagens/estante.png" style="width:20px;height:20px;object-fit:contain;opacity:.9" alt="">
+                        Adicionar à Estante
+                    </button>
+                    <button id="btnComprarAgora" class="btn-primario" onclick="handleComprarAgora()">
+                        Comprar agora →
+                    </button>
+                </div>
+
+                <!-- Aviso: já na estante -->
+                <p id="avisoEstante" class="aviso-estante" style="display:none;">
+                    ✓ Este livro já está na sua estante.
+                    <a href="/livros/estante">Ver estante</a>
+                </p>
+
+            </section>
+        </div>
+    </main>
+
+    <script th:src="@{/js/produto/livro_detalhe.js}"></script>
+</body>
+</html>

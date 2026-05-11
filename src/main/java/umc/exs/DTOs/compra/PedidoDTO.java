@@ -1,4 +1,4 @@
-package umc.exs.DTOs.compra;
+package umc.exs.dtos.compra;
 
 import java.time.LocalDateTime;
 

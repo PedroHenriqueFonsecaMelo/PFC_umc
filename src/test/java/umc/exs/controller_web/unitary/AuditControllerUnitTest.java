@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
-import umc.exs.DTOs.user.ClienteDTO;
 import umc.exs.controller.web.AuditController;
+import umc.exs.dtos.user.ClienteDTO;
 import umc.exs.model.entidades.logic.LogAuditoria;
 import umc.exs.service.core.cliente.ClienteService;
 import umc.exs.service.log.LogAuditoriaService;

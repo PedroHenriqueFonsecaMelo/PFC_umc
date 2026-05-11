@@ -1,10 +1,17 @@
 /* ================================================================
    venda_livro.js — Vender Livros · Bibliotroca
    ================================================================ */
+let debounceTimer;
+function debounce(func, delay) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(func, delay);
+}
 
 (async function () {
     try {
-        const res = await fetch("/clientes/meu-perfil-json", { credentials: "include" });
+        const res = await fetch("/clientes/meu-perfil-json", {
+            credentials: "include",
+        });
         if (!res.ok) return;
         const c = await res.json();
         const el = document.getElementById("navSaldo");
@@ -70,7 +77,14 @@ function criarCard(id, index) {
 function adicionarLivro() {
     if (livros.length >= MAX) return;
     const id = nextId++;
-    livros.push({ id, isbn: "", titulo: "", autor: "", arquivos: [], quantidadedeFotos: 0 });
+    livros.push({
+        id,
+        isbn: "",
+        titulo: "",
+        autor: "",
+        arquivos: [],
+        quantidadedeFotos: 0,
+    });
     const index = livros.length;
     const card = criarCard(id, index);
     document.getElementById("livrosContainer").appendChild(card);
@@ -155,11 +169,14 @@ function handleFotos(id, files) {
     const previews = document.getElementById(`upload-previews-${id}`);
     if (selecionados.length > 0) {
         placeholder.style.display = "none";
+        previews.innerHTML = "";
+        selecionados.forEach((f) => {
+            const img = document.createElement("img");
+            img.src = URL.createObjectURL(f);
+            img.alt = "";
+            previews.appendChild(img);
+        });
         previews.style.display = "flex";
-        previews.innerHTML = selecionados.map((f) => {
-            const url = URL.createObjectURL(f);
-            return `<img src="${url}" alt="preview"/>`;
-        }).join("");
     } else {
         placeholder.style.display = "";
         previews.style.display = "none";
@@ -179,9 +196,50 @@ document.getElementById("livrosContainer").addEventListener("input", (e) => {
     const el = e.target;
     if (!el.dataset.field) return;
     const id = Number(el.dataset.id);
+
+    // Atualiza o valor no array local imediatamente
     setField(id, el.dataset.field, el.value);
-    if (el.dataset.field === "isbn") buscarIsbn(id, el.value);
+
+    // Se for o campo ISBN, dispara a busca automática com debounce
+    if (el.dataset.field === "isbn") {
+        const isbnLimpo = el.value.replace(/\D/g, "");
+        if (isbnLimpo.length >= 10) {
+            debounce(() => {
+                consultarBackendIsbn(id, isbnLimpo);
+            }, 600); // 600ms de espera após parar de digitar
+        }
+    }
 });
+
+async function consultarBackendIsbn(id, isbn) {
+    const spinner = document.getElementById(`spinner-${id}`);
+    if (spinner) spinner.classList.add("active");
+
+    try {
+        // Ajuste a URL para bater com o seu @PostMapping do Java
+        const res = await fetch(`/api/livros/cadastrar-isbn/${isbn}`, {
+            method: "GET",
+        });
+
+        if (!res.ok) throw new Error("ISBN não encontrado");
+
+        const data = await res.json();
+
+        // Preenche os inputs na tela
+        const inputTitulo = document.getElementById(`titulo-${id}`);
+        const inputAutor = document.getElementById(`autor-${id}`);
+
+        if (inputTitulo) inputTitulo.value = data.titulo;
+        if (inputAutor) inputAutor.value = data.autor;
+
+        setField(id, "titulo", data.titulo);
+        setField(id, "autor", data.autor);
+    } catch (err) {
+        console.warn("Não foi possível auto-preencher os dados:", err);
+    } finally {
+        if (spinner) spinner.classList.remove("active");
+    }
+}
 
 document.getElementById("livrosContainer").addEventListener("change", (e) => {
     const el = e.target;
@@ -190,7 +248,10 @@ document.getElementById("livrosContainer").addEventListener("change", (e) => {
     handleFotos(id, el.files);
 });
 
-document.getElementById("btnAdicionar").addEventListener("click", adicionarLivro);
+document.getElementById("btnAdicionar").addEventListener(
+    "click",
+    adicionarLivro,
+);
 
 document.getElementById("formVenda").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -199,6 +260,12 @@ document.getElementById("formVenda").addEventListener("submit", async (e) => {
     const invalidos = livros.filter((l) => !l.titulo.trim() || !l.autor.trim());
     if (invalidos.length > 0) {
         mostrarErro("Preencha título e autor de todos os livros.");
+        return;
+    }
+
+    const semFoto = livros.find((l) => l.arquivos.length === 0);
+    if (semFoto) {
+        mostrarErro("Adicione pelo menos uma foto do livro antes de enviar.");
         return;
     }
 
@@ -212,17 +279,26 @@ document.getElementById("formVenda").addEventListener("submit", async (e) => {
             titulo: l.titulo.trim(),
             autor: l.autor.trim(),
             isbn: l.isbn.replace(/\D/g, ""),
+            idioma: null,
             quantidadedeFotos: l.quantidadedeFotos,
         })),
     };
-    formData.append("loteDados", new Blob([JSON.stringify(loteJson)], { type: "application/json" }));
-    livros.forEach((l) => l.arquivos.forEach((f) => formData.append("fotos", f)));
+    formData.append(
+        "loteDados",
+        new Blob([JSON.stringify(loteJson)], { type: "application/json" }),
+    );
+    livros.forEach((l) =>
+        l.arquivos.forEach((f) => formData.append("fotos", f))
+    );
 
     try {
-        const res = await fetch("/api/livros/lotes/vender", { method: "POST", body: formData });
+        const res = await fetch("/api/livros/lotes/vender", {
+            method: "POST",
+            body: formData,
+        });
         if (res.ok) {
-            mostrarOk("Lote enviado! Nossa curadoria avaliará em breve.");
-            setTimeout(() => window.location.href = "/", 2000);
+            const lote = await res.json();
+            mostrarModalConfirmacao(lote);
         } else {
             const msg = await res.text();
             mostrarErro(msg || "Erro ao enviar o lote. Tente novamente.");
@@ -230,7 +306,9 @@ document.getElementById("formVenda").addEventListener("submit", async (e) => {
             btnSubmit.textContent = "Enviar para avaliação";
         }
     } catch (_) {
-        mostrarErro("Erro de conexão. Verifique sua internet e tente novamente.");
+        mostrarErro(
+            "Erro de conexão. Verifique sua internet e tente novamente.",
+        );
         btnSubmit.disabled = false;
         btnSubmit.textContent = "Enviar para avaliação";
     }
@@ -251,5 +329,59 @@ function esconderAlertas() {
     document.getElementById("alertErro").classList.remove("show");
     document.getElementById("alertOk").classList.remove("show");
 }
+
+/* ── Comprovante do lote ── */
+
+function escHtml(str) {
+    return String(str || "")
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function mostrarModalConfirmacao(lote) {
+    const protocolo = lote.codigoProtocolo || String(lote.id || "—");
+    const numLote = lote.id ? "Lote #" + lote.id : "";
+    const data = new Date().toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+    });
+
+    document.getElementById("recProtocolo").textContent = protocolo;
+    document.getElementById("recNumLote").textContent = numLote;
+    document.getElementById("recData").textContent = data;
+
+    document.getElementById("recLivros").innerHTML = livros.map((l, i) => {
+        const sub = [
+            l.autor ? escHtml(l.autor) : null,
+            l.isbn ? "ISBN: " + l.isbn.replace(/\D/g, "") : null,
+        ].filter(Boolean).join(" · ");
+        return `<div class="rec-livro-item">
+            <span class="rec-livro-num">${String(i + 1).padStart(2, "0")}</span>
+            <div>
+                <div class="rec-livro-titulo">${escHtml(l.titulo || "—")}</div>
+                ${sub ? `<div class="rec-livro-sub">${sub}</div>` : ""}
+            </div>
+        </div>`;
+    }).join("");
+
+    // Espelha o recibo na área de impressão
+    document.getElementById("printArea").innerHTML =
+        document.getElementById("recibo").innerHTML;
+
+    document.getElementById("modalConfirmacao").style.display = "flex";
+    document.body.style.overflow = "hidden";
+}
+
+document.getElementById("btnPdf").addEventListener(
+    "click",
+    () => window.print(),
+);
+
+document.getElementById("btnConcluir").addEventListener("click", () => {
+    window.location.href = "/?enviado=1";
+});
+
+/* ─────────────────────────────────────────────────────────── */
 
 adicionarLivro();
