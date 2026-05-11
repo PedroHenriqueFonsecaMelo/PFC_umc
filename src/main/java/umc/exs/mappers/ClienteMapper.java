@@ -25,6 +25,7 @@ public interface ClienteMapper {
     @Mapping(target = "senha", ignore = true)
     @Mapping(target = "avaliacoes", ignore = true)
     @Mapping(target = "fotoPerfil", ignore = true)
+    @Mapping(target = "enderecoSelecionadoId", ignore = true)
     Cliente paraEntidade(SignupDTO dto);
 
     @Mapping(target = "senha", ignore = true)
@@ -51,5 +52,6 @@ public interface ClienteMapper {
     @Mapping(target = "bloqueada", ignore = true)
     @Mapping(target = "tentativas", ignore = true)
     @Mapping(target = "avaliacoes", ignore = true)
+    @Mapping(target = "enderecoSelecionadoId", ignore = true)
     void atualizarEntidadeDeDto(ClienteDTO dto, @MappingTarget Cliente entity);
 }

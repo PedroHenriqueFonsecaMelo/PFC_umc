@@ -538,33 +538,131 @@ function mostrarToast(msg, tipo) {
 /* ════════════════════════════════════════
    BLOG
    ════════════════════════════════════════ */
+let postsCache = [];
+
 async function carregarBlogAdmin() {
   const lista = document.getElementById("listaBlog");
   try {
-    const res = await fetch("/api/blog");
-    const posts = await res.json();
+    const res = await fetch("/api/admin/blog");
+    postsCache = await res.json();
 
-    if (posts.length === 0) {
+    if (postsCache.length === 0) {
       lista.innerHTML = '<p style="font-size:.875rem;color:#7A6E65;padding:1rem">Nenhum post publicado ainda.</p>';
       return;
     }
 
-    lista.innerHTML = posts.map((p) => `
-    <div class="blog-post-item">
+    lista.innerHTML = postsCache.map((p) => `
+    <div class="blog-post-item" data-post-id="${p.id}">
       ${p.imagemUrl
         ? `<img src="${p.imagemUrl}" alt="" class="blog-post-img"/>`
         : '<div class="blog-post-img" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem">📝</div>'}
       <div style="flex:1;min-width:0">
-        <div style="font-weight:700;color:#2C241B;font-size:.9rem;margin-bottom:.25rem">${p.titulo}</div>
-        <div style="font-size:.75rem;color:#7A6E65;margin-bottom:.5rem">Por ${p.autorNome} · ${p.dataPublicacao}</div>
-        <div style="font-size:.85rem;color:#7A6E65;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${p.conteudo}</div>
+        <div style="font-weight:700;color:#2C241B;font-size:.9rem;margin-bottom:.25rem">${escBlog(p.titulo)}</div>
+        <div style="font-size:.75rem;color:#7A6E65;margin-bottom:.5rem">Por ${escBlog(p.autorNome)} · ${p.dataPublicacao} · <span style="font-weight:600">${p.status}</span></div>
+        <div style="font-size:.85rem;color:#7A6E65;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${escBlog(p.conteudo)}</div>
       </div>
-      <button onclick="blogConfirmarDel(${p.id}, this)" class="btn-remover-post" title="Remover post">
-        <i class="fa-solid fa-trash-can"></i>
-      </button>
+      <div style="display:flex;flex-direction:column;gap:.35rem;flex-shrink:0">
+        <button onclick="blogAbrirEdicao(${p.id})" class="btn-editar-post" title="Editar post">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </button>
+        <button onclick="blogConfirmarDel(${p.id}, this)" class="btn-remover-post" title="Remover post">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+      </div>
     </div>`).join("");
   } catch (e) {
     lista.innerHTML = '<p style="font-size:.875rem;color:#722F37">Erro ao carregar posts.</p>';
+  }
+}
+
+function escBlog(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function garantirModalEditarBlog() {
+  if (document.getElementById("modalEditarBlog")) return;
+  const overlay = document.createElement("div");
+  overlay.id = "modalEditarBlog";
+  overlay.style.cssText = "display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center";
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:2px;width:min(560px,95vw);max-height:90vh;overflow-y:auto;padding:2rem;box-shadow:0 8px 32px rgba(0,0,0,.18);position:relative">
+      <button onclick="fecharModalEditarBlog()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;cursor:pointer;font-size:1.1rem;color:#7A6E65">✕</button>
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.15rem;margin-bottom:1.25rem;color:#2C241B">Editar Post</h3>
+      <form id="formEditarBlog" onsubmit="salvarEdicaoBlog(event)">
+        <input type="hidden" id="editBlogId"/>
+        <div style="margin-bottom:1rem">
+          <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.35rem;color:#2C241B">Título</label>
+          <input id="editBlogTitulo" type="text" required
+            style="width:100%;padding:.6rem .75rem;border:1px solid rgba(44,36,27,.2);border-radius:2px;font-size:.9rem;box-sizing:border-box"/>
+        </div>
+        <div style="margin-bottom:1rem">
+          <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.35rem;color:#2C241B">Conteúdo</label>
+          <textarea id="editBlogConteudo" rows="8" required
+            style="width:100%;padding:.6rem .75rem;border:1px solid rgba(44,36,27,.2);border-radius:2px;font-size:.875rem;resize:vertical;box-sizing:border-box"></textarea>
+        </div>
+        <div style="margin-bottom:1rem">
+          <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.35rem;color:#2C241B">Imagem atual</label>
+          <div id="editBlogImgAtual" style="margin-bottom:.5rem"></div>
+          <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.35rem;color:#2C241B">Nova imagem (opcional)</label>
+          <input id="editBlogImagem" type="file" accept="image/*" style="font-size:.85rem"/>
+        </div>
+        <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.5rem">
+          <button type="button" onclick="fecharModalEditarBlog()"
+            style="padding:.55rem 1.25rem;border:1px solid rgba(44,36,27,.2);background:none;border-radius:2px;cursor:pointer;font-size:.85rem">Cancelar</button>
+          <button type="submit" id="btnSalvarEdicaoBlog"
+            style="padding:.55rem 1.5rem;background:#722F37;color:#fff;border:none;border-radius:2px;cursor:pointer;font-size:.85rem;font-weight:600">Salvar</button>
+        </div>
+      </form>
+    </div>`;
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) fecharModalEditarBlog(); });
+  document.body.appendChild(overlay);
+}
+
+function blogAbrirEdicao(id) {
+  garantirModalEditarBlog();
+  const post = postsCache.find(p => p.id === id);
+  if (!post) return;
+  document.getElementById("editBlogId").value = id;
+  document.getElementById("editBlogTitulo").value = post.titulo;
+  document.getElementById("editBlogConteudo").value = post.conteudo;
+  const imgAtual = document.getElementById("editBlogImgAtual");
+  imgAtual.innerHTML = post.imagemUrl
+    ? `<img src="${post.imagemUrl}" style="max-height:120px;border:1px solid rgba(44,36,27,.15);display:block"/>`
+    : '<span style="font-size:.8rem;color:#7A6E65">Nenhuma imagem</span>';
+  document.getElementById("editBlogImagem").value = "";
+  const modal = document.getElementById("modalEditarBlog");
+  modal.style.display = "flex";
+}
+
+function fecharModalEditarBlog() {
+  const modal = document.getElementById("modalEditarBlog");
+  if (modal) modal.style.display = "none";
+}
+
+async function salvarEdicaoBlog(e) {
+  e.preventDefault();
+  const id = document.getElementById("editBlogId").value;
+  const btn = document.getElementById("btnSalvarEdicaoBlog");
+  btn.disabled = true;
+  btn.textContent = "Salvando…";
+
+  const formData = new FormData();
+  formData.append("titulo", document.getElementById("editBlogTitulo").value);
+  formData.append("conteudo", document.getElementById("editBlogConteudo").value);
+  const img = document.getElementById("editBlogImagem").files[0];
+  if (img) formData.append("imagem", img);
+
+  try {
+    const res = await fetch("/api/blog/" + id, { method: "PUT", body: formData, credentials: "include" });
+    if (!res.ok) throw new Error();
+    fecharModalEditarBlog();
+    mostrarToast("Post atualizado com sucesso!", "sucesso");
+    carregarBlogAdmin();
+  } catch (_) {
+    mostrarToast("Erro ao salvar edição.", "erro");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Salvar";
   }
 }
 

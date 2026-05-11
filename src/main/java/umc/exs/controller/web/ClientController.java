@@ -179,6 +179,11 @@ public class ClientController {
         if (user == null)
             return REDIRECT_LOGIN;
 
+        boolean isAdmin = user.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (isAdmin)
+            return "redirect:/admin/painel";
+
         ClienteDTO clienteDTO = clienteService.buscarClientePorEmail(user.getUsername())
                 .orElseThrow(() -> new RuntimeException("Perfil não encontrado."));
 
@@ -276,6 +281,18 @@ public class ClientController {
             ra.addFlashAttribute(ATTR_SUCESSO, "Endereço removido com sucesso!");
         } catch (Exception e) {
             ra.addFlashAttribute("erro", "Erro ao remover: " + e.getMessage());
+        }
+        return REDIRECT_ENDERECOS;
+    }
+
+    @PostMapping("/enderecos/selecionar")
+    public String selecionarEndereco(@RequestParam Long enderecoId,
+            @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
+        try {
+            clienteService.selecionarEnderecoParaUsuarioLogado(user.getUsername(), enderecoId);
+            ra.addFlashAttribute(ATTR_SUCESSO, "Endereço de entrega atualizado!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("erro", "Erro ao selecionar: " + e.getMessage());
         }
         return REDIRECT_ENDERECOS;
     }

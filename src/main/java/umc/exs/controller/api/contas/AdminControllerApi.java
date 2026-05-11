@@ -1,6 +1,7 @@
 package umc.exs.controller.api.contas;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import umc.exs.service.core.bussiness.LivroService;
 import umc.exs.service.core.control.DashboardService;
 import umc.exs.service.core.control.LoteService;
 import umc.exs.service.core.control.PedidoService;
+import umc.exs.service.core.interactions.PostBlogService;
 import umc.exs.service.cupom.CupomService;
 
 @Slf4j
@@ -48,6 +50,7 @@ public class AdminControllerApi {
     private final PedidoService pedidoService;
     private final DashboardService dashboardService;
     private final CupomService cupomService;
+    private final PostBlogService postBlogService;
 
     private static final String NAO_AUTENTICADO = "Acesso negado: Admin não autenticado.";
     private static final String ADMIN_NAO_ENCONTRADO = "Conta de administrador não encontrada.";
@@ -231,5 +234,40 @@ public class AdminControllerApi {
     @GetMapping("/dashboard/metricas")
     public ResponseEntity<DashboardMetricasDTO> getMetricas() {
         return ResponseEntity.ok(dashboardService.getMetricas());
+    }
+
+    // ==========================================================
+    // SESSÃO
+    // ==========================================================
+
+    @GetMapping("/me")
+    public ResponseEntity<Map<String, String>> getMe(@AuthenticationPrincipal UserDetails user) {
+        String nome = adminRepository.findByEmail(user.getUsername())
+                .map(a -> a.getNome())
+                .orElse("Administrador");
+        return ResponseEntity.ok(Map.of("nome", nome, "role", "ADMIN"));
+    }
+
+    // ==========================================================
+    // BLOG
+    // ==========================================================
+
+    @GetMapping("/blog")
+    public ResponseEntity<List<Map<String, Object>>> listarPostsBlog() {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        List<Map<String, Object>> posts = postBlogService.listarTodos().stream()
+                .map(p -> {
+                    java.util.LinkedHashMap<String, Object> m = new java.util.LinkedHashMap<>();
+                    m.put("id", p.getId());
+                    m.put("titulo", p.getTitulo() != null ? p.getTitulo() : "");
+                    m.put("conteudo", p.getConteudo() != null ? p.getConteudo() : "");
+                    m.put("imagemUrl", p.getImagemUrl() != null ? p.getImagemUrl() : "");
+                    m.put("autorNome", p.getAutorNome() != null ? p.getAutorNome() : "Administrador");
+                    m.put("dataPublicacao", p.getDataPublicacao() != null ? p.getDataPublicacao().format(fmt) : "");
+                    m.put("curtidas", p.getCurtidas());
+                    m.put("status", p.getStatus() != null ? p.getStatus().name() : "PUBLICADO");
+                    return (Map<String, Object>) m;
+                }).toList();
+        return ResponseEntity.ok(posts);
     }
 }

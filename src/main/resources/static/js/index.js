@@ -96,19 +96,37 @@ async function carregarRanking() {
 async function carregarNavUsuario() {
   try {
     const res = await fetch("/clientes/meu-perfil-json", { credentials: "include" });
-    if (!res.ok) return;
-    const cliente = await res.json();
-    const primeiroNome = (cliente.nome || "").split(" ")[0];
 
-    const fotoHtml = cliente.fotoPerfil
-      ? `<img src="${cliente.fotoPerfil}" style="width:84px;height:84px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:.4rem;">`
-      : "";
-    document.getElementById("mastheadTagline").innerHTML = fotoHtml + "Olá, <strong>" + primeiroNome + "</strong>";
-    document.getElementById("navGuest").style.display = "none";
-    document.getElementById("navUser").style.display = "flex";
-    document.getElementById("navMinhaConta").href = "/clientes/meu-perfil";
-    const btn = document.getElementById("btnQueroVender");
-    if (btn) btn.href = "/livros/vender";
+    if (res.ok) {
+      const cliente = await res.json();
+      const primeiroNome = (cliente.nome || "").split(" ")[0];
+      const fotoHtml = cliente.fotoPerfil
+        ? `<img src="${cliente.fotoPerfil}" style="width:84px;height:84px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:.4rem;">`
+        : "";
+      document.getElementById("mastheadTagline").innerHTML = fotoHtml + "Olá, <strong>" + primeiroNome + "</strong>";
+      document.getElementById("navGuest").style.display = "none";
+      document.getElementById("navUser").style.display = "flex";
+      document.getElementById("navMinhaConta").href = "/clientes/meu-perfil";
+      const btn = document.getElementById("btnQueroVender");
+      if (btn) btn.href = "/livros/vender";
+      return;
+    }
+
+    // 404 → pode ser admin (não está na tabela de clientes)
+    if (res.status === 404) {
+      const adminRes = await fetch("/api/admin/me", { credentials: "include" });
+      if (!adminRes.ok) return;
+      const admin = await adminRes.json();
+      const primeiroNome = (admin.nome || "Administrador").split(" ")[0];
+      document.getElementById("mastheadTagline").innerHTML = "Olá, <strong>" + primeiroNome + "</strong> · Admin";
+      document.getElementById("navGuest").style.display = "none";
+      document.getElementById("navUser").style.display = "flex";
+      // Redireciona links do nav para o painel
+      const perfilLink = document.querySelector("#navUser a");
+      if (perfilLink) { perfilLink.href = "/admin/painel"; perfilLink.textContent = "Painel Admin"; }
+      document.getElementById("navMinhaConta").href = "/admin/painel";
+      document.getElementById("navMinhaConta").textContent = "Painel Admin";
+    }
   } catch (_) {}
 }
 

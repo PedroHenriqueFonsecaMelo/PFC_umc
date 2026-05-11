@@ -114,7 +114,7 @@
 }
 
 select,
-button:not(.nav-item):not(.tab-btn):not(.filter-btn):not(.btn-salvar-envio):not(.btn-publicar):not(.btn-remover-post):not(.blog-confirm-sim):not(.blog-confirm-nao) {
+button:not(.nav-item):not(.tab-btn):not(.filter-btn):not(.btn-salvar-envio):not(.btn-publicar):not(.btn-remover-post):not(.btn-editar-post):not(.blog-confirm-sim):not(.blog-confirm-nao) {
   width: 100%;
   margin-top: 10px;
   padding: 12px;
@@ -340,7 +340,7 @@ input[type="text"].search-input:focus { border-color: #722f37; }
 .blog-post-item {
   background: #ffffff;
   border: 1px solid rgba(44, 36, 27, 0.1);
-  padding: 1rem 2.5rem 1rem 1.25rem;
+  padding: 1rem 1.25rem;
   display: flex;
   gap: 1rem;
   align-items: flex-start;
@@ -359,19 +359,21 @@ input[type="text"].search-input:focus { border-color: #722f37; }
   flex-shrink: 0;
   background: #ede8df;
 }
+.btn-editar-post,
 .btn-remover-post {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
   background: none;
   border: none;
-  color: #d0c9c4;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   line-height: 1;
-  padding: 3px;
+  padding: 4px 6px;
   border-radius: 2px;
   transition: color 0.15s, background 0.15s;
+  color: #d0c9c4;
+}
+.btn-editar-post:hover {
+  color: #2c6e49;
+  background: rgba(44, 110, 73, 0.08);
 }
 .btn-remover-post:hover {
   color: #722f37;

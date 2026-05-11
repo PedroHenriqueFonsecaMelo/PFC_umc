@@ -63,6 +63,25 @@
             <section class="checkout-pagamento">
                 <h2>Pagamento em tokens</h2>
 
+                <!-- Endereço de entrega -->
+                <div id="enderecoEntregaBloco" style="margin-bottom:1.25rem;">
+                    <h3 style="font-size:.85rem; font-weight:600; color:var(--muted,#7a6e65);
+                               text-transform:uppercase; letter-spacing:.05em; margin-bottom:.5rem;">
+                        Endereço de entrega
+                    </h3>
+                    <div id="enderecoEntregaCard" style="font-size:.85rem; padding:.75rem;
+                         border:1px solid var(--border,rgba(44,36,27,.15)); border-radius:8px;
+                         background:#faf8f5; line-height:1.6;">
+                        <span style="color:var(--muted,#7a6e65);">Carregando...</span>
+                    </div>
+                </div>
+
+                <!-- Alerta sem endereço -->
+                <div id="alertaEndereco" style="display:none; padding:.75rem 1rem; border-radius:8px;
+                     background:rgba(114,47,55,.07); border-left:3px solid var(--accent,#722f37);
+                     font-size:.85rem; margin-bottom:1rem; color:var(--accent,#722f37);">
+                </div>
+
                 <div class="pagamento-card">
                     <div class="pagamento-linha">
                         <span>Saldo atual</span>

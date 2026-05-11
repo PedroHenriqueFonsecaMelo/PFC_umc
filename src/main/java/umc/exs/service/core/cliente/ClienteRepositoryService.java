@@ -107,10 +107,22 @@ public class ClienteRepositoryService {
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         Endereco novoEndereco = enderecoMapper.paraEntidade(enderecoDTO);
+        boolean semSelecao = cliente.getEnderecoSelecionadoId() == null;
 
         cliente.getEnderecos().add(novoEndereco);
+        final Cliente salvo = clienteRepository.save(cliente);
 
-        clienteRepository.save(cliente);
+        // Auto-seleciona o endereço recém adicionado se nenhum estava selecionado
+        if (semSelecao) {
+            salvo.getEnderecos().stream()
+                    .map(Endereco::getId)
+                    .filter(id -> id != null)
+                    .findFirst()
+                    .ifPresent(id -> {
+                        salvo.setEnderecoSelecionadoId(id);
+                        clienteRepository.save(salvo);
+                    });
+        }
     }
 
     @Transactional
@@ -123,6 +135,17 @@ public class ClienteRepositoryService {
 
         if (!removido) {
             throw new IllegalArgumentException("Endereço não encontrado ou não pertence a este cliente.");
+        }
+
+        // Limpa seleção se o endereço removido era o selecionado
+        if (enderecoId.equals(cliente.getEnderecoSelecionadoId())) {
+            cliente.setEnderecoSelecionadoId(
+                    cliente.getEnderecos().stream()
+                            .map(Endereco::getId)
+                            .filter(id -> id != null)
+                            .findFirst()
+                            .orElse(null)
+            );
         }
 
         clienteRepository.save(cliente);

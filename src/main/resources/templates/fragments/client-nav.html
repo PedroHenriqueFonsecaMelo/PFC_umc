@@ -277,13 +277,28 @@
         });
         setInterval(cnAtualizarBadgeEstante, 1500);
 
-        /* ── Saldo na navbar ── */
+        /* ── Saldo na navbar (e detecção de admin) ── */
         fetch('/clientes/meu-perfil-json', { credentials: 'include' })
-            .then(function(r) { return r.ok ? r.json() : null; })
-            .then(function(c) {
-                if (!c) return;
-                var el = document.getElementById('navSaldo');
-                if (el) el.textContent = 'T$ ' + (c.saldoTokens || 0).toFixed(2);
+            .then(function(r) {
+                if (r.ok) return r.json().then(function(d) { return { tipo: 'cliente', d: d }; });
+                if (r.status === 404) return { tipo: 'verificarAdmin' };
+                return null;
+            })
+            .then(function(result) {
+                if (!result) return;
+                if (result.tipo === 'cliente') {
+                    var el = document.getElementById('navSaldo');
+                    if (el) el.textContent = 'T$ ' + (result.d.saldoTokens || 0).toFixed(2);
+                } else if (result.tipo === 'verificarAdmin') {
+                    fetch('/api/admin/me', { credentials: 'include' })
+                        .then(function(r2) { return r2.ok ? r2.json() : null; })
+                        .then(function(admin) {
+                            if (!admin) return;
+                            // Redireciona "Meu Perfil" para o painel do admin
+                            var link = document.querySelector('a.cn-btn[href="/clientes/meu-perfil"]');
+                            if (link) { link.href = '/admin/painel'; link.textContent = 'Painel Admin'; }
+                        }).catch(function(){});
+                }
             }).catch(function(){});
 
         /* ── Notificações ── */

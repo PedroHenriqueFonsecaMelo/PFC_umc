@@ -94,6 +94,10 @@ public class Cliente {
     @Column(nullable = false)
     private boolean emailVerificado = false;
 
+    /** ID do endereço padrão selecionado para entrega. Null se nenhum selecionado. */
+    @Column
+    private Long enderecoSelecionadoId;
+
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, cascade = {
             CascadeType.PERSIST,

@@ -57,6 +57,10 @@ public class LivroCompraService {
         Cliente comprador = clienteRepository.findByEmail(emailComprador)
                 .orElseThrow(() -> new IllegalStateException("Comprador não encontrado."));
 
+        if (comprador.getEnderecos() == null || comprador.getEnderecos().isEmpty()) {
+            throw new IllegalStateException("É necessário cadastrar um endereço de entrega antes de comprar.");
+        }
+
         if (comprador.getSaldoTokens() < livro.getPrecoAprovado()) {
             throw new IllegalStateException("Saldo insuficiente para completar a compra.");
         }
@@ -113,6 +117,9 @@ public class LivroCompraService {
                 .orElseThrow(() -> new IllegalStateException("Comprador não encontrado."));
         if (c.isBloqueada()) {
             throw new IllegalStateException("Sua conta está bloqueada.");
+        }
+        if (c.getEnderecos() == null || c.getEnderecos().isEmpty()) {
+            throw new IllegalStateException("É necessário cadastrar um endereço de entrega antes de comprar.");
         }
         return c;
     }

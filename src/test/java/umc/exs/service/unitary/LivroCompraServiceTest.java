@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import umc.exs.mappers.LivroMapper;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.livro.Obra;
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.core.bussiness.GoogleBooksService;
@@ -80,6 +82,13 @@ class LivroCompraServiceTest {
                 c.setId(1L);
                 c.setEmail(email);
                 c.setSaldoTokens(saldo);
+                // Endereço obrigatório para realizar compra
+                Endereco end = new Endereco();
+                end.setId(1L);
+                end.setCep("01001000");
+                end.setRua("Rua Teste");
+                end.setNumero("1");
+                c.getEnderecos().add(end);
                 return c;
         }
 

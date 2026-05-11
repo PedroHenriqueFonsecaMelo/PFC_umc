@@ -107,6 +107,28 @@ public class PostBlogService {
         return postBlogRepository.save(post);
     }
 
+    @SuppressWarnings({"null", "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"})
+    @Transactional
+    public PostBlog editarPost(Long id, String titulo, String conteudo, MultipartFile imagem) throws IOException {
+        PostBlog post = postBlogRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException(POST_N_ENCONTRADO));
+        if (titulo != null && !titulo.isBlank()) post.setTitulo(titulo);
+        if (conteudo != null && !conteudo.isBlank()) post.setConteudo(conteudo);
+        if (imagem != null && !imagem.isEmpty()) {
+            String ext = "";
+            String original = imagem.getOriginalFilename();
+            if (original != null && original.contains(".")) {
+                ext = original.substring(original.lastIndexOf("."));
+            }
+            String nomeFoto = UUID.randomUUID() + ext;
+            Path caminho = Paths.get("uploads/blog/" + nomeFoto);
+            Files.createDirectories(caminho.getParent());
+            Files.copy(imagem.getInputStream(), caminho);
+            post.setImagemUrl("/uploads/blog/" + nomeFoto);
+        }
+        return postBlogRepository.save(post);
+    }
+
     @SuppressWarnings("null")
     public void deletarPost(Long id) {
         postBlogRepository.deleteById(id);

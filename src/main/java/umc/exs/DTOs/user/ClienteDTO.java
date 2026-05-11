@@ -62,6 +62,11 @@ public class ClienteDTO {
     private LocalDateTime dataCriacao;
 
     /**
+     * ID do endereço selecionado para entrega.
+     */
+    private Long enderecoSelecionadoId;
+
+    /**
      * Lista de endereços.
      */
     private List<EnderecoDTO> enderecos = new ArrayList<>();

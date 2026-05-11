@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import umc.exs.dtos.user.EnderecoDTO;
+
 import lombok.RequiredArgsConstructor;
 import umc.exs.dtos.user.ClienteDTO;
 import umc.exs.model.entidades.foundation.Transacao;
@@ -65,6 +67,23 @@ public class ClientControllerApi {
         return clienteService.buscarClientePorEmail(user.getUsername())
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(404).build());
+    }
+
+    /** Retorna o endereço selecionado para entrega do cliente logado */
+    @GetMapping("/endereco-selecionado")
+    public ResponseEntity<EnderecoDTO> getEnderecoSelecionado(@AuthenticationPrincipal UserDetails user) {
+        return clienteService.buscarClientePorEmail(user.getUsername())
+                .flatMap(c -> c.getEnderecos().stream()
+                        .filter(e -> e.getId() != null && e.getId().equals(c.getEnderecoSelecionadoId()))
+                        .findFirst()
+                        .map(ResponseEntity::ok))
+                .orElseGet(() ->
+                        // Se nenhum selecionado mas tem endereço, retorna o primeiro
+                        clienteService.buscarClientePorEmail(user.getUsername())
+                                .filter(c -> !c.getEnderecos().isEmpty())
+                                .map(c -> ResponseEntity.ok(c.getEnderecos().get(0)))
+                                .orElse(ResponseEntity.noContent().build())
+                );
     }
 
     @GetMapping("/removerEndereco/{id}")

@@ -386,147 +386,190 @@
              ------------------------------------------------ -->
         <div id="panel-enderecos" class="tab-panel">
 
-            <!-- Sem endereço cadastrado -->
-            <div th:if="${#lists.isEmpty(cliente.enderecos)}">
-                <div id="sem-endereco-info" class="panel-card" style="text-align:center; padding:2rem;">
-                    <p style="margin-bottom:1rem; color:var(--text-muted);">Você ainda não tem um endereço de entrega cadastrado.</p>
-                    <button type="button" onclick="mostrarFormCadastrarEndereco()" class="btn-tech-secondary">
-                        + Cadastrar Endereço
-                    </button>
-                </div>
-                <div id="form-novo-endereco" class="endereco-item item-card" style="display:none;">
-                    <form th:action="@{/clientes/enderecos/novo}" method="post">
-                        <fieldset>
-                            <legend>Novo Endereço</legend>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label>CEP</label>
-                                    <input type="text" name="cep" onblur="buscarCep(this)" placeholder="00000-000" required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Rua</label>
-                                    <input type="text" name="rua" data-cep-field="rua" required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Número</label>
-                                    <input type="text" name="numero" data-cep-field="numero" required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Bairro</label>
-                                    <input type="text" name="bairro" data-cep-field="bairro" required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Cidade</label>
-                                    <input type="text" name="cidade" data-cep-field="cidade" required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Estado</label>
-                                    <input type="text" name="estado" data-cep-field="estado" maxlength="2" required />
-                                </div>
-                                <div class="form-group">
-                                    <label>País</label>
-                                    <input type="text" name="pais" data-cep-field="pais" value="Brasil" required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Complemento</label>
-                                    <input type="text" name="complemento" />
-                                </div>
-                                <div class="form-group">
-                                    <label>Tipo de Residência</label>
-                                    <input type="text" name="tipoResidencia" placeholder="Ex: Casa, Apto" />
-                                </div>
-                            </div>
-                            <div class="form-submit-row">
-                                <button type="button" onclick="ocultarFormCadastrarEndereco()" class="btn-cancelar-js">✕ Cancelar</button>
-                                <button type="submit" class="btn-tech-primary">▶ Salvar</button>
-                            </div>
-                        </fieldset>
-                    </form>
-                </div>
+            <!-- Barra superior: título + botão adicionar -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 style="margin:0; font-size:.95rem; color:var(--muted,#7a6e65);">
+                    <span th:text="${#lists.size(cliente.enderecos)}">0</span> endereço(s) cadastrado(s)
+                </h3>
+                <button type="button" onclick="toggleFormNovoEndereco()" class="btn-tech-secondary">
+                    + Adicionar Endereço
+                </button>
             </div>
 
-            <!-- Endereço existente -->
-            <div th:unless="${#lists.isEmpty(cliente.enderecos)}"
-                 th:with="end=${cliente.enderecos[0]}">
+            <!-- Formulário novo endereço (oculto por padrão) -->
+            <div id="form-novo-endereco" class="endereco-item item-card" style="display:none; margin-bottom:1rem;">
+                <form th:action="@{/clientes/enderecos/novo}" method="post">
+                    <fieldset style="border:none; padding:0; margin:0;">
+                        <legend style="font-weight:600; margin-bottom:.75rem; font-size:.9rem;">Novo Endereço</legend>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>CEP</label>
+                                <input type="text" name="cep" onblur="buscarCep(this)" placeholder="00000-000" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Rua</label>
+                                <input type="text" name="rua" data-cep-field="rua" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Número</label>
+                                <input type="text" name="numero" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Bairro</label>
+                                <input type="text" name="bairro" data-cep-field="bairro" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Cidade</label>
+                                <input type="text" name="cidade" data-cep-field="cidade" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Estado</label>
+                                <input type="text" name="estado" data-cep-field="estado" maxlength="2" required />
+                            </div>
+                            <div class="form-group">
+                                <label>País</label>
+                                <input type="text" name="pais" value="Brasil" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Complemento</label>
+                                <input type="text" name="complemento" />
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo de Residência</label>
+                                <input type="text" name="tipoResidencia" placeholder="Ex: Casa, Apto" />
+                            </div>
+                        </div>
+                        <div class="form-submit-row">
+                            <button type="button" onclick="toggleFormNovoEndereco()" class="btn-cancelar-js">✕ Cancelar</button>
+                            <button type="submit" class="btn-tech-primary">▶ Salvar</button>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
 
-                <!-- Cartão de visualização -->
-                <div id="endereco-card" class="endereco-item item-card">
-                    <div class="endereco-readonly">
-                        <div class="endereco-linha"><strong>CEP:</strong> <span th:text="${end.cep}"></span></div>
-                        <div class="endereco-linha"><strong>Endereço:</strong>
-                            <span th:text="${end.rua} + ', ' + ${end.numero}"></span>
-                        </div>
-                        <div th:if="${end.complemento != null and !#strings.isEmpty(end.complemento)}" class="endereco-linha">
-                            <strong>Complemento:</strong> <span th:text="${end.complemento}"></span>
-                        </div>
-                        <div class="endereco-linha"><strong>Bairro:</strong> <span th:text="${end.bairro}"></span></div>
-                        <div class="endereco-linha"><strong>Cidade / Estado:</strong>
-                            <span th:text="${end.cidade} + ' - ' + ${end.estado}"></span>
-                        </div>
-                        <div class="endereco-linha"><strong>País:</strong> <span th:text="${end.pais}"></span></div>
-                        <div th:if="${end.tipoResidencia != null and !#strings.isEmpty(end.tipoResidencia)}" class="endereco-linha">
-                            <strong>Tipo:</strong> <span th:text="${end.tipoResidencia}"></span>
-                        </div>
+            <!-- Estado: sem endereços -->
+            <div th:if="${#lists.isEmpty(cliente.enderecos)}" class="panel-card" style="text-align:center; padding:2rem;">
+                <p style="color:var(--muted,#7a6e65); margin-bottom:.5rem;">Você ainda não tem endereços cadastrados.</p>
+                <p style="font-size:.82rem; color:var(--accent,#722f37);">⚠ Cadastre um endereço para poder realizar compras.</p>
+            </div>
+
+            <!-- Lista de todos os endereços -->
+            <div th:each="end,stat : ${cliente.enderecos}"
+                 class="endereco-item item-card"
+                 th:style="${end.id == cliente.enderecoSelecionadoId} ? 'border:2px solid var(--accent,#722f37); position:relative;' : 'position:relative;'"
+                 style="margin-bottom:.85rem;">
+
+                <!-- Badge de selecionado -->
+                <div th:if="${end.id == cliente.enderecoSelecionadoId}"
+                     style="position:absolute; top:.6rem; right:.75rem; background:var(--accent,#722f37);
+                            color:#fff; font-size:.7rem; font-weight:600; padding:.2rem .55rem;
+                            border-radius:20px; letter-spacing:.03em;">
+                    ✓ Endereço de entrega
+                </div>
+
+                <!-- Número do endereço -->
+                <div style="font-size:.72rem; color:var(--muted,#7a6e65); font-weight:600;
+                            text-transform:uppercase; letter-spacing:.05em; margin-bottom:.5rem;">
+                    Endereço <span th:text="${stat.index + 1}">1</span>
+                </div>
+
+                <!-- Dados -->
+                <div class="endereco-readonly">
+                    <div class="endereco-linha">
+                        <strong>Endereço:</strong>
+                        <span th:text="${end.rua} + ', ' + ${end.numero}"></span>
                     </div>
-                    <div class="endereco-acoes">
-                        <button type="button" onclick="mostrarFormEditarEndereco()" class="btn-tech-secondary">✎ Editar</button>
-                        <form th:action="@{/clientes/enderecos/remover}" method="post" style="display:inline;">
-                            <input type="hidden" name="enderecoId" th:value="${end.id}" />
-                            <button type="submit" class="btn-remover-endereco"
-                                    onclick="return confirm('Deseja remover este endereço?')">✕ Remover</button>
-                        </form>
+                    <div th:if="${end.complemento != null and !#strings.isEmpty(end.complemento)}" class="endereco-linha">
+                        <strong>Complemento:</strong> <span th:text="${end.complemento}"></span>
                     </div>
+                    <div class="endereco-linha">
+                        <strong>Bairro:</strong> <span th:text="${end.bairro}"></span>
+                    </div>
+                    <div class="endereco-linha">
+                        <strong>Cidade / Estado:</strong>
+                        <span th:text="${end.cidade} + ' - ' + ${end.estado}"></span>
+                    </div>
+                    <div class="endereco-linha">
+                        <strong>CEP:</strong> <span th:text="${end.cep}"></span>
+                    </div>
+                    <div th:if="${end.tipoResidencia != null and !#strings.isEmpty(end.tipoResidencia)}" class="endereco-linha">
+                        <strong>Tipo:</strong> <span th:text="${end.tipoResidencia}"></span>
+                    </div>
+                </div>
+
+                <!-- Ações -->
+                <div class="endereco-acoes" style="margin-top:.75rem; display:flex; flex-wrap:wrap; gap:.5rem;">
+                    <!-- Selecionar para entrega (só se não for o atual) -->
+                    <form th:unless="${end.id == cliente.enderecoSelecionadoId}"
+                          th:action="@{/clientes/enderecos/selecionar}" method="post" style="display:inline;">
+                        <input type="hidden" name="enderecoId" th:value="${end.id}" />
+                        <button type="submit" class="btn-tech-secondary" style="font-size:.8rem;">
+                            ◎ Usar para entrega
+                        </button>
+                    </form>
+
+                    <!-- Editar -->
+                    <button type="button"
+                            th:onclick="'toggleEditarEndereco(' + ${stat.index} + ')'"
+                            class="btn-tech-secondary" style="font-size:.8rem;">✎ Editar</button>
+
+                    <!-- Remover -->
+                    <form th:action="@{/clientes/enderecos/remover}" method="post" style="display:inline;">
+                        <input type="hidden" name="enderecoId" th:value="${end.id}" />
+                        <button type="submit" class="btn-remover-endereco"
+                                style="font-size:.8rem;"
+                                onclick="return confirm('Deseja remover este endereço?')">✕ Remover</button>
+                    </form>
                 </div>
 
                 <!-- Formulário de edição (oculto por padrão) -->
-                <div id="form-editar-endereco" class="endereco-item item-card" style="display:none;">
+                <div th:id="'form-editar-' + ${stat.index}" style="display:none; margin-top:1rem; border-top:1px solid var(--border,rgba(44,36,27,.15)); padding-top:1rem;">
                     <form th:action="@{/clientes/enderecos/editar}" method="post">
                         <input type="hidden" name="id" th:value="${end.id}" />
-                        <fieldset>
-                            <legend>Editar Endereço</legend>
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label>CEP</label>
-                                    <input type="text" name="cep" th:value="${end.cep}" onblur="buscarCep(this)" placeholder="00000-000" required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Rua</label>
-                                    <input type="text" name="rua" th:value="${end.rua}" data-cep-field="rua" required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Número</label>
-                                    <input type="text" name="numero" th:value="${end.numero}" data-cep-field="numero" required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Bairro</label>
-                                    <input type="text" name="bairro" th:value="${end.bairro}" data-cep-field="bairro" required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Cidade</label>
-                                    <input type="text" name="cidade" th:value="${end.cidade}" data-cep-field="cidade" required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Estado</label>
-                                    <input type="text" name="estado" th:value="${end.estado}" data-cep-field="estado" maxlength="2" required />
-                                </div>
-                                <div class="form-group">
-                                    <label>País</label>
-                                    <input type="text" name="pais" th:value="${end.pais}" data-cep-field="pais" required />
-                                </div>
-                                <div class="form-group">
-                                    <label>Complemento</label>
-                                    <input type="text" name="complemento" th:value="${end.complemento}" />
-                                </div>
-                                <div class="form-group">
-                                    <label>Tipo de Residência</label>
-                                    <input type="text" name="tipoResidencia" th:value="${end.tipoResidencia}" placeholder="Ex: Casa, Apto" />
-                                </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>CEP</label>
+                                <input type="text" name="cep" th:value="${end.cep}" onblur="buscarCep(this)" placeholder="00000-000" required />
                             </div>
-                            <div class="form-submit-row">
-                                <button type="button" onclick="ocultarFormEditarEndereco()" class="btn-cancelar-js">✕ Cancelar</button>
-                                <button type="submit" class="btn-tech-primary">▶ Salvar</button>
+                            <div class="form-group">
+                                <label>Rua</label>
+                                <input type="text" name="rua" th:value="${end.rua}" data-cep-field="rua" required />
                             </div>
-                        </fieldset>
+                            <div class="form-group">
+                                <label>Número</label>
+                                <input type="text" name="numero" th:value="${end.numero}" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Bairro</label>
+                                <input type="text" name="bairro" th:value="${end.bairro}" data-cep-field="bairro" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Cidade</label>
+                                <input type="text" name="cidade" th:value="${end.cidade}" data-cep-field="cidade" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Estado</label>
+                                <input type="text" name="estado" th:value="${end.estado}" maxlength="2" required />
+                            </div>
+                            <div class="form-group">
+                                <label>País</label>
+                                <input type="text" name="pais" th:value="${end.pais}" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Complemento</label>
+                                <input type="text" name="complemento" th:value="${end.complemento}" />
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo de Residência</label>
+                                <input type="text" name="tipoResidencia" th:value="${end.tipoResidencia}" placeholder="Ex: Casa, Apto" />
+                            </div>
+                        </div>
+                        <div class="form-submit-row">
+                            <button type="button"
+                                    th:onclick="'toggleEditarEndereco(' + ${stat.index} + ')'"
+                                    class="btn-cancelar-js">✕ Cancelar</button>
+                            <button type="submit" class="btn-tech-primary">▶ Salvar Alterações</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -708,22 +751,24 @@
 
 <script th:inline="javascript">
     /* ── Endereço: toggle formulários ─────────────────────── */
-    function mostrarFormCadastrarEndereco() {
-        document.getElementById('sem-endereco-info').style.display = 'none';
-        document.getElementById('form-novo-endereco').style.display = 'block';
+    function toggleFormNovoEndereco() {
+        var el = document.getElementById('form-novo-endereco');
+        if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
     }
-    function ocultarFormCadastrarEndereco() {
-        document.getElementById('sem-endereco-info').style.display = 'block';
-        document.getElementById('form-novo-endereco').style.display = 'none';
+    function toggleEditarEndereco(idx) {
+        var el = document.getElementById('form-editar-' + idx);
+        if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
     }
-    function mostrarFormEditarEndereco() {
-        document.getElementById('endereco-card').style.display = 'none';
-        document.getElementById('form-editar-endereco').style.display = 'block';
-    }
-    function ocultarFormEditarEndereco() {
-        document.getElementById('endereco-card').style.display = 'block';
-        document.getElementById('form-editar-endereco').style.display = 'none';
-    }
+
+    /* ── Ativar tab via parâmetro de URL (?aba=enderecos) ── */
+    (function() {
+        var params = new URLSearchParams(window.location.search);
+        var aba = params.get('aba');
+        if (aba) {
+            var btn = document.querySelector('.tab-btn[data-tab="' + aba + '"]');
+            if (btn) btn.click();
+        }
+    })();
 
     /* ── Lazy-load flags ───────────────────────────────────── */
     var comprasLoaded = false, historicoLoaded = false, carteiraLoaded = false;

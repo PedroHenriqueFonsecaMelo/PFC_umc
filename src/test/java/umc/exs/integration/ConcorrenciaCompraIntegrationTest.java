@@ -18,6 +18,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import jakarta.persistence.EntityManager;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.core.bussiness.LivroService;
@@ -146,6 +147,15 @@ class ConcorrenciaCompraIntegrationTest {
 
     // Helper para simplificar o Arrange
     private Cliente criarCliente(String email, String cpf) {
+        Endereco end = new Endereco();
+        end.setCep("01001000");
+        end.setRua("Rua Teste");
+        end.setNumero("1");
+        end.setCidade("São Paulo");
+        end.setEstado("SP");
+        end.setBairro("Centro");
+        end.setPais("Brasil");
+
         Cliente c = new Cliente();
         c.setEmail(email);
         c.setSaldoTokens(100.0);
@@ -153,6 +163,7 @@ class ConcorrenciaCompraIntegrationTest {
         c.setCpf(cpf);
         c.setSenha("admin123");
         c.setDatanasc("1990-01-01");
+        c.getEnderecos().add(end);
         return clienteRepo.saveAndFlush(c);
     }
 }

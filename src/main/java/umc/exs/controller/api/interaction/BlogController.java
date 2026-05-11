@@ -127,6 +127,23 @@ public class BlogController {
         }
     }
 
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Object>> editarPost(
+            @PathVariable @NonNull Long id,
+            @RequestParam("titulo") String titulo,
+            @RequestParam(CONTEUDO) String conteudo,
+            @RequestParam(value = "imagem", required = false) MultipartFile imagem) {
+        try {
+            PostBlog post = postBlogService.editarPost(id, titulo, conteudo, imagem);
+            return ResponseEntity.ok(Map.of(
+                    "id", Objects.requireNonNull(post.getId()),
+                    MENSAGEM, "Post atualizado com sucesso."));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(ERRO, "Falha ao salvar imagem."));
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deletarPost(@PathVariable Long id) {
         postBlogService.deletarPost(id);

@@ -274,6 +274,17 @@ public class ClienteService {
     }
 
     @Transactional
+    public void selecionarEnderecoParaUsuarioLogado(String email, Long enderecoId) {
+        Cliente cliente = buscarEntidadePorEmail(email);
+        boolean pertence = cliente.getEnderecos().stream().anyMatch(e -> e.getId().equals(enderecoId));
+        if (!pertence) {
+            throw new IllegalArgumentException("Endereço não pertence a este cliente.");
+        }
+        cliente.setEnderecoSelecionadoId(enderecoId);
+        repositoryService.salvar(cliente);
+    }
+
+    @Transactional
     public void atualizarEnderecoDoCliente(@NonNull Long clienteId, @NonNull EnderecoDTO dto) {
         repositoryService.atualizarEnderecoDoCliente(clienteId, dto);
     }

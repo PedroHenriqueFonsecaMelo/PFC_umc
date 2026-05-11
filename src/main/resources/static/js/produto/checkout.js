@@ -25,25 +25,54 @@ let _saldoAtual        = null;
 // true  → veio da estante (localStorage); false → compra direta (sessionStorage)
 let _compraViaEstante  = true;
 
-/* ── Saldo do usuário ── */
-async function carregarSaldo() {
+/* ── Perfil completo (saldo + endereços) ── */
+async function carregarPerfil() {
     try {
         const res = await fetch('/clientes/meu-perfil-json', { credentials: 'include' });
-        if (res.status === 401) {
-            window.location.href = '/clientes/login';
-            return null;
-        }
+        if (res.status === 401) { window.location.href = '/clientes/login'; return null; }
         if (!res.ok) return null;
         const c = await res.json();
-
         _saldoAtual = c.saldoTokens || 0;
-
-        // Atualiza saldo na navbar
         const navEl = document.getElementById('navSaldo');
         if (navEl) navEl.textContent = `T$ ${_saldoAtual.toFixed(2)}`;
-
-        return _saldoAtual;
+        return c;
     } catch (_) { return null; }
+}
+
+/* ── Saldo do usuário ── */
+async function carregarSaldo() {
+    const c = await carregarPerfil();
+    return c ? (c.saldoTokens || 0) : null;
+}
+
+/* ── Exibe / valida endereço de entrega ── */
+function carregarEnderecoEntrega(perfil) {
+    const card     = document.getElementById('enderecoEntregaCard');
+    const alertaEl = document.getElementById('alertaEndereco');
+    const btn      = document.getElementById('btnConfirmar');
+
+    if (!perfil || !perfil.enderecos || perfil.enderecos.length === 0) {
+        if (card) card.innerHTML = '';
+        if (alertaEl) {
+            alertaEl.innerHTML = '⚠ Você precisa <a href="/clientes/homepage?aba=enderecos" style="color:var(--accent,#722f37);font-weight:600;text-decoration:underline;">cadastrar um endereço de entrega</a> antes de concluir a compra.';
+            alertaEl.style.display = 'block';
+        }
+        if (btn) btn.disabled = true;
+        return;
+    }
+
+    const endereco = perfil.enderecos.find(e => e.id === perfil.enderecoSelecionadoId)
+                  || perfil.enderecos[0];
+
+    if (card) {
+        card.innerHTML =
+            `<strong>${escHtml(endereco.rua)}, ${escHtml(endereco.numero)}</strong>` +
+            (endereco.complemento ? `<br>${escHtml(endereco.complemento)}` : '') +
+            `<br>${escHtml(endereco.bairro)} — ${escHtml(endereco.cidade)}/${escHtml(endereco.estado)}` +
+            `<br>CEP: ${escHtml(endereco.cep)}` +
+            `<br><a href="/clientes/homepage?aba=enderecos" style="font-size:.8rem;color:var(--accent,#722f37);">Alterar endereço →</a>`;
+    }
+    if (alertaEl) alertaEl.style.display = 'none';
 }
 
 /* ── Escapa HTML ── */
@@ -274,8 +303,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 4. Renderiza itens
     renderItens(_itensSelecionados);
 
-    // 5. Carrega saldo e calcula financeiro
-    const saldo = await carregarSaldo();
+    // 5. Carrega perfil, valida endereço e calcula financeiro
+    const perfil = await carregarPerfil();
+    carregarEnderecoEntrega(perfil);
     const total = _itensSelecionados.reduce((s, i) => s + (i.precoAprovado || 0), 0);
-    renderFinanceiro(saldo !== null ? saldo : 0, total);
+    renderFinanceiro(perfil ? (perfil.saldoTokens || 0) : 0, total);
 });
