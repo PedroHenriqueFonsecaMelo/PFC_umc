@@ -3,6 +3,53 @@ const TOKENS_POR_REAL = 2;
 
 let intervaloCheck = null;
 
+function mostrarConfirmacaoPix(valor) {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:flex;align-items:center;justify-content:center';
+
+        const tokens = (valor * TOKENS_POR_REAL).toFixed(0);
+        overlay.innerHTML = `
+          <div style="background:#f9f6f0;border-radius:14px;padding:2rem 2rem 1.5rem;max-width:360px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.18);text-align:center">
+            <div style="font-size:2rem;margin-bottom:.75rem">
+              <i class="fa-solid fa-pix" style="color:#32bcad"></i>
+            </div>
+            <p style="font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:#2c241b;margin:0 0 .5rem">
+              Confirmar pagamento via PIX?
+            </p>
+            <p style="font-size:.875rem;color:#7a6e65;margin:0 0 1.25rem;line-height:1.5">
+              Será gerado um QR Code para pagamento de <strong style="color:#2c241b">R$ ${valor.toFixed(2)}</strong>,
+              creditando <strong style="color:#722f37">T$ ${tokens}</strong> na sua carteira.
+            </p>
+            <div style="display:flex;gap:.75rem;justify-content:center">
+              <button id="pixConfNao" style="padding:.6rem 1.4rem;border:1.5px solid rgba(44,36,27,.2);background:transparent;border-radius:8px;cursor:pointer;font-size:.85rem;color:#7a6e65;font-family:'DM Sans',sans-serif">
+                Cancelar
+              </button>
+              <button id="pixConfSim" style="padding:.6rem 1.6rem;background:#32bcad;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:700;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:.5rem">
+                <i class="fa-solid fa-qrcode"></i> Gerar QR Code
+              </button>
+            </div>
+          </div>`;
+
+        document.body.appendChild(overlay);
+
+        overlay.querySelector('#pixConfSim').addEventListener('click', () => {
+            document.body.removeChild(overlay);
+            resolve(true);
+        });
+        overlay.querySelector('#pixConfNao').addEventListener('click', () => {
+            document.body.removeChild(overlay);
+            resolve(false);
+        });
+        overlay.addEventListener('click', (ev) => {
+            if (ev.target === overlay) {
+                document.body.removeChild(overlay);
+                resolve(false);
+            }
+        });
+    });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     carregarSaldo();
     carregarHistorico();
@@ -60,6 +107,9 @@ async function efetuarCompra(e) {
         return;
     }
 
+    const confirmado = await mostrarConfirmacaoPix(valor);
+    if (!confirmado) return;
+
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Gerando PIX...';
 
@@ -95,7 +145,7 @@ async function efetuarCompra(e) {
         mostrarErroForm("Erro de conexão. Tente novamente.");
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-qrcode"></i> Gerar QR Code PIX';
+        btn.innerHTML = '<i class="fa-solid fa-qrcode"></i> Confirmar e pagar via PIX';
     }
 }
 

@@ -49,6 +49,9 @@ public class DashboardService {
                 double tokensDisponibilizados = tokensDisp != null ? tokensDisp : 0.0;
                 double tokensUtilizados       = tokensUtil != null ? tokensUtil : 0.0;
 
+                long pixGerados    = transacaoRepository.count();
+                long pixConvertidos = transacaoRepository.countByStatus("CONFIRMADO");
+
                 // ── Gráficos: últimos 12 meses ────────────────────────────
                 // Início = primeiro dia do mês de 11 meses atrás, à meia-noite
                 LocalDateTime inicio = YearMonth.now().minusMonths(11)
@@ -93,6 +96,8 @@ public class DashboardService {
                                 .totalAdquiridos(totalAdquiridos)
                                 .tokensDisponibilizados(tokensDisponibilizados)
                                 .tokensUtilizados(tokensUtilizados)
+                                .pixGerados(pixGerados)
+                                .pixConvertidos(pixConvertidos)
                                 .rotulos(rotulos)
                                 .clientesPorMes(clientesMensais)
                                 .vendasPorMes(vendasMensais)

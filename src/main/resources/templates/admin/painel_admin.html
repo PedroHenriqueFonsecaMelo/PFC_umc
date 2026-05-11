@@ -46,58 +46,31 @@
 
             <!-- ════ PAINEL PEDIDOS ════ -->
             <div class="tab-panel" id="panel-pedidos">
-              <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem"
-              >
-                <span class="pedidos-heading">Pedidos — Gestão de Envio</span>
-                <button onclick="carregarPedidos()" class="btn-refresh">
-                  <i class="fa-solid fa-rotate-right"></i> Atualizar
-                </button>
-              </div>
 
-              <!-- Filtros de status -->
-              <div class="filter-bar">
-                <button
-                  class="filter-btn active"
-                  onclick="filtrarPedidos('TODOS', this)"
-                >
-                  Todos
-                </button>
-                <button
-                  class="filter-btn"
-                  onclick="filtrarPedidos('AGUARDANDO_ENVIO', this)"
-                >
-                  ⏳ Aguardando
-                </button>
-                <button
-                  class="filter-btn"
-                  onclick="filtrarPedidos('EM_TRANSITO', this)"
-                >
-                  🚚 Em Trânsito
-                </button>
-                <button
-                  class="filter-btn"
-                  onclick="filtrarPedidos('ENTREGUE', this)"
-                >
-                  ✅ Entregues
-                </button>
-                <button
-                  class="filter-btn"
-                  onclick="filtrarPedidos('CANCELADO', this)"
-                >
-                  ❌ Cancelados
-                </button>
-              </div>
-
-              <!-- Buscador -->
-              <div style="margin-bottom: 1rem">
-                <input
-                  type="text"
-                  id="buscaPedido"
-                  placeholder="🔍  Buscar por título, comprador ou pedido #..."
-                  oninput="renderPedidos()"
-                  class="search-input"
-                />
+              <!-- Toolbar de pedidos -->
+              <div class="pedidos-toolbar">
+                <div class="pedidos-toolbar-top">
+                  <span class="pedidos-heading">Pedidos — Gestão de Envio</span>
+                  <button onclick="carregarPedidos()" class="btn-refresh">
+                    <i class="fa-solid fa-rotate-right"></i> Atualizar
+                  </button>
+                </div>
+                <div class="pedidos-toolbar-bottom">
+                  <div class="filter-bar">
+                    <button class="filter-btn active" onclick="filtrarPedidos('TODOS', this)">Todos</button>
+                    <button class="filter-btn" onclick="filtrarPedidos('AGUARDANDO_ENVIO', this)">⏳ Aguardando</button>
+                    <button class="filter-btn" onclick="filtrarPedidos('EM_TRANSITO', this)">🚚 Em Trânsito</button>
+                    <button class="filter-btn" onclick="filtrarPedidos('ENTREGUE', this)">✅ Entregues</button>
+                    <button class="filter-btn" onclick="filtrarPedidos('CANCELADO', this)">❌ Cancelados</button>
+                  </div>
+                  <input
+                    type="text"
+                    id="buscaPedido"
+                    placeholder="Buscar por título, comprador ou pedido #..."
+                    oninput="renderPedidos()"
+                    class="search-input pedidos-search"
+                  />
+                </div>
               </div>
 
               <div

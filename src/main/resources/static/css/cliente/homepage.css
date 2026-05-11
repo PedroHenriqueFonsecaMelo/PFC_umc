@@ -97,6 +97,7 @@ body {
 .profile-hero {
   background: #ffffff;
   border: 1px solid rgba(44, 36, 27, 0.12);
+  border-radius: 16px;
   padding: 2rem;
   margin-bottom: 2rem;
   display: flex;
@@ -186,6 +187,7 @@ body {
   padding: 0.75rem 1.25rem;
   border: 1px solid rgba(44, 36, 27, 0.12);
   background: #f9f6f0;
+  border-radius: 12px;
 }
 
 .stat-chip .stat-icon {
@@ -228,6 +230,7 @@ body {
 .alert {
   padding: 0.75rem 1rem;
   border: 1px solid;
+  border-radius: 10px;
   margin-bottom: 1rem;
   font-size: 0.875rem;
 }
@@ -313,6 +316,7 @@ a.tab-btn:hover {
 .panel-card {
   background: #ffffff;
   border: 1px solid rgba(44, 36, 27, 0.12);
+  border-radius: 14px;
   padding: 1.75rem;
   margin-bottom: 1.5rem;
 }
@@ -451,12 +455,14 @@ input::placeholder {
 .item-card {
   background: #f9f6f0;
   border: 1px solid rgba(44, 36, 27, 0.12);
+  border-radius: 12px;
   padding: 1.25rem;
   margin-bottom: 1rem;
 }
 
 fieldset {
   border: 1px solid rgba(44, 36, 27, 0.15);
+  border-radius: 12px;
   padding: 1.25rem;
 }
 
@@ -554,6 +560,7 @@ legend {
   padding: 1rem 1.25rem;
   background: #ffffff;
   border: 1px solid rgba(44, 36, 27, 0.12);
+  border-radius: 12px;
   text-decoration: none;
   color: #2c241b;
   transition: box-shadow 0.2s;
@@ -643,6 +650,7 @@ legend {
   padding: 0.75rem 1rem;
   background: #f9f6f0;
   border: 1px solid rgba(44, 36, 27, 0.1);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -651,6 +659,7 @@ legend {
 .gami-perfil-card {
   background: #f9f6f0 !important;
   border: 1px solid rgba(44, 36, 27, 0.12) !important;
+  border-radius: 12px !important;
   padding: 1.25rem !important;
 }
 
@@ -686,6 +695,7 @@ legend {
 .gami-rank-item {
   background: #f9f6f0 !important;
   border: 1px solid rgba(44, 36, 27, 0.12) !important;
+  border-radius: 10px !important;
   transition: box-shadow 0.2s !important;
 }
 .gami-rank-item:hover {

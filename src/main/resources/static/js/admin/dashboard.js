@@ -77,6 +77,14 @@ function renderDashboard(d) {
     : "—";
   document.getElementById("badgeTokensUtil").textContent = pct;
 
+  document.getElementById("valPixGerados").textContent = fmt(d.pixGerados);
+  document.getElementById("valPixConvertidos").textContent = fmt(d.pixConvertidos);
+
+  const taxaConv = d.pixGerados > 0
+    ? ((d.pixConvertidos / d.pixGerados) * 100).toFixed(1) + "% de conversão"
+    : "—";
+  document.getElementById("badgePixConv").textContent = taxaConv;
+
   const primeiro = d.rotulos[0];
   const ultimo = d.rotulos[d.rotulos.length - 1];
   const periodo = `Últimos 12 meses · ${primeiro} – ${ultimo}`;

@@ -20,6 +20,8 @@ public class DashboardMetricasDTO {
     private long totalAdquiridos;
     private double tokensDisponibilizados;
     private double tokensUtilizados;
+    private long pixGerados;
+    private long pixConvertidos;
 
     // ── Gráficos (12 meses, mais antigo → mais recente) ──
     private List<String> rotulos; // ex: ["Abr", "Mai", ..., "Mar"]

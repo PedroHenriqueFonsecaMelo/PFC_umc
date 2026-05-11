@@ -24,4 +24,8 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
      */
     @Query("SELECT SUM(t.valor) FROM Transacao t WHERE t.status = :status")
     Double sumValorByStatus(@Param("status") String status);
+
+    long countByStatus(String status);
+
+    long count();
 }

@@ -393,15 +393,18 @@ function buildPedidoRow(p) {
   const podeAtualizar = proximos.length > 0;
 
   const acoesHtml = podeAtualizar
-    ? `<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+    ? `<div style="display:flex;flex-direction:column;gap:.4rem;max-width:460px">
         <input class="rastreio-input" id="rastreio-${p.id}" type="text"
-               placeholder="Cód. rastreio (opcional)" value="${p.codigoRastreio || ""}" />
-        <select class="select-status" id="status-${p.id}">
-          ${proximos.map((s) => `<option value="${s}">${LABEL_STATUS[s]}</option>`).join("")}
-        </select>
-        <button class="btn-salvar-envio" onclick="salvarEnvio(${p.id})">
-          <i class="fa-solid fa-floppy-disk"></i> Salvar
-        </button>
+               placeholder="Cód. rastreio (opcional)" value="${p.codigoRastreio || ""}"
+               style="width:100%" />
+        <div style="display:flex;gap:.4rem;align-items:center">
+          <select class="select-status" id="status-${p.id}" style="flex:1;margin:0">
+            ${proximos.map((s) => `<option value="${s}">${LABEL_STATUS[s]}</option>`).join("")}
+          </select>
+          <button class="btn-salvar-envio" onclick="salvarEnvio(${p.id})" style="white-space:nowrap;flex-shrink:0">
+            <i class="fa-solid fa-floppy-disk"></i> Atualizar
+          </button>
+        </div>
       </div>`
     : `<span style="font-size:.75rem;color:#7A6E65;font-style:italic">Status final — sem ações disponíveis</span>`;
 
