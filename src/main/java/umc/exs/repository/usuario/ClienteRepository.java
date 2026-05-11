@@ -56,4 +56,8 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
      * dashboard).
      */
     List<Cliente> findByDataCriacaoAfter(LocalDateTime data);
+
+    /** Soma de todos os saldos ativos na plataforma (tokens em circulação). */
+    @Query("SELECT COALESCE(SUM(c.saldoTokens), 0) FROM Cliente c WHERE c.ativo = true")
+    Double sumSaldoTokensAtivos();
 }

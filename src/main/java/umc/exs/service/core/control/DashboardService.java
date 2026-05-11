@@ -44,7 +44,7 @@ public class DashboardService {
                 long totalVisitas    = visitasRaw != null ? visitasRaw : 0L;
                 long totalAdquiridos = pedidoRepository.count();
 
-                Double tokensDisp = transacaoRepository.sumValorByStatus("CONFIRMADO");
+                Double tokensDisp = clienteRepository.sumSaldoTokensAtivos();
                 Double tokensUtil = pedidoRepository.sumTokensUtilizados();
                 double tokensDisponibilizados = tokensDisp != null ? tokensDisp : 0.0;
                 double tokensUtilizados       = tokensUtil != null ? tokensUtil : 0.0;
