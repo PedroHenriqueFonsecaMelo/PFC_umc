@@ -19,7 +19,7 @@ function debounce(func, delay) {
     } catch (_) {}
 })();
 
-const MAX = 5;
+const MAX = 10;
 let livros = [];
 let nextId = 1;
 

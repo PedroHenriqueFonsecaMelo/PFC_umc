@@ -110,12 +110,19 @@
                     align-items:center;justify-content:center;line-height:1;">0</span>
             </button>
             <div id="cnNotifDropdown" style="display:none;position:absolute;right:0;top:110%;
-                min-width:280px;max-width:340px;background:#fff;border:1px solid rgba(44,36,27,.15);
+                min-width:340px;max-width:400px;background:#fff;border:1px solid rgba(44,36,27,.15);
                 border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;overflow:hidden;">
                 <div style="padding:.6rem 1rem;border-bottom:1px solid rgba(44,36,27,.1);
-                    font-size:.8rem;font-weight:600;color:#2c241b;">Notificações</div>
-                <ul id="cnNotifLista" style="list-style:none;margin:0;padding:0;max-height:320px;overflow-y:auto;"></ul>
-                <div id="cnNotifVazia" style="padding:1rem;text-align:center;font-size:.82rem;color:#7a6e65;">
+                    display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-size:.8rem;font-weight:600;color:#2c241b;">Notificações</span>
+                    <button id="cnBtnMarcarTodas" onclick="cnMarcarTodas(event)"
+                            style="background:none;border:none;cursor:pointer;font-size:.72rem;
+                                   color:#722f37;font-weight:600;padding:0;text-decoration:underline;">
+                        Marcar todas como lidas
+                    </button>
+                </div>
+                <ul id="cnNotifLista" style="list-style:none;margin:0;padding:0;max-height:340px;overflow-y:auto;"></ul>
+                <div id="cnNotifVazia" style="padding:1rem;text-align:center;font-size:.82rem;color:#7a6e65;display:none;">
                     Nenhuma notificação.
                 </div>
             </div>
@@ -302,7 +309,9 @@
             }).catch(function(){});
 
         /* ── Notificações ── */
-        function cnCarregarNotificacoes() {
+        var _cnNotifAberto = false;
+
+        function cnCarregarBadge() {
             fetch('/api/notificacoes/nao-lidas', { credentials: 'include' })
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(data) {
@@ -317,45 +326,96 @@
             }).catch(function(){});
         }
 
+        function cnFmtData(iso) {
+            if (!iso) return '';
+            var d = new Date(iso);
+            var agora = new Date();
+            var meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+            var hhmm = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            if (d.toDateString() === agora.toDateString()) return 'hoje às ' + hhmm;
+            var ontem = new Date(agora); ontem.setDate(agora.getDate() - 1);
+            if (d.toDateString() === ontem.toDateString()) return 'ontem às ' + hhmm;
+            return d.getDate() + ' ' + meses[d.getMonth()] + ' às ' + hhmm;
+        }
+
         window.cnToggleNotif = function(e) {
             e.stopPropagation();
             var dd = document.getElementById('cnNotifDropdown');
-            var aberto = dd.style.display === 'block';
-            dd.style.display = aberto ? 'none' : 'block';
-            if (!aberto) cnPopularDropdown();
+            _cnNotifAberto = dd.style.display !== 'block';
+            dd.style.display = _cnNotifAberto ? 'block' : 'none';
+            if (_cnNotifAberto) {
+                cnPopularDropdown();
+                // Marca todas como lidas ao abrir e some o badge
+                fetch('/api/notificacoes/marcar-lidas', { method: 'POST', credentials: 'include' })
+                .then(function() {
+                    var badge = document.getElementById('cnNotifBadge');
+                    if (badge) badge.style.display = 'none';
+                }).catch(function(){});
+            }
         };
 
         function cnPopularDropdown() {
-            fetch('/api/notificacoes/nao-lidas', { credentials: 'include' })
+            fetch('/api/notificacoes', { credentials: 'include' })
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(data) {
                 var lista = document.getElementById('cnNotifLista');
                 var vazia = document.getElementById('cnNotifVazia');
-                if (!data || !data.notificacoes || data.notificacoes.length === 0) {
+                if (!data || data.length === 0) {
                     lista.innerHTML = '';
                     vazia.style.display = 'block';
                     return;
                 }
                 vazia.style.display = 'none';
-                lista.innerHTML = data.notificacoes.map(function(n) {
+                lista.innerHTML = data.map(function(n) {
+                    var lida = n.lida;
+                    var bg   = lida ? 'transparent' : '#fef9f0';
+                    var cor  = lida ? '#7a6e65'     : '#2c241b';
+                    var peso = lida ? '400'         : '600';
+                    var link = n.link ? ' onclick="if(event.target.dataset.del)return;window.location.href=' + JSON.stringify(n.link) + '"' : '';
                     return '<li style="padding:.65rem 1rem;border-bottom:1px solid rgba(44,36,27,.07);' +
-                        'cursor:pointer;font-size:.82rem;color:#2c241b;" ' +
-                        'onclick="cnMarcarLida(' + n.id + ',' + JSON.stringify(n.link || '') + ')">' +
-                        '<span style="display:block;">' + cnEscHtml(n.mensagem) + '</span>' +
-                        '<span style="font-size:.72rem;color:#7a6e65;">' +
-                        n.dataCriacao.substring(0,16).replace('T',' ') + '</span>' +
+                        'background:' + bg + ';cursor:' + (n.link ? 'pointer' : 'default') + ';' +
+                        'font-size:.82rem;display:flex;align-items:flex-start;gap:.5rem;"' + link + '>' +
+                        '<div style="flex:1;min-width:0;">' +
+                        '<span style="display:block;color:' + cor + ';font-weight:' + peso + ';">' +
+                        cnEscHtml(n.mensagem) + '</span>' +
+                        '<span style="font-size:.7rem;color:#b0a49a;">' + cnFmtData(n.dataCriacao) + '</span>' +
+                        '</div>' +
+                        '<button data-del="1" onclick="cnDeletarNotif(' + n.id + ',this)" ' +
+                        'style="background:none;border:none;cursor:pointer;color:#b0a49a;' +
+                        'font-size:.85rem;padding:0 0 0 .3rem;line-height:1;flex-shrink:0;" ' +
+                        'title="Remover">✕</button>' +
                         '</li>';
                 }).join('');
             }).catch(function(){});
         }
 
-        window.cnMarcarLida = function(id, link) {
-            fetch('/api/notificacoes/' + id + '/lida', { method: 'PATCH', credentials: 'include' })
+        window.cnMarcarTodas = function(e) {
+            e.stopPropagation();
+            fetch('/api/notificacoes/marcar-lidas', { method: 'POST', credentials: 'include' })
             .then(function() {
-                cnCarregarNotificacoes();
-                document.getElementById('cnNotifDropdown').style.display = 'none';
-                if (link) window.location.href = link;
+                var badge = document.getElementById('cnNotifBadge');
+                if (badge) badge.style.display = 'none';
+                cnPopularDropdown();
             }).catch(function(){});
+        };
+
+        window.cnDeletarNotif = function(id, btn) {
+            btn.disabled = true;
+            fetch('/api/notificacoes/' + id, { method: 'DELETE', credentials: 'include' })
+            .then(function(r) {
+                if (r.ok || r.status === 204) {
+                    var li = btn.closest('li');
+                    if (li) li.remove();
+                    // Mostra estado vazio se não restar itens
+                    var lista = document.getElementById('cnNotifLista');
+                    if (lista && lista.children.length === 0) {
+                        var vazia = document.getElementById('cnNotifVazia');
+                        if (vazia) vazia.style.display = 'block';
+                    }
+                } else {
+                    btn.disabled = false;
+                }
+            }).catch(function() { btn.disabled = false; });
         };
 
         document.addEventListener('click', function(e) {
@@ -363,10 +423,11 @@
             if (wrapper && !wrapper.contains(e.target)) {
                 var dd = document.getElementById('cnNotifDropdown');
                 if (dd) dd.style.display = 'none';
+                _cnNotifAberto = false;
             }
         });
 
-        cnCarregarNotificacoes();
+        cnCarregarBadge();
     })();
     </script>
 </header>

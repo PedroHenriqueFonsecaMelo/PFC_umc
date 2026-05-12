@@ -9,9 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -93,6 +96,43 @@ public class NotificacaoController {
         notificacao.setLida(true);
         notificacaoRepository.save(notificacao);
         return ResponseEntity.ok(Map.of("mensagem", "Notificação marcada como lida."));
+    }
+
+    /** Marca todas as notificações do usuário como lidas. */
+    @PostMapping("/marcar-lidas")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> marcarTodas(@AuthenticationPrincipal UserDetails user) {
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        Cliente cliente = clienteRepository.findByEmail(user.getUsername())
+                .orElseThrow(() -> new RuntimeException(CLIENTE_NAO_ENCONTRADO));
+
+        int atualizadas = notificacaoRepository.marcarTodasLidas(cliente.getId());
+        return ResponseEntity.ok(Map.of("atualizadas", atualizadas));
+    }
+
+    /** Remove uma notificação do usuário. */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(
+            @PathVariable @NonNull Long id,
+            @AuthenticationPrincipal UserDetails user) {
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        Cliente cliente = clienteRepository.findByEmail(user.getUsername())
+                .orElseThrow(() -> new RuntimeException(CLIENTE_NAO_ENCONTRADO));
+
+        NotificacaoDashboard notificacao = notificacaoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Notificação não encontrada"));
+
+        Long clienteIdLogado = Objects.requireNonNull(cliente.getId(), "ID do cliente logado está nulo");
+        Long clienteIdNotificacao = Objects.requireNonNull(notificacao.getCliente().getId(), "ID do dono da notificação está nulo");
+
+        if (!clienteIdNotificacao.equals(clienteIdLogado)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        notificacaoRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     private Map<String, Object> toMap(NotificacaoDashboard n) {
