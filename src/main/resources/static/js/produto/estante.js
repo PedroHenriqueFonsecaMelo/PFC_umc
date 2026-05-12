@@ -6,6 +6,10 @@
 
 const CART_KEY     = 'bibliotroca_carrinho';
 const CHECKOUT_KEY = 'bibliotroca_checkout_ids';
+const CUPOM_KEY    = 'bibliotroca_checkout_cupom';
+
+/* ── Estado do cupom ── */
+let _cupomAtivo = null; // { codigo, percentual, desconto, totalComDesconto, totalOriginal }
 
 /* ── Helpers do carrinho ── */
 
@@ -96,7 +100,7 @@ function escHtml(str) {
 /* ── Atualiza subtotal e estado dos botões ── */
 function atualizarSubtotal() {
     const checks      = document.querySelectorAll('.estante-item-check:checked');
-    const total       = Array.from(checks).reduce((s, c) => s + parseFloat(c.dataset.preco || 0), 0);
+    const totalOriginal = Array.from(checks).reduce((s, c) => s + parseFloat(c.dataset.preco || 0), 0);
     const qtd         = checks.length;
 
     const subtotalEl  = document.getElementById('subtotalValor');
@@ -105,7 +109,24 @@ function atualizarSubtotal() {
     const btnRemover  = document.getElementById('btnRemoverSelecionados');
     const chkTodos    = document.getElementById('chkSelecionarTodos');
 
-    if (subtotalEl) subtotalEl.textContent = `T$ ${total.toFixed(2)}`;
+    // Se houver cupom ativo, recalcula com o novo total
+    if (_cupomAtivo) {
+        const desconto = totalOriginal * (_cupomAtivo.percentual / 100);
+        const totalFinal = Math.max(0, totalOriginal - desconto);
+        _cupomAtivo.totalOriginal    = totalOriginal;
+        _cupomAtivo.desconto         = desconto;
+        _cupomAtivo.totalComDesconto = totalFinal;
+        renderCupomAplicado();
+
+        if (subtotalEl) {
+            subtotalEl.innerHTML =
+                `<span class="subtotal-original">T$ ${totalOriginal.toFixed(2)}</span>` +
+                `<span class="subtotal-valor" style="color:var(--forest,#4a5d23)">T$ ${totalFinal.toFixed(2)}</span>`;
+        }
+    } else {
+        if (subtotalEl) subtotalEl.textContent = `T$ ${totalOriginal.toFixed(2)}`;
+    }
+
     if (qtdEl)      qtdEl.textContent      = qtd;
     if (btnPross)   btnPross.disabled      = qtd === 0;
     if (btnRemover) btnRemover.disabled    = qtd === 0;
@@ -113,7 +134,7 @@ function atualizarSubtotal() {
     // Atualiza estado do "Selecionar todos"
     if (chkTodos) {
         const totalItens = document.querySelectorAll('.estante-item-check').length;
-        chkTodos.checked      = totalItens > 0 && qtd === totalItens;
+        chkTodos.checked       = totalItens > 0 && qtd === totalItens;
         chkTodos.indeterminate = qtd > 0 && qtd < totalItens;
     }
 
@@ -146,6 +167,86 @@ window.removerSelecionados = function() {
     renderEstante();
 };
 
+/* ── Aplicar cupom ── */
+window.aplicarCupom = async function() {
+    const codigo    = (document.getElementById('cupomCodigo')?.value || '').trim().toUpperCase();
+    const feedbackEl = document.getElementById('cupomFeedback');
+
+    if (!codigo) return;
+
+    // Calcula total dos itens selecionados
+    const checks = document.querySelectorAll('.estante-item-check:checked');
+    const total  = Array.from(checks).reduce((s, c) => s + parseFloat(c.dataset.preco || 0), 0);
+
+    if (checks.length === 0) {
+        mostrarFeedbackCupom('Selecione pelo menos um livro antes de aplicar o cupom.', 'erro');
+        return;
+    }
+
+    const btn = document.querySelector('.btn-cupom-aplicar');
+    if (btn) { btn.disabled = true; btn.textContent = '…'; }
+
+    try {
+        const res  = await fetch(`/api/cupons/validar?codigo=${encodeURIComponent(codigo)}&total=${total}`,
+                                 { credentials: 'include' });
+        const data = await res.json();
+
+        if (!res.ok || !data.valido) {
+            mostrarFeedbackCupom(data.mensagem || 'Cupom inválido.', 'erro');
+            _cupomAtivo = null;
+        } else {
+            _cupomAtivo = {
+                codigo:          data.codigo,
+                percentual:      data.percentual,
+                totalOriginal:   data.totalOriginal,
+                desconto:        data.desconto,
+                totalComDesconto: data.totalComDesconto
+            };
+            if (feedbackEl) feedbackEl.style.display = 'none';
+            atualizarSubtotal();
+        }
+    } catch (_) {
+        mostrarFeedbackCupom('Erro ao validar cupom. Tente novamente.', 'erro');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Aplicar'; }
+    }
+};
+
+function mostrarFeedbackCupom(msg, tipo) {
+    const el = document.getElementById('cupomFeedback');
+    if (!el) return;
+    el.className = 'cupom-feedback ' + tipo;
+    el.textContent = msg;
+    el.style.display = 'block';
+    const bloco = document.getElementById('cupomAplicadoBloco');
+    if (bloco) bloco.style.display = 'none';
+}
+
+function renderCupomAplicado() {
+    if (!_cupomAtivo) return;
+    const bloco = document.getElementById('cupomAplicadoBloco');
+    if (!bloco) return;
+    bloco.innerHTML =
+        `<div>
+            <span class="cupom-aplicado-info">${escHtml(_cupomAtivo.codigo)} — ${_cupomAtivo.percentual}% OFF</span>
+            <span class="cupom-aplicado-desconto"> -T$ ${(_cupomAtivo.desconto || 0).toFixed(2)}</span>
+         </div>
+         <button class="btn-cupom-remover" onclick="removerCupom()">✕ Remover</button>`;
+    bloco.style.display = 'flex';
+}
+
+/* ── Remover cupom ── */
+window.removerCupom = function() {
+    _cupomAtivo = null;
+    const bloco    = document.getElementById('cupomAplicadoBloco');
+    const feedback = document.getElementById('cupomFeedback');
+    const input    = document.getElementById('cupomCodigo');
+    if (bloco)    bloco.style.display    = 'none';
+    if (feedback) feedback.style.display = 'none';
+    if (input)    input.value            = '';
+    atualizarSubtotal();
+};
+
 /* ── Prosseguir para o checkout ── */
 window.prosseguirCheckout = function() {
     const ids = Array.from(document.querySelectorAll('.estante-item-check:checked'))
@@ -153,13 +254,20 @@ window.prosseguirCheckout = function() {
 
     if (ids.length === 0) return;
 
-    // Persiste os IDs selecionados para a página de checkout
+    // Persiste os IDs selecionados e o cupom para a página de checkout
     sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify(ids));
+    if (_cupomAtivo) {
+        sessionStorage.setItem(CUPOM_KEY, JSON.stringify(_cupomAtivo));
+    } else {
+        sessionStorage.removeItem(CUPOM_KEY);
+    }
     window.location.href = '/livros/checkout';
 };
 
 /* ── Init ── */
 document.addEventListener('DOMContentLoaded', () => {
+    // Garante que nenhum cupom de compra anterior persista
+    sessionStorage.removeItem(CUPOM_KEY);
     carregarSaldo();
     renderEstante();
 });

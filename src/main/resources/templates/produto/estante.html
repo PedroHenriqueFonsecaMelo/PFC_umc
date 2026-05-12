@@ -54,6 +54,18 @@
             <!-- Lista de livros -->
             <div id="listaEstante" class="estante-lista"></div>
 
+            <!-- Cupom de desconto -->
+            <div class="estante-cupom" id="estanteCupom">
+                <div class="cupom-row" id="cupomInputRow">
+                    <input type="text" id="cupomCodigo" class="cupom-input"
+                           placeholder="Código do cupom" maxlength="30" autocomplete="off"
+                           onkeydown="if(event.key==='Enter') aplicarCupom()">
+                    <button class="btn-cupom-aplicar" onclick="aplicarCupom()">Aplicar</button>
+                </div>
+                <div id="cupomFeedback" class="cupom-feedback" style="display:none;"></div>
+                <div id="cupomAplicadoBloco" class="cupom-aplicado-bloco" style="display:none;"></div>
+            </div>
+
             <!-- Rodapé com subtotal e ação -->
             <div class="estante-footer">
                 <div class="estante-subtotal">

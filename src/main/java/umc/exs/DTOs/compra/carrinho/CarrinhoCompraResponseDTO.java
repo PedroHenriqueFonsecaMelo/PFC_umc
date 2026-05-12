@@ -19,6 +19,9 @@ public class CarrinhoCompraResponseDTO {
     private int totalComprados;
     private double totalGasto;
     private double saldoRestante;
+    private double totalOriginal;
+    private double descontoAplicado;
+    private String codigoCupomAplicado;
 
     private List<ItemResultadoDTO> comprados;
     private List<ItemResultadoDTO> falhas;
@@ -28,6 +31,9 @@ public class CarrinhoCompraResponseDTO {
             int totalComprados,
             double totalGasto,
             double saldoRestante,
+            double totalOriginal,
+            double descontoAplicado,
+            String codigoCupomAplicado,
             List<ItemResultadoDTO> comprados,
             List<ItemResultadoDTO> falhas) {
 
@@ -35,6 +41,9 @@ public class CarrinhoCompraResponseDTO {
         this.totalComprados = totalComprados;
         this.totalGasto = totalGasto;
         this.saldoRestante = saldoRestante;
+        this.totalOriginal = totalOriginal;
+        this.descontoAplicado = descontoAplicado;
+        this.codigoCupomAplicado = codigoCupomAplicado;
 
         // ✔ cópia defensiva SEM null
         this.comprados = (comprados == null) ? new ArrayList<>() : new ArrayList<>(comprados);
@@ -59,6 +68,18 @@ public class CarrinhoCompraResponseDTO {
 
     public double getSaldoRestante() {
         return saldoRestante;
+    }
+
+    public double getTotalOriginal() {
+        return totalOriginal;
+    }
+
+    public double getDescontoAplicado() {
+        return descontoAplicado;
+    }
+
+    public String getCodigoCupomAplicado() {
+        return codigoCupomAplicado;
     }
 
     public List<ItemResultadoDTO> getComprados() {
@@ -94,6 +115,9 @@ public class CarrinhoCompraResponseDTO {
         private int totalComprados;
         private double totalGasto;
         private double saldoRestante;
+        private double totalOriginal;
+        private double descontoAplicado;
+        private String codigoCupomAplicado;
         private List<ItemResultadoDTO> comprados = new ArrayList<>();
         private List<ItemResultadoDTO> falhas = new ArrayList<>();
 
@@ -117,6 +141,21 @@ public class CarrinhoCompraResponseDTO {
             return this;
         }
 
+        public Builder totalOriginal(double totalOriginal) {
+            this.totalOriginal = totalOriginal;
+            return this;
+        }
+
+        public Builder descontoAplicado(double descontoAplicado) {
+            this.descontoAplicado = descontoAplicado;
+            return this;
+        }
+
+        public Builder codigoCupomAplicado(String codigoCupomAplicado) {
+            this.codigoCupomAplicado = codigoCupomAplicado;
+            return this;
+        }
+
         public Builder comprados(List<ItemResultadoDTO> comprados) {
             this.comprados = (comprados == null) ? new ArrayList<>() : new ArrayList<>(comprados);
             return this;
@@ -133,6 +172,9 @@ public class CarrinhoCompraResponseDTO {
                     totalComprados,
                     totalGasto,
                     saldoRestante,
+                    totalOriginal,
+                    descontoAplicado,
+                    codigoCupomAplicado,
                     comprados,
                     falhas
             );

@@ -14,6 +14,7 @@ import umc.exs.repository.negocios.ListaDesejosRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
+import umc.exs.service.notificacao.NotificacaoService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,6 +30,7 @@ public class ListaDesejosService {
     private final ListaDesejosRepository listaDesejosRepository;
     private final ClienteRepository clienteRepository;
     private final EmailService emailService;
+    private final NotificacaoService notificacaoService;
 
     @Transactional
     public ListaDesejosDTO adicionarDesejo(String emailCliente, String isbn) {
@@ -81,11 +83,11 @@ public class ListaDesejosService {
     }
 
     /**
-     * Notifica via e-mail todos os clientes que têm o ISBN na lista de desejos
+     * Notifica via e-mail e dashboard todos os clientes que têm o ISBN na lista de desejos
      * quando um livro com esse ISBN é aprovado e fica disponível na vitrine.
      */
     @SuppressWarnings("null")
-    @Transactional(readOnly = true)
+    @Transactional
     public void notificarClientesSeDisponivel(String isbn, String titulo) {
         if (isbn == null || isbn.isBlank()) {
             return;
@@ -109,11 +111,44 @@ public class ListaDesejosService {
                         cliente.getEmail(), assunto,
                         EmailHtmlBuilder.listaDesejosDisponivel(
                                 cliente.getNome(), titulo, isbn, desejo.isPreReservaAtiva(), baseUrl));
+
+                // Notificação dashboard
+                notificacaoService.criarNotificacaoDashboard(
+                        cliente,
+                        String.format("O livro '%s' da sua lista de desejos está disponível na vitrine!", titulo),
+                        "/livros/vitrine");
+
                 log.info("Notificação enviada para {} sobre ISBN {} (pré-reserva: {})",
                         cliente.getEmail(), isbn, desejo.isPreReservaAtiva());
             } catch (Exception e) {
                 log.error("Falha ao notificar cliente {} sobre ISBN {}: {}", desejo.getCliente().getEmail(), isbn,
                         e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Notifica via dashboard todos os clientes que têm o ISBN na lista de desejos
+     * quando o livro entra em promoção.
+     */
+    @Transactional
+    public void notificarClientesSeEmPromocao(String isbn, String titulo, double precoPromo) {
+        if (isbn == null || isbn.isBlank()) return;
+
+        List<ListaDesejos> interessados = listaDesejosRepository.findByIsbn(isbn);
+        if (interessados.isEmpty()) return;
+
+        log.info("Notificando {} cliente(s) sobre promoção do livro ISBN {}", interessados.size(), isbn);
+
+        for (ListaDesejos desejo : interessados) {
+            try {
+                notificacaoService.criarNotificacaoDashboard(
+                        desejo.getCliente(),
+                        String.format("O livro '%s' que você deseja está em promoção por T$ %.2f!", titulo, precoPromo),
+                        "/livros/vitrine");
+            } catch (Exception e) {
+                log.error("Falha ao notificar cliente {} sobre promoção ISBN {}: {}",
+                        desejo.getCliente().getEmail(), isbn, e.getMessage());
             }
         }
     }

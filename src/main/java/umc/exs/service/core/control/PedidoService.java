@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.log.LogAuditoriaService;
+import umc.exs.service.notificacao.NotificacaoService;
 
 /**
  * Gerencia o ciclo de vida dos pedidos (compras de livros).
@@ -36,6 +37,7 @@ public class PedidoService {
         private final ClienteRepository clienteRepository;
         private final LogAuditoriaService logAuditoria;
         private final EmailService emailService;
+        private final NotificacaoService notificacaoService;
 
         // ==========================================================
         // CRIAÇÃO
@@ -172,6 +174,17 @@ public class PedidoService {
                         } catch (Exception e) {
                                 log.error("Falha ao enviar e-mail de estorno para {}: {}", comprador.getEmail(), e.getMessage());
                         }
+
+                        // Notificação dashboard: estorno
+                        try {
+                                notificacaoService.criarNotificacaoDashboard(
+                                        comprador,
+                                        String.format("Seu pedido #%d foi cancelado. T$ %.2f foram devolvidos ao seu saldo.",
+                                                pedidoId, valorEstorno),
+                                        "/clientes/homepage?aba=pedidos");
+                        } catch (Exception e) {
+                                log.error("Falha ao criar notificação de estorno: {}", e.getMessage());
+                        }
                 }
 
                 pedido.setStatusEnvio(novoStatus);
@@ -205,6 +218,19 @@ public class PedidoService {
                                                 baseUrl));
                         } catch (Exception e) {
                                 log.error("Falha ao enviar e-mail de status do pedido #{}: {}", pedidoId, e.getMessage());
+                        }
+
+                        // Notificação dashboard para status não-cancelados (cancelado já notificou acima)
+                        if (novoStatus != StatusEnvio.CANCELADO) {
+                                try {
+                                        notificacaoService.criarNotificacaoDashboard(
+                                                pedido.getComprador(),
+                                                String.format("Seu pedido #%d foi atualizado para: %s.",
+                                                        pedidoId, novoStatus.getDescricao()),
+                                                "/clientes/homepage?aba=pedidos");
+                                } catch (Exception e) {
+                                        log.error("Falha ao criar notificação de status do pedido #{}: {}", pedidoId, e.getMessage());
+                                }
                         }
                 }
 

@@ -18,6 +18,7 @@ import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.repository.usuario.PontuacaoUsuarioRepository;
 import umc.exs.service.cupom.CupomService;
 import umc.exs.service.log.LogAuditoriaService;
+import umc.exs.service.notificacao.NotificacaoService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class GamificacaoService {
     private final ClienteRepository clienteRepository;
     private final LogAuditoriaService logAuditoria;
     private final CupomService cupomService;
+    private final NotificacaoService notificacaoService;
 
     // Resolução do Sonar java:S6809: Auto-injeção para chamadas transacionais
     private GamificacaoService self;
@@ -87,8 +89,19 @@ public class GamificacaoService {
         NivelUsuario nivelDepois = NivelUsuario.calcular(xpDepois);
 
         if (!nivelAntes.equals(nivelDepois)) {
-            logAuditoria.registrarLog("NIVEL_SUBIU", clienteId, 
+            logAuditoria.registrarLog("NIVEL_SUBIU", clienteId,
                 pontuacao.getCliente().getEmail(), "Subiu para " + nivelDepois.getDescricao());
+
+            // Notificação dashboard: novo nível atingido
+            try {
+                notificacaoService.criarNotificacaoDashboard(
+                        pontuacao.getCliente(),
+                        String.format("Parabéns! Você atingiu o nível %s %s no ranking!",
+                                nivelDepois.getBadge(), nivelDepois.getDescricao()),
+                        "/gamificacao");
+            } catch (Exception e) {
+                logAuditoria.registrarLog("ERRO_NOTIF_NIVEL", clienteId, null, "Erro: " + e.getMessage());
+            }
         }
     }
 

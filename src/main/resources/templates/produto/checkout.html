@@ -82,10 +82,30 @@
                      font-size:.85rem; margin-bottom:1rem; color:var(--accent,#722f37);">
                 </div>
 
+                <!-- Campo de cupom (input + feedback + estado aplicado) -->
+                <div class="checkout-cupom-section">
+                    <div id="checkoutCupomInputRow" class="cupom-row">
+                        <input type="text" id="checkoutCupomCodigo" class="cupom-input"
+                               placeholder="Código do cupom (opcional)" maxlength="30" autocomplete="off"
+                               onkeydown="if(event.key==='Enter') aplicarCupomCheckout()">
+                        <button class="btn-cupom-aplicar" onclick="aplicarCupomCheckout()">Aplicar</button>
+                    </div>
+                    <div id="checkoutCupomFeedback" class="cupom-feedback" style="display:none;"></div>
+                    <div id="checkoutCupomAplicado" class="cupom-aplicado-bloco" style="display:none;"></div>
+                </div>
+
                 <div class="pagamento-card">
                     <div class="pagamento-linha">
                         <span>Saldo atual</span>
                         <span id="saldoAtual" class="pagamento-saldo">T$ —</span>
+                    </div>
+                    <div id="linhaSubtotalOriginal" class="pagamento-linha" style="display:none;">
+                        <span>Subtotal original</span>
+                        <span id="subtotalOriginal" style="text-decoration:line-through;color:var(--muted);">T$ —</span>
+                    </div>
+                    <div id="linhaDesconto" class="pagamento-linha" style="display:none;">
+                        <span id="labelDesconto">Desconto (cupom)</span>
+                        <span id="valorDesconto" style="color:#15803d;font-weight:700;">-T$ —</span>
                     </div>
                     <div class="pagamento-linha">
                         <span>Total a debitar</span>

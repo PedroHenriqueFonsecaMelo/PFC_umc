@@ -215,6 +215,83 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
 }
 .link-carregar:hover { text-decoration: underline; }
 
+/* ── Cupom no checkout ── */
+.checkout-cupom-section {
+  margin-bottom: 1rem;
+  padding: .85rem 1rem;
+  border: 1px dashed var(--border);
+  background: var(--white);
+}
+.cupom-row {
+  display: flex;
+  gap: .6rem;
+  align-items: center;
+}
+.cupom-input {
+  flex: 1;
+  padding: .5rem .75rem;
+  font-family: "DM Sans", sans-serif;
+  font-size: .85rem;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  border: 1.5px solid var(--border);
+  background: var(--paper);
+  color: var(--ink);
+  outline: none;
+  transition: border-color .18s;
+}
+.cupom-input:focus { border-color: var(--accent); }
+.btn-cupom-aplicar {
+  padding: .5rem 1rem;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  font-family: "DM Sans", sans-serif;
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .18s;
+}
+.btn-cupom-aplicar:hover:not(:disabled) { background: var(--accent); }
+.btn-cupom-aplicar:disabled { opacity: .5; cursor: not-allowed; }
+.cupom-feedback {
+  margin-top: .55rem;
+  font-size: .82rem;
+  padding: .4rem .7rem;
+}
+.cupom-feedback.erro { background: #fee2e2; color: #b91c1c; border-left: 3px solid #fca5a5; }
+.cupom-feedback.ok   { background: #dcfce7; color: #15803d; border-left: 3px solid #86efac; }
+.cupom-aplicado-bloco {
+  margin-top: .6rem;
+  padding: .55rem .85rem;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  font-size: .83rem;
+  color: #15803d;
+}
+.cupom-aplicado-info { font-weight: 600; }
+.cupom-aplicado-desconto { font-family: "Playfair Display", serif; font-weight: 800; }
+.btn-cupom-remover {
+  background: transparent;
+  border: 1px solid rgba(21,128,61,.4);
+  color: #15803d;
+  font-size: .75rem;
+  font-weight: 700;
+  padding: .2rem .55rem;
+  cursor: pointer;
+  transition: background .15s;
+  white-space: nowrap;
+}
+.btn-cupom-remover:hover { background: rgba(21,128,61,.12); }
+
 /* ── Botão confirmar ── */
 .btn-confirmar {
   width: 100%;

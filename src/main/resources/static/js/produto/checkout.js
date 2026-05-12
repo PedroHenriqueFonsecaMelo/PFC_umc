@@ -7,6 +7,7 @@
 
 const CART_KEY     = 'bibliotroca_carrinho';
 const CHECKOUT_KEY = 'bibliotroca_checkout_ids';
+const CUPOM_KEY    = 'bibliotroca_checkout_cupom';
 
 /* ── Helpers do carrinho ── */
 
@@ -22,6 +23,8 @@ function saveCarrinho(itens) {
 /* ── Dados do checkout (preenchidos no init) ── */
 let _itensSelecionados = [];
 let _saldoAtual        = null;
+let _totalOriginal     = 0;   // total sem desconto; usado para recalcular ao aplicar/remover cupom
+let _cupomCheckout     = null; // { codigo, percentual, desconto, totalComDesconto }
 // true  → veio da estante (localStorage); false → compra direta (sessionStorage)
 let _compraViaEstante  = true;
 
@@ -107,12 +110,117 @@ function renderItens(itens) {
     }).join('');
 }
 
+/* ── Renderiza estado do cupom no checkout (aplicado ou limpo) ── */
+function renderCupomCheckout() {
+    const inputRow  = document.getElementById('checkoutCupomInputRow');
+    const aplicado  = document.getElementById('checkoutCupomAplicado');
+    const feedback  = document.getElementById('checkoutCupomFeedback');
+    const linhaOrig = document.getElementById('linhaSubtotalOriginal');
+    const origEl    = document.getElementById('subtotalOriginal');
+    const linhaDesc = document.getElementById('linhaDesconto');
+    const labelDesc = document.getElementById('labelDesconto');
+    const valorDesc = document.getElementById('valorDesconto');
+
+    if (_cupomCheckout) {
+        // Oculta input, mostra bloco "cupom aplicado"
+        if (inputRow) inputRow.style.display = 'none';
+        if (feedback) feedback.style.display = 'none';
+        if (aplicado) {
+            aplicado.innerHTML =
+                `<div>
+                    <span class="cupom-aplicado-info">${escHtml(_cupomCheckout.codigo)} — ${_cupomCheckout.percentual}% OFF</span>
+                    <span class="cupom-aplicado-desconto"> -T$ ${(_cupomCheckout.desconto || 0).toFixed(2)}</span>
+                 </div>
+                 <button class="btn-cupom-remover" onclick="removerCupomCheckout()">✕ Remover</button>`;
+            aplicado.style.display = 'flex';
+        }
+        // Linhas de desconto no card financeiro
+        if (linhaOrig) linhaOrig.style.display = 'flex';
+        if (origEl)    origEl.textContent       = `T$ ${_totalOriginal.toFixed(2)}`;
+        if (linhaDesc) linhaDesc.style.display  = 'flex';
+        if (labelDesc) labelDesc.textContent    = `Desconto (${_cupomCheckout.codigo})`;
+        if (valorDesc) valorDesc.textContent    = `-T$ ${(_cupomCheckout.desconto || 0).toFixed(2)}`;
+    } else {
+        // Mostra input, oculta bloco aplicado e linhas de desconto
+        if (inputRow) inputRow.style.display = 'flex';
+        if (aplicado) aplicado.style.display = 'none';
+        if (linhaOrig) linhaOrig.style.display = 'none';
+        if (linhaDesc) linhaDesc.style.display = 'none';
+    }
+}
+
+/* ── Aplicar cupom diretamente no checkout ── */
+window.aplicarCupomCheckout = async function() {
+    const codigo = (document.getElementById('checkoutCupomCodigo')?.value || '').trim().toUpperCase();
+    const feedback = document.getElementById('checkoutCupomFeedback');
+    if (!codigo) return;
+
+    const btn = document.querySelector('.btn-cupom-aplicar');
+    if (btn) { btn.disabled = true; btn.textContent = '…'; }
+
+    try {
+        const res  = await fetch(
+            `/api/cupons/validar?codigo=${encodeURIComponent(codigo)}&total=${_totalOriginal}`,
+            { credentials: 'include' }
+        );
+        const data = await res.json();
+
+        if (!res.ok || !data.valido) {
+            if (feedback) {
+                feedback.className   = 'cupom-feedback erro';
+                feedback.textContent = data.mensagem || 'Cupom inválido.';
+                feedback.style.display = 'block';
+            }
+        } else {
+            if (feedback) feedback.style.display = 'none';
+            _cupomCheckout = {
+                codigo:          data.codigo,
+                percentual:      data.percentual,
+                desconto:        data.desconto,
+                totalComDesconto: data.totalComDesconto
+            };
+            renderCupomCheckout();
+            renderFinanceiro(_saldoAtual, _totalOriginal);
+        }
+    } catch (_) {
+        if (feedback) {
+            feedback.className   = 'cupom-feedback erro';
+            feedback.textContent = 'Erro ao validar cupom. Tente novamente.';
+            feedback.style.display = 'block';
+        }
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Aplicar'; }
+    }
+};
+
+/* ── Remover cupom no checkout ── */
+window.removerCupomCheckout = function() {
+    _cupomCheckout = null;
+    sessionStorage.removeItem(CUPOM_KEY);
+    const input = document.getElementById('checkoutCupomCodigo');
+    if (input) input.value = '';
+    renderCupomCheckout();
+    renderFinanceiro(_saldoAtual, _totalOriginal);
+};
+
 /* ── Atualiza os valores de saldo / total / saldo pós ── */
-function renderFinanceiro(saldo, total) {
-    const saldoEl  = document.getElementById('saldoAtual');
-    const totalEl  = document.getElementById('totalDebitar');
-    const aposEl   = document.getElementById('saldoApos');
+function renderFinanceiro(saldo, totalOriginal) {
+    _saldoAtual    = saldo;
+    _totalOriginal = totalOriginal;
+
+    // Recalcula desconto com o total atualizado quando há cupom ativo
+    if (_cupomCheckout) {
+        const desconto = totalOriginal * (_cupomCheckout.percentual / 100);
+        _cupomCheckout.desconto          = desconto;
+        _cupomCheckout.totalComDesconto  = Math.max(0, totalOriginal - desconto);
+    }
+
+    const total    = _cupomCheckout ? _cupomCheckout.totalComDesconto : totalOriginal;
     const saldoPos = saldo - total;
+
+    const saldoEl = document.getElementById('saldoAtual');
+    const totalEl = document.getElementById('totalDebitar');
+    const aposEl  = document.getElementById('saldoApos');
 
     if (saldoEl) saldoEl.textContent = `T$ ${saldo.toFixed(2)}`;
     if (totalEl) totalEl.textContent = `T$ ${total.toFixed(2)}`;
@@ -122,7 +230,9 @@ function renderFinanceiro(saldo, total) {
         aposEl.classList.toggle('negativo', saldoPos < 0);
     }
 
-    // Alerta de saldo insuficiente (pré-validação local, antes do click)
+    renderCupomCheckout();
+
+    // Alerta de saldo insuficiente
     const alerta = document.getElementById('alertaSaldo');
     const btn    = document.getElementById('btnConfirmar');
     if (saldoPos < 0) {
@@ -159,14 +269,15 @@ window.confirmarCompra = async function() {
     document.getElementById('alertaErro').style.display  = 'none';
     document.getElementById('alertaSaldo').style.display = 'none';
 
-    const livroIds = _itensSelecionados.map(i => i.id);
+    const livroIds    = _itensSelecionados.map(i => i.id);
+    const codigoCupom = _cupomCheckout ? _cupomCheckout.codigo : null;
 
     try {
         const res = await fetch('/api/livros/carrinho/comprar', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ livroIds })
+            body: JSON.stringify({ livroIds, codigoCupom })
         });
 
         if (res.status === 401) {
@@ -211,6 +322,7 @@ window.confirmarCompra = async function() {
         // Limpa sessão de checkout
         sessionStorage.removeItem(CHECKOUT_KEY);
         sessionStorage.removeItem(CHECKOUT_KEY + '_direto');
+        sessionStorage.removeItem(CUPOM_KEY);
 
         // Monta dados completos para a página de confirmação
         const agora      = new Date();
@@ -300,10 +412,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (vazio)  vazio.style.display  = 'none';
     if (layout) layout.style.display = 'grid';
 
-    // 4. Renderiza itens
+    // 4. Lê cupom do sessionStorage (vindo da estante)
+    try {
+        _cupomCheckout = JSON.parse(sessionStorage.getItem(CUPOM_KEY)) || null;
+    } catch (_) { _cupomCheckout = null; }
+
+    // 5. Renderiza itens
     renderItens(_itensSelecionados);
 
-    // 5. Carrega perfil, valida endereço e calcula financeiro
+    // 6. Carrega perfil, valida endereço e calcula financeiro
     const perfil = await carregarPerfil();
     carregarEnderecoEntrega(perfil);
     const total = _itensSelecionados.reduce((s, i) => s + (i.precoAprovado || 0), 0);

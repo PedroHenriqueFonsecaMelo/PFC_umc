@@ -26,6 +26,7 @@ import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.gamificacao.GamificacaoService;
 import umc.exs.service.log.LogAuditoriaService;
+import umc.exs.service.notificacao.NotificacaoService;
 
 @Slf4j
 @Service
@@ -40,6 +41,7 @@ public class LivroAdminService {
     private final EmailService emailService;
     private final ListaDesejosService listaDesejosService;
     private final GamificacaoService gamificacaoService;
+    private final NotificacaoService notificacaoService;
 
     private final LivroMapper livroMapper;
 
@@ -133,6 +135,17 @@ public class LivroAdminService {
             } catch (Exception e) {
                 log.error("Erro ao enviar email de livro aprovado: {}", e.getMessage(), e);
             }
+
+            // Notificação dashboard: livro aprovado
+            try {
+                notificacaoService.criarNotificacaoDashboard(
+                        vendedor,
+                        String.format("Seu livro '%s' foi aprovado e está na vitrine! Você recebeu T$ %.2f de bônus.",
+                                anuncio.getTitulo(), TOKEN_REWARD),
+                        "/livros/vitrine");
+            } catch (Exception e) {
+                log.error("Erro ao notificar aprovação para vendedor {}: {}", vendedor.getEmail(), e.getMessage());
+            }
         }
 
         if (anuncio.getLote() != null) {
@@ -175,6 +188,19 @@ public class LivroAdminService {
                                 comentario));
             } catch (Exception e) {
                 log.error("Erro ao enviar email de livro rejeitado: {}", e.getMessage(), e);
+            }
+
+            // Notificação dashboard: livro rejeitado
+            try {
+                String motivoTexto = (comentario != null && !comentario.isBlank())
+                        ? " Motivo: " + comentario
+                        : "";
+                notificacaoService.criarNotificacaoDashboard(
+                        vendedor,
+                        String.format("Seu livro '%s' foi rejeitado.%s", anuncio.getTitulo(), motivoTexto),
+                        "/clientes/homepage");
+            } catch (Exception e) {
+                log.error("Erro ao notificar rejeição para vendedor {}: {}", vendedor.getEmail(), e.getMessage());
             }
         }
 
@@ -256,6 +282,9 @@ public class LivroAdminService {
         Livro livro = livroRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
 
+        // Captura estado anterior de promoção antes de modificar
+        boolean eraPromocao = Boolean.TRUE.equals(livro.getEmPromocao());
+
         // ===== dados básicos =====
         livro.setTitulo(req.getTitulo());
         livro.setAutor(req.getAutor());
@@ -271,19 +300,30 @@ public class LivroAdminService {
 
         livro.setEmPromocao(promoAtiva);
 
+        double precoPromo = 0.0;
         if (promoAtiva) {
-            
             livro.setPrecoOriginal(req.getPreco());
-            livro.setPrecoAprovado(req.getPreco() * (1.0 - req.getPercentualDesconto() / 100.0));
+            precoPromo = req.getPreco() * (1.0 - req.getPercentualDesconto() / 100.0);
+            livro.setPrecoAprovado(precoPromo);
             livro.setPromocaoExpira(req.getPromocaoExpira());
         } else {
-
             livro.setPrecoAprovado(req.getPreco());
             livro.setPrecoOriginal(null);
             livro.setPromocaoExpira(null);
         }
 
         Livro salvo = livroRepository.save(livro);
+
+        // Notifica usuários da lista de desejos quando promoção é ativada
+        if (promoAtiva && !eraPromocao && livro.getIsbn() != null) {
+            final double precoFinal = precoPromo;
+            try {
+                listaDesejosService.notificarClientesSeEmPromocao(
+                        livro.getIsbn(), livro.getTitulo(), precoFinal);
+            } catch (Exception e) {
+                log.error("Erro ao notificar wishlist sobre promoção do livro {}: {}", id, e.getMessage());
+            }
+        }
 
         return livroMapper.paraDTO(salvo);
     }

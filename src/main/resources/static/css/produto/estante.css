@@ -192,6 +192,94 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
 }
 .estante-item-remover:hover { color: var(--accent); }
 
+/* ── Cupom ── */
+.estante-cupom {
+  margin-bottom: 1.2rem;
+  padding: 1rem 1.2rem;
+  border: 1px dashed var(--border);
+  background: var(--white);
+}
+.cupom-row {
+  display: flex;
+  gap: .6rem;
+  align-items: center;
+}
+.cupom-input {
+  flex: 1;
+  padding: .55rem .8rem;
+  font-family: "DM Sans", sans-serif;
+  font-size: .88rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  border: 1.5px solid var(--border);
+  background: var(--paper);
+  color: var(--ink);
+  outline: none;
+  transition: border-color .18s;
+}
+.cupom-input:focus { border-color: var(--accent); }
+.btn-cupom-aplicar {
+  padding: .55rem 1.1rem;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  font-family: "DM Sans", sans-serif;
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .18s;
+}
+.btn-cupom-aplicar:hover { background: var(--accent); }
+.cupom-feedback {
+  margin-top: .6rem;
+  font-size: .82rem;
+  padding: .4rem .7rem;
+}
+.cupom-feedback.erro   { background: #fee2e2; color: #b91c1c; border-left: 3px solid #fca5a5; }
+.cupom-feedback.ok     { background: #dcfce7; color: #15803d; border-left: 3px solid #86efac; }
+.cupom-aplicado-bloco {
+  margin-top: .75rem;
+  padding: .6rem .9rem;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  font-size: .84rem;
+  color: #15803d;
+}
+.cupom-aplicado-info { font-weight: 600; }
+.cupom-aplicado-desconto { font-family: "Playfair Display", serif; font-weight: 800; }
+.btn-cupom-remover {
+  background: transparent;
+  border: 1px solid rgba(21,128,61,.4);
+  color: #15803d;
+  font-size: .75rem;
+  font-weight: 700;
+  padding: .2rem .55rem;
+  cursor: pointer;
+  transition: background .15s;
+  white-space: nowrap;
+}
+.btn-cupom-remover:hover { background: rgba(21,128,61,.12); }
+.subtotal-original {
+  font-family: "Playfair Display", serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: line-through;
+}
+.subtotal-desconto {
+  font-size: .8rem;
+  color: #15803d;
+  font-weight: 600;
+}
+
 /* ── Rodapé ── */
 .estante-footer {
   position: sticky;

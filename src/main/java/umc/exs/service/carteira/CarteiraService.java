@@ -55,6 +55,16 @@ public class CarteiraService {
                 notificacaoService.notificarSaldo(cliente.getId(), cliente.getSaldoTokens(),
                                 "Recarga de T$ " + String.format("%.2f", valor) + " via " + metodo);
 
+                // Notificação dashboard: recarga confirmada
+                try {
+                        notificacaoService.criarNotificacaoDashboard(
+                                        cliente,
+                                        String.format("Recarga confirmada! T$ %.2f adicionados ao seu saldo.", valor),
+                                        "/clientes/carteira");
+                } catch (Exception e) {
+                        log.error("Erro ao criar notificação de recarga: {}", e.getMessage());
+                }
+
                 logAuditoriaService.registrarLog("TOKENS_ADICIONADOS", cliente.getId(), cliente.getEmail(),
                                 String.format("Método: %s | Valor: T$%.2f | Info: %s", metodo, valor, infoAdicional));
 
@@ -148,6 +158,16 @@ public class CarteiraService {
                                                                 LocalDateTime.now()));
                         } catch (Exception e) {
                                 log.error("Erro no e-mail PIX: {}", e.getMessage());
+                        }
+
+                        // Notificação dashboard: PIX confirmado
+                        try {
+                                notificacaoService.criarNotificacaoDashboard(
+                                                cliente,
+                                                String.format("Recarga confirmada! T$ %.2f adicionados ao seu saldo via PIX.", valorPix),
+                                                "/clientes/carteira");
+                        } catch (Exception e) {
+                                log.error("Erro ao criar notificação de PIX: {}", e.getMessage());
                         }
                 }
         }

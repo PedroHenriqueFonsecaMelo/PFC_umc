@@ -30,6 +30,32 @@ public class PontosSchedulerService {
     private final NotificacaoService notificacaoService;
 
     /**
+     * 09h: Avisa usuários cujo XP está prestes a começar a diminuir por inatividade
+     * (entre 25 e 29 dias sem atividade — antes do limiar de 30 dias).
+     */
+    @Transactional
+    @Scheduled(cron = "0 0 9 * * *")
+    public void avisarXpAExpirar() {
+        LocalDateTime inicioDaJanela = LocalDateTime.now().minusDays(29);
+        LocalDateTime fimDaJanela    = LocalDateTime.now().minusDays(25);
+
+        List<PontuacaoUsuario> emRisco = pontuacaoRepository
+                .findAllByUltimaAtualizacaoBetween(inicioDaJanela, fimDaJanela);
+
+        for (PontuacaoUsuario p : emRisco) {
+            if (p.getXpTotal() <= 0) continue;
+            try {
+                notificacaoService.criarNotificacaoDashboard(
+                        p.getCliente(),
+                        "Atenção! Seu XP está prestes a começar a diminuir por inatividade. Acesse a plataforma para evitar perdas.",
+                        "/gamificacao");
+            } catch (Exception e) {
+                log.error("Erro ao avisar XP a expirar para {}: {}", p.getCliente().getEmail(), e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Meia-noite: Processa a perda de XP por inatividade.
      */
     @Transactional

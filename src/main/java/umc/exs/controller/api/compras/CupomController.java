@@ -30,27 +30,31 @@ public class CupomController {
     }
 
     /**
-     * Valida um cupom para um item específico do carrinho (preview do desconto).
+     * Valida um cupom sobre o total do carrinho (preview do desconto).
      * Não registra uso — apenas calcula o desconto.
      *
-     * @param codigo  código do cupom
-     * @param livroId ID do livro ao qual o desconto seria aplicado
-     * @param user    usuário autenticado
-     * @return mapa com: valido, percentual, precoOriginal, precoComDesconto, economia, mensagem
+     * @param codigo código do cupom
+     * @param total  valor total da compra sobre o qual aplicar o desconto
+     * @param user   usuário autenticado
+     * @return mapa com: valido, codigo, percentual, totalOriginal, desconto, totalComDesconto
      */
     @GetMapping("/validar")
     public ResponseEntity<Map<String, Object>> validar(
             @RequestParam String codigo,
-            @RequestParam Long livroId,
+            @RequestParam double total,
             @AuthenticationPrincipal UserDetails user) {
 
         if (user == null) return ResponseEntity.status(401).build();
 
-        var precoFinal = cupomService.validarCupom(codigo, user.getUsername(), livroId);
-        return ResponseEntity.ok(Map.of(
-                "valido", true,
-                "precoComDesconto", precoFinal
-        ));
+        try {
+            var result = cupomService.validarCupomParaTotal(codigo, user.getUsername(), total);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, Object> err = new java.util.LinkedHashMap<>();
+            err.put("valido", false);
+            err.put("mensagem", e.getMessage());
+            return ResponseEntity.badRequest().body(err);
+        }
     }
 
 }

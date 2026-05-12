@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import umc.exs.model.entidades.foundation.Cupom;
 import umc.exs.model.entidades.foundation.CupomUso;
 import umc.exs.model.entidades.usuario.Cliente;
-import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.negocios.CupomRepository;
 import umc.exs.repository.negocios.CupomUsoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
@@ -36,7 +35,6 @@ public class CupomService {
     private final CupomRepository cupomRepository;
     private final CupomUsoRepository cupomUsoRepository;
     private final ClienteRepository clienteRepository;
-    private final LivroRepository livroRepository;
     private final CupomMapper cupomMapper;
 
     // ───────────────────────── XP (Cupons Gerados por Gamificação)
@@ -112,41 +110,50 @@ public class CupomService {
     // ───────────────────────── VALIDAÇÃO E APLICAÇÃO ─────────────────────────
 
     /**
-     * Valida se o cupom pode ser usado pelo cliente e retorna o novo preço.
+     * Valida o cupom sobre o total do carrinho e retorna preview do desconto.
+     * Não registra uso.
      */
     @Transactional(readOnly = true)
-    public double validarCupom(String codigo, String emailCliente, Long livroId) {
+    public java.util.Map<String, Object> validarCupomParaTotal(String codigo, String emailCliente, double total) {
         Cliente cliente = clienteRepository.findByEmail(emailCliente)
                 .orElseThrow(() -> new RuntimeException(CLIENTE_NAO_ENCONTRADO));
 
         Cupom cupom = cupomRepository.findByCodigo(codigo.toUpperCase())
-                .orElseThrow(() -> new RuntimeException(CUPOM_NAO_ENCONTRADO));
+                .orElseThrow(() -> new RuntimeException("Cupom não encontrado."));
 
         verificarElegibilidade(cupom, cliente);
 
-        var livro = livroRepository.findByIdAndAprovadoTrue(livroId)
-                .orElseThrow(() -> new IllegalArgumentException("Livro não disponível para venda"));
+        double desconto = total * (cupom.getPercentualDesconto() / 100.0);
+        double totalComDesconto = Math.max(0, total - desconto);
 
-        return calcularPrecoComDesconto(livro.getPrecoAprovado(), cupom.getPercentualDesconto());
+        return java.util.Map.of(
+                "valido", true,
+                "codigo", cupom.getCodigo(),
+                "percentual", cupom.getPercentualDesconto(),
+                "totalOriginal", total,
+                "desconto", desconto,
+                "totalComDesconto", totalComDesconto
+        );
     }
 
     /**
-     * Aplica o cupom definitivamente, registrando o uso único.
+     * Aplica o cupom ao total do carrinho, registrando o uso único.
+     * Retorna o total com desconto aplicado.
      */
     @SuppressWarnings("null")
     @Transactional
-    public double aplicarCupom(String codigo, Cliente cliente, Long livroId, double precoOriginal) {
+    public double aplicarCupomCarrinho(String codigo, Cliente cliente, double totalOriginal) {
         Cupom cupom = cupomRepository.findByCodigo(codigo.toUpperCase())
                 .orElseThrow(() -> new RuntimeException(CUPOM_NAO_ENCONTRADO));
 
         // Re-valida no momento da compra para evitar race conditions
         verificarElegibilidade(cupom, cliente);
 
-        // REGRA iFOOD: Registrar o uso na tabela de histórico (CupomUso)
+        // Registra uso do cupom (livroId null = aplicado sobre o total do carrinho)
         CupomUso uso = CupomUso.builder()
                 .cupom(cupom)
                 .cliente(cliente)
-                .livroId(livroId)
+                .livroId(null)
                 .dataUso(LocalDateTime.now())
                 .build();
         cupomUsoRepository.save(uso);
@@ -160,7 +167,7 @@ public class CupomService {
         }
 
         cupomRepository.save(cupom);
-        return calcularPrecoComDesconto(precoOriginal, cupom.getPercentualDesconto());
+        return calcularPrecoComDesconto(totalOriginal, cupom.getPercentualDesconto());
     }
 
     // ───────────────────────── HELPERS ─────────────────────────

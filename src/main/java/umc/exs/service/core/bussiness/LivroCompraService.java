@@ -26,10 +26,12 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.core.control.PedidoService;
+import umc.exs.service.cupom.CupomService;
 import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.gamificacao.GamificacaoService;
 import umc.exs.service.log.LogAuditoriaService;
+import umc.exs.service.notificacao.NotificacaoService;
 
 @Slf4j
 @Service
@@ -44,8 +46,10 @@ public class LivroCompraService {
 
     private final EmailService emailService;
     private final PedidoService pedidoService;
+    private final CupomService cupomService;
     private final GamificacaoService gamificacaoService;
     private final LogAuditoriaService logAuditoria;
+    private final NotificacaoService notificacaoService;
 
     private static final String ASSUNTO_SALDO = "Atualização de saldo — Bibliotroca";
 
@@ -65,15 +69,47 @@ public class LivroCompraService {
             throw new IllegalStateException("Saldo insuficiente para completar a compra.");
         }
 
+        // Captura vendedor antes de deletar o livro
+        Cliente vendedor = livro.getVendedor();
+        if (vendedor == null && livro.getLote() != null) {
+            vendedor = livro.getLote().getCliente();
+        }
+        final Cliente vendedorFinal = vendedor;
+        final String tituloLivro   = livro.getTitulo();
+        final double precoLivro    = livro.getPrecoAprovado();
+
         double saldoAntes = comprador.getSaldoTokens();
         processarBaixaLivro(comprador, livro);
 
         enviarEmailsCompraUnica(comprador, livro, saldoAntes);
 
         logAuditoria.registrarLog("COMPRA_LIVRO_SUCESSO", comprador.getId(), comprador.getEmail(),
-                "Livro " + livroId + " T$" + livro.getPrecoAprovado());
+                "Livro " + livroId + " T$" + precoLivro);
 
         gamificacaoService.xpCompra(comprador.getId());
+
+        // Notificação dashboard: compra realizada (comprador)
+        try {
+            notificacaoService.criarNotificacaoDashboard(
+                    comprador,
+                    String.format("Compra realizada! T$ %.2f debitados. Saldo atual: T$ %.2f.",
+                            precoLivro, comprador.getSaldoTokens()),
+                    "/clientes/homepage?aba=pedidos");
+        } catch (Exception e) {
+            log.error("Erro ao notificar comprador {}: {}", comprador.getEmail(), e.getMessage());
+        }
+
+        // Notificação dashboard: livro vendido (vendedor)
+        if (vendedorFinal != null) {
+            try {
+                notificacaoService.criarNotificacaoDashboard(
+                        vendedorFinal,
+                        String.format("Seu livro '%s' foi vendido!", tituloLivro),
+                        "/clientes/homepage?aba=pedidos");
+            } catch (Exception e) {
+                log.error("Erro ao notificar vendedor {}: {}", vendedorFinal.getEmail(), e.getMessage());
+            }
+        }
 
         emailService.enviar(
                 comprador.getEmail(),
@@ -94,17 +130,60 @@ public class LivroCompraService {
                 .toList();
 
         List<ItemResultadoDTO> falhas = identificarFalhas(ids, livrosParaComprar);
-        validarSaldoTotal(comprador, livrosParaComprar);
+
+        // Calcula o total original dos livros disponíveis
+        double totalOriginal = livrosParaComprar.stream()
+                .mapToDouble(l -> l.getPrecoAprovado() != null ? l.getPrecoAprovado() : 0.0)
+                .sum();
+
+        // Aplica cupom no total, se informado
+        String codigoCupom = request.getCodigoCupom();
+        double totalComDesconto = totalOriginal;
+        double descontoAplicado = 0.0;
+        String cupomAplicado = null;
+
+        if (codigoCupom != null && !codigoCupom.isBlank()) {
+            totalComDesconto = cupomService.aplicarCupomCarrinho(codigoCupom, comprador, totalOriginal);
+            descontoAplicado = totalOriginal - totalComDesconto;
+            cupomAplicado = codigoCupom.toUpperCase().trim();
+        }
+
+        // Valida saldo contra o total com desconto
+        if (comprador.getSaldoTokens() < totalComDesconto) {
+            throw new IllegalStateException(
+                String.format("Saldo insuficiente. Necessário: T$ %.2f", totalComDesconto));
+        }
 
         double saldoAnterior = comprador.getSaldoTokens();
-        List<ItemResultadoDTO> comprados = processarItensCarrinho(comprador, livrosParaComprar, falhas);
 
+        // Processa cada livro (registra pedido + remove), SEM debitar por item
+        List<ItemResultadoDTO> comprados = registrarLivrosCarrinho(comprador, livrosParaComprar, falhas);
+
+        // Debita o total (com desconto) de uma vez
+        comprador.setSaldoTokens(saldoAnterior - totalComDesconto);
         clienteRepository.save(comprador);
+
         registrarLogECoordenarEmails(comprador, comprados, falhas, saldoAnterior);
+
+        // Notificação dashboard: compra via carrinho (comprador)
+        if (!comprados.isEmpty()) {
+            try {
+                notificacaoService.criarNotificacaoDashboard(
+                        comprador,
+                        String.format("Compra realizada! T$ %.2f debitados. Saldo atual: T$ %.2f.",
+                                saldoAnterior - comprador.getSaldoTokens(), comprador.getSaldoTokens()),
+                        "/clientes/homepage?aba=pedidos");
+            } catch (Exception e) {
+                log.error("Erro ao notificar comprador carrinho {}: {}", comprador.getEmail(), e.getMessage());
+            }
+        }
 
         return CarrinhoCompraResponseDTO.builder()
                 .totalSolicitados(ids.size())
                 .totalComprados(comprados.size())
+                .totalOriginal(totalOriginal)
+                .descontoAplicado(descontoAplicado)
+                .codigoCupomAplicado(cupomAplicado)
                 .totalGasto(saldoAnterior - comprador.getSaldoTokens())
                 .saldoRestante(comprador.getSaldoTokens())
                 .comprados(comprados)
@@ -132,23 +211,40 @@ public class LivroCompraService {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private void validarSaldoTotal(Cliente comprador, List<Livro> livros) {
-        double total = livros.stream().mapToDouble(l -> l.getPrecoAprovado() != null ? l.getPrecoAprovado() : 0.0)
-                .sum();
-        if (comprador.getSaldoTokens() < total) {
-            throw new IllegalStateException(String.format("Saldo insuficiente. Necessário: T$ %.2f", total));
-        }
-    }
-
-    private List<ItemResultadoDTO> processarItensCarrinho(Cliente comprador, List<Livro> livros,
+    /**
+     * Registra pedido e remove cada livro do estoque.
+     * O débito do saldo ocorre em bloco no comprarCarrinho (com desconto aplicado).
+     */
+    private List<ItemResultadoDTO> registrarLivrosCarrinho(Cliente comprador, List<Livro> livros,
             List<ItemResultadoDTO> falhas) {
         List<ItemResultadoDTO> sucesso = new ArrayList<>();
         for (Livro livro : livros) {
             try {
-                processarBaixaLivro(comprador, livro);
+                // Captura vendedor e título antes de deletar o livro
+                final String titulo = livro.getTitulo();
+                Cliente vendedor = livro.getVendedor();
+                if (vendedor == null && livro.getLote() != null) {
+                    vendedor = livro.getLote().getCliente();
+                }
+                final Cliente vendedorFinal = vendedor;
+
+                pedidoService.registrarPedido(comprador, livro);
+                livroRepository.delete(livro);
                 sucesso.add(ItemResultadoDTO.builder()
-                        .livroId(livro.getId()).titulo(livro.getTitulo()).preco(livro.getPrecoAprovado()).build());
+                        .livroId(livro.getId()).titulo(titulo).preco(livro.getPrecoAprovado()).build());
                 gamificacaoService.xpCompra(comprador.getId());
+
+                // Notificação dashboard: livro vendido (vendedor)
+                if (vendedorFinal != null) {
+                    try {
+                        notificacaoService.criarNotificacaoDashboard(
+                                vendedorFinal,
+                                String.format("Seu livro '%s' foi vendido!", titulo),
+                                "/clientes/homepage?aba=pedidos");
+                    } catch (Exception ne) {
+                        log.error("Erro ao notificar vendedor {}: {}", vendedorFinal.getEmail(), ne.getMessage());
+                    }
+                }
             } catch (Exception e) {
                 falhas.add(ItemResultadoDTO.builder().livroId(livro.getId()).motivo("Erro: " + e.getMessage()).build());
             }

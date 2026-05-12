@@ -55,4 +55,9 @@ public interface PontuacaoUsuarioRepository extends JpaRepository<PontuacaoUsuar
                      @Param("fim") LocalDateTime fim);
 
        List<PontuacaoUsuario> findAllByUltimaAtualizacaoBefore(LocalDateTime data);
+
+       /**
+        * Pontuações cuja última atualização ficou entre duas datas (janela de alerta de XP).
+        */
+       List<PontuacaoUsuario> findAllByUltimaAtualizacaoBetween(LocalDateTime inicio, LocalDateTime fim);
 }
