@@ -175,6 +175,30 @@ public class AdminViewController {
                 .body(bytes);
     }
 
+    /**
+     * Exporta logs de auditoria para PDF gerado no backend.
+     */
+    @GetMapping("/audit/exportar-pdf")
+    @ResponseBody
+    public ResponseEntity<byte[]> exportarPDF(
+            @RequestParam(required = false) String emailUsuario,
+            @RequestParam(required = false) String acao,
+            @RequestParam(required = false) String dataInicio,
+            @RequestParam(required = false) String dataFim) {
+
+        List<LogAuditoria> logs = logAuditoriaService.buscarComFiltros(emailUsuario, acao, dataInicio, dataFim);
+        byte[] pdfBytes = logAuditoriaService.exportarPDF(logs);
+
+        logAuditoriaService.registrarLog("EXPORTACAO_PDF", null, "admin",
+                "Exportação PDF de auditoria — " + logs.size() + " registros");
+
+        String filename = "auditoria_" + java.time.LocalDate.now() + ".pdf";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
+    }
+
     @GetMapping("/estoque")
     public String estoque() {
         return "admin/estoque";

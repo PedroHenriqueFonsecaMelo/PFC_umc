@@ -179,39 +179,21 @@ function limparFiltros() {
   window.location.href = '/admin/audit';
 }
 
-// ── Exportação PDF (client-side com jsPDF) ───────────────────────
+// ── Exportação PDF (gerada no backend) ──────────────────────────
 function exportarPDF() {
-  if (!window.jspdf) { alert('Biblioteca PDF não carregada.'); return; }
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'landscape' });
+  const params = new URLSearchParams();
+  const emailVal = document.getElementById('emailUsuario')?.value?.trim();
+  const acaoVal  = document.getElementById('acaoFiltro')?.value;
+  const iniVal   = document.getElementById('dataInicio')?.value;
+  const fimVal   = document.getElementById('dataFim')?.value;
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.text('Relatório de Auditoria — Bibliotroca', 14, 15);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.text('Gerado em: ' + new Date().toLocaleString('pt-BR'), 14, 22);
+  if (emailVal) params.set('emailUsuario', emailVal);
+  if (acaoVal)  params.set('acao', acaoVal);
+  if (iniVal)   params.set('dataInicio', iniVal);
+  if (fimVal)   params.set('dataFim', fimVal);
 
-  const rows = dados.map((l, i) => [
-    i + 1,
-    l.acao || '—',
-    l.emailUsuario || '—',
-    l.idUsuario || '—',
-    (l.detalhes || '—').substring(0, 80),
-    l.dataHora || '—'
-  ]);
-
-  doc.autoTable({
-    startY: 27,
-    head: [['#', 'Ação', 'E-mail', 'ID', 'Detalhes', 'Data/Hora']],
-    body: rows,
-    styles: { fontSize: 8, cellPadding: 3 },
-    headStyles: { fillColor: [74, 93, 35], textColor: 255, fontStyle: 'bold' },
-    alternateRowStyles: { fillColor: [249, 246, 240] },
-    columnStyles: { 4: { cellWidth: 80 } }
-  });
-
-  doc.save('auditoria_' + new Date().toISOString().split('T')[0] + '.pdf');
+  const query = params.toString();
+  window.location.href = '/admin/audit/exportar-pdf' + (query ? '?' + query : '');
 }
 
 // ── Inicializar ──────────────────────────────────────────────────
