@@ -209,3 +209,18 @@
     align-items: start;
   }
 }
+
+/* ── Badge "Você" no ranking do perfil ── */
+.gami-rank-voce { background: rgba(114,47,55,.08) !important; }
+.gami-voce-pill {
+  display: inline-block;
+  background: #722f37;
+  color: #fff;
+  font-size: .58rem;
+  font-weight: 700;
+  padding: .1rem .4rem;
+  border-radius: 8px;
+  margin-left: .3rem;
+  vertical-align: middle;
+  letter-spacing: .04em;
+}

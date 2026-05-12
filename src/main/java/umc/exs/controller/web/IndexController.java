@@ -45,4 +45,10 @@ public class IndexController {
     public String adminPage() {
         return "admin";
     }
+
+    /** Página pública de ranking geral — acessível sem login. */
+    @GetMapping("/ranking")
+    public String ranking() {
+        return "ranking";
+    }
 }

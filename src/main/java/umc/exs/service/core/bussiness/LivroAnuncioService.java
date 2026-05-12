@@ -41,7 +41,8 @@ import umc.exs.service.log.LogAuditoriaService;
 @RequiredArgsConstructor
 public class LivroAnuncioService {
 
-    private static final String URL_UPLOAD = "/uploads/livros/";
+    /** Caminho relativo ao working-directory do processo (sem / inicial). */
+    private static final String URL_UPLOAD = "uploads/livros/";
 
     private final LivroRepository livroRepository;
     private final ClienteRepository clienteRepository;
@@ -234,16 +235,43 @@ public class LivroAnuncioService {
     // ========================= MÉTODOS AUXILIARES =========================
 
     private String salvarFoto(MultipartFile foto) {
-        String nome = UUID.randomUUID() + "_" + foto.getOriginalFilename();
+        String nomeOriginal = foto.getOriginalFilename();
+
+        // Sanitiza o nome: mantém apenas alfanuméricos, hífens, underscores e ponto.
+        // Também garante extensão ".jpg" quando o nome está ausente ou é vazio.
+        String nomeSanitizado = sanitizarNomeArquivo(nomeOriginal);
+        String nome = UUID.randomUUID() + "_" + nomeSanitizado;
+
+        // URL_UPLOAD é relativo ao working-directory — nunca começa com /
         Path caminho = Paths.get(URL_UPLOAD + nome);
 
         try {
             Files.createDirectories(caminho.getParent());
             Files.copy(foto.getInputStream(), caminho);
-            return URL_UPLOAD + nome;
+            // A URL pública inicia com / para ser acessível pelo browser
+            return "/" + URL_UPLOAD + nome;
         } catch (IOException e) {
-            throw new IllegalStateException("Erro ao salvar foto: " + nome);
+            log.error("Erro de I/O ao salvar foto '{}': {}", nome, e.getMessage(), e);
+            throw new IllegalStateException("Erro ao salvar foto: " + nome + " — " + e.getMessage());
         }
+    }
+
+    /**
+     * Remove caracteres perigosos do nome de arquivo enviado pelo cliente.
+     * - Strips separadores de caminho (path traversal)
+     * - Mantém: letras, dígitos, hífen, underscore, ponto
+     * - Se o resultado ficar vazio ou sem extensão válida, usa "imagem.jpg"
+     */
+    private String sanitizarNomeArquivo(String nomeOriginal) {
+        if (nomeOriginal == null || nomeOriginal.isBlank()) {
+            return "imagem.jpg";
+        }
+        // Remove qualquer componente de caminho (ex: ../../etc/passwd)
+        String base = Paths.get(nomeOriginal).getFileName().toString();
+        // Mantém apenas chars seguros
+        String seguro = base.replaceAll("[^a-zA-Z0-9.\\-_]", "_");
+        // Garante que tem pelo menos algum conteúdo
+        return seguro.isBlank() ? "imagem.jpg" : seguro;
     }
 
     private String converterParaJson(List<String> lista) {

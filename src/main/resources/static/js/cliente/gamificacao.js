@@ -56,6 +56,9 @@
       if (!res.ok) throw new Error("erro");
       const p = await res.json();
 
+      // Salva posição para destacar na lista de ranking
+      _minhaPosRanking = p.posicaoRanking || 0;
+
       container.innerHTML = `
         <div class="gami-perfil-card">
           <div class="gami-perfil-topo">
@@ -94,13 +97,16 @@
      RANKING TOP 5
   ------------------------------------------------------- */
 
+  /* ── posição do usuário logado (setada por carregarMeuPerfil) ── */
+  let _minhaPosRanking = 0;
+
   async function carregarRanking() {
     const lista = document.getElementById("gami-ranking-lista");
     const empty = document.getElementById("gami-ranking-vazio");
     if (!lista) return;
 
     try {
-      const res = await fetch("/api/gamificacao/ranking");
+      const res = await fetch("/api/ranking/top?limite=10");
       if (!res.ok) throw new Error("erro");
       const dados = await res.json();
 
@@ -112,23 +118,25 @@
       const xpMax = dados[0].xpTotal || 1;
 
       lista.innerHTML = dados
-        .map(
-          (u) => `
-        <li class="gami-rank-item" style="--pos:${u.posicao}">
-          <span class="gami-rank-medal">${medalha(u.posicao)}</span>
-          <span class="gami-rank-badge">${u.badge}</span>
-          <div class="gami-rank-info">
-            <span class="gami-rank-nome">${u.nome}</span>
-            <div class="gami-rank-barra-track">
-              <div class="gami-rank-barra-fill"
-                   style="width:${Math.round((u.xpTotal / xpMax) * 100)}%;
-                          background:${corBarra(u.posicao)}">
+        .map((u) => {
+          const eVoce = _minhaPosRanking > 0 && u.posicao === _minhaPosRanking;
+          const nomeCurto = u.primeiroNome + (u.inicialSobrenome ? " " + u.inicialSobrenome : "");
+          return `
+          <li class="gami-rank-item${eVoce ? " gami-rank-voce" : ""}" style="--pos:${u.posicao}">
+            <span class="gami-rank-medal">${medalha(u.posicao)}</span>
+            <span class="gami-rank-badge">${u.badge}</span>
+            <div class="gami-rank-info">
+              <span class="gami-rank-nome">${nomeCurto}${eVoce ? ' <span class="gami-voce-pill">Você</span>' : ""}</span>
+              <div class="gami-rank-barra-track">
+                <div class="gami-rank-barra-fill"
+                     style="width:${Math.round((u.xpTotal / xpMax) * 100)}%;
+                            background:${corBarra(u.posicao)}">
+                </div>
               </div>
             </div>
-          </div>
-          <span class="gami-rank-xp">${u.xpTotal} XP</span>
-        </li>`
-        )
+            <span class="gami-rank-xp">${u.xpTotal} XP</span>
+          </li>`;
+        })
         .join("");
     } catch {
       lista.innerHTML = `<li class="gami-aviso">Não foi possível carregar o ranking.</li>`;
@@ -139,8 +147,8 @@
      INICIALIZAÇÃO
   ------------------------------------------------------- */
 
-  document.addEventListener("DOMContentLoaded", function () {
-    carregarMeuPerfil();
+  document.addEventListener("DOMContentLoaded", async function () {
+    await carregarMeuPerfil(); // aguarda para ter _minhaPosRanking antes do ranking
     carregarRanking();
   });
 })();

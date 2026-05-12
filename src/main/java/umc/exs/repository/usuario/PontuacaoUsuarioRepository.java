@@ -60,4 +60,13 @@ public interface PontuacaoUsuarioRepository extends JpaRepository<PontuacaoUsuar
         * Pontuações cuja última atualização ficou entre duas datas (janela de alerta de XP).
         */
        List<PontuacaoUsuario> findAllByUltimaAtualizacaoBetween(LocalDateTime inicio, LocalDateTime fim);
+
+       /** Ranking público — todos os tempos, top N por XP. */
+       @Query("SELECT p FROM PontuacaoUsuario p JOIN FETCH p.cliente ORDER BY p.xpTotal DESC")
+       List<PontuacaoUsuario> findRankingTodos(Pageable pageable);
+
+       /** Ranking público — filtrado a partir de uma data (mês/ano). */
+       @Query("SELECT p FROM PontuacaoUsuario p JOIN FETCH p.cliente " +
+              "WHERE p.ultimaAtualizacao >= :desde ORDER BY p.xpTotal DESC")
+       List<PontuacaoUsuario> findRankingDesde(@Param("desde") LocalDateTime desde, Pageable pageable);
 }

@@ -55,40 +55,39 @@ async function carregarLivrosDestaque() {
   }
 }
 
-/* ── Ranking ── */
+/* ── Ranking homepage — pódio top 3 ── */
 async function carregarRanking() {
-  const list = document.getElementById("rankingList");
+  const container = document.getElementById("rankingList");
   try {
-    const res = await fetch("/api/gamificacao/ranking");
+    const res = await fetch("/api/ranking/top?limite=3&periodo=mes");
     if (!res.ok) throw new Error();
     const ranking = await res.json();
-    const maxXp = ranking.length > 0 ? ranking[0].xpTotal : 1;
 
-    list.innerHTML = ranking.map((item, i) => {
-      const topClass = i < 3 ? `top-${i + 1}` : "";
-      const pct = Math.round((item.xpTotal / maxXp) * 100);
-      const medalha = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : item.badge || "📖";
+    if (ranking.length === 0) {
+      container.innerHTML = `<p style="text-align:center;color:rgba(249,246,240,.3);padding:2rem 0;font-style:italic">
+        Nenhum leitor no ranking ainda.</p>`;
+      return;
+    }
+
+    const medalha = (pos) => ["🥇","🥈","🥉"][pos-1] || "";
+    const inicial  = (nome) => (nome || "?").charAt(0).toUpperCase();
+    const esc      = (s) => String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+    container.innerHTML = ranking.map(u => {
+      const nomeCurto = esc(u.primeiroNome) + (u.inicialSobrenome ? " " + esc(u.inicialSobrenome) : "");
       return `
-      <div class="rank-item ${topClass}">
-        <div class="rank-pos">${item.posicao}</div>
-        <div class="rank-badge">${medalha}</div>
-        <div class="rank-info">
-          <div class="rank-nome">${item.nome}</div>
-          <div class="rank-nivel">${item.nivel || "Leitor"}</div>
-        </div>
-        <div class="rank-xp-block">
-          <div class="rank-xp">${item.xpTotal.toLocaleString("pt-BR")}</div>
-          <div class="rank-xp-label">XP</div>
-          <div class="rank-bar-wrap">
-            <div class="rank-bar" style="width:${pct}%"></div>
-          </div>
-        </div>
+      <div class="rhi-card pos-${u.posicao}">
+        <div class="rhi-medalha">${medalha(u.posicao)}</div>
+        <div class="rhi-avatar">${inicial(u.primeiroNome)}</div>
+        <div class="rhi-nome" title="${nomeCurto}">${nomeCurto}</div>
+        <div class="rhi-nivel">${esc(u.nivel)}</div>
+        <div class="rhi-xp">${u.xpTotal.toLocaleString("pt-BR")}</div>
+        <div class="rhi-xp-label">XP</div>
       </div>`;
     }).join("");
   } catch (_) {
-    list.innerHTML = `<p style="text-align:center;color:rgba(249,246,240,.3);padding:2rem 0;font-style:italic">
-      Ranking indisponível no momento.
-    </p>`;
+    container.innerHTML = `<p style="text-align:center;color:rgba(249,246,240,.3);padding:2rem 0;font-style:italic">
+      Ranking indisponível no momento.</p>`;
   }
 }
 
@@ -109,6 +108,9 @@ async function carregarNavUsuario() {
       document.getElementById("navMinhaConta").href = "/clientes/meu-perfil";
       const btn = document.getElementById("btnQueroVender");
       if (btn) btn.href = "/livros/vender";
+      // Botão do ranking: usuário logado → "Ver ranking completo"
+      const ctaRanking = document.getElementById("rankingCtaBtn");
+      if (ctaRanking) { ctaRanking.href = "/ranking"; ctaRanking.textContent = "Ver ranking completo →"; }
       return;
     }
 

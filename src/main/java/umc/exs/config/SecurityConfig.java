@@ -181,7 +181,9 @@ public class SecurityConfig {
                         "/api/livros/todos", "/api/avaliacoes/livro/**",
                         "/livros/vitrine", "/clientes/termo", "/clientes/politica", "/clientes/sobre",
                         "/clientes/recuperar-senha/**", "/clientes/reset-senha/**", "/clientes/alterar-senha/**",
-                        "/blog", "/blog/**"
+                        "/blog", "/blog/**",
+                        // Ranking público
+                        "/ranking", "/api/ranking/top"
         };
 
         // Recursos estáticos (CSS, JS, Imagens)

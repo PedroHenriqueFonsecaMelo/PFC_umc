@@ -1,0 +1,370 @@
+/* ================================================================
+   ranking.css — Página pública de Ranking · Bibliotroca
+   ================================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:    #2c241b;
+  --paper:  #f9f6f0;
+  --cream:  #ede8df;
+  --accent: #722f37;
+  --muted:  #7a6e65;
+  --border: rgba(44,36,27,.13);
+  --serif:  "Playfair Display", Georgia, serif;
+  --sans:   "DM Sans", sans-serif;
+  --gold:   #c9a227;
+  --silver: #9ba4b5;
+  --bronze: #b87333;
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* ── HERO ── */
+.rk-hero {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 3.5rem 5vw 3rem;
+  text-align: center;
+}
+.rk-hero-inner { max-width: 660px; margin: 0 auto; }
+.rk-kicker {
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(249,246,240,.4);
+  margin-bottom: .6rem;
+}
+.rk-titulo {
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: .8rem;
+}
+.rk-titulo em { font-style: italic; color: var(--accent); }
+.rk-sub {
+  font-size: .9rem;
+  color: rgba(249,246,240,.55);
+  line-height: 1.65;
+  max-width: 500px;
+  margin: 0 auto 1rem;
+}
+.rk-minha-pos-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-size: .78rem;
+  font-weight: 700;
+  padding: .35rem .9rem;
+  border-radius: 20px;
+  letter-spacing: .04em;
+}
+
+/* ── FILTROS ── */
+.rk-filtros-wrap {
+  background: var(--cream);
+  border-bottom: 1px solid var(--border);
+  padding: .6rem 5vw;
+  display: flex;
+  justify-content: center;
+}
+.rk-filtros {
+  display: flex;
+  gap: .5rem;
+}
+.rk-filtro-btn {
+  font-family: var(--sans);
+  font-size: .78rem;
+  font-weight: 600;
+  padding: .4rem 1rem;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .18s;
+  letter-spacing: .04em;
+}
+.rk-filtro-btn:hover { background: rgba(44,36,27,.06); color: var(--ink); }
+.rk-filtro-btn.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+/* ── MAIN CONTENT ── */
+.rk-main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2.5rem 5vw 4rem;
+}
+
+/* ── PÓDIO ── */
+.rk-podio-section { margin-bottom: 3rem; }
+.rk-podio {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+/* Skeletons */
+.rk-podio-skeleton {
+  width: 160px;
+  height: 180px;
+  background: rgba(44,36,27,.06);
+  border: 1px solid var(--border);
+  animation: rkShimmer 1.4s infinite;
+}
+.rk-podio-skeleton-center { height: 220px; }
+@keyframes rkShimmer {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .45; }
+}
+
+/* Cards do pódio */
+.rk-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.4rem 1.2rem 1.2rem;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  width: 200px;
+  position: relative;
+  transition: transform .18s;
+  text-align: center;
+}
+.rk-card:hover { transform: translateY(-3px); }
+
+/* 1º lugar — maior, no centro */
+.rk-card.pos-1 {
+  order: 2;
+  width: 240px;
+  border-color: var(--gold);
+  box-shadow: 0 4px 20px rgba(201,162,39,.18);
+}
+.rk-card.pos-2 { order: 1; border-color: var(--silver); }
+.rk-card.pos-3 { order: 3; border-color: var(--bronze); }
+
+/* Destaque do usuário logado */
+.rk-card.e-voce  { background: rgba(114,47,55,.05); }
+.rk-linha.e-voce { background: rgba(114,47,55,.07); }
+
+.rk-card-medalha { font-size: 2.2rem; margin-bottom: .5rem; }
+.rk-card.pos-1 .rk-card-medalha { font-size: 2.8rem; }
+
+.rk-card-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--ink);
+  border: 2px solid var(--border);
+  margin-bottom: .65rem;
+  flex-shrink: 0;
+}
+.rk-card.pos-1 .rk-card-avatar {
+  width: 64px;
+  height: 64px;
+  font-size: 1.6rem;
+  border-color: var(--gold);
+}
+
+.rk-card-nome {
+  font-weight: 700;
+  font-size: .92rem;
+  color: var(--ink);
+  margin-bottom: .15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.rk-card.pos-1 .rk-card-nome { font-size: 1rem; }
+
+.rk-card-nivel {
+  font-size: .68rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: .6rem;
+}
+
+.rk-card-xp-num {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.rk-card.pos-1 .rk-card-xp-num { font-size: 1.3rem; }
+.rk-card-xp-label {
+  font-size: .6rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+
+.rk-card-voce-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: .62rem;
+  font-weight: 700;
+  padding: .18rem .45rem;
+  border-radius: 10px;
+  letter-spacing: .05em;
+}
+
+/* ── TABELA ── */
+.rk-tabela-section {}
+.rk-tabela-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: .6rem;
+  border-bottom: 1px solid var(--border);
+}
+.rk-tabela-titulo {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.rk-tabela-sub { font-size: .75rem; color: var(--muted); }
+
+/* Linha da tabela */
+.rk-linha {
+  display: grid;
+  grid-template-columns: 44px 44px 1fr auto auto;
+  align-items: center;
+  gap: .75rem;
+  padding: .65rem .8rem;
+  border-bottom: 1px solid rgba(44,36,27,.05);
+  transition: background .15s;
+}
+.rk-linha:hover { background: rgba(44,36,27,.03); }
+
+.rk-linha-pos {
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+}
+.rk-linha-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--ink);
+  border: 1.5px solid var(--border);
+  flex-shrink: 0;
+}
+.rk-linha-info { min-width: 0; }
+.rk-linha-nome {
+  font-weight: 600;
+  font-size: .87rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rk-linha-nivel {
+  font-size: .67rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  margin-top: .05rem;
+}
+
+.rk-linha-barra-wrap { width: 90px; }
+.rk-linha-barra-track {
+  height: 4px;
+  background: rgba(44,36,27,.08);
+  overflow: hidden;
+}
+.rk-linha-barra-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width .7s cubic-bezier(.25,.46,.45,.94);
+}
+.rk-linha-xp {
+  font-family: var(--serif);
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.rk-linha-voce {
+  font-size: .6rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  padding: .12rem .4rem;
+  border-radius: 8px;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+/* Estado vazio / loading */
+.rk-loading, .rk-vazio {
+  text-align: center;
+  font-family: "IM Fell English", Georgia, serif;
+  font-style: italic;
+  color: var(--muted);
+  padding: 3rem 0;
+  font-size: 1rem;
+}
+
+/* ── FOOTER ── */
+.rk-footer {
+  text-align: center;
+  padding: 2rem 5vw;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: .8rem;
+}
+.rk-footer-logo {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: .3rem;
+}
+.rk-footer-logo em { font-style: italic; color: var(--accent); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .rk-podio { gap: .5rem; }
+  .rk-card  { width: 28vw; padding: 1rem .6rem; }
+  .rk-card.pos-1 { width: 34vw; }
+  .rk-card-medalha      { font-size: 1.5rem; }
+  .rk-card.pos-1 .rk-card-medalha { font-size: 1.8rem; }
+  .rk-card-avatar       { width: 38px; height: 38px; font-size: 1rem; }
+  .rk-card.pos-1 .rk-card-avatar { width: 46px; height: 46px; }
+  .rk-card-nome         { font-size: .75rem; }
+  .rk-card-nivel        { display: none; }
+  .rk-linha             { grid-template-columns: 32px 32px 1fr auto; }
+  .rk-linha-barra-wrap  { display: none; }
+}

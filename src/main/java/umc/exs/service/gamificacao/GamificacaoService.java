@@ -9,8 +9,11 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+
 import umc.exs.dtos.gamificacao.MeuPerfilGamificacaoDTO;
 import umc.exs.dtos.gamificacao.RankingItemDTO;
+import umc.exs.dtos.gamificacao.RankingPublicoDTO;
 import umc.exs.model.entidades.social.PontuacaoUsuario;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.NivelUsuario;
@@ -172,6 +175,50 @@ public class GamificacaoService {
         }
 
         return ranking;
+    }
+
+    /**
+     * Ranking público LGPD-compliant.
+     * Retorna posicao, primeiroNome, inicialSobrenome, nivel, badge, xpTotal, xpProximoNivel.
+     * Nunca expõe e-mail, CPF ou sobrenome completo.
+     *
+     * @param limite  máximo de posições (capped em 100)
+     * @param periodo "mes", "ano" ou "todos"
+     */
+    public List<RankingPublicoDTO> obterRankingPublico(int limite, String periodo) {
+        int cap = Math.min(Math.max(limite, 1), 100);
+
+        LocalDateTime desde = null;
+        if ("mes".equalsIgnoreCase(periodo)) {
+            desde = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        } else if ("ano".equalsIgnoreCase(periodo)) {
+            desde = LocalDate.now().withDayOfYear(1).atStartOfDay();
+        }
+
+        List<PontuacaoUsuario> top = desde == null
+            ? pontuacaoRepository.findRankingTodos(PageRequest.of(0, cap))
+            : pontuacaoRepository.findRankingDesde(desde, PageRequest.of(0, cap));
+
+        List<RankingPublicoDTO> result = new ArrayList<>();
+        for (int i = 0; i < top.size(); i++) {
+            PontuacaoUsuario p = top.get(i);
+            String nomeCompleto = (p.getCliente() != null && p.getCliente().getNome() != null)
+                ? p.getCliente().getNome().trim() : "Leitor";
+            String[] partes = nomeCompleto.split("\\s+");
+            String primeiroNome = partes[0];
+            String inicialSobrenome = partes.length > 1
+                ? partes[partes.length - 1].substring(0, 1).toUpperCase() + "." : "";
+
+            NivelUsuario nivel = p.getNivel();
+            int xpAtual = p.getXpTotal() != null ? p.getXpTotal() : 0;
+            int xpProximo = calcularXpParaProximoNivel(nivel, xpAtual);
+
+            result.add(new RankingPublicoDTO(
+                i + 1, primeiroNome, inicialSobrenome,
+                nivel.getDescricao(), nivel.getBadge(), xpAtual, xpProximo
+            ));
+        }
+        return result;
     }
 
     // ==========================================
