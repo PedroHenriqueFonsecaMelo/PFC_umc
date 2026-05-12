@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,6 +23,7 @@ import umc.exs.security.JwtRequestFilter;
 import umc.exs.security.RateLimitFilter;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
         private static final String ROLE_ADMIN = "ADMIN";
@@ -201,6 +203,7 @@ public class SecurityConfig {
                         "/api/tokens/comprar", "/api/tokens/historico", "/api/tokens/**",
                         "/api/pedidos/**", "/api/forum/respostas/*/curtir", "/api/forum/respostas/*/melhor",
                         "/api/lista-desejos", "/api/lista-desejos/**",
-                        "/clientes/lista-desejos"
+                        "/clientes/lista-desejos",
+                        "/clientes/cancelamento/**"
         };
 }

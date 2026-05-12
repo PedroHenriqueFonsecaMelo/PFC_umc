@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cancelamentos — Bibliotroca Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/admin/layout.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/cancelamentos.css}" />
+  </head>
+  <body>
+    <div class="layout">
+      <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('cancelamentos')}"></th:block>
+
+      <div class="overlay" id="overlay" onclick="fecharMenu()"></div>
+
+      <div class="content">
+        <header class="topbar">
+          <div style="display:flex;align-items:center;gap:14px">
+            <button class="menu-btn" onclick="abrirMenu()">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div>
+              <div class="topbar-title">Cancelamentos</div>
+              <div class="topbar-date" id="dataHoje"></div>
+            </div>
+          </div>
+          <div class="topbar-right">
+            <span class="badge-online"><span class="dot"></span> Sistema Online</span>
+            <div class="avatar"><i class="fa-solid fa-user"></i></div>
+          </div>
+        </header>
+
+        <!-- STATS -->
+        <div class="stats-strip">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#722F37"><i class="fa-solid fa-ban"></i></div>
+            <div>
+              <div class="stat-value" id="statTotal">—</div>
+              <div class="stat-label">Total</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#b45309"><i class="fa-solid fa-clock"></i></div>
+            <div>
+              <div class="stat-value" id="statPendentes">—</div>
+              <div class="stat-label">Pendentes</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#2e7d32"><i class="fa-solid fa-circle-check"></i></div>
+            <div>
+              <div class="stat-value" id="statAprovados">—</div>
+              <div class="stat-label">Aprovados</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#555"><i class="fa-solid fa-circle-xmark"></i></div>
+            <div>
+              <div class="stat-value" id="statRecusados">—</div>
+              <div class="stat-label">Recusados</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="filter-group">
+              <label>Filtrar por status</label>
+              <select id="filtroStatus" onchange="aplicarFiltro()">
+                <option value="">Todos</option>
+                <option value="PENDENTE">Pendente</option>
+                <option value="APROVADO">Aprovado</option>
+                <option value="RECUSADO">Recusado</option>
+              </select>
+            </div>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn-refresh" onclick="carregarDados()">
+              <i class="fa-solid fa-rotate-right"></i> Atualizar
+            </button>
+          </div>
+        </div>
+
+        <!-- CARDS -->
+        <div class="cards-area" id="cardsArea">
+          <div class="loading-placeholder">
+            <i class="fa-solid fa-spinner fa-spin"></i> Carregando solicitações...
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MODAL: Aprovar / Recusar -->
+    <div class="modal-overlay" id="modalOverlay" onclick="fecharModal()"></div>
+    <div class="modal" id="modal">
+      <div class="modal-header" id="modalHeader">
+        <h2 id="modalTitulo">Responder Solicitação</h2>
+        <button class="modal-close" onclick="fecharModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-info" id="modalInfo"></div>
+        <div class="form-group">
+          <label for="comentarioAdmin">Comentário para o cliente <span style="color:#7a6e65;font-weight:400">(opcional)</span></label>
+          <textarea id="comentarioAdmin" rows="4" placeholder="Ex: Pedido já encaminhado ao transportador..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-sec" onclick="fecharModal()">Cancelar</button>
+        <button class="btn-modal-pri" id="btnConfirmarAcao" onclick="confirmarAcao()">Confirmar</button>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="toast" style="display:none"></div>
+
+    <script th:src="@{/js/admin/cancelamentos.js}"></script>
+  </body>
+</html>

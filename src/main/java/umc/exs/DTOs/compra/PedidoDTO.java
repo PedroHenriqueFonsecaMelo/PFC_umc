@@ -37,4 +37,7 @@ public class PedidoDTO {
 
     // Preenchido apenas quando o pedido é cancelado com estorno
     private Double saldoAposEstorno;
+
+    // True quando existe SolicitacaoCancelamento PENDENTE para este pedido
+    private boolean temCancelamentoPendente;
 }

@@ -153,6 +153,84 @@ const PASSOS = [
     { key: "ENTREGUE",         label: "Entregue"    },
 ];
 
+/* ── CANCELAMENTO ────────────────────────────────────────────────── */
+
+function abrirModalCancelamento(pedidoId, titulo) {
+    document.getElementById("cancelPedidoId").value   = pedidoId;
+    document.getElementById("cancelTituloLivro").textContent = titulo;
+    document.getElementById("cancelCategoria").value  = "";
+    document.getElementById("cancelDescricao").value  = "";
+    document.getElementById("cancelFeedback").textContent = "";
+    document.getElementById("cancelFeedback").style.display = "none";
+
+    document.getElementById("modalCancelOverlay").style.display = "block";
+    document.getElementById("modalCancel").style.display = "block";
+}
+
+function fecharModalCancelamento() {
+    document.getElementById("modalCancelOverlay").style.display = "none";
+    document.getElementById("modalCancel").style.display = "none";
+}
+
+async function enviarSolicitacaoCancelamento() {
+    const pedidoId  = document.getElementById("cancelPedidoId").value;
+    const categoria = document.getElementById("cancelCategoria").value;
+    const descricao = document.getElementById("cancelDescricao").value.trim();
+    const feedback  = document.getElementById("cancelFeedback");
+    const btnEnviar = document.getElementById("btnEnviarCancel");
+
+    if (!categoria) {
+        feedback.textContent = "Selecione um motivo.";
+        feedback.style.color = "#722F37";
+        feedback.style.display = "block";
+        return;
+    }
+    if (!descricao) {
+        feedback.textContent = "Descreva o motivo com detalhes.";
+        feedback.style.color = "#722F37";
+        feedback.style.display = "block";
+        return;
+    }
+
+    btnEnviar.disabled = true;
+    btnEnviar.textContent = "Enviando...";
+
+    try {
+        const res = await fetch(`/api/pedidos/${pedidoId}/solicitar-cancelamento`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...authHeader },
+            body: JSON.stringify({ motivoCategoria: categoria, motivoDescricao: descricao }),
+        });
+
+        if (res.ok) {
+            fecharModalCancelamento();
+            mostrarToastGlobal("Solicitação de cancelamento enviada! Aguarde análise da equipe.", "ok");
+            await init();
+        } else {
+            const data = await res.json().catch(() => ({}));
+            feedback.textContent = data.message || "Não foi possível enviar a solicitação. Tente novamente.";
+            feedback.style.color = "#722F37";
+            feedback.style.display = "block";
+        }
+    } catch (_) {
+        feedback.textContent = "Erro de conexão. Tente novamente.";
+        feedback.style.color = "#722F37";
+        feedback.style.display = "block";
+    }
+
+    btnEnviar.disabled = false;
+    btnEnviar.textContent = "Enviar Solicitação";
+}
+
+function mostrarToastGlobal(msg, tipo) {
+    const t = document.getElementById("toastGlobal");
+    if (!t) return;
+    t.textContent = msg;
+    t.className   = "toast-global toast-global-" + tipo;
+    t.style.display = "block";
+    setTimeout(() => { t.style.display = "none"; }, 5000);
+}
+
 function buildTimeline(status) {
     if (status === "CANCELADO") {
         return `<div class="mt-3" style="margin-top:.75rem">
@@ -188,6 +266,19 @@ function buildCard(p) {
         ? `<span style="font-size:.75rem;color:#7A6E65">Atualizado em ${fmtData(p.dataAtualizacaoStatus)}</span>`
         : "";
 
+    let btnCancelar = "";
+    if (p.statusEnvio === "AGUARDANDO_ENVIO" && p.temCancelamentoPendente) {
+        btnCancelar = `<div style="margin-top:.6rem">
+            <span class="status-badge status-CANCELAMENTO_SOLICITADO">Cancelamento Solicitado</span>
+            <div style="font-size:.75rem;color:#7a6e65;margin-top:4px">Aguardando análise da equipe Bibliotroca.</div>
+        </div>`;
+    } else if (p.statusEnvio === "AGUARDANDO_ENVIO") {
+        btnCancelar = `<button class="btn-solicitar-cancelamento"
+               onclick="abrirModalCancelamento(${p.id}, ${JSON.stringify(p.tituloLivro)})">
+               <i class="fa-solid fa-ban"></i> Solicitar Cancelamento
+           </button>`;
+    }
+
     return `
         <div class="pedido-card">
             <img class="pedido-capa" src="${imgSrc}" alt="${p.tituloLivro}"
@@ -213,6 +304,7 @@ function buildCard(p) {
                 ${rastreio}
                 ${dataAtual}
                 ${buildTimeline(p.statusEnvio)}
+                ${btnCancelar}
             </div>
         </div>`;
 }

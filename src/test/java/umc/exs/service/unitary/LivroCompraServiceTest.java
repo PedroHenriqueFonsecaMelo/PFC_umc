@@ -20,9 +20,11 @@ import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.core.bussiness.GoogleBooksService;
 import umc.exs.service.core.bussiness.LivroCompraService;
 import umc.exs.service.core.control.PedidoService;
+import umc.exs.service.cupom.CupomService;
 import umc.exs.service.email.EmailService;
 import umc.exs.service.gamificacao.GamificacaoService;
 import umc.exs.service.log.LogAuditoriaService;
+import umc.exs.service.notificacao.NotificacaoService;
 
 class LivroCompraServiceTest {
 
@@ -30,8 +32,10 @@ class LivroCompraServiceTest {
         private ClienteRepository clienteRepository;
         private PedidoService pedidoService;
         private EmailService emailService;
+        private CupomService cupomService;
         private GamificacaoService gamificacaoService;
         private LogAuditoriaService logAuditoriaService;
+        private NotificacaoService notificacaoService;
         private GoogleBooksService googleBooksService;
         private LivroMapper livroMapper;
 
@@ -43,16 +47,20 @@ class LivroCompraServiceTest {
                 clienteRepository = mock(ClienteRepository.class);
                 pedidoService = mock(PedidoService.class);
                 emailService = mock(EmailService.class);
+                cupomService = mock(CupomService.class);
                 gamificacaoService = mock(GamificacaoService.class);
                 logAuditoriaService = mock(LogAuditoriaService.class);
+                notificacaoService = mock(NotificacaoService.class);
 
                 service = new LivroCompraService(
                                 livroRepository,
                                 clienteRepository,
                                 emailService,
                                 pedidoService,
+                                cupomService,
                                 gamificacaoService,
-                                logAuditoriaService);
+                                logAuditoriaService,
+                                notificacaoService);
         }
 
         // =========================

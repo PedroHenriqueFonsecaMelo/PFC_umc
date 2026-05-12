@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -54,6 +55,18 @@ public class PedidoController {
         Long id = resolverId(user.getUsername());
         List<PedidoDTO> lista = pedidoService.listarPorCliente(id);
         return ResponseEntity.ok(lista);
+    }
+
+    @GetMapping("/{pedidoId}")
+    public ResponseEntity<?> buscarPorId(
+            @PathVariable Long pedidoId,
+            @AuthenticationPrincipal UserDetails user) {
+        if (user == null)
+            return ResponseEntity.status(401).build();
+        Long clienteId = resolverId(user.getUsername());
+        return pedidoService.buscarPorIdEComprador(pedidoId, clienteId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     private Long resolverId(String email) {

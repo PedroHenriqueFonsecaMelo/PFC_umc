@@ -359,6 +359,38 @@ public final class EmailHtmlBuilder {
         return base("Comunicado — Bibliotroca", paragrafos.toString());
     }
 
+    /** Cancelamento de pedido APROVADO pelo admin (com estorno). */
+    public static String cancelamentoAprovado(String nome, Long pedidoId, String tituloLivro,
+            double valorEstorno, double novoSaldo, String comentarioAdmin) {
+        String corpo = saudacao(nome) +
+                paragrafo("Sua solicitação de cancelamento do pedido <strong>#" + pedidoId + "</strong> foi <strong>aprovada</strong>.") +
+                tabelaFinanceira(
+                        linhaSaldo("Livro", tituloLivro, COR_TEXTO),
+                        linhaSaldo("Valor estornado", String.format("T$ %.2f", valorEstorno), COR_SUCESSO),
+                        linhaSaldo("Novo saldo", String.format("T$ %.2f", novoSaldo), COR_PRIMARIA)) +
+                (comentarioAdmin != null && !comentarioAdmin.isBlank()
+                        ? aviso("Comentário da equipe: " + comentarioAdmin)
+                        : "") +
+                paragrafo("Os créditos foram devolvidos ao seu saldo e já estão disponíveis para uso.") +
+                botao("Ver meu saldo", "/clientes/carteira");
+        return base("Cancelamento aprovado — Bibliotroca", corpo);
+    }
+
+    /** Cancelamento de pedido RECUSADO pelo admin. */
+    public static String cancelamentoRecusado(String nome, Long pedidoId, String tituloLivro,
+            String comentarioAdmin) {
+        String corpo = saudacao(nome) +
+                paragrafo("Infelizmente, sua solicitação de cancelamento do pedido <strong>#" + pedidoId + "</strong> não pôde ser aprovada.") +
+                tabelaFinanceira(
+                        linhaSaldo("Livro", tituloLivro, COR_TEXTO)) +
+                (comentarioAdmin != null && !comentarioAdmin.isBlank()
+                        ? aviso("Motivo informado pela equipe: " + comentarioAdmin)
+                        : "") +
+                paragrafo("Seu pedido permanece ativo e será enviado normalmente. Se tiver dúvidas, entre em contato com nosso suporte.") +
+                botao("Ver meus pedidos", "/clientes/homepage?aba=pedidos");
+        return base("Cancelamento não aprovado — Bibliotroca", corpo);
+    }
+
     /** Aviso de pontos XP próximos ao vencimento. */
     public static String xpExpirando(String nome, long xpTotal, String dataExpiracao) {
         String corpo = saudacao(nome) +

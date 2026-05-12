@@ -221,6 +221,15 @@ public class ClientController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/cancelamento/{pedidoId}")
+    public String paginaCancelamento(@PathVariable Long pedidoId,
+            @AuthenticationPrincipal UserDetails user, Model model) {
+        if (user == null)
+            return REDIRECT_LOGIN;
+        model.addAttribute("pedidoId", pedidoId);
+        return "cliente/cancelamento";
+    }
+
     @PostMapping("/foto-perfil")
     public String uploadFotoPerfil(@RequestParam("foto") MultipartFile foto,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {

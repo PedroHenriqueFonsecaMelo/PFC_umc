@@ -1,0 +1,247 @@
+/* ================================================================
+   cancelamento.css — Fluxo de Cancelamento · Bibliotroca
+   ================================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --accent: #722f37;
+    --accent-hover: #5d252d;
+    --ink: #2c241b;
+    --muted: #7a6e65;
+    --paper: #f9f6f0;
+    --border: rgba(44,36,27,.15);
+    --forest: #2e7d32;
+}
+
+body {
+    font-family: "DM Sans", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+}
+
+/* ── MAIN ─────────────────────────────────────────────────────── */
+.cancel-main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 2rem 5vw 4rem;
+}
+
+/* ── BREADCRUMB ───────────────────────────────────────────────── */
+.cancel-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .8rem;
+    color: var(--muted);
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+}
+.cancel-breadcrumb a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity .2s;
+}
+.cancel-breadcrumb a:hover { opacity: .75; }
+.bc-sep { font-size: .65rem; color: var(--muted); }
+.bc-current { color: var(--ink); font-weight: 600; }
+
+/* ── LOADING / ERROR ─────────────────────────────────────────── */
+.cancel-loading, .cancel-error {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--muted);
+    font-size: .95rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .75rem;
+}
+.cancel-error { color: var(--accent); }
+.cancel-error i { font-size: 2rem; }
+.cancel-error p { font-size: .95rem; }
+
+/* ── CONTAINER ────────────────────────────────────────────────── */
+.cancel-container { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* ── HEADER ───────────────────────────────────────────────────── */
+.cancel-header { padding-bottom: .25rem; }
+.cancel-title {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 1.6rem;
+    color: var(--accent);
+    margin-bottom: .35rem;
+}
+.cancel-subtitle { font-size: .88rem; color: var(--muted); }
+
+/* ── CARD ─────────────────────────────────────────────────────── */
+.cancel-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+
+/* ── PEDIDO RESUMO ───────────────────────────────────────────── */
+.cancel-pedido-row {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+}
+.cancel-capa {
+    width: 72px;
+    height: 96px;
+    object-fit: cover;
+    border-radius: 5px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,.1);
+}
+.cancel-pedido-info { flex: 1; }
+.cancel-pedido-num {
+    font-size: .75rem;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: .3rem;
+}
+.cancel-pedido-titulo {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: .2rem;
+}
+.cancel-pedido-autor {
+    font-size: .82rem;
+    color: var(--muted);
+    margin-bottom: .4rem;
+}
+.cancel-pedido-preco {
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+/* ── FORMULÁRIO ──────────────────────────────────────────────── */
+.cancel-form-title {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+}
+.cancel-form-group { margin-bottom: 1.1rem; }
+.cancel-form-group label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: .45rem;
+}
+.cancel-char-count {
+    font-size: .75rem;
+    font-weight: 400;
+    color: var(--muted);
+}
+.cancel-form-group select,
+.cancel-form-group textarea {
+    width: 100%;
+    padding: .65rem .85rem;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    font-size: .88rem;
+    color: var(--ink);
+    font-family: "DM Sans", sans-serif;
+    background: #fff;
+    transition: border-color .2s;
+    resize: vertical;
+}
+.cancel-form-group select:focus,
+.cancel-form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(114,47,55,.08);
+}
+
+/* ── FEEDBACK ────────────────────────────────────────────────── */
+.cancel-feedback {
+    padding: .65rem .9rem;
+    border-radius: 7px;
+    font-size: .83rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+.cancel-feedback-erro {
+    background: rgba(114,47,55,.07);
+    border-left: 3px solid var(--accent);
+    color: var(--accent);
+}
+
+/* ── AVISO ───────────────────────────────────────────────────── */
+.cancel-aviso {
+    display: flex;
+    gap: .6rem;
+    align-items: flex-start;
+    background: #f9f6f0;
+    border-radius: 7px;
+    padding: .75rem 1rem;
+    font-size: .8rem;
+    color: var(--muted);
+    line-height: 1.55;
+    border: 1px solid var(--border);
+    margin-top: .5rem;
+}
+.cancel-aviso i { color: var(--accent); flex-shrink: 0; margin-top: .15rem; }
+
+/* ── AÇÕES ───────────────────────────────────────────────────── */
+.cancel-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.cancel-btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .65rem 1.25rem;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    color: var(--muted);
+    font-size: .88rem;
+    font-weight: 500;
+    text-decoration: none;
+    background: #fff;
+    transition: border-color .2s, color .2s;
+}
+.cancel-btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+.cancel-btn-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .7rem 1.75rem;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: .9rem;
+    font-weight: 600;
+    font-family: "DM Sans", sans-serif;
+    cursor: pointer;
+    transition: opacity .2s;
+    letter-spacing: .02em;
+}
+.cancel-btn-submit:hover { opacity: .87; }
+.cancel-btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+@media (max-width: 480px) {
+    .cancel-actions { flex-direction: column-reverse; }
+    .cancel-btn-submit, .cancel-btn-back { width: 100%; justify-content: center; }
+}

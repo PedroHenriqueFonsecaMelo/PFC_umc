@@ -184,6 +184,11 @@ public class AdminViewController {
         return "admin/cupons";
     }
 
+    @GetMapping("/cancelamentos")
+    public String cancelamentos() {
+        return "admin/cancelamentos";
+    }
+
     /**
      * Logout admin: limpa cookie JWT e SecurityContext.
      */

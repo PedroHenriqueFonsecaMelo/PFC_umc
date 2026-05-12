@@ -2,6 +2,7 @@ package umc.exs.service.core.control;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +14,9 @@ import umc.exs.model.entidades.foundation.Pedido;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.StatusEnvio;
+import umc.exs.model.enums.StatusSolicitacao;
 import umc.exs.repository.negocios.PedidoRepository;
+import umc.exs.repository.negocios.SolicitacaoCancelamentoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import org.springframework.beans.factory.annotation.Value;
 import umc.exs.service.email.EmailHtmlBuilder;
@@ -35,6 +38,7 @@ public class PedidoService {
 
         private final PedidoRepository pedidoRepository;
         private final ClienteRepository clienteRepository;
+        private final SolicitacaoCancelamentoRepository cancelamentoRepository;
         private final LogAuditoriaService logAuditoria;
         private final EmailService emailService;
         private final NotificacaoService notificacaoService;
@@ -106,6 +110,14 @@ public class PedidoService {
                                 .stream()
                                 .map(this::toDTO)
                                 .toList();
+        }
+
+        /** Pedido por ID, validando que pertence ao comprador. */
+        @Transactional(readOnly = true)
+        public Optional<PedidoDTO> buscarPorIdEComprador(Long pedidoId, Long compradorId) {
+                return pedidoRepository.findById(pedidoId)
+                                .filter(p -> p.getComprador() != null && compradorId.equals(p.getComprador().getId()))
+                                .map(this::toDTO);
         }
 
         /** Pedidos com status ENTREGUE (concluídos). */
@@ -244,6 +256,8 @@ public class PedidoService {
         private PedidoDTO toDTO(Pedido p) {
                 Double saldoApos = null;
                 String enderecoFormatado = null;
+                boolean temCancelamentoPendente = cancelamentoRepository
+                                .existsByPedidoIdAndStatus(p.getId(), StatusSolicitacao.PENDENTE);
 
                 if (p.getComprador() != null) {
                         if (p.getStatusEnvio() == StatusEnvio.CANCELADO) {
@@ -283,6 +297,7 @@ public class PedidoService {
                                 .compradorEmail(p.getComprador() != null ? p.getComprador().getEmail() : null)
                                 .compradorEndereco(enderecoFormatado)
                                 .saldoAposEstorno(saldoApos)
+                                .temCancelamentoPendente(temCancelamentoPendente)
                                 .build();
         }
 }

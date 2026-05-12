@@ -46,6 +46,27 @@
         .status-EM_TRANSITO { background:#dbeafe; color:#1e40af; }
         .status-ENTREGUE { background:#d1fae5; color:#065f46; }
         .status-CANCELADO { background:#fee2e2; color:#991b1b; }
+        .status-CANCELAMENTO_SOLICITADO { background:#fff3cd; color:#856404; }
+        .btn-solicitar-cancel {
+            display:inline-flex; align-items:center; gap:5px;
+            margin-top:.6rem; padding:5px 13px;
+            font-size:.74rem; font-weight:600;
+            color:var(--accent,#722f37);
+            background:transparent;
+            border:1px solid rgba(114,47,55,.4);
+            border-radius:6px; cursor:pointer;
+            text-decoration:none; transition:background .2s;
+        }
+        .btn-solicitar-cancel:hover { background:rgba(114,47,55,.07); }
+        /* Toast global no meu-perfil */
+        .toast-perfil {
+            position:fixed; bottom:28px; right:28px;
+            padding:12px 20px; border-radius:8px;
+            font-size:.88rem; font-weight:500;
+            box-shadow:0 4px 16px rgba(0,0,0,.15);
+            z-index:2000; max-width:340px; display:none;
+        }
+        .toast-perfil-ok { background:#2e7d32; color:#fff; }
         .timeline { display:flex; gap:1rem; margin-top:.75rem; }
         .tl-step { display:flex; flex-direction:column; align-items:center; gap:.25rem; }
         .tl-dot {
@@ -730,6 +751,9 @@
         </div>
     </div>
 
+    <!-- TOAST GLOBAL -->
+    <div id="toastPerfil" class="toast-perfil"></div>
+
     <!-- DANGER ZONE -->
     <div class="danger-zone">
         <form th:action="@{/clientes/deletar}" method="post"
@@ -767,6 +791,17 @@
         if (aba) {
             var btn = document.querySelector('.tab-btn[data-tab="' + aba + '"]');
             if (btn) btn.click();
+        }
+        // Toast de retorno do fluxo de cancelamento
+        var toast = params.get('toast');
+        if (toast === 'cancelamento-solicitado') {
+            var toastEl = document.getElementById('toastPerfil');
+            if (toastEl) {
+                toastEl.textContent = '✓ Solicitação de cancelamento enviada! Aguarde análise da equipe.';
+                toastEl.className = 'toast-perfil toast-perfil-ok';
+                toastEl.style.display = 'block';
+                setTimeout(function() { toastEl.style.display = 'none'; }, 6000);
+            }
         }
     })();
 
@@ -866,6 +901,16 @@
     function buildPedidoCard(p) {
         var foto = primeiraFoto(p.fotosUrls);
         var imgSrc = foto || 'https://placehold.co/64x86?text=%F0%9F%93%9A';
+        var cancelBtn = '';
+        if (p.statusEnvio === 'AGUARDANDO_ENVIO' && p.temCancelamentoPendente) {
+            cancelBtn = '<div style="margin-top:.5rem">' +
+                '<span class="status-badge status-CANCELAMENTO_SOLICITADO">Cancelamento Solicitado</span>' +
+                '<div style="font-size:.72rem;color:#7a6e65;margin-top:4px">Aguardando análise da equipe Bibliotroca.</div>' +
+                '</div>';
+        } else if (p.statusEnvio === 'AGUARDANDO_ENVIO') {
+            cancelBtn = '<a class="btn-solicitar-cancel" href="/clientes/cancelamento/' + p.id + '">' +
+                '<i class="fa-solid fa-ban" style="font-size:.7rem"></i> Solicitar Cancelamento</a>';
+        }
         return '<div class="pedido-card">' +
             '<img class="pedido-capa" src="' + imgSrc + '" alt="' + (p.tituloLivro||'') + '" onerror="this.style.display=\'none\'" />' +
             '<div class="pedido-info" style="flex:1">' +
@@ -880,6 +925,7 @@
                     (p.statusEnvio === 'CANCELADO' ? '<span>·</span><span class="pedido-estorno">↩ T$ ' + (p.precoLivro||0).toFixed(2) + ' estornados</span>' : '') +
                 '</div>' +
                 buildTimeline(p.statusEnvio) +
+                cancelBtn +
             '</div></div>';
     }
     function emptyState(msg) {

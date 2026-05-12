@@ -47,6 +47,14 @@
            th:classappend="${activeMenu == 'cupons'} ? ' ativo'">
             <i class="fa-solid fa-ticket"></i> Cupons
         </a>
+        <a href="/admin/cancelamentos" class="nav-item" id="navCancelamentos"
+           th:classappend="${activeMenu == 'cancelamentos'} ? ' ativo'"
+           style="display:flex;align-items:center;justify-content:space-between;">
+            <span><i class="fa-solid fa-ban"></i> Cancelamentos</span>
+            <span id="badgeCancelamentos" style="display:none;background:#c0392b;color:#fff;
+                  font-size:.68rem;font-weight:700;padding:1px 7px;border-radius:20px;
+                  min-width:18px;text-align:center;line-height:1.6;">0</span>
+        </a>
         <a href="/admin/audit" class="nav-item"
            th:classappend="${activeMenu == 'auditoria'} ? ' ativo'">
             <i class="fa-solid fa-shield-halved"></i> Auditoria
@@ -63,5 +71,29 @@
     </div>
 </aside>
 
+<script>
+(function() {
+    function atualizarBadge() {
+        fetch('/api/admin/cancelamentos/pendentes/count', { credentials: 'include' })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(n) {
+                var el = document.getElementById('badgeCancelamentos');
+                if (!el) return;
+                if (n && n > 0) {
+                    el.textContent = n;
+                    el.style.display = 'inline-block';
+                } else {
+                    el.style.display = 'none';
+                }
+            })
+            .catch(function() {});
+    }
+    // Só busca fora da própria página de cancelamentos (que já limpa ao carregar)
+    if (!window.location.pathname.startsWith('/admin/cancelamentos')) {
+        atualizarBadge();
+        setInterval(atualizarBadge, 30000);
+    }
+})();
+</script>
 </body>
 </html>
