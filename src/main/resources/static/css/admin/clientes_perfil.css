@@ -1,0 +1,311 @@
+/* ================================================================
+   clientes_perfil.css — Admin · Bibliotroca
+   ================================================================ */
+
+/* ── BREADCRUMB ─────────────────────────────────────────────── */
+.breadcrumb {
+    padding: 20px 28px 0;
+    font-size: 12px;
+    color: #b0a49a;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.breadcrumb a { color: #722F37; text-decoration: none; font-weight: 500; }
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb i { font-size: 9px; color: #c8bdb5; }
+
+/* ── PERFIL HEADER ──────────────────────────────────────────── */
+.perfil-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px 28px;
+    background: #fff;
+    margin: 16px 28px 0;
+    border-radius: 12px;
+    border: 1px solid #f0e8e0;
+    box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    flex-wrap: wrap;
+}
+.perfil-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #722F37;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+.perfil-info { flex: 1; min-width: 0; }
+.perfil-nome {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #2c241b;
+}
+.perfil-email { font-size: 14px; color: #7a6e65; margin-top: 3px; }
+.perfil-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+.perfil-meta-item { font-size: 12px; color: #7a6e65; display: flex; align-items: center; gap: 5px; }
+.perfil-meta-item i { color: #b0a49a; width: 14px; text-align: center; }
+
+.badge-nivel {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+.nivel-Bronze   { background: #f3ede6; color: #8a6336; }
+.nivel-Prata    { background: #e8edf5; color: #4a5d8a; }
+.nivel-Ouro     { background: #fef3c7; color: #92400e; }
+.nivel-Platina  { background: #f5e8f8; color: #7b2d8b; }
+
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.status-ativo   { background: #d1e7dd; color: #0f5132; }
+.status-inativo { background: #f5c6c6; color: #7a1c1c; }
+
+.btn-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    background: #f3ede6;
+    border: 1px solid #e8ddd4;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #722F37;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background .2s;
+    flex-shrink: 0;
+}
+.btn-voltar:hover { background: #e8ddd4; }
+
+/* ── SUMMARY CARDS ──────────────────────────────────────────── */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    padding: 20px 28px 0;
+}
+.summary-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 18px 20px;
+    border: 1px solid #f0e8e0;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.summary-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #fff;
+    flex-shrink: 0;
+    margin-bottom: 4px;
+}
+.summary-value { font-size: 22px; font-weight: 700; color: #2c241b; }
+.summary-label { font-size: 11px; color: #7a6e65; font-weight: 500; }
+
+/* ── TABS ───────────────────────────────────────────────────── */
+.tabs-area {
+    padding: 24px 28px 0;
+}
+.tabs-header {
+    display: flex;
+    gap: 4px;
+    border-bottom: 2px solid #f0e8e0;
+    margin-bottom: 0;
+    flex-wrap: wrap;
+}
+.tab-btn {
+    padding: 10px 18px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 600;
+    color: #7a6e65;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color .15s, border-color .15s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.tab-btn:hover { color: #2c241b; }
+.tab-btn.ativo { color: #722F37; border-bottom-color: #722F37; }
+
+.tab-panel { display: none; }
+.tab-panel.ativo { display: block; }
+
+/* ── PAINEL DE ABA ──────────────────────────────────────────── */
+.panel-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #f0e8e0;
+    box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    margin: 16px 0;
+    overflow: hidden;
+}
+.panel-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid #f0e8e0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.panel-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: #2c241b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.panel-title i { color: #722F37; }
+
+/* Filtro de período nos pedidos */
+.period-filter { display: flex; gap: 4px; flex-wrap: wrap; }
+.period-btn {
+    padding: 5px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #fff;
+    color: #7a6e65;
+    transition: all .15s;
+}
+.period-btn.ativo { background: #722F37; color: #fff; border-color: #722F37; }
+.period-btn:hover:not(.ativo) { background: #f3ede6; }
+
+/* Tabela interna */
+table.inner-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+.inner-table thead {
+    background: #fdf9f5;
+}
+.inner-table th {
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #b0a49a;
+    border-bottom: 1px solid #f0e8e0;
+    white-space: nowrap;
+}
+.inner-table td {
+    padding: 12px 16px;
+    color: #2c241b;
+    border-bottom: 1px solid #f9f4ef;
+    vertical-align: middle;
+}
+.inner-table tbody tr:last-child td { border-bottom: none; }
+.inner-table tbody tr:hover { background: #fdf9f5; }
+
+/* Status envio badge */
+.badge-envio {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.envio-AGUARDANDO_ENVIO  { background: #fff3cd; color: #856404; }
+.envio-EM_TRANSITO       { background: #cfe2ff; color: #084298; }
+.envio-ENTREGUE          { background: #d1e7dd; color: #0f5132; }
+.envio-CANCELADO         { background: #f5c6c6; color: #7a1c1c; }
+
+/* ── INFO GRID (vendas, engajamento) ──────────────────────────── */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    padding: 20px 22px;
+}
+.info-item { display: flex; flex-direction: column; gap: 4px; }
+.info-label { font-size: 11px; color: #b0a49a; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.info-value { font-size: 20px; font-weight: 700; color: #2c241b; }
+
+/* ── EMPTY / LOADING ─────────────────────────────────────────── */
+.empty-state-sm {
+    text-align: center;
+    padding: 32px 20px;
+    color: #b0a49a;
+}
+.empty-state-sm i { font-size: 28px; margin-bottom: 10px; display: block; }
+.empty-state-sm p { font-size: 13px; margin: 0; }
+
+.loading-placeholder {
+    text-align: center;
+    padding: 60px 20px;
+    color: #7a6e65;
+    font-size: 15px;
+}
+.loading-placeholder i { margin-right: 8px; }
+
+/* ── TOAST ──────────────────────────────────────────────────── */
+.toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 16px rgba(0,0,0,.15);
+    z-index: 2000;
+    max-width: 360px;
+}
+.toast-ok  { background: #2e7d32; color: #fff; }
+.toast-err { background: #722F37; color: #fff; }
+
+/* ── RESPONSIVO ─────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .breadcrumb, .perfil-header, .summary-grid, .tabs-area { padding-left: 16px; padding-right: 16px; }
+    .perfil-header { margin-left: 16px; margin-right: 16px; }
+    .summary-grid { padding-left: 16px; padding-right: 16px; }
+}
+@media (max-width: 600px) {
+    .perfil-avatar { width: 52px; height: 52px; font-size: 20px; }
+    .perfil-nome { font-size: 18px; }
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+}

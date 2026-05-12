@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -187,6 +188,23 @@ public class AdminViewController {
     @GetMapping("/cancelamentos")
     public String cancelamentos() {
         return "admin/cancelamentos";
+    }
+
+    @GetMapping("/cancelamentos/{id}")
+    public String cancelamentoDetalhe(@PathVariable Long id, Model model) {
+        model.addAttribute("solicitacaoId", id);
+        return "admin/cancelamento_detalhe";
+    }
+
+    @GetMapping("/clientes")
+    public String clientes() {
+        return "admin/clientes";
+    }
+
+    @GetMapping("/clientes/{id}")
+    public String clientePerfil(@PathVariable Long id, Model model) {
+        model.addAttribute("clienteId", id);
+        return "admin/clientes_perfil";
     }
 
     /**

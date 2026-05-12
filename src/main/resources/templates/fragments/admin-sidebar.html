@@ -5,7 +5,7 @@
 <!--
   Fragment: adminSidebar(activeMenu)
   Uso: <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('dashboard')}"></th:block>
-  Valores de activeMenu: dashboard | lotes | pedidos | blog | forum | auditoria
+  Valores de activeMenu: dashboard | lotes | cancelamentos | pedidos | clientes | estoque | cupons | blog | forum | auditoria | notificacoes
 -->
 <aside th:fragment="adminSidebar(activeMenu)" class="sidebar" id="sidebar">
     <div class="sidebar-logo">
@@ -27,17 +27,21 @@
            th:classappend="${activeMenu == 'lotes'} ? ' ativo'">
             <i class="fa-solid fa-box-open"></i> Lotes Pendentes
         </a>
+        <a href="/admin/cancelamentos" class="nav-item" id="navCancelamentos"
+           th:classappend="${activeMenu == 'cancelamentos'} ? ' ativo'"
+           style="display:flex;align-items:center;justify-content:space-between;">
+            <span><i class="fa-solid fa-ban"></i> Cancelamentos</span>
+            <span id="badgeCancelamentos" style="display:none;background:#c0392b;color:#fff;
+                  font-size:.68rem;font-weight:700;padding:1px 7px;border-radius:20px;
+                  min-width:18px;text-align:center;line-height:1.6;">0</span>
+        </a>
         <a href="/admin/painel?tab=pedidos" class="nav-item"
            th:classappend="${activeMenu == 'pedidos'} ? ' ativo'">
             <i class="fa-solid fa-truck"></i> Pedidos / Envio
         </a>
-        <a href="/admin/painel?tab=blog" class="nav-item"
-           th:classappend="${activeMenu == 'blog'} ? ' ativo'">
-            <i class="fa-solid fa-pen-to-square"></i> Blog
-        </a>
-        <a href="/forum" class="nav-item"
-           th:classappend="${activeMenu == 'forum'} ? ' ativo'">
-            <i class="fa-solid fa-comments"></i> Fórum
+        <a href="/admin/clientes" class="nav-item"
+           th:classappend="${activeMenu == 'clientes'} ? ' ativo'">
+            <i class="fa-solid fa-users"></i> Clientes
         </a>
         <a href="/admin/estoque" class="nav-item"
            th:classappend="${activeMenu == 'estoque'} ? ' ativo'">
@@ -47,13 +51,13 @@
            th:classappend="${activeMenu == 'cupons'} ? ' ativo'">
             <i class="fa-solid fa-ticket"></i> Cupons
         </a>
-        <a href="/admin/cancelamentos" class="nav-item" id="navCancelamentos"
-           th:classappend="${activeMenu == 'cancelamentos'} ? ' ativo'"
-           style="display:flex;align-items:center;justify-content:space-between;">
-            <span><i class="fa-solid fa-ban"></i> Cancelamentos</span>
-            <span id="badgeCancelamentos" style="display:none;background:#c0392b;color:#fff;
-                  font-size:.68rem;font-weight:700;padding:1px 7px;border-radius:20px;
-                  min-width:18px;text-align:center;line-height:1.6;">0</span>
+        <a href="/admin/painel?tab=blog" class="nav-item"
+           th:classappend="${activeMenu == 'blog'} ? ' ativo'">
+            <i class="fa-solid fa-pen-to-square"></i> Blog
+        </a>
+        <a href="/forum" class="nav-item"
+           th:classappend="${activeMenu == 'forum'} ? ' ativo'">
+            <i class="fa-solid fa-comments"></i> Fórum
         </a>
         <a href="/admin/audit" class="nav-item"
            th:classappend="${activeMenu == 'auditoria'} ? ' ativo'">

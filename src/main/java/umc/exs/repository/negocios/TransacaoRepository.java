@@ -28,4 +28,8 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
     long countByStatus(String status);
 
     long count();
+
+    /** Soma de tokens recarregados confirmados por um cliente. */
+    @Query("SELECT COALESCE(SUM(t.valor), 0.0) FROM Transacao t WHERE t.cliente.id = :clienteId AND t.status = 'CONFIRMADO'")
+    Double sumValorConfirmadoByClienteId(@Param("clienteId") Long clienteId);
 }

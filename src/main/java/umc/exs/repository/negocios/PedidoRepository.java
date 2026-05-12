@@ -42,4 +42,16 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
      *  Retorna null quando não há pedidos; o service trata com orElse(0.0). */
     @Query("SELECT SUM(p.precoLivro) FROM Pedido p")
     Double sumTokensUtilizados();
+
+    /** Estatísticas agregadas de pedidos por comprador — usado pela listagem admin de clientes. */
+    @Query("SELECT p.comprador.id, COUNT(p), COALESCE(SUM(p.precoLivro), 0.0) FROM Pedido p GROUP BY p.comprador.id")
+    List<Object[]> statsGroupedByComprador();
+
+    /** Total gasto por um cliente específico. */
+    @Query("SELECT COALESCE(SUM(p.precoLivro), 0.0) FROM Pedido p WHERE p.comprador.id = :clienteId")
+    Double sumGastoByClienteId(@Param("clienteId") Long clienteId);
+
+    /** Pedidos de um cliente com filtro de data. */
+    List<Pedido> findByCompradorIdAndDataCompraAfterOrderByDataCompraDesc(
+            Long compradorId, LocalDateTime dataInicio);
 }

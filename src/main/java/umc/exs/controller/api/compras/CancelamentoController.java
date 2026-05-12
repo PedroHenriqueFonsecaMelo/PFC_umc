@@ -56,6 +56,16 @@ public class CancelamentoController {
         return ResponseEntity.ok(cancelamentoService.listarTodas());
     }
 
+    @GetMapping("/api/admin/cancelamentos/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(cancelamentoService.buscarPorId(id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
+        }
+    }
+
     @GetMapping("/api/admin/cancelamentos/pendentes")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<SolicitacaoCancelamentoResponseDTO>> listarPendentes() {

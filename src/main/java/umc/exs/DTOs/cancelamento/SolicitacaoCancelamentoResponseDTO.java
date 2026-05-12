@@ -23,6 +23,9 @@ public class SolicitacaoCancelamentoResponseDTO {
     private LocalDateTime dataSolicitacao;
     private LocalDateTime dataResposta;
     private Double precoLivro;
+    private String isbnLivro;
+    private LocalDateTime dataCompra;
+    private Double saldoAtualComprador;
 
     // Getters e Setters
     public Long getId() { return id; }
@@ -72,4 +75,13 @@ public class SolicitacaoCancelamentoResponseDTO {
 
     public Double getPrecoLivro() { return precoLivro; }
     public void setPrecoLivro(Double precoLivro) { this.precoLivro = precoLivro; }
+
+    public String getIsbnLivro() { return isbnLivro; }
+    public void setIsbnLivro(String isbnLivro) { this.isbnLivro = isbnLivro; }
+
+    public LocalDateTime getDataCompra() { return dataCompra; }
+    public void setDataCompra(LocalDateTime dataCompra) { this.dataCompra = dataCompra; }
+
+    public Double getSaldoAtualComprador() { return saldoAtualComprador; }
+    public void setSaldoAtualComprador(Double saldoAtualComprador) { this.saldoAtualComprador = saldoAtualComprador; }
 }

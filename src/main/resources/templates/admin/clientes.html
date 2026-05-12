@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clientes — Bibliotroca Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/admin/layout.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/clientes.css}" />
+  </head>
+  <body>
+    <div class="layout">
+      <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('clientes')}"></th:block>
+
+      <div class="overlay" id="overlay" onclick="fecharMenu()"></div>
+
+      <div class="content">
+        <header class="topbar">
+          <div style="display:flex;align-items:center;gap:14px">
+            <button class="menu-btn" onclick="abrirMenu()">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div>
+              <div class="topbar-title">Clientes</div>
+              <div class="topbar-date" id="dataHoje"></div>
+            </div>
+          </div>
+          <div class="topbar-right">
+            <span class="badge-online"><span class="dot"></span> Sistema Online</span>
+            <div class="avatar"><i class="fa-solid fa-user"></i></div>
+          </div>
+        </header>
+
+        <!-- HEADER -->
+        <div class="page-header">
+          <div>
+            <div class="page-title">Gestão de Clientes</div>
+            <div class="page-subtitle" id="totalLabel">Carregando...</div>
+          </div>
+        </div>
+
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="busca" placeholder="Buscar por nome ou e-mail..." oninput="aplicarFiltros()" />
+            </div>
+            <div class="filter-tabs">
+              <button class="filter-tab ativo" data-filtro="todos" onclick="setFiltro('todos')">Todos</button>
+              <button class="filter-tab" data-filtro="ativos" onclick="setFiltro('ativos')">Ativos</button>
+              <button class="filter-tab" data-filtro="inativos" onclick="setFiltro('inativos')">Inativos</button>
+            </div>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn-refresh" onclick="carregarDados()">
+              <i class="fa-solid fa-rotate-right"></i> Atualizar
+            </button>
+          </div>
+        </div>
+
+        <!-- TABELA -->
+        <div class="table-area">
+          <div class="table-card" id="tableCard">
+            <div class="loading-placeholder">
+              <i class="fa-solid fa-spinner fa-spin"></i> Carregando clientes...
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="toast" class="toast" style="display:none"></div>
+
+    <script th:src="@{/js/admin/clientes.js}"></script>
+  </body>
+</html>

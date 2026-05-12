@@ -50,4 +50,7 @@ public interface TopicoForumRepository extends JpaRepository<TopicoForum, Long> 
         @Modifying
         @Query("UPDATE TopicoForum t SET t.visualizacoes = t.visualizacoes + 1 WHERE t.id = :id")
         void incrementarVisualizacoes(@Param("id") Long id);
+
+        /** Conta tópicos criados por um autor (cliente). */
+        long countByAutorId(Long autorId);
 }

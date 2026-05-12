@@ -106,4 +106,11 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
                   AND l.promocaoExpira < :agora
             """)
     List<Livro> findPromocoesExpiradas(@Param("agora") LocalDateTime agora);
+
+    /** Total de livros aprovados enviados por um vendedor (cliente). */
+    long countByVendedorIdAndAprovadoTrue(Long vendedorId);
+
+    /** Total de livros rejeitados (não aprovados e já avaliados) de um vendedor. */
+    @Query("SELECT COUNT(l) FROM Livro l WHERE l.vendedor.id = :vendedorId AND l.aprovado = false AND l.adminAprovadorId IS NOT NULL")
+    long countRejeitadosByVendedorId(@Param("vendedorId") Long vendedorId);
 }

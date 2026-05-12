@@ -13,4 +13,7 @@ public interface CupomUsoRepository extends JpaRepository<CupomUso, Long> {
 
     /** Total de vezes que um cupom foi utilizado. */
     long countByCupomId(Long cupomId);
+
+    /** Total de cupons utilizados por um cliente. */
+    long countByClienteId(Long clienteId);
 }

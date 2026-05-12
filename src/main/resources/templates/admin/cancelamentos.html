@@ -72,8 +72,12 @@
         <!-- TOOLBAR -->
         <div class="toolbar">
           <div class="toolbar-left">
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="busca" placeholder="Buscar por livro ou cliente..." oninput="aplicarFiltro()" />
+            </div>
             <div class="filter-group">
-              <label>Filtrar por status</label>
+              <label>Status</label>
               <select id="filtroStatus" onchange="aplicarFiltro()">
                 <option value="">Todos</option>
                 <option value="PENDENTE">Pendente</option>
@@ -96,26 +100,6 @@
           </div>
         </div>
 
-      </div>
-    </div>
-
-    <!-- MODAL: Aprovar / Recusar -->
-    <div class="modal-overlay" id="modalOverlay" onclick="fecharModal()"></div>
-    <div class="modal" id="modal">
-      <div class="modal-header" id="modalHeader">
-        <h2 id="modalTitulo">Responder Solicitação</h2>
-        <button class="modal-close" onclick="fecharModal()"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="modal-body">
-        <div class="modal-info" id="modalInfo"></div>
-        <div class="form-group">
-          <label for="comentarioAdmin">Comentário para o cliente <span style="color:#7a6e65;font-weight:400">(opcional)</span></label>
-          <textarea id="comentarioAdmin" rows="4" placeholder="Ex: Pedido já encaminhado ao transportador..."></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-modal-sec" onclick="fecharModal()">Cancelar</button>
-        <button class="btn-modal-pri" id="btnConfirmarAcao" onclick="confirmarAcao()">Confirmar</button>
       </div>
     </div>
 

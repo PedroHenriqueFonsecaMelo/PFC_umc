@@ -16,4 +16,8 @@ public interface LoteRepository extends JpaRepository<Lote, Long> {
     long countByClienteIdAndStatus(@Param("clienteId") Long clienteId, @Param("status") Lote.LoteStatus status);
 
     List<Lote> findByClienteAndStatus(Cliente cliente, Lote.LoteStatus status);
+
+    /** Conta lotes de um cliente com determinados status. */
+    @Query("SELECT COUNT(l) FROM Lote l WHERE l.cliente.id = :clienteId AND l.status IN :statuses")
+    long countByClienteIdAndStatusIn(@Param("clienteId") Long clienteId, @Param("statuses") java.util.List<Lote.LoteStatus> statuses);
 }

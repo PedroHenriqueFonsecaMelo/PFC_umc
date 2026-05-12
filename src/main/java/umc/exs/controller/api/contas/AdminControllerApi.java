@@ -18,9 +18,12 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Objects;
 
 import umc.exs.dtos.admin.AdminAprovacaoDTO;
+import umc.exs.dtos.admin.ClienteListaDTO;
+import umc.exs.dtos.admin.ClientePerfilDTO;
 import umc.exs.dtos.admin.DashboardMetricasDTO;
 import umc.exs.dtos.admin.LivroAdminRequest;
 import umc.exs.dtos.admin.RejeicaoLivroDTO;
+import umc.exs.service.core.control.ClienteAdminService;
 import umc.exs.dtos.compra.AtualizarEnvioDTO;
 import umc.exs.dtos.compra.CriarCupomDTO;
 import umc.exs.dtos.compra.PedidoDTO;
@@ -51,6 +54,7 @@ public class AdminControllerApi {
     private final DashboardService dashboardService;
     private final CupomService cupomService;
     private final PostBlogService postBlogService;
+    private final ClienteAdminService clienteAdminService;
 
     private static final String NAO_AUTENTICADO = "Acesso negado: Admin não autenticado.";
     private static final String ADMIN_NAO_ENCONTRADO = "Conta de administrador não encontrada.";
@@ -246,6 +250,26 @@ public class AdminControllerApi {
                 .map(a -> a.getNome())
                 .orElse("Administrador");
         return ResponseEntity.ok(Map.of("nome", nome, "role", "ADMIN"));
+    }
+
+    // ==========================================================
+    // CLIENTES
+    // ==========================================================
+
+    @GetMapping("/clientes")
+    public ResponseEntity<List<ClienteListaDTO>> listarClientes() {
+        return ResponseEntity.ok(clienteAdminService.listarClientes());
+    }
+
+    @GetMapping("/clientes/{id}")
+    public ResponseEntity<?> getPerfilCliente(@PathVariable Long id) {
+        try {
+            ClientePerfilDTO perfil = clienteAdminService.getPerfilCliente(id);
+            return ResponseEntity.ok(perfil);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponseDTO(false, e.getMessage()));
+        }
     }
 
     // ==========================================================

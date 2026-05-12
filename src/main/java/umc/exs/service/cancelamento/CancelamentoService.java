@@ -241,6 +241,13 @@ public class CancelamentoService {
         return sol;
     }
 
+    @Transactional(readOnly = true)
+    public SolicitacaoCancelamentoResponseDTO buscarPorId(Long solicitacaoId) {
+        SolicitacaoCancelamento sol = cancelamentoRepository.findById(solicitacaoId)
+                .orElseThrow(() -> new IllegalArgumentException("Solicitação não encontrada: " + solicitacaoId));
+        return toDTO(sol);
+    }
+
     private SolicitacaoCancelamentoResponseDTO toDTO(SolicitacaoCancelamento s) {
         SolicitacaoCancelamentoResponseDTO dto = new SolicitacaoCancelamentoResponseDTO();
         dto.setId(s.getId());
@@ -249,6 +256,9 @@ public class CancelamentoService {
         dto.setAutorLivro(s.getPedido().getAutorLivro());
         dto.setFotosUrls(s.getPedido().getFotosUrls());
         dto.setPrecoLivro(s.getPedido().getPrecoLivro());
+        dto.setIsbnLivro(s.getPedido().getIsbnLivro());
+        dto.setDataCompra(s.getPedido().getDataCompra());
+        dto.setSaldoAtualComprador(s.getCliente().getSaldoTokens());
         dto.setClienteNome(s.getCliente().getNome());
         dto.setClienteEmail(s.getCliente().getEmail());
         dto.setMotivoCategoria(s.getMotivoCategoria());
