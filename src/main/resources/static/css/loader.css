@@ -1,0 +1,202 @@
+/* ══════════════════════════════════════════════════════════════════
+   Bibliotroca — Page Loader
+   Inclua via: <th:block th:replace="~{fragments/loader :: loader}">
+   API JavaScript: showLoader() / hideLoader()
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Overlay semitransparente ─────────────────────────────────── */
+#bib-loader-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(44, 36, 27, 0.48);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.22s ease;
+}
+
+/* ── Card central (fundo creme) ───────────────────────────────── */
+.bib-loader-card {
+    background: #f4f1ec;
+    border-radius: 3px;
+    padding: 2.25rem 2.75rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.1rem;
+    box-shadow:
+        0 8px 40px rgba(44, 36, 27, 0.22),
+        0 2px 8px rgba(44, 36, 27, 0.10);
+    min-width: 300px;
+    max-width: 88vw;
+    border-top: 3px solid #722f37;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIVRO ANIMADO — páginas virando
+   ═══════════════════════════════════════════════════════════════ */
+.bib-book {
+    width: 76px;
+    height: 56px;
+    position: relative;
+    perspective: 280px;
+    margin: 0.15rem auto 0;
+    flex-shrink: 0;
+}
+
+/* Página esquerda (creme) */
+.bib-book-left {
+    position: absolute;
+    left: 0; top: 0;
+    width: 35px; height: 54px;
+    background: linear-gradient(to right, #ddd6c8, #f4f1ec);
+    border: 1.5px solid rgba(114, 47, 55, 0.32);
+    border-right: none;
+    border-radius: 2px 0 0 2px;
+}
+
+/* Lombada */
+.bib-book-spine {
+    position: absolute;
+    left: 35px; top: 0;
+    width: 5px; height: 54px;
+    background: #5a1e25;
+    z-index: 10;
+    border-radius: 1px;
+    box-shadow: 0 1px 3px rgba(44, 36, 27, 0.3);
+}
+
+/* Capa direita (vinho) */
+.bib-book-right {
+    position: absolute;
+    right: 0; top: 0;
+    width: 35px; height: 54px;
+    background: linear-gradient(135deg, #722f37 0%, #5a1e25 100%);
+    border: 1.5px solid rgba(90, 30, 37, 0.55);
+    border-left: none;
+    border-radius: 0 2px 2px 2px;
+}
+
+/* Ornamento da capa */
+.bib-book-right::after {
+    content: '';
+    position: absolute;
+    top: 8px; left: 6px; right: 6px; bottom: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 1px;
+}
+
+/* Páginas girando */
+.bib-page {
+    position: absolute;
+    left: 40px; top: 3px;
+    width: 31px; height: 48px;
+    background: #f9f6f0;
+    transform-origin: left center;
+    border: 1px solid rgba(44, 36, 27, 0.10);
+    animation: bib-flip 2.1s ease-in-out infinite;
+    box-shadow: 1px 0 4px rgba(44, 36, 27, 0.07);
+    border-radius: 0 1px 1px 0;
+}
+
+.bib-page:nth-child(4) { z-index: 7; animation-delay: 0s;     background: #f9f6f0; }
+.bib-page:nth-child(5) { z-index: 6; animation-delay: 0.38s;  background: #f0ece3; }
+.bib-page:nth-child(6) { z-index: 5; animation-delay: 0.76s;  background: #e7e1d6; }
+
+@keyframes bib-flip {
+    0%   { transform: rotateY(0deg);    }
+    40%  { transform: rotateY(-164deg); }
+    60%  { transform: rotateY(-164deg); }
+    100% { transform: rotateY(0deg);    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BARRA DE PROGRESSO — vinho, esquerda → direita
+   ═══════════════════════════════════════════════════════════════ */
+.bib-progress-track {
+    width: 100%;
+    height: 3px;
+    background: rgba(114, 47, 55, 0.14);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.bib-progress-bar {
+    position: absolute;
+    top: 0;
+    left: -55%;
+    width: 55%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, #722f37 40%, #722f37 60%, transparent);
+    border-radius: 2px;
+    animation: bib-progress 1.7s ease-in-out infinite;
+}
+
+@keyframes bib-progress {
+    0%   { left: -55%; }
+    100% { left: 100%; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TRÊS PONTINHOS ANIMADOS
+   ═══════════════════════════════════════════════════════════════ */
+.bib-dots {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.bib-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #722f37;
+    animation: bib-bounce 1.1s ease-in-out infinite;
+    opacity: 0.45;
+}
+
+.bib-dot:nth-child(1) { animation-delay: 0s;    }
+.bib-dot:nth-child(2) { animation-delay: 0.18s; }
+.bib-dot:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes bib-bounce {
+    0%, 60%, 100% { transform: translateY(0);     opacity: 0.4; }
+    30%            { transform: translateY(-7px);  opacity: 1;   }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CITAÇÃO — troca a cada 7.5 s com fade suave
+   ═══════════════════════════════════════════════════════════════ */
+.bib-quote-wrap {
+    text-align: center;
+    max-width: 272px;
+    min-height: 4em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.28rem;
+}
+
+.bib-quote {
+    font-family: 'IM Fell English', 'Georgia', 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 0.83rem;
+    color: #4a3d2e;
+    line-height: 1.58;
+    margin: 0;
+    transition: opacity 0.45s ease;
+}
+
+.bib-quote-author {
+    font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+    font-style: normal;
+    font-size: 0.69rem;
+    font-weight: 500;
+    color: #8a7a6a;
+    letter-spacing: 0.045em;
+    margin: 0;
+    transition: opacity 0.45s ease;
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+  Fragment: loader
+  Uso: <th:block th:replace="~{fragments/loader :: loader}"></th:block>
+  API JS: showLoader() / hideLoader()
+  O loader é ativado automaticamente em todas as chamadas fetch().
+  Para suprimir em um fetch específico, adicione a URL à lista SKIP_PATTERNS em loader.js.
+-->
+<th:block th:fragment="loader">
+
+    <!-- Estilos do loader -->
+    <link rel="stylesheet" th:href="@{/css/loader.css}" />
+
+    <!-- ── Overlay do Page Loader ──────────────────────────── -->
+    <div id="bib-loader-overlay" role="status" aria-live="polite" aria-label="Carregando, por favor aguarde">
+
+        <div class="bib-loader-card">
+
+            <!-- Livro animado com páginas virando -->
+            <div class="bib-book" aria-hidden="true">
+                <div class="bib-book-left"></div>
+                <div class="bib-book-spine"></div>
+                <div class="bib-book-right"></div>
+                <!-- 3 páginas que giram em sequência -->
+                <div class="bib-page"></div>
+                <div class="bib-page"></div>
+                <div class="bib-page"></div>
+            </div>
+
+            <!-- Barra de progresso vinho -->
+            <div class="bib-progress-track" aria-hidden="true">
+                <div class="bib-progress-bar"></div>
+            </div>
+
+            <!-- Três pontinhos animados -->
+            <div class="bib-dots" aria-hidden="true">
+                <span class="bib-dot"></span>
+                <span class="bib-dot"></span>
+                <span class="bib-dot"></span>
+            </div>
+
+            <!-- Citação que troca a cada 7,5 segundos -->
+            <div class="bib-quote-wrap">
+                <p class="bib-quote" id="bibLoaderQuote"></p>
+                <p class="bib-quote-author" id="bibLoaderAuthor"></p>
+            </div>
+
+        </div>
+    </div><!-- /#bib-loader-overlay -->
+
+    <!-- Script do loader (intercepta fetch + expõe showLoader/hideLoader) -->
+    <script th:src="@{/js/loader.js}"></script>
+
+</th:block>
+
+</body>
+</html>
