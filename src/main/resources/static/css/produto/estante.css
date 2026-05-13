@@ -50,6 +50,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   align-items: center;
   padding: .5rem 1rem;
   border: 1.5px solid var(--border);
+  border-radius: 8px;
   color: var(--muted);
   text-decoration: none;
   font-size: .8rem;
@@ -81,6 +82,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   padding: .7rem 1rem;
   background: var(--cream);
   border: 1px solid var(--border);
+  border-radius: 10px;
   margin-bottom: 1rem;
 }
 
@@ -103,6 +105,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
 .btn-remover-selecionados {
   background: transparent;
   border: 1px solid rgba(114, 47, 55, .35);
+  border-radius: 8px;
   color: var(--accent);
   padding: .35rem .8rem;
   font-size: .78rem;
@@ -123,8 +126,10 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   padding: 1rem 1.2rem;
   background: var(--white);
   border: 1px solid var(--border);
-  transition: border-color .18s;
+  border-radius: 14px;
+  transition: border-color .18s, box-shadow .18s;
 }
+.estante-item:hover { box-shadow: 3px 3px 0 rgba(44,36,27,.07); }
 .estante-item.selecionado { border-color: var(--accent); background: rgba(114,47,55,.04); }
 
 .estante-item-check {
@@ -139,6 +144,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   height: 72px;
   object-fit: cover;
   border: 1px solid var(--border);
+  border-radius: 6px;
   flex-shrink: 0;
 }
 .estante-item-info { flex: 1; min-width: 0; }
@@ -197,6 +203,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   margin-bottom: 1.2rem;
   padding: 1rem 1.2rem;
   border: 1px dashed var(--border);
+  border-radius: 12px;
   background: var(--white);
 }
 .cupom-row {
@@ -213,6 +220,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   letter-spacing: .08em;
   text-transform: uppercase;
   border: 1.5px solid var(--border);
+  border-radius: 8px;
   background: var(--paper);
   color: var(--ink);
   outline: none;
@@ -224,6 +232,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   background: var(--ink);
   color: var(--paper);
   border: none;
+  border-radius: 8px;
   font-family: "DM Sans", sans-serif;
   font-size: .82rem;
   font-weight: 700;
@@ -238,6 +247,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   margin-top: .6rem;
   font-size: .82rem;
   padding: .4rem .7rem;
+  border-radius: 6px;
 }
 .cupom-feedback.erro   { background: #fee2e2; color: #b91c1c; border-left: 3px solid #fca5a5; }
 .cupom-feedback.ok     { background: #dcfce7; color: #15803d; border-left: 3px solid #86efac; }
@@ -246,6 +256,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   padding: .6rem .9rem;
   background: #dcfce7;
   border: 1px solid #86efac;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -258,6 +269,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
 .btn-cupom-remover {
   background: transparent;
   border: 1px solid rgba(21,128,61,.4);
+  border-radius: 6px;
   color: #15803d;
   font-size: .75rem;
   font-weight: 700;
@@ -286,6 +298,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   bottom: 0;
   background: var(--cream);
   border: 1.5px solid var(--ink);
+  border-radius: 16px 16px 0 0;
   padding: 1.25rem 1.5rem;
   display: flex;
   align-items: center;
@@ -307,13 +320,14 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   background: var(--accent);
   color: var(--paper);
   border: 2px solid var(--accent);
+  border-radius: 10px;
   font-family: "DM Sans", sans-serif;
   font-size: .9rem;
   font-weight: 700;
   letter-spacing: .07em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background .18s;
+  transition: background .18s, border-color .18s;
   white-space: nowrap;
 }
 .btn-prosseguir:hover:not(:disabled) { background: #5a2229; border-color: #5a2229; }
@@ -328,6 +342,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   background: var(--accent);
   color: var(--paper);
   border: none;
+  border-radius: 10px;
   font-family: "DM Sans", sans-serif;
   font-size: .85rem;
   font-weight: 700;

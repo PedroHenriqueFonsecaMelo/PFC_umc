@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./mvnw compile *)",
+      "Bash(mvn compile *)",
+      "Bash(chmod +x mvnw)",
+      "Bash(bash mvnw compile -q)",
+      "Read(//opt/**)",
+      "Read(//usr/share/**)",
+      "Bash(/home/ambie/.m2/wrapper/dists/apache-maven-3.9.14/db91789b/bin/mvn compile *)",
+      "Bash(/home/ambie/.m2/wrapper/dists/apache-maven-3.9.14/db91789b/bin/mvn test *)",
+      "Bash(awk NR>=62 && NR<=72 *)",
+      "Bash(xargs ls -la)",
+      "Bash(cmd.exe /c \"mvnw.cmd compile -q 2>&1\")",
+      "Bash(cmd.exe /c \"mvnw.cmd compile 2>&1\")",
+      "Bash(cmd.exe /c \"mvnw.cmd clean compile 2>&1\")"
+    ]
+  }
+}
