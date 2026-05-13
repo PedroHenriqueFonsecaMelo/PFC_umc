@@ -47,6 +47,11 @@
         .status-ENTREGUE { background:#d1fae5; color:#065f46; }
         .status-CANCELADO { background:#fee2e2; color:#991b1b; }
         .status-CANCELAMENTO_SOLICITADO { background:#fff3cd; color:#856404; }
+        /* Badges de status de venda */
+        .venda-badge-AGUARDANDO_APROVACAO { background:#fef9c3; color:#854d0e; }
+        .venda-badge-NA_VITRINE           { background:#d1fae5; color:#065f46; }
+        .venda-badge-VENDIDO              { background:#dbeafe; color:#1e40af; }
+        .venda-badge-REJEITADO            { background:#fee2e2; color:#991b1b; }
         .btn-solicitar-cancel {
             display:inline-flex; align-items:center; gap:5px;
             margin-top:.6rem; padding:5px 13px;
@@ -289,17 +294,20 @@
         <button class="tab-btn" data-tab="enderecos">
             <span class="tab-icon">⌖</span> Endereços
         </button>
-        <button class="tab-btn" data-tab="ranking">
-            <span class="tab-icon">▲</span> Ranking
-        </button>
         <button class="tab-btn" data-tab="compras">
             <span class="tab-icon">▣</span> Compras
+        </button>
+        <button class="tab-btn" data-tab="vendas">
+            <span class="tab-icon">◐</span> Vendas
+        </button>
+        <button class="tab-btn" data-tab="carteira">
+            <span class="tab-icon">◈</span> Carteira
         </button>
         <button class="tab-btn" data-tab="historico">
             <span class="tab-icon">≡</span> Histórico
         </button>
-        <button class="tab-btn" data-tab="carteira">
-            <span class="tab-icon">◈</span> Carteira
+        <button class="tab-btn" data-tab="ranking">
+            <span class="tab-icon">▲</span> Ranking
         </button>
     </nav>
 
@@ -659,7 +667,30 @@
         </div>
 
         <!-- ------------------------------------------------
-             PANEL 5 · HISTÓRICO
+             PANEL 5 · VENDAS
+             ------------------------------------------------ -->
+        <div id="panel-vendas" class="tab-panel">
+            <div class="panel-card">
+                <h2 class="panel-title">
+                    <span class="panel-title-accent">◐</span>
+                    Minhas Vendas <span id="vendas-count-title" style="font-size:.9rem;font-weight:400;color:var(--muted,#7a6e65)"></span>
+                </h2>
+
+                <!-- Filtros -->
+                <div class="csub-bar" id="vendas-filtros">
+                    <button class="csub-btn active" data-vfiltro="TODOS" onclick="vendasFiltro('TODOS',this)">Todos</button>
+                    <button class="csub-btn" data-vfiltro="AGUARDANDO_APROVACAO" onclick="vendasFiltro('AGUARDANDO_APROVACAO',this)">Aguardando</button>
+                    <button class="csub-btn" data-vfiltro="NA_VITRINE" onclick="vendasFiltro('NA_VITRINE',this)">Na Vitrine</button>
+                    <button class="csub-btn" data-vfiltro="VENDIDO" onclick="vendasFiltro('VENDIDO',this)">Vendidos</button>
+                    <button class="csub-btn" data-vfiltro="REJEITADO" onclick="vendasFiltro('REJEITADO',this)">Rejeitados</button>
+                </div>
+
+                <div id="vendas-list"><p class="gami-aviso">Carregando...</p></div>
+            </div>
+        </div>
+
+        <!-- ------------------------------------------------
+             PANEL 6 · HISTÓRICO
              ------------------------------------------------ -->
         <div id="panel-historico" class="tab-panel">
             <div class="panel-card">
@@ -811,7 +842,7 @@
     })();
 
     /* ── Lazy-load flags ───────────────────────────────────── */
-    var comprasLoaded = false, historicoLoaded = false, carteiraLoaded = false;
+    var comprasLoaded = false, historicoLoaded = false, carteiraLoaded = false, vendasLoaded = false;
 
     /* ── Tab switching ─────────────────────────────────────── */
     document.querySelectorAll('.tab-btn').forEach(function(btn) {
@@ -828,6 +859,7 @@
             if (panel) panel.classList.add('active');
 
             if (tabId === 'compras' && !comprasLoaded) { comprasLoaded = true; initCompras(); }
+            else if (tabId === 'vendas' && !vendasLoaded) { vendasLoaded = true; initVendas(); }
             else if (tabId === 'historico' && !historicoLoaded) { historicoLoaded = true; initHistorico(); }
             else if (tabId === 'carteira' && !carteiraLoaded) { carteiraLoaded = true; initCarteira(); }
         });
@@ -976,6 +1008,92 @@
         if (concluidos.length > 0) {
             var bc = document.getElementById('badge-concluidos');
             if (bc) { bc.textContent = concluidos.length; bc.style.display = 'inline-flex'; }
+        }
+    }
+
+    /* ============================================================
+       VENDAS — inline
+       ============================================================ */
+    var _todasVendas = [];
+
+    var VENDA_STATUS_LABEL = {
+        AGUARDANDO_APROVACAO: 'Aguardando Aprovação',
+        NA_VITRINE:           'Na Vitrine',
+        VENDIDO:              'Vendido',
+        REJEITADO:            'Rejeitado'
+    };
+
+    function fmtDataVenda(iso) {
+        if (!iso) return '—';
+        var d = new Date(iso);
+        return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
+    }
+
+    function buildVendaCard(v) {
+        var imgSrc = v.primeiraFoto || 'https://placehold.co/56x76?text=%F0%9F%93%9A';
+        var badgeCls = 'venda-badge-' + (v.statusVenda || 'AGUARDANDO_APROVACAO');
+        var label    = VENDA_STATUS_LABEL[v.statusVenda] || v.statusVenda;
+        var preco    = v.precoAprovado != null ? 'T$ ' + Number(v.precoAprovado).toFixed(2) : 'A definir';
+        return '<div class="pedido-card">' +
+            '<img class="pedido-capa" src="' + imgSrc + '" alt="' + (v.titulo||'') + '" onerror="this.style.display=\'none\'" />' +
+            '<div class="pedido-info" style="flex:1">' +
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;flex-wrap:wrap;margin-bottom:.35rem">' +
+                    '<div>' +
+                        '<div class="pedido-titulo">' + (v.titulo||'—') + '</div>' +
+                        '<div class="pedido-autor">' + (v.autor||'') + '</div>' +
+                    '</div>' +
+                    '<span class="status-badge ' + badgeCls + '">' + label + '</span>' +
+                '</div>' +
+                '<div class="pedido-meta">' +
+                    '<span>' + preco + '</span><span>·</span>' +
+                    '<span>' + fmtDataVenda(v.dataAnuncio) + '</span>' +
+                    (v.motivoRejeicao ? '<span style="color:#991b1b;font-size:.75rem;margin-top:.25rem;display:block">Motivo: ' + v.motivoRejeicao + '</span>' : '') +
+                '</div>' +
+                '<div style="margin-top:.6rem">' +
+                    '<a href="/clientes/minhas-vendas/' + v.id + '" class="csub-btn active" style="font-size:.78rem;padding:.3rem .8rem;text-decoration:none">Ver detalhes →</a>' +
+                '</div>' +
+            '</div></div>';
+    }
+
+    function vendasFiltro(filtro, btn) {
+        document.querySelectorAll('#vendas-filtros .csub-btn').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        var lista = filtro === 'TODOS' ? _todasVendas : _todasVendas.filter(function(v){ return v.statusVenda === filtro; });
+        renderVendas(lista);
+    }
+
+    function renderVendas(lista) {
+        var el = document.getElementById('vendas-list');
+        if (!el) return;
+        if (!lista.length) {
+            el.innerHTML = '<div class="empty-state"><div class="icon">📦</div>' +
+                '<p>Nenhum anúncio neste filtro.</p></div>';
+            return;
+        }
+        el.innerHTML = lista.map(buildVendaCard).join('');
+    }
+
+    async function initVendas() {
+        var el = document.getElementById('vendas-list');
+        try {
+            var res = await fetch('/api/clientes/minhas-vendas', { credentials:'include' });
+            if (!res.ok) { el.innerHTML = '<p style="color:#722f37;padding:1rem">Erro ao carregar anúncios.</p>'; return; }
+            _todasVendas = await res.json();
+
+            var countEl = document.getElementById('vendas-count-title');
+            if (countEl && _todasVendas.length > 0) countEl.textContent = '(' + _todasVendas.length + ')';
+
+            if (_todasVendas.length === 0) {
+                el.innerHTML = '<div class="empty-state">' +
+                    '<div class="icon">📚</div>' +
+                    '<p>Você ainda não anunciou nenhum livro. Que tal vender agora?</p>' +
+                    '<a href="/livros/vender" class="csub-btn active" style="text-decoration:none;margin-top:.75rem;display:inline-block">Vender livros →</a>' +
+                    '</div>';
+                return;
+            }
+            renderVendas(_todasVendas);
+        } catch(e) {
+            el.innerHTML = '<p style="color:#722f37;padding:1rem">Erro de conexão.</p>';
         }
     }
 

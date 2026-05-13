@@ -159,6 +159,41 @@
             }
         }
 
+        /* ── Mini Carrinho: sincroniza preços via API (background) ── */
+        function cnSincronizarPrecos() {
+            var itens;
+            try { itens = JSON.parse(localStorage.getItem(CART_KEY)) || []; }
+            catch(_) { return; }
+            if (itens.length === 0) return;
+
+            var alterados = 0;
+            var pendentes = itens.length;
+
+            itens.forEach(function(item) {
+                fetch('/api/livros/' + item.id, { credentials: 'include' })
+                    .then(function(res) { return res.ok ? res.json() : null; })
+                    .then(function(livro) {
+                        if (!livro) return;
+                        var precoNovo = livro.precoAprovado != null ? livro.precoAprovado : livro.preco;
+                        if (precoNovo != null && Math.abs((item.precoAprovado || 0) - precoNovo) > 0.001) {
+                            item.precoAprovado = precoNovo;
+                            alterados++;
+                        }
+                    })
+                    .catch(function() {})
+                    .finally(function() {
+                        pendentes--;
+                        if (pendentes === 0 && alterados > 0) {
+                            localStorage.setItem(CART_KEY, JSON.stringify(itens));
+                            cnAtualizarBadgeEstante();
+                            // Refresca o dropdown se estiver visível
+                            var cart = document.getElementById('cnMiniCart');
+                            if (cart && cart.style.display !== 'none') cnPopularMiniCart();
+                        }
+                    });
+            });
+        }
+
         /* ── Mini Carrinho: toggle ── */
         window.cnToggleMiniCart = function() {
             var cart = document.getElementById('cnMiniCart');
@@ -169,6 +204,7 @@
             } else {
                 cnPopularMiniCart();
                 cart.style.display = 'block';
+                cnSincronizarPrecos(); // verifica preços ao abrir
             }
         };
 

@@ -255,7 +255,7 @@ body {
   gap: 0;
   border-bottom: 2px solid #2c241b;
   margin-bottom: 1.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -264,14 +264,14 @@ body {
 }
 
 .tab-btn {
-  padding: 0.6rem 1.25rem;
+  padding: 0.6rem 0.9rem;
   background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
   margin-bottom: -2px;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 500;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
   color: #7a6e65;

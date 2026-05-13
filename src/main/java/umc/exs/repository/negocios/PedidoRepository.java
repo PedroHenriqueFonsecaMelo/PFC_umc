@@ -54,4 +54,10 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     /** Pedidos de um cliente com filtro de data. */
     List<Pedido> findByCompradorIdAndDataCompraAfterOrderByDataCompraDesc(
             Long compradorId, LocalDateTime dataInicio);
+
+    /** Verifica se um livro foi comprado (livroId é snapshot no Pedido). */
+    boolean existsByLivroId(Long livroId);
+
+    /** Retorna o pedido de compra de um livro, se existir. */
+    java.util.Optional<Pedido> findByLivroId(Long livroId);
 }

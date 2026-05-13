@@ -154,38 +154,15 @@ public class LivroAnuncioService {
 
             String jsonFotos = converterParaJson(urls);
 
-            GoogleBookResponse response = googleBooksService.buscarPorIsbnAsync(item.getIsbn()).join();
-
-            if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
-                throw new IllegalArgumentException("Livro não encontrado na API externa para o ISBN: " + item.getIsbn());
-            }
-
-            var info = response.getItems().get(0).getVolumeInfo();
-
-            String primeiroAutor = (info.getAuthors() != null && !info.getAuthors().isEmpty())
-                    ? info.getAuthors().get(0)
-                    : "Autor Desconhecido";
-
-            String capaUrl = "";
-
-            if (info.getImageLinks() != null &&
-                    info.getImageLinks().getThumbnail() != null) {
-
-                capaUrl = info.getImageLinks().getThumbnail();
-            }
-
-            Obra obra = obterOuCriarObra(info.getTitle(), primeiroAutor,
-                    info.getLanguage(), capaUrl);
-
             Livro anuncio = Livro.builder()
                     .titulo(item.getTitulo())
                     .autor(item.getAutor())
                     .isbn(item.getIsbn())
                     .fotosUrls(jsonFotos)
+                    .vendedor(cliente)
                     .lote(lote)
                     .dataAnuncio(LocalDateTime.now())
                     .aprovado(false)
-                    .obra(obra)
                     .build();
 
             livroRepository.save(anuncio);
@@ -202,34 +179,40 @@ public class LivroAnuncioService {
     @SuppressWarnings("null")
     @Transactional
     public LivroDTO cadastrarPorIsbn(String isbn) {
-        // 1. Chama a API e TRAVA a execução até o Google responder (.join())
+        // 1. Tenta Google Books (nunca lança exceção — retorna null se indisponível)
         GoogleBookResponse response = googleBooksService.buscarPorIsbnAsync(isbn).join();
 
-        // 2. Valida se a API trouxe algo
-        if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
-            throw new IllegalArgumentException("Livro não encontrado na API externa para o ISBN: " + isbn);
+        if (response != null && response.getItems() != null && !response.getItems().isEmpty()) {
+            var info = response.getItems().get(0).getVolumeInfo();
+
+            String primeiroAutor = (info.getAuthors() != null && !info.getAuthors().isEmpty())
+                    ? info.getAuthors().get(0)
+                    : "Autor Desconhecido";
+
+            Livro anuncio = Livro.builder()
+                    .titulo(info.getTitle())
+                    .autor(primeiroAutor)
+                    .isbn(isbn)
+                    .idioma(info.getLanguage())
+                    .resumoOficial(info.getDescription())
+                    .dataAnuncio(LocalDateTime.now())
+                    .aprovado(false)
+                    .obra(null)
+                    .build();
+
+            return livroMapper.paraDTO(anuncio);
         }
 
-        var info = response.getItems().get(0).getVolumeInfo();
+        // 2. Fallback: OpenLibrary
+        log.info("Google Books não retornou dados para ISBN {}. Tentando OpenLibrary...", isbn);
+        var openLibraryResult = googleBooksService.buscarPorIsbnOpenLibrary(isbn);
+        if (openLibraryResult.isPresent()) {
+            return openLibraryResult.get();
+        }
 
-        // 3. Cria ou recupera a Obra (usando seu método já existente)
-        String primeiroAutor = (info.getAuthors() != null && !info.getAuthors().isEmpty())
-                ? info.getAuthors().get(0)
-                : "Autor Desconhecido";
-
-        // 4. Monta a entidade Livro com os dados da API
-        Livro anuncio = Livro.builder()
-                .titulo(info.getTitle())
-                .autor(primeiroAutor)
-                .isbn(isbn)
-                .idioma(info.getLanguage())
-                .resumoOficial(info.getDescription())
-                .dataAnuncio(LocalDateTime.now())
-                .aprovado(false)
-                .obra(null)
-                .build();
-
-        return livroMapper.paraDTO(anuncio);
+        // 3. Ambas as APIs falharam — retorna 404 com mensagem amigável
+        throw new EntityNotFoundException(
+                "Livro não encontrado automaticamente. Preencha os dados manualmente.");
     }
 
     // ========================= MÉTODOS AUXILIARES =========================

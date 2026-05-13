@@ -230,6 +230,15 @@ public class ClientController {
         return "cliente/cancelamento";
     }
 
+    @GetMapping("/minhas-vendas/{id}")
+    public String paginaDetalheVenda(@PathVariable Long id,
+            @AuthenticationPrincipal UserDetails user, Model model) {
+        if (user == null)
+            return REDIRECT_LOGIN;
+        model.addAttribute("livroId", id);
+        return "cliente/minhas-vendas-detalhe";
+    }
+
     @PostMapping("/foto-perfil")
     public String uploadFotoPerfil(@RequestParam("foto") MultipartFile foto,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {

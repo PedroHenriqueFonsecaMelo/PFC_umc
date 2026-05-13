@@ -1,22 +1,92 @@
 package umc.exs.service.core.bussiness;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import lombok.extern.slf4j.Slf4j;
 import umc.exs.dtos.livro.GoogleBookResponse;
+import umc.exs.dtos.livro.LivroDTO;
+import umc.exs.dtos.livro.OpenLibraryBookData;
 
+@Slf4j
 @Service
 public class GoogleBooksService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    /**
+     * Busca na Google Books API. Retorna null (sem lançar exceção) se o serviço
+     * estiver indisponível ou ocorrer qualquer erro de rede/HTTP.
+     */
     @Async
     public CompletableFuture<GoogleBookResponse> buscarPorIsbnAsync(String isbn) {
         String url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn;
-        GoogleBookResponse response = restTemplate.getForObject(url, GoogleBookResponse.class);
-        return CompletableFuture.completedFuture(response);
+        try {
+            GoogleBookResponse response = restTemplate.getForObject(url, GoogleBookResponse.class);
+            return CompletableFuture.completedFuture(response);
+        } catch (RestClientException e) {
+            log.warn("Google Books API indisponível para ISBN {}: {}", isbn, e.getMessage());
+            return CompletableFuture.completedFuture(null);
+        }
+    }
+
+    /**
+     * Fallback: busca na OpenLibrary API.
+     * Retorna Optional vazio se o livro não for encontrado ou se a API falhar.
+     */
+    public Optional<LivroDTO> buscarPorIsbnOpenLibrary(String isbn) {
+        String url = "https://openlibrary.org/api/books?bibkeys=ISBN:" + isbn + "&format=json&jscmd=data";
+        try {
+            Map<String, OpenLibraryBookData> result = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, OpenLibraryBookData>>() {}
+            ).getBody();
+
+            if (result == null || result.isEmpty()) {
+                return Optional.empty();
+            }
+
+            OpenLibraryBookData data = result.values().iterator().next();
+            if (data == null || data.getTitle() == null) {
+                return Optional.empty();
+            }
+
+            String autor = (data.getAuthors() != null && !data.getAuthors().isEmpty())
+                    ? data.getAuthors().get(0).getName()
+                    : "Autor Desconhecido";
+
+            String capa = "";
+            if (data.getCover() != null) {
+                capa = data.getCover().getMedium() != null
+                        ? data.getCover().getMedium()
+                        : (data.getCover().getLarge() != null ? data.getCover().getLarge() : "");
+            }
+
+            LivroDTO dto = new LivroDTO();
+            dto.setTitulo(data.getTitle());
+            dto.setAutor(autor);
+            dto.setIsbn(isbn);
+            dto.setResumoOficial(data.getNotes());
+            // Reutiliza o campo fotosUrls para transportar a capa ao frontend
+            if (!capa.isEmpty()) {
+                dto.setFotosUrls(capa);
+            }
+
+            return Optional.of(dto);
+
+        } catch (RestClientException e) {
+            log.warn("OpenLibrary API indisponível para ISBN {}: {}", isbn, e.getMessage());
+            return Optional.empty();
+        }
     }
 }

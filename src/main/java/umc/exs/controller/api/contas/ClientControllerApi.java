@@ -13,11 +13,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import umc.exs.dtos.livro.MinhaVendaDetalheDTO;
+import umc.exs.dtos.livro.MinhaVendaDTO;
 import umc.exs.dtos.user.EnderecoDTO;
 
 import lombok.RequiredArgsConstructor;
 import umc.exs.dtos.user.ClienteDTO;
 import umc.exs.model.entidades.foundation.Transacao;
+import umc.exs.service.core.bussiness.MinhasVendasService;
 import umc.exs.service.core.cliente.ClienteService;
 
 @RestController
@@ -28,6 +31,7 @@ public class ClientControllerApi {
     private static final String CLIENTE_NAO_ENCONTRADO = "Cliente não encontrado.";
 
     private final ClienteService clienteService;
+    private final MinhasVendasService minhasVendasService;
 
     /** Retorna dados do perfil para atualizar saldo/nome via JS */
     @GetMapping("/meu-perfil")
@@ -126,5 +130,36 @@ public class ClientControllerApi {
         }
 
         return "redirect:/clientes/homepage";
+    }
+
+    // ── MINHAS VENDAS ───────────────────────────────────────────────
+
+    /**
+     * Lista todos os livros anunciados pelo cliente autenticado.
+     * Segurança: o email é extraído do JWT — o cliente só vê seus próprios anúncios.
+     */
+    @GetMapping("/minhas-vendas")
+    public ResponseEntity<List<MinhaVendaDTO>> listarMinhasVendas(
+            @AuthenticationPrincipal UserDetails user) {
+        if (user == null) return ResponseEntity.status(401).build();
+        List<MinhaVendaDTO> vendas = minhasVendasService.listarMinhasVendas(user.getUsername());
+        return ResponseEntity.ok(vendas);
+    }
+
+    /**
+     * Detalhe de um anúncio específico.
+     * Segurança: valida que o livro pertence ao cliente autenticado antes de retornar.
+     */
+    @GetMapping("/minhas-vendas/{id}")
+    public ResponseEntity<Object> detalharMinhaVenda(
+            @AuthenticationPrincipal UserDetails user,
+            @PathVariable Long id) {
+        if (user == null) return ResponseEntity.status(401).build();
+        try {
+            MinhaVendaDetalheDTO dto = minhasVendasService.detalharMinhaVenda(id, user.getUsername());
+            return ResponseEntity.ok(dto);
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
     }
 }

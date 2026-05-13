@@ -151,10 +151,12 @@ public class LivroControllerApi {
             // Apenas busca e retorna os dados, sem salvar nada ainda
             LivroDTO livro = livroService.cadastrarPorIsbn(isbn);
             return ResponseEntity.ok(livro);
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            // Google Books e OpenLibrary indisponíveis ou ISBN não encontrado em nenhuma delas
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            // Se o Google cair (503), retornamos um erro limpo para o JS
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body("Serviço do Google temporariamente fora do ar.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Livro não encontrado automaticamente. Preencha os dados manualmente.");
         }
     }
 }

@@ -264,10 +264,53 @@ window.prosseguirCheckout = function() {
     window.location.href = '/livros/checkout';
 };
 
+/* ── Sincronizar preços com a API ── */
+async function sincronizarPrecos() {
+    const itens = getCarrinho();
+    if (itens.length === 0) return;
+
+    const avisos = [];
+    let atualizado = false;
+
+    await Promise.all(itens.map(async item => {
+        try {
+            const res = await fetch(`/api/livros/${item.id}`, { credentials: 'include' });
+            if (!res.ok) return; // livro pode ter sido removido; ignora silenciosamente
+            const livro = await res.json();
+            const precoNovo = livro.precoAprovado ?? livro.preco;
+            if (precoNovo == null) return;
+
+            if (Math.abs((item.precoAprovado || 0) - precoNovo) > 0.001) {
+                avisos.push(`O preço de "<strong>${escHtml(item.titulo)}</strong>" foi atualizado de T$ ${(item.precoAprovado || 0).toFixed(2)} para T$ ${precoNovo.toFixed(2)}.`);
+                item.precoAprovado = precoNovo;
+                atualizado = true;
+            }
+        } catch (_) { /* rede indisponível — mantém preço local */ }
+    }));
+
+    if (atualizado) {
+        saveCarrinho(itens);
+        renderEstante();
+    }
+
+    if (avisos.length > 0) {
+        let banner = document.getElementById('preco-atualizado-banner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'preco-atualizado-banner';
+            banner.style.cssText = 'background:#fef9c3;border:1px solid #fde047;border-radius:8px;padding:.85rem 1.1rem;margin-bottom:1rem;font-size:.85rem;color:#854d0e;line-height:1.6;';
+            const conteudo = document.getElementById('estanteConteudo');
+            if (conteudo) conteudo.prepend(banner);
+        }
+        banner.innerHTML = '<strong>⚠ Preços atualizados:</strong><br>' + avisos.join('<br>');
+    }
+}
+
 /* ── Init ── */
 document.addEventListener('DOMContentLoaded', () => {
     // Garante que nenhum cupom de compra anterior persista
     sessionStorage.removeItem(CUPOM_KEY);
     carregarSaldo();
     renderEstante();
+    sincronizarPrecos();
 });

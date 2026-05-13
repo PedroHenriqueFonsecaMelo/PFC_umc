@@ -113,4 +113,33 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
     /** Total de livros rejeitados (não aprovados e já avaliados) de um vendedor. */
     @Query("SELECT COUNT(l) FROM Livro l WHERE l.vendedor.id = :vendedorId AND l.aprovado = false AND l.adminAprovadorId IS NOT NULL")
     long countRejeitadosByVendedorId(@Param("vendedorId") Long vendedorId);
+
+    /**
+     * Todos os livros anunciados por um cliente — vendas diretas (vendedor_id) e
+     * livros enviados em lote (lote.cliente_id). Usa LEFT JOIN explícito para
+     * garantir que o Hibernate não descarte registros com FK nula.
+     */
+    @Query("""
+                SELECT l FROM Livro l
+                LEFT JOIN l.vendedor v
+                LEFT JOIN l.lote lo
+                LEFT JOIN lo.cliente lc
+                WHERE v.email = :email OR lc.email = :email
+                ORDER BY l.dataAnuncio DESC
+            """)
+    List<Livro> findAllByVendedorEmail(@Param("email") String email);
+
+    /**
+     * Detalhe de um livro validando propriedade do cliente (segurança / LGPD).
+     * Cobre vendas diretas e livros de lote via LEFT JOIN explícito.
+     */
+    @Query("""
+                SELECT l FROM Livro l
+                LEFT JOIN l.vendedor v
+                LEFT JOIN l.lote lo
+                LEFT JOIN lo.cliente lc
+                WHERE l.id = :id
+                  AND (v.email = :email OR lc.email = :email)
+            """)
+    Optional<Livro> findByIdAndVendedorEmail(@Param("id") Long id, @Param("email") String email);
 }

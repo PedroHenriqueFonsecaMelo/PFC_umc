@@ -291,7 +291,11 @@ public class LivroAdminService {
         livro.setIsbn(req.getIsbn());
         livro.setEstadoAprovado(req.getEstado());
         livro.setResumoOficial(req.getResumo());
-        livro.setFotosUrls(req.getCapa());
+        // Só sobrescreve fotosUrls se o campo foi explicitamente enviado,
+        // evitando apagar fotos existentes ao editar outros campos.
+        if (req.getCapa() != null && !req.getCapa().isBlank()) {
+            livro.setFotosUrls(req.getCapa());
+        }
 
         // ===== regra de promoção =====
         boolean promoAtiva = Boolean.TRUE.equals(req.getEmPromocao())

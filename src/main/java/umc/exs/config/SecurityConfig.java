@@ -206,6 +206,8 @@ public class SecurityConfig {
                         "/api/pedidos/**", "/api/forum/respostas/*/curtir", "/api/forum/respostas/*/melhor",
                         "/api/lista-desejos", "/api/lista-desejos/**",
                         "/clientes/lista-desejos",
-                        "/clientes/cancelamento/**"
+                        "/clientes/cancelamento/**",
+                        "/api/clientes/minhas-vendas", "/api/clientes/minhas-vendas/**",
+                        "/clientes/minhas-vendas/**"
         };
 }

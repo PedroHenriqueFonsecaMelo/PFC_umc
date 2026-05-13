@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Detalhe do Anúncio — Bibliotroca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+    <style>
+        :root {
+            --accent: #722f37;
+            --accent-light: #f5e8e9;
+            --muted: #7a6e65;
+            --border: rgba(44,36,27,.14);
+            --radius: 10px;
+            --font-title: 'Playfair Display', serif;
+            --font-body: 'DM Sans', sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-body); background: #f8f5f2; color: #2c241b; }
+
+        /* ── Breadcrumb ── */
+        .bc-nav {
+            max-width: 960px; margin: 0 auto; padding: 1.25rem 1.5rem .5rem;
+            font-size: .82rem; color: var(--muted); display: flex; gap: .4rem; align-items: center; flex-wrap: wrap;
+        }
+        .bc-nav a { color: var(--accent); text-decoration: none; }
+        .bc-nav a:hover { text-decoration: underline; }
+        .bc-sep { color: #c9b8a8; font-size: .72rem; }
+        .bc-current { color: var(--muted); }
+
+        /* ── Loading / Error ── */
+        .mv-loading {
+            max-width: 960px; margin: 3rem auto; padding: 2rem 1.5rem;
+            text-align: center; color: var(--muted); font-size: 1rem;
+        }
+
+        /* ── Main layout ── */
+        .mv-main {
+            max-width: 960px; margin: 0 auto; padding: 1rem 1.5rem 3rem;
+            display: none; /* shown after JS loads */
+        }
+        .mv-grid {
+            display: grid; grid-template-columns: 280px 1fr; gap: 2rem; align-items: start;
+        }
+        @media (max-width: 680px) {
+            .mv-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ── Galeria ── */
+        .mv-galeria { position: sticky; top: 1.5rem; }
+        .mv-foto-principal {
+            width: 100%; aspect-ratio: 3/4; object-fit: cover;
+            border-radius: var(--radius); background: #e8e0d8;
+            border: 1px solid var(--border);
+        }
+        .mv-foto-placeholder {
+            width: 100%; aspect-ratio: 3/4;
+            display: flex; align-items: center; justify-content: center;
+            background: #ede8e2; border-radius: var(--radius); border: 1px solid var(--border);
+            font-size: 4rem;
+        }
+        .mv-thumbs {
+            display: flex; gap: .5rem; margin-top: .75rem; flex-wrap: wrap;
+        }
+        .mv-thumb {
+            width: 60px; height: 80px; object-fit: cover;
+            border-radius: 6px; border: 2px solid transparent; cursor: pointer;
+            transition: border-color .15s;
+        }
+        .mv-thumb.active, .mv-thumb:hover { border-color: var(--accent); }
+
+        /* ── Info coluna direita ── */
+        .mv-info { display: flex; flex-direction: column; gap: 1.25rem; }
+
+        .mv-titulo {
+            font-family: var(--font-title); font-size: 1.6rem; font-weight: 700;
+            line-height: 1.25; color: #2c241b;
+        }
+        .mv-autor { font-size: .95rem; color: var(--muted); margin-top: .3rem; }
+
+        .mv-meta-row {
+            display: flex; flex-wrap: wrap; gap: .5rem .75rem;
+            font-size: .82rem; color: var(--muted); align-items: center;
+        }
+        .mv-badge {
+            font-size: .75rem; font-weight: 600; padding: .28rem .65rem;
+            border-radius: 20px; white-space: nowrap;
+        }
+        .mv-badge-estado { background: #f3ede8; color: #5c4a3a; border: 1px solid #d4c4b4; }
+        .mv-badge-AGUARDANDO_APROVACAO { background:#fef9c3; color:#854d0e; }
+        .mv-badge-NA_VITRINE           { background:#d1fae5; color:#065f46; }
+        .mv-badge-VENDIDO              { background:#dbeafe; color:#1e40af; }
+        .mv-badge-REJEITADO            { background:#fee2e2; color:#991b1b; }
+
+        .mv-preco {
+            font-family: var(--font-title); font-size: 1.5rem; font-weight: 700;
+            color: var(--accent);
+        }
+        .mv-preco-label { font-size: .8rem; color: var(--muted); margin-top: .1rem; }
+
+        /* ── Card genérico ── */
+        .mv-card {
+            background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+        }
+        .mv-card-title {
+            font-family: var(--font-title); font-size: 1rem; font-weight: 600;
+            color: #2c241b; margin-bottom: 1rem;
+        }
+
+        /* ── Timeline ── */
+        .mv-timeline { display: flex; flex-direction: column; gap: .5rem; }
+        .mv-tl-step {
+            display: flex; align-items: flex-start; gap: .9rem;
+        }
+        .mv-tl-dot {
+            width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .78rem; font-weight: 700;
+            background: #e8e0d8; color: #b0a090; border: 2px solid #d4c4b4;
+            transition: all .2s;
+        }
+        .mv-tl-step.done .mv-tl-dot  { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .mv-tl-step.active .mv-tl-dot { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+        .mv-tl-step.rejected .mv-tl-dot { background: #fee2e2; color: #991b1b; border-color: #f87171; }
+        .mv-tl-body { flex: 1; }
+        .mv-tl-label { font-weight: 600; font-size: .88rem; line-height: 1.2; }
+        .mv-tl-sub   { font-size: .78rem; color: var(--muted); margin-top: .15rem; }
+        .mv-tl-motivo {
+            margin-top: .5rem; padding: .7rem 1rem;
+            background: #fff5f5; border: 1px solid #fca5a5; border-radius: 6px;
+            font-size: .83rem; color: #991b1b; line-height: 1.5;
+        }
+        .mv-tl-connector {
+            width: 2px; height: 16px; background: #e2d8cf; margin-left: 13px;
+        }
+
+        /* ── Detalhe info grid ── */
+        .mv-detalhe-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: .6rem .75rem;
+            font-size: .83rem;
+        }
+        .mv-detalhe-item label { color: var(--muted); font-size: .75rem; display: block; margin-bottom: .15rem; }
+        .mv-detalhe-item span  { font-weight: 500; }
+
+        /* ── Botão voltar ── */
+        .mv-back {
+            display: inline-flex; align-items: center; gap: .4rem;
+            font-size: .85rem; font-weight: 600; color: var(--accent);
+            text-decoration: none; margin-bottom: 1rem;
+            padding: .4rem .9rem; border: 1.5px solid var(--accent);
+            border-radius: 6px; transition: all .18s;
+        }
+        .mv-back:hover { background: var(--accent); color: #fff; }
+    </style>
+</head>
+<body>
+<header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+<!-- Breadcrumb (atualizado via JS após carregar dados) -->
+<nav class="bc-nav" id="mv-breadcrumb">
+    <a href="/clientes/meu-perfil">Meu Perfil</a>
+    <span class="bc-sep"><i class="fa-solid fa-chevron-right"></i></span>
+    <a href="/clientes/meu-perfil?aba=vendas">Minhas Vendas</a>
+    <span class="bc-sep"><i class="fa-solid fa-chevron-right"></i></span>
+    <span class="bc-current" id="mv-bc-titulo">Carregando...</span>
+</nav>
+
+<!-- Loading -->
+<div class="mv-loading" id="mv-loading">
+    <i class="fa-solid fa-spinner fa-spin"></i> Carregando anúncio...
+</div>
+
+<!-- Conteúdo principal -->
+<main class="mv-main" id="mv-main">
+
+    <a href="/clientes/meu-perfil?aba=vendas" class="mv-back">
+        <i class="fa-solid fa-arrow-left"></i> Voltar para Minhas Vendas
+    </a>
+
+    <div class="mv-grid">
+
+        <!-- Coluna esquerda: galeria -->
+        <aside class="mv-galeria">
+            <div id="mv-foto-wrap">
+                <div class="mv-foto-placeholder">📚</div>
+            </div>
+            <div class="mv-thumbs" id="mv-thumbs"></div>
+        </aside>
+
+        <!-- Coluna direita: informações -->
+        <div class="mv-info">
+
+            <!-- Título e autor -->
+            <div>
+                <h1 class="mv-titulo" id="mv-titulo">—</h1>
+                <div class="mv-autor" id="mv-autor"></div>
+            </div>
+
+            <!-- Status + estado físico + preço -->
+            <div class="mv-meta-row">
+                <span class="mv-badge" id="mv-badge-status"></span>
+                <span class="mv-badge mv-badge-estado" id="mv-badge-estado"></span>
+            </div>
+            <div>
+                <div class="mv-preco" id="mv-preco">—</div>
+                <div class="mv-preco-label">tokens</div>
+            </div>
+
+            <!-- Detalhes -->
+            <div class="mv-card">
+                <div class="mv-card-title">Informações do Anúncio</div>
+                <div class="mv-detalhe-grid">
+                    <div class="mv-detalhe-item">
+                        <label>ISBN</label>
+                        <span id="mv-isbn">—</span>
+                    </div>
+                    <div class="mv-detalhe-item">
+                        <label>Idioma</label>
+                        <span id="mv-idioma">—</span>
+                    </div>
+                    <div class="mv-detalhe-item">
+                        <label>Data do anúncio</label>
+                        <span id="mv-data-anuncio">—</span>
+                    </div>
+                    <div class="mv-detalhe-item">
+                        <label>Data de aprovação</label>
+                        <span id="mv-data-aprovacao">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline de status -->
+            <div class="mv-card">
+                <div class="mv-card-title">Histórico do Anúncio</div>
+                <div class="mv-timeline" id="mv-timeline"></div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<script th:inline="javascript">
+    var LIVRO_ID = /*[[${livroId}]]*/ null;
+
+    function fmt(iso) {
+        if (!iso) return '—';
+        var d = new Date(iso);
+        return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    }
+
+    function fmtData(iso) {
+        if (!iso) return '—';
+        var d = new Date(iso);
+        return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
+    }
+
+    var ESTADO_LABEL = {
+        NOVO:'Novo', OTIMO:'Ótimo', BOM:'Bom', DESGASTADO:'Desgastado', RUIM:'Ruim'
+    };
+
+    function buildTimeline(v) {
+        var s = v.statusVenda;
+        var passos = [];
+
+        // Passo 1 — sempre marcado
+        passos.push({ done: true, label: 'Enviado para análise', sub: fmtData(v.dataAnuncio) });
+        passos.push({ connector: true });
+
+        // Passo 2 — marcado se saiu de AGUARDANDO
+        var passou = (s === 'NA_VITRINE' || s === 'VENDIDO' || s === 'REJEITADO');
+        passos.push({ done: passou, active: !passou, label: 'Em análise pelo admin', sub: passou ? 'Concluída' : 'Aguardando revisão' });
+        passos.push({ connector: true });
+
+        if (s === 'REJEITADO') {
+            passos.push({ rejected: true, label: 'Rejeitado', sub: v.dataAprovacao ? fmtData(v.dataAprovacao) : '', motivo: v.motivoRejeicao });
+        } else {
+            var aprovado = (s === 'NA_VITRINE' || s === 'VENDIDO');
+            passos.push({ done: aprovado, active: !aprovado && passou, label: 'Aprovado e na vitrine', sub: aprovado && v.dataAprovacao ? fmtData(v.dataAprovacao) : (aprovado ? '' : 'Pendente') });
+            if (aprovado) {
+                passos.push({ connector: true });
+                var vendido = (s === 'VENDIDO');
+                var subVendido = vendido ? 'em ' + fmtData(v.dataVenda) + (v.tokensRecebidos ? ' · T$ ' + Number(v.tokensRecebidos).toFixed(2) + ' recebidos' : '') : 'Aguardando comprador';
+                passos.push({ done: vendido, active: !vendido, label: vendido ? 'Vendido!' : 'Aguardando venda', sub: subVendido });
+            }
+        }
+
+        return passos.map(function(p) {
+            if (p.connector) return '<div class="mv-tl-connector"></div>';
+            var cls = p.done ? 'done' : p.active ? 'active' : p.rejected ? 'rejected' : '';
+            var icon = p.done ? '<i class="fa-solid fa-check"></i>' : (p.rejected ? '<i class="fa-solid fa-xmark"></i>' : '•');
+            var motivo = p.motivo ? '<div class="mv-tl-motivo"><i class="fa-solid fa-circle-exclamation"></i> ' + p.motivo + '</div>' : '';
+            return '<div class="mv-tl-step ' + cls + '">' +
+                '<div class="mv-tl-dot">' + icon + '</div>' +
+                '<div class="mv-tl-body">' +
+                    '<div class="mv-tl-label">' + p.label + '</div>' +
+                    (p.sub ? '<div class="mv-tl-sub">' + p.sub + '</div>' : '') +
+                    motivo +
+                '</div></div>';
+        }).join('');
+    }
+
+    function renderGaleria(fotos) {
+        var wrap = document.getElementById('mv-foto-wrap');
+        var thumbsEl = document.getElementById('mv-thumbs');
+        if (!fotos || !fotos.length) return;
+
+        wrap.innerHTML = '<img id="mv-foto-principal" class="mv-foto-principal" src="' + fotos[0] + '" alt="Foto do livro" onerror="this.src=\'https://placehold.co/280x380?text=%F0%9F%93%9A\'" />';
+
+        if (fotos.length > 1) {
+            thumbsEl.innerHTML = fotos.map(function(f, i) {
+                return '<img class="mv-thumb' + (i===0?' active':'') + '" src="' + f + '" alt="Foto ' + (i+1) + '" ' +
+                    'onclick="trocarFoto(\'' + f + '\', this)" ' +
+                    'onerror="this.style.display=\'none\'" />';
+            }).join('');
+        }
+    }
+
+    function trocarFoto(src, thumb) {
+        var principal = document.getElementById('mv-foto-principal');
+        if (principal) principal.src = src;
+        document.querySelectorAll('.mv-thumb').forEach(function(t){ t.classList.remove('active'); });
+        thumb.classList.add('active');
+    }
+
+    async function carregarDetalhe() {
+        if (!LIVRO_ID) {
+            document.getElementById('mv-loading').textContent = 'ID de anúncio inválido.';
+            return;
+        }
+        try {
+            var res = await fetch('/api/clientes/minhas-vendas/' + LIVRO_ID, { credentials: 'include' });
+            if (res.status === 401) { window.location.href = '/clientes/login'; return; }
+            if (!res.ok) {
+                var msg = await res.text();
+                document.getElementById('mv-loading').innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color:#991b1b"></i> ' + (msg || 'Anúncio não encontrado.');
+                return;
+            }
+
+            var v = await res.json();
+
+            // Breadcrumb
+            document.getElementById('mv-bc-titulo').textContent = v.titulo || 'Detalhe';
+            document.title = (v.titulo || 'Anúncio') + ' — Bibliotroca';
+
+            // Galeria
+            renderGaleria(v.fotos);
+
+            // Título / autor
+            document.getElementById('mv-titulo').textContent = v.titulo || '—';
+            document.getElementById('mv-autor').textContent = v.autor || '';
+
+            // Badges
+            var statusLabel = { AGUARDANDO_APROVACAO:'Aguardando Aprovação', NA_VITRINE:'Na Vitrine', VENDIDO:'Vendido', REJEITADO:'Rejeitado' };
+            var badgeEl = document.getElementById('mv-badge-status');
+            badgeEl.textContent = statusLabel[v.statusVenda] || v.statusVenda;
+            badgeEl.classList.add('mv-badge-' + v.statusVenda);
+
+            var estadoEl = document.getElementById('mv-badge-estado');
+            if (v.estadoAprovado) {
+                var ESTADO_LABEL = { NOVO:'Novo', OTIMO:'Ótimo', BOM:'Bom', DESGASTADO:'Desgastado', RUIM:'Ruim' };
+                estadoEl.textContent = ESTADO_LABEL[v.estadoAprovado] || v.estadoAprovado;
+            } else {
+                estadoEl.style.display = 'none';
+            }
+
+            // Preço
+            document.getElementById('mv-preco').textContent = v.precoAprovado != null ? 'T$ ' + Number(v.precoAprovado).toFixed(2) : 'A definir';
+
+            // Detalhes
+            document.getElementById('mv-isbn').textContent          = v.isbn || '—';
+            document.getElementById('mv-idioma').textContent         = v.idioma || '—';
+            document.getElementById('mv-data-anuncio').textContent   = fmtData(v.dataAnuncio);
+            document.getElementById('mv-data-aprovacao').textContent = fmtData(v.dataAprovacao);
+
+            // Timeline
+            document.getElementById('mv-timeline').innerHTML = buildTimeline(v);
+
+            // Exibir
+            document.getElementById('mv-loading').style.display = 'none';
+            document.getElementById('mv-main').style.display    = 'block';
+
+        } catch(e) {
+            document.getElementById('mv-loading').innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color:#991b1b"></i> Erro de conexão.';
+        }
+    }
+
+    carregarDetalhe();
+</script>
+</body>
+</html>

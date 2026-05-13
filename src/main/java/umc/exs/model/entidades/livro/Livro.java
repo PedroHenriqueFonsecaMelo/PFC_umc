@@ -74,6 +74,10 @@ public class Livro {
 
     private Long adminAprovadorId;
 
+    /** Preenchido pelo admin ao rejeitar o anúncio. Visível apenas ao vendedor. */
+    @Column(columnDefinition = "TEXT")
+    private String motivoRejeicao;
+
     /** Promoção — exibe badge "PROMOÇÃO" e preço original riscado na vitrine. */
     @Builder.Default
     private Boolean emPromocao = false;
