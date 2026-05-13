@@ -28,11 +28,13 @@ import umc.exs.dtos.compra.AtualizarEnvioDTO;
 import umc.exs.dtos.compra.CriarCupomDTO;
 import umc.exs.dtos.compra.PedidoDTO;
 import umc.exs.dtos.compra.cupom.CupomDTO;
-import umc.exs.dtos.compra.lote.LoteExibicaoDTO;
+import umc.exs.DTOs.compra.lote.LoteExibicaoDTO;
 import umc.exs.dtos.livro.LivroDTO;
 import umc.exs.dtos.shared.ApiResponseDTO;
 import umc.exs.model.entidades.foundation.Cupom;
+import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.logic.Administrador;
+import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.logic.AdminRepository;
 import umc.exs.service.core.bussiness.LivroService;
 import umc.exs.service.core.control.DashboardService;
@@ -48,6 +50,7 @@ import umc.exs.service.cupom.CupomService;
 public class AdminControllerApi {
 
     private final LivroService livroService;
+    private final LivroRepository livroRepository;
     private final AdminRepository adminRepository;
     private final LoteService loteService;
     private final PedidoService pedidoService;
@@ -65,11 +68,44 @@ public class AdminControllerApi {
 
     @GetMapping("/lotes/pendentes")
     public ResponseEntity<List<LoteExibicaoDTO>> listarLotesPendentes() {
-        List<LoteExibicaoDTO> lotes = loteService.listarPendentes().stream()
-                .map(lote -> new LoteExibicaoDTO(lote.getId(), lote.getCodigoProtocolo(),
-                        lote.getStatus().toString(), lote.getDataCriacao()))
+        List<LoteExibicaoDTO> dtos = loteService.listarPendentesComCliente().stream()
+                .map(lote -> {
+                    long qtd = livroRepository.countByLoteId(lote.getId());
+                    String nome  = lote.getCliente() != null ? lote.getCliente().getNome()  : "—";
+                    String email = lote.getCliente() != null ? lote.getCliente().getEmail() : "—";
+                    return new LoteExibicaoDTO(lote.getId(), lote.getCodigoProtocolo(),
+                            lote.getStatus().toString(), lote.getDataCriacao(), nome, email, qtd);
+                })
                 .toList();
-        return ResponseEntity.ok(lotes);
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/lotes/{id}/detalhes")
+    public ResponseEntity<Map<String, Object>> detalharLote(@PathVariable Long id) {
+        Lote lote = loteService.findByIdComCliente(id);
+        List<LivroDTO> livros = livroService.listarLivrosPorLote(id);
+
+        java.util.LinkedHashMap<String, Object> resp = new java.util.LinkedHashMap<>();
+        resp.put("id", lote.getId());
+        resp.put("codigoProtocolo", lote.getCodigoProtocolo());
+        resp.put("status", lote.getStatus().toString());
+        resp.put("dataCriacao", lote.getDataCriacao());
+        resp.put("nomeVendedor",  lote.getCliente() != null ? lote.getCliente().getNome()  : "—");
+        resp.put("emailVendedor", lote.getCliente() != null ? lote.getCliente().getEmail() : "—");
+        resp.put("vendedorId",    lote.getCliente() != null ? lote.getCliente().getId()     : null);
+
+        List<Map<String, Object>> livrosMaps = livros.stream().map(b -> {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id",        b.getId());
+            map.put("titulo",    b.getTitulo());
+            map.put("autor",     b.getAutor());
+            map.put("isbn",      b.getIsbn());
+            map.put("fotosUrls", b.getFotosUrls() != null ? b.getFotosUrls() : "[]");
+            return map;
+        }).toList();
+        resp.put("livros", livrosMaps);
+        resp.put("quantidadeLivros", livrosMaps.size());
+        return ResponseEntity.ok(resp);
     }
 
     @GetMapping("/lotes/{id}")

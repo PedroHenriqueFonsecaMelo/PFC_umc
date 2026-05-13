@@ -114,7 +114,7 @@
 }
 
 select,
-button:not(.nav-item):not(.tab-btn):not(.filter-btn):not(.btn-salvar-envio):not(.btn-publicar):not(.btn-remover-post):not(.btn-editar-post):not(.blog-confirm-sim):not(.blog-confirm-nao):not(.btn-refresh):not(.btn-abrir-lote):not(.btn-publicar-livro):not(.btn-rejeitar-livro) {
+button:not(.nav-item):not(.tab-btn):not(.filter-btn):not(.btn-salvar-envio):not(.btn-publicar):not(.btn-remover-post):not(.btn-editar-post):not(.blog-confirm-sim):not(.blog-confirm-nao):not(.btn-refresh):not(.btn-abrir-lote):not(.btn-auditar-lote):not(.btn-voltar-lotes):not(.btn-publicar-livro):not(.btn-rejeitar-livro) {
   width: 100%;
   margin-top: 10px;
   padding: 12px;
@@ -739,4 +739,348 @@ input[type="text"].search-input.pedidos-search {
 .btn-rejeitar-livro:hover {
   background: rgba(185, 28, 28, 0.06);
   border-color: #b91c1c;
+}
+
+/* ════════════════════════════════════════
+   TABELA DE LOTES PENDENTES
+   ════════════════════════════════════════ */
+
+.lotes-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #7a6e65;
+}
+
+.lotes-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+  flex-wrap: wrap;
+}
+
+.lotes-header-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #2c241b;
+}
+
+.lotes-header-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.55rem;
+  height: 1.55rem;
+  padding: 0 .45rem;
+  background: #722f37;
+  color: #fff;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
+  margin-left: .45rem;
+  vertical-align: middle;
+}
+
+.lotes-search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 360px;
+  min-width: 180px;
+}
+
+.lotes-search-icon {
+  position: absolute;
+  left: .75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a09890;
+  font-size: .8rem;
+  pointer-events: none;
+}
+
+.lotes-search-input {
+  width: 100%;
+  padding: .55rem .85rem .55rem 2.1rem;
+  border: 1.5px solid rgba(44,36,27,.18);
+  border-radius: 2px;
+  background: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .85rem;
+  color: #2c241b;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color .18s;
+}
+
+.lotes-search-input:focus {
+  border-color: rgba(74,93,35,.55);
+}
+
+.lotes-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid rgba(44,36,27,.1);
+  border-radius: 2px;
+  overflow: hidden;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .85rem;
+}
+
+.lotes-th {
+  padding: .65rem 1rem;
+  background: #f5f2ed;
+  text-align: left;
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #7a6e65;
+  border-bottom: 1px solid rgba(44,36,27,.12);
+  white-space: nowrap;
+}
+
+.lotes-row {
+  border-bottom: 1px solid rgba(44,36,27,.07);
+  transition: background .15s;
+}
+
+.lotes-row:last-child { border-bottom: none; }
+
+.lotes-row:hover { background: #faf8f4; }
+
+.lotes-td {
+  padding: .75rem 1rem;
+  color: #2c241b;
+  vertical-align: middle;
+}
+
+.lotes-td-id {
+  font-family: 'Courier New', monospace;
+  font-size: .78rem;
+  color: #7a6e65;
+  white-space: nowrap;
+}
+
+.lotes-td-vendedor {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.lotes-td-email {
+  font-size: .78rem;
+  color: #7a6e65;
+  font-family: 'Courier New', monospace;
+}
+
+.lotes-td-data {
+  white-space: nowrap;
+  font-size: .82rem;
+  color: #7a6e65;
+}
+
+.lotes-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  background: rgba(74,93,35,.12);
+  color: #4a5d23;
+  font-size: .72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.lote-protocolo-pill {
+  font-family: 'Courier New', monospace;
+  font-size: .75rem;
+  padding: .2rem .55rem;
+  background: rgba(44,36,27,.06);
+  border: 1px solid rgba(44,36,27,.12);
+  border-radius: 2px;
+  color: #2c241b;
+  white-space: nowrap;
+}
+
+.lotes-qtd-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 .4rem;
+  background: rgba(37,99,235,.1);
+  color: #1d4ed8;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
+}
+
+.btn-auditar-lote {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .42rem .9rem;
+  background: #2c241b;
+  color: #f9f6f0;
+  border: none;
+  border-radius: 2px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .18s;
+}
+
+.btn-auditar-lote:hover { background: #722f37; }
+
+/* ════════════════════════════════════════
+   CABEÇALHO DA AUDITORIA
+   ════════════════════════════════════════ */
+
+.audit-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: .75rem;
+  border-bottom: 1px solid rgba(44,36,27,.1);
+  flex-wrap: wrap;
+}
+
+.audit-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2c241b;
+  margin: 0;
+}
+
+.audit-count {
+  font-family: 'DM Sans', sans-serif;
+  font-size: .78rem;
+  font-weight: 400;
+  color: #7a6e65;
+  margin-left: .5rem;
+}
+
+.btn-voltar-lotes {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .42rem .85rem;
+  background: #fff;
+  border: 1.5px solid rgba(44,36,27,.2);
+  color: #7a6e65;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: border-color .18s, color .18s;
+}
+
+.btn-voltar-lotes:hover {
+  border-color: #2c241b;
+  color: #2c241b;
+}
+
+.audit-vendedor-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .75rem 1rem;
+  background: #fff;
+  border: 1px solid rgba(44,36,27,.1);
+  border-left: 3px solid #4a5d23;
+  margin-bottom: .75rem;
+  border-radius: 2px;
+  flex-wrap: wrap;
+}
+
+.audit-vendedor-info {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.audit-vendedor-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  background: rgba(74,93,35,.12);
+  color: #4a5d23;
+  font-size: .85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.audit-vendedor-nome {
+  font-weight: 700;
+  font-size: .88rem;
+  color: #2c241b;
+}
+
+.audit-vendedor-email {
+  font-size: .75rem;
+  color: #7a6e65;
+  font-family: 'Courier New', monospace;
+}
+
+.audit-protocolo {
+  font-family: 'Courier New', monospace;
+  font-size: .75rem;
+  color: #7a6e65;
+  padding: .25rem .65rem;
+  background: rgba(44,36,27,.05);
+  border: 1px solid rgba(44,36,27,.1);
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.audit-progress-wrap {
+  margin-bottom: 1.1rem;
+}
+
+.audit-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: .72rem;
+  color: #7a6e65;
+  margin-bottom: .3rem;
+}
+
+.audit-progress-track {
+  height: 6px;
+  background: rgba(44,36,27,.1);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.audit-progress-fill {
+  height: 100%;
+  background: #4a5d23;
+  border-radius: 999px;
+  transition: width .4s ease;
 }

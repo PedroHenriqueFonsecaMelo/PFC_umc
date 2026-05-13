@@ -49,6 +49,8 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
 
     List<Livro> findByLoteIdAndAprovadoFalse(Long loteId);
 
+    long countByLoteId(Long loteId);
+
     long countByLoteIdAndAprovadoFalse(Long loteId);
 
     // =========================================================

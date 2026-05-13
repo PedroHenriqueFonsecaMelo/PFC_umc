@@ -8,9 +8,20 @@ import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.usuario.Cliente;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface LoteRepository extends JpaRepository<Lote, Long> {
     List<Lote> findByStatus(Lote.LoteStatus status);
+
+    /** Lista lotes por status com cliente carregado (evita N+1 queries). */
+    @Query("SELECT l FROM Lote l JOIN FETCH l.cliente WHERE l.status = :status ORDER BY l.dataCriacao ASC")
+    List<Lote> findByStatusWithCliente(@Param("status") Lote.LoteStatus status);
+
+    /** Busca lote por ID com cliente carregado. */
+    @Query("SELECT l FROM Lote l JOIN FETCH l.cliente WHERE l.id = :id")
+    Optional<Lote> findByIdWithCliente(@Param("id") Long id);
+
+    long countByClienteId(Long clienteId);
 
     @Query("SELECT COUNT(l) FROM Lote l WHERE l.cliente.id = :clienteId AND l.status = :status")
     long countByClienteIdAndStatus(@Param("clienteId") Long clienteId, @Param("status") Lote.LoteStatus status);

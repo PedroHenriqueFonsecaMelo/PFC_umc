@@ -2,75 +2,146 @@
    LOTES
    ════════════════════════════════════════ */
 const priceMap = { "NOVO": 50, "OTIMO": 40, "BOM": 30, "DESGASTADO": 20, "RUIM": 0 };
-let livrosCache = [];
+let livrosCache     = [];
+let loteAtualMeta   = null; // { id, codigoProtocolo, nomeVendedor, emailVendedor, quantidadeLivros }
+let todosLotes      = [];
+let loteSearchTimer = null;
 
 async function loadLotes() {
   const container = document.getElementById("contentArea");
   container.innerHTML = '<div class="loading">Carregando lotes pendentes...</div>';
   try {
     const res = await fetch("/api/admin/lotes/pendentes");
-    const lotes = await res.json();
-
-    if (lotes.length === 0) {
-      container.innerHTML = `
-        <div class="lotes-empty">
-          <i class="fa-solid fa-box-open"></i>
-          <h3>Nenhum lote aguardando revisão</h3>
-          <p>Todos os lotes foram avaliados. Novas submissões aparecerão aqui.</p>
-        </div>`;
-      return;
-    }
-
-    let html = `
-      <div class="lotes-section-header">
-        <h3 class="lotes-section-title">Lotes Aguardando Revisão</h3>
-        <span class="lotes-count">${lotes.length} lote(s)</span>
-      </div>
-      <div class="lotes-grid">`;
-
-    lotes.forEach((lote) => {
-      const data = lote.dataCriacao
-        ? new Date(lote.dataCriacao).toLocaleDateString("pt-BR", {
-            day: "2-digit", month: "long", year: "numeric"
-          })
-        : "—";
-      const qtdLivros = (lote.livros && lote.livros.length > 0)
-        ? `<div class="lote-info-row"><i class="fa-solid fa-book"></i> ${lote.livros.length} livro(s) no lote</div>`
-        : "";
-
-      html += `
-      <div class="lote-card">
-        <div class="lote-card-header">
-          <i class="fa-solid fa-box-open lote-icon"></i>
-          <span class="lote-badge-aguardando">Aguardando Revisão</span>
-        </div>
-        <div class="lote-numero">Lote #${lote.id}</div>
-        <div class="lote-protocolo">${lote.codigoProtocolo}</div>
-        <div class="lote-info-row">
-          <i class="fa-regular fa-calendar"></i>
-          ${data}
-        </div>
-        ${qtdLivros}
-        <button class="btn-abrir-lote" onclick="loadLivrosLote(${lote.id})">
-          <i class="fa-solid fa-magnifying-glass"></i> Abrir Lote para Auditoria
-        </button>
-      </div>`;
-    });
-
-    html += "</div>";
-    container.innerHTML = html;
+    todosLotes = await res.json();
+    renderLotesTabela();
   } catch (e) {
     container.innerHTML = '<p style="color:#722F37;padding:1rem">Erro ao conectar com o servidor.</p>';
   }
 }
 
+function renderLotesTabela(filtro) {
+  const container = document.getElementById("contentArea");
+
+  let lotes = todosLotes;
+
+  // Filtro de texto
+  if (filtro && filtro.trim()) {
+    const q = filtro.trim().toLowerCase();
+    lotes = lotes.filter(l =>
+      (l.codigoProtocolo || "").toLowerCase().includes(q) ||
+      (l.nomeVendedor    || "").toLowerCase().includes(q) ||
+      (l.emailVendedor   || "").toLowerCase().includes(q) ||
+      String(l.id).includes(q)
+    );
+  }
+
+  const totalPendentes = todosLotes.length;
+
+  if (totalPendentes === 0) {
+    container.innerHTML = `
+      <div class="lotes-empty">
+        <i class="fa-solid fa-box-open" style="font-size:2.5rem;color:#c5bfb7;margin-bottom:.75rem"></i>
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;color:#2c241b;margin:0 0 .35rem">Nenhum lote aguardando revisão</h3>
+        <p style="font-size:.85rem;color:#7a6e65;margin:0">Todos os lotes foram avaliados. Novas submissões aparecerão aqui.</p>
+      </div>`;
+    return;
+  }
+
+  let html = `
+    <div class="lotes-header-bar">
+      <div>
+        <span class="lotes-header-title">Lotes Pendentes</span>
+        <span class="lotes-header-badge">${totalPendentes}</span>
+      </div>
+      <div class="lotes-search-wrap">
+        <i class="fa-solid fa-magnifying-glass lotes-search-icon"></i>
+        <input class="lotes-search-input" id="lotesSearchInput" type="text"
+               placeholder="Buscar por protocolo, vendedor ou e-mail…"
+               value="${esc(filtro || '')}"
+               oninput="onLoteSearch(this.value)" />
+      </div>
+    </div>`;
+
+  if (lotes.length === 0) {
+    html += `<div style="padding:2rem;text-align:center;color:#7a6e65;font-size:.88rem">Nenhum lote corresponde à busca.</div>`;
+    container.innerHTML = html;
+    return;
+  }
+
+  html += `
+    <table class="lotes-table">
+      <thead>
+        <tr>
+          <th class="lotes-th">#</th>
+          <th class="lotes-th">Protocolo</th>
+          <th class="lotes-th">Vendedor</th>
+          <th class="lotes-th">E-mail</th>
+          <th class="lotes-th" style="text-align:center">Livros</th>
+          <th class="lotes-th">Recebido em</th>
+          <th class="lotes-th" style="text-align:center">Ação</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  lotes.forEach(lote => {
+    const data = lote.dataCriacao
+      ? new Date(lote.dataCriacao).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })
+      : "—";
+    html += `
+      <tr class="lotes-row" id="lote-row-${lote.id}">
+        <td class="lotes-td lotes-td-id">#${lote.id}</td>
+        <td class="lotes-td"><span class="lote-protocolo-pill">${esc(lote.codigoProtocolo || "—")}</span></td>
+        <td class="lotes-td lotes-td-vendedor">
+          <span class="lotes-avatar">${esc((lote.nomeVendedor || "?").charAt(0).toUpperCase())}</span>
+          ${esc(lote.nomeVendedor || "—")}
+        </td>
+        <td class="lotes-td lotes-td-email">${esc(lote.emailVendedor || "—")}</td>
+        <td class="lotes-td" style="text-align:center">
+          <span class="lotes-qtd-badge">${lote.quantidadeLivros}</span>
+        </td>
+        <td class="lotes-td lotes-td-data">${data}</td>
+        <td class="lotes-td" style="text-align:center">
+          <button class="btn-auditar-lote" onclick="loadLivrosLote(${lote.id})">
+            <i class="fa-solid fa-magnifying-glass"></i> Auditar
+          </button>
+        </td>
+      </tr>`;
+  });
+
+  html += `</tbody></table>`;
+  container.innerHTML = html;
+}
+
+function onLoteSearch(val) {
+  clearTimeout(loteSearchTimer);
+  loteSearchTimer = setTimeout(() => renderLotesTabela(val), 220);
+}
+
+function avatarInicial(nome) {
+  return (nome || "?").charAt(0).toUpperCase();
+}
+
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 async function loadLivrosLote(loteId) {
+  const container = document.getElementById("contentArea");
+  container.innerHTML = '<div class="loading">Carregando livros do lote...</div>';
   try {
-    const res = await fetch("/api/admin/lotes/" + loteId);
-    livrosCache = await res.json();
+    const res = await fetch("/api/admin/lotes/" + loteId + "/detalhes");
+    const data = await res.json();
+    loteAtualMeta = {
+      id:              data.id,
+      codigoProtocolo: data.codigoProtocolo,
+      nomeVendedor:    data.nomeVendedor,
+      emailVendedor:   data.emailVendedor,
+      quantidadeLivros: data.quantidadeLivros,
+    };
+    livrosCache = data.livros || [];
     renderLivros();
   } catch (e) {
-    alert("Erro ao carregar livros do lote.");
+    container.innerHTML = '<p style="color:#722F37;padding:1rem">Erro ao carregar livros do lote.</p>';
   }
 }
 
@@ -86,15 +157,45 @@ function renderLivros() {
   garantirModalRejeicao();
   const container = document.getElementById("contentArea");
 
-  let html = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid rgba(44,36,27,.1)">
-      <h3 style="font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:#2c241b">
-        Auditando Livros <span style="font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:400;color:#7a6e65">${livrosCache.length} livro(s) neste lote</span>
-      </h3>
-      <button onclick="loadLotes()" style="background:none;border:none;cursor:pointer;font-size:.78rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#7a6e65;display:flex;align-items:center;gap:.35rem;padding:0">
-        <i class="fa-solid fa-arrow-left" style="font-size:.7rem"></i> Voltar
-      </button>
+  const total      = loteAtualMeta ? loteAtualMeta.quantidadeLivros : livrosCache.length;
+  const restantes  = livrosCache.length;
+  const revisados  = total - restantes;
+  const pct        = total > 0 ? Math.round((revisados / total) * 100) : 0;
+
+  const vendedorHtml = loteAtualMeta ? `
+    <div class="audit-vendedor-bar">
+      <div class="audit-vendedor-info">
+        <span class="audit-vendedor-avatar">${avatarInicial(loteAtualMeta.nomeVendedor)}</span>
+        <div>
+          <div class="audit-vendedor-nome">${esc(loteAtualMeta.nomeVendedor)}</div>
+          <div class="audit-vendedor-email">${esc(loteAtualMeta.emailVendedor)}</div>
+        </div>
+      </div>
+      <div class="audit-protocolo">
+        <i class="fa-solid fa-hashtag"></i> ${esc(loteAtualMeta.codigoProtocolo)}
+      </div>
     </div>
+    <div class="audit-progress-wrap">
+      <div class="audit-progress-labels">
+        <span>${revisados} de ${total} livros revisados</span>
+        <span>${pct}%</span>
+      </div>
+      <div class="audit-progress-track">
+        <div class="audit-progress-fill" style="width:${pct}%"></div>
+      </div>
+    </div>` : "";
+
+  let html = `
+    <div class="audit-topbar">
+      <button class="btn-voltar-lotes" onclick="loadLotes()">
+        <i class="fa-solid fa-arrow-left"></i> Voltar aos Lotes
+      </button>
+      <h3 class="audit-title">
+        Auditoria do Lote
+        <span class="audit-count">${restantes} livro(s) pendente(s)</span>
+      </h3>
+    </div>
+    ${vendedorHtml}
     <div class="book-grid">`;
 
   livrosCache.forEach((b, bookIdx) => {

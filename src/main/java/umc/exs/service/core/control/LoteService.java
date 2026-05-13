@@ -23,16 +23,27 @@ public class LoteService {
         return loteRepository.findByStatus(Lote.LoteStatus.PENDENTE);
     }
 
+    /** Lista lotes pendentes com o cliente já carregado (JOIN FETCH — sem N+1). */
+    public List<Lote> listarPendentesComCliente() {
+        return loteRepository.findByStatusWithCliente(Lote.LoteStatus.PENDENTE);
+    }
+
     /**
      * Busca lote por ID.
      * Throw se não encontrado.
-     * 
+     *
      * @param id lote
      * @return Lote
      */
     @SuppressWarnings("null")
     public Lote findById(Long id) {
         return loteRepository.findById(id).orElseThrow(() -> new RuntimeException("Lote não encontrado"));
+    }
+
+    /** Busca lote por ID com cliente carregado. */
+    public Lote findByIdComCliente(Long id) {
+        return loteRepository.findByIdWithCliente(id)
+                .orElseThrow(() -> new RuntimeException("Lote não encontrado"));
     }
 
     /**
