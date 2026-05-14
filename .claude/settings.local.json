@@ -13,7 +13,8 @@
       "Bash(xargs ls -la)",
       "Bash(cmd.exe /c \"mvnw.cmd compile -q 2>&1\")",
       "Bash(cmd.exe /c \"mvnw.cmd compile 2>&1\")",
-      "Bash(cmd.exe /c \"mvnw.cmd clean compile 2>&1\")"
+      "Bash(cmd.exe /c \"mvnw.cmd clean compile 2>&1\")",
+      "Bash(grep -E \"\\\\.\\(jsx?|tsx?|vue|html\\)$\")"
     ]
   }
 }

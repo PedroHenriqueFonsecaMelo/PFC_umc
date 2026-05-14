@@ -189,7 +189,7 @@ public class SecurityConfig {
         // Recursos estáticos (CSS, JS, Imagens)
         private static final String[] STATIC_RESOURCES = {
                         "/css/**", "/js/**", "/images/**", "/imagens/**", "/cliente/**",
-                        "/produto/**", "/static/**", "/uploads/**"
+                        "/produto/**", "/static/**", "/uploads/**", "/*.png", "/*.ico", "/*.svg"
         };
 
         // Rotas exclusivas para ADMIN

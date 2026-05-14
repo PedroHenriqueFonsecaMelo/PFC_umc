@@ -73,6 +73,8 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   position: relative;
   background: var(--cream);
   border: 1px solid var(--border);
+  border-radius: 1rem;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -163,6 +165,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   padding: 1.2rem 1.5rem;
   background: var(--cream);
   border: 1px solid var(--border);
+  border-radius: .6rem;
   margin-bottom: 1.4rem;
 }
 .detalhe-preco {
@@ -216,6 +219,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   background: var(--ink);
   color: var(--paper);
   border: 2px solid var(--ink);
+  border-radius: .6rem;
   font-family: "DM Sans", sans-serif;
   font-size: .88rem;
   font-weight: 700;
@@ -249,6 +253,7 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   background: var(--accent);
   color: var(--paper);
   border: 2px solid var(--accent);
+  border-radius: .6rem;
   font-family: "DM Sans", sans-serif;
   font-size: .88rem;
   font-weight: 700;

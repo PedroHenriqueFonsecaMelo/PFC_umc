@@ -33,4 +33,7 @@ public class RankingPublicoDTO {
 
     /** XP necessário para o próximo nível (0 = nível máximo). */
     private int xpProximoNivel;
+
+    /** URL da foto de perfil — pode ser null. */
+    private String fotoPerfil;
 }

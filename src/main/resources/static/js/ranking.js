@@ -98,14 +98,15 @@ function renderPodio(top3) {
         const pct = u.xpTotal > 0 && u.xpProximoNivel >= 0
             ? Math.min(100, Math.round((u.xpTotal / (u.xpTotal + (u.xpProximoNivel || 1))) * 100))
             : 100;
+        const avatarHtml = u.fotoPerfil
+            ? `<img src="${esc(u.fotoPerfil)}" alt="${nomeCurto}" class="rk-card-avatar-img" style="border-color:${corMedalha(u.posicao)}">`
+            : `<div class="rk-card-avatar" style="border-color:${corMedalha(u.posicao)}">${inicial(u.primeiroNome)}</div>`;
 
         return `
         <div class="rk-card pos-${u.posicao}${eVoce ? ' e-voce' : ''}">
             ${eVoce ? '<span class="rk-card-voce-badge">Você</span>' : ''}
             <div class="rk-card-medalha">${medalha(u.posicao)}</div>
-            <div class="rk-card-avatar" style="border-color:${corMedalha(u.posicao)}">
-                ${inicial(u.primeiroNome)}
-            </div>
+            ${avatarHtml}
             <div class="rk-card-nome" title="${nomeCurto}">${nomeCurto}</div>
             <div class="rk-card-nivel">${esc(u.badge)} ${esc(u.nivel)}</div>
             <div class="rk-card-xp-num">${(u.xpTotal).toLocaleString('pt-BR')}</div>
@@ -127,10 +128,13 @@ function renderTabela(items) {
         const eVoce = _minhaPosicao > 0 && u.posicao === _minhaPosicao;
         const nomeCurto = esc(u.primeiroNome) + (u.inicialSobrenome ? ' ' + esc(u.inicialSobrenome) : '');
         const pct = Math.round((u.xpTotal / maxXp) * 100);
+        const avatarLinha = u.fotoPerfil
+            ? `<img src="${esc(u.fotoPerfil)}" alt="${nomeCurto}" class="rk-linha-avatar-img">`
+            : `<div class="rk-linha-avatar">${inicial(u.primeiroNome)}</div>`;
         return `
         <div class="rk-linha${eVoce ? ' e-voce' : ''}">
             <span class="rk-linha-pos">${u.posicao}º</span>
-            <div class="rk-linha-avatar">${inicial(u.primeiroNome)}</div>
+            ${avatarLinha}
             <div class="rk-linha-info">
                 <div class="rk-linha-nome">${nomeCurto}</div>
                 <div class="rk-linha-nivel">${esc(u.badge)} ${esc(u.nivel)}</div>

@@ -197,7 +197,7 @@ function atualizarBotaoEstante(livroId) {
     } else {
         // Livro não está na estante → botão de adição
         btn.innerHTML =
-            '<img src="/imagens/estante.png" style="width:20px;height:20px;object-fit:contain;opacity:.9" alt="">' +
+            '<img src="/estante.png" style="width:80px;height:80px;object-fit:contain;opacity:.9" alt="">' +
             ' Adicionar à Estante';
         btn.classList.remove('remover');
         btn.classList.remove('na-estante');

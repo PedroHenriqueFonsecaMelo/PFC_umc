@@ -622,6 +622,7 @@ footer::before { content: "◆  ◆  ◆"; display: block; font-size: 0.6rem; le
   padding: 1.2rem 1rem 1rem;
   background: rgba(249,246,240,.04);
   border: 1px solid rgba(249,246,240,.09);
+  border-radius: 1rem;
   min-width: 150px;
   text-align: center;
   transition: background .2s;
@@ -656,6 +657,19 @@ footer::before { content: "◆  ◆  ◆"; display: block; font-size: 0.6rem; le
   width: 58px;
   height: 58px;
   font-size: 1.4rem;
+  border-color: rgba(201,162,39,.6);
+}
+.rhi-avatar-img {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(249,246,240,.15);
+  margin-bottom: .5rem;
+}
+.rhi-card.pos-1 .rhi-avatar-img {
+  width: 58px;
+  height: 58px;
   border-color: rgba(201,162,39,.6);
 }
 .rhi-nome {

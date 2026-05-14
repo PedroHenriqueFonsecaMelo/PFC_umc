@@ -75,10 +75,13 @@ async function carregarRanking() {
 
     container.innerHTML = ranking.map(u => {
       const nomeCurto = esc(u.primeiroNome) + (u.inicialSobrenome ? " " + esc(u.inicialSobrenome) : "");
+      const avatarHtml = u.fotoPerfil
+        ? `<img src="${esc(u.fotoPerfil)}" alt="${nomeCurto}" class="rhi-avatar-img">`
+        : `<div class="rhi-avatar">${inicial(u.primeiroNome)}</div>`;
       return `
       <div class="rhi-card pos-${u.posicao}">
         <div class="rhi-medalha">${medalha(u.posicao)}</div>
-        <div class="rhi-avatar">${inicial(u.primeiroNome)}</div>
+        ${avatarHtml}
         <div class="rhi-nome" title="${nomeCurto}">${nomeCurto}</div>
         <div class="rhi-nivel">${esc(u.nivel)}</div>
         <div class="rhi-xp">${u.xpTotal.toLocaleString("pt-BR")}</div>
@@ -110,7 +113,7 @@ async function carregarNavUsuario() {
       if (btn) btn.href = "/livros/vender";
       // Botão do ranking: usuário logado → "Ver ranking completo"
       const ctaRanking = document.getElementById("rankingCtaBtn");
-      if (ctaRanking) { ctaRanking.href = "/ranking"; ctaRanking.textContent = "Ver ranking completo →"; }
+      if (ctaRanking) { ctaRanking.href = "/ranking"; ctaRanking.textContent = "Ranking Completo"; }
       return;
     }
 

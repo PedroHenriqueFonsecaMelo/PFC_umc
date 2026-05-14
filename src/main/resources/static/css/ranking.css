@@ -84,6 +84,7 @@ body {
   font-weight: 600;
   padding: .4rem 1rem;
   border: 1px solid var(--border);
+  border-radius: .5rem;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
@@ -119,6 +120,7 @@ body {
   height: 180px;
   background: rgba(44,36,27,.06);
   border: 1px solid var(--border);
+  border-radius: 1rem;
   animation: rkShimmer 1.4s infinite;
 }
 .rk-podio-skeleton-center { height: 220px; }
@@ -134,6 +136,7 @@ body {
   align-items: center;
   padding: 1.4rem 1.2rem 1.2rem;
   border: 1.5px solid var(--border);
+  border-radius: 1rem;
   background: #fff;
   width: 200px;
   position: relative;
@@ -180,6 +183,19 @@ body {
   height: 64px;
   font-size: 1.6rem;
   border-color: var(--gold);
+}
+.rk-card-avatar-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+  margin-bottom: .65rem;
+  flex-shrink: 0;
+}
+.rk-card.pos-1 .rk-card-avatar-img {
+  width: 64px;
+  height: 64px;
 }
 
 .rk-card-nome {
@@ -280,6 +296,14 @@ body {
   border: 1.5px solid var(--border);
   flex-shrink: 0;
 }
+.rk-linha-avatar-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--border);
+  flex-shrink: 0;
+}
 .rk-linha-info { min-width: 0; }
 .rk-linha-nome {
   font-weight: 600;
@@ -300,11 +324,13 @@ body {
 .rk-linha-barra-track {
   height: 4px;
   background: rgba(44,36,27,.08);
+  border-radius: 2px;
   overflow: hidden;
 }
 .rk-linha-barra-fill {
   height: 100%;
   background: var(--accent);
+  border-radius: 2px;
   transition: width .7s cubic-bezier(.25,.46,.45,.94);
 }
 .rk-linha-xp {
