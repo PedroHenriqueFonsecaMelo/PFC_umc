@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -96,6 +97,32 @@ public class NotificacaoController {
         notificacao.setLida(true);
         notificacaoRepository.save(notificacao);
         return ResponseEntity.ok(Map.of("mensagem", "Notificação marcada como lida."));
+    }
+
+    /** Cria uma notificação para o usuário autenticado (usado pelo frontend para alertas de preço). */
+    @PostMapping
+    public ResponseEntity<Map<String, Object>> criar(
+            @RequestBody Map<String, String> body,
+            @AuthenticationPrincipal UserDetails user) {
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        String mensagem = body.get("mensagem");
+        if (mensagem == null || mensagem.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Mensagem obrigatória."));
+        }
+
+        Cliente cliente = clienteRepository.findByEmail(user.getUsername())
+                .orElseThrow(() -> new RuntimeException(CLIENTE_NAO_ENCONTRADO));
+
+        NotificacaoDashboard notif = NotificacaoDashboard.builder()
+                .cliente(cliente)
+                .mensagem(mensagem.length() > 255 ? mensagem.substring(0, 255) : mensagem)
+                .dataCriacao(java.time.LocalDateTime.now())
+                .link(body.get("link"))
+                .build();
+
+        notificacaoRepository.save(notif);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toMap(notif));
     }
 
     /** Marca todas as notificações do usuário como lidas. */

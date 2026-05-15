@@ -479,6 +479,284 @@
         });
 
         cnCarregarBadge();
+
+        /* ════════════════════════════════════════════════════════
+           NOTIFICAÇÃO DE ALTERAÇÃO DE PREÇO — Cenários 1 e 2
+           ════════════════════════════════════════════════════════ */
+
+        /* ── Injeta CSS do banner / toast ── */
+        (function() {
+            var s = document.createElement('style');
+            s.textContent = [
+                /* Banner topo — Cenário 1 */
+                '#cn-preco-banner{position:fixed;top:0;left:0;right:0;z-index:9999;',
+                'background:#fff;border-left:5px solid #722f37;',
+                'box-shadow:0 4px 28px rgba(44,36,27,.2);',
+                'max-height:60vh;overflow-y:auto;',
+                'transform:translateY(-100%);',
+                'transition:transform .38s cubic-bezier(.34,1.56,.64,1);}',
+                '#cn-preco-banner.cn-banner-visivel{transform:translateY(0);}',
+                '#cn-preco-banner .cn-banner-header{',
+                'display:flex;align-items:center;justify-content:space-between;',
+                'padding:.85rem 1.4rem;',
+                'background:linear-gradient(90deg,rgba(114,47,55,.06),transparent);',
+                'border-bottom:1px solid rgba(114,47,55,.12);}',
+                '#cn-preco-banner .cn-banner-titulo{',
+                'font-family:"Playfair Display",serif;font-size:.97rem;font-weight:700;',
+                'color:#2c241b;display:flex;align-items:center;gap:.5rem;}',
+                '#cn-preco-banner .cn-banner-lista{',
+                'padding:.6rem 1.4rem;list-style:none;margin:0;}',
+                '#cn-preco-banner .cn-banner-lista li{',
+                'padding:.42rem 0;border-bottom:1px solid rgba(44,36,27,.06);',
+                'font-size:.84rem;color:#2c241b;display:flex;align-items:center;gap:.5rem;',
+                'flex-wrap:wrap;}',
+                '#cn-preco-banner .cn-banner-lista li:last-child{border-bottom:none;}',
+                '#cn-preco-banner .cn-preco-titulo{flex:1;min-width:0;',
+                'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;',
+                'font-family:"Playfair Display",serif;font-weight:600;}',
+                '#cn-preco-banner .cn-preco-velho{text-decoration:line-through;',
+                'color:#b0a49a;font-size:.78rem;}',
+                '#cn-preco-banner .cn-preco-novo{font-weight:700;}',
+                '#cn-preco-banner .cn-preco-delta-up{color:#c62828;font-size:.78rem;font-weight:700;}',
+                '#cn-preco-banner .cn-preco-delta-down{color:#2e7d32;font-size:.78rem;font-weight:700;}',
+                '#cn-preco-banner .cn-banner-acoes{',
+                'display:flex;gap:.75rem;padding:.85rem 1.4rem;',
+                'border-top:1px solid rgba(44,36,27,.08);flex-wrap:wrap;}',
+                '#cn-preco-banner .cn-btn-estante{',
+                'padding:.52rem 1.2rem;background:#722f37;color:#fff;',
+                'border:none;border-radius:6px;font-size:.82rem;font-weight:700;',
+                'font-family:"DM Sans",sans-serif;letter-spacing:.05em;cursor:pointer;',
+                'text-decoration:none;display:inline-flex;align-items:center;',
+                'transition:background .2s;}',
+                '#cn-preco-banner .cn-btn-estante:hover{background:#5c2530;}',
+                '#cn-preco-banner .cn-btn-fechar-banner{',
+                'padding:.52rem 1.1rem;background:transparent;',
+                'border:1px solid rgba(44,36,27,.22);color:#7a6e65;',
+                'border-radius:6px;font-size:.82rem;cursor:pointer;',
+                'font-family:"DM Sans",sans-serif;transition:background .2s;}',
+                '#cn-preco-banner .cn-btn-fechar-banner:hover{background:rgba(44,36,27,.06);}',
+                /* Toast — Cenário 2 */
+                '.cn-toast-preco{position:fixed;bottom:24px;right:24px;z-index:9999;',
+                'background:#fff;border-radius:10px;',
+                'box-shadow:0 8px 32px rgba(44,36,27,.18);',
+                'padding:14px 16px;max-width:320px;min-width:220px;',
+                'border-left:4px solid;font-family:"DM Sans",sans-serif;',
+                'animation:cnTstIn .3s ease forwards;}',
+                '.cn-toast-preco.cn-t-subiu{border-color:#c62828;}',
+                '.cn-toast-preco.cn-t-caiu{border-color:#2e7d32;}',
+                '.cn-toast-preco.cn-t-misto{border-color:#722f37;}',
+                '.cn-toast-preco .cn-tst-titulo{font-size:.82rem;font-weight:700;',
+                'color:#2c241b;margin-bottom:.35rem;}',
+                '.cn-toast-preco .cn-tst-item{font-size:.78rem;color:#5a4f47;',
+                'line-height:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
+                '.cn-toast-preco .cn-tst-link{display:inline-block;margin-top:.55rem;',
+                'font-size:.75rem;color:#722f37;font-weight:600;text-decoration:none;',
+                'border-bottom:1px solid rgba(114,47,55,.3);}',
+                '.cn-toast-preco .cn-tst-fechar{position:absolute;top:8px;right:8px;',
+                'background:none;border:none;cursor:pointer;color:#b0a49a;',
+                'font-size:.8rem;line-height:1;padding:.15rem .3rem;border-radius:4px;}',
+                '@keyframes cnTstIn{from{opacity:0;transform:translateX(40px)}',
+                'to{opacity:1;transform:translateX(0)}}'
+            ].join('');
+            document.head.appendChild(s);
+        }());
+
+        /* ── Compara preços do carrinho com API — retorna lista de alterações ── */
+        function cnVerificarPrecos(callback) {
+            var itens;
+            try { itens = JSON.parse(localStorage.getItem(CART_KEY)) || []; }
+            catch(_) { itens = []; }
+            if (itens.length === 0) { callback([]); return; }
+
+            var alteracoes = [];
+            var pendentes  = itens.length;
+
+            itens.forEach(function(item) {
+                fetch('/api/livros/' + item.id, { credentials: 'include' })
+                    .then(function(r) { return r.ok ? r.json() : null; })
+                    .then(function(livro) {
+                        if (!livro) return;
+                        var novo  = livro.precoAprovado != null ? livro.precoAprovado : livro.preco;
+                        var velho = item.precoAprovado || 0;
+                        if (novo != null && Math.abs(velho - novo) > 0.001) {
+                            alteracoes.push({
+                                id:        item.id,
+                                titulo:    item.titulo || 'Livro',
+                                precoVelho: velho,
+                                precoNovo:  novo
+                            });
+                            item.precoAprovado = novo;
+                        }
+                    })
+                    .catch(function() {})
+                    .finally(function() {
+                        pendentes--;
+                        if (pendentes === 0) {
+                            if (alteracoes.length > 0) {
+                                localStorage.setItem(CART_KEY, JSON.stringify(itens));
+                            }
+                            callback(alteracoes);
+                        }
+                    });
+            });
+        }
+
+        /* ── Cenário 1: Banner pós-login ── */
+        function cnMostrarBannerPrecos(alteracoes) {
+            if (!alteracoes || alteracoes.length === 0) return;
+            if (document.getElementById('cn-preco-banner')) return;
+
+            var linhas = alteracoes.map(function(a) {
+                var subiu  = a.precoNovo > a.precoVelho;
+                var seta   = subiu ? '▲' : '▼';
+                var delta  = Math.abs(a.precoNovo - a.precoVelho).toFixed(2);
+                var cls    = subiu ? 'cn-preco-delta-up' : 'cn-preco-delta-down';
+                return '<li>' +
+                    '<span class="cn-preco-titulo">' + cnEscHtml(a.titulo) + '</span>' +
+                    '<span class="cn-preco-velho">T$ ' + a.precoVelho.toFixed(2) + '</span>' +
+                    '<span style="color:#b0a49a;font-size:.78rem;">→</span>' +
+                    '<span class="cn-preco-novo">T$ ' + a.precoNovo.toFixed(2) + '</span>' +
+                    '<span class="' + cls + '">' + seta + ' T$ ' + delta + '</span>' +
+                    '</li>';
+            }).join('');
+
+            var div = document.createElement('div');
+            div.id  = 'cn-preco-banner';
+            div.innerHTML =
+                '<div class="cn-banner-header">' +
+                    '<span class="cn-banner-titulo">⚠️ Preços atualizados na sua estante</span>' +
+                    '<button onclick="cnOcultarBanner()" title="Fechar" ' +
+                    'style="background:none;border:none;cursor:pointer;color:#7a6e65;' +
+                    'font-size:1rem;line-height:1;padding:.2rem .4rem;border-radius:4px;">✕</button>' +
+                '</div>' +
+                '<ul class="cn-banner-lista">' + linhas + '</ul>' +
+                '<div class="cn-banner-acoes">' +
+                    '<a href="/livros/estante" class="cn-btn-estante">Ver minha estante →</a>' +
+                    '<button class="cn-btn-fechar-banner" onclick="cnOcultarBanner()">Fechar e continuar</button>' +
+                '</div>';
+
+            document.body.insertBefore(div, document.body.firstChild);
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    div.classList.add('cn-banner-visivel');
+                });
+            });
+        }
+
+        window.cnOcultarBanner = function() {
+            var b = document.getElementById('cn-preco-banner');
+            if (!b) return;
+            b.style.transition = 'transform .3s ease';
+            b.style.transform  = 'translateY(-100%)';
+            setTimeout(function() { if (b.parentNode) b.parentNode.removeChild(b); }, 320);
+        };
+
+        /* ── Cenário 2: Toast bottom-right ── */
+        function cnMostrarToastPreco(alteracoes) {
+            if (!alteracoes || alteracoes.length === 0) return;
+
+            var sobiu = alteracoes.filter(function(a) { return a.precoNovo > a.precoVelho; }).length;
+            var caiu  = alteracoes.filter(function(a) { return a.precoNovo < a.precoVelho; }).length;
+            var cls   = (sobiu > 0 && caiu > 0) ? 'cn-t-misto' : (sobiu > 0 ? 'cn-t-subiu' : 'cn-t-caiu');
+            var icone = cls === 'cn-t-caiu' ? '💚' : (cls === 'cn-t-subiu' ? '🔴' : '💰');
+
+            var itensHtml = alteracoes.slice(0, 3).map(function(a) {
+                var seta = a.precoNovo > a.precoVelho ? '▲' : '▼';
+                return '<div class="cn-tst-item">' +
+                    cnEscHtml(a.titulo.length > 30 ? a.titulo.substring(0, 30) + '…' : a.titulo) +
+                    ' T$' + a.precoVelho.toFixed(2) + ' → T$' + a.precoNovo.toFixed(2) +
+                    ' <strong>' + seta + '</strong></div>';
+            }).join('');
+            if (alteracoes.length > 3) {
+                itensHtml += '<div class="cn-tst-item" style="color:#b0a49a;">+ ' +
+                    (alteracoes.length - 3) + ' outro(s)…</div>';
+            }
+
+            var t  = document.createElement('div');
+            t.className = 'cn-toast-preco ' + cls;
+            t.style.position = 'relative';
+            t.innerHTML =
+                '<button class="cn-tst-fechar" onclick="this.parentNode.remove()">✕</button>' +
+                '<div class="cn-tst-titulo">' + icone + ' Preço alterado na estante</div>' +
+                itensHtml +
+                '<a href="/livros/estante" class="cn-tst-link">Ver estante →</a>';
+
+            document.body.appendChild(t);
+            setTimeout(function() {
+                if (t.parentNode) {
+                    t.style.transition = 'opacity .4s ease';
+                    t.style.opacity = '0';
+                    setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 420);
+                }
+            }, 7000);
+        }
+
+        /* ── Cenário 2: Cria notificação no sininho via API ── */
+        function cnCriarNotifPreco(alteracoes) {
+            var n    = alteracoes.length;
+            var sobiu = alteracoes.filter(function(a) { return a.precoNovo > a.precoVelho; }).length;
+            var caiu  = alteracoes.filter(function(a) { return a.precoNovo < a.precoVelho; }).length;
+            var msg;
+            if (n === 1) {
+                var a   = alteracoes[0];
+                var dir = a.precoNovo > a.precoVelho ? 'subiu' : 'caiu';
+                msg = 'Preço de "' + a.titulo + '" ' + dir +
+                      ' de T$ ' + a.precoVelho.toFixed(2) +
+                      ' para T$ ' + a.precoNovo.toFixed(2) + '.';
+            } else if (sobiu > 0 && caiu === 0) {
+                msg = n + ' itens da sua estante tiveram preços aumentados.';
+            } else if (caiu > 0 && sobiu === 0) {
+                msg = n + ' itens da sua estante tiveram preços reduzidos!';
+            } else {
+                msg = n + ' itens da sua estante tiveram preços alterados (' +
+                      sobiu + ' subiram, ' + caiu + ' caíram).';
+            }
+
+            fetch('/api/notificacoes', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mensagem: msg, link: '/livros/estante' })
+            })
+            .then(function(r) {
+                if (r.ok || r.status === 201) cnCarregarBadge();
+            })
+            .catch(function() {});
+        }
+
+        /* ── Inicialização: Cenário 1 (pós-login, 1x por sessão) + Cenário 2 (polling) ── */
+        document.addEventListener('DOMContentLoaded', function() {
+            /* Cenário 1 — executa apenas uma vez por sessão de browser */
+            var FLAG = 'bib_pv';
+            if (!sessionStorage.getItem(FLAG)) {
+                sessionStorage.setItem(FLAG, '1');
+                /* Pequeno delay para não travar o carregamento inicial da página */
+                setTimeout(function() {
+                    cnVerificarPrecos(function(alteracoes) {
+                        if (alteracoes.length > 0) cnMostrarBannerPrecos(alteracoes);
+                    });
+                }, 800);
+            }
+
+            /* Cenário 2 — polling a cada 90s enquanto logado com itens na estante */
+            setInterval(function() {
+                var itens;
+                try { itens = JSON.parse(localStorage.getItem(CART_KEY)) || []; }
+                catch(_) { itens = []; }
+                if (itens.length === 0) return;
+
+                cnVerificarPrecos(function(alteracoes) {
+                    if (alteracoes.length === 0) return;
+                    cnMostrarToastPreco(alteracoes);
+                    cnCriarNotifPreco(alteracoes);
+                    /* Atualiza mini-cart se estiver aberto */
+                    var cart = document.getElementById('cnMiniCart');
+                    if (cart && cart.style.display !== 'none') cnPopularMiniCart();
+                });
+            }, 90000);
+        });
+
+        cnCarregarBadge();
     })();
     </script>
 

@@ -10,6 +10,7 @@
           rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cliente/nav.css}"/>
     <link rel="stylesheet" th:href="@{/css/produto/checkout.css}"/>
+    <link rel="stylesheet" th:href="@{/css/breadcrumb.css}"/>
 </head>
 <body>
 
@@ -18,6 +19,18 @@
 
     <!-- Toast de feedback -->
     <div class="toast" id="toastCheckout"></div>
+
+    <!-- NAVEGAÇÃO CONTEXTUAL -->
+    <div class="breadcrumb-wrap">
+        <nav class="breadcrumb-nav">
+            <a href="/">Início</a>
+            <span class="breadcrumb-sep">›</span>
+            <a href="/livros/estante">Minha Estante</a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current">Checkout</span>
+        </nav>
+        <a href="/livros/estante" class="btn-voltar">← Voltar para a Estante</a>
+    </div>
 
     <main class="checkout-main">
 
@@ -56,7 +69,7 @@
                 <div id="listaCheckout" class="checkout-lista"></div>
 
                 <!-- Link para voltar e ajustar seleção -->
-                <a href="/livros/estante" class="link-voltar-estante">← Alterar seleção</a>
+                <a href="/livros/estante" class="btn-voltar" style="margin-top:0.5rem;">← Alterar seleção</a>
             </section>
 
             <!-- Coluna direita: pagamento -->

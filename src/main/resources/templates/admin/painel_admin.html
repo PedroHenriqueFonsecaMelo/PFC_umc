@@ -16,6 +16,7 @@
 
     <link rel="stylesheet" th:href="@{/css/admin/layout.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/painel.css}" />
+    <link rel="stylesheet" th:href="@{/css/breadcrumb.css}" />
   </head>
   <body>
     <div class="layout">
@@ -34,6 +35,18 @@
             <div class="avatar"><i class="fa-solid fa-user"></i></div>
           </div>
         </header>
+
+        <!-- BREADCRUMB DE LOTE (visível quando auditoria de lote está aberta) -->
+        <div id="breadcrumb-lote" class="breadcrumb-wrap" style="display:none;">
+            <nav class="breadcrumb-nav">
+                <a href="/admin/painel">Painel Admin</a>
+                <span class="breadcrumb-sep">›</span>
+                <a href="#" onclick="loadLotes(); return false;">Lotes Pendentes</a>
+                <span class="breadcrumb-sep">›</span>
+                <span class="breadcrumb-current" id="bcrLoteNumero">Lote</span>
+            </nav>
+            <button onclick="loadLotes()" class="btn-voltar">← Voltar para Lotes</button>
+        </div>
 
         <div class="main">
           <div>

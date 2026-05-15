@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" th:href="@{/css/admin/layout.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/cancelamento_detalhe.css}" />
+    <link rel="stylesheet" th:href="@{/css/breadcrumb.css}" />
     <script th:inline="javascript">
         window._SOLICITACAO_ID = /*[[${solicitacaoId}]]*/ null;
     </script>
@@ -39,6 +40,18 @@
             <div class="avatar"><i class="fa-solid fa-user"></i></div>
           </div>
         </header>
+
+        <!-- NAVEGAÇÃO CONTEXTUAL -->
+        <div class="breadcrumb-wrap">
+            <nav class="breadcrumb-nav">
+                <a href="/admin/painel">Painel Admin</a>
+                <span class="breadcrumb-sep">›</span>
+                <a href="/admin/cancelamentos">Cancelamentos</a>
+                <span class="breadcrumb-sep">›</span>
+                <span class="breadcrumb-current" th:text="'Solicitação #' + ${solicitacaoId}">Solicitação</span>
+            </nav>
+            <a href="/admin/cancelamentos" class="btn-voltar">← Voltar para Cancelamentos</a>
+        </div>
 
         <!-- CONTEÚDO DINÂMICO -->
         <div id="pageContent">

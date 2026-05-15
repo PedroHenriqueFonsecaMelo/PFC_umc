@@ -6,6 +6,8 @@
         <title>Recuperação de Senha</title>
 
         <link rel="stylesheet" th:href="@{/css/cliente/styles.css}" />
+        <link rel="stylesheet" th:href="@{/css/breadcrumb.css}" />
+        <link rel="stylesheet" th:href="@{/css/cliente/bookshelf.css}" />
         <link
             href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
             rel="stylesheet"
@@ -13,15 +15,9 @@
     </head>
 
     <body>
-        <nav
-            class="page-nav"
-            style="background: #2c241b; padding: 0.5rem 5vw; margin-bottom: 0"
-        >
-            <a
-                href="/"
-                style="color: #f9f6f0; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; font-family: 'DM Sans', sans-serif"
-            >← Início</a>
-        </nav>
+        <div class="breadcrumb-wrap">
+            <a href="/clientes/login" class="btn-voltar">← Voltar para o login</a>
+        </div>
 
         <div class="container">
             <div class="page-header">
@@ -46,17 +42,21 @@
                     >
                 </div>
 
-                <div class="form-actions-main">
+                <div class="form-actions-main" style="justify-content: center;">
                     <button type="submit" class="btn btn-primary">
                         Enviar link de recuperação
                     </button>
                 </div>
             </form>
-
-            <div class="account-links">
-                <a th:href="@{/clientes/login}" class="btn-link-secondary"
-                >Voltar para o login</a>
-            </div>
         </div>
+
+        <!-- Estante decorativa rodapé -->
+        <div class="bookshelf-container" id="bookshelfContainer" aria-hidden="true">
+            <div class="bookshelf-fade"></div>
+            <div class="books-row" id="booksRow"></div>
+            <div class="bookshelf-floor"></div>
+        </div>
+
+        <script th:src="@{/js/cliente/bookshelf-deco.js}"></script>
     </body>
 </html>

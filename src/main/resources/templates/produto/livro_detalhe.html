@@ -10,6 +10,7 @@
           rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cliente/nav.css}"/>
     <link rel="stylesheet" th:href="@{/css/produto/livro_detalhe.css}"/>
+    <link rel="stylesheet" th:href="@{/css/breadcrumb.css}"/>
 </head>
 <body>
 
@@ -19,10 +20,16 @@
     <!-- Toast de feedback -->
     <div class="toast" id="toastDetalhe"></div>
 
-    <!-- BREADCRUMB -->
-    <div class="detalhe-breadcrumb">
-        <a href="/livros/vitrine">← Vitrine</a>
-        <span id="bcrTitulo">…</span>
+    <!-- NAVEGAÇÃO CONTEXTUAL -->
+    <div class="breadcrumb-wrap">
+        <nav class="breadcrumb-nav">
+            <a href="/">Início</a>
+            <span class="breadcrumb-sep">›</span>
+            <a href="/livros/vitrine">Vitrine</a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current" id="bcrTitulo">…</span>
+        </nav>
+        <a href="/livros/vitrine" class="btn-voltar">← Voltar para a Vitrine</a>
     </div>
 
     <!-- CONTEÚDO PRINCIPAL -->

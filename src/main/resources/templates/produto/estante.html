@@ -10,11 +10,22 @@
           rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cliente/nav.css}"/>
     <link rel="stylesheet" th:href="@{/css/produto/estante.css}"/>
+    <link rel="stylesheet" th:href="@{/css/breadcrumb.css}"/>
 </head>
 <body>
 
     <!-- NAV -->
     <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+    <!-- NAVEGAÇÃO CONTEXTUAL -->
+    <div class="breadcrumb-wrap">
+        <nav class="breadcrumb-nav">
+            <a href="/">Início</a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current">Minha Estante</span>
+        </nav>
+        <a href="/livros/vitrine" class="btn-voltar">← Continuar Comprando</a>
+    </div>
 
     <main class="estante-main">
 
@@ -24,7 +35,6 @@
                 <h1>Minha Estante</h1>
                 <p>Selecione os livros que deseja comprar agora.</p>
             </div>
-            <a href="/livros/vitrine" class="btn-voltar">← Continuar explorando</a>
         </div>
 
         <!-- Estado: estante vazia -->

@@ -1,0 +1,105 @@
+/**
+ * breadcrumb.css — Navegação contextual padronizada · Bibliotroca
+ * Classes reutilizáveis: .breadcrumb-wrap, .breadcrumb-nav, .btn-voltar
+ */
+
+/* ============================================================
+   WRAPPER (limita largura e define o padding)
+   ============================================================ */
+.breadcrumb-wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0.85rem 1.5rem 0.35rem;
+}
+
+/* Para páginas de produto que usam max-width menor */
+.detalhe-main ~ .breadcrumb-wrap,
+.checkout-main .breadcrumb-wrap,
+.estante-main .breadcrumb-wrap {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* ============================================================
+   BREADCRUMB — trilha de migas
+   ============================================================ */
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.79rem;
+  color: #7a6e65;
+  margin-bottom: 0.5rem;
+  list-style: none;
+}
+
+.breadcrumb-nav a {
+  color: var(--accent, #722f37);
+  text-decoration: none;
+  transition: text-decoration 0.15s;
+}
+
+.breadcrumb-nav a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb-sep {
+  color: #c9b8a8;
+  font-size: 0.78rem;
+  line-height: 1;
+  user-select: none;
+}
+
+.breadcrumb-current {
+  color: #2c241b;
+  font-weight: 500;
+}
+
+/* ============================================================
+   BOTÃO VOLTAR — outline discreto cor vinho
+   ============================================================ */
+.btn-voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--accent, #722f37);
+  background: transparent;
+  border: 1.5px solid var(--accent, #722f37);
+  padding: 0.35rem 1rem;
+  border-radius: 5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+  line-height: 1.4;
+}
+
+.btn-voltar:hover {
+  background: var(--accent, #722f37);
+  color: #fff;
+}
+
+/* ============================================================
+   ADMIN — ajuste para layout com sidebar
+   ============================================================ */
+.content .breadcrumb-wrap {
+  padding: 1rem 1.5rem 0.5rem;
+  max-width: none;
+}
+
+/* ============================================================
+   MOBILE — breadcrumb some, apenas botão voltar
+   ============================================================ */
+@media (max-width: 640px) {
+  .breadcrumb-nav {
+    display: none;
+  }
+  .breadcrumb-wrap {
+    padding-top: 0.6rem;
+    padding-bottom: 0.25rem;
+  }
+}
