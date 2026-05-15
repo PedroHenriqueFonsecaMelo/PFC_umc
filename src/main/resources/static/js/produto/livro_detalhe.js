@@ -118,6 +118,58 @@ window.trocarFoto = function(url, thumb) {
     thumb.classList.add('ativa');
 };
 
+/* ── Exibe seção "Sobre o livro" com truncamento opcional ── */
+const RESUMO_MAX = 400;
+
+function exibirResumo(texto) {
+    const secaoEl = document.getElementById('livroResumo');
+    const textoEl = document.getElementById('livroResumoTexto');
+    const btnEl   = document.getElementById('btnLerMais');
+    if (!secaoEl || !textoEl) return;
+
+    const truncar = texto.length > RESUMO_MAX;
+    textoEl.dataset.full  = texto;
+    textoEl.dataset.short = truncar ? texto.slice(0, RESUMO_MAX) + '…' : texto;
+    textoEl.textContent   = textoEl.dataset.short;
+    textoEl.dataset.expandido = 'false';
+
+    if (btnEl) btnEl.style.display = truncar ? 'inline-block' : 'none';
+    secaoEl.style.display = 'block';
+}
+
+window.toggleLerMais = function () {
+    const textoEl = document.getElementById('livroResumoTexto');
+    const btnEl   = document.getElementById('btnLerMais');
+    if (!textoEl || !btnEl) return;
+    const expandido = textoEl.dataset.expandido === 'true';
+    if (expandido) {
+        textoEl.textContent       = textoEl.dataset.short;
+        textoEl.dataset.expandido = 'false';
+        btnEl.textContent         = 'Ler mais';
+    } else {
+        textoEl.textContent       = textoEl.dataset.full;
+        textoEl.dataset.expandido = 'true';
+        btnEl.textContent         = 'Ler menos';
+    }
+};
+
+/* ── Busca sinopse na Google Books API como fallback ── */
+async function buscarResumoGoogleBooks(isbn) {
+    try {
+        const res = await fetch(
+            `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}`
+        );
+        if (!res.ok) return null;
+        const data = await res.json();
+        const desc = data.items && data.items[0] &&
+                     data.items[0].volumeInfo &&
+                     data.items[0].volumeInfo.description;
+        return desc || null;
+    } catch (_) {
+        return null;
+    }
+}
+
 /* ── Renderiza os dados do livro na página ── */
 function renderLivro(livro) {
     // Fotos
@@ -173,9 +225,12 @@ function renderLivro(livro) {
     }
 
     // Resumo/descrição
-    if (livro.resumoOficial) {
-        document.getElementById('livroResumoTexto').textContent = livro.resumoOficial;
-        document.getElementById('livroResumo').style.display    = 'block';
+    if (livro.resumoOficial && livro.resumoOficial.trim()) {
+        exibirResumo(livro.resumoOficial.trim());
+    } else if (livro.isbn) {
+        buscarResumoGoogleBooks(livro.isbn).then(desc => {
+            if (desc) exibirResumo(desc);
+        });
     }
 
     // Estado dos botões: já na estante?

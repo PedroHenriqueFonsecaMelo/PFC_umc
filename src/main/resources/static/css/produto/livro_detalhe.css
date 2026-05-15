@@ -184,9 +184,11 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
 /* ── Resumo ── */
 .detalhe-resumo {
   margin-bottom: 1.6rem;
-  padding: 1.2rem 1.5rem;
-  background: var(--white);
-  border: 1px solid var(--border);
+}
+.resumo-separador {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0 0 1.2rem;
 }
 .detalhe-resumo h3 {
   font-family: "Playfair Display", serif;
@@ -200,6 +202,20 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   line-height: 1.75;
   color: var(--ink);
 }
+.btn-ler-mais {
+  display: inline-block;
+  margin-top: .5rem;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-family: "DM Sans", sans-serif;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  letter-spacing: .01em;
+}
+.btn-ler-mais:hover { text-decoration: underline; }
 
 /* ── Ações ── */
 .detalhe-acoes {
