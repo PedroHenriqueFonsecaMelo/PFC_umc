@@ -229,7 +229,8 @@ public class LivroCompraService {
                 final Cliente vendedorFinal = vendedor;
 
                 pedidoService.registrarPedido(comprador, livro);
-                livroRepository.delete(livro);
+                livro.setAprovado(false);
+                livroRepository.save(livro);
                 sucesso.add(ItemResultadoDTO.builder()
                         .livroId(livro.getId()).titulo(titulo).preco(livro.getPrecoAprovado()).build());
                 gamificacaoService.xpCompra(comprador.getId());
@@ -255,7 +256,8 @@ public class LivroCompraService {
     private void processarBaixaLivro(Cliente comprador, Livro livro) {
         pedidoService.registrarPedido(comprador, livro);
         comprador.setSaldoTokens(comprador.getSaldoTokens() - livro.getPrecoAprovado());
-        livroRepository.delete(livro);
+        livro.setAprovado(false);
+        livroRepository.save(livro);
     }
 
     private void registrarLogECoordenarEmails(Cliente comprador, List<ItemResultadoDTO> comprados,

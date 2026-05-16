@@ -3,6 +3,8 @@ package umc.exs.service.core.bussiness;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,6 +66,14 @@ public class LivroService {
     @Transactional
     public List<LivroDTO> listarLivrosAprovados() {
         return livroAdminService.listarLivrosAprovados();
+    }
+
+    public Page<LivroDTO> listarLivrosAprovadosPaginado(Pageable pageable) {
+        return livroAdminService.listarLivrosAprovadosPaginado(pageable);
+    }
+
+    public Page<LivroDTO> listarPromocoesAtivasPaginado(Pageable pageable) {
+        return livroAdminService.listarPromocoesAtivasPaginado(pageable);
     }
 
     @Transactional

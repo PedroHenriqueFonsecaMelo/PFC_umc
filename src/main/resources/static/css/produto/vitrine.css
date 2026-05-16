@@ -401,30 +401,100 @@ main.main-vitrine > p { font-style: italic; color: var(--muted); font-family: "I
   .btn-abrir-filtros { justify-content: center; }
 }
 
-#gridLivros {
+/* ── Grid da vitrine — 4 colunas ── */
+.vitrine-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
 }
 
-/* ── Livro Cards ── */
-.livro-card { background: var(--white); border: 1px solid rgba(44, 36, 27, 0.12); border-radius: 10px; cursor: pointer; transition: box-shadow 0.22s, transform 0.22s; overflow: hidden; display: flex; flex-direction: column; }
-.livro-card:hover { box-shadow: 0 10px 28px rgba(44, 36, 27, 0.13); transform: translateY(-3px); }
-.livro-card-img { height: 230px; background: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 3rem; border-bottom: 1px solid rgba(44, 36, 27, 0.08); overflow: hidden; flex-shrink: 0; }
-.livro-card-img img { width: 100%; height: 100%; object-fit: cover; }
-.livro-card-body { padding: 1rem 1rem 1rem; display: flex; flex-direction: column; flex: 1; }
+/* ── Cards 3D de livro ── */
+.book-item { cursor: pointer; }
+.main-book-wrap { position: relative; padding: 12px 12px 0; width: 100%; }
+.book-cover { position: relative; width: 100%; }
+.book-inside {
+  position: absolute;
+  width: 90%; height: 96%; aspect-ratio: 2 / 3;
+  top: 1%; left: 14px;
+  border: 1px solid #ccc;
+  border-radius: 2px 6px 6px 2px;
+  background: white;
+  box-shadow: 10px 40px 40px -10px #00000030,
+    inset -2px 0 0 grey, inset -3px 0 0 #dbdbdb,
+    inset -4px 0 0 white, inset -5px 0 0 #dbdbdb,
+    inset -6px 0 0 white, inset -7px 0 0 #dbdbdb,
+    inset -8px 0 0 white, inset -9px 0 0 #dbdbdb;
+}
+.book-image {
+  position: relative; line-height: 0;
+  aspect-ratio: 2 / 3;
+  width: 100%; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: #e8e3da;
+  border-radius: 2px 6px 6px 2px;
+  box-shadow: 6px 6px 18px -2px rgba(0,0,0,0.2), 24px 28px 40px -6px rgba(0,0,0,0.1);
+  transition: all 0.3s ease-in-out;
+  transform: perspective(2000px) rotateY(-15deg) translateX(-10px) scaleX(0.94);
+}
+.book-image:hover {
+  transform: perspective(2000px) rotateY(0deg) translateX(0px) scaleX(1);
+  box-shadow: 6px 6px 12px -1px rgba(0,0,0,0.1), 20px 14px 16px -6px rgba(0,0,0,0.1);
+}
+.book-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.placeholder-cover {
+  aspect-ratio: 2 / 3;
+  width: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #722f37, #5a2229);
+  border-radius: 2px 6px 6px 2px;
+  padding: 1rem; text-align: center;
+}
+.placeholder-cover .ptitle { font-family: Georgia,serif; font-size: 0.85rem; color: #fff; font-style: italic; line-height: 1.4; }
+.placeholder-cover .pauthor { font-size: 0.6rem; color: rgba(255,255,255,0.55); margin-top: 0.4rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.effect {
+  position: absolute; width: 20px; height: 100%;
+  margin-left: 14px; top: 0;
+  border-left: 2px solid #00000010;
+  background-image: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+  transition: all 0.5s ease; z-index: 5;
+}
+.light {
+  width: 90%; height: 100%; position: absolute;
+  border-radius: 3px;
+  background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 100%);
+  top: 0; right: 0; opacity: 0.1; transition: all 0.5s ease; z-index: 4;
+}
+.book-image:hover .effect { margin-left: 12px; }
+.book-info { padding: 0.75rem 0.5rem 0.5rem; }
+.book-badge {
+  display: inline-block; font-size: 0.6rem; padding: 2px 8px;
+  border-radius: 999px; margin-bottom: 0.4rem; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.badge-novo     { background: rgba(74,93,35,0.1);    color: #4a5d23; border: 1px solid rgba(74,93,35,0.2); }
+.badge-bom      { background: rgba(44,62,107,0.1);   color: #2c3e6b; border: 1px solid rgba(44,62,107,0.2); }
+.badge-regular  { background: rgba(139,105,20,0.1);  color: #8b6914; border: 1px solid rgba(139,105,20,0.2); }
+.badge-ruim     { background: rgba(114,47,55,0.1);   color: #722f37; border: 1px solid rgba(114,47,55,0.2); }
+.book-title  { font-family: Georgia,serif; font-size: 0.88rem; font-weight: bold; color: #2c241b; margin: 0 0 0.15rem; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.book-author { font-family: Georgia,serif; font-style: italic; font-size: 0.75rem; color: rgba(44,36,27,0.5); margin: 0 0 0.4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.book-price  { font-family: Georgia,serif; font-size: 1.05rem; font-weight: bold; color: #722f37; margin: 0; }
 
-/* Badge de estado — pill colorido */
-.livro-estado { display: inline-block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; padding: 0.18rem 0.6rem; border-radius: 20px; border: 1px solid transparent; margin-bottom: 0.55rem; width: fit-content; }
-.estado-otimo   { background: #dcfce7; color: #166534; border-color: #86efac; }
-.estado-bom     { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
-.estado-regular { background: #fef9c3; color: #92400e; border-color: #fde68a; }
-.estado-ruim    { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+/* ── Paginação ── */
+.pagination { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 2.5rem; }
+.page-btn { width: 36px; height: 36px; border-radius: 4px; border: 1px solid rgba(114,47,55,0.2); background: #fff; color: #2c241b; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.page-btn:hover { border-color: #722f37; color: #722f37; }
+.page-btn.active { background: #722f37; color: #fff; border-color: #722f37; }
+.page-btn.disabled { opacity: 0.35; cursor: default; pointer-events: none; }
 
-/* Hierarquia textual */
-.livro-titulo { font-family: "Playfair Display", serif; font-size: 0.97rem; font-weight: 700; margin: 0 0 0.15rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); line-height: 1.3; }
-.livro-autor  { font-size: 0.73rem; color: var(--muted); font-style: italic; margin-bottom: 0.7rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.livro-preco  { font-family: "Playfair Display", serif; font-size: 1.3rem; font-weight: 800; color: var(--accent); letter-spacing: -0.01em; margin: 0.35rem 0 0.8rem; }
+/* ── Responsivo ── */
+@media (max-width: 1100px) { .vitrine-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 750px)  { .vitrine-grid { grid-template-columns: repeat(2, 1fr); } }
 
 /* Botão estante */
 .btn-carrinho { width: 100%; margin-top: auto; padding: 0.65rem 0.5rem; background: var(--ink); color: var(--paper); border: 2px solid var(--ink); border-radius: 8px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; cursor: pointer; transition: background 0.18s, color 0.18s, transform 0.12s; display: flex; align-items: center; justify-content: center; gap: 0.45rem; }

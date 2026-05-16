@@ -16,6 +16,7 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.MotivoCategoria;
 import umc.exs.model.enums.StatusEnvio;
 import umc.exs.model.enums.StatusSolicitacao;
+import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.negocios.PedidoRepository;
 import umc.exs.repository.negocios.SolicitacaoCancelamentoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
@@ -31,6 +32,7 @@ public class CancelamentoService {
 
     private final SolicitacaoCancelamentoRepository cancelamentoRepository;
     private final PedidoRepository pedidoRepository;
+    private final LivroRepository livroRepository;
     private final ClienteRepository clienteRepository;
     private final NotificacaoService notificacaoService;
     private final EmailService emailService;
@@ -139,6 +141,17 @@ public class CancelamentoService {
         pedido.setStatusEnvio(StatusEnvio.CANCELADO);
         pedido.setDataAtualizacaoStatus(LocalDateTime.now());
         pedidoRepository.save(pedido);
+
+        // Devolve o livro para a vitrine
+        try {
+            livroRepository.findById(pedido.getLivroId()).ifPresent(livro -> {
+                livro.setAprovado(true);
+                livroRepository.save(livro);
+                log.info("Livro id={} devolvido à vitrine após cancelamento aprovado.", livro.getId());
+            });
+        } catch (Exception e) {
+            log.error("Erro ao devolver livro à vitrine após cancelamento: {}", e.getMessage());
+        }
 
         // Realiza estorno
         Cliente cliente = sol.getCliente();

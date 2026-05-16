@@ -2,6 +2,9 @@ package umc.exs.controller.api.interaction;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -42,6 +45,23 @@ public class LivroControllerApi {
             return ResponseEntity.ok(livroService.listarPromocoesAtivas());
         }
         return ResponseEntity.ok(livroService.listarLivrosAprovados());
+    }
+
+    /**
+     * Vitrine paginada — 20 livros por página.
+     * Parâmetros: page (default 0), size (default 20), emPromocao (opcional).
+     */
+    @GetMapping("/vitrine")
+    public ResponseEntity<Page<LivroDTO>> listarVitrine(
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false)    Boolean emPromocao) {
+
+        var pageable = PageRequest.of(page, Math.min(size, 50), Sort.by(Sort.Direction.DESC, "id"));
+        if (Boolean.TRUE.equals(emPromocao)) {
+            return ResponseEntity.ok(livroService.listarPromocoesAtivasPaginado(pageable));
+        }
+        return ResponseEntity.ok(livroService.listarLivrosAprovadosPaginado(pageable));
     }
 
     /**

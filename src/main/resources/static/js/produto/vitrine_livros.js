@@ -1,6 +1,6 @@
 /* ================================================================
    vitrine_livros.js — Vitrine de livros · Bibliotroca
-   Busca em tempo real + filtros (estado, preço, ordem) + chips
+   Paginação server-side (20/pág) + cards 3D + busca e filtros
    ================================================================ */
 
 /* ── Saldo na navbar ── */
@@ -15,12 +15,15 @@ async function carregarSaldo() {
 }
 
 /* ── Estado global ── */
-let _todosLivros = [];   // todos os livros carregados do servidor
-let modoPromo    = false;
+let _todosLivros   = [];   // livros da página atual (até 20 itens)
+let _paginaAtual   = 0;
+let _totalPaginas  = 0;
+let _totalElements = 0;
+let modoPromo      = false;
 
 let _filtros = {
     busca:    '',
-    estados:  [],        // ex: ['BOM', 'OTIMO']
+    estados:  [],
     precoMin: null,
     precoMax: null,
     ordem:    'relevancia'
@@ -51,14 +54,6 @@ function iniciarContadores() {
 
             if (diff <= 0) {
                 el.style.display = 'none';
-                const badge = document.getElementById('badge-' + id);
-                if (badge) badge.style.display = 'none';
-                const precoEl = document.getElementById('preco-' + id);
-                if (precoEl) {
-                    const precoOriginal = parseFloat(el.dataset.precoOriginal) || 0;
-                    precoEl.innerHTML = `T$ ${precoOriginal.toFixed(2)}`;
-                    precoEl.style.color = '';
-                }
             } else {
                 const h = Math.floor(diff / 3600000);
                 const m = Math.floor((diff % 3600000) / 60000);
@@ -75,7 +70,8 @@ function iniciarContadores() {
 
 /* ── Toggle: somente promoções ── */
 function togglePromo() {
-    modoPromo = !modoPromo;
+    modoPromo    = !modoPromo;
+    _paginaAtual = 0;
     const btn    = document.getElementById('btnPromo');
     const titulo = document.getElementById('vitrineTitulo');
 
@@ -91,12 +87,29 @@ function togglePromo() {
     carregarLivros();
 }
 
-/* ── Classe CSS por estado ── */
-function classeEstado(estado) {
+/* ── Fallback de capa: OpenLibrary → foto do vendedor → placeholder ── */
+window.vitrineFallback = function(img) {
+    const fallback = img.dataset.fallback;
+    if (fallback) {
+        delete img.dataset.fallback;
+        img.onerror = function() {
+            img.style.display = 'none';
+            const ph = img.nextElementSibling;
+            if (ph) ph.style.display = 'flex';
+        };
+        img.src = fallback;
+    } else {
+        img.style.display = 'none';
+        const ph = img.nextElementSibling;
+        if (ph) ph.style.display = 'flex';
+    }
+};
+
+/* ── Classe CSS do badge por estado ── */
+function classeBadge(estado) {
     const mapa = {
-        'ÓTIMO': 'otimo', 'OTIMO': 'otimo',
-        'BOM':   'bom',   'COMO_NOVO': 'otimo',
-        'REGULAR': 'regular', 'RUIM': 'ruim', 'NOVO': 'otimo'
+        'NOVO': 'novo', 'OTIMO': 'novo', 'COMO_NOVO': 'novo',
+        'BOM': 'bom', 'REGULAR': 'regular', 'RUIM': 'ruim'
     };
     return mapa[(estado || '').toUpperCase()] || 'bom';
 }
@@ -119,73 +132,135 @@ function renderLivros(livros) {
     }
 
     grid.innerHTML = livros.map(livro => {
-        let foto = 'https://via.placeholder.com/300x400?text=Sem+Foto';
-        try {
-            const arr = JSON.parse(livro.fotosUrls);
-            if (Array.isArray(arr) && arr.length > 0) foto = arr[0];
-        } catch (_) {}
+        const isbn  = (livro.isbn || '').replace(/-/g, '');
+        let fotos = [];
+        try { fotos = JSON.parse(livro.fotosUrls || '[]'); } catch(_) {}
+        const vendorFoto = fotos.length > 0 ? fotos[0] : '';
 
-        const badgePromo = livro.emPromocao
-            ? `<span id="badge-${livro.id}" style="position:absolute;top:.5rem;left:.5rem;
-                   background:#e11d48;color:#fff;font-size:.7rem;font-weight:700;
-                   padding:.2rem .55rem;text-transform:uppercase;letter-spacing:.04em;">PROMOÇÃO</span>`
-            : '';
+        const estado      = livro.estadoAprovado || 'BOM';
+        const estadoLabel = estado.replace('_', ' ');
+        const badgeClass  = classeBadge(estado);
 
         let precoHtml;
         if (livro.emPromocao && livro.precoOriginal) {
-            precoHtml = `<div class="livro-preco" id="preco-${livro.id}">
-                <span style="text-decoration:line-through;color:#9a8a80;font-size:.85rem;margin-right:.4rem;">
-                    T$ ${livro.precoOriginal.toFixed(2)}
-                </span>
-                <span style="color:#e11d48;font-weight:700;">
-                    T$ ${(livro.precoAprovado || 0).toFixed(2)}
-                </span>
-            </div>`;
+            precoHtml = `<p class="book-price">
+                <span style="text-decoration:line-through;color:#9a8a80;font-size:.85rem;margin-right:.3rem;">
+                    T$ ${livro.precoOriginal.toFixed(2)}</span>
+                <span style="color:#e11d48;">T$ ${(livro.precoAprovado || 0).toFixed(2)}</span>
+            </p>`;
         } else {
-            precoHtml = `<div class="livro-preco" id="preco-${livro.id}">
-                T$ ${(livro.precoAprovado || 0).toFixed(2)}
-            </div>`;
+            precoHtml = `<p class="book-price">T$ ${(livro.precoAprovado || 0).toFixed(2)}</p>`;
         }
 
-        const countdownHtml = (livro.emPromocao && livro.promocaoExpira)
+        const promoCountdown = (livro.emPromocao && livro.promocaoExpira)
             ? `<div class="promo-countdown"
                     data-livro-id="${livro.id}"
                     data-expira="${livro.promocaoExpira}"
-                    data-preco-original="${livro.precoOriginal || livro.precoAprovado || 0}"
-                    style="margin-top:.45rem;font-size:.82rem;font-weight:700;color:#e11d48;">
-                   🔥 Oferta expira em: <span id="timer-${livro.id}">…</span>
+                    style="font-size:.75rem;font-weight:700;color:#e11d48;margin-top:.3rem;">
+                   🔥 Expira em: <span id="timer-${livro.id}">…</span>
                </div>`
             : '';
 
-        const estadoLabel = (livro.estadoAprovado || 'BOM').replace('_', ' ');
+        // Lógica de imagem: OpenLibrary → foto do vendedor → placeholder
+        let imgTag, phStyle;
+        if (isbn) {
+            const fbAttr = vendorFoto ? `data-fallback="${vendorFoto}"` : '';
+            imgTag  = `<img src="https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg"
+                            ${fbAttr} onerror="vitrineFallback(this)"
+                            alt="${livro.titulo}" />`;
+            phStyle = 'display:none';
+        } else if (vendorFoto) {
+            imgTag  = `<img src="${vendorFoto}"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+                            alt="${livro.titulo}" />`;
+            phStyle = 'display:none';
+        } else {
+            imgTag  = '';
+            phStyle = 'display:flex';
+        }
 
         return `
-        <a href="/livros/${livro.id}" class="livro-card"
-           style="position:relative;text-decoration:none;color:inherit;"
-           title="Ver detalhes de ${livro.titulo}">
-            ${badgePromo}
-            <div class="livro-card-img">
-                <img src="${foto}" alt="${livro.titulo}"
-                     onerror="this.src='https://via.placeholder.com/300x400?text=📚'">
+        <div class="book-item" onclick="window.location='/livros/${livro.id}'">
+          <div class="main-book-wrap">
+            <div class="book-cover">
+              <div class="book-inside"></div>
+              <div class="book-image">
+                ${imgTag}
+                <div class="placeholder-cover" style="${phStyle}">
+                  <div class="ptitle">${livro.titulo}</div>
+                  <div class="pauthor">${livro.autor}</div>
+                </div>
+                <div class="effect"></div>
+                <div class="light"></div>
+              </div>
             </div>
-            <div class="livro-card-body">
-                <span class="livro-estado estado-${classeEstado(estadoLabel)}">${estadoLabel}</span>
-                <h3 class="livro-titulo">${livro.titulo}</h3>
-                <p class="livro-autor">por ${livro.autor}</p>
-                ${precoHtml}
-                ${countdownHtml}
-            </div>
-        </a>`;
+          </div>
+          <div class="book-info">
+            <span class="book-badge badge-${badgeClass}">${estadoLabel}</span>
+            <p class="book-title">${livro.titulo}</p>
+            <p class="book-author">por ${livro.autor}</p>
+            ${precoHtml}
+            ${promoCountdown}
+          </div>
+        </div>`;
     }).join('');
 
     iniciarContadores();
 }
 
-/* ── Aplica todos os filtros sobre _todosLivros ── */
+/* ── Paginação ── */
+function irParaPagina(p) {
+    if (p < 0 || p >= _totalPaginas) return;
+    _paginaAtual = p;
+    carregarLivros();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderPaginacao() {
+    const container = document.getElementById('vitrinePaginacao');
+    if (!container) return;
+
+    if (_totalPaginas <= 1) { container.innerHTML = ''; return; }
+
+    const isPrimeira = _paginaAtual === 0;
+    const isUltima   = _paginaAtual === _totalPaginas - 1;
+    const delta = 2;
+    let left  = Math.max(0, _paginaAtual - delta);
+    let right = Math.min(_totalPaginas - 1, _paginaAtual + delta);
+
+    if (right - left < 4) {
+        if (left === 0) right = Math.min(_totalPaginas - 1, left + 4);
+        else            left  = Math.max(0, right - 4);
+    }
+
+    let html = '';
+    html += `<button class="page-btn${isPrimeira ? ' disabled' : ''}"
+                     onclick="irParaPagina(${_paginaAtual - 1})" aria-label="Anterior">←</button>`;
+
+    if (left > 0) {
+        html += `<button class="page-btn" onclick="irParaPagina(0)">1</button>`;
+        if (left > 1) html += `<span class="page-btn" style="border:none;cursor:default;pointer-events:none;">…</span>`;
+    }
+    for (let i = left; i <= right; i++) {
+        html += `<button class="page-btn${i === _paginaAtual ? ' active' : ''}"
+                         onclick="irParaPagina(${i})">${i + 1}</button>`;
+    }
+    if (right < _totalPaginas - 1) {
+        if (right < _totalPaginas - 2)
+            html += `<span class="page-btn" style="border:none;cursor:default;pointer-events:none;">…</span>`;
+        html += `<button class="page-btn" onclick="irParaPagina(${_totalPaginas - 1})">${_totalPaginas}</button>`;
+    }
+
+    html += `<button class="page-btn${isUltima ? ' disabled' : ''}"
+                     onclick="irParaPagina(${_paginaAtual + 1})" aria-label="Próxima">→</button>`;
+
+    container.innerHTML = html;
+}
+
+/* ── Aplica filtros client-side sobre os livros da página atual ── */
 function aplicarFiltros() {
     let lista = [..._todosLivros];
 
-    /* Busca textual */
     if (_filtros.busca) {
         const termo = norm(_filtros.busca);
         lista = lista.filter(l =>
@@ -195,7 +270,6 @@ function aplicarFiltros() {
         );
     }
 
-    /* Estado físico (múltipla seleção) */
     if (_filtros.estados.length > 0) {
         lista = lista.filter(l => {
             const est = (l.estadoAprovado || 'BOM').toUpperCase();
@@ -203,47 +277,37 @@ function aplicarFiltros() {
         });
     }
 
-    /* Faixa de preço */
-    if (_filtros.precoMin !== null) {
+    if (_filtros.precoMin !== null)
         lista = lista.filter(l => (l.precoAprovado || 0) >= _filtros.precoMin);
-    }
-    if (_filtros.precoMax !== null) {
+    if (_filtros.precoMax !== null)
         lista = lista.filter(l => (l.precoAprovado || 0) <= _filtros.precoMax);
-    }
 
-    /* Ordenação */
     switch (_filtros.ordem) {
-        case 'menor_preco':
-            lista.sort((a, b) => (a.precoAprovado || 0) - (b.precoAprovado || 0)); break;
-        case 'maior_preco':
-            lista.sort((a, b) => (b.precoAprovado || 0) - (a.precoAprovado || 0)); break;
-        case 'recente':
-            lista.sort((a, b) => (b.id || 0) - (a.id || 0)); break;
-        case 'az':
-            lista.sort((a, b) => (a.titulo || '').localeCompare(b.titulo || '', 'pt-BR')); break;
-        case 'za':
-            lista.sort((a, b) => (b.titulo || '').localeCompare(a.titulo || '', 'pt-BR')); break;
+        case 'menor_preco': lista.sort((a, b) => (a.precoAprovado || 0) - (b.precoAprovado || 0)); break;
+        case 'maior_preco': lista.sort((a, b) => (b.precoAprovado || 0) - (a.precoAprovado || 0)); break;
+        case 'recente':     lista.sort((a, b) => (b.id || 0) - (a.id || 0)); break;
+        case 'az':          lista.sort((a, b) => (a.titulo || '').localeCompare(b.titulo || '', 'pt-BR')); break;
+        case 'za':          lista.sort((a, b) => (b.titulo || '').localeCompare(a.titulo || '', 'pt-BR')); break;
     }
 
     renderLivros(lista);
     renderChips();
+    renderPaginacao();
 }
 
 /* ── Lê valores do painel de filtros e aplica ── */
 function lerEAplicarFiltros() {
-    /* Estado: coleta checkboxes marcadas */
     const checks = document.querySelectorAll('#filtroEstados input[type=checkbox]:checked');
     _filtros.estados = Array.from(checks).map(c => c.value);
 
-    /* Preço */
     const minVal = document.getElementById('filtroPrecoMin')?.value;
     const maxVal = document.getElementById('filtroPrecoMax')?.value;
     _filtros.precoMin = minVal !== '' && minVal !== null ? parseFloat(minVal) : null;
     _filtros.precoMax = maxVal !== '' && maxVal !== null ? parseFloat(maxVal) : null;
 
-    /* Ordenação */
     _filtros.ordem = document.getElementById('filtroOrdem')?.value || 'relevancia';
 
+    _paginaAtual = 0;
     aplicarFiltros();
     fecharPainelFiltros();
 }
@@ -251,7 +315,9 @@ function lerEAplicarFiltros() {
 /* ── Contador ── */
 function atualizarContador(n) {
     const el = document.getElementById('vitrineContador');
-    if (el) el.textContent = `Exibindo ${n} livro${n !== 1 ? 's' : ''}`;
+    if (!el) return;
+    const sufixo = _totalElements > 0 ? ` de ${_totalElements}` : '';
+    el.textContent = `Exibindo ${n}${sufixo} livro${_totalElements !== 1 ? 's' : ''}`;
 }
 
 /* ── Chips de filtros ativos ── */
@@ -272,19 +338,15 @@ function renderChips() {
         chips.push(`<span class="filtro-chip">Estado: ${ESTADO_LABEL_MAP[est] || est}
             <button onclick="removerChipEstado('${est}')" aria-label="Remover filtro">×</button></span>`);
     });
-
-    if (_filtros.precoMin !== null) {
+    if (_filtros.precoMin !== null)
         chips.push(`<span class="filtro-chip">De T$ ${_filtros.precoMin.toFixed(2)}
             <button onclick="removerChipPrecoMin()" aria-label="Remover filtro">×</button></span>`);
-    }
-    if (_filtros.precoMax !== null) {
+    if (_filtros.precoMax !== null)
         chips.push(`<span class="filtro-chip">Até T$ ${_filtros.precoMax.toFixed(2)}
             <button onclick="removerChipPrecoMax()" aria-label="Remover filtro">×</button></span>`);
-    }
-    if (_filtros.ordem !== 'relevancia') {
+    if (_filtros.ordem !== 'relevancia')
         chips.push(`<span class="filtro-chip">Ordenar: ${ORDEM_LABEL_MAP[_filtros.ordem] || _filtros.ordem}
             <button onclick="removerChipOrdem()" aria-label="Remover filtro">×</button></span>`);
-    }
 
     container.innerHTML = chips.join('');
 }
@@ -292,26 +354,22 @@ function renderChips() {
 /* ── Remoção individual de chips ── */
 window.removerChipEstado = function(est) {
     _filtros.estados = _filtros.estados.filter(e => e !== est);
-    /* Desmarca checkbox correspondente */
     const cb = document.querySelector(`#filtroEstados input[value="${est}"]`);
     if (cb) cb.checked = false;
     aplicarFiltros();
 };
-
 window.removerChipPrecoMin = function() {
     _filtros.precoMin = null;
     const el = document.getElementById('filtroPrecoMin');
     if (el) el.value = '';
     aplicarFiltros();
 };
-
 window.removerChipPrecoMax = function() {
     _filtros.precoMax = null;
     const el = document.getElementById('filtroPrecoMax');
     if (el) el.value = '';
     aplicarFiltros();
 };
-
 window.removerChipOrdem = function() {
     _filtros.ordem = 'relevancia';
     const sel = document.getElementById('filtroOrdem');
@@ -319,7 +377,7 @@ window.removerChipOrdem = function() {
     aplicarFiltros();
 };
 
-/* ── Busca em tempo real (debounce 400ms) ── */
+/* ── Busca em tempo real (debounce 400 ms) ── */
 function onBuscaInput() {
     const val = document.getElementById('vitrineBusca')?.value || '';
     const btnX = document.getElementById('btnLimparBusca');
@@ -341,17 +399,16 @@ function limparBusca() {
     aplicarFiltros();
 }
 
-/* ── Limpar todos os filtros ── */
+/* ── Limpar todos os filtros (volta à pág 1 e re-busca) ── */
 function limparFiltros() {
-    _filtros = { busca: '', estados: [], precoMin: null, precoMax: null, ordem: 'relevancia' };
+    _filtros     = { busca: '', estados: [], precoMin: null, precoMax: null, ordem: 'relevancia' };
+    _paginaAtual = 0;
 
     const busca = document.getElementById('vitrineBusca');
     if (busca) busca.value = '';
     const btnX = document.getElementById('btnLimparBusca');
     if (btnX) btnX.style.display = 'none';
-
-    document.querySelectorAll('#filtroEstados input[type=checkbox]')
-            .forEach(cb => { cb.checked = false; });
+    document.querySelectorAll('#filtroEstados input[type=checkbox]').forEach(cb => { cb.checked = false; });
     const min = document.getElementById('filtroPrecoMin');
     const max = document.getElementById('filtroPrecoMax');
     if (min) min.value = '';
@@ -359,48 +416,54 @@ function limparFiltros() {
     const sel = document.getElementById('filtroOrdem');
     if (sel) sel.value = 'relevancia';
 
-    aplicarFiltros();
+    carregarLivros();
 }
 
 /* ── Painel de filtros (abrir/fechar) ── */
 let _painelAberto = false;
 
-function toggleFiltros() {
-    _painelAberto ? fecharPainelFiltros() : abrirPainelFiltros();
-}
+function toggleFiltros() { _painelAberto ? fecharPainelFiltros() : abrirPainelFiltros(); }
 
 function abrirPainelFiltros() {
     _painelAberto = true;
-    const painel = document.getElementById('painelFiltros');
-    const arrow  = document.getElementById('btnFiltrosArrow');
-    const btn    = document.getElementById('btnFiltros');
-    if (painel) painel.classList.add('aberto');
-    if (arrow)  arrow.textContent = '▴';
-    if (btn)    btn.classList.add('ativo');
+    document.getElementById('painelFiltros')?.classList.add('aberto');
+    const arrow = document.getElementById('btnFiltrosArrow');
+    if (arrow) arrow.textContent = '▴';
+    document.getElementById('btnFiltros')?.classList.add('ativo');
 }
 
 function fecharPainelFiltros() {
     _painelAberto = false;
-    const painel = document.getElementById('painelFiltros');
-    const arrow  = document.getElementById('btnFiltrosArrow');
-    const btn    = document.getElementById('btnFiltros');
-    if (painel) painel.classList.remove('aberto');
-    if (arrow)  arrow.textContent = '▾';
-    if (btn)    btn.classList.remove('ativo');
+    document.getElementById('painelFiltros')?.classList.remove('aberto');
+    const arrow = document.getElementById('btnFiltrosArrow');
+    if (arrow) arrow.textContent = '▾';
+    document.getElementById('btnFiltros')?.classList.remove('ativo');
 }
 
-/* ── Carrega livros do servidor ── */
+/* ── Carrega página de livros do servidor ── */
 async function carregarLivros() {
     const grid = document.getElementById('gridLivros');
     if (!grid) return;
 
     grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#7A6E65;
         padding:3rem 0;font-family:'IM Fell English',serif;font-style:italic;">Carregando…</p>`;
-    document.getElementById('vitrineContador').textContent = '';
+    const contadorEl = document.getElementById('vitrineContador');
+    if (contadorEl) contadorEl.textContent = '';
+    const paginacaoEl = document.getElementById('vitrinePaginacao');
+    if (paginacaoEl) paginacaoEl.innerHTML = '';
 
     try {
-        const url    = modoPromo ? '/api/livros/todos?emPromocao=true' : '/api/livros/todos';
-        _todosLivros = await fetch(url).then(r => r.json());
+        const params = new URLSearchParams({ page: _paginaAtual, size: 20 });
+        if (modoPromo) params.set('emPromocao', 'true');
+
+        const res  = await fetch(`/api/livros/vitrine?${params}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        _todosLivros   = data.content       || [];
+        _totalPaginas  = data.totalPages    || 0;
+        _totalElements = data.totalElements || 0;
+
         aplicarFiltros();
     } catch (err) {
         console.error('Erro ao carregar vitrine:', err);

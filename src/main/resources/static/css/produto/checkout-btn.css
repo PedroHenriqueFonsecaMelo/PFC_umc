@@ -1,0 +1,153 @@
+@property --ck-ga {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+:root {
+  --ck-rainbow: oklch(72% 0.33 12), oklch(78% 0.3 55),
+    oklch(88% 0.26 100), oklch(80% 0.3 155),
+    oklch(72% 0.33 210), oklch(68% 0.32 270),
+    oklch(74% 0.34 320), oklch(72% 0.33 12);
+}
+
+#ck-particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ck-btn-wrap {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  width: 100%;
+}
+
+.ck-btn-wrap::before,
+.ck-btn-wrap::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  background: conic-gradient(from var(--ck-ga), var(--ck-rainbow));
+  animation: ck-spin 4s linear infinite;
+  opacity: 0;
+  transition: opacity 0.2s ease, filter 0.2s ease;
+  z-index: 0;
+}
+
+.ck-btn-wrap::before {
+  inset: -3px;
+  filter: blur(8px);
+}
+
+.ck-btn-wrap::after {
+  inset: -5px;
+  filter: blur(20px);
+}
+
+.ck-btn-wrap:hover::before { opacity: 1; }
+.ck-btn-wrap:hover::after  { opacity: 0.6; }
+.ck-btn-wrap:hover .bloom  { opacity: 0.35; }
+
+.bloom {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  border-radius: 9999px;
+  background: conic-gradient(from var(--ck-ga), var(--ck-rainbow));
+  filter: blur(32px);
+  opacity: 0.2;
+  animation: ck-spin 4s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* Sobrescreve o btn-confirmar existente para suportar a animação */
+#btnConfirmar {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  background:
+    linear-gradient(oklch(22% 0.04 12), oklch(16% 0.03 12)) padding-box,
+    conic-gradient(from var(--ck-ga), var(--ck-rainbow)) border-box;
+  animation: ck-spin 4s linear infinite;
+  transition: filter 0.2s ease, transform 0.12s cubic-bezier(0.34,1.56,0.64,1);
+  cursor: pointer;
+  padding: 1rem 2rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: white;
+}
+
+#btnConfirmar:hover {
+  filter: brightness(1.15);
+  transform: scale(1.03);
+}
+
+#btnConfirmar:active {
+  transform: scale(0.97);
+  filter: brightness(0.95);
+}
+
+#btnConfirmar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+
+/* Brilho interno no topo do botão */
+#btnConfirmar::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 1px;
+  inset-inline: 10%;
+  height: 35%;
+  border-radius: 9999px;
+  background: linear-gradient(to bottom,
+    oklch(100% 0 0 / 0.15),
+    oklch(100% 0 0 / 0.02));
+  pointer-events: none;
+}
+
+.ck-symbol {
+  display: inline-block;
+  background: conic-gradient(from var(--ck-ga), var(--ck-rainbow));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ck-spin 4s linear infinite;
+  font-size: 1rem;
+}
+
+.ck-word {
+  background: linear-gradient(145deg,
+    oklch(100% 0.02 30),
+    oklch(92% 0.03 40),
+    oklch(100% 0.02 50));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@keyframes ck-spin { to { --ck-ga: 360deg; } }
+
+/* Ajusta o wrap pai para suportar o canvas */
+.btn-confirmar-wrap {
+  position: relative !important;
+  overflow: visible !important;
+}

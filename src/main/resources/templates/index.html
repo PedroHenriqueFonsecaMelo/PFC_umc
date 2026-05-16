@@ -11,6 +11,8 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" th:href="@{/css/index.css}" />
+    <link rel="stylesheet" th:href="@{/css/book-wall.css}" />
+    <link rel="stylesheet" th:href="@{/css/book-scroll.css}" />
   </head>
   <body>
     <!-- FLASH: lote enviado -->
@@ -85,6 +87,44 @@
           <div class="shelf-plank"></div>
         </div>
       </div>
+    </section>
+
+    <!-- BOOK SCROLL -->
+    <section class="bw-scroll-section">
+      <div class="bw-content-wrap">
+        <div class="bw-scroll-area">
+          <div class="bw-content">
+            <div class="bw-grid">
+              <div class="bw-layer" id="bw-layer-1">
+                <div></div><div></div><div></div>
+                <div></div><div></div><div></div>
+              </div>
+              <div class="bw-layer" id="bw-layer-2">
+                <div></div><div></div><div></div>
+                <div></div><div></div><div></div>
+              </div>
+              <div class="bw-layer" id="bw-layer-3">
+                <div></div><div></div>
+              </div>
+              <div class="bw-scaler" id="bw-scaler">
+                <img src="" alt="" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bw-fim">
+        <h2 class="bw-fluid-title">Livros esperando por você.</h2>
+      </div>
+    </section>
+
+    <!-- BOOK WALL -->
+    <section class="book-wall-section">
+      <div class="book-wall-heading">
+        <h2>Livros esperando por você</h2>
+        <p>Uma curadoria de títulos que encontraram novos lares pela Bibliotroca.</p>
+      </div>
+      <div class="book-wall" id="bookWall"></div>
     </section>
 
     <!-- STATS -->
@@ -290,6 +330,8 @@
       </div>
     </footer>
 
+    <script th:src="@{/js/book-scroll.js}"></script>
+    <script th:src="@{/js/book-wall.js}"></script>
     <script th:src="@{/js/index.js}"></script>
 
     <!-- Page Loader -->

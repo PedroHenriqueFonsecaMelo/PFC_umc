@@ -16,7 +16,9 @@
       "Bash(cmd.exe /c \"mvnw.cmd clean compile 2>&1\")",
       "Bash(grep -E \"\\\\.\\(jsx?|tsx?|vue|html\\)$\")",
       "Bash(grep -E \"\\\\.\\(html|xml\\)$\")",
-      "Bash(mvn clean:*)"
+      "Bash(mvn clean:*)",
+      "Bash(grep -E \"\\\\.\\(html|js|css\\)$\")",
+      "Bash(curl -sL \"https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js\" -o \"/Users/ThiagoHenrique/Downloads/PFC_umc-main 5/src/main/resources/static/js/vendor/gsap.min.js\")"
     ]
   }
 }

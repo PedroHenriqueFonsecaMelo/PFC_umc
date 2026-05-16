@@ -11,6 +11,7 @@
     <link rel="stylesheet" th:href="@{/css/cliente/nav.css}"/>
     <link rel="stylesheet" th:href="@{/css/produto/checkout.css}"/>
     <link rel="stylesheet" th:href="@{/css/breadcrumb.css}"/>
+    <link rel="stylesheet" th:href="@{/css/produto/checkout-btn.css}" />
 </head>
 <body>
 
@@ -139,9 +140,14 @@
 
                 <!-- Botão de confirmação -->
                 <div class="btn-confirmar-wrap" id="btnConfirmarWrap">
-                    <button id="btnConfirmar" class="btn-confirmar" onclick="confirmarCompra()">
-                        Confirmar compra
-                    </button>
+                    <canvas id="ck-particles"></canvas>
+                    <div class="ck-btn-wrap">
+                        <div class="bloom"></div>
+                        <button id="btnConfirmar" class="btn-confirmar" onclick="confirmarCompra()">
+                            <span class="ck-symbol">✦</span>
+                            <span class="ck-word">Confirmar compra</span>
+                        </button>
+                    </div>
                 </div>
 
                 <p class="checkout-disclaimer">
@@ -154,5 +160,6 @@
     </main>
 
     <script th:src="@{/js/produto/checkout.js}"></script>
+    <script th:src="@{/js/produto/checkout-particles.js}"></script>
 </body>
 </html>

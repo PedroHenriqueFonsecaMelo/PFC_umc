@@ -16,12 +16,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnLogout = document.getElementById('btnLogout');
     if (btnLogout) btnLogout.addEventListener('click', logout);
 
-    initValidacaoSenha();
+    initValidacaoSenha('senha',     'senha-requisitos');
+    initValidacaoSenha('novaSenha', 'senha-requisitos');
     initDataNascimento();
     initForcaSenha('senha',     'forca-senha-container');
     initForcaSenha('novaSenha', 'forca-nova-senha-container');
     initConfirmarSenha();
     initAlterarSenha();
+    initResetSenha();
 
     document.querySelectorAll('[data-confirm]').forEach(function (el) {
         el.addEventListener('click', function (e) {
@@ -38,9 +40,9 @@ document.addEventListener("DOMContentLoaded", () => {
    VALIDAÇÃO VISUAL DE SENHA
    ============================================================ */
 
-function initValidacaoSenha() {
-    const campo = document.getElementById('senha');
-    const lista = document.getElementById('senha-requisitos');
+function initValidacaoSenha(campoId, listaId) {
+    const campo = document.getElementById(campoId || 'senha');
+    const lista = document.getElementById(listaId || 'senha-requisitos');
     if (!campo || !lista) return;
 
     campo.addEventListener('focus', () => { lista.style.display = 'block'; });
@@ -248,6 +250,49 @@ function initConfirmarSenha() {
 
     campo.addEventListener('input', validar);
     senha.addEventListener('input', () => { if (campo.value) validar(); else podeSubmeter(); });
+}
+
+/* ============================================================
+   VALIDAÇÃO DE REDEFINIÇÃO DE SENHA — RESET VIA TOKEN
+   ============================================================ */
+
+function initResetSenha() {
+    const senha     = document.getElementById('novaSenha');
+    const confirmar = document.getElementById('confirmarSenha');
+    const msg       = document.getElementById('msg-confirmar-reset');
+    const btn       = document.getElementById('btn-redefinir');
+    if (!senha || !confirmar || !msg || !btn) return;
+
+    btn.disabled = true;
+
+    function podeSubmeter() {
+        const forca    = avaliarForcaSenha(senha.value);
+        const forcaOk  = forca !== null && forca !== 'fraca';
+        const coincide = confirmar.value.length > 0 && confirmar.value === senha.value;
+        btn.disabled = !(forcaOk && coincide);
+    }
+
+    function validar() {
+        if (!confirmar.value) {
+            msg.textContent = '';
+            confirmar.style.borderColor = '';
+            podeSubmeter();
+            return;
+        }
+        if (confirmar.value === senha.value) {
+            msg.textContent = '✓ Senhas coincidem';
+            msg.style.color = '#2e7d32';
+            confirmar.style.borderColor = '#2e7d32';
+        } else {
+            msg.textContent = '✗ Senhas não coincidem';
+            msg.style.color = '#c62828';
+            confirmar.style.borderColor = '#c62828';
+        }
+        podeSubmeter();
+    }
+
+    confirmar.addEventListener('input', validar);
+    senha.addEventListener('input', () => { if (confirmar.value) validar(); else podeSubmeter(); });
 }
 
 /* ============================================================

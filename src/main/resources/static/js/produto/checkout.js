@@ -358,7 +358,7 @@ window.confirmarCompra = async function() {
         };
         sessionStorage.setItem('bibliotroca_confirmacao', JSON.stringify(confirmacaoData));
 
-        window.location.href = '/livros/pedido-confirmado';
+        setTimeout(() => { window.location.href = '/livros/pedido-confirmado'; }, 900);
 
     } catch (err) {
         console.error('Erro ao confirmar compra:', err);
@@ -392,20 +392,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 2. Detecta fluxo: compra direta (sessionStorage) ou via estante (localStorage)
-    const idsSet = new Set(ids);
+    const idsSet = new Set(ids.map(Number));
     let dadosDireto = [];
     try {
         dadosDireto = JSON.parse(sessionStorage.getItem(CHECKOUT_KEY + '_direto')) || [];
     } catch (_) {}
 
-    if (dadosDireto.length > 0) {
-        // Compra direta — dados vêm do sessionStorage; localStorage não é tocado
+    // Só usa compra direta se os IDs do _direto baterem exatamente
+    // com os IDs selecionados — evita conflito com compras anteriores
+    const idsDireto = new Set(dadosDireto.map(i => Number(i.id)));
+    const idsConferem = ids.every(id => idsDireto.has(Number(id))) && ids.length === idsDireto.size;
+
+    if (dadosDireto.length > 0 && idsConferem) {
         _compraViaEstante  = false;
-        _itensSelecionados = dadosDireto.filter(i => idsSet.has(i.id));
+        _itensSelecionados = dadosDireto;
     } else {
-        // Via estante — dados vêm do localStorage
+        // Via estante ou IDs não conferem — limpa _direto e usa localStorage
+        sessionStorage.removeItem(CHECKOUT_KEY + '_direto');
         _compraViaEstante  = true;
-        _itensSelecionados = getCarrinho().filter(i => idsSet.has(i.id));
+        _itensSelecionados = getCarrinho().filter(i => idsSet.has(Number(i.id)));
     }
 
     if (_itensSelecionados.length === 0) {

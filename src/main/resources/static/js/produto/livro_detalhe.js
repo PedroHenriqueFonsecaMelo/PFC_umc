@@ -92,6 +92,52 @@ function iniciarCountdown(expiraISO) {
     _timerInterval = setInterval(atualizar, 1000);
 }
 
+/* ── Livro 3D: virar ── */
+window.toggleFlip = function() {
+    document.getElementById('bookInner').classList.toggle('flipped');
+};
+
+/* ── Livro 3D: preenche capa, verso e lombo com dados do livro ── */
+function renderBookCover(livro) {
+    // Lombo
+    document.getElementById('bookSpineText').textContent = livro.titulo + ' · ' + livro.autor;
+
+    // Placeholder (frente sem imagem)
+    document.getElementById('placeholderTitle').textContent  = livro.titulo;
+    document.getElementById('placeholderAuthor').textContent = livro.autor;
+
+    // Verso: resumo truncado + ISBN
+    const resumo = livro.resumoOficial || 'Sem descrição disponível para este livro.';
+    document.getElementById('bookBackText').textContent  = resumo.length > 400 ? resumo.slice(0, 400) + '…' : resumo;
+    document.getElementById('bookBackIsbn').textContent  = livro.isbn ? 'ISBN ' + livro.isbn : '';
+
+    // Capa: tenta OpenLibrary pelo ISBN primeiro; cai para primeira foto do usuário
+    const img  = document.getElementById('bookCoverImg');
+    const ph   = document.getElementById('bookPlaceholder');
+
+    function usarFotoUsuario() {
+        try {
+            const fotos = JSON.parse(livro.fotosUrls || '[]');
+            if (fotos.length > 0) {
+                img.src = fotos[0];
+                img.style.display = 'block';
+                ph.style.display  = 'none';
+            }
+        } catch(_) {}
+    }
+
+    if (livro.isbn) {
+        img.src    = 'https://covers.openlibrary.org/b/isbn/' + livro.isbn.replace(/-/g, '') + '-L.jpg';
+        img.onload = function() {
+            img.style.display = 'block';
+            ph.style.display  = 'none';
+        };
+        img.onerror = usarFotoUsuario;
+    } else {
+        usarFotoUsuario();
+    }
+}
+
 /* ── Galeria de fotos ── */
 function renderGaleria(fotos) {
     const fotoMain   = document.getElementById('fotoMain');
@@ -153,6 +199,51 @@ window.toggleLerMais = function () {
     }
 };
 
+/* ── Galeria de fotos do vendedor ── */
+function renderFotosVendedor(fotos) {
+    const section = document.getElementById('fotosVendedorSection');
+    const grid    = document.getElementById('fotosVendedorGrid');
+    if (!section || !grid || fotos.length === 0) return;
+
+    grid.innerHTML = fotos.map((url, i) =>
+        `<img src="${url}" class="foto-thumb" alt="Foto ${i + 1}"
+              onerror="this.style.display='none'"
+              onclick="abrirLightbox(${i})">`
+    ).join('');
+
+    section.style.display = 'block';
+}
+
+/* ── Lightbox ── */
+let _lightboxFotos  = [];
+let _lightboxIndice = 0;
+
+function abrirLightbox(indice) {
+    _lightboxIndice = indice;
+    const overlay = document.getElementById('lightboxOverlay');
+    const img     = document.getElementById('lightboxImg');
+    if (!overlay || !img) return;
+    img.src = _lightboxFotos[indice];
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+window.fecharLightbox = function() {
+    const overlay = document.getElementById('lightboxOverlay');
+    if (overlay) overlay.style.display = 'none';
+    document.body.style.overflow = '';
+};
+
+window.fecharLightboxClick = function(e) {
+    if (e.target === document.getElementById('lightboxOverlay')) fecharLightbox();
+};
+
+window.navegarLightbox = function(dir) {
+    _lightboxIndice = (_lightboxIndice + dir + _lightboxFotos.length) % _lightboxFotos.length;
+    const img = document.getElementById('lightboxImg');
+    if (img) img.src = _lightboxFotos[_lightboxIndice];
+};
+
 /* ── Busca sinopse na Google Books API como fallback ── */
 async function buscarResumoGoogleBooks(isbn) {
     try {
@@ -172,13 +263,18 @@ async function buscarResumoGoogleBooks(isbn) {
 
 /* ── Renderiza os dados do livro na página ── */
 function renderLivro(livro) {
-    // Fotos
+    // Livro 3D
+    renderBookCover(livro);
+
+    // Fotos do vendedor
     let fotos = [];
     try {
         const arr = JSON.parse(livro.fotosUrls);
         if (Array.isArray(arr) && arr.length > 0) fotos = arr;
     } catch (_) {}
+    _lightboxFotos = fotos;
     renderGaleria(fotos);
+    renderFotosVendedor(fotos);
 
     // Badge de promoção
     if (livro.emPromocao) {
@@ -243,19 +339,19 @@ function atualizarBotaoEstante(livroId) {
     const aviso = document.getElementById('avisoEstante');
     if (!btn) return;
 
+    const textEl = btn.querySelector('.atce__text');
+
     if (jaEstaNoCarrinho(livroId)) {
-        // Livro está na estante → botão de remoção
-        btn.innerHTML = '✕ Remover da Estante';
-        btn.classList.add('remover');
-        btn.classList.remove('na-estante');
+        btn.classList.add('na-estante');
+        btn.classList.remove('remover');
+        if (textEl) textEl.textContent = 'Na Estante';
+        btn.title = 'Clique para remover da estante';
         if (aviso) aviso.style.display = 'block';
     } else {
-        // Livro não está na estante → botão de adição
-        btn.innerHTML =
-            '<img src="/estante.png" style="width:80px;height:80px;object-fit:contain;opacity:.9" alt="">' +
-            ' Adicionar à Estante';
-        btn.classList.remove('remover');
         btn.classList.remove('na-estante');
+        btn.classList.remove('remover');
+        if (textEl) textEl.textContent = 'Add Estante';
+        btn.title = '';
         if (aviso) aviso.style.display = 'none';
     }
 }
@@ -283,8 +379,7 @@ window.handleAdicionarEstante = function() {
         atualizarBotaoEstante(_livroAtual.id);
         atualizarBadgeNav();
         mostrarToast(
-            `<img src="/imagens/estante.png" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px" alt="">` +
-            ` <strong>${_livroAtual.titulo}</strong> adicionado à estante!`,
+            `<strong>${_livroAtual.titulo}</strong> adicionado à estante!`,
             'info'
         );
     }
@@ -347,4 +442,120 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     carregarLivro(id);
+
+    // Teclado: Escape fecha, setas navegam no lightbox
+    document.addEventListener('keydown', (e) => {
+        const overlay = document.getElementById('lightboxOverlay');
+        if (!overlay || overlay.style.display === 'none') return;
+        if (e.key === 'Escape')      fecharLightbox();
+        if (e.key === 'ArrowLeft')   navegarLightbox(-1);
+        if (e.key === 'ArrowRight')  navegarLightbox(1);
+    });
 });
+
+/* ── Botão ATC Estante com animação GSAP ── */
+(function initAtcEstante() {
+  // gsap já está disponível globalmente via script tag
+  const gsap = window.gsap;
+  if (!gsap) return;
+
+  const btn = document.getElementById('btnEstante');
+  if (!btn) return;
+
+  const text           = btn.querySelector('.atce__text');
+  const cart           = btn.querySelector('.atce__cart');
+  const cartContent    = btn.querySelector('.atce__cart-content');
+  const dummy          = btn.querySelector('.atce__cart--dummy');
+  const check          = btn.querySelector('.atce__check');
+  const animBorder     = btn.querySelector('.atce__border--animated');
+  const staticBorder   = btn.querySelector('.atce__border--static');
+  const completeBorder = btn.querySelector('.atce__border--complete');
+
+  let running = false;
+
+  gsap.set(cartContent, { y: -24 });
+
+  // Sincroniza visual com localStorage
+  function syncVisual() {
+    if (!_livroAtual) return;
+    const naEstante = jaEstaNoCarrinho(_livroAtual.id);
+    if (naEstante) {
+      btn.classList.add('na-estante');
+      if (text) text.textContent = 'Na Estante';
+      check.style.opacity = '1';
+      cart.style.display  = 'none';
+    } else {
+      btn.classList.remove('na-estante');
+      if (text) text.textContent = 'Add Estante';
+      check.style.opacity = '0';
+      cart.style.display  = 'inline-block';
+    }
+  }
+
+  // Animação de adicionar (carrinho voa)
+  function animarAdicionar(onComplete) {
+    const dummyRect = dummy.getBoundingClientRect();
+    const cartRect  = cart.getBoundingClientRect();
+    const distX     = dummyRect.left - cartRect.left;
+
+    gsap.timeline({ onComplete })
+      .to(cart, { x: distX, duration: 0.22 })
+      .to(cart, { rotate: -20, yoyo: true, repeat: 1, duration: 0.11 }, 0)
+      .to(text, { opacity: 0, x: distX, duration: 0.22, filter: 'blur(6px)' }, 0)
+      .to(cartContent, { y: 0, duration: 0.1, delay: 0.1 })
+      .to(staticBorder, { opacity: 1, duration: 0.1 }, '<')
+      .set(animBorder, { opacity: 0 })
+      .to(cart, { x: distX * 4, duration: 0.6, delay: 0.1 })
+      .to(cart, { rotate: -30, duration: 0.1 }, '<')
+      .to(completeBorder, { opacity: 1, duration: 0.22 }, '<')
+      .to(check, {
+        opacity: 1, scale: 1.3, duration: 0.25,
+        yoyo: true, repeat: 1, repeatDelay: 0.1
+      }, '<')
+      .set(cart,        { x: 0, rotate: 0, opacity: 0 })
+      .set(cartContent, { y: -24 })
+      .set(text,        { x: 0 })
+      .to([staticBorder, completeBorder], { opacity: 0, duration: 0.4, delay: 0.1 })
+      .to(text, { opacity: 1, duration: 0.22, filter: 'blur(0px)' })
+      .to(animBorder, { opacity: 1, duration: 0.5 });
+  }
+
+  // Animação de remover (simples)
+  function animarRemover(onComplete) {
+    gsap.timeline({ onComplete })
+      .to(btn, { scale: 0.97, duration: 0.1 })
+      .to(btn, { scale: 1.0,  duration: 0.2 });
+  }
+
+  // Clique no botão
+  btn.addEventListener('click', () => {
+    if (running || !_livroAtual) return;
+    running = true;
+
+    const naEstante = jaEstaNoCarrinho(_livroAtual.id);
+
+    if (naEstante) {
+      animarRemover(() => {
+        handleAdicionarEstante();
+        syncVisual();
+        running = false;
+      });
+    } else {
+      animarAdicionar(() => {
+        handleAdicionarEstante();
+        syncVisual();
+        running = false;
+      });
+    }
+  });
+
+  // Espera _livroAtual carregar para sincronizar visual
+  const esperar = setInterval(() => {
+    if (_livroAtual) {
+      clearInterval(esperar);
+      syncVisual();
+    }
+  }, 100);
+
+  gsap.defaults({ ease: 'power2.out' });
+})();
