@@ -71,51 +71,28 @@
     <!-- Voltar -->
     <a th:href="@{/}" href="/" class="back-link">← Voltar para o início</a>
 
-    <!-- Livro aberto -->
+    <!-- Layout novo: órbita + login -->
     <main class="page-content">
-      <div class="book">
-        <!-- Capa / página esquerda -->
-        <div class="book-cover" aria-hidden="true">
-          <div class="cover-corner tl"></div>
-          <div class="cover-corner tr"></div>
-          <div class="cover-corner bl"></div>
-          <div class="cover-corner br"></div>
 
-          <div class="cover-brand">
-<div class="cover-title">Biblio<em>troca</em></div>
-            <div class="cover-tagline">Sua estante compartilhada</div>
-          </div>
-
-          <div class="cover-divider">
-            <span></span>
-            <i>✦</i>
-            <span></span>
-          </div>
-
-          <div class="cover-quote" id="cover-quote">
-            <p id="quote-texto">&#x201C;Em todo livro h&#xE1; um sonho esperando para ser vivido.&#x201D;</p>
-            <footer id="quote-autor">&#x2014; Neil Gaiman</footer>
-          </div>
-
-          <div class="cover-page-num">i</div>
+      <!-- Lado esquerdo: órbita de capas -->
+      <div class="orbit-side" aria-hidden="true">
+        <div class="orbit-wrap">
+          <ul class="orbit-list" id="orbitList"></ul>
         </div>
+      </div>
 
-        <!-- Lombada -->
-        <div class="book-spine"></div>
-
-        <!-- Página direita — formulário -->
+      <!-- Lado direito: card de login -->
+      <div class="login-side">
         <div class="book-page">
           <div class="page-header">
             <h1>Bem-vindo de volta</h1>
             <p>Acesse sua conta para explorar e trocar livros.</p>
           </div>
 
-          <!-- Alertas -->
           <div th:if="${param.error}" class="alert alert-erro">
             E-mail ou senha inválidos.
           </div>
-          <div th:if="${erro}" th:text="${erro}" id="erro-login" class="alert alert-erro">
-          </div>
+          <div th:if="${erro}" th:text="${erro}" id="erro-login" class="alert alert-erro"></div>
           <div th:if="${param.logout}" class="alert alert-sucesso">
             Você saiu com sucesso.
           </div>
@@ -125,65 +102,44 @@
           <div th:if="${param.emailVerificado}" class="alert alert-sucesso">
             E-mail verificado com sucesso! Agora você pode fazer login.
           </div>
-          <div th:if="${sucesso}" th:text="${sucesso}" class="alert alert-sucesso">
-          </div>
+          <div th:if="${sucesso}" th:text="${sucesso}" class="alert alert-sucesso"></div>
 
-          <!-- Formulário -->
-          <form
-            th:action="@{/clientes/login}"
-            action="/clientes/login"
-            method="post"
-          >
+          <form th:action="@{/clientes/login}" action="/clientes/login" method="post">
             <div class="field">
               <label for="email">E-mail</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                placeholder="seu@email.com"
-              />
+              <input type="email" id="email" name="email" required
+                     placeholder="seu@email.com"/>
             </div>
-
             <div class="field">
               <label for="senha">Senha</label>
               <div class="input-senha-wrapper">
-                <input
-                  type="password"
-                  id="senha"
-                  name="senha"
-                  required
-                  placeholder="••••••••"
-                />
-                <button type="button" class="btn-toggle-senha" aria-label="Mostrar senha" onclick="toggleSenhaLogin('senha', this)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <input type="password" id="senha" name="senha" required
+                       placeholder="••••••••"/>
+                <button type="button" class="btn-toggle-senha"
+                        aria-label="Mostrar senha"
+                        onclick="toggleSenhaLogin('senha', this)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                       viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
                 </button>
               </div>
             </div>
-
             <button type="submit" class="btn-entrar">Abrir a biblioteca</button>
           </form>
 
-          <hr class="divider" />
-
+          <hr class="divider"/>
           <div class="panel-links">
-            <a
-              th:href="@{/clientes/novo-cadastro}"
-              href="/clientes/novo-cadastro"
-              class="panel-link"
-            >Criar conta</a>
-            <a
-              th:href="@{/clientes/recuperar-senha}"
-              href="/clientes/recuperar-senha"
-              class="panel-link"
-            >Esqueceu a senha?</a>
+            <a th:href="@{/clientes/novo-cadastro}" href="/clientes/novo-cadastro"
+               class="panel-link">Criar conta</a>
+            <a th:href="@{/clientes/recuperar-senha}" href="/clientes/recuperar-senha"
+               class="panel-link">Esqueceu a senha?</a>
           </div>
         </div>
-        <!-- /book-page -->
       </div>
-      <!-- /book -->
 
-      <p class="footnote">Bibliotroca &mdash; Sistema de Troca de Livros</p>
     </main>
 
     <!-- Estante interativa rodapé -->
@@ -195,5 +151,6 @@
 
     <script th:src="@{/js/cliente/login_cliente.js}"></script>
     <script th:src="@{/js/cliente/bookshelf-login.js}"></script>
+    <script th:src="@{/js/cliente/orbit-login.js}"></script>
   </body>
 </html>
