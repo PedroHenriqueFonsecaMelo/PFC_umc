@@ -8,8 +8,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
-import umc.exs.dtos.auth.SignupDTO;
-import umc.exs.dtos.user.ClienteDTO;
+import umc.exs.dto.auth.SignupDTO;
+import umc.exs.dto.user.ClienteDTO;
 import umc.exs.model.entidades.usuario.Cliente;
 
 @Mapper(componentModel = "spring", uses = { EnderecoMapper.class, CartaoMapper.class })

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import umc.exs.dtos.user.ClienteDTO;
+import umc.exs.dto.user.ClienteDTO;
 import umc.exs.model.entidades.logic.LogAuditoria;
 import umc.exs.service.core.cliente.ClienteService;
 import umc.exs.service.log.LogAuditoriaService;

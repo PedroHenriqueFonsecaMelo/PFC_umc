@@ -53,12 +53,26 @@
           </button>
         </div>
 
-        <!-- GRID DE LIVROS -->
-        <div class="estoque-grid" id="estoqueGrid">
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
+        <!-- TABELA DE LIVROS -->
+        <div class="estoque-table-wrap">
+          <table class="estoque-table" id="estoqueGrid">
+            <thead>
+              <tr>
+                <th style="width:48px">#</th>
+                <th>Livro</th>
+                <th>ISBN</th>
+                <th>Estado</th>
+                <th>Preço</th>
+                <th>Promoção</th>
+                <th style="width:160px">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="estoqueBody">
+              <tr class="skeleton-row"><td colspan="7"></td></tr>
+              <tr class="skeleton-row"><td colspan="7"></td></tr>
+              <tr class="skeleton-row"><td colspan="7"></td></tr>
+            </tbody>
+          </table>
         </div>
 
         <div id="estoqueVazio" class="estoque-vazio" style="display:none">
@@ -118,6 +132,49 @@
         <div class="form-group">
           <label>Resumo / Descrição</label>
           <textarea id="fResumo" rows="3" placeholder="Breve descrição do livro..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Gênero</label>
+          <select id="fGenero">
+            <option value="">— Detectar automaticamente via ISBN —</option>
+            <option value="Ficção">Ficção</option>
+            <option value="Ficção Científica">Ficção Científica</option>
+            <option value="Fantasia">Fantasia</option>
+            <option value="Infantojuvenil">Infantojuvenil</option>
+            <option value="Jovem Adulto">Jovem Adulto</option>
+            <option value="Mistério">Mistério</option>
+            <option value="Suspense">Suspense</option>
+            <option value="Terror">Terror</option>
+            <option value="Romance">Romance</option>
+            <option value="Ficção Histórica">Ficção Histórica</option>
+            <option value="Aventura">Aventura</option>
+            <option value="Biografia">Biografia</option>
+            <option value="História">História</option>
+            <option value="Filosofia">Filosofia</option>
+            <option value="Psicologia">Psicologia</option>
+            <option value="Autoajuda">Autoajuda</option>
+            <option value="Negócios">Negócios</option>
+            <option value="Ciências">Ciências</option>
+            <option value="Tecnologia">Tecnologia</option>
+            <option value="Computação">Computação</option>
+            <option value="Arte">Arte</option>
+            <option value="Poesia">Poesia</option>
+            <option value="Drama">Drama</option>
+            <option value="Quadrinhos">Quadrinhos</option>
+            <option value="Literatura">Literatura</option>
+            <option value="Não-ficção">Não-ficção</option>
+            <option value="Culinária">Culinária</option>
+            <option value="Esportes">Esportes</option>
+            <option value="Humor">Humor</option>
+            <option value="Religião">Religião</option>
+            <option value="Política">Política</option>
+            <option value="Direito">Direito</option>
+            <option value="Medicina">Medicina</option>
+            <option value="Educação">Educação</option>
+          </select>
+          <span style="font-size:.75rem;color:#7a6e65;margin-top:.25rem;display:block;">
+            Deixe em branco para detectar automaticamente pelo ISBN via Google Books.
+          </span>
         </div>
 
         <!-- ── PROMOÇÃO ── -->

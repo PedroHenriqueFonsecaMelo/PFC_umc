@@ -2,7 +2,7 @@ package umc.exs.mappers;
 
 import org.mapstruct.Mapper;
 
-import umc.exs.dtos.compra.cupom.CupomValidacaoDTO;
+import umc.exs.dto.compra.cupom.CupomValidacaoDTO;
 
 @Mapper(componentModel = "spring")
 public interface CupomValidacaoMapper {

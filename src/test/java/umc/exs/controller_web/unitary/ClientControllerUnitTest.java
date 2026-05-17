@@ -11,8 +11,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import umc.exs.controller.web.ClientController;
-import umc.exs.dtos.auth.SignupDTO;
-import umc.exs.dtos.user.ClienteDTO;
+import umc.exs.dto.auth.SignupDTO;
+import umc.exs.dto.user.ClienteDTO;
 import umc.exs.security.JwtUtil;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.service.core.cliente.ClienteService;

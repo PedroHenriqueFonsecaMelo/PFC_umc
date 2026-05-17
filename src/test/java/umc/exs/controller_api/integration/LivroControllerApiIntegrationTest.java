@@ -19,8 +19,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import umc.exs.dtos.compra.carrinho.CarrinhoCompraRequestDTO;
-import umc.exs.dtos.compra.carrinho.CarrinhoCompraResponseDTO;
+import umc.exs.dto.compra.carrinho.CarrinhoCompraRequestDTO;
+import umc.exs.dto.compra.carrinho.CarrinhoCompraResponseDTO;
 import umc.exs.service.core.bussiness.LivroService;
 
 @SpringBootTest

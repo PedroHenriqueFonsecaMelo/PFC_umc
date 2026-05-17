@@ -15,7 +15,7 @@ import com.mercadopago.resources.payment.Payment;
 
 import lombok.extern.slf4j.Slf4j;
 import umc.exs.design.strategy.PagamentoStrategy;
-import umc.exs.dtos.compra.CompraTokensRequestDTO;
+import umc.exs.dto.compra.CompraTokensRequestDTO;
 
 @Slf4j
 @Component

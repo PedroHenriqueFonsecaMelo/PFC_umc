@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import umc.exs.controller.web.AuditController;
-import umc.exs.dtos.user.ClienteDTO;
+import umc.exs.dto.user.ClienteDTO;
 import umc.exs.model.entidades.logic.LogAuditoria;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;

@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import umc.exs.dtos.gamificacao.MeuPerfilGamificacaoDTO;
-import umc.exs.dtos.gamificacao.RankingItemDTO;
+import umc.exs.dto.gamificacao.MeuPerfilGamificacaoDTO;
+import umc.exs.dto.gamificacao.RankingItemDTO;
 import umc.exs.service.gamificacao.GamificacaoService;
 
 import java.util.List;

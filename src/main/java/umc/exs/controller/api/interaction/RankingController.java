@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.dtos.gamificacao.RankingPublicoDTO;
+import umc.exs.dto.gamificacao.RankingPublicoDTO;
 import umc.exs.service.gamificacao.GamificacaoService;
 
 /**

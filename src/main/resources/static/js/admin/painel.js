@@ -8,6 +8,10 @@ let todosLotes      = [];
 let loteSearchTimer = null;
 
 async function loadLotes() {
+  // Oculta breadcrumb de lote ao voltar para a lista
+  const bcLote = document.getElementById('breadcrumb-lote');
+  if (bcLote) bcLote.style.display = 'none';
+
   const container = document.getElementById("contentArea");
   container.innerHTML = '<div class="loading">Carregando lotes pendentes...</div>';
   try {
@@ -139,6 +143,13 @@ async function loadLivrosLote(loteId) {
       quantidadeLivros: data.quantidadeLivros,
     };
     livrosCache = data.livros || [];
+
+    // Exibe e atualiza breadcrumb de lote
+    const bcLote = document.getElementById('breadcrumb-lote');
+    const bcrNum = document.getElementById('bcrLoteNumero');
+    if (bcLote) bcLote.style.display = 'block';
+    if (bcrNum) bcrNum.textContent = 'Lote #' + (data.codigoProtocolo || data.id);
+
     renderLivros();
   } catch (e) {
     container.innerHTML = '<p style="color:#722F37;padding:1rem">Erro ao carregar livros do lote.</p>';

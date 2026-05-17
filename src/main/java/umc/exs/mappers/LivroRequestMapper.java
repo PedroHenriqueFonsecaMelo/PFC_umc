@@ -3,7 +3,7 @@ package umc.exs.mappers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import umc.exs.dtos.livro.LivroRequestDTO;
+import umc.exs.dto.livro.LivroRequestDTO;
 import umc.exs.model.entidades.livro.Livro;
 
 @Mapper(componentModel = "spring")

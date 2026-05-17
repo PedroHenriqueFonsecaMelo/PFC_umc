@@ -10,7 +10,11 @@
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <link rel="stylesheet" th:href="@{/css/index.css}" />
+    <link rel="stylesheet" th:href="@{/css/book-wall.css}" />
+    <link rel="stylesheet" th:href="@{/css/book-scroll.css}" />
+    <link rel="stylesheet" th:href="@{/css/social-icons.css}"/>
   </head>
   <body>
     <!-- FLASH: lote enviado -->
@@ -87,6 +91,44 @@
       </div>
     </section>
 
+    <!-- BOOK SCROLL -->
+    <section class="bw-scroll-section">
+      <div class="bw-content-wrap">
+        <div class="bw-scroll-area">
+          <div class="bw-content">
+            <div class="bw-grid">
+              <div class="bw-layer" id="bw-layer-1">
+                <div></div><div></div><div></div>
+                <div></div><div></div><div></div>
+              </div>
+              <div class="bw-layer" id="bw-layer-2">
+                <div></div><div></div><div></div>
+                <div></div><div></div><div></div>
+              </div>
+              <div class="bw-layer" id="bw-layer-3">
+                <div></div><div></div>
+              </div>
+              <div class="bw-scaler" id="bw-scaler">
+                <img src="" alt="" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bw-fim">
+        <h2 class="bw-fluid-title">Livros esperando por você.</h2>
+      </div>
+    </section>
+
+    <!-- BOOK WALL -->
+    <section class="book-wall-section">
+      <div class="book-wall-heading">
+        <h2>Livros esperando por você</h2>
+        <p>Uma curadoria de títulos que encontraram novos lares pela Bibliotroca.</p>
+      </div>
+      <div class="book-wall" id="bookWall"></div>
+    </section>
+
     <!-- STATS -->
     <div class="stats-bar">
       <div class="stat-item">
@@ -122,34 +164,28 @@
           <a class="livros-header-link" th:href="@{/livros/vitrine}"
           >Ver todos →</a>
         </div>
-        <div class="livros-grid" id="livrosGrid">
-          <div class="livro-skeleton">
-            <div class="sk-img"></div>
-            <div class="sk-text">
-              <div class="sk-line"></div>
-              <div class="sk-line short"></div>
-            </div>
+        <!-- Carrossel 3D -->
+        <div class="carousel-root" id="carrosselDestaque">
+          <div class="carousel-track-wrap">
+            <div class="carousel-track" id="carrosselTrack"></div>
           </div>
-          <div class="livro-skeleton">
-            <div class="sk-img"></div>
-            <div class="sk-text">
-              <div class="sk-line"></div>
-              <div class="sk-line short"></div>
-            </div>
-          </div>
-          <div class="livro-skeleton">
-            <div class="sk-img"></div>
-            <div class="sk-text">
-              <div class="sk-line"></div>
-              <div class="sk-line short"></div>
-            </div>
-          </div>
-          <div class="livro-skeleton">
-            <div class="sk-img"></div>
-            <div class="sk-text">
-              <div class="sk-line"></div>
-              <div class="sk-line short"></div>
-            </div>
+          <!-- Controles -->
+          <div class="carousel-controls">
+            <button class="carousel-btn" id="carrosselPrev" aria-label="Anterior">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            </button>
+            <div class="carousel-dots" id="carrosselDots"></div>
+            <button class="carousel-btn" id="carrosselNext" aria-label="Próximo">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
           </div>
         </div>
       </div>
@@ -244,7 +280,7 @@
             </p>
           </div>
           <a id="rankingCtaBtn" class="btn-secondary" style="align-self: flex-end"
-             href="/clientes/login">Entrar na disputa →</a>
+             href="/clientes/login">Ranking Completo</a>
         </div>
         <div class="ranking-podio" id="rankingList">
           <div class="rank-skeleton"></div>
@@ -288,8 +324,16 @@
         <a th:href="@{/clientes/termo}">Termos de Uso</a>
         <a th:href="@{/clientes/politica}">Política de Privacidade</a>
       </div>
+      <div class="social-footer-icons">
+        <a href="https://facebook.com" class="sf-social sf-facebook" target="_blank" rel="noopener" aria-label="Facebook"></a>
+        <a href="https://twitter.com" class="sf-social sf-twitter" target="_blank" rel="noopener" aria-label="Twitter"></a>
+        <a href="https://instagram.com" class="sf-social sf-instagram" target="_blank" rel="noopener" aria-label="Instagram"></a>
+        <a href="https://linkedin.com" class="sf-social sf-linkedin" target="_blank" rel="noopener" aria-label="LinkedIn"></a>
+      </div>
     </footer>
 
+    <script th:src="@{/js/book-scroll.js}"></script>
+    <script th:src="@{/js/book-wall.js}"></script>
     <script th:src="@{/js/index.js}"></script>
 
     <!-- Page Loader -->

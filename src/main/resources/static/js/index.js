@@ -9,49 +9,128 @@ document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
 
 /* ── Livros em destaque ── */
 async function carregarLivrosDestaque() {
-  const grid = document.getElementById("livrosGrid");
+  const track    = document.getElementById("carrosselTrack");
+  const dotsWrap = document.getElementById("carrosselDots");
+  const btnPrev  = document.getElementById("carrosselPrev");
+  const btnNext  = document.getElementById("carrosselNext");
+  if (!track) return;
+
   try {
     const res = await fetch("/api/livros/todos");
-    if (!res.ok) throw new Error("Falha na API");
+    if (!res.ok) throw new Error();
     const livros = await res.json();
-    const destaque = livros.slice(0, 8);
+    const destaque = livros.slice(0, 10);
+    if (destaque.length === 0) return;
 
-    if (destaque.length === 0) {
-      grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--muted);padding:3rem 0;font-style:italic;font-family:var(--fell)">
-        Nenhum livro disponível no momento.
-      </p>`;
-      return;
-    }
+    let activeIndex = Math.min(3, Math.floor(destaque.length / 2));
 
-    grid.innerHTML = destaque.map((livro) => {
+    // Monta slides
+    destaque.forEach((livro, i) => {
       let foto = null;
       try {
         const arr = JSON.parse(livro.fotosUrls);
         if (Array.isArray(arr) && arr.length > 0) foto = arr[0];
       } catch (_) {}
 
-      const imgHTML = foto
-        ? `<img src="${foto}" alt="${livro.titulo}" loading="lazy" />`
-        : `📚`;
+      // Tenta capa via OpenLibrary se não tiver foto
+      const capaUrl = foto
+        || (livro.isbn
+          ? `https://covers.openlibrary.org/b/isbn/${livro.isbn.replace(/-/g,'')}-M.jpg`
+          : null);
 
-      return `
-      <a class="livro-card" href="/livros/vitrine">
-        <div class="livro-card-img">${imgHTML}</div>
-        <div class="livro-card-body">
-          <span class="livro-card-estado">${livro.estadoAprovado || "BOM"}</span>
-          <div class="livro-card-titulo">${livro.titulo}</div>
-          <div class="livro-card-autor">${livro.autor}</div>
-          <div class="livro-card-preco">
-            T$ ${(livro.precoAprovado || 0).toFixed(2)}
-            <small> / token</small>
+      const slide = document.createElement('div');
+      slide.className = 'carousel-slide';
+      slide.dataset.index = i;
+      slide.innerHTML = `
+        <div class="carousel-slide-inner">
+          <div class="carousel-img-wrap">
+            ${capaUrl
+              ? `<img src="${capaUrl}" alt="${livro.titulo}" loading="lazy"
+                      onerror="this.parentElement.innerHTML='<span class=\\'carousel-no-img\\'>📚</span>'">`
+              : `<span class="carousel-no-img">📚</span>`}
           </div>
-        </div>
-      </a>`;
-    }).join("");
-  } catch (err) {
-    grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--muted);padding:3rem 0;font-style:italic;font-family:var(--fell)">
-      Não foi possível carregar os livros. <a href="/livros/vitrine" style="color:var(--accent)">Ver vitrine completa →</a>
-    </p>`;
+          <div class="carousel-slide-info">
+            <div class="carousel-slide-titulo">${livro.titulo}</div>
+            <div class="carousel-slide-autor">${livro.autor || ''}</div>
+          </div>
+        </div>`;
+      slide.addEventListener('click', () => {
+        if (parseInt(slide.dataset.index) !== activeIndex) {
+          goTo(parseInt(slide.dataset.index));
+        } else {
+          window.location.href = `/livros/${livro.id}`;
+        }
+      });
+      track.appendChild(slide);
+    });
+
+    // Dots
+    destaque.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'carousel-dot';
+      dot.addEventListener('click', () => goTo(i));
+      dotsWrap.appendChild(dot);
+    });
+
+    function updateCarousel() {
+      const slides = track.querySelectorAll('.carousel-slide');
+      const dots   = dotsWrap.querySelectorAll('.carousel-dot');
+      const total  = slides.length;
+      const slideW = slides[0] ? slides[0].offsetWidth : 220;
+      const wrapW  = track.parentElement.offsetWidth;
+
+      // Centraliza o slide ativo na tela
+      const offsetX = (wrapW / 2) - (activeIndex * slideW) - (slideW / 2);
+      track.style.transform = `translateX(${offsetX}px)`;
+
+      slides.forEach((slide, i) => {
+        const diff    = i - activeIndex;
+        const rotY    = diff * 45;
+        const scale   = i === activeIndex ? 1 : 0.82;
+        const isActive = i === activeIndex;
+        const opacity = Math.abs(diff) > 2 ? 0 : 1;
+
+        slide.style.transform = `rotateY(${rotY}deg) scale(${scale})`;
+        slide.style.zIndex    = isActive ? 10 : Math.max(1, 8 - Math.abs(diff));
+        slide.style.opacity   = opacity;
+
+        const info = slide.querySelector('.carousel-slide-info');
+        if (info) {
+          info.style.opacity = isActive ? '1' : '0';
+          info.style.filter  = isActive ? 'blur(0)' : 'blur(3px)';
+        }
+      });
+
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === activeIndex);
+      });
+
+      if (btnPrev) btnPrev.disabled = activeIndex === 0;
+      if (btnNext) btnNext.disabled = activeIndex === total - 1;
+    }
+
+    function goTo(index) {
+      activeIndex = Math.max(0, Math.min(destaque.length - 1, index));
+      updateCarousel();
+    }
+
+    if (btnPrev) btnPrev.addEventListener('click', () => goTo(activeIndex - 1));
+    if (btnNext) btnNext.addEventListener('click', () => goTo(activeIndex + 1));
+
+    // Swipe touch
+    let touchStartX = 0;
+    track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+    track.addEventListener('touchend', e => {
+      const diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 40) goTo(activeIndex + (diff > 0 ? 1 : -1));
+    });
+
+    updateCarousel();
+
+  } catch (_) {
+    if (track) track.innerHTML = `<p style="grid-column:1/-1;text-align:center;
+      color:var(--muted);padding:3rem 0;font-style:italic;">
+      <a href="/livros/vitrine" style="color:var(--accent)">Ver vitrine completa →</a></p>`;
   }
 }
 
@@ -75,10 +154,13 @@ async function carregarRanking() {
 
     container.innerHTML = ranking.map(u => {
       const nomeCurto = esc(u.primeiroNome) + (u.inicialSobrenome ? " " + esc(u.inicialSobrenome) : "");
+      const avatarHtml = u.fotoPerfil
+        ? `<img src="${esc(u.fotoPerfil)}" alt="${nomeCurto}" class="rhi-avatar-img">`
+        : `<div class="rhi-avatar">${inicial(u.primeiroNome)}</div>`;
       return `
       <div class="rhi-card pos-${u.posicao}">
         <div class="rhi-medalha">${medalha(u.posicao)}</div>
-        <div class="rhi-avatar">${inicial(u.primeiroNome)}</div>
+        ${avatarHtml}
         <div class="rhi-nome" title="${nomeCurto}">${nomeCurto}</div>
         <div class="rhi-nivel">${esc(u.nivel)}</div>
         <div class="rhi-xp">${u.xpTotal.toLocaleString("pt-BR")}</div>
@@ -110,7 +192,7 @@ async function carregarNavUsuario() {
       if (btn) btn.href = "/livros/vender";
       // Botão do ranking: usuário logado → "Ver ranking completo"
       const ctaRanking = document.getElementById("rankingCtaBtn");
-      if (ctaRanking) { ctaRanking.href = "/ranking"; ctaRanking.textContent = "Ver ranking completo →"; }
+      if (ctaRanking) { ctaRanking.href = "/ranking"; ctaRanking.textContent = "Ranking Completo"; }
       return;
     }
 

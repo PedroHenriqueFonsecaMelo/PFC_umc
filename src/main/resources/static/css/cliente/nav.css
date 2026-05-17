@@ -13,6 +13,8 @@
   height: 54px;
   background: #2c241b;
   gap: 0.5rem;
+  line-height: 1.2;
+  font-size: 16px;
 }
 
 /* ── Logo ── */
@@ -59,6 +61,7 @@
   font-family: "DM Sans", sans-serif;
   font-size: 0.68rem;
   font-weight: 500;
+  line-height: 1.2;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   text-decoration: none;
@@ -88,6 +91,7 @@
 .cn-saldo {
   font-family: monospace;
   font-size: 0.78rem;
+  line-height: 1.2;
   color: rgba(249, 246, 240, 0.88);
   background: rgba(249, 246, 240, 0.07);
   border: 1px solid rgba(249, 246, 240, 0.15);
@@ -119,4 +123,102 @@
 @media (max-width: 560px) {
   .cn-brand  { font-size: 1.2rem; }
   .client-nav { padding: 0 4vw; gap: 0.3rem; }
+}
+
+/* ── Ícone estante animado ── */
+.cn-estante-svg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .3rem .45rem;
+  border-radius: 8px;
+  transition: none;
+  position: relative;
+  background: none !important;
+}
+
+.cn-estante-svg:hover {
+  background: none !important;
+}
+
+/* Tooltip */
+.cn-estante-svg::after {
+  content: 'Minha Estante';
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(44, 36, 27, .85);
+  color: #fff;
+  font-size: .7rem;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: .25rem .55rem;
+  border-radius: 5px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+  z-index: 100;
+}
+
+.cn-estante-svg:hover::after {
+  opacity: 1;
+}
+
+/* Animações dos livros */
+@keyframes book-bounce {
+  0%   { transform: translateY(0); }
+  40%  { transform: translateY(-6px); }
+  80%  { transform: translateY(0); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes shelf-lift {
+  0%   { transform: translateY(0) rotate(0); }
+  20%  { transform: translateY(-3px) rotate(10deg); }
+  40%  { transform: translateY(-3px) rotate(-10deg); }
+  80%  { transform: translateY(0) rotate(0); }
+  100% { transform: translateY(0) rotate(0); }
+}
+
+/* Animação ao hover */
+.cn-estante-svg:hover .book-shelf__book--one {
+  animation: book-bounce 0.4s ease 1;
+}
+.cn-estante-svg:hover .book-shelf__book--two {
+  animation: book-bounce 0.4s ease 1;
+  animation-delay: 0.04s;
+}
+.cn-estante-svg:hover .book-shelf__book--three {
+  animation: book-bounce 0.4s ease 1;
+  animation-delay: 0.08s;
+}
+.cn-estante-svg:hover .book-shelf__shelf {
+  animation: shelf-lift 0.4s ease 1;
+  transform-origin: 50% 50%;
+}
+
+/* Animação ao adicionar item à estante */
+@keyframes shelf-pulse {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.25); }
+  60%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+.book-shelf-nav.shelf-animating .book-shelf__book--one {
+  animation: book-bounce 0.4s ease 1;
+}
+.book-shelf-nav.shelf-animating .book-shelf__book--two {
+  animation: book-bounce 0.4s ease 1;
+  animation-delay: 0.04s;
+}
+.book-shelf-nav.shelf-animating .book-shelf__book--three {
+  animation: book-bounce 0.4s ease 1;
+  animation-delay: 0.08s;
+}
+.book-shelf-nav.shelf-animating .book-shelf__shelf {
+  animation: shelf-lift 0.4s ease 1;
+  transform-origin: 50% 50%;
 }

@@ -10,7 +10,7 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
 import umc.exs.controller.web.AdminViewController;
-import umc.exs.dtos.auth.LoginDTO;
+import umc.exs.dto.auth.LoginDTO;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
 import umc.exs.service.log.LogAuditoriaService;

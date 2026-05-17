@@ -10,6 +10,8 @@
           rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cliente/nav.css}"/>
     <link rel="stylesheet" th:href="@{/css/produto/checkout.css}"/>
+    <link rel="stylesheet" th:href="@{/css/breadcrumb.css}"/>
+    <link rel="stylesheet" th:href="@{/css/produto/checkout-btn.css}" />
 </head>
 <body>
 
@@ -18,6 +20,18 @@
 
     <!-- Toast de feedback -->
     <div class="toast" id="toastCheckout"></div>
+
+    <!-- NAVEGAÇÃO CONTEXTUAL -->
+    <div class="breadcrumb-wrap">
+        <nav class="breadcrumb-nav">
+            <a href="/">Início</a>
+            <span class="breadcrumb-sep">›</span>
+            <a href="/livros/estante">Minha Estante</a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current">Checkout</span>
+        </nav>
+        <a href="/livros/estante" class="btn-voltar">← Voltar para a Estante</a>
+    </div>
 
     <main class="checkout-main">
 
@@ -53,10 +67,11 @@
             <!-- Coluna esquerda: resumo dos itens -->
             <section class="checkout-resumo">
                 <h2>Resumo do pedido</h2>
+
                 <div id="listaCheckout" class="checkout-lista"></div>
 
                 <!-- Link para voltar e ajustar seleção -->
-                <a href="/livros/estante" class="link-voltar-estante">← Alterar seleção</a>
+                <a href="/livros/estante" class="btn-voltar" style="margin-top:0.5rem;">← Alterar seleção</a>
             </section>
 
             <!-- Coluna direita: pagamento -->
@@ -74,12 +89,6 @@
                          background:#faf8f5; line-height:1.6;">
                         <span style="color:var(--muted,#7a6e65);">Carregando...</span>
                     </div>
-                </div>
-
-                <!-- Alerta sem endereço -->
-                <div id="alertaEndereco" style="display:none; padding:.75rem 1rem; border-radius:8px;
-                     background:rgba(114,47,55,.07); border-left:3px solid var(--accent,#722f37);
-                     font-size:.85rem; margin-bottom:1rem; color:var(--accent,#722f37);">
                 </div>
 
                 <!-- Campo de cupom (input + feedback + estado aplicado) -->
@@ -130,9 +139,16 @@
                 </div>
 
                 <!-- Botão de confirmação -->
-                <button id="btnConfirmar" class="btn-confirmar" onclick="confirmarCompra()">
-                    Confirmar compra
-                </button>
+                <div class="btn-confirmar-wrap" id="btnConfirmarWrap">
+                    <canvas id="ck-particles"></canvas>
+                    <div class="ck-btn-wrap">
+                        <div class="bloom"></div>
+                        <button id="btnConfirmar" class="btn-confirmar" onclick="confirmarCompra()">
+                            <span class="ck-symbol">✦</span>
+                            <span class="ck-word">Confirmar compra</span>
+                        </button>
+                    </div>
+                </div>
 
                 <p class="checkout-disclaimer">
                     Os tokens serão debitados imediatamente. Em caso de falha, o
@@ -144,5 +160,6 @@
     </main>
 
     <script th:src="@{/js/produto/checkout.js}"></script>
+    <script th:src="@{/js/produto/checkout-particles.js}"></script>
 </body>
 </html>

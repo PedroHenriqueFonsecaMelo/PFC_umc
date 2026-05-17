@@ -15,9 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
-import umc.exs.dtos.auth.LoginDTO;
-import umc.exs.dtos.auth.SignupDTO;
-import umc.exs.dtos.user.ClienteDTO;
+import umc.exs.dto.auth.LoginDTO;
+import umc.exs.dto.auth.SignupDTO;
+import umc.exs.dto.user.ClienteDTO;
 import umc.exs.model.entidades.foundation.EmailVerificacao;
 import umc.exs.model.entidades.usuario.Cliente;
 

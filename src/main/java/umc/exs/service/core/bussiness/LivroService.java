@@ -3,18 +3,20 @@ package umc.exs.service.core.bussiness;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.dtos.admin.LivroAdminRequest;
-import umc.exs.dtos.compra.carrinho.CarrinhoCompraRequestDTO;
-import umc.exs.dtos.compra.carrinho.CarrinhoCompraResponseDTO;
-import umc.exs.dtos.compra.lote.LoteRequestDTO;
-import umc.exs.dtos.livro.LivroDTO;
-import umc.exs.dtos.livro.LivroRequestDTO;
+import umc.exs.dto.admin.LivroAdminRequest;
+import umc.exs.dto.compra.carrinho.CarrinhoCompraRequestDTO;
+import umc.exs.dto.compra.carrinho.CarrinhoCompraResponseDTO;
+import umc.exs.dto.compra.lote.LoteRequestDTO;
+import umc.exs.dto.livro.LivroDTO;
+import umc.exs.dto.livro.LivroRequestDTO;
 import umc.exs.model.entidades.foundation.Lote;
 
 @Service("livroService")
@@ -66,13 +68,21 @@ public class LivroService {
         return livroAdminService.listarLivrosAprovados();
     }
 
+    public Page<LivroDTO> listarLivrosAprovadosPaginado(Pageable pageable) {
+        return livroAdminService.listarLivrosAprovadosPaginado(pageable);
+    }
+
+    public Page<LivroDTO> listarPromocoesAtivasPaginado(Pageable pageable) {
+        return livroAdminService.listarPromocoesAtivasPaginado(pageable);
+    }
+
     @Transactional
     public List<LivroDTO> listarLivrosPorLote(Long loteId) {
         return livroAdminService.listarLivrosPorLote(loteId);
     }
 
     @Transactional
-    public LivroDTO aprovarLivro(Long livroId, Long adminId, umc.exs.dtos.admin.AdminAprovacaoDTO dto) {
+    public LivroDTO aprovarLivro(Long livroId, Long adminId, umc.exs.dto.admin.AdminAprovacaoDTO dto) {
         return livroAdminService.aprovarLivro(livroId, adminId, dto);
     }
 

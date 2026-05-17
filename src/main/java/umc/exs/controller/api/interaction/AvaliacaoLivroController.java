@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.dtos.livro.AvaliacaoLivroDTO;
-import umc.exs.dtos.shared.ComentarioRequestDTO;
+import umc.exs.dto.livro.AvaliacaoLivroDTO;
+import umc.exs.dto.shared.ComentarioRequestDTO;
 import umc.exs.model.entidades.livro.AvaliacaoLivro;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.usuario.Cliente;

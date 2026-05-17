@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import umc.exs.dtos.compra.lote.ListaDesejosDTO;
+import umc.exs.dto.compra.lote.ListaDesejosDTO;
 import umc.exs.model.entidades.foundation.ListaDesejos;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.negocios.ListaDesejosRepository;

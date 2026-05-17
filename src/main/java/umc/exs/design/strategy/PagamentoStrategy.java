@@ -1,6 +1,6 @@
 package umc.exs.design.strategy;
 
-import umc.exs.dtos.compra.CompraTokensRequestDTO;
+import umc.exs.dto.compra.CompraTokensRequestDTO;
 
 public interface PagamentoStrategy {
 

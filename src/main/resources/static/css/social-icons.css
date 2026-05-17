@@ -1,0 +1,80 @@
+.social-footer-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.sf-social {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  line-height: 44px;
+  position: relative;
+  overflow: visible;
+  text-indent: -9999em;
+  cursor: pointer;
+}
+
+/* Fundo redondo colorido */
+.sf-social::before {
+  content: '';
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: center 44px;
+  transform: rotateX(0deg);
+  transition: transform 0.3s ease-in-out, background 0.3s ease-in-out;
+  perspective: 40px;
+}
+
+/* Ícone Font Awesome */
+.sf-social::after {
+  font-family: 'Font Awesome 6 Brands';
+  font-size: 22px;
+  color: #fff;
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  line-height: 44px;
+  text-align: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  text-indent: 0;
+  transform: scale(1);
+  transition: transform 0.3s ease-in, color 0.3s ease-in-out;
+}
+
+/* Cores de fundo por rede */
+.sf-facebook::before  { background: #3b5998; }
+.sf-twitter::before   { background: #1da1f2; }
+.sf-instagram::before { background: #784cac; }
+.sf-linkedin::before  { background: #007bb6; }
+
+/* Ícones */
+.sf-facebook::after  { content: '\f09a'; }
+.sf-twitter::after   { content: '\f099'; }
+.sf-instagram::after { content: '\f16d'; }
+.sf-linkedin::after  { content: '\f0e1'; }
+
+/* Hover: fundo cai para trás (bg-fall) */
+.sf-social:hover::before {
+  transform: rotateX(90deg);
+}
+
+/* Hover: ícone infla (fg-inflate) */
+.sf-social:hover::after {
+  transform: scale(1.5);
+}
+
+/* Hover: ícone muda para cor da rede (fg-color) */
+.sf-facebook:hover::after  { color: #3b5998; }
+.sf-twitter:hover::after   { color: #1da1f2; }
+.sf-instagram:hover::after { color: #784cac; }
+.sf-linkedin:hover::after  { color: #007bb6; }

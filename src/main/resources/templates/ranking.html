@@ -12,11 +12,22 @@
     />
     <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
     <link rel="stylesheet" th:href="@{/css/ranking.css}" />
+    <link rel="stylesheet" th:href="@{/css/breadcrumb.css}" />
   </head>
   <body>
 
     <!-- NAV -->
     <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+
+    <!-- NAVEGAÇÃO CONTEXTUAL -->
+    <div class="breadcrumb-wrap">
+        <nav class="breadcrumb-nav">
+            <a href="/">Início</a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current">Ranking Geral</span>
+        </nav>
+        <a href="/" class="btn-voltar">← Voltar para Início</a>
+    </div>
 
     <!-- PAGE HEADER -->
     <div class="rk-hero">

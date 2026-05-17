@@ -1,0 +1,152 @@
+@property --atce-complete {
+  initial-value: 0;
+  inherits: false;
+  syntax: '<number>';
+}
+
+.atc-estante {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100px;
+  border: 2px solid #c5b9b0;
+  background: #fbfaf6;
+  color: #2c241b;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.2s ease;
+  min-width: 180px;
+}
+
+.atc-estante:hover { border-color: #722f37; }
+
+.atce__content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: inherit;
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.atce__content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #fbfaf6;
+  z-index: -1;
+}
+
+.atce__cart,
+.atce__cart--dummy,
+.atce__check {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.atce__cart--dummy {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  opacity: 0;
+  translate: -50% -50%;
+  width: 20px;
+  height: 20px;
+}
+
+.atce__check {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+/* Quando na estante: mostra check ao lado do texto */
+.atc-estante.na-estante .atce__check {
+  opacity: 1;
+}
+
+.atc-estante.na-estante .atce__cart {
+  display: none;
+}
+
+.atce__cart-content { fill: #722f37; }
+.atce__check { stroke: #16a34a; }
+
+.atce__icon {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.atce__text {
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+/* Estado: já na estante — botão todo verde */
+.atc-estante.na-estante {
+  border-color: #16a34a;
+  color: #15803d;
+}
+.atc-estante.na-estante .atce__content::before {
+  background: #f0fdf4;
+}
+.atc-estante.na-estante:hover {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.atce__border {
+  position: absolute;
+  inset: -2px;
+  container-type: inline-size;
+  border: 2px solid transparent;
+  mask:
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0) border-box;
+  mask-composite: exclude;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.atce__border--static   { opacity: 0; border-color: #722f37; }
+.atce__border--complete { border-color: #16a34a; opacity: 0; }
+
+.atce__border--animated::after {
+  content: '';
+  width: calc(100cqi + 4px);
+  height: calc(100cqi + 4px);
+  background: conic-gradient(
+    from calc(var(--atce-complete, 0) * 180deg) in hsl increasing hue,
+    #0000 0 calc((1 - var(--atce-complete)) * 20%),
+    #722f37 calc((1 - var(--atce-complete)) * 30%),
+    #a84455 calc(100% - ((1 - var(--atce-complete)) * 30%)),
+    #0000 calc(100% - ((1 - var(--atce-complete)) * 20%)) 100%
+  );
+  position: absolute;
+  top: 50%; left: 50%;
+  translate: -50% -50%;
+  z-index: -1;
+  animation: atce-spin 2s infinite linear;
+  transition: --atce-complete 0.22s ease-out;
+}
+
+@keyframes atce-spin { to { rotate: 360deg; } }
+
+/* Quando na estante: para a animação e deixa borda verde fixa */
+.atc-estante.na-estante .atce__border--animated::after {
+  animation-play-state: paused;
+  background: conic-gradient(#16a34a, #16a34a);
+}

@@ -11,7 +11,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import umc.exs.controller.web.ClientController;
-import umc.exs.dtos.user.ClienteDTO;
+import umc.exs.dto.user.ClienteDTO;
 import umc.exs.security.JwtUtil;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.service.core.cliente.ClienteService;

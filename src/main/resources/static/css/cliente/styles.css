@@ -267,6 +267,74 @@ input[readonly] {
   color: var(--ink);
 }
 
+/* === BOTÃO GERAR SENHA === */
+.input-senha-wrapper.has-generator input {
+  padding-right: 5rem;
+}
+
+.btn-gerar-senha {
+  position: absolute;
+  right: 2.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.btn-gerar-senha:hover {
+  color: var(--accent);
+}
+
+/* === BOTÃO COPIAR SENHA GERADA === */
+.copiar-container {
+  margin-top: 5px;
+}
+
+.btn-copiar-senha {
+  font-size: 0.75rem;
+  font-family: 'DM Sans', sans-serif;
+  padding: 3px 10px;
+  border: 1.5px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  border-radius: 3px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-copiar-senha:hover {
+  background: var(--accent);
+  color: white;
+}
+
+/* === FORÇA DE SENHA — 4 segmentos === */
+.forca-segmentos {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.forca-seg {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: #e0e0e0;
+  transition: background 0.3s;
+}
+
+.forca-label {
+  font-size: 0.78rem;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+}
+
 /* === GRID DE FORMULÁRIO === */
 .form-grid {
   display: grid;

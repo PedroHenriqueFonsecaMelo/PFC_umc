@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
-import umc.exs.dtos.admin.EmailDestinatarioDTO;
-import umc.exs.dtos.admin.EmailDisparoDTO;
+import umc.exs.dto.admin.EmailDestinatarioDTO;
+import umc.exs.dto.admin.EmailDisparoDTO;
 import umc.exs.model.entidades.social.PontuacaoUsuario;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.usuario.ClienteRepository;

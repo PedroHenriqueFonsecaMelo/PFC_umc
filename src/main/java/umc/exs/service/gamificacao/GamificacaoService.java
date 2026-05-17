@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
-import umc.exs.dtos.gamificacao.MeuPerfilGamificacaoDTO;
-import umc.exs.dtos.gamificacao.RankingItemDTO;
-import umc.exs.dtos.gamificacao.RankingPublicoDTO;
+import umc.exs.dto.gamificacao.MeuPerfilGamificacaoDTO;
+import umc.exs.dto.gamificacao.RankingItemDTO;
+import umc.exs.dto.gamificacao.RankingPublicoDTO;
 import umc.exs.model.entidades.social.PontuacaoUsuario;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.NivelUsuario;
@@ -195,9 +195,15 @@ public class GamificacaoService {
             desde = LocalDate.now().withDayOfYear(1).atStartOfDay();
         }
 
-        List<PontuacaoUsuario> top = desde == null
-            ? pontuacaoRepository.findRankingTodos(PageRequest.of(0, cap))
-            : pontuacaoRepository.findRankingDesde(desde, PageRequest.of(0, cap));
+        List<PontuacaoUsuario> top;
+        if (desde == null) {
+            top = pontuacaoRepository.findRankingTodos(PageRequest.of(0, cap));
+        } else {
+            top = pontuacaoRepository.findRankingDesde(desde, PageRequest.of(0, cap));
+            if (top.size() < cap) {
+                top = pontuacaoRepository.findRankingTodos(PageRequest.of(0, cap));
+            }
+        }
 
         List<RankingPublicoDTO> result = new ArrayList<>();
         for (int i = 0; i < top.size(); i++) {
@@ -212,10 +218,11 @@ public class GamificacaoService {
             NivelUsuario nivel = p.getNivel();
             int xpAtual = p.getXpTotal() != null ? p.getXpTotal() : 0;
             int xpProximo = calcularXpParaProximoNivel(nivel, xpAtual);
+            String fotoPerfil = (p.getCliente() != null) ? p.getCliente().getFotoPerfil() : null;
 
             result.add(new RankingPublicoDTO(
                 i + 1, primeiroNome, inicialSobrenome,
-                nivel.getDescricao(), nivel.getBadge(), xpAtual, xpProximo
+                nivel.getDescricao(), nivel.getBadge(), xpAtual, xpProximo, fotoPerfil
             ));
         }
         return result;

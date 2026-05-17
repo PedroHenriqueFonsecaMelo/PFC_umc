@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.dtos.forum.NovaRespostaDTO;
-import umc.exs.dtos.forum.NovoTopicoDTO;
+import umc.exs.dto.forum.NovaRespostaDTO;
+import umc.exs.dto.forum.NovoTopicoDTO;
 import umc.exs.model.entidades.social.RespostaForum;
 import umc.exs.model.entidades.social.TopicoForum;
 import umc.exs.model.entidades.usuario.Cliente;

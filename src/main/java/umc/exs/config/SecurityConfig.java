@@ -183,13 +183,15 @@ public class SecurityConfig {
                         "/clientes/recuperar-senha/**", "/clientes/reset-senha/**", "/clientes/alterar-senha/**",
                         "/blog", "/blog/**",
                         // Ranking público
-                        "/ranking", "/api/ranking/top"
+                        "/ranking", "/api/ranking/top",
+                        // Proxy Google Books (sem chave exposta no frontend)
+                        "/api/books/**"
         };
 
         // Recursos estáticos (CSS, JS, Imagens)
         private static final String[] STATIC_RESOURCES = {
                         "/css/**", "/js/**", "/images/**", "/imagens/**", "/cliente/**",
-                        "/produto/**", "/static/**", "/uploads/**"
+                        "/produto/**", "/static/**", "/uploads/**", "/*.png", "/*.ico", "/*.svg"
         };
 
         // Rotas exclusivas para ADMIN

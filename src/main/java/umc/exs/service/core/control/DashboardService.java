@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.dtos.admin.DashboardMetricasDTO;
+import umc.exs.dto.admin.DashboardMetricasDTO;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.logic.VisitaSiteRepository;
 import umc.exs.repository.negocios.PedidoRepository;

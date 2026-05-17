@@ -18,52 +18,22 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background:
-        radial-gradient(ellipse at center, transparent 30%, rgba(249, 246, 240, 0.6) 100%),
-        radial-gradient(ellipse 900px 600px at 50% 46%, rgba(74, 93, 35, 0.10) 0%, rgba(74, 93, 35, 0.05) 50%, transparent 72%),
-        #f9f6f0;
+    /* fundo creme + linhas horizontais sutis simulando páginas */
+    background-color: #f4f1ec;
+    background-image: repeating-linear-gradient(
+        180deg,
+        transparent,
+        transparent 27px,
+        rgba(114, 47, 55, 0.06) 27px,
+        rgba(114, 47, 55, 0.06) 28px
+    );
 }
 
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-    opacity: 0.025;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.shelves-bg {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-}
-.shelf-line {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: rgba(74, 93, 35, 0.1);
-}
-.shelf-line:nth-child(1) { top: 18%; }
-.shelf-line:nth-child(2) { top: 40%; }
-.shelf-line:nth-child(3) { top: 62%; }
-.shelf-line:nth-child(4) { top: 82%; }
+/* elemento estranho abaixo do card — oculto */
+.shelves-bg { display: none; }
 
 .bg-books {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 100px;
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    padding: 0 2vw;
-    opacity: 0.18;
+    display: none; /* decoração oculta — evita aparência de gráfico de barras */
 }
 .bg-book {
     flex-shrink: 0;
@@ -91,20 +61,29 @@ body::before {
 
 .back-link {
     position: fixed;
-    top: 28px;
-    left: 32px;
-    z-index: 10;
-    font-size: 0.82rem;
-    font-weight: 500;
-    color: rgba(74, 93, 35, 0.55);
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: rgba(114, 47, 55, 0.72);
     text-decoration: none;
     display: flex;
     align-items: center;
     gap: 6px;
-    letter-spacing: 0.04em;
-    transition: color 0.25s;
+    letter-spacing: 0.03em;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1.5px solid rgba(114, 47, 55, 0.28);
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(6px);
+    transition: color 0.22s, background 0.22s, border-color 0.22s;
 }
-.back-link:hover { color: rgba(74, 93, 35, 0.9); }
+.back-link:hover {
+    color: #722f37;
+    background: rgba(255, 255, 255, 0.88);
+    border-color: rgba(114, 47, 55, 0.55);
+}
 
 .page-content {
     position: relative;
@@ -191,9 +170,41 @@ body::before {
 .cover-divider span { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(114, 47, 55, 0.45), transparent); }
 .cover-divider i { font-style: normal; font-size: 0.75rem; color: rgba(114, 47, 55, 0.55); }
 
-.cover-quote { position: relative; z-index: 1; }
-.cover-quote p { font-family: "IM Fell English", Georgia, serif; font-style: italic; font-size: 0.82rem; line-height: 1.65; color: rgba(44, 36, 27, 0.6); }
-.cover-quote footer { margin-top: 8px; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(114, 47, 55, 0.5); }
+.cover-quote {
+    position: relative;
+    z-index: 1;
+    transition: opacity 0.6s ease;
+    padding-top: 1.8rem;
+}
+/* aspas decorativas grandes */
+.cover-quote::before {
+    content: '\201C';
+    position: absolute;
+    top: -0.6rem;
+    left: -0.4rem;
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 4rem;
+    line-height: 1;
+    color: #722f37;
+    opacity: 0.3;
+    pointer-events: none;
+}
+.cover-quote p {
+    font-family: "IM Fell English", Georgia, serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: rgba(44, 36, 27, 0.75);
+}
+.cover-quote footer {
+    margin-top: 12px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #722f37;
+}
 
 .cover-page-num { position: relative; z-index: 1; font-size: 0.68rem; color: rgba(114, 47, 55, 0.4); letter-spacing: 0.08em; text-align: center; }
 
@@ -302,3 +313,96 @@ body::before {
     line-height: 1;
 }
 .btn-toggle-senha:hover { color: var(--ink, #2C241B); }
+
+
+/* ── Layout órbita + login ── */
+.page-content {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3rem !important;
+  min-height: 100vh;
+  padding: 2rem 2rem 2rem 4rem;
+  box-sizing: border-box;
+  overflow: visible;
+  position: relative !important;
+  top: 0 !important;
+  transform: none !important;
+  margin: 0 !important;
+}
+
+.orbit-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 520px;
+  position: relative;
+}
+
+.orbit-wrap {
+  position: relative;
+  width: 500px;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.orbit-list {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.orbit-list li {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+
+.orbit-list li:hover { z-index: 999; }
+
+.login-side {
+  flex: 0 0 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-side .book-page {
+  width: 380px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 8px 48px rgba(44,36,27,0.13);
+  margin-top: 0;
+  position: relative;
+  top: 0;
+}
+
+.book {
+  display: none !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  pointer-events: none !important;
+}
+.footnote { display: none !important; }
+
+@media (max-width: 900px) {
+  .page-content {
+    flex-direction: column !important;
+    gap: 2rem !important;
+  }
+  .orbit-side  { min-height: 360px; }
+  .orbit-wrap  { width: 320px; height: 320px; }
+  .login-side  { flex: unset; width: 100%; }
+}

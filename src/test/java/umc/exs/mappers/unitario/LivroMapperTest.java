@@ -3,7 +3,7 @@ package umc.exs.mappers.unitario;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
-import umc.exs.dtos.livro.LivroRequestDTO;
+import umc.exs.dto.livro.LivroRequestDTO;
 import umc.exs.mappers.LivroRequestMapper;
 import umc.exs.model.entidades.livro.Livro;
 

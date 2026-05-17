@@ -338,6 +338,38 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
 }
 .btn-primario:hover { background: #5a2229; }
 
+/* ── Link inline "Cadastrar endereço" no card de endereço ── */
+.checkout-link-endereco {
+  display: inline-block;
+  margin-top: .45rem;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+.checkout-link-endereco:hover { text-decoration: underline; }
+
+/* ── Tooltip no botão desabilitado ── */
+.btn-confirmar-wrap {
+  position: relative;
+}
+.btn-confirmar-wrap[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(44, 36, 27, .88);
+  color: #fff;
+  font-family: "DM Sans", sans-serif;
+  font-size: .76rem;
+  padding: .3rem .7rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+}
+
 /* ── Responsivo ── */
 @media (max-width: 720px) {
   .checkout-layout { grid-template-columns: 1fr; }

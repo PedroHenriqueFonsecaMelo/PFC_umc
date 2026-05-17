@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.dtos.compra.PedidoDTO;
+import umc.exs.dto.compra.PedidoDTO;
 import umc.exs.model.entidades.foundation.Pedido;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.usuario.Cliente;

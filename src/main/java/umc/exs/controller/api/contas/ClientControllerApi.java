@@ -13,12 +13,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import umc.exs.dtos.livro.MinhaVendaDetalheDTO;
-import umc.exs.dtos.livro.MinhaVendaDTO;
-import umc.exs.dtos.user.EnderecoDTO;
-
 import lombok.RequiredArgsConstructor;
-import umc.exs.dtos.user.ClienteDTO;
+import umc.exs.dto.livro.MinhaVendaDTO;
+import umc.exs.dto.livro.MinhaVendaDetalheDTO;
+import umc.exs.dto.user.ClienteDTO;
+import umc.exs.dto.user.EnderecoDTO;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.service.core.bussiness.MinhasVendasService;
 import umc.exs.service.core.cliente.ClienteService;

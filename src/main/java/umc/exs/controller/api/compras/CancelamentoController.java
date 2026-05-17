@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.dtos.cancelamento.RespostaAdminDTO;
-import umc.exs.dtos.cancelamento.SolicitacaoCancelamentoRequestDTO;
-import umc.exs.dtos.cancelamento.SolicitacaoCancelamentoResponseDTO;
+import umc.exs.dto.cancelamento.RespostaAdminDTO;
+import umc.exs.dto.cancelamento.SolicitacaoCancelamentoRequestDTO;
+import umc.exs.dto.cancelamento.SolicitacaoCancelamentoResponseDTO;
 import umc.exs.service.cancelamento.CancelamentoService;
 
 @Slf4j

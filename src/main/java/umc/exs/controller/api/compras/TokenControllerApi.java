@@ -18,7 +18,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import umc.exs.design.strategy.impl.PagamentoPixStrategy;
-import umc.exs.dtos.compra.CompraTokensRequestDTO;
+import umc.exs.dto.compra.CompraTokensRequestDTO;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.service.core.cliente.ClienteService;

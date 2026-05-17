@@ -1,0 +1,195 @@
+/* ================================================================
+   bookshelf.css — Estante decorativa rodapé · Compartilhado pelas 3 telas de auth
+   ================================================================ */
+
+body {
+    background-color: #f4f1ec;
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 28px,
+        rgba(114, 47, 55, 0.06) 28px,
+        rgba(114, 47, 55, 0.06) 29px
+    );
+    padding-bottom: 160px;
+}
+
+.bookshelf-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 155px;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.bookshelf-fade {
+    display: none;
+}
+
+.bookshelf-floor {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 6px;
+    background: rgba(114, 47, 55, 0.2);
+    z-index: 2;
+}
+
+.books-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 4px;
+    padding: 0;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.book-item {
+    border-radius: 2px 3px 3px 2px;
+    position: relative;
+    flex-shrink: 0;
+    box-shadow: 1px 0 4px rgba(44, 36, 27, 0.15);
+}
+
+.book-spine {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    border-radius: 2px 0 0 2px;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.book-title-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-rl;
+    font-family: Georgia, serif;
+    font-size: 9px;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.75);
+    overflow: hidden;
+    padding: 4px 0;
+}
+
+/* ── Interatividade (ativa apenas no login via JS pointer-events) ── */
+.book-item.interactive {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.book-item.interactive:hover {
+    transform: translateY(-10px);
+    box-shadow: 2px -2px 10px rgba(44, 36, 27, 0.22);
+}
+
+.book-item.interactive.active {
+    transform: translateY(-14px);
+    box-shadow: 3px -3px 14px rgba(44, 36, 27, 0.28);
+}
+
+/* ── Tooltip ── */
+#bs-tooltip {
+    position: fixed;
+    z-index: 9000;
+    width: 240px;
+    background: #fff;
+    border-left: 3px solid #722f37;
+    border-radius: 6px;
+    box-shadow: 0 8px 28px rgba(44, 36, 27, 0.18), 0 2px 6px rgba(44, 36, 27, 0.08);
+    padding: 12px 14px;
+    pointer-events: none;
+    opacity: 0;
+    display: none;
+    transform: translateY(8px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+#bs-tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.bs-tt-titulo {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #722f37;
+    margin-bottom: 6px;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.bs-tt-trecho {
+    font-family: 'IM Fell English', Georgia, serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: rgba(44, 36, 27, 0.82);
+    margin-bottom: 7px;
+}
+
+.bs-tt-autor {
+    font-size: 0.65rem;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    color: rgba(114, 47, 55, 0.65);
+    text-align: right;
+    letter-spacing: 0.05em;
+}
+
+/* ── Hint pulsante (login) ── */
+.bs-hint {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.67rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    color: rgba(114, 47, 55, 0.6);
+    letter-spacing: 0.08em;
+    pointer-events: none;
+    white-space: nowrap;
+    animation: bsPulse 2.5s ease-in-out infinite;
+    z-index: 3;
+}
+
+@keyframes bsPulse {
+    0%, 100% { opacity: 0.4; }
+    50%       { opacity: 1;   }
+}
+
+.bs-hint.out {
+    animation: bsHintOut 0.35s ease forwards;
+}
+
+@keyframes bsHintOut {
+    to { opacity: 0; transform: translateX(-50%) translateY(4px); }
+}
+
+/* ── z-index conteúdo principal ── */
+.breadcrumb-wrap,
+.container,
+.page-content,
+.book {
+    position: relative;
+    z-index: 10;
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+    body { padding-bottom: 0; }
+    .bookshelf-container { display: none; }
+}

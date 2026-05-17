@@ -17,8 +17,8 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.negocios.CupomRepository;
 import umc.exs.repository.negocios.CupomUsoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
-import umc.exs.dtos.compra.CriarCupomDTO;
-import umc.exs.dtos.compra.cupom.CupomDTO;
+import umc.exs.dto.compra.CriarCupomDTO;
+import umc.exs.dto.compra.cupom.CupomDTO;
 import umc.exs.mappers.CupomMapper;
 
 @Slf4j

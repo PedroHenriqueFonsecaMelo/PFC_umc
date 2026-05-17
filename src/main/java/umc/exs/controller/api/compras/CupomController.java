@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.dtos.compra.cupom.CupomDTO;
+import umc.exs.dto.compra.cupom.CupomDTO;
 import umc.exs.service.cupom.CupomService;
 
 @RestController

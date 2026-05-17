@@ -3,8 +3,9 @@ package umc.exs.service.core.control;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import umc.exs.dtos.admin.ClienteListaDTO;
-import umc.exs.dtos.admin.ClientePerfilDTO;
+
+import umc.exs.dto.admin.ClienteListaDTO;
+import umc.exs.dto.admin.ClientePerfilDTO;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.foundation.Pedido;
 import umc.exs.model.entidades.usuario.Cliente;

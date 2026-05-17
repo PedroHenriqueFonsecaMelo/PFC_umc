@@ -1,0 +1,214 @@
+/* ================================================================
+   book-wall.css — Galeria infinita de capas · Bibliotroca
+   ================================================================ */
+
+/* ── Seção ── */
+.book-wall-section {
+  background: #ece8e1;
+  padding: 3rem 0 0;
+}
+
+.book-wall-heading {
+  text-align: center;
+  padding: 0 1rem 2rem;
+}
+
+.book-wall-heading h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #722f37;
+  line-height: 1.2;
+}
+
+.book-wall-heading p {
+  font-family: "IM Fell English", serif;
+  font-style: italic;
+  color: #7a6e65;
+  margin-top: 0.5rem;
+  font-size: 1rem;
+}
+
+/* ── Container das colunas ── */
+.book-wall {
+  display: flex;
+  gap: 14px;
+  padding: 0 14px;
+  height: 500px;
+  overflow: hidden;
+}
+
+/* ── Coluna ── */
+.bw-col {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Pausa o scroll ao hover na coluna */
+.bw-col:hover .bw-track {
+  animation-play-state: paused !important;
+}
+
+/* ── Track (lista de cards, duplicada para loop) ── */
+.bw-track {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  will-change: transform;
+}
+
+/* ── Card individual ── */
+.bw-card {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  background: #d4cfc7;
+}
+
+.bw-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 20px 48px rgba(44, 36, 27, 0.35);
+  z-index: 10;
+}
+
+/* Imagem da capa */
+.bw-card img {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+/* Placeholder vinho (quando imagem falha) */
+.bw-placeholder {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  background: linear-gradient(145deg, #722f37 0%, #5a2229 60%, #3d161b 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0.6rem;
+  text-align: center;
+  gap: 0.4rem;
+}
+
+.bw-ph-title {
+  font-family: Georgia, serif;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bw-ph-author {
+  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.48);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  display: block;
+}
+
+/* ── Overlay título/autor (aparece no hover) ── */
+.bw-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(114, 47, 55, 0.93);
+  backdrop-filter: blur(2px);
+  padding: 0.55rem 0.7rem;
+  transform: translateY(100%);
+  transition: transform 0.22s ease;
+}
+
+.bw-card:hover .bw-overlay {
+  transform: translateY(0);
+}
+
+.bw-ov-title {
+  font-family: Georgia, serif;
+  font-size: 0.78rem;
+  font-weight: bold;
+  color: #fff;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bw-ov-author {
+  font-size: 0.64rem;
+  color: rgba(255, 255, 255, 0.72);
+  font-style: italic;
+  margin-top: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Keyframe do scroll infinito ── */
+@keyframes bwScroll {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+
+/* ── Fade nas bordas superior e inferior ── */
+.book-wall::before,
+.book-wall::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 80px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.book-wall-section {
+  position: relative;
+}
+
+.book-wall-section::after {
+  content: "";
+  display: block;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(to top, #ece8e1, transparent);
+  pointer-events: none;
+}
+
+/* ── Responsivo: mobile 3 colunas ── */
+@media (max-width: 768px) {
+  .book-wall {
+    gap: 8px;
+    padding: 0 8px;
+    height: 420px;
+  }
+
+  .bw-track {
+    gap: 8px;
+  }
+
+  /* Ocultar colunas 4 e 5 no mobile */
+  .bw-col:nth-child(4),
+  .bw-col:nth-child(5) {
+    display: none;
+  }
+
+  .book-wall-heading h2 {
+    font-size: 1.5rem;
+  }
+}

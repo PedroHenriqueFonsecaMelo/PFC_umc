@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-import umc.exs.dtos.compra.cupom.CupomDTO;
+import umc.exs.dto.compra.cupom.CupomDTO;
 import umc.exs.model.entidades.foundation.Cupom;
 
 @Mapper(

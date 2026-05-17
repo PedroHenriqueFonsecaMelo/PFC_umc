@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+    <link rel="stylesheet" th:href="@{/css/breadcrumb.css}" />
     <style>
         :root {
             --accent: #722f37;
@@ -161,14 +162,19 @@
 <body>
 <header th:replace="~{fragments/client-nav :: clientNav}"></header>
 
-<!-- Breadcrumb (atualizado via JS após carregar dados) -->
-<nav class="bc-nav" id="mv-breadcrumb">
-    <a href="/clientes/meu-perfil">Meu Perfil</a>
-    <span class="bc-sep"><i class="fa-solid fa-chevron-right"></i></span>
-    <a href="/clientes/meu-perfil?aba=vendas">Minhas Vendas</a>
-    <span class="bc-sep"><i class="fa-solid fa-chevron-right"></i></span>
-    <span class="bc-current" id="mv-bc-titulo">Carregando...</span>
-</nav>
+<!-- NAVEGAÇÃO CONTEXTUAL -->
+<div class="breadcrumb-wrap" id="mv-breadcrumb">
+    <nav class="breadcrumb-nav">
+        <a href="/">Início</a>
+        <span class="breadcrumb-sep">›</span>
+        <a href="/clientes/meu-perfil">Meu Perfil</a>
+        <span class="breadcrumb-sep">›</span>
+        <a href="/clientes/meu-perfil?tab=vendas">Minhas Vendas</a>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current" id="mv-bc-titulo">Carregando...</span>
+    </nav>
+    <a href="/clientes/meu-perfil?tab=vendas" class="btn-voltar">← Voltar para Minhas Vendas</a>
+</div>
 
 <!-- Loading -->
 <div class="mv-loading" id="mv-loading">
@@ -178,9 +184,6 @@
 <!-- Conteúdo principal -->
 <main class="mv-main" id="mv-main">
 
-    <a href="/clientes/meu-perfil?aba=vendas" class="mv-back">
-        <i class="fa-solid fa-arrow-left"></i> Voltar para Minhas Vendas
-    </a>
 
     <div class="mv-grid">
 

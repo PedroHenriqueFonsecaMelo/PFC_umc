@@ -19,7 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
 import umc.exs.controller.web.ForumViewController;
-import umc.exs.dtos.forum.NovoTopicoDTO;
+import umc.exs.dto.forum.NovoTopicoDTO;
 import umc.exs.model.entidades.social.TopicoForum;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.CategoriaForum;

@@ -4,15 +4,17 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.dtos.admin.AdminAprovacaoDTO;
-import umc.exs.dtos.admin.LivroAdminRequest;
-import umc.exs.dtos.livro.LivroDTO;
+import umc.exs.dto.admin.AdminAprovacaoDTO;
+import umc.exs.dto.admin.LivroAdminRequest;
+import umc.exs.dto.livro.LivroDTO;
 import umc.exs.mappers.LivroMapper;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.livro.Livro;
@@ -42,6 +44,7 @@ public class LivroAdminService {
     private final ListaDesejosService listaDesejosService;
     private final GamificacaoService gamificacaoService;
     private final NotificacaoService notificacaoService;
+    private final GoogleBooksService googleBooksService;
 
     private final LivroMapper livroMapper;
 
@@ -58,6 +61,14 @@ public class LivroAdminService {
     public List<LivroDTO> listarLivrosAprovados() {
         List<Livro> livros = livroRepository.findByAprovadoTrue();
         return converterLista(livros);
+    }
+
+    public Page<LivroDTO> listarLivrosAprovadosPaginado(Pageable pageable) {
+        return livroRepository.findByAprovadoTrue(pageable).map(livroMapper::paraDTO);
+    }
+
+    public Page<LivroDTO> listarPromocoesAtivasPaginado(Pageable pageable) {
+        return livroRepository.findPromocoesAtivasPaginado(LocalDateTime.now(), pageable).map(livroMapper::paraDTO);
     }
 
     public List<LivroDTO> listarLivrosPorLote(Long loteId) {
@@ -81,6 +92,16 @@ public class LivroAdminService {
         anuncio.setPrecoAprovado((double) estado.getPreco());
         anuncio.setAdminAprovadorId(adminId);
         anuncio.setDataAprovacao(LocalDateTime.now());
+
+        // Busca gênero automaticamente via Google Books se não estiver preenchido
+        if (anuncio.getGenero() == null || anuncio.getGenero().isBlank()) {
+            try {
+                String genero = googleBooksService.buscarGeneroPorIsbn(anuncio.getIsbn());
+                if (genero != null) anuncio.setGenero(genero);
+            } catch (Exception e) {
+                log.warn("Não foi possível buscar gênero para ISBN {}: {}", anuncio.getIsbn(), e.getMessage());
+            }
+        }
 
         if (dto.getFotosUrls() != null && !dto.getFotosUrls().isBlank()) {
             anuncio.setFotosUrls(dto.getFotosUrls());
@@ -271,6 +292,17 @@ public class LivroAdminService {
                 .promocaoExpira(promoAtiva ? req.getPromocaoExpira() : null)
                 .build();
 
+        if (req.getGenero() != null && !req.getGenero().isBlank()) {
+            livro.setGenero(req.getGenero());
+        } else if (livro.getIsbn() != null) {
+            try {
+                String genero = googleBooksService.buscarGeneroPorIsbn(livro.getIsbn());
+                if (genero != null) livro.setGenero(genero);
+            } catch (Exception e) {
+                log.warn("Não foi possível buscar gênero: {}", e.getMessage());
+            }
+        }
+
         Livro salvo = livroRepository.save(livro);
 
         return livroMapper.paraDTO(salvo);
@@ -314,6 +346,10 @@ public class LivroAdminService {
             livro.setPrecoAprovado(req.getPreco());
             livro.setPrecoOriginal(null);
             livro.setPromocaoExpira(null);
+        }
+
+        if (req.getGenero() != null) {
+            livro.setGenero(req.getGenero().isBlank() ? null : req.getGenero());
         }
 
         Livro salvo = livroRepository.save(livro);

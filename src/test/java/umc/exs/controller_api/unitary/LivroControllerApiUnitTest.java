@@ -15,8 +15,8 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import umc.exs.controller.api.interaction.LivroControllerApi;
-import umc.exs.dtos.compra.carrinho.CarrinhoCompraRequestDTO;
-import umc.exs.dtos.compra.carrinho.CarrinhoCompraResponseDTO;
+import umc.exs.dto.compra.carrinho.CarrinhoCompraRequestDTO;
+import umc.exs.dto.compra.carrinho.CarrinhoCompraResponseDTO;
 import umc.exs.service.core.bussiness.LivroService;
 
 class LivroControllerApiUnitTest {

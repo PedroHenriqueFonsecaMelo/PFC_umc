@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import umc.exs.dtos.auth.LoginDTO;
+import umc.exs.dto.auth.LoginDTO;
 import umc.exs.model.entidades.logic.LogAuditoria;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;

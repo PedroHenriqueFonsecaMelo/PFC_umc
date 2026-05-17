@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -65,6 +67,8 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
 
     List<Livro> findByAprovadoTrue();
 
+    Page<Livro> findByAprovadoTrue(Pageable pageable);
+
     List<Livro> findByAprovadoFalse();
 
     long countByAprovadoTrue();
@@ -98,6 +102,16 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
                   AND (l.promocaoExpira IS NULL OR l.promocaoExpira > :agora)
             """)
     List<Livro> findPromocoesAtivas(@Param("agora") LocalDateTime agora);
+
+    /** Promoções ativas paginadas */
+    @Query("""
+                SELECT l
+                FROM Livro l
+                WHERE l.aprovado = true
+                  AND l.emPromocao = true
+                  AND (l.promocaoExpira IS NULL OR l.promocaoExpira > :agora)
+            """)
+    Page<Livro> findPromocoesAtivasPaginado(@Param("agora") LocalDateTime agora, Pageable pageable);
 
     /** Promoções expiradas */
     @Query("""

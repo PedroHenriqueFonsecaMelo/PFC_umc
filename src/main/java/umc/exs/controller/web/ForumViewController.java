@@ -20,8 +20,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import umc.exs.dtos.forum.NovaRespostaDTO;
-import umc.exs.dtos.forum.NovoTopicoDTO;
+import umc.exs.dto.forum.NovaRespostaDTO;
+import umc.exs.dto.forum.NovoTopicoDTO;
 import umc.exs.model.entidades.social.TopicoForum;
 import umc.exs.model.enums.CategoriaForum;
 import umc.exs.repository.usuario.ClienteRepository;

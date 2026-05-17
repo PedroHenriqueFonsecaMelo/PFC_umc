@@ -5,8 +5,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.dtos.user.ClienteDTO;
-import umc.exs.dtos.user.ClienteUpdateDTO;
+import umc.exs.dto.user.ClienteDTO;
+import umc.exs.dto.user.ClienteUpdateDTO;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.service.log.LogAuditoriaService;
 

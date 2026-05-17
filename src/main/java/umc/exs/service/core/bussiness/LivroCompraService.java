@@ -15,11 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.dtos.compra.ItemResultadoDTO;
-import umc.exs.dtos.compra.carrinho.CarrinhoCompraRequestDTO;
-import umc.exs.dtos.compra.carrinho.CarrinhoCompraResponseDTO;
-import umc.exs.dtos.livro.GoogleBookResponse;
-import umc.exs.dtos.livro.LivroDTO;
+import umc.exs.dto.compra.ItemResultadoDTO;
+import umc.exs.dto.compra.carrinho.CarrinhoCompraRequestDTO;
+import umc.exs.dto.compra.carrinho.CarrinhoCompraResponseDTO;
+import umc.exs.dto.livro.GoogleBookResponse;
+import umc.exs.dto.livro.LivroDTO;
 import umc.exs.mappers.LivroMapper;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.usuario.Cliente;
@@ -229,7 +229,8 @@ public class LivroCompraService {
                 final Cliente vendedorFinal = vendedor;
 
                 pedidoService.registrarPedido(comprador, livro);
-                livroRepository.delete(livro);
+                livro.setAprovado(false);
+                livroRepository.save(livro);
                 sucesso.add(ItemResultadoDTO.builder()
                         .livroId(livro.getId()).titulo(titulo).preco(livro.getPrecoAprovado()).build());
                 gamificacaoService.xpCompra(comprador.getId());
@@ -255,7 +256,8 @@ public class LivroCompraService {
     private void processarBaixaLivro(Cliente comprador, Livro livro) {
         pedidoService.registrarPedido(comprador, livro);
         comprador.setSaldoTokens(comprador.getSaldoTokens() - livro.getPrecoAprovado());
-        livroRepository.delete(livro);
+        livro.setAprovado(false);
+        livroRepository.save(livro);
     }
 
     private void registrarLogECoordenarEmails(Cliente comprador, List<ItemResultadoDTO> comprados,

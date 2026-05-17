@@ -25,68 +25,71 @@
             <button class="cn-btn" id="cnCartBtn"
                     onclick="cnToggleMiniCart()"
                     title="Minha Estante"
-                    style="background:none;border:none;cursor:pointer;padding:.25rem .4rem;
-                           position:relative;display:inline-flex;align-items:center;">
-                <!-- SVG: livro aberto -->
+                    style="background:none;border:none;cursor:pointer;padding:.3rem .45rem;
+                           position:relative;display:inline-flex;align-items:center;
+                           border-radius:8px;transition:background .18s;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
                      fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;">
+                     stroke-linecap="round" stroke-linejoin="round">
                     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
                     <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
                 </svg>
                 <span id="cnCartBadge"
-                      style="display:none;position:absolute;top:-3px;right:-5px;
+                      style="display:none;position:absolute;top:-4px;right:-6px;
                              background:#722f37;color:#fff;border-radius:50%;
-                             min-width:17px;height:17px;font-size:.62rem;font-weight:700;
+                             min-width:17px;height:17px;font-size:.6rem;font-weight:700;
                              align-items:center;justify-content:center;line-height:1;padding:0 3px;">0</span>
             </button>
 
             <!-- Dropdown mini carrinho -->
             <div id="cnMiniCart"
-                 style="display:none;position:absolute;right:0;top:calc(100% + 8px);
-                        width:300px;background:#f9f6f0;border:1.5px solid #2c241b;
-                        box-shadow:4px 4px 0 rgba(44,36,27,.15);z-index:999;">
-                <!-- Cabeçalho do dropdown -->
-                <div style="padding:.65rem 1rem;border-bottom:1px solid rgba(44,36,27,.12);
-                            display:flex;align-items:center;justify-content:space-between;">
-                    <span style="font-family:'Playfair Display',serif;font-size:.88rem;
-                                 font-weight:700;color:#2c241b;">Minha Estante</span>
+                 style="display:none;position:absolute;right:0;top:calc(100% + 10px);
+                        width:310px;background:#f9f6f0;
+                        border:1px solid rgba(44,36,27,.12);border-radius:14px;
+                        box-shadow:0 8px 32px rgba(44,36,27,.18);z-index:999;overflow:hidden;">
+                <!-- Cabeçalho -->
+                <div style="padding:.75rem 1.1rem;border-bottom:1px solid rgba(44,36,27,.08);
+                            display:flex;align-items:center;justify-content:space-between;
+                            background:#fff;">
+                    <span style="font-family:'Playfair Display',serif;font-size:.9rem;
+                                 font-weight:700;color:#2c241b;">🎒 Minha Estante</span>
                     <button onclick="cnFecharMiniCart()"
-                            style="background:none;border:none;cursor:pointer;
-                                   color:#7a6e65;font-size:.85rem;line-height:1;padding:0;">✕</button>
+                            style="background:rgba(44,36,27,.06);border:none;cursor:pointer;
+                                   color:#7a6e65;font-size:.8rem;line-height:1;padding:.25rem .45rem;
+                                   border-radius:6px;transition:background .15s;">✕</button>
                 </div>
                 <!-- Lista de itens -->
                 <div id="cnMiniCartLista"
-                     style="max-height:230px;overflow-y:auto;padding:.4rem .8rem;"></div>
+                     style="max-height:240px;overflow-y:auto;padding:.5rem .9rem;"></div>
                 <!-- Estado vazio -->
                 <div id="cnMiniCartVazio"
-                     style="padding:1.2rem;text-align:center;font-size:.82rem;
+                     style="padding:1.5rem;text-align:center;font-size:.84rem;
                             color:#7a6e65;font-family:'IM Fell English',serif;font-style:italic;">
                     Sua estante está vazia.
                 </div>
-                <!-- Rodapé com total e ações -->
+                <!-- Rodapé -->
                 <div id="cnMiniCartFooter"
-                     style="display:none;padding:.65rem 1rem;
-                            border-top:1px solid rgba(44,36,27,.12);background:#ede8df;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;">
-                        <span style="font-size:.78rem;color:#7a6e65;">Total</span>
+                     style="display:none;padding:.75rem 1.1rem;
+                            border-top:1px solid rgba(44,36,27,.08);background:#ede8df;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.65rem;">
+                        <span style="font-size:.78rem;color:#7a6e65;font-weight:500;">Total</span>
                         <span id="cnMiniCartTotal"
                               style="font-family:'Playfair Display',serif;font-weight:800;
-                                     color:#2c241b;font-size:.98rem;">T$ 0,00</span>
+                                     color:#722f37;font-size:1rem;">T$ 0,00</span>
                     </div>
-                    <!-- Único botão de ação: Ver Estante -->
                     <a href="/livros/estante"
                        style="display:block;width:100%;padding:.6rem;background:#722f37;color:#f9f6f0;
-                              text-align:center;font-size:.78rem;font-weight:700;letter-spacing:.07em;
+                              text-align:center;font-size:.78rem;font-weight:700;letter-spacing:.06em;
                               text-transform:uppercase;text-decoration:none;font-family:'DM Sans',sans-serif;
-                              margin-bottom:.4rem;box-sizing:border-box;">
+                              margin-bottom:.45rem;box-sizing:border-box;border-radius:8px;">
                         Ver Estante →
                     </a>
                     <button onclick="cnLimparEstante()"
                             style="width:100%;background:transparent;
-                                   border:1px solid rgba(44,36,27,.2);color:#7a6e65;
-                                   padding:.38rem;font-size:.75rem;cursor:pointer;
-                                   font-family:'DM Sans',sans-serif;">
+                                   border:1px solid rgba(44,36,27,.18);color:#7a6e65;
+                                   padding:.4rem;font-size:.74rem;cursor:pointer;
+                                   font-family:'DM Sans',sans-serif;border-radius:8px;
+                                   transition:background .15s;">
                         Limpar estante
                     </button>
                 </div>
@@ -97,40 +100,65 @@
         <div class="cn-notif-wrapper" id="cnNotifWrapper" style="position:relative;display:inline-block;">
             <button class="cn-btn cn-notif-btn" id="cnNotifBtn"
                     onclick="cnToggleNotif(event)"
-                    style="background:none;border:none;cursor:pointer;padding:.25rem .4rem;position:relative;">
+                    style="background:none;border:none;cursor:pointer;padding:.3rem .45rem;
+                           position:relative;border-radius:8px;transition:background .18s;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                      fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;">
+                     stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                     <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                 </svg>
-                <span id="cnNotifBadge" style="display:none;position:absolute;top:0;right:0;
+                <span id="cnNotifBadge" style="display:none;position:absolute;top:-4px;right:-6px;
                     background:#722f37;color:#fff;border-radius:50%;
-                    width:17px;height:17px;font-size:.65rem;font-weight:700;
+                    width:17px;height:17px;font-size:.6rem;font-weight:700;
                     align-items:center;justify-content:center;line-height:1;">0</span>
             </button>
-            <div id="cnNotifDropdown" style="display:none;position:absolute;right:0;top:110%;
-                min-width:340px;max-width:400px;background:#fff;border:1px solid rgba(44,36,27,.15);
-                border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;overflow:hidden;">
-                <div style="padding:.6rem 1rem;border-bottom:1px solid rgba(44,36,27,.1);
-                    display:flex;align-items:center;justify-content:space-between;">
-                    <span style="font-size:.8rem;font-weight:600;color:#2c241b;">Notificações</span>
+            <div id="cnNotifDropdown" style="display:none;position:absolute;right:0;top:calc(100% + 10px);
+                min-width:340px;max-width:400px;background:#fff;
+                border:1px solid rgba(44,36,27,.1);border-radius:14px;
+                box-shadow:0 8px 32px rgba(44,36,27,.15);z-index:999;overflow:hidden;">
+                <div style="padding:.75rem 1.1rem;border-bottom:1px solid rgba(44,36,27,.08);
+                    display:flex;align-items:center;justify-content:space-between;background:#f9f6f0;">
+                    <span style="font-size:.85rem;font-weight:700;color:#2c241b;
+                                 font-family:'Playfair Display',serif;">🔔 Notificações</span>
                     <button id="cnBtnMarcarTodas" onclick="cnMarcarTodas(event)"
-                            style="background:none;border:none;cursor:pointer;font-size:.72rem;
-                                   color:#722f37;font-weight:600;padding:0;text-decoration:underline;">
-                        Marcar todas como lidas
+                            style="background:rgba(114,47,55,.08);border:none;cursor:pointer;
+                                   font-size:.7rem;color:#722f37;font-weight:600;
+                                   padding:.22rem .55rem;border-radius:6px;
+                                   transition:background .15s;">
+                        Marcar lidas
                     </button>
                 </div>
                 <ul id="cnNotifLista" style="list-style:none;margin:0;padding:0;max-height:340px;overflow-y:auto;"></ul>
-                <div id="cnNotifVazia" style="padding:1rem;text-align:center;font-size:.82rem;color:#7a6e65;display:none;">
+                <div id="cnNotifVazia" style="padding:1.5rem;text-align:center;font-size:.82rem;
+                    color:#7a6e65;font-family:'IM Fell English',serif;font-style:italic;display:none;">
                     Nenhuma notificação.
                 </div>
             </div>
         </div>
 
-        <a th:href="@{/livros/estante}" class="cn-btn cn-estante">
-            <img src="/favicon.ico" alt="Estante" class="cn-estante-icon"/>
-            Minha Estante
+        <a th:href="@{/livros/estante}" class="cn-estante-svg"
+           title="Minha Estante" aria-label="Minha Estante">
+          <svg class="book-shelf-nav" xmlns="http://www.w3.org/2000/svg"
+               preserveAspectRatio="xMidYMid" viewBox="0 0 84 94"
+               height="46" width="46">
+            <g class="book-shelf__book book-shelf__book--one" fill-rule="evenodd">
+              <path fill="#5199fc" d="M31 29h4c1.105 0 2 .895 2 2v29c0 1.105-.895 2-2 2h-4c-1.105 0-2-.895-2-2V31c0-1.105.895-2 2-2z"/>
+              <path fill="#afd7fb" d="M34 36h-2c-.552 0-1-.448-1-1s.448-1 1-1h2c.552 0 1 .448 1 1s-.448 1-1 1zm-2 1h2c.552 0 1 .448 1 1s-.448 1-1 1h-2c-.552 0-1-.448-1-1s.448-1 1-1z"/>
+            </g>
+            <g class="book-shelf__book book-shelf__book--two" fill-rule="evenodd">
+              <path fill="#ff9868" d="M39 34h6c1.105 0 2 .895 2 2v24c0 1.105-.895 2-2 2h-6c-1.105 0-2-.895-2-2V36c0-1.105.895-2 2-2z"/>
+              <path fill="#d06061" d="M42 38c1.105 0 2 .895 2 2s-.895 2-2 2-2-.895-2-2 .895-2 2-2z"/>
+            </g>
+            <g class="book-shelf__book book-shelf__book--three" fill-rule="evenodd">
+              <path fill="#ff5068" d="M49 32h2c1.105 0 2 .86 2 1.92v25.906c0 1.06-.895 1.92-2 1.92h-2c-1.105 0-2-.86-2-1.92V33.92c0-1.06.895-1.92 2-1.92z"/>
+              <path fill="#d93368" d="M50 35c.552 0 1 .448 1 1v2c0 .552-.448 1-1 1s-1-.448-1-1v-2c0-.552.448-1 1-1z"/>
+            </g>
+            <g fill-rule="evenodd">
+              <path class="book-shelf__shelf" fill="#ae8280" d="M21 60h40c1.105 0 2 .895 2 2s-.895 2-2 2H21c-1.105 0-2-.895-2-2s.895-2 2-2z"/>
+              <path fill="#855f6d" d="M51.5 67c-.828 0-1.5-.672-1.5-1.5V64h3v1.5c0 .828-.672 1.5-1.5 1.5zm-21 0c-.828 0-1.5-.672-1.5-1.5V64h3v1.5c0 .828-.672 1.5-1.5 1.5z"/>
+            </g>
+          </svg>
         </a>
         <a th:href="@{/clientes/meu-perfil}"     class="cn-btn">Meu Perfil</a>
         <a th:href="@{/clientes/sair}"           class="cn-btn">Sair</a>
@@ -255,20 +283,20 @@
                 } catch(_) {}
                 var preco = item.precoAprovado || 0;
                 total += preco;
-                return '<div style="display:flex;align-items:center;gap:.55rem;' +
-                       'padding:.45rem 0;border-bottom:1px solid rgba(44,36,27,.07);">' +
+                return '<div style="display:flex;align-items:center;gap:.6rem;' +
+                       'padding:.5rem 0;border-bottom:1px solid rgba(44,36,27,.06);">' +
                        '<img src="' + foto + '" ' +
-                       'style="width:34px;height:46px;object-fit:cover;' +
-                       'border:1px solid rgba(44,36,27,.15);flex-shrink:0;" ' +
+                       'style="width:36px;height:48px;object-fit:cover;flex-shrink:0;' +
+                       'border-radius:6px;border:1px solid rgba(44,36,27,.12);" ' +
                        'onerror="this.src=\'https://via.placeholder.com/40x54?text=📚\'">' +
                        '<div style="flex:1;min-width:0;">' +
-                       '<div style="font-size:.77rem;font-family:\'Playfair Display\',serif;' +
+                       '<div style="font-size:.78rem;font-family:\'Playfair Display\',serif;' +
                        'font-weight:600;color:#2c241b;overflow:hidden;text-overflow:ellipsis;' +
                        'white-space:nowrap;">' + cnEscHtml(item.titulo) + '</div>' +
-                       '<div style="font-size:.7rem;color:#7a6e65;font-style:italic;">' +
+                       '<div style="font-size:.7rem;color:#7a6e65;font-style:italic;margin-top:.1rem;">' +
                        cnEscHtml(item.autor || '') + '</div>' +
                        '</div>' +
-                       '<div style="font-size:.8rem;font-weight:700;color:#722f37;flex-shrink:0;">' +
+                       '<div style="font-size:.82rem;font-weight:700;color:#722f37;flex-shrink:0;">' +
                        'T$ ' + preco.toFixed(2) + '</div>' +
                        '</div>';
             }).join('');
@@ -287,6 +315,18 @@
 
         /* ── Expõe badge globalmente para páginas de produto atualizarem ── */
         window.cnAtualizarBadgeEstante = cnAtualizarBadgeEstante;
+
+        /* Dispara animação da estante ao adicionar item */
+        window.cnAnimarEstante = function() {
+            var svg = document.querySelector('.book-shelf-nav');
+            if (!svg) return;
+            svg.classList.remove('shelf-animating');
+            void svg.offsetWidth; // reflow para reiniciar animação
+            svg.classList.add('shelf-animating');
+            setTimeout(function() {
+                svg.classList.remove('shelf-animating');
+            }, 500);
+        };
 
         /* ── Hover no mini carrinho (mouseenter/mouseleave com delay) ── */
         document.addEventListener('DOMContentLoaded', function() {
@@ -404,21 +444,27 @@
                 vazia.style.display = 'none';
                 lista.innerHTML = data.map(function(n) {
                     var lida = n.lida;
-                    var bg   = lida ? 'transparent' : '#fef9f0';
-                    var cor  = lida ? '#7a6e65'     : '#2c241b';
-                    var peso = lida ? '400'         : '600';
+                    var bg   = lida ? '#fff' : '#fef6ee';
+                    var cor  = lida ? '#7a6e65' : '#2c241b';
+                    var peso = lida ? '400'     : '600';
+                    var dot  = lida ? '' : '<span style="width:7px;height:7px;border-radius:50%;' +
+                        'background:#722f37;flex-shrink:0;margin-top:.25rem;"></span>';
                     var link = n.link ? ' onclick="if(event.target.dataset.del)return;window.location.href=' + JSON.stringify(n.link) + '"' : '';
-                    return '<li style="padding:.65rem 1rem;border-bottom:1px solid rgba(44,36,27,.07);' +
+                    return '<li style="padding:.65rem 1.1rem;border-bottom:1px solid rgba(44,36,27,.06);' +
                         'background:' + bg + ';cursor:' + (n.link ? 'pointer' : 'default') + ';' +
-                        'font-size:.82rem;display:flex;align-items:flex-start;gap:.5rem;"' + link + '>' +
+                        'font-size:.82rem;display:flex;align-items:flex-start;gap:.55rem;' +
+                        'transition:background .15s;"' + link + '>' +
+                        dot +
                         '<div style="flex:1;min-width:0;">' +
-                        '<span style="display:block;color:' + cor + ';font-weight:' + peso + ';">' +
+                        '<span style="display:block;color:' + cor + ';font-weight:' + peso + ';line-height:1.4;">' +
                         cnEscHtml(n.mensagem) + '</span>' +
-                        '<span style="font-size:.7rem;color:#b0a49a;">' + cnFmtData(n.dataCriacao) + '</span>' +
+                        '<span style="font-size:.68rem;color:#b0a49a;margin-top:.2rem;display:block;">' +
+                        cnFmtData(n.dataCriacao) + '</span>' +
                         '</div>' +
                         '<button data-del="1" onclick="cnDeletarNotif(' + n.id + ',this)" ' +
-                        'style="background:none;border:none;cursor:pointer;color:#b0a49a;' +
-                        'font-size:.85rem;padding:0 0 0 .3rem;line-height:1;flex-shrink:0;" ' +
+                        'style="background:rgba(44,36,27,.06);border:none;cursor:pointer;color:#b0a49a;' +
+                        'font-size:.75rem;padding:.2rem .35rem;border-radius:5px;line-height:1;flex-shrink:0;' +
+                        'transition:background .15s;" ' +
                         'title="Remover">✕</button>' +
                         '</li>';
                 }).join('');
@@ -461,6 +507,284 @@
                 if (dd) dd.style.display = 'none';
                 _cnNotifAberto = false;
             }
+        });
+
+        cnCarregarBadge();
+
+        /* ════════════════════════════════════════════════════════
+           NOTIFICAÇÃO DE ALTERAÇÃO DE PREÇO — Cenários 1 e 2
+           ════════════════════════════════════════════════════════ */
+
+        /* ── Injeta CSS do banner / toast ── */
+        (function() {
+            var s = document.createElement('style');
+            s.textContent = [
+                /* Banner topo — Cenário 1 */
+                '#cn-preco-banner{position:fixed;top:0;left:0;right:0;z-index:9999;',
+                'background:#fff;border-left:5px solid #722f37;',
+                'box-shadow:0 4px 28px rgba(44,36,27,.2);',
+                'max-height:60vh;overflow-y:auto;',
+                'transform:translateY(-100%);',
+                'transition:transform .38s cubic-bezier(.34,1.56,.64,1);}',
+                '#cn-preco-banner.cn-banner-visivel{transform:translateY(0);}',
+                '#cn-preco-banner .cn-banner-header{',
+                'display:flex;align-items:center;justify-content:space-between;',
+                'padding:.85rem 1.4rem;',
+                'background:linear-gradient(90deg,rgba(114,47,55,.06),transparent);',
+                'border-bottom:1px solid rgba(114,47,55,.12);}',
+                '#cn-preco-banner .cn-banner-titulo{',
+                'font-family:"Playfair Display",serif;font-size:.97rem;font-weight:700;',
+                'color:#2c241b;display:flex;align-items:center;gap:.5rem;}',
+                '#cn-preco-banner .cn-banner-lista{',
+                'padding:.6rem 1.4rem;list-style:none;margin:0;}',
+                '#cn-preco-banner .cn-banner-lista li{',
+                'padding:.42rem 0;border-bottom:1px solid rgba(44,36,27,.06);',
+                'font-size:.84rem;color:#2c241b;display:flex;align-items:center;gap:.5rem;',
+                'flex-wrap:wrap;}',
+                '#cn-preco-banner .cn-banner-lista li:last-child{border-bottom:none;}',
+                '#cn-preco-banner .cn-preco-titulo{flex:1;min-width:0;',
+                'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;',
+                'font-family:"Playfair Display",serif;font-weight:600;}',
+                '#cn-preco-banner .cn-preco-velho{text-decoration:line-through;',
+                'color:#b0a49a;font-size:.78rem;}',
+                '#cn-preco-banner .cn-preco-novo{font-weight:700;}',
+                '#cn-preco-banner .cn-preco-delta-up{color:#c62828;font-size:.78rem;font-weight:700;}',
+                '#cn-preco-banner .cn-preco-delta-down{color:#2e7d32;font-size:.78rem;font-weight:700;}',
+                '#cn-preco-banner .cn-banner-acoes{',
+                'display:flex;gap:.75rem;padding:.85rem 1.4rem;',
+                'border-top:1px solid rgba(44,36,27,.08);flex-wrap:wrap;}',
+                '#cn-preco-banner .cn-btn-estante{',
+                'padding:.52rem 1.2rem;background:#722f37;color:#fff;',
+                'border:none;border-radius:6px;font-size:.82rem;font-weight:700;',
+                'font-family:"DM Sans",sans-serif;letter-spacing:.05em;cursor:pointer;',
+                'text-decoration:none;display:inline-flex;align-items:center;',
+                'transition:background .2s;}',
+                '#cn-preco-banner .cn-btn-estante:hover{background:#5c2530;}',
+                '#cn-preco-banner .cn-btn-fechar-banner{',
+                'padding:.52rem 1.1rem;background:transparent;',
+                'border:1px solid rgba(44,36,27,.22);color:#7a6e65;',
+                'border-radius:6px;font-size:.82rem;cursor:pointer;',
+                'font-family:"DM Sans",sans-serif;transition:background .2s;}',
+                '#cn-preco-banner .cn-btn-fechar-banner:hover{background:rgba(44,36,27,.06);}',
+                /* Toast — Cenário 2 */
+                '.cn-toast-preco{position:fixed;bottom:24px;right:24px;z-index:9999;',
+                'background:#fff;border-radius:10px;',
+                'box-shadow:0 8px 32px rgba(44,36,27,.18);',
+                'padding:14px 16px;max-width:320px;min-width:220px;',
+                'border-left:4px solid;font-family:"DM Sans",sans-serif;',
+                'animation:cnTstIn .3s ease forwards;}',
+                '.cn-toast-preco.cn-t-subiu{border-color:#c62828;}',
+                '.cn-toast-preco.cn-t-caiu{border-color:#2e7d32;}',
+                '.cn-toast-preco.cn-t-misto{border-color:#722f37;}',
+                '.cn-toast-preco .cn-tst-titulo{font-size:.82rem;font-weight:700;',
+                'color:#2c241b;margin-bottom:.35rem;}',
+                '.cn-toast-preco .cn-tst-item{font-size:.78rem;color:#5a4f47;',
+                'line-height:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
+                '.cn-toast-preco .cn-tst-link{display:inline-block;margin-top:.55rem;',
+                'font-size:.75rem;color:#722f37;font-weight:600;text-decoration:none;',
+                'border-bottom:1px solid rgba(114,47,55,.3);}',
+                '.cn-toast-preco .cn-tst-fechar{position:absolute;top:8px;right:8px;',
+                'background:none;border:none;cursor:pointer;color:#b0a49a;',
+                'font-size:.8rem;line-height:1;padding:.15rem .3rem;border-radius:4px;}',
+                '@keyframes cnTstIn{from{opacity:0;transform:translateX(40px)}',
+                'to{opacity:1;transform:translateX(0)}}'
+            ].join('');
+            document.head.appendChild(s);
+        }());
+
+        /* ── Compara preços do carrinho com API — retorna lista de alterações ── */
+        function cnVerificarPrecos(callback) {
+            var itens;
+            try { itens = JSON.parse(localStorage.getItem(CART_KEY)) || []; }
+            catch(_) { itens = []; }
+            if (itens.length === 0) { callback([]); return; }
+
+            var alteracoes = [];
+            var pendentes  = itens.length;
+
+            itens.forEach(function(item) {
+                fetch('/api/livros/' + item.id, { credentials: 'include' })
+                    .then(function(r) { return r.ok ? r.json() : null; })
+                    .then(function(livro) {
+                        if (!livro) return;
+                        var novo  = livro.precoAprovado != null ? livro.precoAprovado : livro.preco;
+                        var velho = item.precoAprovado || 0;
+                        if (novo != null && Math.abs(velho - novo) > 0.001) {
+                            alteracoes.push({
+                                id:        item.id,
+                                titulo:    item.titulo || 'Livro',
+                                precoVelho: velho,
+                                precoNovo:  novo
+                            });
+                            item.precoAprovado = novo;
+                        }
+                    })
+                    .catch(function() {})
+                    .finally(function() {
+                        pendentes--;
+                        if (pendentes === 0) {
+                            if (alteracoes.length > 0) {
+                                localStorage.setItem(CART_KEY, JSON.stringify(itens));
+                            }
+                            callback(alteracoes);
+                        }
+                    });
+            });
+        }
+
+        /* ── Cenário 1: Banner pós-login ── */
+        function cnMostrarBannerPrecos(alteracoes) {
+            if (!alteracoes || alteracoes.length === 0) return;
+            if (document.getElementById('cn-preco-banner')) return;
+
+            var linhas = alteracoes.map(function(a) {
+                var subiu  = a.precoNovo > a.precoVelho;
+                var seta   = subiu ? '▲' : '▼';
+                var delta  = Math.abs(a.precoNovo - a.precoVelho).toFixed(2);
+                var cls    = subiu ? 'cn-preco-delta-up' : 'cn-preco-delta-down';
+                return '<li>' +
+                    '<span class="cn-preco-titulo">' + cnEscHtml(a.titulo) + '</span>' +
+                    '<span class="cn-preco-velho">T$ ' + a.precoVelho.toFixed(2) + '</span>' +
+                    '<span style="color:#b0a49a;font-size:.78rem;">→</span>' +
+                    '<span class="cn-preco-novo">T$ ' + a.precoNovo.toFixed(2) + '</span>' +
+                    '<span class="' + cls + '">' + seta + ' T$ ' + delta + '</span>' +
+                    '</li>';
+            }).join('');
+
+            var div = document.createElement('div');
+            div.id  = 'cn-preco-banner';
+            div.innerHTML =
+                '<div class="cn-banner-header">' +
+                    '<span class="cn-banner-titulo">⚠️ Preços atualizados na sua estante</span>' +
+                    '<button onclick="cnOcultarBanner()" title="Fechar" ' +
+                    'style="background:none;border:none;cursor:pointer;color:#7a6e65;' +
+                    'font-size:1rem;line-height:1;padding:.2rem .4rem;border-radius:4px;">✕</button>' +
+                '</div>' +
+                '<ul class="cn-banner-lista">' + linhas + '</ul>' +
+                '<div class="cn-banner-acoes">' +
+                    '<a href="/livros/estante" class="cn-btn-estante">Ver minha estante →</a>' +
+                    '<button class="cn-btn-fechar-banner" onclick="cnOcultarBanner()">Fechar e continuar</button>' +
+                '</div>';
+
+            document.body.insertBefore(div, document.body.firstChild);
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    div.classList.add('cn-banner-visivel');
+                });
+            });
+        }
+
+        window.cnOcultarBanner = function() {
+            var b = document.getElementById('cn-preco-banner');
+            if (!b) return;
+            b.style.transition = 'transform .3s ease';
+            b.style.transform  = 'translateY(-100%)';
+            setTimeout(function() { if (b.parentNode) b.parentNode.removeChild(b); }, 320);
+        };
+
+        /* ── Cenário 2: Toast bottom-right ── */
+        function cnMostrarToastPreco(alteracoes) {
+            if (!alteracoes || alteracoes.length === 0) return;
+
+            var sobiu = alteracoes.filter(function(a) { return a.precoNovo > a.precoVelho; }).length;
+            var caiu  = alteracoes.filter(function(a) { return a.precoNovo < a.precoVelho; }).length;
+            var cls   = (sobiu > 0 && caiu > 0) ? 'cn-t-misto' : (sobiu > 0 ? 'cn-t-subiu' : 'cn-t-caiu');
+            var icone = cls === 'cn-t-caiu' ? '💚' : (cls === 'cn-t-subiu' ? '🔴' : '💰');
+
+            var itensHtml = alteracoes.slice(0, 3).map(function(a) {
+                var seta = a.precoNovo > a.precoVelho ? '▲' : '▼';
+                return '<div class="cn-tst-item">' +
+                    cnEscHtml(a.titulo.length > 30 ? a.titulo.substring(0, 30) + '…' : a.titulo) +
+                    ' T$' + a.precoVelho.toFixed(2) + ' → T$' + a.precoNovo.toFixed(2) +
+                    ' <strong>' + seta + '</strong></div>';
+            }).join('');
+            if (alteracoes.length > 3) {
+                itensHtml += '<div class="cn-tst-item" style="color:#b0a49a;">+ ' +
+                    (alteracoes.length - 3) + ' outro(s)…</div>';
+            }
+
+            var t  = document.createElement('div');
+            t.className = 'cn-toast-preco ' + cls;
+            t.style.position = 'relative';
+            t.innerHTML =
+                '<button class="cn-tst-fechar" onclick="this.parentNode.remove()">✕</button>' +
+                '<div class="cn-tst-titulo">' + icone + ' Preço alterado na estante</div>' +
+                itensHtml +
+                '<a href="/livros/estante" class="cn-tst-link">Ver estante →</a>';
+
+            document.body.appendChild(t);
+            setTimeout(function() {
+                if (t.parentNode) {
+                    t.style.transition = 'opacity .4s ease';
+                    t.style.opacity = '0';
+                    setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 420);
+                }
+            }, 7000);
+        }
+
+        /* ── Cenário 2: Cria notificação no sininho via API ── */
+        function cnCriarNotifPreco(alteracoes) {
+            var n    = alteracoes.length;
+            var sobiu = alteracoes.filter(function(a) { return a.precoNovo > a.precoVelho; }).length;
+            var caiu  = alteracoes.filter(function(a) { return a.precoNovo < a.precoVelho; }).length;
+            var msg;
+            if (n === 1) {
+                var a   = alteracoes[0];
+                var dir = a.precoNovo > a.precoVelho ? 'subiu' : 'caiu';
+                msg = 'Preço de "' + a.titulo + '" ' + dir +
+                      ' de T$ ' + a.precoVelho.toFixed(2) +
+                      ' para T$ ' + a.precoNovo.toFixed(2) + '.';
+            } else if (sobiu > 0 && caiu === 0) {
+                msg = n + ' itens da sua estante tiveram preços aumentados.';
+            } else if (caiu > 0 && sobiu === 0) {
+                msg = n + ' itens da sua estante tiveram preços reduzidos!';
+            } else {
+                msg = n + ' itens da sua estante tiveram preços alterados (' +
+                      sobiu + ' subiram, ' + caiu + ' caíram).';
+            }
+
+            fetch('/api/notificacoes', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mensagem: msg, link: '/livros/estante' })
+            })
+            .then(function(r) {
+                if (r.ok || r.status === 201) cnCarregarBadge();
+            })
+            .catch(function() {});
+        }
+
+        /* ── Inicialização: Cenário 1 (pós-login, 1x por sessão) + Cenário 2 (polling) ── */
+        document.addEventListener('DOMContentLoaded', function() {
+            /* Cenário 1 — executa apenas uma vez por sessão de browser */
+            var FLAG = 'bib_pv';
+            if (!sessionStorage.getItem(FLAG)) {
+                sessionStorage.setItem(FLAG, '1');
+                /* Pequeno delay para não travar o carregamento inicial da página */
+                setTimeout(function() {
+                    cnVerificarPrecos(function(alteracoes) {
+                        if (alteracoes.length > 0) cnMostrarBannerPrecos(alteracoes);
+                    });
+                }, 800);
+            }
+
+            /* Cenário 2 — polling a cada 90s enquanto logado com itens na estante */
+            setInterval(function() {
+                var itens;
+                try { itens = JSON.parse(localStorage.getItem(CART_KEY)) || []; }
+                catch(_) { itens = []; }
+                if (itens.length === 0) return;
+
+                cnVerificarPrecos(function(alteracoes) {
+                    if (alteracoes.length === 0) return;
+                    cnMostrarToastPreco(alteracoes);
+                    cnCriarNotifPreco(alteracoes);
+                    /* Atualiza mini-cart se estiver aberto */
+                    var cart = document.getElementById('cnMiniCart');
+                    if (cart && cart.style.display !== 'none') cnPopularMiniCart();
+                });
+            }, 90000);
         });
 
         cnCarregarBadge();

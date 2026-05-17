@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.dtos.compra.PedidoDTO;
-import umc.exs.dtos.user.ClienteDTO;
+import umc.exs.dto.compra.PedidoDTO;
+import umc.exs.dto.user.ClienteDTO;
 import umc.exs.service.core.cliente.ClienteService;
 import umc.exs.service.core.control.PedidoService;
 

@@ -27,6 +27,8 @@ let _totalOriginal     = 0;   // total sem desconto; usado para recalcular ao ap
 let _cupomCheckout     = null; // { codigo, percentual, desconto, totalComDesconto }
 // true  → veio da estante (localStorage); false → compra direta (sessionStorage)
 let _compraViaEstante  = true;
+// true enquanto o usuário não tiver endereço cadastrado — impede renderFinanceiro de habilitar o botão
+let _semEndereco       = false;
 
 /* ── Perfil completo (saldo + endereços) ── */
 async function carregarPerfil() {
@@ -50,19 +52,24 @@ async function carregarSaldo() {
 
 /* ── Exibe / valida endereço de entrega ── */
 function carregarEnderecoEntrega(perfil) {
-    const card     = document.getElementById('enderecoEntregaCard');
-    const alertaEl = document.getElementById('alertaEndereco');
-    const btn      = document.getElementById('btnConfirmar');
+    const card    = document.getElementById('enderecoEntregaCard');
+    const btn     = document.getElementById('btnConfirmar');
+    const btnWrap = document.getElementById('btnConfirmarWrap');
 
     if (!perfil || !perfil.enderecos || perfil.enderecos.length === 0) {
-        if (card) card.innerHTML = '';
-        if (alertaEl) {
-            alertaEl.innerHTML = '⚠ Você precisa <a href="/clientes/homepage?aba=enderecos" style="color:var(--accent,#722f37);font-weight:600;text-decoration:underline;">cadastrar um endereço de entrega</a> antes de concluir a compra.';
-            alertaEl.style.display = 'block';
-        }
-        if (btn) btn.disabled = true;
+        _semEndereco = true;
+
+        if (card) card.innerHTML =
+            '<span style="color:var(--muted,#7a6e65);font-size:.83rem;">Nenhum endereço cadastrado.</span>' +
+            '<br><a href="/clientes/meu-perfil?tab=enderecos" class="checkout-link-endereco">Cadastrar endereço →</a>';
+
+        if (btn)     btn.disabled = true;
+        if (btnWrap) btnWrap.dataset.tooltip = 'Cadastre um endereço de entrega primeiro';
         return;
     }
+
+    _semEndereco = false;
+    if (btnWrap) delete btnWrap.dataset.tooltip;
 
     const endereco = perfil.enderecos.find(e => e.id === perfil.enderecoSelecionadoId)
                   || perfil.enderecos[0];
@@ -72,10 +79,8 @@ function carregarEnderecoEntrega(perfil) {
             `<strong>${escHtml(endereco.rua)}, ${escHtml(endereco.numero)}</strong>` +
             (endereco.complemento ? `<br>${escHtml(endereco.complemento)}` : '') +
             `<br>${escHtml(endereco.bairro)} — ${escHtml(endereco.cidade)}/${escHtml(endereco.estado)}` +
-            `<br>CEP: ${escHtml(endereco.cep)}` +
-            `<br><a href="/clientes/homepage?aba=enderecos" style="font-size:.8rem;color:var(--accent,#722f37);">Alterar endereço →</a>`;
+            `<br>CEP: ${escHtml(endereco.cep)}`;
     }
-    if (alertaEl) alertaEl.style.display = 'none';
 }
 
 /* ── Escapa HTML ── */
@@ -243,7 +248,8 @@ function renderFinanceiro(saldo, totalOriginal) {
         if (btn)    btn.disabled         = true;
     } else {
         if (alerta) alerta.style.display = 'none';
-        if (btn)    btn.disabled         = false;
+        /* Só habilita o botão se o usuário já tiver endereço cadastrado */
+        if (btn && !_semEndereco) btn.disabled = false;
     }
 }
 
@@ -352,7 +358,7 @@ window.confirmarCompra = async function() {
         };
         sessionStorage.setItem('bibliotroca_confirmacao', JSON.stringify(confirmacaoData));
 
-        window.location.href = '/livros/pedido-confirmado';
+        setTimeout(() => { window.location.href = '/livros/pedido-confirmado'; }, 900);
 
     } catch (err) {
         console.error('Erro ao confirmar compra:', err);
@@ -386,20 +392,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 2. Detecta fluxo: compra direta (sessionStorage) ou via estante (localStorage)
-    const idsSet = new Set(ids);
+    const idsSet = new Set(ids.map(Number));
     let dadosDireto = [];
     try {
         dadosDireto = JSON.parse(sessionStorage.getItem(CHECKOUT_KEY + '_direto')) || [];
     } catch (_) {}
 
-    if (dadosDireto.length > 0) {
-        // Compra direta — dados vêm do sessionStorage; localStorage não é tocado
+    // Só usa compra direta se os IDs do _direto baterem exatamente
+    // com os IDs selecionados — evita conflito com compras anteriores
+    const idsDireto = new Set(dadosDireto.map(i => Number(i.id)));
+    const idsConferem = ids.every(id => idsDireto.has(Number(id))) && ids.length === idsDireto.size;
+
+    if (dadosDireto.length > 0 && idsConferem) {
         _compraViaEstante  = false;
-        _itensSelecionados = dadosDireto.filter(i => idsSet.has(i.id));
+        _itensSelecionados = dadosDireto;
     } else {
-        // Via estante — dados vêm do localStorage
+        // Via estante ou IDs não conferem — limpa _direto e usa localStorage
+        sessionStorage.removeItem(CHECKOUT_KEY + '_direto');
         _compraViaEstante  = true;
-        _itensSelecionados = getCarrinho().filter(i => idsSet.has(i.id));
+        _itensSelecionados = getCarrinho().filter(i => idsSet.has(Number(i.id)));
     }
 
     if (_itensSelecionados.length === 0) {

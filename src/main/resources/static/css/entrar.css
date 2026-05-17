@@ -298,7 +298,133 @@ body::before {
   color: #4a5d23;
 }
 
+/* ── Layout novo da página de login ── */
+.page-content {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  min-height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.orbit-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+}
+
+.orbit-wrap {
+  position: relative;
+  width: 420px;
+  height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orbit-list {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  animation: orbitRotate 30s linear infinite;
+}
+
+@keyframes orbitRotate {
+  from { rotate: 0deg; }
+  to   { rotate: 360deg; }
+}
+
+.orbit-list li {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+
+.orbit-list li a {
+  display: block;
+  width: 110px;
+  height: 165px;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  transition: box-shadow 0.2s ease, scale 0.2s ease;
+}
+
+.orbit-list li a:hover {
+  box-shadow: 0 8px 32px rgba(114,47,55,0.5);
+  scale: 1.08;
+  z-index: 10;
+}
+
+.orbit-list li img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  animation: orbitCounter 30s linear infinite;
+}
+
+@keyframes orbitCounter {
+  from { rotate: 0deg; }
+  to   { rotate: -360deg; }
+}
+
+.login-side {
+  flex: 0 0 420px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 2rem;
+}
+
+.login-side .book-page {
+  width: 380px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 8px 48px rgba(44,36,27,0.13);
+}
+
+/* Remove estilos antigos do book que não são mais necessários */
+.book { display: none !important; }
+.footnote { display: none !important; }
+
 /* ── Responsivo ── */
+@media (max-width: 768px) {
+  .page-content {
+    flex-direction: column !important;
+  }
+  .orbit-side {
+    min-height: 300px;
+  }
+  .orbit-wrap {
+    width: 280px;
+    height: 280px;
+  }
+  .login-side {
+    flex: unset;
+    padding-right: 0;
+    width: 100%;
+    justify-content: center;
+  }
+  .orbit-list li a {
+    width: 75px;
+    height: 112px;
+  }
+}
+
+/* ── Responsivo (legado) ── */
 @media (max-width: 680px) {
   body { overflow: auto; justify-content: flex-start; padding: 64px 0 40px; }
   .book { flex-direction: column; border-radius: 8px; transform: none; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }

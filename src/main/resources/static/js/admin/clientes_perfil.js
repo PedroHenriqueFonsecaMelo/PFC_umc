@@ -90,16 +90,11 @@ function renderPerfil(p) {
         ? `<span class="badge-status status-ativo"><i class="fa-solid fa-circle" style="font-size:7px"></i> Ativo</span>`
         : `<span class="badge-status status-inativo"><i class="fa-solid fa-circle" style="font-size:7px"></i> Inativo</span>`;
 
-    const html = `
-        <!-- BREADCRUMB -->
-        <div class="breadcrumb">
-            <a href="/admin/dashboard"><i class="fa-solid fa-gauge"></i> Painel Admin</a>
-            <i class="fa-solid fa-chevron-right"></i>
-            <a href="/admin/clientes">Clientes</a>
-            <i class="fa-solid fa-chevron-right"></i>
-            <span>${esc(p.nome)}</span>
-        </div>
+    // Atualiza breadcrumb padronizado com o nome do cliente
+    const bcrNome = document.getElementById('bcrNomeCliente');
+    if (bcrNome) bcrNome.textContent = p.nome;
 
+    const html = `
         <!-- HEADER DO PERFIL -->
         <div class="perfil-header">
             <div class="perfil-avatar">${inicial(p.nome)}</div>
@@ -114,9 +109,6 @@ function renderPerfil(p) {
                     ${p.cpfMascarado ? `<span class="perfil-meta-item"><i class="fa-solid fa-id-card"></i> CPF: ${esc(p.cpfMascarado)}</span>` : ''}
                 </div>
             </div>
-            <a href="/admin/clientes" class="btn-voltar">
-                <i class="fa-solid fa-arrow-left"></i> Voltar para Clientes
-            </a>
         </div>
 
         <!-- SUMMARY CARDS -->

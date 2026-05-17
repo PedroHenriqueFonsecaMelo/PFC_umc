@@ -69,40 +69,18 @@
     <!-- Voltar -->
     <a th:href="@{/}" href="/" class="back-link">← Início</a>
 
-    <!-- Livro aberto -->
+    <!-- Layout novo: órbita + login -->
     <main class="page-content">
-      <div class="book">
-        <!-- Capa / página esquerda -->
-        <div class="book-cover" aria-hidden="true">
-          <div class="cover-corner tl"></div>
-          <div class="cover-corner tr"></div>
-          <div class="cover-corner bl"></div>
-          <div class="cover-corner br"></div>
 
-          <div class="cover-brand">
-            <span class="cover-icon">📚</span>
-            <div class="cover-title">Biblio<em>troca</em></div>
-            <div class="cover-tagline">Sua estante compartilhada</div>
-          </div>
-
-          <div class="cover-divider">
-            <span></span>
-            <i>✦</i>
-            <span></span>
-          </div>
-
-          <div class="cover-quote">
-            <p>"Um livro é um sonho que você segura nas mãos."</p>
-            <footer>— Neil Gaiman</footer>
-          </div>
-
-          <div class="cover-page-num">i</div>
+      <!-- Lado esquerdo: órbita de capas -->
+      <div class="orbit-side" aria-hidden="true">
+        <div class="orbit-wrap">
+          <ul class="orbit-list" id="orbitList"></ul>
         </div>
+      </div>
 
-        <!-- Lombada -->
-        <div class="book-spine"></div>
-
-        <!-- Página direita — formulário -->
+      <!-- Lado direito: card de login -->
+      <div class="login-side">
         <div class="book-page">
           <div class="page-header">
             <h1>Bem-vindo de volta</h1>
@@ -115,71 +93,46 @@
             Você saiu com sucesso.
           </div>
 
-          <!-- Formulário unificado -->
+          <!-- Formulário -->
           <form th:action="@{/entrar}" action="/entrar" method="post">
             <div class="field">
               <label for="email">E-mail</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                placeholder="seu@email.com"
-                th:value="${emailAnterior}"
-              />
+              <input type="email" id="email" name="email" required
+                     placeholder="seu@email.com" th:value="${emailAnterior}"/>
             </div>
-
             <div class="field">
               <label for="senha">Senha</label>
               <div class="senha-wrapper">
-                <input
-                  type="password"
-                  id="senha"
-                  name="senha"
-                  required
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  class="btn-olho"
-                  id="btnOlho"
-                  aria-label="Segurar para ver senha"
-                  title="Segure para ver a senha"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <input type="password" id="senha" name="senha" required
+                       placeholder="••••••••"/>
+                <button type="button" class="btn-olho" id="btnOlho"
+                        aria-label="Segurar para ver senha">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                       viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                     <circle cx="12" cy="12" r="3"/>
                   </svg>
                 </button>
               </div>
             </div>
-
             <button type="submit" class="btn-entrar">Abrir a biblioteca</button>
           </form>
 
-          <hr class="divider" />
-
+          <hr class="divider"/>
           <div class="panel-links">
-            <a
-              th:href="@{/clientes/novo-cadastro}"
-              href="/clientes/novo-cadastro"
-              class="panel-link"
-            >Criar conta</a>
-            <a
-              th:href="@{/clientes/recuperar-senha}"
-              href="/clientes/recuperar-senha"
-              class="panel-link"
-            >Esqueceu a senha?</a>
+            <a th:href="@{/clientes/novo-cadastro}" href="/clientes/novo-cadastro"
+               class="panel-link">Criar conta</a>
+            <a th:href="@{/clientes/recuperar-senha}" href="/clientes/recuperar-senha"
+               class="panel-link">Esqueceu a senha?</a>
           </div>
         </div>
-        <!-- /book-page -->
       </div>
-      <!-- /book -->
 
-      <p class="footnote">Bibliotroca &mdash; Sistema de Troca de Livros</p>
     </main>
 
     <script th:src="@{/js/entrar.js}"></script>
+    <script th:src="@{/js/orbit-login.js}"></script>
 
     <!-- Page Loader -->
     <th:block th:replace="~{fragments/loader :: loader}"></th:block>

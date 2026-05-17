@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import umc.exs.dtos.user.EnderecoDTO;
+import umc.exs.dto.user.EnderecoDTO;
 import umc.exs.mappers.EnderecoMapper;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.entidades.usuario.Endereco;

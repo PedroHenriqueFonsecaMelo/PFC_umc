@@ -1,0 +1,130 @@
+/* ================================================================
+   bookshelf-login.css — Camada INTERATIVA da estante · Login
+   Carregado APÓS bookshelf.css (que define os estilos visuais).
+   Adiciona apenas: hover, clique, tooltip, hint, cursor e
+   overrides de z-index específicos da tela de login.
+   ================================================================ */
+
+/* ── Z-index do formulário de login ── */
+.page-content,
+.book,
+.back-link {
+    position: relative;
+    z-index: 10;
+}
+
+/* ── Habilita pointer-events na fileira interativa ── */
+.bs-books {
+    pointer-events: all;
+}
+
+/* ── Livro interativo ── */
+.bs-book {
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.25s ease;
+}
+
+.bs-book:hover {
+    transform: translateY(-10px);
+    box-shadow: 2px -2px 12px rgba(44, 36, 27, 0.2);
+}
+
+.bs-book.active {
+    transform: translateY(-14px);
+    box-shadow: 3px -3px 16px rgba(44, 36, 27, 0.28),
+                0 -2px 10px rgba(114, 47, 55, 0.14);
+    overflow: visible;
+    z-index: 5;
+}
+
+/* ── Hint pulsante (acima da estante) ── */
+.bsl-hint {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.68rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    color: rgba(114, 47, 55, 0.62);
+    letter-spacing: 0.08em;
+    pointer-events: none;
+    animation: bslPulse 2.5s ease-in-out infinite;
+    white-space: nowrap;
+    z-index: 2;
+}
+
+#bs-login-wrap {
+    position: relative; /* permite ::before absolute do hint */
+}
+
+@keyframes bslPulse {
+    0%, 100% { opacity: 0.5; }
+    50%       { opacity: 1;   }
+}
+
+.bsl-hint.bsl-hint-out {
+    animation: bslHintOut 0.4s ease forwards;
+}
+
+@keyframes bslHintOut {
+    to { opacity: 0; transform: translateX(-50%) translateY(5px); }
+}
+
+/* ── Tooltip fixo posicionado via JS ── */
+#bsl-tooltip {
+    position: fixed;
+    z-index: 9000;
+    width: 238px;
+    background: #fff;
+    border-left: 3px solid #722f37;
+    border-radius: 6px;
+    box-shadow: 0 8px 28px rgba(44, 36, 27, 0.18),
+                0 2px 6px rgba(44, 36, 27, 0.08);
+    padding: 11px 13px;
+    pointer-events: none;
+    opacity: 0;
+    display: none;
+    transform: translateY(7px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#bsl-tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.bsl-tt-titulo {
+    font-size: 0.63rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #722f37;
+    margin-bottom: 6px;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.bsl-tt-trecho {
+    font-family: 'IM Fell English', Georgia, serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: rgba(44, 36, 27, 0.82);
+    margin-bottom: 7px;
+}
+
+.bsl-tt-autor {
+    font-size: 0.66rem;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    color: rgba(114, 47, 55, 0.65);
+    text-align: right;
+    letter-spacing: 0.05em;
+}
+
+/* ── Mobile: remove padding, já tratado em bookshelf.css ── */
+@media (max-width: 680px) {
+    .bsl-hint { display: none; }
+}
