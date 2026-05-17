@@ -21,6 +21,10 @@ public class GoogleBookResponse {
         private String language;
         private String description;
         private ImageLinks imageLinks;
+        private List<String> categories;
+        private Integer pageCount;
+        private String publishedDate;
+        private String publisher;
     }
 
     @Data

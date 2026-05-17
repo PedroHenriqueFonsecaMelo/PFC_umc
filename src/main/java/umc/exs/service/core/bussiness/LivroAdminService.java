@@ -44,6 +44,7 @@ public class LivroAdminService {
     private final ListaDesejosService listaDesejosService;
     private final GamificacaoService gamificacaoService;
     private final NotificacaoService notificacaoService;
+    private final GoogleBooksService googleBooksService;
 
     private final LivroMapper livroMapper;
 
@@ -91,6 +92,16 @@ public class LivroAdminService {
         anuncio.setPrecoAprovado((double) estado.getPreco());
         anuncio.setAdminAprovadorId(adminId);
         anuncio.setDataAprovacao(LocalDateTime.now());
+
+        // Busca gênero automaticamente via Google Books se não estiver preenchido
+        if (anuncio.getGenero() == null || anuncio.getGenero().isBlank()) {
+            try {
+                String genero = googleBooksService.buscarGeneroPorIsbn(anuncio.getIsbn());
+                if (genero != null) anuncio.setGenero(genero);
+            } catch (Exception e) {
+                log.warn("Não foi possível buscar gênero para ISBN {}: {}", anuncio.getIsbn(), e.getMessage());
+            }
+        }
 
         if (dto.getFotosUrls() != null && !dto.getFotosUrls().isBlank()) {
             anuncio.setFotosUrls(dto.getFotosUrls());
@@ -281,6 +292,17 @@ public class LivroAdminService {
                 .promocaoExpira(promoAtiva ? req.getPromocaoExpira() : null)
                 .build();
 
+        if (req.getGenero() != null && !req.getGenero().isBlank()) {
+            livro.setGenero(req.getGenero());
+        } else if (livro.getIsbn() != null) {
+            try {
+                String genero = googleBooksService.buscarGeneroPorIsbn(livro.getIsbn());
+                if (genero != null) livro.setGenero(genero);
+            } catch (Exception e) {
+                log.warn("Não foi possível buscar gênero: {}", e.getMessage());
+            }
+        }
+
         Livro salvo = livroRepository.save(livro);
 
         return livroMapper.paraDTO(salvo);
@@ -324,6 +346,10 @@ public class LivroAdminService {
             livro.setPrecoAprovado(req.getPreco());
             livro.setPrecoOriginal(null);
             livro.setPromocaoExpira(null);
+        }
+
+        if (req.getGenero() != null) {
+            livro.setGenero(req.getGenero().isBlank() ? null : req.getGenero());
         }
 
         Livro salvo = livroRepository.save(livro);

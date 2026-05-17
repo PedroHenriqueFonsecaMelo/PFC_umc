@@ -20,6 +20,7 @@ public class LivroAdminRequest {
     String capa;
     Long adminId;
     Long vendedorId;
+    String genero;
     Boolean emPromocao;
     Double percentualDesconto;
     LocalDateTime promocaoExpira;

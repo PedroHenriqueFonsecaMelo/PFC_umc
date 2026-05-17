@@ -24,6 +24,7 @@ let modoPromo      = false;
 let _filtros = {
     busca:    '',
     estados:  [],
+    generos:  [],
     precoMin: null,
     precoMax: null,
     ordem:    'relevancia'
@@ -208,6 +209,42 @@ function renderLivros(livros) {
     iniciarContadores();
 }
 
+function popularFiltroGeneros(livros) {
+    const generos = [...new Set(
+        livros
+            .map(l => l.genero)
+            .filter(g => g && g.trim())
+    )].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+    const container = document.getElementById('filtroGeneros');
+    if (!container) return;
+
+    if (generos.length === 0) {
+        container.innerHTML = '<span style="font-size:.8rem;color:#9a8a80;font-style:italic;">Nenhum gênero disponível</span>';
+        return;
+    }
+
+    container.innerHTML = generos.map(g =>
+        `<label class="filtro-check-item">
+            <input type="checkbox" value="${g}"
+                   onchange="atualizarFiltroGeneros()"> ${g}
+         </label>`
+    ).join('');
+}
+
+function atualizarFiltroGeneros() {
+    const checks = document.querySelectorAll('#filtroGeneros input:checked');
+    _filtros.generos = Array.from(checks).map(c => c.value);
+    aplicarFiltros();
+}
+
+window.removerChipGenero = function(g) {
+    _filtros.generos = _filtros.generos.filter(x => x !== g);
+    const cb = document.querySelector(`#filtroGeneros input[value="${g}"]`);
+    if (cb) cb.checked = false;
+    aplicarFiltros();
+};
+
 /* ── Paginação ── */
 function irParaPagina(p) {
     if (p < 0 || p >= _totalPaginas) return;
@@ -277,6 +314,12 @@ function aplicarFiltros() {
         });
     }
 
+    if (_filtros.generos.length > 0) {
+        lista = lista.filter(l =>
+            l.genero && _filtros.generos.includes(l.genero)
+        );
+    }
+
     if (_filtros.precoMin !== null)
         lista = lista.filter(l => (l.precoAprovado || 0) >= _filtros.precoMin);
     if (_filtros.precoMax !== null)
@@ -299,6 +342,9 @@ function aplicarFiltros() {
 function lerEAplicarFiltros() {
     const checks = document.querySelectorAll('#filtroEstados input[type=checkbox]:checked');
     _filtros.estados = Array.from(checks).map(c => c.value);
+
+    const genChecks = document.querySelectorAll('#filtroGeneros input:checked');
+    _filtros.generos = Array.from(genChecks).map(c => c.value);
 
     const minVal = document.getElementById('filtroPrecoMin')?.value;
     const maxVal = document.getElementById('filtroPrecoMax')?.value;
@@ -344,6 +390,10 @@ function renderChips() {
     if (_filtros.precoMax !== null)
         chips.push(`<span class="filtro-chip">Até T$ ${_filtros.precoMax.toFixed(2)}
             <button onclick="removerChipPrecoMax()" aria-label="Remover filtro">×</button></span>`);
+    _filtros.generos.forEach(g => {
+        chips.push(`<span class="filtro-chip">Gênero: ${g}
+            <button onclick="removerChipGenero('${g}')" aria-label="Remover filtro">×</button></span>`);
+    });
     if (_filtros.ordem !== 'relevancia')
         chips.push(`<span class="filtro-chip">Ordenar: ${ORDEM_LABEL_MAP[_filtros.ordem] || _filtros.ordem}
             <button onclick="removerChipOrdem()" aria-label="Remover filtro">×</button></span>`);
@@ -401,7 +451,8 @@ function limparBusca() {
 
 /* ── Limpar todos os filtros (volta à pág 1 e re-busca) ── */
 function limparFiltros() {
-    _filtros     = { busca: '', estados: [], precoMin: null, precoMax: null, ordem: 'relevancia' };
+    _filtros     = { busca: '', estados: [], generos: [], precoMin: null, precoMax: null, ordem: 'relevancia' };
+    document.querySelectorAll('#filtroGeneros input').forEach(cb => { cb.checked = false; });
     _paginaAtual = 0;
 
     const busca = document.getElementById('vitrineBusca');
@@ -464,6 +515,7 @@ async function carregarLivros() {
         _totalPaginas  = data.totalPages    || 0;
         _totalElements = data.totalElements || 0;
 
+        popularFiltroGeneros(_todosLivros);
         aplicarFiltros();
     } catch (err) {
         console.error('Erro ao carregar vitrine:', err);

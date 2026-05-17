@@ -41,84 +41,100 @@ async function carregarEstoque() {
 }
 
 function renderGrid(livros) {
-    const grid   = document.getElementById("estoqueGrid");
+    const tbody  = document.getElementById("estoqueBody");
     const vazio  = document.getElementById("estoqueVazio");
     const cont   = document.getElementById("contadorLivros");
+
+    if (!tbody) return;
 
     cont.textContent = `${livros.length} livro${livros.length !== 1 ? "s" : ""}`;
 
     if (livros.length === 0) {
-        grid.innerHTML = "";
+        tbody.innerHTML = "";
         vazio.style.display = "block";
         return;
     }
     vazio.style.display = "none";
 
-    grid.innerHTML = livros.map(l => {
-
-        const foto  = l.fotoUrl || primeiraFoto(l.fotosUrls) || "";
-        const imgSrc = foto || "https://via.placeholder.com/300x180?text=📚";
+    tbody.innerHTML = livros.map((l, idx) => {
+        const foto   = l.fotoUrl || primeiraFoto(l.fotosUrls) || "";
         const estado = l.estadoAprovado || "BOM";
-
         const promoAtiva = l.emPromocao && l.precoOriginal != null && promoValida(l.promocaoExpira);
 
+        // Preço
         let precoHtml;
         if (promoAtiva) {
-            const desconto = Math.round((1 - l.precoAprovado / l.precoOriginal) * 100);
+            const desc = Math.round((1 - l.precoAprovado / l.precoOriginal) * 100);
             precoHtml = `
-                <div class="card-preco" id="adm-preco-${l.id}">
-                    <span class="preco-original">T$ ${Number(l.precoOriginal).toFixed(2)}</span>
-                    <span class="preco-promo">T$ ${Number(l.precoAprovado).toFixed(2)}</span>
-                </div>`;
+                <span class="preco-original" style="text-decoration:line-through;color:#9a8a80;font-size:.8rem;">
+                    T$ ${Number(l.precoOriginal).toFixed(2)}
+                </span><br>
+                <span class="preco-promo" style="color:#e11d48;font-weight:700;">
+                    T$ ${Number(l.precoAprovado).toFixed(2)}
+                </span>`;
         } else {
-            const preco = l.precoAprovado != null ? `T$ ${Number(l.precoAprovado).toFixed(2)}` : "—";
-            precoHtml = `<div class="card-preco" id="adm-preco-${l.id}">${preco}</div>`;
+            precoHtml = `<span style="font-weight:600;">
+                T$ ${l.precoAprovado != null ? Number(l.precoAprovado).toFixed(2) : "—"}
+            </span>`;
         }
 
-        const promoBadge = promoAtiva
-            ? `<span class="card-promo-badge" id="adm-badge-${l.id}">${Math.round((1 - l.precoAprovado / l.precoOriginal) * 100)}% OFF</span>`
-            : "";
+        // Promoção
+        let promoHtml = "—";
+        if (promoAtiva) {
+            const desc = Math.round((1 - l.precoAprovado / l.precoOriginal) * 100);
+            promoHtml = `
+                <span class="badge-promo-adm">${desc}% OFF</span>
+                ${l.promocaoExpira ? `<br><small id="adm-timer-${l.id}" style="color:#e11d48;font-size:.72rem;font-weight:700;">...</small>` : ""}`;
+        }
 
-        const countdownHtml = (promoAtiva && l.promocaoExpira)
-            ? `<div class="promo-countdown"
-                    data-livro-id="${l.id}"
-                    data-expira="${l.promocaoExpira}"
-                    data-preco-original="${l.precoOriginal}"
-                    style="display:flex;align-items:center;gap:.35rem;
-                           margin-top:.4rem;padding:.25rem .5rem;
-                           background:#fff0f3;border:1.5px solid #e11d48;
-                           border-radius:8px;line-height:1.3;">
-                   <span style="font-size:.9rem;">🔥</span>
-                   <span style="font-size:.7rem;color:#e11d48;font-weight:700;">
-                       Expira em: <span id="adm-timer-${l.id}" style="font-weight:800;">...</span>
-                   </span>
-               </div>`
-            : "";
+        // Capa miniatura
+        const capaHtml = foto
+            ? `<img src="${foto}" alt="${l.titulo}"
+                    style="width:36px;height:52px;object-fit:cover;border-radius:3px;
+                           box-shadow:0 2px 6px rgba(0,0,0,0.2);flex-shrink:0;"
+                    onerror="this.style.display='none'">`
+            : `<div style="width:36px;height:52px;background:#f0ebe4;border-radius:3px;
+                           display:flex;align-items:center;justify-content:center;
+                           font-size:1.1rem;">📚</div>`;
 
         return `
-        <div class="livro-card-admin" id="adm-card-${l.id}">
-            <img class="card-img" src="${imgSrc}" alt="${l.titulo}"
-                 onerror="this.src='https://via.placeholder.com/300x180?text=📚'"/>
-            <div class="card-body">
-                <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-                    <span class="card-estado estado-${estado}">${ESTADO_LABEL[estado] || estado}</span>
-                    ${promoBadge}
-                </div>
-                <div class="card-titulo">${l.titulo}</div>
-                <div class="card-autor">${l.autor}</div>
-                ${l.isbn ? `<div class="card-isbn">${l.isbn}</div>` : ""}
-                ${precoHtml}
-                ${countdownHtml}
+        <tr class="estoque-row" id="adm-card-${l.id}">
+          <td class="col-num">${idx + 1}</td>
+          <td class="col-livro">
+            <div style="display:flex;align-items:center;gap:10px;">
+              ${capaHtml}
+              <div>
+                <div class="row-titulo">${l.titulo}</div>
+                <div class="row-autor">${l.autor || "—"}</div>
+              </div>
             </div>
-            <div class="card-actions">
-                <button class="btn-editar" onclick='abrirModalEdit(${JSON.stringify(l)})'>
-                    <i class="fa-solid fa-pen"></i> Editar
-                </button>
-                <button class="btn-excluir" onclick="confirmarExclusao(${l.id}, '${l.titulo.replace(/'/g, "\\'")}')">
-                    <i class="fa-solid fa-trash"></i> Excluir
-                </button>
-            </div>
-        </div>`;
+          </td>
+          <td class="col-isbn">
+            <span class="isbn-tag">${l.isbn || "—"}</span>
+          </td>
+          <td class="col-estado">
+            <span class="card-estado estado-${estado}">
+              ${ESTADO_LABEL[estado] || estado}
+            </span>
+          </td>
+          <td class="col-preco" id="adm-preco-${l.id}">${precoHtml}</td>
+          <td class="col-promo"
+              data-livro-id="${l.id}"
+              data-expira="${l.promocaoExpira || ""}"
+              data-preco-original="${l.precoOriginal || ""}">
+            ${promoHtml}
+          </td>
+          <td class="col-acoes">
+            <button class="btn-editar btn-sm"
+                    onclick='abrirModalEdit(${JSON.stringify(l)})'>
+              <i class="fa-solid fa-pen"></i> Editar
+            </button>
+            <button class="btn-excluir btn-sm"
+                    onclick="confirmarExclusao(${l.id}, '${l.titulo.replace(/'/g, "\\'")}')">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>`;
     }).join("");
 
     iniciarContadoresAdmin();
@@ -239,6 +255,7 @@ function abrirModalAdd() {
     document.getElementById("fPreco").value  = "";
     document.getElementById("fEstado").value = "BOM";
     document.getElementById("fResumo").value = "";
+    document.getElementById("fGenero").value = "";
     const statusEl = document.getElementById("fIsbnStatus");
     if (statusEl) statusEl.style.display = "none";
     limparCamposPromo();
@@ -257,6 +274,7 @@ function abrirModalEdit(livro) {
     document.getElementById("fIsbn").value   = livro.isbn   || "";
     document.getElementById("fEstado").value = livro.estadoAprovado || "BOM";
     document.getElementById("fResumo").value = livro.resumoOficial  || "";
+    document.getElementById("fGenero").value = livro.genero || "";
 
     // Preço: se em promoção, mostra o preço original no campo
     const precoBase = livro.emPromocao && livro.precoOriginal != null
@@ -323,6 +341,7 @@ async function salvarLivro(e) {
         preco:               parseFloat(document.getElementById("fPreco").value),
         estado:              document.getElementById("fEstado").value,
         resumo:              document.getElementById("fResumo").value.trim(),
+        genero:              document.getElementById("fGenero").value.trim() || null,
         emPromocao:          emPromocao,
         percentualDesconto:  emPromocao ? desconto : null,
         promocaoExpira:      emPromocao ? promocaoExpira : null,
@@ -393,14 +412,14 @@ function iniciarContadoresAdmin() {
 
     const atualizar = () => {
         const agora = Date.now();
-        document.querySelectorAll('.promo-countdown').forEach(el => {
+        document.querySelectorAll('[data-expira]').forEach(el => {
+            if (!el.dataset.expira) return;
             const expira = new Date(el.dataset.expira).getTime();
-            const diff   = expira - agora;
-            const id     = el.dataset.livroId;
-
+            if (!expira) return;
+            const diff = expira - agora;
+            const id   = el.dataset.livroId;
             if (diff <= 0) {
-                el.style.display = 'none';
-                const badge = document.getElementById('adm-badge-' + id);
+                const badge = el.querySelector('.badge-promo-adm');
                 if (badge) badge.style.display = 'none';
                 const precoEl = document.getElementById('adm-preco-' + id);
                 if (precoEl) {

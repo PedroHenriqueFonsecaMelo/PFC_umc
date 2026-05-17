@@ -127,12 +127,26 @@ function renderBookCover(livro) {
     }
 
     if (livro.isbn) {
-        img.src    = 'https://covers.openlibrary.org/b/isbn/' + livro.isbn.replace(/-/g, '') + '-L.jpg';
-        img.onload = function() {
-            img.style.display = 'block';
-            ph.style.display  = 'none';
-        };
-        img.onerror = usarFotoUsuario;
+        // Tenta Google Books primeiro (melhor qualidade), depois OpenLibrary
+        buscarDadosGoogleBooks(livro.isbn).then(gbData => {
+            if (gbData && gbData.capaUrl) {
+                img.src = gbData.capaUrl;
+                img.onload = () => { img.style.display = 'block'; ph.style.display = 'none'; };
+                img.onerror = () => {
+                    img.src = 'https://covers.openlibrary.org/b/isbn/' + livro.isbn.replace(/-/g, '') + '-L.jpg';
+                    img.onload = () => { img.style.display = 'block'; ph.style.display = 'none'; };
+                    img.onerror = usarFotoUsuario;
+                };
+            } else {
+                img.src = 'https://covers.openlibrary.org/b/isbn/' + livro.isbn.replace(/-/g, '') + '-L.jpg';
+                img.onload = () => { img.style.display = 'block'; ph.style.display = 'none'; };
+                img.onerror = usarFotoUsuario;
+            }
+        }).catch(() => {
+            img.src = 'https://covers.openlibrary.org/b/isbn/' + livro.isbn.replace(/-/g, '') + '-L.jpg';
+            img.onload = () => { img.style.display = 'block'; ph.style.display = 'none'; };
+            img.onerror = usarFotoUsuario;
+        });
     } else {
         usarFotoUsuario();
     }
@@ -244,21 +258,109 @@ window.navegarLightbox = function(dir) {
     if (img) img.src = _lightboxFotos[_lightboxIndice];
 };
 
-/* ── Busca sinopse na Google Books API como fallback ── */
-async function buscarResumoGoogleBooks(isbn) {
+/* ── Busca dados enriquecidos na Google Books API ── */
+async function buscarDadosGoogleBooks(isbn) {
     try {
         const res = await fetch(
-            `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}`
+            `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}&key=AIzaSyAIr4ocw6g1VbuOi2r1_90wabNb9ebS8sI`
         );
         if (!res.ok) return null;
         const data = await res.json();
-        const desc = data.items && data.items[0] &&
-                     data.items[0].volumeInfo &&
-                     data.items[0].volumeInfo.description;
-        return desc || null;
+        if (!data.items || !data.items[0]) return null;
+        const info = data.items[0].volumeInfo;
+        return {
+            descricao:       info.description   || null,
+            genero:          info.categories    ? info.categories[0] : null,
+            paginas:         info.pageCount     || null,
+            editora:         info.publisher     || null,
+            dataPublicacao:  info.publishedDate || null,
+            capaUrl:         info.imageLinks    ? (info.imageLinks.large || info.imageLinks.thumbnail) : null,
+            idioma:          info.language      || null,
+        };
     } catch (_) {
         return null;
     }
+}
+
+// Mapeamento de gêneros inglês → português
+const GENERO_MAP = {
+    'Fiction': 'Ficção', 'Juvenile Fiction': 'Infantojuvenil',
+    'Young Adult Fiction': 'Jovem Adulto', 'Science Fiction': 'Ficção Científica',
+    'Fantasy': 'Fantasia', 'Mystery': 'Mistério', 'Thriller': 'Suspense',
+    'Horror': 'Terror', 'Romance': 'Romance', 'Historical Fiction': 'Ficção Histórica',
+    'Adventure': 'Aventura', 'Biography & Autobiography': 'Biografia',
+    'Biography': 'Biografia', 'History': 'História', 'Philosophy': 'Filosofia',
+    'Psychology': 'Psicologia', 'Self-Help': 'Autoajuda',
+    'Business & Economics': 'Negócios', 'Science': 'Ciências',
+    'Technology': 'Tecnologia', 'Computers': 'Computação', 'Art': 'Arte',
+    'Poetry': 'Poesia', 'Drama': 'Drama',
+    'Comics & Graphic Novels': 'Quadrinhos', 'Religion': 'Religião',
+    'Cooking': 'Culinária', 'Sports & Recreation': 'Esportes',
+    'Nonfiction': 'Não-ficção', 'Literary Collections': 'Literatura',
+    'Political Science': 'Política', 'Medical': 'Medicina', 'Law': 'Direito',
+    'Humor': 'Humor', 'Education': 'Educação', 'Nature': 'Natureza',
+};
+
+function traduzirGenero(generoEn) {
+    if (!generoEn) return null;
+    for (const [en, pt] of Object.entries(GENERO_MAP)) {
+        if (generoEn.includes(en)) return pt;
+    }
+    return generoEn;
+}
+
+function formatarDataPublicacao(data) {
+    if (!data) return null;
+    if (data.length === 4) return data; // só ano
+    try {
+        const d = new Date(data);
+        return d.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch (_) { return data; }
+}
+
+/* ── Exibe metadados enriquecidos do Google Books ── */
+function exibirMetadados(livro, gbData) {
+    // Gênero
+    const genPt = livro.genero || traduzirGenero(gbData.genero);
+    if (genPt) {
+        const el = document.getElementById('livroGeneroTag');
+        if (el) { el.textContent = genPt; el.style.display = 'inline-flex'; }
+    }
+
+    // Grid de metadados
+    const grid = document.getElementById('livroMetaGrid');
+    if (!grid) return;
+
+    const itens = [];
+
+    if (gbData.paginas) {
+        itens.push({ icone: '📄', label: 'Páginas', valor: gbData.paginas + ' páginas' });
+    }
+    if (gbData.editora) {
+        itens.push({ icone: '🏢', label: 'Editora', valor: gbData.editora });
+    }
+    if (gbData.dataPublicacao) {
+        itens.push({ icone: '📅', label: 'Publicação', valor: formatarDataPublicacao(gbData.dataPublicacao) });
+    }
+    if (gbData.idioma) {
+        const idiomas = { 'pt': 'Português', 'en': 'Inglês', 'es': 'Espanhol',
+                          'fr': 'Francês', 'de': 'Alemão', 'it': 'Italiano' };
+        itens.push({ icone: '🌐', label: 'Idioma', valor: idiomas[gbData.idioma] || gbData.idioma });
+    }
+
+    if (itens.length === 0) return;
+
+    grid.innerHTML = itens.map(i => `
+        <div class="meta-item">
+            <span class="meta-icone">${i.icone}</span>
+            <div class="meta-info">
+                <span class="meta-label">${i.label}</span>
+                <span class="meta-valor">${i.valor}</span>
+            </div>
+        </div>
+    `).join('');
+
+    grid.style.display = 'grid';
 }
 
 /* ── Renderiza os dados do livro na página ── */
@@ -320,13 +422,30 @@ function renderLivro(livro) {
         iniciarCountdown(livro.promocaoExpira);
     }
 
-    // Resumo/descrição
-    if (livro.resumoOficial && livro.resumoOficial.trim()) {
-        exibirResumo(livro.resumoOficial.trim());
-    } else if (livro.isbn) {
-        buscarResumoGoogleBooks(livro.isbn).then(desc => {
-            if (desc) exibirResumo(desc);
+    // Resumo + metadados via Google Books
+    if (livro.isbn) {
+        buscarDadosGoogleBooks(livro.isbn).then(gbData => {
+            // Resumo
+            const descFinal = (livro.resumoOficial && livro.resumoOficial.trim())
+                ? livro.resumoOficial.trim()
+                : (gbData && gbData.descricao ? gbData.descricao : null);
+            if (descFinal) exibirResumo(descFinal);
+
+            // Metadados enriquecidos
+            if (gbData) exibirMetadados(livro, gbData);
+        }).catch(() => {
+            if (livro.resumoOficial && livro.resumoOficial.trim()) {
+                exibirResumo(livro.resumoOficial.trim());
+            }
         });
+    } else if (livro.resumoOficial && livro.resumoOficial.trim()) {
+        exibirResumo(livro.resumoOficial.trim());
+    }
+
+    // Gênero do banco (se já tiver)
+    if (livro.genero) {
+        const el = document.getElementById('livroGeneroTag');
+        if (el) { el.textContent = livro.genero; el.style.display = 'inline-flex'; }
     }
 
     // Estado dos botões: já na estante?
@@ -357,9 +476,12 @@ function atualizarBotaoEstante(livroId) {
 }
 
 /* ── Helper: atualiza o badge do ícone livro na navbar ── */
-function atualizarBadgeNav() {
+function atualizarBadgeNav(adicionou) {
     if (typeof window.cnAtualizarBadgeEstante === 'function') {
         window.cnAtualizarBadgeEstante();
+    }
+    if (adicionou && typeof window.cnAnimarEstante === 'function') {
+        window.cnAnimarEstante();
     }
 }
 
@@ -371,13 +493,13 @@ window.handleAdicionarEstante = function() {
         // Remove do carrinho
         saveCarrinho(getCarrinho().filter(i => i.id !== _livroAtual.id));
         atualizarBotaoEstante(_livroAtual.id);
-        atualizarBadgeNav();
+        atualizarBadgeNav(false);
         mostrarToast(`<strong>${_livroAtual.titulo}</strong> removido da estante.`, 'aviso');
     } else {
         // Adiciona ao carrinho
         adicionarAoCarrinho(_livroAtual);
         atualizarBotaoEstante(_livroAtual.id);
-        atualizarBadgeNav();
+        atualizarBadgeNav(true);
         mostrarToast(
             `<strong>${_livroAtual.titulo}</strong> adicionado à estante!`,
             'info'
@@ -479,16 +601,31 @@ document.addEventListener('DOMContentLoaded', () => {
   function syncVisual() {
     if (!_livroAtual) return;
     const naEstante = jaEstaNoCarrinho(_livroAtual.id);
+
+    // Reseta TODAS as transformações do GSAP antes de mudar estado
+    gsap.killTweensOf([cart, text, check, cartContent,
+                       animBorder, staticBorder, completeBorder]);
+    gsap.set(cart,          { x: 0, rotate: 0, opacity: 1, clearProps: 'all' });
+    gsap.set(text,          { x: 0, opacity: 1, filter: 'blur(0px)', clearProps: 'transform,filter' });
+    gsap.set(check,         { opacity: 0, scale: 1, clearProps: 'all' });
+    gsap.set(cartContent,   { y: -24 });
+    gsap.set(animBorder,    { opacity: 1 });
+    gsap.set(staticBorder,  { opacity: 0 });
+    gsap.set(completeBorder,{ opacity: 0 });
+
     if (naEstante) {
       btn.classList.add('na-estante');
       if (text) text.textContent = 'Na Estante';
       check.style.opacity = '1';
       cart.style.display  = 'none';
+      btn.title = 'Clique para remover da estante';
     } else {
       btn.classList.remove('na-estante');
       if (text) text.textContent = 'Add Estante';
       check.style.opacity = '0';
       cart.style.display  = 'inline-block';
+      gsap.set(cart, { x: 0, rotate: 0, opacity: 1 });
+      btn.title = '';
     }
   }
 

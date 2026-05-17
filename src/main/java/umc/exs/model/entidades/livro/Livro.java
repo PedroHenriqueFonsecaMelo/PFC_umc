@@ -43,6 +43,9 @@ public class Livro {
 
     private String idioma;
 
+    @Column(length = 100)
+    private String genero;
+
     @Column(name = "fotos_urls", columnDefinition = "TEXT")
     @Builder.Default
     private String fotosUrls = "[]";

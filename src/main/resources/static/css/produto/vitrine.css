@@ -409,12 +409,14 @@ main.main-vitrine > p { font-style: italic; color: var(--muted); font-family: "I
 }
 
 /* ── Cards 3D de livro ── */
-.book-item { cursor: pointer; }
-.main-book-wrap { position: relative; padding: 12px 12px 0; width: 100%; }
+.book-item { cursor: pointer; min-width: 0; overflow: hidden; }
+.main-book-wrap { position: relative; padding: 12px 12px 0; width: 100%; min-width: 0; }
 .book-cover { position: relative; width: 100%; }
 .book-inside {
   position: absolute;
-  width: 90%; height: 96%; aspect-ratio: 2 / 3;
+  width: 90%; height: 96%;
+  max-height: 245px;
+  aspect-ratio: 2 / 3;
   top: 1%; left: 14px;
   border: 1px solid #ccc;
   border-radius: 2px 6px 6px 2px;
@@ -428,7 +430,9 @@ main.main-vitrine > p { font-style: italic; color: var(--muted); font-family: "I
 .book-image {
   position: relative; line-height: 0;
   aspect-ratio: 2 / 3;
-  width: 100%; overflow: hidden;
+  width: 100%;
+  max-height: 260px;
+  overflow: hidden;
   display: flex; align-items: center; justify-content: center;
   background: #e8e3da;
   border-radius: 2px 6px 6px 2px;
@@ -443,7 +447,8 @@ main.main-vitrine > p { font-style: italic; color: var(--muted); font-family: "I
 .book-image img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center top;
   display: block;
 }
 .placeholder-cover {
@@ -557,4 +562,36 @@ main.main-vitrine > p { font-style: italic; color: var(--muted); font-family: "I
 .toast-sucesso { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
 .toast-erro { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
 .toast-aviso { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+
+/* Filtro 4 colunas */
+.filtro-colunas-4 {
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+}
+
+.filtro-generos {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: .25rem;
+}
+
+.filtro-generos::-webkit-scrollbar {
+  width: 4px;
+}
+.filtro-generos::-webkit-scrollbar-track {
+  background: #f0ebe4;
+  border-radius: 2px;
+}
+.filtro-generos::-webkit-scrollbar-thumb {
+  background: #c5b9b0;
+  border-radius: 2px;
+}
+
+@media (max-width: 900px) {
+  .filtro-colunas-4 {
+    grid-template-columns: 1fr;
+  }
+}
 .toast-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }

@@ -406,3 +406,78 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
 .book-back-divider { width: 30px; height: 1px; background: rgba(255,255,255,0.2); margin: 0.75rem 0; }
 .book-back-isbn { font-size: 0.6rem; color: rgba(255,255,255,0.35); letter-spacing: 0.1em; text-transform: uppercase; }
 .book-hint { font-size: 11px; color: rgba(114,47,55,0.5); font-style: italic; text-align: center; margin-top: 0.5rem; }
+
+/* ── Tag de gênero ── */
+.livro-genero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  background: rgba(114,47,55,.09);
+  color: #722f37;
+  border: 1px solid rgba(114,47,55,.2);
+  border-radius: 20px;
+  font-size: .78rem;
+  font-weight: 600;
+  padding: .25rem .75rem;
+  margin: .4rem 0 .75rem;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: .02em;
+}
+
+.livro-genero-tag::before {
+  content: '📚';
+  font-size: .85rem;
+}
+
+/* ── Grid de metadados ── */
+.livro-meta-grid {
+  display: none;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .65rem;
+  margin: 1rem 0 1.25rem;
+  padding: 1rem;
+  background: #faf8f5;
+  border: 1px solid #ece8e0;
+  border-radius: 10px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+}
+
+.meta-icone {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.meta-info {
+  display: flex;
+  flex-direction: column;
+  gap: .05rem;
+}
+
+.meta-label {
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #9a8a80;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.meta-valor {
+  font-size: .85rem;
+  font-weight: 500;
+  color: #2c241b;
+  font-family: 'DM Sans', sans-serif;
+}
+
+@media (max-width: 480px) {
+  .livro-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -35,4 +35,6 @@ public class LivroDTO {
     private Double precoOriginal;
 
     private LocalDateTime promocaoExpira;
+
+    private String genero;
 }
