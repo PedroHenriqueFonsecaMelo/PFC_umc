@@ -261,21 +261,21 @@ window.navegarLightbox = function(dir) {
 /* ── Busca dados enriquecidos na Google Books API ── */
 async function buscarDadosGoogleBooks(isbn) {
     try {
-        const res = await fetch(
-            `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}&key=AIzaSyAIr4ocw6g1VbuOi2r1_90wabNb9ebS8sI`
-        );
+        const res = await fetch(`/api/books/isbn/${encodeURIComponent(isbn)}`);
         if (!res.ok) return null;
         const data = await res.json();
         if (!data.items || !data.items[0]) return null;
         const info = data.items[0].volumeInfo;
         return {
-            descricao:       info.description   || null,
-            genero:          info.categories    ? info.categories[0] : null,
-            paginas:         info.pageCount     || null,
-            editora:         info.publisher     || null,
-            dataPublicacao:  info.publishedDate || null,
-            capaUrl:         info.imageLinks    ? (info.imageLinks.large || info.imageLinks.thumbnail) : null,
-            idioma:          info.language      || null,
+            descricao:      info.description   || null,
+            genero:         info.categories    ? info.categories[0] : null,
+            paginas:        info.pageCount     || null,
+            editora:        info.publisher     || null,
+            dataPublicacao: info.publishedDate || null,
+            capaUrl:        info.imageLinks
+                ? (info.imageLinks.large || info.imageLinks.thumbnail)
+                : null,
+            idioma:         info.language      || null,
         };
     } catch (_) {
         return null;

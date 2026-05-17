@@ -183,7 +183,9 @@ public class SecurityConfig {
                         "/clientes/recuperar-senha/**", "/clientes/reset-senha/**", "/clientes/alterar-senha/**",
                         "/blog", "/blog/**",
                         // Ranking público
-                        "/ranking", "/api/ranking/top"
+                        "/ranking", "/api/ranking/top",
+                        // Proxy Google Books (sem chave exposta no frontend)
+                        "/api/books/**"
         };
 
         // Recursos estáticos (CSS, JS, Imagens)
