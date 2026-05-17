@@ -59,11 +59,5 @@ app:
 mail:
   from: bibliotroca.noreply@gmail.com
 
-logging:
-  level:
-    root: WARN
-    umc:
-      exs: INFO
-
 mercadopago:
   access-token: ${MP_ACCESS_TOKEN:APP_USR-896232806247217-050415-3526eeb645e7bafbf92fc24135a6ff67-833555716}

@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+
+    <!-- Appender 1: Console (Terminal) -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
+    <!-- Appender 2: Arquivo de Aplicação Geral com Rotação -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/application.log</file>
         <encoder>
@@ -14,11 +17,12 @@
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>logs/application.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
-            <maxHistory>30</maxHistory>
-            <totalSizeCap>1GB</totalSizeCap>
+            <maxHistory>1825</maxHistory>
+            <totalSizeCap>10GB</totalSizeCap>
         </rollingPolicy>
     </appender>
 
+    <!-- Appender 3: Arquivo do Sistema de Auditoria -->
     <appender name="AUDIT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/auditoria.log</file>
         <encoder>
@@ -26,18 +30,23 @@
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>logs/auditoria.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>1825</maxHistory>
         </rollingPolicy>
     </appender>
 
-    <logger name="umc.exs.backstage.log.LogAuditoriaService" level="INFO" additivity="false">
-        <appender-ref ref="AUDIT_FILE" />
+    <logger name="umc.exs" level="INFO" />
+    <logger name="org.hibernate" level="WARN" />
+    <logger name="org.hibernate.SQL" level="WARN" />
+    <logger name="org.hibernate.type.descriptor.sql" level="WARN" />
+    <logger name="org.springframework" level="INFO" />
+    
+    <logger name="AUDIT" level="INFO" additivity="false">
+        <appender-ref ref="AUDIT_FILE"/>
     </logger>
 
-    <logger name="umc.exs" level="INFO" />
-
-    <root level="WARN">
-        <appender-ref ref="FILE" />
+    <root level="INFO">
         <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
     </root>
 
 </configuration>

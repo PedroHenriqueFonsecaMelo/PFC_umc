@@ -1,7 +1,6 @@
 package umc.exs.model.entidades.logic;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,8 +18,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class LogAuditoria {
-
-    private static final DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,14 +41,14 @@ public class LogAuditoria {
 
     // Data e hora da ocorrência do log
     @Column(name = "data_hora", nullable = false)
-    private String dataHora;
+    private LocalDateTime  dataHora;
 
     public LogAuditoria(Long idUsuario, String emailUsuario, String acao, String detalhes, LocalDateTime dataHora) {
         this.idUsuario = idUsuario;
         this.emailUsuario = emailUsuario;
         this.acao = acao;
         this.detalhes = detalhes;
-        this.dataHora = dataHora.format(f);
+        this.dataHora = dataHora;
     }
 
 }
