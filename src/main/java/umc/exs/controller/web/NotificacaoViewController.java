@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import umc.exs.dto.admin.EmailDestinatarioDTO;
 import umc.exs.dto.admin.EmailDisparoDTO;
+import umc.exs.dto.admin.EmailHistoricoDTO;
 import umc.exs.service.core.control.NotificacaoEmailService;
 
 import java.util.List;
@@ -39,5 +40,11 @@ public class NotificacaoViewController {
     public ResponseEntity<Map<String, String>> disparar(@RequestBody EmailDisparoDTO dto) {
         String mensagem = notificacaoEmailService.dispararOuAgendar(dto);
         return ResponseEntity.ok(Map.of("mensagem", mensagem));
+    }
+
+    @GetMapping("/historico")
+    @ResponseBody
+    public ResponseEntity<List<EmailHistoricoDTO>> historico() {
+        return ResponseEntity.ok(notificacaoEmailService.listarHistorico());
     }
 }

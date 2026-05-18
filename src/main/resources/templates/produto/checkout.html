@@ -11,7 +11,6 @@
     <link rel="stylesheet" th:href="@{/css/cliente/nav.css}"/>
     <link rel="stylesheet" th:href="@{/css/produto/checkout.css}"/>
     <link rel="stylesheet" th:href="@{/css/breadcrumb.css}"/>
-    <link rel="stylesheet" th:href="@{/css/produto/checkout-btn.css}" />
 </head>
 <body>
 
@@ -89,6 +88,55 @@
                          background:#faf8f5; line-height:1.6;">
                         <span style="color:var(--muted,#7a6e65);">Carregando...</span>
                     </div>
+
+                    <!-- Formulário inline para adicionar / usar outro endereço -->
+                    <div id="formEnderecoInline" class="form-endereco-inline" style="display:none;">
+
+                        <!-- CEP primeiro: preenche os demais campos automaticamente -->
+                        <div class="form-end-cep-bloco">
+                            <div class="form-end-group form-end-cep">
+                                <label>CEP *</label>
+                                <input id="fEndCep" type="text" placeholder="00000-000" maxlength="9"
+                                       oninput="mascaraCepCheckout(this)" autocomplete="postal-code">
+                            </div>
+                            <span id="cepStatus" class="cep-status"></span>
+                        </div>
+
+                        <div class="form-end-row">
+                            <div class="form-end-group feg-flex">
+                                <label>Rua / Logradouro *</label>
+                                <input id="fEndRua" type="text" placeholder="Preenchido pelo CEP" autocomplete="address-line1">
+                            </div>
+                            <div class="form-end-group form-end-num">
+                                <label>Número *</label>
+                                <input id="fEndNumero" type="text" placeholder="42">
+                            </div>
+                        </div>
+                        <div class="form-end-group">
+                            <label>Complemento</label>
+                            <input id="fEndComplemento" type="text" placeholder="Apto, bloco, etc." autocomplete="address-line2">
+                        </div>
+                        <div class="form-end-group">
+                            <label>Bairro *</label>
+                            <input id="fEndBairro" type="text" placeholder="Preenchido pelo CEP">
+                        </div>
+                        <div class="form-end-row">
+                            <div class="form-end-group feg-flex">
+                                <label>Cidade *</label>
+                                <input id="fEndCidade" type="text" placeholder="Preenchida pelo CEP" autocomplete="address-level2">
+                            </div>
+                            <div class="form-end-group form-end-uf">
+                                <label>Estado *</label>
+                                <input id="fEndEstado" type="text" placeholder="SP" maxlength="2"
+                                       oninput="this.value=this.value.toUpperCase()" autocomplete="address-level1">
+                            </div>
+                        </div>
+                        <div id="erroFormEndereco" class="erro-form-endereco" style="display:none;"></div>
+                        <div class="form-end-acoes">
+                            <button type="button" class="btn-end-cancelar" onclick="fecharFormEndereco()">Cancelar</button>
+                            <button type="button" class="btn-end-salvar" onclick="salvarEnderecoCheckout()">Salvar e usar</button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Campo de cupom (input + feedback + estado aplicado) -->
@@ -140,14 +188,9 @@
 
                 <!-- Botão de confirmação -->
                 <div class="btn-confirmar-wrap" id="btnConfirmarWrap">
-                    <canvas id="ck-particles"></canvas>
-                    <div class="ck-btn-wrap">
-                        <div class="bloom"></div>
-                        <button id="btnConfirmar" class="btn-confirmar" onclick="confirmarCompra()">
-                            <span class="ck-symbol">✦</span>
-                            <span class="ck-word">Confirmar compra</span>
-                        </button>
-                    </div>
+                    <button id="btnConfirmar" class="btn-confirmar" onclick="confirmarCompra()">
+                        Confirmar compra
+                    </button>
                 </div>
 
                 <p class="checkout-disclaimer">
@@ -160,6 +203,5 @@
     </main>
 
     <script th:src="@{/js/produto/checkout.js}"></script>
-    <script th:src="@{/js/produto/checkout-particles.js}"></script>
 </body>
 </html>

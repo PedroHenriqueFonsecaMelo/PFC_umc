@@ -2,12 +2,17 @@ package umc.exs.controller.api.contas;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -87,6 +92,39 @@ public class ClientControllerApi {
                                 .map(c -> ResponseEntity.ok(c.getEnderecos().get(0)))
                                 .orElse(ResponseEntity.noContent().build())
                 );
+    }
+
+    /**
+     * Adiciona um endereço para o cliente logado e o seleciona automaticamente.
+     * Usado pelo formulário inline do checkout.
+     */
+    @PostMapping("/enderecos")
+    public ResponseEntity<Void> adicionarEndereco(
+            @RequestBody EnderecoDTO enderecoDTO,
+            @AuthenticationPrincipal UserDetails user) {
+
+        if (user == null) return ResponseEntity.status(401).build();
+
+        // Captura IDs existentes antes de adicionar, para identificar o novo
+        Set<Long> idsAntes = clienteService.buscarClientePorEmail(user.getUsername())
+                .map(c -> c.getEnderecos().stream()
+                        .map(EnderecoDTO::getId)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet()))
+                .orElse(Set.of());
+
+        clienteService.adicionarEnderecoParaUsuarioLogado(user.getUsername(), enderecoDTO);
+
+        // Seleciona o novo endereço automaticamente
+        clienteService.buscarClientePorEmail(user.getUsername())
+                .flatMap(c -> c.getEnderecos().stream()
+                        .filter(e -> e.getId() != null && !idsAntes.contains(e.getId()))
+                        .findFirst()
+                        .map(EnderecoDTO::getId))
+                .ifPresent(id ->
+                        clienteService.selecionarEnderecoParaUsuarioLogado(user.getUsername(), id));
+
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/removerEndereco/{id}")

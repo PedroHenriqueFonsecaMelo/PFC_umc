@@ -1,0 +1,69 @@
+spring:
+  application:
+    name: PFC_Projeto
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  datasource:
+    url: jdbc:sqlite:user.db
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    show-sql: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "bibliotroca.noreply@gmail.com"
+    password: "hdds wufj yldp btqy"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: smtp.gmail.com
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+server:
+  port: 8443
+  ssl:
+    enabled: true
+    key-store: classpath:certs/keystore.p12
+    key-store-type: PKCS12
+    key-store-password: "123456789"
+    key-alias: UMC_PFC
+  error:
+    include-stacktrace: never
+    include-message: never
+
+jwt:
+  secret: "changeitchangeitchangeitchangeit"
+  expiration: 86400000
+  cookie:
+    name: token
+
+app:
+  allowed-origin: "https://localhost:8443"
+  base-url: "https://localhost:8443"
+
+mail:
+  from: bibliotroca.noreply@gmail.com
+
+mercadopago:
+  access-token: APP_USR-896232806247217-050415-3526eeb645e7bafbf92fc24135a6ff67-833555716
+
+google:
+  books:
+    api-key: "AIzaSyCLtdElTKODoIsXYwx1Gu64_jBs63ri-LA"
+
+logging:
+  level:
+    root: WARN
+    umc:
+      exs: INFO

@@ -24,7 +24,6 @@
       <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('notificacoes')}"></th:block>
 
       <div class="content">
-        <!-- TOPBAR igual às outras telas -->
         <header class="topbar">
           <div>
             <div class="topbar-title">Disparo de E-mails</div>
@@ -69,10 +68,6 @@
                   <option value="50">Top 50</option>
                   <option value="100">Top 100</option>
                 </select>
-
-                <button class="btn-notif-preview" style="width:100%;margin-top:14px;" onclick="carregarPreview()">
-                  <i class="fa-solid fa-eye"></i> Visualizar destinatários
-                </button>
               </div>
 
               <!-- Card: Composição do e-mail -->
@@ -88,7 +83,11 @@
                 <textarea class="notif-textarea" id="corpo" placeholder="Escreva aqui o conteúdo do e-mail..."></textarea>
 
                 <label class="notif-label">Agendar envio (opcional)</label>
-                <input type="datetime-local" class="notif-input" id="agendamento" />
+                <input type="text" class="notif-input" id="agendamento"
+                       placeholder="DD/MM/AAAA HH:MM"
+                       maxlength="16"
+                       autocomplete="off"
+                       oninput="mascaraDataHora(this)" />
                 <span class="notif-hint">Deixe em branco para envio imediato.</span>
 
                 <div class="notif-actions">
@@ -103,31 +102,28 @@
 
             </div>
 
-            <!-- COLUNA DIREITA: preview de destinatários -->
+            <!-- COLUNA DIREITA: histórico de e-mails -->
             <div class="notif-card">
               <div class="preview-header">
                 <div class="notif-card-title" style="margin-bottom:0;">
-                  <i class="fa-solid fa-users"></i> Pré-visualização
+                  <i class="fa-solid fa-clock-rotate-left"></i> Histórico de E-mails
                 </div>
-                <span class="preview-badge" id="previewCount">0 usuários</span>
               </div>
 
               <div class="preview-table-wrap">
                 <table class="preview-table">
                   <thead>
                     <tr>
-                      <th>Nome</th>
-                      <th>E-mail</th>
-                      <th>XP</th>
-                      <th>Tokens</th>
-                      <th>Membro desde</th>
+                      <th>Data</th>
+                      <th>Assunto</th>
+                      <th>Destinatários</th>
+                      <th>Tipo</th>
+                      <th>Agendado para</th>
                     </tr>
                   </thead>
-                  <tbody id="previewBody">
+                  <tbody id="historicoBody">
                     <tr>
-                      <td colspan="5" class="preview-empty">
-                        Clique em "Visualizar destinatários" para ver a lista.
-                      </td>
+                      <td colspan="5" class="preview-empty">Carregando histórico...</td>
                     </tr>
                   </tbody>
                 </table>
@@ -143,7 +139,7 @@
     <div class="notif-toast" id="toast"></div>
 
     <script>
-      // Exibe data atual na topbar (padrão das outras telas)
+      // Topbar date
       const dataHoje = document.getElementById('dataHoje');
       if (dataHoje) {
         const now = new Date();
@@ -160,56 +156,72 @@
         setTimeout(() => { t.style.display = 'none'; }, 5000);
       }
 
-      function carregarPreview() {
-        const filtro = document.getElementById('filtro').value;
-        const limite = document.getElementById('limite').value;
-        const tbody  = document.getElementById('previewBody');
-        const badge  = document.getElementById('previewCount');
+      // ── Máscara de data/hora DD/MM/AAAA HH:MM ────────────────────────────────
+      function mascaraDataHora(el) {
+        let v = el.value.replace(/\D/g, '').slice(0, 12);
+        if (v.length > 10)      v = v.replace(/(\d{2})(\d{2})(\d{4})(\d{2})(\d{0,2})/, '$1/$2/$3 $4:$5');
+        else if (v.length > 8)  v = v.replace(/(\d{2})(\d{2})(\d{4})(\d{0,2})/,        '$1/$2/$3 $4');
+        else if (v.length > 4)  v = v.replace(/(\d{2})(\d{2})(\d{0,4})/,                '$1/$2/$3');
+        else if (v.length > 2)  v = v.replace(/(\d{2})(\d{0,2})/,                       '$1/$2');
+        el.value = v;
+      }
 
+      // ── Histórico de e-mails ──────────────────────────────────────────────────
+      function carregarHistorico() {
+        const tbody = document.getElementById('historicoBody');
         tbody.innerHTML = '<tr><td colspan="5" class="preview-empty">Carregando...</td></tr>';
 
-        fetch(`/admin/notificacoes/preview?filtro=${filtro}&limite=${limite}`)
+        fetch('/admin/notificacoes/historico')
           .then(r => r.json())
           .then(data => {
-            badge.textContent = data.length + ' usuário(s)';
-            if (data.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="5" class="preview-empty">Nenhum usuário encontrado.</td></tr>';
+            if (!data.length) {
+              tbody.innerHTML = '<tr><td colspan="5" class="preview-empty">Nenhum e-mail enviado ainda.</td></tr>';
               return;
             }
-            tbody.innerHTML = data.map(u => `
-              <tr>
-                <td>${u.nome}</td>
-                <td>${u.email}</td>
-                <td>${u.xpTotal ?? 0} XP</td>
-                <td>${(u.saldoTokens ?? 0).toFixed(1)}</td>
-                <td>${u.dataCriacao}</td>
-              </tr>
-            `).join('');
+            tbody.innerHTML = data.map(e => {
+              const tipo = e.tipo === 'AGENDADO'
+                ? '<span style="background:rgba(13,148,136,.12);color:#0f766e;font-size:.72rem;font-weight:700;padding:.15rem .45rem;border-radius:4px;">Agendado</span>'
+                : '<span style="background:rgba(74,93,35,.12);color:#4a5d23;font-size:.72rem;font-weight:700;padding:.15rem .45rem;border-radius:4px;">Imediato</span>';
+              const agendadoPara = e.agendadoPara
+                ? `<span style="font-size:.78rem;">${e.agendadoPara}</span>`
+                : '<span style="color:#b0a49a;">—</span>';
+              const assuntoTrunc = e.assunto.length > 40 ? e.assunto.substring(0, 40) + '…' : e.assunto;
+              const corpoPreview = e.corpo.length > 60 ? e.corpo.substring(0, 60) + '…' : e.corpo;
+              return `<tr>
+                <td style="white-space:nowrap;font-size:.78rem;">${e.dataRegistro}</td>
+                <td>
+                  <div style="font-weight:600;font-size:.82rem;">${assuntoTrunc}</div>
+                  <div style="font-size:.72rem;color:#7a6e65;margin-top:.15rem;">${corpoPreview}</div>
+                </td>
+                <td style="text-align:center;font-weight:700;">${e.quantidadeDestinatarios}</td>
+                <td>${tipo}</td>
+                <td>${agendadoPara}</td>
+              </tr>`;
+            }).join('');
           })
           .catch(() => {
-            tbody.innerHTML = '<tr><td colspan="5" class="preview-empty">Erro ao carregar.</td></tr>';
-            mostrarToast('Erro ao buscar destinatários.', '#b91c1c');
+            tbody.innerHTML = '<tr><td colspan="5" class="preview-empty">Erro ao carregar histórico.</td></tr>';
+            mostrarToast('Erro ao buscar histórico.', '#b91c1c');
           });
       }
 
+      // ── Disparar / agendar ────────────────────────────────────────────────────
       function disparar(comAgendamento) {
-        const filtro     = document.getElementById('filtro').value;
-        const limite     = parseInt(document.getElementById('limite').value);
-        const assunto    = document.getElementById('assunto').value.trim();
-        const corpo      = document.getElementById('corpo').value.trim();
-        const agendamento = document.getElementById('agendamento').value;
+        const filtro      = document.getElementById('filtro').value;
+        const limite      = parseInt(document.getElementById('limite').value);
+        const assunto     = document.getElementById('assunto').value.trim();
+        const corpo       = document.getElementById('corpo').value.trim();
+        const agendamento = document.getElementById('agendamento').value.trim();
 
         if (!assunto) { mostrarToast('Preencha o assunto do e-mail.', '#b45309'); return; }
         if (!corpo)   { mostrarToast('Preencha a mensagem do e-mail.', '#b45309'); return; }
         if (comAgendamento && !agendamento) {
-          mostrarToast('Selecione a data e hora para agendamento.', '#b45309');
+          mostrarToast('Informe a data e hora para agendamento.', '#b45309');
           return;
         }
 
-        const payload = {
-          filtro, limite, assunto, corpo,
-          agendamento: comAgendamento ? agendamento : ''
-        };
+        const payload = { filtro, limite, assunto, corpo,
+          agendamento: comAgendamento ? agendamento : '' };
 
         fetch('/admin/notificacoes/disparar', {
           method: 'POST',
@@ -217,9 +229,15 @@
           body: JSON.stringify(payload)
         })
         .then(r => r.json())
-        .then(data => mostrarToast(data.mensagem, '#2c6e49'))
+        .then(data => {
+          mostrarToast(data.mensagem, '#2c6e49');
+          carregarHistorico();
+        })
         .catch(() => mostrarToast('Erro ao processar o disparo.', '#b91c1c'));
       }
+
+      // Carrega histórico ao abrir a página
+      document.addEventListener('DOMContentLoaded', carregarHistorico);
     </script>
   </body>
 </html>

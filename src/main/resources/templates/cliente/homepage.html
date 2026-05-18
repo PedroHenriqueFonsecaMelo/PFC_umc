@@ -350,6 +350,14 @@
                                 Atenção: é necessário ser maior de 18 anos para se cadastrar.
                             </p>
                         </div>
+                        <div class="form-group-2">
+                            <label>CPF</label>
+                            <input type="text"
+                                   th:value="${cliente != null && cliente.cpf != null ? cliente.cpf : '—'}"
+                                   readonly
+                                   style="background:rgba(44,36,27,0.04);color:var(--muted,#7a6e65);
+                                          cursor:default;border-style:dashed;letter-spacing:.04em;" />
+                        </div>
                     </div>
                 </div>
                 <div class="form-submit-row">
@@ -565,12 +573,9 @@
                             class="btn-tech-secondary" style="font-size:.8rem;">✎ Editar</button>
 
                     <!-- Remover -->
-                    <form th:action="@{/clientes/enderecos/remover}" method="post" style="display:inline;">
-                        <input type="hidden" name="enderecoId" th:value="${end.id}" />
-                        <button type="submit" class="btn-remover-endereco"
-                                style="font-size:.8rem;"
-                                onclick="return confirm('Deseja remover este endereço?')">✕ Remover</button>
-                    </form>
+                    <button type="button" class="btn-remover-endereco"
+                            style="font-size:.8rem;"
+                            th:onclick="'abrirModalRemoverEndereco(' + ${end.id} + ')'">✕ Remover</button>
                 </div>
 
                 <!-- Formulário de edição (oculto por padrão) -->
@@ -814,15 +819,61 @@
 
     <!-- DANGER ZONE -->
     <div class="danger-zone">
-        <form th:action="@{/clientes/deletar}" method="post"
-              onsubmit="return confirm('Tem certeza? Esta ação é irreversível e removerá sua conta permanentemente.')">
-            <button type="submit" class="btn-danger-link">
+        <form id="formDeletarConta" th:action="@{/clientes/deletar}" method="post">
+            <button type="button" class="btn-danger-link" onclick="abrirModalDeletarConta()">
                 Remover conta permanentemente
             </button>
         </form>
     </div>
 
 </div><!-- /dash-wrapper -->
+
+<!-- ── Modal: Remover Endereço ───────────────────────────────── -->
+<form id="formRemoverEndereco" action="/clientes/enderecos/remover" method="post" style="display:none;">
+    <input type="hidden" id="enderecoIdRemover" name="enderecoId" value="" />
+</form>
+
+<div id="modalRemoverEndereco" class="cn-modal-sair-overlay" style="display:none;"
+     onclick="if(event.target===this)fecharModalRemoverEndereco()">
+    <div class="cn-modal-sair-box">
+        <div class="cn-modal-sair-icone">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+                 fill="none" stroke="#722f37" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                <path d="M10 11v6"/><path d="M14 11v6"/>
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            </svg>
+        </div>
+        <p class="cn-modal-sair-msg">Deseja remover este endereço?</p>
+        <div class="cn-modal-sair-acoes">
+            <button class="cn-modal-btn-cancelar" onclick="fecharModalRemoverEndereco()">Cancelar</button>
+            <button class="cn-modal-btn-sair" onclick="confirmarRemoverEndereco()">Sim, remover</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Modal: Deletar Conta ─────────────────────────────────── -->
+<div id="modalDeletarConta" class="cn-modal-sair-overlay" style="display:none;"
+     onclick="if(event.target===this)fecharModalDeletarConta()">
+    <div class="cn-modal-sair-box" style="max-width:360px;">
+        <div class="cn-modal-sair-icone">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+                 fill="none" stroke="#722f37" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </div>
+        <p class="cn-modal-sair-msg">Tem certeza? Esta ação é <strong>irreversível</strong> e removerá sua conta permanentemente.</p>
+        <div class="cn-modal-sair-acoes">
+            <button class="cn-modal-btn-cancelar" onclick="fecharModalDeletarConta()">Cancelar</button>
+            <button class="cn-modal-btn-sair" onclick="confirmarDeletarConta()">Sim, remover conta</button>
+        </div>
+    </div>
+</div>
 
 <!-- ============================================================
      SCRIPTS
@@ -1313,6 +1364,37 @@
             if (data.mensagem) cwMostrarMsg(data.mensagem, 'sucesso');
         } catch(_) {}
     }
+
+    /* ── Modal: Remover Endereço ────────────────────────────── */
+    function abrirModalRemoverEndereco(id) {
+        document.getElementById('enderecoIdRemover').value = id;
+        document.getElementById('modalRemoverEndereco').style.display = 'flex';
+    }
+    function fecharModalRemoverEndereco() {
+        document.getElementById('modalRemoverEndereco').style.display = 'none';
+    }
+    function confirmarRemoverEndereco() {
+        document.getElementById('formRemoverEndereco').submit();
+    }
+
+    /* ── Modal: Deletar Conta ───────────────────────────────── */
+    function abrirModalDeletarConta() {
+        document.getElementById('modalDeletarConta').style.display = 'flex';
+    }
+    function fecharModalDeletarConta() {
+        document.getElementById('modalDeletarConta').style.display = 'none';
+    }
+    function confirmarDeletarConta() {
+        document.getElementById('formDeletarConta').submit();
+    }
+
+    /* Fecha modais com ESC */
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            fecharModalRemoverEndereco();
+            fecharModalDeletarConta();
+        }
+    });
 
 </script>
 

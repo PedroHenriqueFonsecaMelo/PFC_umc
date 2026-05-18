@@ -70,7 +70,7 @@
   ];
 
   /* ── Velocidades → durações em segundos (dur = 15 / speed) ── */
-  var DURATIONS = [37.5, 25.0, 30.0, 21.4, 33.3];
+  var DURATIONS = [67.0, 45.0, 54.0, 38.0, 60.0];
 
   /* ── Fisher-Yates shuffle ── */
   function shuffle(arr) {

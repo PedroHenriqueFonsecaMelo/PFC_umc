@@ -53,6 +53,7 @@
                             required
                             th:value="${cliente != null && cliente.email != null ? cliente.email : ''}"
                         />
+                        <p id="email-feedback" style="font-size:0.82rem; font-family:'DM Sans',sans-serif; margin-top:4px; min-height:1.2em;"></p>
                     </div>
 
                     <div class="form-group-2">
@@ -67,12 +68,8 @@
                             autocomplete="off"
                             th:value="${cliente != null && cliente.datanasc != null ? cliente.datanasc : ''}"
                         />
-                        <p id="aviso-data-futura" class="mensagem erro" style="display:none; margin-top:6px;">
-                            Data inválida: essa data ainda não aconteceu.
-                        </p>
-                        <p id="aviso-menor-idade" class="mensagem erro" style="display:none; margin-top:6px;">
-                            Atenção: é necessário ser maior de 18 anos para se cadastrar.
-                        </p>
+                        <p id="aviso-data-futura" style="display:none; font-size:0.82rem; font-family:'DM Sans',sans-serif; margin-top:4px; color:#c62828;">✗ Data inválida: essa data ainda não aconteceu.</p>
+                        <p id="aviso-menor-idade" style="display:none; font-size:0.82rem; font-family:'DM Sans',sans-serif; margin-top:4px; color:#c62828;">✗ É necessário ser maior de 18 anos para se cadastrar.</p>
                     </div>
 
                     <!--
@@ -99,6 +96,7 @@
                             placeholder="000.000.000-00"
                             autocomplete="off"
                         />
+                        <p id="cpf-feedback" style="font-size:0.82rem; font-family:'DM Sans',sans-serif; margin-top:4px; min-height:1.2em;"></p>
                     </div>
 
                     <div class="form-group-2">
@@ -128,7 +126,7 @@
                             <button type="button" id="btn-copiar-cadastro" class="btn-copiar-senha"
                                     onclick="copiarSenha('btn-copiar-cadastro')">Copiar</button>
                         </div>
-                        <ul id="senha-requisitos" style="display:none; list-style:none; padding:6px 0 0; margin:0; font-size:0.82rem; font-family:'DM Sans',sans-serif">
+                        <ul id="senha-requisitos" style="list-style:none; padding:4px 0 0; margin:0; font-size:0.82rem; font-family:'DM Sans',sans-serif; color:#c62828;">
                             <li id="req-tamanho">✗ 8 a 20 caracteres</li>
                             <li id="req-maiuscula">✗ Uma letra maiúscula (A-Z)</li>
                             <li id="req-minuscula">✗ Uma letra minúscula (a-z)</li>
@@ -136,15 +134,6 @@
                             <li id="req-especial">✗ Um caractere especial (@#$%^&amp;+=!)</li>
                             <li id="req-espaco">✗ Sem espaços</li>
                         </ul>
-                        <div id="forca-senha-container" style="display:none; margin-top:8px;">
-                            <div class="forca-segmentos">
-                                <div class="forca-seg"></div>
-                                <div class="forca-seg"></div>
-                                <div class="forca-seg"></div>
-                                <div class="forca-seg"></div>
-                            </div>
-                            <span class="forca-label"></span>
-                        </div>
                     </div>
                     <div class="form-group-2">
                         <label for="confirmarSenha">Confirmar Senha:</label>
@@ -162,7 +151,7 @@
                                 </svg>
                             </button>
                         </div>
-                        <div id="msg-confirmar-cadastro" style="font-size:0.82rem; font-family:'DM Sans',sans-serif; margin-top:4px; min-height:1.2em; font-weight:600;"></div>
+                        <div id="msg-confirmar-cadastro" style="font-size:0.82rem; font-family:'DM Sans',sans-serif; margin-top:4px; min-height:1.2em;"></div>
                     </div>
                 </div>
                 <hr />
@@ -170,12 +159,14 @@
                 <div class="form-group-checkboxes">
                     <div class="form-actions-main">
                         <button
+                            type="button"
                             class="btn btn-primary"
                             onclick="document.getElementById('modal').style.display='block'"
                         >
                             Termos de uso
                         </button>
                         <button
+                            type="button"
                             class="btn btn-primary"
                             onclick="document.getElementById('modal2').style.display='block'"
                         >

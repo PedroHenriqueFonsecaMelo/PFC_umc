@@ -8,8 +8,8 @@
 document.addEventListener("DOMContentLoaded", () => {
     initDynamicForms();
 
-    const campoCpf = document.getElementById('cpf');
-    if (campoCpf) campoCpf.addEventListener('input', mascaraCpf);
+    initValidacaoCpf();
+    initValidacaoEmail();
 
     initTermosModal();
 
@@ -222,11 +222,35 @@ function initConfirmarSenha() {
 
     btn.disabled = true;
 
+    function senhaOk(v) {
+        return v.length >= 8 && v.length <= 20 &&
+               /[A-Z]/.test(v) && /[a-z]/.test(v) &&
+               /[0-9]/.test(v) && /[@#$%^&+=!]/.test(v) &&
+               !/\s/.test(v);
+    }
+
     function podeSubmeter() {
-        const forca    = avaliarForcaSenha(senha.value);
-        const forcaOk  = forca !== null && forca !== 'fraca';
-        const coincide = campo.value.length > 0 && campo.value === senha.value;
-        btn.disabled = !(forcaOk && coincide);
+        const nome        = document.getElementById('nome');
+        const email       = document.getElementById('email');
+        const datanasc    = document.getElementById('datanasc');
+        const cpf         = document.getElementById('cpf');
+        const terms       = document.getElementById('termsAccepted');
+        const privacy     = document.getElementById('privacyAccepted');
+        const avisoFutura = document.getElementById('aviso-data-futura');
+        const avisoIdade  = document.getElementById('aviso-menor-idade');
+
+        const nomeOk      = nome     && nome.value.trim().length > 0;
+        const emailOk     = email    && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value);
+        const dataOk      = datanasc && datanasc.value.length === 10 &&
+                            (!avisoFutura || avisoFutura.style.display === 'none') &&
+                            (!avisoIdade  || avisoIdade.style.display  === 'none');
+        const cpfOk       = cpf      && cpfValido(cpf.value);
+        const senhaValida = senhaOk(senha.value);
+        const coincide    = campo.value.length > 0 && campo.value === senha.value;
+        const termsOk     = terms    && terms.checked;
+        const privacyOk   = privacy  && privacy.checked;
+
+        btn.disabled = !(nomeOk && emailOk && dataOk && cpfOk && senhaValida && coincide && termsOk && privacyOk);
     }
 
     function validar() {
@@ -250,6 +274,15 @@ function initConfirmarSenha() {
 
     campo.addEventListener('input', validar);
     senha.addEventListener('input', () => { if (campo.value) validar(); else podeSubmeter(); });
+
+    ['nome', 'email', 'datanasc', 'cpf'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', podeSubmeter);
+    });
+    ['termsAccepted', 'privacyAccepted'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', podeSubmeter);
+    });
 }
 
 /* ============================================================
@@ -435,6 +468,63 @@ function mascaraCpf(e) {
     e.target.value = v;
 }
 
+function cpfValido(cpf) {
+    const d = cpf.replace(/\D/g, '');
+    if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+    let s = 0;
+    for (let i = 0; i < 9; i++) s += parseInt(d[i]) * (10 - i);
+    let r = (s * 10) % 11;
+    if (r >= 10) r = 0;
+    if (r !== parseInt(d[9])) return false;
+    s = 0;
+    for (let i = 0; i < 10; i++) s += parseInt(d[i]) * (11 - i);
+    r = (s * 10) % 11;
+    if (r >= 10) r = 0;
+    return r === parseInt(d[10]);
+}
+
+function initValidacaoCpf() {
+    const input = document.getElementById('cpf');
+    const msg   = document.getElementById('cpf-feedback');
+    if (!input || !msg) return;
+    input.addEventListener('input', function () {
+        mascaraCpf({ target: input });
+        const digits = input.value.replace(/\D/g, '');
+        if (!digits.length) {
+            msg.textContent = '';
+            input.style.borderColor = '';
+            return;
+        }
+        if (digits.length === 11) {
+            const valido = cpfValido(input.value);
+            msg.textContent = valido ? '✓ CPF válido' : '✗ CPF inválido';
+            msg.style.color = valido ? '#2e7d32' : '#c62828';
+            input.style.borderColor = valido ? '#2e7d32' : '#c62828';
+        } else {
+            msg.textContent = '';
+            input.style.borderColor = '';
+        }
+    });
+}
+
+function initValidacaoEmail() {
+    const input = document.getElementById('email');
+    const msg   = document.getElementById('email-feedback');
+    if (!input || !msg) return;
+    input.addEventListener('input', function () {
+        const v = input.value.trim();
+        if (!v) {
+            msg.textContent = '';
+            input.style.borderColor = '';
+            return;
+        }
+        const valido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+        msg.textContent = valido ? '✓ E-mail válido' : '✗ Formato inválido';
+        msg.style.color  = valido ? '#2e7d32' : '#c62828';
+        input.style.borderColor = valido ? '#2e7d32' : '#c62828';
+    });
+}
+
 /* ============================================================
    MODAIS DE TERMOS
    ============================================================ */
@@ -445,7 +535,7 @@ function initTermosModal() {
         btnFecharTermos.addEventListener('click', () => {
             document.getElementById('modal').style.display = 'none';
             const cb = document.getElementById('termsAccepted');
-            if (cb) cb.checked = true;
+            if (cb) { cb.checked = true; cb.dispatchEvent(new Event('change')); }
         });
     }
 
@@ -454,7 +544,7 @@ function initTermosModal() {
         btnFecharPrivacidade.addEventListener('click', () => {
             document.getElementById('modal2').style.display = 'none';
             const cb = document.getElementById('privacyAccepted');
-            if (cb) cb.checked = true;
+            if (cb) { cb.checked = true; cb.dispatchEvent(new Event('change')); }
         });
     }
 }

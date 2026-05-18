@@ -7,8 +7,11 @@ import org.springframework.stereotype.Service;
 
 import umc.exs.dto.admin.EmailDestinatarioDTO;
 import umc.exs.dto.admin.EmailDisparoDTO;
+import umc.exs.dto.admin.EmailHistoricoDTO;
+import umc.exs.model.entidades.foundation.EmailEnviado;
 import umc.exs.model.entidades.social.PontuacaoUsuario;
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.repository.negocios.EmailEnviadoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.repository.usuario.PontuacaoUsuarioRepository;
 import umc.exs.service.email.EmailHtmlBuilder;
@@ -32,13 +35,10 @@ public class NotificacaoEmailService {
     private final PontuacaoUsuarioRepository pontuacaoRepository;
     private final EmailService emailService;
     private final TaskScheduler taskScheduler;
+    private final EmailEnviadoRepository emailEnviadoRepository;
 
-    /**
-     * Formato produzido por inputs datetime-local do HTML: "yyyy-MM-dd'T'HH:mm"
-     * LocalDateTime.parse() padrão exige segundos — por isso precisamos do formatter.
-     */
     private static final DateTimeFormatter DATETIME_LOCAL_FMT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private static final DateTimeFormatter EXIBICAO_FMT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm");
@@ -131,8 +131,6 @@ public String dispararOuAgendar(EmailDisparoDTO dto) {
         String agendamento = dto.getAgendamento();
         if (agendamento != null && !agendamento.isBlank()) {
             // ── AGENDADO ──────────────────────────────────────────────────────
-            // Bug fix: datetime-local HTML envia "yyyy-MM-dd'T'HH:mm" (sem segundos).
-            // LocalDateTime.parse() padrão exige segundos e lançava DateTimeParseException.
             try {
                 LocalDateTime dataHora = LocalDateTime.parse(agendamento, DATETIME_LOCAL_FMT);
                 Instant instant = dataHora.atZone(ZoneId.of("America/Sao_Paulo")).toInstant();
@@ -144,6 +142,17 @@ public String dispararOuAgendar(EmailDisparoDTO dto) {
 
                 taskScheduler.schedule(tarefa, instant);
                 log.info("Disparo agendado para {} ({})", dataHora.format(EXIBICAO_FMT), instant);
+
+                emailEnviadoRepository.save(EmailEnviado.builder()
+                        .assunto(dto.getAssunto())
+                        .corpo(dto.getCorpo())
+                        .filtro(dto.getFiltro())
+                        .quantidadeDestinatarios(destinatarios.size())
+                        .dataRegistro(LocalDateTime.now())
+                        .agendadoPara(dataHora)
+                        .tipo("AGENDADO")
+                        .build());
+
                 return "E-mail agendado para " + dataHora.format(EXIBICAO_FMT)
                         + " — " + destinatarios.size() + " destinatário(s).";
 
@@ -154,12 +163,39 @@ public String dispararOuAgendar(EmailDisparoDTO dto) {
 
         } else {
             // ── IMEDIATO ──────────────────────────────────────────────────────
-            // Bug fix: substituído new Thread().start() por taskScheduler.schedule(Instant.now())
-            // para usar o pool gerenciado pelo Spring, evitar threads cruas e ter ciclo de vida controlado.
             taskScheduler.schedule(tarefa, Instant.now());
             log.info("Disparo imediato enfileirado via taskScheduler para {} destinatário(s).",
                     destinatarios.size());
+
+            emailEnviadoRepository.save(EmailEnviado.builder()
+                    .assunto(dto.getAssunto())
+                    .corpo(dto.getCorpo())
+                    .filtro(dto.getFiltro())
+                    .quantidadeDestinatarios(destinatarios.size())
+                    .dataRegistro(LocalDateTime.now())
+                    .agendadoPara(null)
+                    .tipo("IMEDIATO")
+                    .build());
+
             return "Disparo iniciado para " + destinatarios.size() + " destinatário(s). Acompanhe os logs.";
         }
+    }
+
+    // ── Histórico de e-mails disparados ─────────────────────────────────────
+
+    public List<EmailHistoricoDTO> listarHistorico() {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm");
+        return emailEnviadoRepository.findAllByOrderByDataRegistroDesc().stream()
+                .map(e -> new EmailHistoricoDTO(
+                        e.getId(),
+                        e.getAssunto(),
+                        e.getCorpo(),
+                        e.getFiltro(),
+                        e.getQuantidadeDestinatarios(),
+                        e.getDataRegistro() != null ? e.getDataRegistro().format(fmt) : "—",
+                        e.getAgendadoPara() != null ? e.getAgendadoPara().format(fmt) : null,
+                        e.getTipo()
+                ))
+                .collect(Collectors.toList());
     }
 }

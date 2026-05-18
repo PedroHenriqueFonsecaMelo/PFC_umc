@@ -124,29 +124,6 @@
 .atce__border--static   { opacity: 0; border-color: #722f37; }
 .atce__border--complete { border-color: #16a34a; opacity: 0; }
 
-.atce__border--animated::after {
-  content: '';
-  width: calc(100cqi + 4px);
-  height: calc(100cqi + 4px);
-  background: conic-gradient(
-    from calc(var(--atce-complete, 0) * 180deg) in hsl increasing hue,
-    #0000 0 calc((1 - var(--atce-complete)) * 20%),
-    #722f37 calc((1 - var(--atce-complete)) * 30%),
-    #a84455 calc(100% - ((1 - var(--atce-complete)) * 30%)),
-    #0000 calc(100% - ((1 - var(--atce-complete)) * 20%)) 100%
-  );
-  position: absolute;
-  top: 50%; left: 50%;
-  translate: -50% -50%;
-  z-index: -1;
-  animation: atce-spin 2s infinite linear;
-  transition: --atce-complete 0.22s ease-out;
-}
+.atce__border--animated::after { display: none; }
 
 @keyframes atce-spin { to { rotate: 360deg; } }
-
-/* Quando na estante: para a animação e deixa borda verde fixa */
-.atc-estante.na-estante .atce__border--animated::after {
-  animation-play-state: paused;
-  background: conic-gradient(#16a34a, #16a34a);
-}

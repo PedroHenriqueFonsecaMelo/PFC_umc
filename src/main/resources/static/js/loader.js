@@ -119,24 +119,37 @@
     var _count      = 0;     // número de operações em andamento
     var _quoteTimer = null;
     var _quoteIdx   = 0;
+    var _showTimer  = null;  // timer de atraso antes de exibir o loader
+    var SHOW_DELAY  = 5000;  // ms — só aparece se demorar mais que isso
 
     /* ════════════════════════════════════════════════════════════
        API PÚBLICA: showLoader / hideLoader
        ════════════════════════════════════════════════════════════ */
     function showLoader() {
         _count++;
-        if (_count !== 1) return;   // já estava visível
-        var overlay = document.getElementById('bib-loader-overlay');
-        if (!overlay) return;
-        overlay.style.display = 'flex';
-        overlay.offsetHeight;       // força reflow para ativar a transition
-        overlay.style.opacity = '1';
-        _startQuotes();
+        if (_count !== 1) return;   // já há operação em andamento, timer já agendado
+        if (_showTimer) return;
+        _showTimer = setTimeout(function () {
+            _showTimer = null;
+            if (_count <= 0) return;  // já terminou antes do tempo
+            var overlay = document.getElementById('bib-loader-overlay');
+            if (!overlay) return;
+            overlay.style.display = 'flex';
+            overlay.offsetHeight;    // força reflow para ativar a transition
+            overlay.style.opacity = '1';
+            _startQuotes();
+        }, SHOW_DELAY);
     }
 
     function hideLoader() {
         _count = Math.max(0, _count - 1);
         if (_count !== 0) return;   // ainda há operações em andamento
+        // Operação terminou antes do loader aparecer — cancela o timer
+        if (_showTimer) {
+            clearTimeout(_showTimer);
+            _showTimer = null;
+            return;
+        }
         var overlay = document.getElementById('bib-loader-overlay');
         if (!overlay) return;
         overlay.style.opacity = '0';
@@ -239,6 +252,7 @@
     window.addEventListener('pageshow', function (e) {
         if (e.persisted) {
             _count = 0;
+            if (_showTimer) { clearTimeout(_showTimer); _showTimer = null; }
             var overlay = document.getElementById('bib-loader-overlay');
             if (overlay) { overlay.style.opacity = '0'; overlay.style.display = 'none'; }
             _stopQuotes();

@@ -370,6 +370,118 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   z-index: 10;
 }
 
+/* ── Formulário inline de endereço ── */
+.form-endereco-inline {
+  margin-top: .6rem;
+  padding: .9rem .9rem .7rem;
+  border: 1px dashed var(--border);
+  background: var(--white);
+}
+.form-end-row {
+  display: flex;
+  gap: .5rem;
+}
+.form-end-group {
+  display: flex;
+  flex-direction: column;
+  gap: .18rem;
+  margin-bottom: .5rem;
+}
+.form-end-group label {
+  font-size: .69rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.form-end-group input {
+  padding: .4rem .6rem;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: var(--paper);
+  font-family: "DM Sans", sans-serif;
+  font-size: .82rem;
+  color: var(--ink);
+  outline: none;
+  width: 100%;
+  transition: border-color .15s, box-shadow .15s;
+}
+.form-end-group input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(114,47,55,.08);
+}
+.feg-flex    { flex: 1; min-width: 0; }
+.form-end-num { width: 84px;  flex-shrink: 0; }
+.form-end-cep { width: 130px; flex-shrink: 0; }
+.form-end-uf  { width: 62px;  flex-shrink: 0; }
+
+/* Bloco do CEP com status inline */
+.form-end-cep-bloco {
+  display: flex;
+  align-items: flex-end;
+  gap: .65rem;
+  margin-bottom: 0;
+}
+.cep-status {
+  font-size: .74rem;
+  font-weight: 600;
+  padding-bottom: .55rem;
+  white-space: nowrap;
+  transition: color .2s;
+}
+.cep-buscando { color: var(--muted); }
+.cep-ok       { color: #15803d; }
+.cep-erro     { color: #b91c1c; }
+.erro-form-endereco {
+  font-size: .77rem;
+  color: #b91c1c;
+  background: #fee2e2;
+  border-left: 3px solid #fca5a5;
+  padding: .32rem .6rem;
+  margin-bottom: .45rem;
+}
+.form-end-acoes {
+  display: flex;
+  gap: .5rem;
+  justify-content: flex-end;
+  margin-top: .2rem;
+}
+.btn-end-cancelar {
+  padding: .4rem .85rem;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font-family: "DM Sans", sans-serif;
+  font-size: .77rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.btn-end-cancelar:hover { border-color: var(--ink); color: var(--ink); }
+.btn-end-salvar {
+  padding: .4rem .95rem;
+  background: var(--accent);
+  border: 1.5px solid var(--accent);
+  border-radius: 6px;
+  color: var(--paper);
+  font-family: "DM Sans", sans-serif;
+  font-size: .77rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-end-salvar:hover:not(:disabled) { background: #5a2229; border-color: #5a2229; }
+.btn-end-salvar:disabled { opacity: .5; cursor: not-allowed; }
+.btn-link-inline {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+
 /* ── Responsivo ── */
 @media (max-width: 720px) {
   .checkout-layout { grid-template-columns: 1fr; }

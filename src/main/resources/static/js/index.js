@@ -209,7 +209,17 @@ async function carregarNavUsuario() {
       const perfilLink = document.querySelector("#navUser a");
       if (perfilLink) { perfilLink.href = "/admin/painel"; perfilLink.textContent = "Painel Admin"; }
       document.getElementById("navMinhaConta").href = "/admin/painel";
-      document.getElementById("navMinhaConta").textContent = "Painel Admin";
+      document.getElementById("navMinhaConta").textContent = "— Painel Admin";
+      // Oculta Vitrine e Vender — admin não é cliente
+      document.querySelectorAll(".masthead-nav a:not(#navMinhaConta)").forEach(function(el) {
+        el.style.display = "none";
+      });
+      // Redireciona todos os CTAs de cliente para o painel admin
+      ["/livros/vitrine", "/livros/vender", "/clientes/novo-cadastro"].forEach(function(path) {
+        document.querySelectorAll('a[href="' + path + '"]').forEach(function(el) {
+          el.href = "/admin/painel";
+        });
+      });
     }
   } catch (_) {}
 }

@@ -18,7 +18,16 @@
       "Bash(grep -E \"\\\\.\\(html|xml\\)$\")",
       "Bash(mvn clean:*)",
       "Bash(grep -E \"\\\\.\\(html|js|css\\)$\")",
-      "Bash(curl -sL \"https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js\" -o \"/Users/ThiagoHenrique/Downloads/PFC_umc-main 5/src/main/resources/static/js/vendor/gsap.min.js\")"
+      "Bash(curl -sL \"https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js\" -o \"/Users/ThiagoHenrique/Downloads/PFC_umc-main 5/src/main/resources/static/js/vendor/gsap.min.js\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\guilh\\\\OneDrive\\\\Área de Trabalho\\\\PFCF1705\\\\src\\\\main\\\\java\" -Recurse -Filter \"*Controller*\")",
+      "Bash(Select-Object -First 20)",
+      "Bash(xargs grep -l \"remover\\\\|excluir\\\\|deletar\\\\|endereço\\\\|endereco\")",
+      "Bash(xargs grep -l \"remover\\\\|confirm\\\\|excluir\")",
+      "Bash(xargs grep -l \"CPF\\\\|cpf\\\\|endere\\\\|remov\\\\|exclu\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\guilh\\\\OneDrive\\\\Área de Trabalho\\\\PFCF1705\" -Recurse -Directory)",
+      "Bash(Format-List FullName)",
+      "Bash(xargs grep -l \"preview\\\\|notif\\\\|email\")",
+      "Bash(xargs grep -l \"Disparo\\\\|email.*historico\\\\|historico.*email\")"
     ]
   }
 }

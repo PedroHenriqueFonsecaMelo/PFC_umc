@@ -53,8 +53,8 @@ nav.page-nav a:hover {
 .container {
   max-width: 680px;
   width: 95%;
-  margin: 2rem auto;
-  padding: 2.5rem;
+  margin: 0.5rem auto;
+  padding: 1.25rem 1.75rem;
   background-color: var(--white);
   border: 1px solid var(--border);
   box-shadow: 4px 4px 0 var(--ink);
@@ -63,7 +63,7 @@ nav.page-nav a:hover {
 /* === CABEÇALHO DA PÁGINA === */
 .page-header {
   text-align: center;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1rem;
 }
 
 .page-header h1 {
@@ -72,8 +72,8 @@ nav.page-nav a:hover {
   font-weight: 700;
   color: var(--ink);
   border-bottom: 1px solid var(--border);
-  padding-bottom: 0.75rem;
-  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.25rem;
 }
 
 .page-header p {
@@ -104,7 +104,7 @@ h2 {
 hr {
   border: none;
   border-top: 1px solid rgba(44, 36, 27, 0.12);
-  margin: 1.5rem 0;
+  margin: 0.75rem 0;
 }
 
 /* === MENSAGENS (SUCESSO / ERRO) === */
@@ -152,7 +152,7 @@ legend {
 }
 
 .form-group-2 {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   display: flex;
   flex-direction: column;
 }
@@ -191,6 +191,7 @@ textarea {
   width: 100%;
   padding: 0.7rem 0.9rem;
   border: 1.5px solid rgba(44, 36, 27, 0.18);
+  border-radius: 8px;
   background: var(--paper);
   color: var(--ink);
   font-family: "DM Sans", sans-serif;
@@ -339,15 +340,15 @@ input[readonly] {
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: 0.7rem;
 }
 
 /* === CHECKBOXES === */
 .form-group-checkboxes {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
 }
 
 /* === ÁREA ROLÁVEL DE TERMOS === */
@@ -366,6 +367,7 @@ input[readonly] {
   background: var(--ink);
   color: var(--paper);
   border: 2px solid var(--ink);
+  border-radius: 8px;
   font-family: "DM Sans", sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
@@ -387,6 +389,7 @@ input[readonly] {
   background: var(--ink);
   color: var(--paper);
   border: 2px solid var(--ink);
+  border-radius: 8px;
   font-family: "DM Sans", sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
@@ -408,6 +411,7 @@ input[readonly] {
   background: transparent;
   color: var(--ink);
   border: 2px solid var(--ink);
+  border-radius: 8px;
   font-family: "DM Sans", sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
@@ -421,6 +425,14 @@ input[readonly] {
 .btn-secondary:hover {
   background: var(--ink);
   color: var(--paper);
+}
+
+.btn:disabled,
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* Links de perigo / ação textual */
@@ -467,7 +479,7 @@ input[readonly] {
 .form-actions-main {
   display: flex;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 0.75rem;
 }
 
 /* === LINKS DE CONTA === */

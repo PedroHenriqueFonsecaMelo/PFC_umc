@@ -22,24 +22,38 @@
 
         <!-- ── Mini Carrinho (estante) ── -->
         <div style="position:relative;display:inline-block;" id="cnMiniCartWrapper">
-            <button class="cn-btn" id="cnCartBtn"
+            <button class="cn-estante-svg" id="cnCartBtn"
                     onclick="cnToggleMiniCart()"
                     title="Minha Estante"
-                    style="background:none;border:none;cursor:pointer;padding:.3rem .45rem;
-                           position:relative;display:inline-flex;align-items:center;
-                           border-radius:8px;transition:background .18s;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    style="background:none;border:none;cursor:pointer;padding:0;
+                           position:relative;display:inline-flex;align-items:center;">
+                <svg class="book-shelf-nav" xmlns="http://www.w3.org/2000/svg"
+                     preserveAspectRatio="xMidYMid" viewBox="0 0 84 94"
+                     height="48" width="48" style="transform:translateY(4px)">
+                  <g class="book-shelf__book book-shelf__book--one" fill-rule="evenodd">
+                    <path fill="#5199fc" d="M31 29h4c1.105 0 2 .895 2 2v29c0 1.105-.895 2-2 2h-4c-1.105 0-2-.895-2-2V31c0-1.105.895-2 2-2z"/>
+                    <path fill="#afd7fb" d="M34 36h-2c-.552 0-1-.448-1-1s.448-1 1-1h2c.552 0 1 .448 1 1s-.448 1-1 1zm-2 1h2c.552 0 1 .448 1 1s-.448 1-1 1h-2c-.552 0-1-.448-1-1s.448-1 1-1z"/>
+                  </g>
+                  <g class="book-shelf__book book-shelf__book--two" fill-rule="evenodd">
+                    <path fill="#ff9868" d="M39 34h6c1.105 0 2 .895 2 2v24c0 1.105-.895 2-2 2h-6c-1.105 0-2-.895-2-2V36c0-1.105.895-2 2-2z"/>
+                    <path fill="#d06061" d="M42 38c1.105 0 2 .895 2 2s-.895 2-2 2-2-.895-2-2 .895-2 2-2z"/>
+                  </g>
+                  <g class="book-shelf__book book-shelf__book--three" fill-rule="evenodd">
+                    <path fill="#ff5068" d="M49 32h2c1.105 0 2 .86 2 1.92v25.906c0 1.06-.895 1.92-2 1.92h-2c-1.105 0-2-.86-2-1.92V33.92c0-1.06.895-1.92 2-1.92z"/>
+                    <path fill="#d93368" d="M50 35c.552 0 1 .448 1 1v2c0 .552-.448 1-1 1s-1-.448-1-1v-2c0-.552.448-1 1-1z"/>
+                  </g>
+                  <g fill-rule="evenodd">
+                    <path class="book-shelf__shelf" fill="#ae8280" d="M21 60h40c1.105 0 2 .895 2 2s-.895 2-2 2H21c-1.105 0-2-.895-2-2s.895-2 2-2z"/>
+                    <path fill="#855f6d" d="M51.5 67c-.828 0-1.5-.672-1.5-1.5V64h3v1.5c0 .828-.672 1.5-1.5 1.5zm-21 0c-.828 0-1.5-.672-1.5-1.5V64h3v1.5c0 .828-.672 1.5-1.5 1.5z"/>
+                  </g>
                 </svg>
-                <span id="cnCartBadge"
-                      style="display:none;position:absolute;top:-4px;right:-6px;
-                             background:#722f37;color:#fff;border-radius:50%;
-                             min-width:17px;height:17px;font-size:.6rem;font-weight:700;
-                             align-items:center;justify-content:center;line-height:1;padding:0 3px;">0</span>
             </button>
+            <span id="cnCartBadge"
+                  style="display:none;position:absolute;top:2px;right:2px;
+                         background:#722f37;color:#fff;border-radius:50%;
+                         min-width:17px;height:17px;font-size:.6rem;font-weight:700;
+                         align-items:center;justify-content:center;line-height:1;padding:0 3px;
+                         pointer-events:none;z-index:1;">0</span>
 
             <!-- Dropdown mini carrinho -->
             <div id="cnMiniCart"
@@ -52,7 +66,16 @@
                             display:flex;align-items:center;justify-content:space-between;
                             background:#fff;">
                     <span style="font-family:'Playfair Display',serif;font-size:.9rem;
-                                 font-weight:700;color:#2c241b;">🎒 Minha Estante</span>
+                                 font-weight:700;color:#2c241b;display:flex;align-items:center;gap:.4rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid"
+                             viewBox="0 0 84 94" height="20" width="20" style="flex-shrink:0;">
+                          <g fill-rule="evenodd"><path fill="#5199fc" d="M31 29h4c1.105 0 2 .895 2 2v29c0 1.105-.895 2-2 2h-4c-1.105 0-2-.895-2-2V31c0-1.105.895-2 2-2z"/><path fill="#afd7fb" d="M34 36h-2c-.552 0-1-.448-1-1s.448-1 1-1h2c.552 0 1 .448 1 1s-.448 1-1 1zm-2 1h2c.552 0 1 .448 1 1s-.448 1-1 1h-2c-.552 0-1-.448-1-1s.448-1 1-1z"/></g>
+                          <g fill-rule="evenodd"><path fill="#ff9868" d="M39 34h6c1.105 0 2 .895 2 2v24c0 1.105-.895 2-2 2h-6c-1.105 0-2-.895-2-2V36c0-1.105.895-2 2-2z"/><path fill="#d06061" d="M42 38c1.105 0 2 .895 2 2s-.895 2-2 2-2-.895-2-2 .895-2 2-2z"/></g>
+                          <g fill-rule="evenodd"><path fill="#ff5068" d="M49 32h2c1.105 0 2 .86 2 1.92v25.906c0 1.06-.895 1.92-2 1.92h-2c-1.105 0-2-.86-2-1.92V33.92c0-1.06.895-1.92 2-1.92z"/><path fill="#d93368" d="M50 35c.552 0 1 .448 1 1v2c0 .552-.448 1-1 1s-1-.448-1-1v-2c0-.552.448-1 1-1z"/></g>
+                          <g fill-rule="evenodd"><path fill="#ae8280" d="M21 60h40c1.105 0 2 .895 2 2s-.895 2-2 2H21c-1.105 0-2-.895-2-2s.895-2 2-2z"/><path fill="#855f6d" d="M51.5 67c-.828 0-1.5-.672-1.5-1.5V64h3v1.5c0 .828-.672 1.5-1.5 1.5zm-21 0c-.828 0-1.5-.672-1.5-1.5V64h3v1.5c0 .828-.672 1.5-1.5 1.5z"/></g>
+                        </svg>
+                        Minha Estante
+                    </span>
                     <button onclick="cnFecharMiniCart()"
                             style="background:rgba(44,36,27,.06);border:none;cursor:pointer;
                                    color:#7a6e65;font-size:.8rem;line-height:1;padding:.25rem .45rem;
@@ -102,7 +125,7 @@
                     onclick="cnToggleNotif(event)"
                     style="background:none;border:none;cursor:pointer;padding:.3rem .45rem;
                            position:relative;border-radius:8px;transition:background .18s;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                      fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -137,31 +160,60 @@
             </div>
         </div>
 
-        <a th:href="@{/livros/estante}" class="cn-estante-svg"
-           title="Minha Estante" aria-label="Minha Estante">
-          <svg class="book-shelf-nav" xmlns="http://www.w3.org/2000/svg"
-               preserveAspectRatio="xMidYMid" viewBox="0 0 84 94"
-               height="46" width="46">
-            <g class="book-shelf__book book-shelf__book--one" fill-rule="evenodd">
-              <path fill="#5199fc" d="M31 29h4c1.105 0 2 .895 2 2v29c0 1.105-.895 2-2 2h-4c-1.105 0-2-.895-2-2V31c0-1.105.895-2 2-2z"/>
-              <path fill="#afd7fb" d="M34 36h-2c-.552 0-1-.448-1-1s.448-1 1-1h2c.552 0 1 .448 1 1s-.448 1-1 1zm-2 1h2c.552 0 1 .448 1 1s-.448 1-1 1h-2c-.552 0-1-.448-1-1s.448-1 1-1z"/>
-            </g>
-            <g class="book-shelf__book book-shelf__book--two" fill-rule="evenodd">
-              <path fill="#ff9868" d="M39 34h6c1.105 0 2 .895 2 2v24c0 1.105-.895 2-2 2h-6c-1.105 0-2-.895-2-2V36c0-1.105.895-2 2-2z"/>
-              <path fill="#d06061" d="M42 38c1.105 0 2 .895 2 2s-.895 2-2 2-2-.895-2-2 .895-2 2-2z"/>
-            </g>
-            <g class="book-shelf__book book-shelf__book--three" fill-rule="evenodd">
-              <path fill="#ff5068" d="M49 32h2c1.105 0 2 .86 2 1.92v25.906c0 1.06-.895 1.92-2 1.92h-2c-1.105 0-2-.86-2-1.92V33.92c0-1.06.895-1.92 2-1.92z"/>
-              <path fill="#d93368" d="M50 35c.552 0 1 .448 1 1v2c0 .552-.448 1-1 1s-1-.448-1-1v-2c0-.552.448-1 1-1z"/>
-            </g>
-            <g fill-rule="evenodd">
-              <path class="book-shelf__shelf" fill="#ae8280" d="M21 60h40c1.105 0 2 .895 2 2s-.895 2-2 2H21c-1.105 0-2-.895-2-2s.895-2 2-2z"/>
-              <path fill="#855f6d" d="M51.5 67c-.828 0-1.5-.672-1.5-1.5V64h3v1.5c0 .828-.672 1.5-1.5 1.5zm-21 0c-.828 0-1.5-.672-1.5-1.5V64h3v1.5c0 .828-.672 1.5-1.5 1.5z"/>
-            </g>
-          </svg>
-        </a>
-        <a th:href="@{/clientes/meu-perfil}"     class="cn-btn">Meu Perfil</a>
-        <a th:href="@{/clientes/sair}"           class="cn-btn">Sair</a>
+
+        <!-- ── Menu de conta (ícone + dropdown hover) ── -->
+        <div class="cn-perfil-wrapper" id="cnPerfilWrapper">
+            <button class="cn-perfil-btn" id="cnPerfilBtn" aria-label="Minha conta" title="Minha conta">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+            </button>
+            <div class="cn-perfil-dropdown" id="cnPerfilDropdown">
+                <a th:href="@{/clientes/meu-perfil}" id="cnPerfilLink" class="cn-perfil-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="8" r="4"/>
+                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                    </svg>
+                    <span class="cn-perfil-item-txt">Meu Perfil</span>
+                </a>
+                <button class="cn-perfil-item cn-sair-item" onclick="cnAbrirModalSair()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    Sair
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmação de saída -->
+    <div id="cnModalSair" class="cn-modal-sair-overlay" style="display:none;"
+         onclick="if(event.target===this)cnFecharModalSair()">
+        <div class="cn-modal-sair-box">
+            <div class="cn-modal-sair-icone">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+                     fill="none" stroke="#722f37" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+            </div>
+            <p class="cn-modal-sair-msg">Deseja mesmo sair da Bibliotroca?</p>
+            <div class="cn-modal-sair-acoes">
+                <button class="cn-modal-btn-cancelar" onclick="cnFecharModalSair()">Cancelar</button>
+                <button class="cn-modal-btn-sair" onclick="window.location.href='/clientes/sair'">Sim, sair</button>
+            </div>
+        </div>
     </div>
 
     <!-- Script do nav: DEVE ficar DENTRO do th:fragment para ser incluído via th:replace -->
@@ -321,35 +373,93 @@
             var svg = document.querySelector('.book-shelf-nav');
             if (!svg) return;
             svg.classList.remove('shelf-animating');
-            void svg.offsetWidth; // reflow para reiniciar animação
+            void svg.offsetWidth;
             svg.classList.add('shelf-animating');
-            setTimeout(function() {
-                svg.classList.remove('shelf-animating');
-            }, 500);
+            setTimeout(function() { svg.classList.remove('shelf-animating'); }, 500);
         };
 
         /* ── Hover no mini carrinho (mouseenter/mouseleave com delay) ── */
         document.addEventListener('DOMContentLoaded', function() {
-            var wrapper = document.getElementById('cnMiniCartWrapper');
-            var cartEl  = document.getElementById('cnMiniCart');
-            var _timer  = null;
+            var wrapper        = document.getElementById('cnMiniCartWrapper');
+            var cartEl         = document.getElementById('cnMiniCart');
+            var perfilWrapper  = document.getElementById('cnPerfilWrapper');
+            var perfilDropdown = document.getElementById('cnPerfilDropdown');
+            var notifWrapper   = document.getElementById('cnNotifWrapper');
+            var notifDropdown  = document.getElementById('cnNotifDropdown');
+            var _globalTimer   = null;
 
+            /* Fecha todos os dropdowns, opcionalmente preservando um */
+            function fecharTodos(exceto) {
+                if (exceto !== 'cart'  && cartEl)         cartEl.style.display = 'none';
+                if (exceto !== 'notif' && notifDropdown)  { notifDropdown.style.display = 'none'; _cnNotifAberto = false; }
+                if (exceto !== 'perfil'&& perfilDropdown) perfilDropdown.classList.remove('cn-perfil-dropdown--open');
+            }
+
+            /* Agenda o fechamento de tudo após sair da área dos ícones */
+            function agendarFechamento() {
+                if (_globalTimer) clearTimeout(_globalTimer);
+                _globalTimer = setTimeout(function() { fecharTodos(null); }, 350);
+            }
+
+            /* ── Mini Carrinho ── */
             if (wrapper && cartEl) {
                 wrapper.addEventListener('mouseenter', function() {
-                    if (_timer) { clearTimeout(_timer); _timer = null; }
+                    if (_globalTimer) { clearTimeout(_globalTimer); _globalTimer = null; }
+                    fecharTodos('cart');
                     cnPopularMiniCart();
                     cartEl.style.display = 'block';
                 });
-                wrapper.addEventListener('mouseleave', function() {
-                    _timer = setTimeout(function() {
-                        cartEl.style.display = 'none';
-                    }, 180);
+                wrapper.addEventListener('mouseleave', agendarFechamento);
+            }
+
+            /* Fecha ao clicar fora */
+            document.addEventListener('click', function(e) {
+                if (wrapper && !wrapper.contains(e.target)) cnFecharMiniCart();
+            });
+
+            /* ── Perfil ── */
+            if (perfilWrapper && perfilDropdown) {
+                perfilWrapper.addEventListener('mouseenter', function() {
+                    if (_globalTimer) { clearTimeout(_globalTimer); _globalTimer = null; }
+                    fecharTodos('perfil');
+                    perfilDropdown.classList.add('cn-perfil-dropdown--open');
+                });
+                perfilWrapper.addEventListener('mouseleave', agendarFechamento);
+                document.addEventListener('click', function(e) {
+                    if (!perfilWrapper.contains(e.target))
+                        perfilDropdown.classList.remove('cn-perfil-dropdown--open');
                 });
             }
 
-            /* Fecha ao clicar fora (fallback para touch) */
-            document.addEventListener('click', function(e) {
-                if (wrapper && !wrapper.contains(e.target)) cnFecharMiniCart();
+            /* ── Notificações ── */
+            if (notifWrapper && notifDropdown) {
+                notifWrapper.addEventListener('mouseenter', function() {
+                    if (_globalTimer) { clearTimeout(_globalTimer); _globalTimer = null; }
+                    fecharTodos('notif');
+                    notifDropdown.style.display = 'block';
+                    _cnNotifAberto = true;
+                    cnPopularDropdown();
+                    fetch('/api/notificacoes/marcar-lidas', { method: 'POST', credentials: 'include' })
+                        .then(function() {
+                            var badge = document.getElementById('cnNotifBadge');
+                            if (badge) badge.style.display = 'none';
+                        }).catch(function(){});
+                });
+                notifWrapper.addEventListener('mouseleave', agendarFechamento);
+            }
+
+            /* ── Modal de confirmação de saída ── */
+            window.cnAbrirModalSair = function() {
+                var modal = document.getElementById('cnModalSair');
+                if (modal) modal.style.display = 'flex';
+            };
+            window.cnFecharModalSair = function() {
+                var modal = document.getElementById('cnModalSair');
+                if (modal) modal.style.display = 'none';
+            };
+            /* Fecha com ESC */
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') cnFecharModalSair();
             });
         });
 
@@ -378,8 +488,22 @@
                         .then(function(admin) {
                             if (!admin) return;
                             // Redireciona "Meu Perfil" para o painel do admin
-                            var link = document.querySelector('a.cn-btn[href="/clientes/meu-perfil"]');
-                            if (link) { link.href = '/admin/painel'; link.textContent = 'Painel Admin'; }
+                            var link = document.getElementById('cnPerfilLink');
+                            if (link) {
+                                link.href = '/admin/painel';
+                                var txt = link.querySelector('.cn-perfil-item-txt');
+                                if (txt) txt.textContent = 'Painel Admin';
+                            }
+                            // Admin não compra: oculta links de navegação, saldo, carrinho e sininho
+                            var esconder = ['cnMiniCartWrapper', 'cnNotifWrapper'];
+                            esconder.forEach(function(id) {
+                                var el = document.getElementById(id);
+                                if (el) el.style.display = 'none';
+                            });
+                            var navLinks = document.querySelector('.cn-links');
+                            if (navLinks) navLinks.style.display = 'none';
+                            var saldo = document.getElementById('navSaldo');
+                            if (saldo) saldo.style.display = 'none';
                         }).catch(function(){});
                 }
             }).catch(function(){});

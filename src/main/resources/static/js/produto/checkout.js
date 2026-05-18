@@ -60,8 +60,8 @@ function carregarEnderecoEntrega(perfil) {
         _semEndereco = true;
 
         if (card) card.innerHTML =
-            '<span style="color:var(--muted,#7a6e65);font-size:.83rem;">Nenhum endereço cadastrado.</span>' +
-            '<br><a href="/clientes/meu-perfil?tab=enderecos" class="checkout-link-endereco">Cadastrar endereço →</a>';
+            '<span style="color:var(--muted,#7a6e65);font-size:.83rem;">Nenhum endereço cadastrado.</span><br>' +
+            '<button type="button" class="checkout-link-endereco btn-link-inline" onclick="abrirFormEndereco()">+ Adicionar endereço aqui</button>';
 
         if (btn)     btn.disabled = true;
         if (btnWrap) btnWrap.dataset.tooltip = 'Cadastre um endereço de entrega primeiro';
@@ -79,7 +79,8 @@ function carregarEnderecoEntrega(perfil) {
             `<strong>${escHtml(endereco.rua)}, ${escHtml(endereco.numero)}</strong>` +
             (endereco.complemento ? `<br>${escHtml(endereco.complemento)}` : '') +
             `<br>${escHtml(endereco.bairro)} — ${escHtml(endereco.cidade)}/${escHtml(endereco.estado)}` +
-            `<br>CEP: ${escHtml(endereco.cep)}`;
+            `<br>CEP: ${escHtml(endereco.cep)}` +
+            `<br><button type="button" class="checkout-link-endereco btn-link-inline" style="margin-top:.4rem;" onclick="abrirFormEndereco()">Usar outro endereço →</button>`;
     }
 }
 
@@ -368,6 +369,116 @@ window.confirmarCompra = async function() {
         if (alertaErro) alertaErro.style.display = 'block';
         btn.disabled    = false;
         btn.textContent = 'Confirmar compra';
+    }
+};
+
+/* ── Formulário inline de endereço ── */
+window.abrirFormEndereco = function() {
+    const form   = document.getElementById('formEnderecoInline');
+    const erroEl = document.getElementById('erroFormEndereco');
+    if (form)   form.style.display   = 'block';
+    if (erroEl) erroEl.style.display = 'none';
+};
+
+window.fecharFormEndereco = function() {
+    const form = document.getElementById('formEnderecoInline');
+    if (form) form.style.display = 'none';
+};
+
+window.mascaraCepCheckout = function(input) {
+    let v = input.value.replace(/\D/g, '').substring(0, 8);
+    if (v.length > 5) v = v.substring(0, 5) + '-' + v.substring(5);
+    input.value = v;
+    const statusEl = document.getElementById('cepStatus');
+    if (v.replace(/\D/g, '').length === 8) {
+        buscarCepCheckout(v.replace(/\D/g, ''));
+    } else {
+        if (statusEl) { statusEl.className = 'cep-status'; statusEl.textContent = ''; }
+    }
+};
+
+async function buscarCepCheckout(cep) {
+    const statusEl = document.getElementById('cepStatus');
+    if (statusEl) { statusEl.className = 'cep-status cep-buscando'; statusEl.textContent = 'Buscando...'; }
+    try {
+        const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (data.erro) {
+            if (statusEl) { statusEl.className = 'cep-status cep-erro'; statusEl.textContent = 'CEP não encontrado.'; }
+            return;
+        }
+        const preencher = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+        preencher('fEndRua',    data.logradouro);
+        preencher('fEndBairro', data.bairro);
+        preencher('fEndCidade', data.localidade);
+        preencher('fEndEstado', (data.uf || '').toUpperCase());
+        if (statusEl) { statusEl.className = 'cep-status cep-ok'; statusEl.textContent = '✓ Endereço encontrado'; }
+        document.getElementById('fEndNumero')?.focus();
+    } catch (_) {
+        if (statusEl) { statusEl.className = 'cep-status cep-erro'; statusEl.textContent = 'Erro ao buscar CEP.'; }
+    }
+}
+
+window.salvarEnderecoCheckout = async function() {
+    const rua    = (document.getElementById('fEndRua')?.value         || '').trim();
+    const num    = (document.getElementById('fEndNumero')?.value       || '').trim();
+    const comp   = (document.getElementById('fEndComplemento')?.value  || '').trim();
+    const bairro = (document.getElementById('fEndBairro')?.value       || '').trim();
+    const cep    = (document.getElementById('fEndCep')?.value          || '').trim();
+    const cidade = (document.getElementById('fEndCidade')?.value       || '').trim();
+    const estado = (document.getElementById('fEndEstado')?.value       || '').trim().toUpperCase();
+
+    const erroEl = document.getElementById('erroFormEndereco');
+    const mostrarErroEnd = msg => {
+        if (erroEl) { erroEl.textContent = msg; erroEl.style.display = 'block'; }
+    };
+
+    if (!rua || !num || !bairro || !cep || !cidade || !estado) {
+        mostrarErroEnd('Preencha todos os campos obrigatórios (*).');
+        return;
+    }
+    if (estado.length !== 2) {
+        mostrarErroEnd('Estado deve ter 2 letras (ex: SP).');
+        return;
+    }
+    if (cep.replace(/\D/g, '').length !== 8) {
+        mostrarErroEnd('CEP inválido. Informe os 8 dígitos.');
+        return;
+    }
+
+    const btnSalvar = document.querySelector('.btn-end-salvar');
+    if (btnSalvar) { btnSalvar.disabled = true; btnSalvar.textContent = 'Salvando...'; }
+    if (erroEl) erroEl.style.display = 'none';
+
+    try {
+        const res = await fetch('/api/clientes/enderecos', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ rua, numero: num, complemento: comp || null,
+                                   bairro, cep, cidade, estado, pais: 'BR' })
+        });
+
+        if (res.status === 401) { window.location.href = '/clientes/login'; return; }
+
+        if (!res.ok) {
+            mostrarErroEnd('Erro ao salvar endereço. Tente novamente.');
+            return;
+        }
+
+        fecharFormEndereco();
+        ['fEndRua','fEndNumero','fEndComplemento','fEndBairro','fEndCep','fEndCidade','fEndEstado']
+            .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+        const perfil = await carregarPerfil();
+        carregarEnderecoEntrega(perfil);
+        renderFinanceiro(_saldoAtual, _totalOriginal);
+
+    } catch (_) {
+        mostrarErroEnd('Erro de conexão. Tente novamente.');
+    } finally {
+        if (btnSalvar) { btnSalvar.disabled = false; btnSalvar.textContent = 'Salvar e usar'; }
     }
 };
 

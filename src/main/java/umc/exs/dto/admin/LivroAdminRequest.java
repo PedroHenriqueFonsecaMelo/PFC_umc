@@ -2,6 +2,7 @@ package umc.exs.dto.admin;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,5 +24,6 @@ public class LivroAdminRequest {
     String genero;
     Boolean emPromocao;
     Double percentualDesconto;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime promocaoExpira;
 }

@@ -11,7 +11,12 @@ document.getElementById("dataHoje").textContent =
 
 /* ── UTILS ── */
 function promoValida(promocaoExpira) {
-    if (!promocaoExpira) return true; // sem expiração = válida indefinidamente
+    if (!promocaoExpira) return true;
+    // Jackson pode serializar LocalDateTime como array [ano,mes,dia,h,m,s] ou como string ISO
+    if (Array.isArray(promocaoExpira)) {
+        const [y, mo, d, h = 0, m = 0, s = 0] = promocaoExpira;
+        return new Date(y, mo - 1, d, h, m, s).getTime() > Date.now();
+    }
     return new Date(promocaoExpira).getTime() > Date.now();
 }
 
@@ -151,6 +156,59 @@ function filtrar() {
     ));
 }
 
+/* ── MÁSCARA E VALIDAÇÃO DA DATA DE PROMOÇÃO ── */
+function mascaraDataHora(input) {
+    var digits = input.value.replace(/\D/g, '').substring(0, 12);
+    var out = '';
+    if (digits.length > 0)  out  = digits.substring(0, 2);
+    if (digits.length > 2)  out += '/' + digits.substring(2, 4);
+    if (digits.length > 4)  out += '/' + digits.substring(4, 8);
+    if (digits.length > 8)  out += ' ' + digits.substring(8, 10);
+    if (digits.length > 10) out += ':' + digits.substring(10, 12);
+    input.value = out;
+    validarDataPromoInput(out);
+}
+
+function validarDataPromoInput(valor) {
+    var erroEl = document.getElementById('fPromoExpiraErro');
+    if (!erroEl) return true;
+    if (!valor || valor.length < 16) { erroEl.style.display = 'none'; return true; }
+    var iso = maskedParaIso(valor);
+    if (!iso) { erroEl.style.display = 'none'; return true; }
+    var data = new Date(iso);
+    if (isNaN(data.getTime())) {
+        erroEl.textContent = 'Data inválida.';
+        erroEl.style.display = 'block';
+        return false;
+    }
+    if (data <= new Date()) {
+        erroEl.textContent = 'A data deve ser futura.';
+        erroEl.style.display = 'block';
+        return false;
+    }
+    erroEl.style.display = 'none';
+    return true;
+}
+
+function maskedParaIso(masked) {
+    var m = masked.match(/^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2})$/);
+    if (!m) return null;
+    return m[3] + '-' + m[2] + '-' + m[1] + 'T' + m[4] + ':' + m[5] + ':00';
+}
+
+function isoParaMasked(iso) {
+    if (!iso) return '';
+    // Se vier como array do Jackson: [ano, mes, dia, hora, minuto, ...]
+    if (Array.isArray(iso)) {
+        const [y, mo, d, h = 0, mi = 0] = iso;
+        const pad = n => String(n).padStart(2, '0');
+        return pad(d) + '/' + pad(mo) + '/' + y + ' ' + pad(h) + ':' + pad(mi);
+    }
+    var m = iso.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+    if (!m) return '';
+    return m[3] + '/' + m[2] + '/' + m[1] + ' ' + m[4] + ':' + m[5];
+}
+
 /* ── PROMO HELPERS ── */
 function togglePromo() {
     const ativo = document.getElementById("fEmPromocao").checked;
@@ -288,8 +346,7 @@ function abrirModalEdit(livro) {
         document.getElementById("promoSection").style.display   = "block";
         document.getElementById("fDesconto").value              = desconto;
         document.getElementById("fPrecoPromo").value            = Number(livro.precoAprovado).toFixed(2);
-        document.getElementById("fPromoExpira").value           = livro.promocaoExpira
-            ? livro.promocaoExpira.substring(0, 16) : "";
+        document.getElementById("fPromoExpira").value           = isoParaMasked(livro.promocaoExpira);
     } else {
         limparCamposPromo();
     }
@@ -330,9 +387,45 @@ async function salvarLivro(e) {
 
     const emPromocao = document.getElementById("fEmPromocao").checked;
     const desconto   = parseFloat(document.getElementById("fDesconto").value) || 0;
-    const promoExpiraRaw = document.getElementById("fPromoExpira").value;
-    // datetime-local gives "YYYY-MM-DDTHH:mm", backend expects "YYYY-MM-DDTHH:mm:ss"
-    const promocaoExpira = promoExpiraRaw ? promoExpiraRaw + ":00" : null;
+    const promoExpiraRaw = document.getElementById("fPromoExpira").value.trim();
+
+    if (emPromocao && desconto <= 0) {
+        mostrarErro("Informe o percentual de desconto (deve ser maior que 0%).");
+        btn.disabled = false;
+        btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
+        return;
+    }
+
+    if (emPromocao && !promoExpiraRaw) {
+        mostrarErro("Informe a data de validade da promoção (DD/MM/AAAA HH:MM).");
+        btn.disabled = false;
+        btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
+        return;
+    }
+
+    let promocaoExpira = null;
+    if (promoExpiraRaw) {
+        if (promoExpiraRaw.length < 16) {
+            mostrarErro("Preencha a data de validade completa (DD/MM/AAAA HH:MM).");
+            btn.disabled = false;
+            btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
+            return;
+        }
+        const isoConvertido = maskedParaIso(promoExpiraRaw);
+        if (!isoConvertido) {
+            mostrarErro("Data de validade inválida.");
+            btn.disabled = false;
+            btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
+            return;
+        }
+        if (new Date(isoConvertido) <= new Date()) {
+            mostrarErro("A data de validade da promoção deve ser futura.");
+            btn.disabled = false;
+            btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
+            return;
+        }
+        promocaoExpira = isoConvertido;
+    }
 
     const payload = {
         titulo:              document.getElementById("fTitulo").value.trim(),
