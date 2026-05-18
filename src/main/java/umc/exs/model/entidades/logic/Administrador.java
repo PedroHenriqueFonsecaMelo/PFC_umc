@@ -5,9 +5,19 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import io.github.manoelcampos.dtogen.DTO;
 
 @Entity
 @Table(name = "admins")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@DTO
 public class Administrador {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,63 +26,4 @@ public class Administrador {
     private String nome;
     private String email;
     private String password;
-
-    public Administrador() {
-    }
-
-    /**
-     * @return Long
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * @param id
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    /**
-     * @return String
-     */
-    public String getNome() {
-        return nome;
-    }
-
-    /**
-     * @param nome
-     */
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    /**
-     * @return String
-     */
-    public String getEmail() {
-        return email;
-    }
-
-    /**
-     * @param email
-     */
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    /**
-     * @return String
-     */
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * @param password
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

@@ -3,9 +3,11 @@ package umc.exs.model.entidades.livro;
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
 import lombok.*;
+import io.github.manoelcampos.dtogen.DTO;
 import umc.exs.model.entidades.usuario.Cliente;
 
 @Entity
+@DTO
 @Builder
 @Data
 @NoArgsConstructor

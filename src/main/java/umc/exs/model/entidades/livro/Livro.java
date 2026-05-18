@@ -19,12 +19,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import io.github.manoelcampos.dtogen.DTO;
 import umc.exs.dto.livro.LivroExibicaoDTO;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.EstadoLivro;
 
 @Entity
+@DTO
 @Data
 @Builder
 @NoArgsConstructor

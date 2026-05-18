@@ -2,6 +2,7 @@ package umc.exs.model.entidades.social;
 
 import jakarta.persistence.*;
 import lombok.*;
+import io.github.manoelcampos.dtogen.DTO;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.NivelUsuario;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "pontuacao_usuario")
+@DTO
 @Data
 @Builder
 @NoArgsConstructor

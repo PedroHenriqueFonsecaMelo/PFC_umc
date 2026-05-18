@@ -9,11 +9,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import io.github.manoelcampos.dtogen.DTO;
 
 @Entity
 @Table(name = "log_auditoria")
+@DTO
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Data

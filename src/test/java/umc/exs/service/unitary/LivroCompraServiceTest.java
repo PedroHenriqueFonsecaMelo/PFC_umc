@@ -126,7 +126,7 @@ class LivroCompraServiceTest {
 
                 assertEquals(10.0, buyer.getSaldoTokens());
 
-                verify(livroRepository).delete(livro);
+                verify(livroRepository).save(livro);                
                 verify(clienteRepository, never()).save(any());
                 verify(pedidoService).registrarPedido(buyer, livro);
                 verify(emailService).enviar(
@@ -161,6 +161,6 @@ class LivroCompraServiceTest {
 
                 assertEquals("Saldo insuficiente para completar a compra.", ex.getMessage());
 
-                verify(livroRepository, never()).delete(any());
+                 verify(livroRepository, never()).save(any());
         }
 }

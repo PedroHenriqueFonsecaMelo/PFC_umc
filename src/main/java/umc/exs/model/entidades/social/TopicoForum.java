@@ -20,19 +20,25 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import io.github.manoelcampos.dtogen.DTO;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.CategoriaForum;
 
 @Entity
 @Table(name = "topico_forum")
+@DTO
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 @ToString(exclude = { "autor", "respostas" })
 public class TopicoForum {
@@ -60,15 +66,19 @@ public class TopicoForum {
     private LocalDateTime dataCriacao;
 
     @Column(nullable = false)
+    @Builder.Default
     private int visualizacoes = 0;
 
     @Column(nullable = false)
+    @Builder.Default
     private int qtdRespostas = 0;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean resolvido = false;
 
     @OneToMany(mappedBy = "topico", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("dataCriacao ASC")
+    @Builder.Default
     private List<RespostaForum> respostas = new ArrayList<>();
 }

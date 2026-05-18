@@ -25,19 +25,23 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import io.github.manoelcampos.dtogen.DTO;
 import umc.exs.handler.CpfConverter;
 import umc.exs.model.entidades.livro.AvaliacaoLivro;
 import umc.exs.model.enums.Genero;
 
 @Entity
 @Table(name = "users")
+@DTO
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
@@ -69,9 +73,11 @@ public class Cliente {
     private String email;
 
     @Column(nullable = false)
+    @Builder.Default
     private int tentativas = 0;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean bloqueada = false;
 
     @CreationTimestamp
@@ -79,12 +85,14 @@ public class Cliente {
     private LocalDateTime dataCriacao;
 
     @Column(nullable = false)
+    @Builder.Default
     private Double saldoTokens = 0.0;
 
     @Column
     private String fotoPerfil;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean ativo = true;
 
     @Column(name = "deleted_at")
@@ -92,6 +100,7 @@ public class Cliente {
 
     /** Verificação de e-mail — false até o usuário clicar no link de confirmação. */
     @Column(nullable = false)
+    @Builder.Default
     private boolean emailVerificado = false;
 
     /** ID do endereço padrão selecionado para entrega. Null se nenhum selecionado. */
@@ -104,6 +113,7 @@ public class Cliente {
             CascadeType.MERGE
     })
     @JoinTable(name = "cliente_cartao", joinColumns = @JoinColumn(name = "cliente_id"), inverseJoinColumns = @JoinColumn(name = "cartao_id"))
+    @Builder.Default
     private Set<Cartao> cartoes = new HashSet<>();
 
     @JsonIgnore
@@ -112,6 +122,7 @@ public class Cliente {
             CascadeType.MERGE
     })
     @JoinTable(name = "cliente_endereco", joinColumns = @JoinColumn(name = "cliente_id"), inverseJoinColumns = @JoinColumn(name = "endereco_id"))
+    @Builder.Default
     private Set<Endereco> enderecos = new HashSet<>();
 
     @OneToMany(mappedBy = "avaliador")

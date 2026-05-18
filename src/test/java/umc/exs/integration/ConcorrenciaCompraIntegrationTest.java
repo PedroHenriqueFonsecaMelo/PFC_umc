@@ -84,7 +84,7 @@ class ConcorrenciaCompraIntegrationTest {
         // Setup de dados (Buyers e Livro)
         criarCliente("buyer1@test.com", "12345678901");
         criarCliente("buyer2@test.com", "98765432109");
-        
+
         Livro sharedLivro = Livro.builder()
                 .titulo("Hot Book")
                 .aprovado(true)
@@ -99,14 +99,16 @@ class ConcorrenciaCompraIntegrationTest {
         for (int i = 0; i < 2; i++) {
             final int threadIdx = i;
             String email = (i == 0) ? "buyer1@test.com" : "buyer2@test.com";
-            
+
             executor.submit(() -> {
                 try {
                     startLatch.await(); // Aguarda o sinal de largada
                     livroService.realizarCompra(livroId, email);
                 } catch (Exception e) {
-                    if (threadIdx == 0) errorThread1.set(e);
-                    else errorThread2.set(e);
+                    if (threadIdx == 0)
+                        errorThread1.set(e);
+                    else
+                        errorThread2.set(e);
                 } finally {
                     endLatch.countDown(); // Sinaliza que esta thread terminou
                 }
@@ -124,21 +126,24 @@ class ConcorrenciaCompraIntegrationTest {
         // --- ASSERT ---
         entityManager.clear(); // Importante para limpar o cache do Hibernate no teste
 
-        boolean livroAindaExiste = livroRepo.existsById(livroId);
+        Livro livroAtualizado = livroRepo.findById(livroId)
+                .orElseThrow();
+
         Exception erro1 = errorThread1.get();
         Exception erro2 = errorThread2.get();
 
-        // Verificação de Erros
-        if (livroAindaExiste) {
-            fail("Falha Grave: O livro ainda existe. " +
-                 "T1 Error: " + (erro1 != null ? erro1.getMessage() : "Nenhum") + 
-                 " | T2 Error: " + (erro2 != null ? erro2.getMessage() : "Nenhum"));
-        }
+        // Livro continua existindo
+        assertNotNull(livroAtualizado);
+
+        // Mas deve estar indisponível
+        assertFalse(
+                livroAtualizado.getAprovado(),
+                "O livro deveria estar indisponível após a compra");
 
         // Verificação de Lógica: Apenas uma thread deve falhar (XOR)
         boolean umaFalhou = (erro1 != null) ^ (erro2 != null);
         assertTrue(umaFalhou, "Uma das threads deveria ter falhado por concorrência!");
-        
+
         // Verificação de Saldo Total (200 - 10 = 190)
         double saldoTotal = clienteRepo.findAll().stream()
                 .mapToDouble(Cliente::getSaldoTokens).sum();

@@ -14,11 +14,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import io.github.manoelcampos.dtogen.DTO;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@DTO
 @Entity
 public class Obra {
     @Id

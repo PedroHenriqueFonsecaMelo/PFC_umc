@@ -18,12 +18,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import io.github.manoelcampos.dtogen.DTO;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.MotivoCategoria;
 import umc.exs.model.enums.StatusSolicitacao;
 
 @Entity
 @Table(name = "solicitacao_cancelamento")
+@DTO
 @Data
 @Builder
 @NoArgsConstructor

@@ -17,18 +17,24 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import io.github.manoelcampos.dtogen.DTO;
 import umc.exs.model.entidades.usuario.Cliente;
 
 @Entity
 @Table(name = "resposta_forum")
+@DTO
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 @ToString(exclude = { "autor", "topico", "curtidoresIds" })
 public class RespostaForum {
@@ -53,13 +59,16 @@ public class RespostaForum {
     private LocalDateTime dataCriacao;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean melhorResposta = false;
 
     @Column(nullable = false)
+    @Builder.Default
     private int qtdCurtidas = 0;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "curtida_resposta", joinColumns = @JoinColumn(name = "resposta_id"))
     @Column(name = "cliente_id")
+    @Builder.Default
     private Set<Long> curtidoresIds = new HashSet<>();
 }

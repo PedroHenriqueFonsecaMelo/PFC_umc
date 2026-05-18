@@ -75,8 +75,8 @@ public class LivroCompraService {
             vendedor = livro.getLote().getCliente();
         }
         final Cliente vendedorFinal = vendedor;
-        final String tituloLivro   = livro.getTitulo();
-        final double precoLivro    = livro.getPrecoAprovado();
+        final String tituloLivro = livro.getTitulo();
+        final double precoLivro = livro.getPrecoAprovado();
 
         double saldoAntes = comprador.getSaldoTokens();
         processarBaixaLivro(comprador, livro);
@@ -125,9 +125,13 @@ public class LivroCompraService {
         if (ids.isEmpty())
             throw new IllegalArgumentException("O carrinho está vazio.");
 
-        List<Livro> livrosParaComprar = livroRepository.findAllById(ids).stream()
+        List<Livro> livrosParaComprar = livroRepository.findAllDisponiveisWithLock(ids).stream()
                 .filter(l -> Boolean.TRUE.equals(l.getAprovado()))
                 .toList();
+        
+        if (livrosParaComprar.isEmpty()) {
+            throw new IllegalArgumentException("Livro indisponível ou não encontrado.");
+        }
 
         List<ItemResultadoDTO> falhas = identificarFalhas(ids, livrosParaComprar);
 
@@ -151,7 +155,7 @@ public class LivroCompraService {
         // Valida saldo contra o total com desconto
         if (comprador.getSaldoTokens() < totalComDesconto) {
             throw new IllegalStateException(
-                String.format("Saldo insuficiente. Necessário: T$ %.2f", totalComDesconto));
+                    String.format("Saldo insuficiente. Necessário: T$ %.2f", totalComDesconto));
         }
 
         double saldoAnterior = comprador.getSaldoTokens();
@@ -227,9 +231,10 @@ public class LivroCompraService {
                     vendedor = livro.getLote().getCliente();
                 }
                 final Cliente vendedorFinal = vendedor;
-
-                pedidoService.registrarPedido(comprador, livro);
+                
                 livro.setAprovado(false);
+                pedidoService.registrarPedido(comprador, livro);
+
                 livroRepository.save(livro);
                 sucesso.add(ItemResultadoDTO.builder()
                         .livroId(livro.getId()).titulo(titulo).preco(livro.getPrecoAprovado()).build());
