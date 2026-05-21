@@ -1,5 +1,6 @@
 package umc.exs.service.core.cliente;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -10,8 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import umc.exs.dto.user.EnderecoDTO;
-import umc.exs.mappers.EnderecoMapper;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.repository.usuario.EnderecoRepository;
@@ -21,107 +20,196 @@ import umc.exs.repository.usuario.EnderecoRepository;
 public class EnderecoService {
 
     private final EnderecoRepository enderecoRepository;
-    private final EnderecoMapper enderecoMapper;
 
     /**
-     * Salva novo ou reutiliza endereço existente.
-     * Busca por campos chave (CEP/rua etc).
-     * Retorna entidade salva/reutilizada.
-     * 
-     * @param dto dados endereço
+     * Reutiliza endereço existente
+     * ou cria novo.
      */
-    @SuppressWarnings("null")
     @Transactional
-    public Endereco saveOrReuseEndereco(EnderecoDTO dto) {
-        Optional<Endereco> enderecoReutilizado = enderecoRepository.findByValueFields(
-                dto.getCep(), dto.getRua(), dto.getNumero(), dto.getComplemento(),
-                dto.getBairro(), dto.getCidade(), dto.getEstado());
+    public Endereco saveOrReuseEndereco(Endereco dto) {
 
-        if (enderecoReutilizado.isPresent()) {
-            return enderecoReutilizado.get();
+        Optional<Endereco> enderecoExistente =
+                enderecoRepository.findByValueFields(
+                        dto.getCep(),
+                        dto.getRua(),
+                        dto.getNumero(),
+                        dto.getComplemento(),
+                        dto.getBairro(),
+                        dto.getCidade(),
+                        dto.getEstado()
+                );
+
+        if (enderecoExistente.isPresent()) {
+            return enderecoExistente.get();
         }
 
-        Endereco endereco = enderecoMapper.paraEntidade(dto);
-        return enderecoRepository.save(endereco);
+        return enderecoRepository.save(dto);
     }
 
     /**
-     * Remove endereço de cliente específico.
-     * Limpa bidirecional, deleta se sem clientes.
-     * 
-     * @param cliente    dono
-     * @param enderecoId ID
+     * Vincula endereço ao cliente.
      */
     @Transactional
-    public void deletarEnderecoDoCliente(Cliente cliente, Long enderecoId) {
-        Endereco enderecoParaRemover = null;
+    public void vincularNovoEndereco(
+            Cliente cliente,
+            Endereco dto) {
 
-        for (Endereco e : cliente.getEnderecos()) {
-            if (e.getId().equals(enderecoId)) {
-                enderecoParaRemover = e;
-                break;
-            }
-        }
-
-        if (enderecoParaRemover == null) {
-            throw new IllegalArgumentException("Endereço não encontrado ou não pertence ao cliente.");
-        }
-
-        cliente.getEnderecos().remove(enderecoParaRemover);
-        enderecoParaRemover.getClientes().remove(cliente);
-
-        if (enderecoParaRemover.getClientes().isEmpty()) {
-            enderecoRepository.delete(enderecoParaRemover);
-        }
-    }
-
-    @Transactional
-    public void vincularNovoEndereco(Cliente cliente, EnderecoDTO dto) {
         Endereco endereco = saveOrReuseEndereco(dto);
+
+        // evita duplicidade
         if (!cliente.getEnderecos().contains(endereco)) {
+
             cliente.getEnderecos().add(endereco);
+
             endereco.getClientes().add(cliente);
         }
     }
 
+    /**
+     * Remove vínculo cliente-endereço.
+     *
+     * Remove o endereço do banco
+     * somente se ele ficar órfão.
+     */
+    @Transactional
+    public void deletarEnderecoDoCliente(
+            Cliente cliente,
+            Long enderecoId) {
+
+        Endereco endereco =
+                enderecoRepository.findById(enderecoId)
+                        .orElseThrow(() ->
+                                new EntityNotFoundException(
+                                        "Endereço não encontrado"));
+
+        if (!cliente.getEnderecos().contains(endereco)) {
+
+            throw new IllegalArgumentException(
+                    "Endereço não pertence ao cliente.");
+        }
+
+        // remove vínculo bidirecional
+        cliente.getEnderecos().remove(endereco);
+
+        endereco.getClientes().remove(cliente);
+
+        // remove entidade órfã
+        if (endereco.getClientes().isEmpty()) {
+
+            enderecoRepository.delete(endereco);
+        }
+    }
+
+    /**
+     * Sincroniza os endereços do cliente.
+     *
+     * Regras:
+     * - remove vínculos ausentes
+     * - mantém existentes
+     * - adiciona novos
+     * - reutiliza endereços iguais
+     */
     @SuppressWarnings("null")
     @Transactional
-    public void sincronizarEnderecos(Cliente cliente, List<EnderecoDTO> dtos) {
-        if (dtos == null) return;
+    public void sincronizarEnderecos(
+            Cliente cliente,
+            List<Endereco> dtos) {
 
-        // 1. Identificar IDs que devem permanecer
-        Set<Long> idsManter = dtos.stream()
-                .map(EnderecoDTO::getId)
+        if (dtos == null) {
+            return;
+        }
+
+        /**
+         * IDs recebidos.
+         */
+        Set<Long> idsRecebidos = dtos.stream()
+                .map(Endereco::getId)
                 .filter(id -> id != null && id != 0)
                 .collect(Collectors.toSet());
 
-        // 2. Remover associações que não estão no DTO (Orfãos)
-        cliente.getEnderecos().removeIf(endereco -> {
-            if (!idsManter.contains(endereco.getId())) {
-                endereco.getClientes().remove(cliente);
-                return true;
-            }
-            return false;
-        });
+        /**
+         * Snapshot evita ConcurrentModificationException
+         */
+        Set<Endereco> enderecosAtuais =
+                new HashSet<>(cliente.getEnderecos());
 
-        // 3. Adicionar novos ou atualizar existentes
-        for (EnderecoDTO dto : dtos) {
-            if (dto.getId() != null && dto.getId() != 0) {
-                Endereco existente = enderecoRepository.findById(dto.getId())
-                        .orElseThrow(() -> new EntityNotFoundException("Endereço não encontrado"));
-                enderecoMapper.atualizarEntidadeDeDto(dto, existente);
+        /**
+         * 1. REMOVE VÍNCULOS AUSENTES
+         */
+        for (Endereco endereco : enderecosAtuais) {
+
+            if (endereco.getId() != null &&
+                    !idsRecebidos.contains(endereco.getId())) {
+
+                cliente.getEnderecos().remove(endereco);
+
+                endereco.getClientes().remove(cliente);
+
+                /**
+                 * Remove endereço órfão.
+                 */
+                if (endereco.getClientes().isEmpty()) {
+
+                    enderecoRepository.delete(endereco);
+                }
+            }
+        }
+
+        /**
+         * 2. PROCESSA DTOs
+         */
+        for (Endereco dto : dtos) {
+
+            /**
+             * ENDEREÇO EXISTENTE
+             */
+            if (dto.getId() != null &&
+                    dto.getId() != 0) {
+
+                Endereco existente =
+                        enderecoRepository.findById(dto.getId())
+                                .orElseThrow(() ->
+                                        new EntityNotFoundException(
+                                                "Endereço não encontrado"));
+
+                /**
+                 * Segurança:
+                 * cliente deve possuir vínculo.
+                 */
+                if (!existente.getClientes()
+                        .contains(cliente)) {
+
+                    throw new IllegalArgumentException(
+                            "Endereço ID "
+                                    + dto.getId()
+                                    + " não pertence ao cliente.");
+                }
+
+                /**
+                 * Atualização.
+                 *
+                 * IMPORTANTE:
+                 * Isso afeta TODOS os clientes
+                 * vinculados ao endereço.
+                 */
+
+                existente.setPais(dto.getPais());
+                existente.setCep(dto.getCep());
+                existente.setEstado(dto.getEstado());
+                existente.setCidade(dto.getCidade());
+                existente.setRua(dto.getRua());
+                existente.setBairro(dto.getBairro());
+                existente.setNumero(dto.getNumero());
+                existente.setComplemento(dto.getComplemento());
+                existente.setTipoResidencia(dto.getTipoResidencia());
+
             } else {
+
+                /**
+                 * NOVO ENDEREÇO
+                 */
                 vincularNovoEndereco(cliente, dto);
             }
         }
     }
-
 }
-
-/**
- * DESCRIÇÃO DO ARQUIVO:
- * Service gerencia endereços clientes (save/reuse/delete).
- * Reutiliza endereços duplicados por campos chave.
- * Transacional, usa EnderecoRepository/Mapper.
- * Bidirecional limpa corretamente M2M Cliente-Endereco.
- */

@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
-import umc.exs.dto.gamificacao.MeuPerfilGamificacaoDTO;
-import umc.exs.dto.gamificacao.RankingItemDTO;
-import umc.exs.dto.gamificacao.RankingPublicoDTO;
+import umc.exs.dto.response.gamificacao.MeuPerfilGameResponse;
+import umc.exs.dto.response.gamificacao.RankingDetalhadoResponse;
+import umc.exs.dto.response.gamificacao.RankingPublicResponse;
 import umc.exs.model.entidades.social.PontuacaoUsuario;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.NivelUsuario;
@@ -128,7 +128,7 @@ public class GamificacaoService {
         return pontuacaoRepository.findByClienteEmail(email).orElse(null);
     }
 
-    public MeuPerfilGamificacaoDTO obterMeuPerfil(String email) {
+    public MeuPerfilGameResponse obterMeuPerfil(String email) {
         PontuacaoUsuario pontuacao = buscarPontuacaoPorEmail(email);
 
         if (pontuacao == null) {
@@ -139,7 +139,7 @@ public class GamificacaoService {
         int xpProximo = calcularXpParaProximoNivel(nivel, pontuacao.getXpTotal());
         int posicao = calcularPosicaoRanking(pontuacao.getCliente().getId());
 
-        return new MeuPerfilGamificacaoDTO(
+        return new MeuPerfilGameResponse(
                 pontuacao.getCliente().getNome(),
                 pontuacao.getXpTotal(),
                 nivel.getDescricao(),
@@ -151,19 +151,19 @@ public class GamificacaoService {
                 pontuacao.getXpAvaliacoes());
     }
 
-    public List<RankingItemDTO> obterRankingTop5() {
+    public List<RankingDetalhadoResponse> obterRankingTop5() {
         // Correção de Wildcard: Usando tipo explícito em vez de List<?>
         List<PontuacaoUsuario> top = pontuacaoRepository
                 .findTopByOrderByXpTotalDesc(PageRequest.of(0, 5));
 
-        List<RankingItemDTO> ranking = new ArrayList<>();
+        List<RankingDetalhadoResponse> ranking = new ArrayList<>();
 
         for (int i = 0; i < top.size(); i++) {
             PontuacaoUsuario p = top.get(i);
             NivelUsuario nivel = p.getNivel();
             String nome = (p.getCliente() != null) ? p.getCliente().getNome() : "Desconhecido";
 
-            ranking.add(new RankingItemDTO(
+            ranking.add(new RankingDetalhadoResponse(
                     i + 1,
                     nome,
                     p.getXpTotal(),
@@ -185,7 +185,7 @@ public class GamificacaoService {
      * @param limite  máximo de posições (capped em 100)
      * @param periodo "mes", "ano" ou "todos"
      */
-    public List<RankingPublicoDTO> obterRankingPublico(int limite, String periodo) {
+    public List<RankingPublicResponse> obterRankingPublico(int limite, String periodo) {
         int cap = Math.min(Math.max(limite, 1), 100);
 
         LocalDateTime desde = null;
@@ -205,7 +205,7 @@ public class GamificacaoService {
             }
         }
 
-        List<RankingPublicoDTO> result = new ArrayList<>();
+        List<RankingPublicResponse> result = new ArrayList<>();
         for (int i = 0; i < top.size(); i++) {
             PontuacaoUsuario p = top.get(i);
             String nomeCompleto = (p.getCliente() != null && p.getCliente().getNome() != null)
@@ -220,7 +220,7 @@ public class GamificacaoService {
             int xpProximo = calcularXpParaProximoNivel(nivel, xpAtual);
             String fotoPerfil = (p.getCliente() != null) ? p.getCliente().getFotoPerfil() : null;
 
-            result.add(new RankingPublicoDTO(
+            result.add(new RankingPublicResponse(
                 i + 1, primeiroNome, inicialSobrenome,
                 nivel.getDescricao(), nivel.getBadge(), xpAtual, xpProximo, fotoPerfil
             ));
@@ -262,8 +262,8 @@ public class GamificacaoService {
                 .orElse((int) pontuacaoRepository.count() + 1);
     }
 
-    private MeuPerfilGamificacaoDTO criarPerfilVazio(String email) {
-        return new MeuPerfilGamificacaoDTO(
+    private MeuPerfilGameResponse criarPerfilVazio(String email) {
+        return new MeuPerfilGameResponse(
                 email, 0, NivelUsuario.INICIANTE.getDescricao(),
                 NivelUsuario.INICIANTE.getBadge(), NivelUsuario.BRONZE.getXpMinimo(),
                 (int) pontuacaoRepository.count() + 1, 0, 0, 0);

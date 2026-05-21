@@ -362,7 +362,7 @@ public class ClienteDTO {
 ```java
 @Mapper(componentModel = "spring")
 public interface ClienteMapper {
-    Cliente toEntity(SignupDTO dto);
+    Cliente toEntity(SignupRequest dto);
     ClienteDTO toDTO(Cliente cliente);
 }
 ```
@@ -408,7 +408,7 @@ public class ClienteService {
 | **Factory**   | PagamentoFactory         | Criação centralizada       |
 | **Builder**   | Lombok @Builder          | Construção flexível        |
 | **DAO**       | JpaRepository            | Abstração de dados         |
-| **DTO**       | ClienteDTO, SignupDTO    | Transferência de dados     |
+| **DTO**       | ClienteDTO, SignupRequest    | Transferência de dados     |
 | **Mapper**    | MapStruct                | Conversão automática       |
 | **Singleton** | Services Spring          | Uma única instância        |
 | **MVC**       | Controller/Service/Model | Separação de preocupações  |

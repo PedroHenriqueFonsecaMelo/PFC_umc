@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.dto.livro.AvaliacaoLivroDTO;
-import umc.exs.dto.shared.ComentarioRequestDTO;
+import umc.exs.dto.request.cliente.ComentarioRequest;
+import umc.exs.dto.request.livro.AvaliacaoLivroRequest;
 import umc.exs.model.entidades.livro.AvaliacaoLivro;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.usuario.Cliente;
@@ -131,7 +131,7 @@ public class AvaliacaoLivroController {
     @SuppressWarnings("null")
     @PostMapping("/salvar")
     public ResponseEntity<Map<String, Object>> salvarComentario(
-            @RequestBody ComentarioRequestDTO payload,
+            @RequestBody ComentarioRequest payload,
             Authentication auth) {
 
         if (auth == null || !auth.isAuthenticated()) {
@@ -204,7 +204,7 @@ public class AvaliacaoLivroController {
     @PostMapping("/legado")
     public ResponseEntity<Map<String, Object>> criarAvaliacao(
             @AuthenticationPrincipal UserDetails user,
-            @RequestBody AvaliacaoLivroDTO dto) {
+            @RequestBody AvaliacaoLivroRequest dto) {
 
         if (user == null) {
             return ResponseEntity.status(401).body(Map.of(ERRO, "Não autorizado."));

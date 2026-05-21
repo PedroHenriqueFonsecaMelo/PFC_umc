@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import umc.exs.dto.admin.ClienteListaDTO;
-import umc.exs.dto.admin.ClientePerfilDTO;
+import umc.exs.dto.response.cliente.ClienteListaResponse;
+import umc.exs.dto.response.cliente.ClientePerfilResponse;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.foundation.Pedido;
 import umc.exs.model.entidades.usuario.Cliente;
@@ -32,7 +32,7 @@ public class ClienteAdminService {
     private final SolicitacaoCancelamentoRepository cancelamentoRepository;
 
     @Transactional(readOnly = true)
-    public List<ClienteListaDTO> listarClientes() {
+    public List<ClienteListaResponse> listarClientes() {
         List<Cliente> clientes = clienteRepository.findAll();
 
         // Agregar stats de pedidos por comprador em uma única query
@@ -49,7 +49,7 @@ public class ClienteAdminService {
             long[] s = statsMap.getOrDefault(c.getId(), new long[]{ 0L, Double.doubleToLongBits(0.0) });
             long totalCompras = s[0];
             double totalGasto = Double.longBitsToDouble(s[1]);
-            return new ClienteListaDTO(
+            return new ClienteListaResponse(
                     c.getId(),
                     c.getNome(),
                     c.getEmail(),
@@ -64,7 +64,7 @@ public class ClienteAdminService {
     }
 
     @Transactional(readOnly = true)
-    public ClientePerfilDTO getPerfilCliente(Long clienteId) {
+    public ClientePerfilResponse getPerfilCliente(Long clienteId) {
         Cliente cliente = clienteRepository.findById(clienteId)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado: " + clienteId));
 
@@ -92,9 +92,9 @@ public class ClienteAdminService {
         long listaDesejos = listaDesejosRepository.findByClienteId(clienteId).size();
 
         // Últimas 20 compras
-        List<ClientePerfilDTO.PedidoResumoDTO> pedidosDTO = pedidos.stream()
+        List<ClientePerfilResponse.PedidoResumoDTO> pedidosDTO = pedidos.stream()
                 .limit(20)
-                .map(p -> new ClientePerfilDTO.PedidoResumoDTO(
+                .map(p -> new ClientePerfilResponse.PedidoResumoDTO(
                         p.getId(),
                         p.getTituloLivro(),
                         p.getAutorLivro(),
@@ -107,7 +107,7 @@ public class ClienteAdminService {
         // CPF mascarado
         String cpfMascarado = mascararCpf(cliente.getCpf());
 
-        return ClientePerfilDTO.builder()
+        return ClientePerfilResponse.builder()
                 .id(cliente.getId())
                 .nome(cliente.getNome())
                 .email(cliente.getEmail())

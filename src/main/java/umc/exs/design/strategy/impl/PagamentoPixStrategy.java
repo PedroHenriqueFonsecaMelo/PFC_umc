@@ -15,7 +15,7 @@ import com.mercadopago.resources.payment.Payment;
 
 import lombok.extern.slf4j.Slf4j;
 import umc.exs.design.strategy.PagamentoStrategy;
-import umc.exs.dto.compra.CompraTokensRequestDTO;
+import umc.exs.dto.request.compra.CompraTokensRequest;
 
 @Slf4j
 @Component
@@ -30,7 +30,7 @@ public class PagamentoPixStrategy implements PagamentoStrategy {
     private static final String QR_API = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=";
 
     @Override
-    public boolean processar(double valorBrl, CompraTokensRequestDTO dados) {
+    public boolean processar(double valorBrl, CompraTokensRequest dados) {
         if (accessToken != null && !accessToken.isBlank()
                 && !accessToken.equals("COLOQUE_SEU_TOKEN_AQUI")) {
             try {
@@ -45,7 +45,7 @@ public class PagamentoPixStrategy implements PagamentoStrategy {
         return processarSimulado(valorBrl, dados);
     }
 
-    private boolean processarMercadoPago(double valorBrl, CompraTokensRequestDTO dados) throws Exception {
+    private boolean processarMercadoPago(double valorBrl, CompraTokensRequest dados) throws Exception {
         MercadoPagoConfig.setAccessToken(accessToken);
 
         String emailPagador = dados.getEmailPagador();
@@ -75,7 +75,7 @@ public class PagamentoPixStrategy implements PagamentoStrategy {
         return true;
     }
 
-    private boolean processarSimulado(double valorBrl, CompraTokensRequestDTO dados) {
+    private boolean processarSimulado(double valorBrl, CompraTokensRequest dados) {
         String id = "SIM-" + UUID.randomUUID().toString().replace("-", "").substring(0, 16).toUpperCase();
 
         String payload = String.format(

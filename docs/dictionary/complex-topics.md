@@ -351,7 +351,7 @@ Interfaces com apenas um método abstrato. A base para expressões lambda.
 
 ```java
 // Function: Converter DTO para Entidade
-Function<SignupDTO, Cliente> toEntity = dto -> {
+Function<SignupRequest, Cliente> toEntity = dto -> {
     Cliente c = new Cliente();
     c.setNome(dto.getNome());
     c.setEmail(dto.getEmail());
@@ -414,11 +414,11 @@ código de negócio.
 
 ```java
 @Transactional
-public ClienteDTO salvarCliente(SignupDTO signupDTO) {
+public ClienteDTO salvarCliente(SignupRequest SignupRequest) {
     // Antes: Início de transação
-    validarDadosSignup(signupDTO);
-    Cliente cliente = clienteMapper.toEntity(signupDTO);
-    cliente.setSenha(passwordEncoder.encode(signupDTO.getSenha()));
+    validarDadosSignup(SignupRequest);
+    Cliente cliente = clienteMapper.toEntity(SignupRequest);
+    cliente.setSenha(passwordEncoder.encode(SignupRequest.getSenha()));
     Cliente salvo = clienteRepository.save(cliente);
     // Depois: Commit ou Rollback automático
     return clienteMapper.toDTO(salvo);
@@ -654,7 +654,7 @@ Framework para validar objetos usando anotações.
 ### Exemplo no Projeto
 
 ```java
-public class SignupDTO {
+public class SignupRequest {
     @NotBlank(message = "O CPF é obrigatório.")
     @Pattern(regexp = "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", message = "Formato: 000.000.000-00")
     private String cpf;
@@ -777,10 +777,10 @@ private Set<Cartao> cartoes;
 @Mapper(componentModel = "spring")
 public interface ClienteMapper {
     
-    // Converte SignupDTO para Entidade
+    // Converte SignupRequest para Entidade
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "senha", ignore = true)  // Será definida manualmente
-    Cliente toEntity(SignupDTO dto);
+    Cliente toEntity(SignupRequest dto);
 
     // Converte Entidade para DTO
     @Mapping(target = "senha", ignore = true)  // Nunca expõe senha

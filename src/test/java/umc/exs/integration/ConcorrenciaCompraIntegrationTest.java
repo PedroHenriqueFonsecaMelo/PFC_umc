@@ -2,6 +2,7 @@ package umc.exs.integration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.LocalDate;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -167,7 +168,7 @@ class ConcorrenciaCompraIntegrationTest {
         c.setNome("User " + email);
         c.setCpf(cpf);
         c.setSenha("admin123");
-        c.setDatanasc("1990-01-01");
+        c.setDatanasc(LocalDate.parse("1990-01-01"));
         c.getEnderecos().add(end);
         return clienteRepo.saveAndFlush(c);
     }

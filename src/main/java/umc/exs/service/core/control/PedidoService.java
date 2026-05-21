@@ -9,14 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.dto.compra.PedidoDTO;
 import umc.exs.model.entidades.foundation.Pedido;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.StatusEnvio;
-import umc.exs.model.enums.StatusSolicitacao;
 import umc.exs.repository.negocios.PedidoRepository;
-import umc.exs.repository.negocios.SolicitacaoCancelamentoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import org.springframework.beans.factory.annotation.Value;
 import umc.exs.service.email.EmailHtmlBuilder;
@@ -38,7 +35,6 @@ public class PedidoService {
 
         private final PedidoRepository pedidoRepository;
         private final ClienteRepository clienteRepository;
-        private final SolicitacaoCancelamentoRepository cancelamentoRepository;
         private final LogAuditoriaService logAuditoria;
         private final EmailService emailService;
         private final NotificacaoService notificacaoService;
@@ -81,53 +77,47 @@ public class PedidoService {
 
         /** Todos os pedidos do sistema (uso admin), mais recente primeiro. */
         @Transactional(readOnly = true)
-        public List<PedidoDTO> listarTodos() {
+        public List<Pedido> listarTodos() {
                 return pedidoRepository.findAll(
                                 org.springframework.data.domain.Sort.by(
                                                 org.springframework.data.domain.Sort.Direction.DESC, "dataCompra"))
                                 .stream()
-                                .map(this::toDTO)
                                 .toList();
         }
 
         /** Todos os pedidos do cliente, mais recente primeiro. */
         @Transactional(readOnly = true)
-        public List<PedidoDTO> listarPorCliente(Long compradorId) {
+        public List<Pedido> listarPorCliente(Long compradorId) {
                 return pedidoRepository
                                 .findByCompradorIdOrderByDataCompraDesc(compradorId)
                                 .stream()
-                                .map(this::toDTO)
                                 .toList();
         }
 
         /** Pedidos com status AGUARDANDO_ENVIO ou EM_TRANSITO (pendentes). */
         @Transactional(readOnly = true)
-        public List<PedidoDTO> listarPendentes(Long compradorId) {
+        public List<Pedido> listarPendentes(Long compradorId) {
                 return pedidoRepository
                                 .findByCompradorIdAndStatusEnvioNotInOrderByDataCompraDesc(
                                                 compradorId,
                                                 List.of(StatusEnvio.ENTREGUE, StatusEnvio.CANCELADO))
                                 .stream()
-                                .map(this::toDTO)
                                 .toList();
         }
 
         /** Pedido por ID, validando que pertence ao comprador. */
         @Transactional(readOnly = true)
-        public Optional<PedidoDTO> buscarPorIdEComprador(Long pedidoId, Long compradorId) {
+        public Optional<Pedido> buscarPorIdEComprador(Long pedidoId, Long compradorId) {
                 return pedidoRepository.findById(pedidoId)
-                                .filter(p -> p.getComprador() != null && compradorId.equals(p.getComprador().getId()))
-                                .map(this::toDTO);
-        }
+                                .filter(p -> p.getComprador() != null && compradorId.equals(p.getComprador().getId()));       }
 
         /** Pedidos com status ENTREGUE (concluídos). */
         @Transactional(readOnly = true)
-        public List<PedidoDTO> listarConcluidos(Long compradorId) {
+        public List<Pedido> listarConcluidos(Long compradorId) {
                 return pedidoRepository
                                 .findByCompradorIdAndStatusEnvioOrderByDataCompraDesc(
                                                 compradorId, StatusEnvio.ENTREGUE)
                                 .stream()
-                                .map(this::toDTO)
                                 .toList();
         }
 
@@ -137,7 +127,7 @@ public class PedidoService {
 
         @SuppressWarnings("null")
         @Transactional
-        public PedidoDTO atualizarStatus(Long pedidoId, StatusEnvio novoStatus, String codigoRastreio) {
+        public Pedido atualizarStatus(Long pedidoId, StatusEnvio novoStatus, String codigoRastreio) {
                 Pedido pedido = pedidoRepository.findById(pedidoId)
                                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado: " + pedidoId));
 
@@ -246,58 +236,7 @@ public class PedidoService {
                         }
                 }
 
-                return toDTO(salvo);
-        }
-
-        // ==========================================================
-        // MAPPER INTERNO
-        // ==========================================================
-
-        private PedidoDTO toDTO(Pedido p) {
-                Double saldoApos = null;
-                String enderecoFormatado = null;
-                boolean temCancelamentoPendente = cancelamentoRepository
-                                .existsByPedidoIdAndStatus(p.getId(), StatusSolicitacao.PENDENTE);
-
-                if (p.getComprador() != null) {
-                        if (p.getStatusEnvio() == StatusEnvio.CANCELADO) {
-                                saldoApos = p.getComprador().getSaldoTokens();
-                        }
-                        enderecoFormatado = p.getComprador().getEnderecos().stream()
-                                        .findFirst()
-                                        .map(e -> {
-                                                StringBuilder sb = new StringBuilder();
-                                                if (e.getRua()    != null) sb.append(e.getRua());
-                                                if (e.getNumero() != null) sb.append(", ").append(e.getNumero());
-                                                if (e.getComplemento() != null && !e.getComplemento().isBlank())
-                                                        sb.append(" - ").append(e.getComplemento());
-                                                if (e.getBairro() != null) sb.append(", ").append(e.getBairro());
-                                                if (e.getCidade() != null) sb.append(", ").append(e.getCidade());
-                                                if (e.getEstado() != null) sb.append(" - ").append(e.getEstado());
-                                                if (e.getCep()    != null) sb.append(" · CEP: ").append(e.getCep());
-                                                return sb.toString();
-                                        })
-                                        .orElse(null);
-                }
-
-                return PedidoDTO.builder()
-                                .id(p.getId())
-                                .livroId(p.getLivroId())
-                                .tituloLivro(p.getTituloLivro())
-                                .autorLivro(p.getAutorLivro())
-                                .isbnLivro(p.getIsbnLivro())
-                                .fotosUrls(p.getFotosUrls())
-                                .precoLivro(p.getPrecoLivro())
-                                .statusEnvio(p.getStatusEnvio())
-                                .statusEnvioDescricao(p.getStatusEnvio().getDescricao())
-                                .dataCompra(p.getDataCompra())
-                                .dataAtualizacaoStatus(p.getDataAtualizacaoStatus())
-                                .codigoRastreio(p.getCodigoRastreio())
-                                .compradorNome(p.getComprador() != null ? p.getComprador().getNome() : null)
-                                .compradorEmail(p.getComprador() != null ? p.getComprador().getEmail() : null)
-                                .compradorEndereco(enderecoFormatado)
-                                .saldoAposEstorno(saldoApos)
-                                .temCancelamentoPendente(temCancelamentoPendente)
-                                .build();
+                return salvo;
         }
 }
+

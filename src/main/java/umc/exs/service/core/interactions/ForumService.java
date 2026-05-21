@@ -10,8 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.dto.forum.NovaRespostaDTO;
-import umc.exs.dto.forum.NovoTopicoDTO;
+import umc.exs.dto.request.cliente.NovoTopicoRequest;
 import umc.exs.model.entidades.social.RespostaForum;
 import umc.exs.model.entidades.social.TopicoForum;
 import umc.exs.model.entidades.usuario.Cliente;
@@ -70,7 +69,7 @@ public class ForumService {
 
     @SuppressWarnings("null")
     @Transactional
-    public TopicoForum criarTopico(NovoTopicoDTO dto, Long autorId) {
+    public TopicoForum criarTopico(NovoTopicoRequest dto, Long autorId) {
         Cliente autor = clienteRepo.findById(autorId)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
 
@@ -85,14 +84,14 @@ public class ForumService {
 
     @SuppressWarnings("null")
     @Transactional
-    public RespostaForum criarResposta(Long topicoId, NovaRespostaDTO dto, Long autorId) {
+    public RespostaForum criarResposta(Long topicoId, String dto, Long autorId) {
         TopicoForum topico = topicoRepo.findById(topicoId)
                 .orElseThrow(() -> new RuntimeException("Tópico não encontrado."));
         Cliente autor = clienteRepo.findById(autorId)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
 
         RespostaForum resposta = new RespostaForum();
-        resposta.setConteudo(dto.getConteudo().trim());
+        resposta.setConteudo(dto.trim());
         resposta.setAutor(autor);
         resposta.setTopico(topico);
 

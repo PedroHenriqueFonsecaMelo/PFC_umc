@@ -15,20 +15,26 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import umc.exs.controller.api.interaction.LivroControllerApi;
-import umc.exs.dto.compra.carrinho.CarrinhoCompraRequestDTO;
-import umc.exs.dto.compra.carrinho.CarrinhoCompraResponseDTO;
+import umc.exs.dto.response.compras.CarrinhoCompraResponse;
+import umc.exs.dto.mapper.LivroMapper;
+import umc.exs.dto.request.compra.CarrinhoCompraRequest;
 import umc.exs.service.core.bussiness.LivroService;
+
 
 class LivroControllerApiUnitTest {
 
     private LivroService livroService;
+    private LivroMapper livroMapper;
     private LivroControllerApi controller;
+
     private UserDetails mockUser;
 
     @BeforeEach
     void setUp() {
         livroService = mock(LivroService.class);
-        controller = new LivroControllerApi(livroService);
+        livroMapper = mock(LivroMapper.class);
+        controller = new LivroControllerApi(livroService, livroMapper);
+
         mockUser = User.withUsername("test@example.com")
                 .password("pass")
                 .authorities("USER")
@@ -83,9 +89,9 @@ class LivroControllerApiUnitTest {
     @Test
     void comprarCarrinho_Sucesso_ComMultiplosLivros_RetornaResponseCompleto() {
         // Arrange
-        CarrinhoCompraRequestDTO request = new CarrinhoCompraRequestDTO();
+        CarrinhoCompraRequest request = new CarrinhoCompraRequest();
         request.setLivroIds(Arrays.asList(1L, 2L));
-        CarrinhoCompraResponseDTO mockResponse = CarrinhoCompraResponseDTO.builder()
+        CarrinhoCompraResponse mockResponse = CarrinhoCompraResponse.builder()
                 .totalSolicitados(2)
                 .totalComprados(2)
                 .totalGasto(25.0)
@@ -106,7 +112,7 @@ class LivroControllerApiUnitTest {
     @Test
     void comprarCarrinho_SemAuth_Retorna401() {
         // Arrange
-        CarrinhoCompraRequestDTO request = new CarrinhoCompraRequestDTO();
+        CarrinhoCompraRequest request = new CarrinhoCompraRequest();
         request.setLivroIds(List.of(1L));
 
         // Act
@@ -121,10 +127,10 @@ class LivroControllerApiUnitTest {
     @Test
     void comprarCarrinho_ServiceThrowsSaldoInsuficiente_RetornaBadRequest() {
         // Arrange
-        CarrinhoCompraRequestDTO request = new CarrinhoCompraRequestDTO();
+        CarrinhoCompraRequest request = new CarrinhoCompraRequest();
         request.setLivroIds(List.of(1L));
         doThrow(new RuntimeException("Saldo insuficiente. Necessário: T$ 50.00 | Disponível: T$ 20.00"))
-                .when(livroService).comprarCarrinho(anyString(), any(CarrinhoCompraRequestDTO.class));
+                .when(livroService).comprarCarrinho(anyString(), any(CarrinhoCompraRequest.class));
 
         // Act
         ResponseEntity<?> response = controller.comprarCarrinho(mockUser, request);
@@ -138,10 +144,10 @@ class LivroControllerApiUnitTest {
     @Test
     void comprarCarrinho_ListaVazia_ThrowsValidationButControllerHandles() {
         // Arrange (validation @Valid catches in real, unit focuses controller)
-        CarrinhoCompraRequestDTO request = new CarrinhoCompraRequestDTO();
+        CarrinhoCompraRequest request = new CarrinhoCompraRequest();
         request.setLivroIds(List.of()); // empty
         doThrow(new RuntimeException("O carrinho está vazio.")).when(livroService).comprarCarrinho(anyString(),
-                any(CarrinhoCompraRequestDTO.class));
+                any(CarrinhoCompraRequest.class));
 
         // Act & Assert (controller wraps)
         ResponseEntity<?> response = controller.comprarCarrinho(mockUser, request);

@@ -20,8 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import umc.exs.dto.forum.NovaRespostaDTO;
-import umc.exs.dto.forum.NovoTopicoDTO;
+import umc.exs.dto.request.cliente.NovoTopicoRequest;
 import umc.exs.model.entidades.social.TopicoForum;
 import umc.exs.model.enums.CategoriaForum;
 import umc.exs.repository.usuario.ClienteRepository;
@@ -54,7 +53,7 @@ public class ForumViewController {
         model.addAttribute("categoriaSelecionada", categoria);
         model.addAttribute("busca", busca != null ? busca : "");
         model.addAttribute("pagina", pagina);
-        model.addAttribute("novoTopico", new NovoTopicoDTO());
+        model.addAttribute("novoTopico", new NovoTopicoRequest());
 
         preencherDadosUsuario(user, model);
 
@@ -78,7 +77,6 @@ public class ForumViewController {
                 .anyMatch(a -> a.getAuthority().equals("ADMIN"));
 
         model.addAttribute("topico", topico);
-        model.addAttribute("novaResposta", new NovaRespostaDTO());
         model.addAttribute("respostasLiked", respostasLiked);
         model.addAttribute("isAdmin", isAdmin);
 
@@ -91,7 +89,7 @@ public class ForumViewController {
 
     @PostMapping("/topicos")
     public String criarTopico(
-            @Valid @ModelAttribute("novoTopico") NovoTopicoDTO dto,
+            @Valid @ModelAttribute("novoTopico") NovoTopicoRequest dto,
             BindingResult result,
             @AuthenticationPrincipal UserDetails user,
             @RequestParam(required = false) String busca,
@@ -124,7 +122,7 @@ public class ForumViewController {
     @PostMapping("/topicos/{id}/respostas")
     public String criarResposta(
             @PathVariable Long id,
-            @Valid @ModelAttribute("novaResposta") NovaRespostaDTO dto,
+            @RequestParam("conteudo") String conteudo,
             BindingResult result,
             @AuthenticationPrincipal UserDetails user,
             RedirectAttributes ra) {
@@ -138,7 +136,7 @@ public class ForumViewController {
         }
 
         Long clienteId = resolverClienteId(user);
-        forumService.criarResposta(id, dto, clienteId);
+        forumService.criarResposta(id, conteudo, clienteId);
         ra.addFlashAttribute("sucesso", "Resposta publicada!");
         return "redirect:/forum/topicos/" + id;
     }

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.dto.admin.DashboardMetricasDTO;
+import umc.exs.dto.response.admin.DashboardResponse;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.logic.VisitaSiteRepository;
 import umc.exs.repository.negocios.PedidoRepository;
@@ -34,7 +34,7 @@ public class DashboardService {
         private static final Locale PT_BR = new Locale("pt", "BR");
 
         @Transactional(readOnly = true)
-        public DashboardMetricasDTO getMetricas() {
+        public DashboardResponse getMetricas() {
 
                 // ── Cards ────────────────────────────────────────────────
                 long totalClientes   = clienteRepository.count();
@@ -89,7 +89,7 @@ public class DashboardService {
                         postagensMensais.add(postagensMap.getOrDefault(ym, 0L));
                 }
 
-                return DashboardMetricasDTO.builder()
+                return DashboardResponse.builder()
                                 .totalClientes(totalClientes)
                                 .totalLivros(totalLivros)
                                 .totalVisitas(totalVisitas)

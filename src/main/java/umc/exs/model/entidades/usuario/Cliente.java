@@ -1,5 +1,6 @@
 package umc.exs.model.entidades.usuario;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -32,7 +33,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import io.github.manoelcampos.dtogen.DTO;
-import umc.exs.handler.CpfConverter;
+import umc.exs.converter.LocalDateStringConverter;
+import umc.exs.converter.CpfConverter;
 import umc.exs.model.entidades.livro.AvaliacaoLivro;
 import umc.exs.model.enums.Genero;
 
@@ -58,8 +60,9 @@ public class Cliente {
     @Column(nullable = false)
     private String nome;
 
+    @Convert(converter = LocalDateStringConverter.class)
     @Column(nullable = false)
-    private String datanasc;
+    private LocalDate datanasc;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)

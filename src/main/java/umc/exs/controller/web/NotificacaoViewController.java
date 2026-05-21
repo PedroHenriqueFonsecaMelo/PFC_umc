@@ -6,9 +6,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import umc.exs.dto.admin.EmailDestinatarioDTO;
-import umc.exs.dto.admin.EmailDisparoDTO;
-import umc.exs.dto.admin.EmailHistoricoDTO;
+import umc.exs.dto.request.admin.EmailDisparoRequest;
+import umc.exs.dto.response.email.EmailDestinatarioResponse;
+import umc.exs.dto.response.email.EmailHistoricoResponse;
 import umc.exs.service.core.control.NotificacaoEmailService;
 
 import java.util.List;
@@ -23,13 +23,13 @@ public class NotificacaoViewController {
 
     @GetMapping
     public String pagina(Model model) {
-        model.addAttribute("emailDTO", new EmailDisparoDTO());
+        model.addAttribute("emailDTO", new EmailDisparoRequest());
         return "admin/notificacoes";
     }
 
     @GetMapping("/preview")
     @ResponseBody
-    public ResponseEntity<List<EmailDestinatarioDTO>> preview(
+    public ResponseEntity<List<EmailDestinatarioResponse>> preview(
             @RequestParam(defaultValue = "todos") String filtro,
             @RequestParam(defaultValue = "0") Integer limite) {
         return ResponseEntity.ok(notificacaoEmailService.filtrarDestinatarios(filtro, limite));
@@ -37,14 +37,14 @@ public class NotificacaoViewController {
 
     @PostMapping("/disparar")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> disparar(@RequestBody EmailDisparoDTO dto) {
+    public ResponseEntity<Map<String, String>> disparar(@RequestBody EmailDisparoRequest dto) {
         String mensagem = notificacaoEmailService.dispararOuAgendar(dto);
         return ResponseEntity.ok(Map.of("mensagem", mensagem));
     }
 
     @GetMapping("/historico")
     @ResponseBody
-    public ResponseEntity<List<EmailHistoricoDTO>> historico() {
+    public ResponseEntity<List<EmailHistoricoResponse>> historico() {
         return ResponseEntity.ok(notificacaoEmailService.listarHistorico());
     }
 }

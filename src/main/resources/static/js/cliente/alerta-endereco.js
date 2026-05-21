@@ -6,7 +6,7 @@
    ================================================================ */
 (function () {
 
-    var PERFIL_URL  = '/clientes/meu-perfil-json';
+    var PERFIL_URL  = '/api/clientes/meu-perfil-json';
     var DESTINO_URL = '/clientes/meu-perfil?tab=enderecos';
     /* Chave única por página — fechar em vitrine não oculta em vender */
     var SS_KEY = 'bib_ae_' + window.location.pathname.replace(/[^a-z0-9]/gi, '_');

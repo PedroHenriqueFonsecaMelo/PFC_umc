@@ -164,7 +164,8 @@ public class CarteiraService {
                         try {
                                 notificacaoService.criarNotificacaoDashboard(
                                                 cliente,
-                                                String.format("Recarga confirmada! T$ %.2f adicionados ao seu saldo via PIX.", valorPix),
+                                                String.format("Recarga confirmada! T$ %.2f adicionados ao seu saldo via PIX.",
+                                                                valorPix),
                                                 "/clientes/carteira");
                         } catch (Exception e) {
                                 log.error("Erro ao criar notificação de PIX: {}", e.getMessage());

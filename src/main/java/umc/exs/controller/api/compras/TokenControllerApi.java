@@ -18,7 +18,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import umc.exs.design.strategy.impl.PagamentoPixStrategy;
-import umc.exs.dto.compra.CompraTokensRequestDTO;
+import umc.exs.dto.request.compra.CompraTokensRequest;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.service.core.cliente.ClienteService;
@@ -40,9 +40,9 @@ public class TokenControllerApi {
     private String accessToken;
 
     @PostMapping("/comprar")
-    public ResponseEntity<CompraTokensRequestDTO> comprar(
+    public ResponseEntity<CompraTokensRequest> comprar(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody @Valid CompraTokensRequestDTO request) {
+            @RequestBody @Valid CompraTokensRequest request) {
 
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

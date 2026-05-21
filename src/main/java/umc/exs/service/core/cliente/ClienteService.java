@@ -16,14 +16,12 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.dto.auth.SignupDTO;
-import umc.exs.dto.user.CartaoDTO;
-import umc.exs.dto.user.ClienteDTO;
-import umc.exs.dto.user.ClienteUpdateDTO;
-import umc.exs.dto.user.EnderecoDTO;
+import umc.exs.dto.request.cliente.ClienteUpdateRequest;
+import umc.exs.dto.request.cliente.SignupRequest;
 import umc.exs.model.entidades.foundation.EmailVerificacao;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.repository.foundation.EmailVerificacaoRepository;
 import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
@@ -50,12 +48,12 @@ public class ClienteService {
     private String baseUrl;
 
     @Transactional
-    public ClienteDTO salvarCliente(SignupDTO signupDTO) {
-        validarNovoCliente(signupDTO);
-        ClienteDTO dto = domainService.cadastrarCliente(signupDTO);
-        auditoria.registrarLog("CADASTRO_USUARIO", dto.getId(), dto.getEmail(), "Cadastro inicial realizado.");
-        enviarEmailVerificacao(dto.getId(), dto.getNome(), dto.getEmail());
-        return dto;
+    public Cliente salvarCliente(SignupRequest SignupRequest) {
+        validarNovoCliente(SignupRequest);
+        Cliente cliente = domainService.cadastrarCliente(SignupRequest);
+        auditoria.registrarLog("CADASTRO_USUARIO", cliente.getId(), cliente.getEmail(), "Cadastro inicial realizado.");
+        enviarEmailVerificacao(cliente.getId(), cliente.getNome(), cliente.getEmail());
+        return cliente;
     }
 
     @SuppressWarnings("null")
@@ -87,13 +85,13 @@ public class ClienteService {
     }
 
     @Transactional
-    public ClienteDTO salvarClienteCompleto(SignupDTO signupDTO, EnderecoDTO enderecoDTO, CartaoDTO cartaoDTO) {
-        validarNovoCliente(signupDTO);
-        ClienteDTO dto = domainService.cadastrarClienteCompleto(signupDTO, enderecoDTO, cartaoDTO);
-        auditoria.registrarLog("CADASTRO_COMPLETO", dto.getId(), dto.getEmail(), "Cadastro completo realizado.");
-        return dto;
+    public Cliente salvarClienteCompleto(SignupRequest SignupRequest, Endereco endereco) {
+        validarNovoCliente(SignupRequest);
+        Cliente cliente = domainService.cadastrarClienteCompleto(SignupRequest, endereco);
+        auditoria.registrarLog("CADASTRO_COMPLETO", cliente.getId(), cliente.getEmail(),
+                "Cadastro completo realizado.");
+        return cliente;
     }
-
 
     @Transactional
     public String uploadFotoPerfil(@NonNull Long clienteId, MultipartFile foto) {
@@ -110,7 +108,7 @@ public class ClienteService {
     }
 
     @Transactional
-    public void atualizarDadosLogados(String email, ClienteUpdateDTO dto) {
+    public void atualizarDadosLogados(String email, ClienteUpdateRequest dto) {
         Cliente cliente = buscarEntidadePorEmail(email);
         operacaoService.atualizarCliente(cliente.getId(), dto);
     }
@@ -122,11 +120,11 @@ public class ClienteService {
     }
 
     @Transactional
-    public ClienteDTO adicionarTokens(Long clienteId, Double valor) {
-        ClienteDTO dto = domainService.adicionarTokens(clienteId, valor);
-        auditoria.registrarLog("RECARGA_TOKENS", clienteId, dto.getEmail(),
+    public Cliente adicionarTokens(Long clienteId, Double valor) {
+        Cliente cliente = domainService.adicionarTokens(clienteId, valor);
+        auditoria.registrarLog("RECARGA_TOKENS", clienteId, cliente.getEmail(),
                 String.format("Recarga de %.2f via PIX", valor));
-        return dto;
+        return cliente;
     }
 
     public Cliente buscarEntidadePorEmail(String email) {
@@ -168,16 +166,15 @@ public class ClienteService {
         log.info("Conta {} anonimizada.", id);
     }
 
-    public Optional<ClienteDTO> buscarClientePorEmail(String email) {
-        return repositoryService.encontrarPorEmail(email)
-                .map(domainService::converterParaDTO);
+    public Optional<Cliente> buscarClientePorEmail(String email) {
+        return repositoryService.encontrarPorEmail(email);
     }
 
-    public ClienteDTO buscarPorId(@NonNull Long id) {
-        return domainService.converterParaDTO(repositoryService.buscarPorId(id));
+    public Cliente buscarPorId(@NonNull Long id) {
+        return repositoryService.buscarPorId(id);
     }
 
-    public void validarNovoCliente(SignupDTO dto) {
+    public void validarNovoCliente(SignupRequest dto) {
 
         if (!Boolean.TRUE.equals(dto.getTermsAccepted()))
             throw new IllegalArgumentException("Aceite os termos.");
@@ -232,8 +229,8 @@ public class ClienteService {
     }
 
     @Transactional
-    public ClienteDTO autenticarCliente(String email, String senha) {
-        ClienteDTO resultado = domainService.processarAutenticacao(email, senha);
+    public Cliente autenticarCliente(String email, String senha) {
+        Cliente resultado = domainService.processarAutenticacao(email, senha);
         auditoria.registrarLog("LOGIN_SUCESSO", resultado.getId(), resultado.getEmail(), "Sessão iniciada.");
         return resultado;
     }
@@ -269,8 +266,8 @@ public class ClienteService {
     }
 
     @Transactional
-    public void adicionarEnderecoParaUsuarioLogado(String email, EnderecoDTO enderecoDTO) {
-        repositoryService.adicionarEnderecoParaUsuarioLogado(email, enderecoDTO);
+    public void adicionarEnderecoParaUsuarioLogado(String email, Endereco endereco) {
+        repositoryService.adicionarEnderecoParaUsuarioLogado(email, endereco);
     }
 
     @Transactional
@@ -285,7 +282,7 @@ public class ClienteService {
     }
 
     @Transactional
-    public void atualizarEnderecoDoCliente(@NonNull Long clienteId, @NonNull EnderecoDTO dto) {
+    public void atualizarEnderecoDoCliente(@NonNull Long clienteId, @NonNull Endereco dto) {
         repositoryService.atualizarEnderecoDoCliente(clienteId, dto);
     }
 

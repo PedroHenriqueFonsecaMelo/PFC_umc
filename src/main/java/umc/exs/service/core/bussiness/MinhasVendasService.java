@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -13,8 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.dto.livro.MinhaVendaDTO;
-import umc.exs.dto.livro.MinhaVendaDetalheDTO;
+import umc.exs.dto.response.admin.VendaResponse;
 import umc.exs.model.entidades.foundation.Pedido;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.enums.StatusVenda;
@@ -31,12 +29,12 @@ public class MinhasVendasService {
     private final ObjectMapper objectMapper;
 
     /** Lista todos os livros anunciados pelo cliente autenticado. */
-    public List<MinhaVendaDTO> listarMinhasVendas(String email) {
+    public List<VendaResponse.resumo> listarMinhasVendas(String email) {
         List<Livro> livros = livroRepository.findAllByVendedorEmail(email);
         log.info("[MinhasVendas] email={} → {} livro(s) encontrado(s)", email, livros.size());
         return livros.stream()
                 .map(this::toMinhaVendaDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -44,7 +42,7 @@ public class MinhasVendasService {
      * Valida que o livro pertence ao cliente autenticado — nunca expõe
      * dados de outro usuário (LGPD / segurança).
      */
-    public MinhaVendaDetalheDTO detalharMinhaVenda(Long livroId, String email) {
+    public VendaResponse detalharMinhaVenda(Long livroId, String email) {
         Livro livro = livroRepository.findByIdAndVendedorEmail(livroId, email)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Anúncio não encontrado ou não pertence ao seu perfil."));
@@ -54,7 +52,7 @@ public class MinhasVendasService {
                 ? pedidoRepository.findByLivroId(livroId)
                 : Optional.empty();
 
-        MinhaVendaDetalheDTO dto = new MinhaVendaDetalheDTO();
+        VendaResponse dto = new VendaResponse();
         dto.setId(livro.getId());
         dto.setTitulo(livro.getTitulo());
         dto.setAutor(livro.getAutor());
@@ -77,10 +75,10 @@ public class MinhasVendasService {
 
     // ── helpers ──────────────────────────────────────────────────
 
-    private MinhaVendaDTO toMinhaVendaDTO(Livro livro) {
+    private VendaResponse.resumo toMinhaVendaDTO(Livro livro) {
         List<String> fotos = parseFotos(livro.getFotosUrls());
         String primeiraFoto = fotos.isEmpty() ? null : fotos.get(0);
-        return new MinhaVendaDTO(
+        return new VendaResponse.resumo(
                 livro.getId(),
                 livro.getTitulo(),
                 livro.getAutor(),
@@ -116,7 +114,7 @@ public class MinhasVendasService {
             return Arrays.stream(fotosUrls.replaceAll("[\\[\\]\"]", "").split(","))
                     .map(String::trim)
                     .filter(s -> !s.isBlank())
-                    .collect(Collectors.toList());
+                    .toList();
         }
     }
 }

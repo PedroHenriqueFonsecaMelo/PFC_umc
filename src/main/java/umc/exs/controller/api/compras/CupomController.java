@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.dto.compra.cupom.CupomDTO;
+import umc.exs.dto.mapper.CupomMapper;
+import umc.exs.dto.response.compras.CupomResponse;
 import umc.exs.service.cupom.CupomService;
 
 @RestController
@@ -21,12 +22,13 @@ import umc.exs.service.cupom.CupomService;
 public class CupomController {
 
     private final CupomService cupomService;
+    private final CupomMapper mapper;
 
     /** Lista os cupons disponíveis do usuário logado. */
     @GetMapping("/meus")
-    public ResponseEntity<List<CupomDTO>> meusCupons(@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<List<CupomResponse>> meusCupons(@AuthenticationPrincipal UserDetails user) {
         if (user == null) return ResponseEntity.status(401).build();
-        return ResponseEntity.ok(cupomService.listarCuponsDisponiveis(user.getUsername()));
+        return ResponseEntity.ok(mapper.toResponseList(cupomService.listarCuponsDisponiveis(user.getUsername())));
     }
 
     /**

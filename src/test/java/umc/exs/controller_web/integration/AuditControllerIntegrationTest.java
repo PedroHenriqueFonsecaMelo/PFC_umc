@@ -22,7 +22,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import umc.exs.controller.web.AuditController;
-import umc.exs.dto.user.ClienteDTO;
+import umc.exs.model.entidades.usuario.Cliente;
+
 import umc.exs.model.entidades.logic.LogAuditoria;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
@@ -68,9 +69,11 @@ class AuditControllerIntegrationTest {
         @Test
         @WithMockUser(username = "user@example.com")
         void listarAuditoriaClienteRetornaView() throws Exception {
-                ClienteDTO clienteDTO = new ClienteDTO();
+Cliente clienteDTO = new Cliente();
                 clienteDTO.setId(10L);
                 clienteDTO.setEmail("user@example.com");
+
+
 
                 // Use matchers genéricos para evitar erros de tipagem/conversão de String
                 when(clienteService.buscarClientePorEmail(anyString()))

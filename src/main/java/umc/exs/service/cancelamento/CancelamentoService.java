@@ -8,12 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.dto.cancelamento.SolicitacaoCancelamentoRequestDTO;
-import umc.exs.dto.cancelamento.SolicitacaoCancelamentoResponseDTO;
+import umc.exs.dto.request.admin.CancelamentoRequest;
 import umc.exs.model.entidades.foundation.Pedido;
 import umc.exs.model.entidades.foundation.SolicitacaoCancelamento;
 import umc.exs.model.entidades.usuario.Cliente;
-import umc.exs.model.enums.MotivoCategoria;
 import umc.exs.model.enums.StatusEnvio;
 import umc.exs.model.enums.StatusSolicitacao;
 import umc.exs.repository.livro.LivroRepository;
@@ -43,8 +41,8 @@ public class CancelamentoService {
     // ──────────────────────────────────────────────────────────────────────
 
     @Transactional
-    public SolicitacaoCancelamentoResponseDTO solicitarCancelamento(
-            Long pedidoId, String emailCliente, SolicitacaoCancelamentoRequestDTO request) {
+    public SolicitacaoCancelamento solicitarCancelamento(
+            Long pedidoId, String emailCliente, CancelamentoRequest request) {
 
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado: " + pedidoId));
@@ -57,7 +55,7 @@ public class CancelamentoService {
         // Só pode solicitar para pedidos AGUARDANDO_ENVIO
         if (pedido.getStatusEnvio() != StatusEnvio.AGUARDANDO_ENVIO) {
             throw new IllegalStateException(
-                "Cancelamento só é possível enquanto o pedido está aguardando envio.");
+                    "Cancelamento só é possível enquanto o pedido está aguardando envio.");
         }
 
         // Impede duplicata
@@ -75,7 +73,7 @@ public class CancelamentoService {
 
         Cliente cliente = pedido.getComprador();
 
-        SolicitacaoCancelamento solicitacao = SolicitacaoCancelamento.builder()
+        SolicitacaoCancelamento sol = SolicitacaoCancelamento.builder()
                 .pedido(pedido)
                 .cliente(cliente)
                 .motivoCategoria(request.getMotivoCategoria())
@@ -83,7 +81,7 @@ public class CancelamentoService {
                 .status(StatusSolicitacao.PENDENTE)
                 .build();
 
-        cancelamentoRepository.save(solicitacao);
+        cancelamentoRepository.save(sol);
 
         logAuditoria.registrarLog("CANCELAMENTO_SOLICITADO", cliente.getId(), cliente.getEmail(),
                 "Pedido #" + pedidoId + " — " + request.getMotivoCategoria().getDescricao());
@@ -92,13 +90,14 @@ public class CancelamentoService {
         try {
             notificacaoService.criarNotificacaoDashboard(
                     cliente,
-                    String.format("Sua solicitação de cancelamento do pedido #%d foi recebida e está em análise.", pedidoId),
+                    String.format("Sua solicitação de cancelamento do pedido #%d foi recebida e está em análise.",
+                            pedidoId),
                     "/clientes/homepage?aba=pedidos");
         } catch (Exception e) {
             log.error("Erro ao notificar cliente sobre solicitação de cancelamento: {}", e.getMessage());
         }
 
-        return toDTO(solicitacao);
+        return sol;
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -106,15 +105,15 @@ public class CancelamentoService {
     // ──────────────────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
-    public List<SolicitacaoCancelamentoResponseDTO> listarTodas() {
+    public List<SolicitacaoCancelamento> listarTodas() {
         return cancelamentoRepository.findAllByOrderByDataSolicitacaoDesc()
-                .stream().map(this::toDTO).toList();
+                .stream().toList();
     }
 
     @Transactional(readOnly = true)
-    public List<SolicitacaoCancelamentoResponseDTO> listarPendentes() {
+    public List<SolicitacaoCancelamento> listarPendentes() {
         return cancelamentoRepository.findByStatusOrderByDataSolicitacaoDesc(StatusSolicitacao.PENDENTE)
-                .stream().map(this::toDTO).toList();
+                .stream().toList();
     }
 
     @Transactional(readOnly = true)
@@ -127,7 +126,7 @@ public class CancelamentoService {
     // ──────────────────────────────────────────────────────────────────────
 
     @Transactional
-    public SolicitacaoCancelamentoResponseDTO aprovarCancelamento(Long solicitacaoId, String comentarioAdmin) {
+    public SolicitacaoCancelamento aprovarCancelamento(Long solicitacaoId, String comentarioAdmin) {
         log.info("Admin aprovando cancelamento solicitacaoId={}", solicitacaoId);
         SolicitacaoCancelamento sol = buscarPendente(solicitacaoId);
 
@@ -186,7 +185,7 @@ public class CancelamentoService {
             log.error("Erro ao enviar e-mail de cancelamento aprovado: {}", e.getMessage());
         }
 
-        return toDTO(sol);
+        return sol;
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -194,7 +193,7 @@ public class CancelamentoService {
     // ──────────────────────────────────────────────────────────────────────
 
     @Transactional
-    public SolicitacaoCancelamentoResponseDTO recusarCancelamento(Long solicitacaoId, String comentarioAdmin) {
+    public SolicitacaoCancelamento recusarCancelamento(Long solicitacaoId, String comentarioAdmin) {
         log.info("Admin recusando cancelamento solicitacaoId={}", solicitacaoId);
         SolicitacaoCancelamento sol = buscarPendente(solicitacaoId);
 
@@ -234,7 +233,7 @@ public class CancelamentoService {
             log.error("Erro ao enviar e-mail de cancelamento recusado: {}", e.getMessage());
         }
 
-        return toDTO(sol);
+        return sol;
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -255,34 +254,8 @@ public class CancelamentoService {
     }
 
     @Transactional(readOnly = true)
-    public SolicitacaoCancelamentoResponseDTO buscarPorId(Long solicitacaoId) {
-        SolicitacaoCancelamento sol = cancelamentoRepository.findById(solicitacaoId)
+    public SolicitacaoCancelamento buscarPorId(Long solicitacaoId) {
+        return cancelamentoRepository.findById(solicitacaoId)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitação não encontrada: " + solicitacaoId));
-        return toDTO(sol);
-    }
-
-    private SolicitacaoCancelamentoResponseDTO toDTO(SolicitacaoCancelamento s) {
-        SolicitacaoCancelamentoResponseDTO dto = new SolicitacaoCancelamentoResponseDTO();
-        dto.setId(s.getId());
-        dto.setPedidoId(s.getPedido().getId());
-        dto.setTituloLivro(s.getPedido().getTituloLivro());
-        dto.setAutorLivro(s.getPedido().getAutorLivro());
-        dto.setFotosUrls(s.getPedido().getFotosUrls());
-        dto.setPrecoLivro(s.getPedido().getPrecoLivro());
-        dto.setIsbnLivro(s.getPedido().getIsbnLivro());
-        dto.setDataCompra(s.getPedido().getDataCompra());
-        dto.setSaldoAtualComprador(s.getCliente().getSaldoTokens());
-        dto.setClienteNome(s.getCliente().getNome());
-        dto.setClienteEmail(s.getCliente().getEmail());
-        dto.setMotivoCategoria(s.getMotivoCategoria());
-        dto.setMotivoCategoriaDescricao(s.getMotivoCategoria() != null
-                ? s.getMotivoCategoria().getDescricao() : null);
-        dto.setMotivoDescricao(s.getMotivoDescricao());
-        dto.setStatus(s.getStatus());
-        dto.setStatusDescricao(s.getStatus() != null ? s.getStatus().getDescricao() : null);
-        dto.setComentarioAdmin(s.getComentarioAdmin());
-        dto.setDataSolicitacao(s.getDataSolicitacao());
-        dto.setDataResposta(s.getDataResposta());
-        return dto;
     }
 }

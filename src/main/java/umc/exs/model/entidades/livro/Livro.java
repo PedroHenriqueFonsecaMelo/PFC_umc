@@ -20,7 +20,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import io.github.manoelcampos.dtogen.DTO;
-import umc.exs.dto.livro.LivroExibicaoDTO;
+import umc.exs.dto.response.compras.LivroExibicaoResponse;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.EstadoLivro;
@@ -100,16 +100,4 @@ public class Livro {
     @JoinColumn(name = "obra_id")
     @JsonIgnore
     private Obra obra;
-
-    public LivroExibicaoDTO paraDTO() {
-        String primeiraFoto = "";
-        try {
-            if (fotosUrls != null && fotosUrls.contains("\"")) {
-                primeiraFoto = fotosUrls.split("\"")[1];
-            }
-        } catch (Exception e) {
-            primeiraFoto = "";
-        }
-        return new LivroExibicaoDTO(id, titulo, autor, isbn, primeiraFoto, estadoAprovado, precoAprovado);
-    }
 }

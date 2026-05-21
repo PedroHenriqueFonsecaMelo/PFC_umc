@@ -17,12 +17,12 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import umc.exs.repository.livro.LivroRepository;
-import umc.exs.dto.compra.carrinho.CarrinhoCompraRequestDTO;
-import umc.exs.dto.compra.carrinho.CarrinhoCompraResponseDTO;
-import umc.exs.dto.compra.lote.LoteRequestDTO;
-import umc.exs.dto.livro.LivroDTO;
-import umc.exs.dto.livro.LivroRequestDTO;
+import umc.exs.dto.mapper.LivroMapper;
+import umc.exs.dto.request.compra.CarrinhoCompraRequest;
+import umc.exs.dto.request.compra.LoteRequest;
+import umc.exs.dto.request.livro.LivroRequest;
+import umc.exs.dto.response.compras.CarrinhoCompraResponse;
+import umc.exs.dto.response.compras.LivroExibicaoResponse;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.service.core.bussiness.LivroService;
 
@@ -32,6 +32,7 @@ import umc.exs.service.core.bussiness.LivroService;
 public class LivroControllerApi {
 
     private final LivroService livroService;
+    private final LivroMapper livroMapper;
 
     private static final String MSG_USUARIO_NAO_LOGADO = "Usuário precisa estar logado.";
 
@@ -40,11 +41,15 @@ public class LivroControllerApi {
      * Suporta filtro opcional para promoções.
      */
     @GetMapping("/todos")
-    public ResponseEntity<List<LivroDTO>> listarTodos(@RequestParam(required = false) Boolean emPromocao) {
+    public ResponseEntity<List<LivroExibicaoResponse>> listarTodos(@RequestParam(required = false) Boolean emPromocao) {
         if (Boolean.TRUE.equals(emPromocao)) {
-            return ResponseEntity.ok(livroService.listarPromocoesAtivas());
+            return ResponseEntity.ok(livroService.listarPromocoesAtivas().stream()
+                    .map(livroMapper::toResponse)
+                    .toList());
         }
-        return ResponseEntity.ok(livroService.listarLivrosAprovados());
+        return ResponseEntity.ok(livroService.listarLivrosAprovados().stream()
+                .map(livroMapper::toResponse)
+                .toList());
     }
 
     /**
@@ -52,24 +57,24 @@ public class LivroControllerApi {
      * Parâmetros: page (default 0), size (default 20), emPromocao (opcional).
      */
     @GetMapping("/vitrine")
-    public ResponseEntity<Page<LivroDTO>> listarVitrine(
+    public ResponseEntity<Page<LivroExibicaoResponse>> listarVitrine(
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false)    Boolean emPromocao) {
 
         var pageable = PageRequest.of(page, Math.min(size, 50), Sort.by(Sort.Direction.DESC, "id"));
         if (Boolean.TRUE.equals(emPromocao)) {
-            return ResponseEntity.ok(livroService.listarPromocoesAtivasPaginado(pageable));
+            return ResponseEntity.ok(livroService.listarPromocoesAtivasPaginado(pageable).map(livroMapper::toResponse));
         }
-        return ResponseEntity.ok(livroService.listarLivrosAprovadosPaginado(pageable));
+        return ResponseEntity.ok(livroService.listarLivrosAprovadosPaginado(pageable).map(livroMapper::toResponse));
     }
 
     /**
      * Busca um livro específico por ID (Endpoint Público).
      */
     @GetMapping("/{id}")
-    public ResponseEntity<LivroDTO> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(livroService.buscarPorIdAtivo(id));
+    public ResponseEntity<LivroExibicaoResponse> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(livroMapper.toResponse(livroService.buscarPorIdAtivo(id)));
     }
 
     /**
@@ -78,7 +83,7 @@ public class LivroControllerApi {
     @PostMapping(value = "/lotes/vender", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> criarLoteVenda(
             @AuthenticationPrincipal UserDetails user,
-            @RequestPart("loteDados") LoteRequestDTO loteDados,
+            @RequestPart("loteDados") LoteRequest loteDados,
             @RequestPart(value = "fotos", required = false) List<MultipartFile> fotos) {
 
         if (user == null)
@@ -102,15 +107,14 @@ public class LivroControllerApi {
     @PostMapping(value = "/vender", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> criarAnuncio(
             @AuthenticationPrincipal UserDetails user,
-            @RequestPart("dados") LivroRequestDTO dados,
+            @RequestPart("dados") LivroRequest dados,
             @RequestPart("foto") MultipartFile foto) {
 
         if (user == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MSG_USUARIO_NAO_LOGADO);
 
         try {
-            LivroDTO anuncio = livroService.cadastrarVenda(user.getUsername(), dados, foto);
-            return ResponseEntity.ok(anuncio);
+            return ResponseEntity.ok(livroMapper.toResponse(livroService.cadastrarVenda(user.getUsername(), dados, foto)));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro ao criar anúncio: " + e.getMessage());
         }
@@ -143,13 +147,13 @@ public class LivroControllerApi {
     @PostMapping("/carrinho/comprar")
     public ResponseEntity<Object> comprarCarrinho(
             @AuthenticationPrincipal UserDetails user,
-            @Valid @RequestBody CarrinhoCompraRequestDTO request) {
+            @Valid @RequestBody CarrinhoCompraRequest request) {
 
         if (user == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MSG_USUARIO_NAO_LOGADO);
 
         try {
-            CarrinhoCompraResponseDTO resultado = livroService.comprarCarrinho(user.getUsername(), request);
+            CarrinhoCompraResponse resultado = livroService.comprarCarrinho(user.getUsername(), request);
             return ResponseEntity.ok(resultado);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro ao processar o carrinho: " + e.getMessage());
@@ -169,8 +173,7 @@ public class LivroControllerApi {
 
         try {
             // Apenas busca e retorna os dados, sem salvar nada ainda
-            LivroDTO livro = livroService.cadastrarPorIsbn(isbn);
-            return ResponseEntity.ok(livro);
+            return ResponseEntity.ok(livroMapper.toResponse(livroService.cadastrarPorIsbn(isbn)));
         } catch (jakarta.persistence.EntityNotFoundException e) {
             // Google Books e OpenLibrary indisponíveis ou ISBN não encontrado em nenhuma delas
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

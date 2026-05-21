@@ -12,10 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.dto.admin.AdminAprovacaoDTO;
-import umc.exs.dto.admin.LivroAdminRequest;
-import umc.exs.dto.livro.LivroDTO;
-import umc.exs.mappers.LivroMapper;
+import umc.exs.dto.request.admin.AdminAprovacaoRequest;
+import umc.exs.dto.request.admin.LivroAdminRequest;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.usuario.Cliente;
@@ -23,6 +21,7 @@ import umc.exs.model.enums.EstadoLivro;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.negocios.LoteRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.api.ExternApi;
 import umc.exs.service.core.control.ListaDesejosService;
 import umc.exs.service.email.EmailHtmlBuilder;
 import umc.exs.service.email.EmailService;
@@ -44,43 +43,38 @@ public class LivroAdminService {
     private final ListaDesejosService listaDesejosService;
     private final GamificacaoService gamificacaoService;
     private final NotificacaoService notificacaoService;
-    private final GoogleBooksService googleBooksService;
-
-    private final LivroMapper livroMapper;
+    private final ExternApi googleBooksService;
 
     private static final double TOKEN_REWARD = 10.0;
     private String message = "Livro não encontrado";
 
     // ========================= LISTAGENS =========================
 
-    public List<LivroDTO> listarLivrosPendentes() {
-        List<Livro> livros = livroRepository.findByAprovadoFalse();
-        return converterLista(livros);
+    public List<Livro> listarLivrosPendentes() {
+        return livroRepository.findByAprovadoFalse();
     }
 
-    public List<LivroDTO> listarLivrosAprovados() {
-        List<Livro> livros = livroRepository.findByAprovadoTrue();
-        return converterLista(livros);
+    public List<Livro> listarLivrosAprovados() {
+        return livroRepository.findByAprovadoTrue();
     }
 
-    public Page<LivroDTO> listarLivrosAprovadosPaginado(Pageable pageable) {
-        return livroRepository.findByAprovadoTrue(pageable).map(livroMapper::paraDTO);
+    public Page<Livro> listarLivrosAprovadosPaginado(Pageable pageable) {
+        return livroRepository.findByAprovadoTrue(pageable);
     }
 
-    public Page<LivroDTO> listarPromocoesAtivasPaginado(Pageable pageable) {
-        return livroRepository.findPromocoesAtivasPaginado(LocalDateTime.now(), pageable).map(livroMapper::paraDTO);
+    public Page<Livro> listarPromocoesAtivasPaginado(Pageable pageable) {
+        return livroRepository.findPromocoesAtivasPaginado(LocalDateTime.now(), pageable);
     }
 
-    public List<LivroDTO> listarLivrosPorLote(Long loteId) {
-        List<Livro> livros = livroRepository.findByLoteId(loteId);
-        return converterLista(livros);
+    public List<Livro> listarLivrosPorLote(Long loteId) {
+        return livroRepository.findByLoteId(loteId);
     }
 
     // ========================= APROVAÇÃO =========================
 
     @SuppressWarnings("null")
     @Transactional
-    public LivroDTO aprovarLivro(Long livroId, Long adminId, AdminAprovacaoDTO dto) {
+    public Livro aprovarLivro(Long livroId, Long adminId, AdminAprovacaoRequest dto) {
 
         Livro anuncio = livroRepository.findById(livroId)
                 .orElseThrow(() -> new RuntimeException(message));
@@ -97,7 +91,8 @@ public class LivroAdminService {
         if (anuncio.getGenero() == null || anuncio.getGenero().isBlank()) {
             try {
                 String genero = googleBooksService.buscarGeneroPorIsbn(anuncio.getIsbn());
-                if (genero != null) anuncio.setGenero(genero);
+                if (genero != null)
+                    anuncio.setGenero(genero);
             } catch (Exception e) {
                 log.warn("Não foi possível buscar gênero para ISBN {}: {}", anuncio.getIsbn(), e.getMessage());
             }
@@ -181,7 +176,7 @@ public class LivroAdminService {
             }
         }
 
-        return livroMapper.paraDTO(saved);
+        return saved;
     }
 
     // ========================= REJEIÇÃO =========================
@@ -251,7 +246,7 @@ public class LivroAdminService {
 
     @SuppressWarnings("null")
     @Transactional
-    public LivroDTO adicionarLivroAdmin(LivroAdminRequest req) {
+    public Livro adicionarLivroAdmin(LivroAdminRequest req) {
 
         // ===== buscar vendedor =====
         Cliente vendedor = null;
@@ -297,7 +292,8 @@ public class LivroAdminService {
         } else if (livro.getIsbn() != null) {
             try {
                 String genero = googleBooksService.buscarGeneroPorIsbn(livro.getIsbn());
-                if (genero != null) livro.setGenero(genero);
+                if (genero != null)
+                    livro.setGenero(genero);
             } catch (Exception e) {
                 log.warn("Não foi possível buscar gênero: {}", e.getMessage());
             }
@@ -305,11 +301,11 @@ public class LivroAdminService {
 
         Livro salvo = livroRepository.save(livro);
 
-        return livroMapper.paraDTO(salvo);
+        return salvo;
     }
 
     @Transactional
-    public LivroDTO editarLivroAdmin(@NonNull Long id, LivroAdminRequest req) {
+    public Livro editarLivroAdmin(@NonNull Long id, LivroAdminRequest req) {
 
         Livro livro = livroRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
@@ -365,23 +361,11 @@ public class LivroAdminService {
             }
         }
 
-        return livroMapper.paraDTO(salvo);
+        return salvo;
     }
 
     @Transactional
     public void deletarLivroAdmin(@NonNull Long id) {
         livroRepository.deleteById(id);
-    }
-
-    // ========================= CONVERSÃO =========================
-
-    private List<LivroDTO> converterLista(List<Livro> livros) {
-        List<LivroDTO> lista = new ArrayList<>();
-
-        for (Livro livro : livros) {
-            lista.add(livroMapper.paraDTO(livro));
-        }
-
-        return lista;
     }
 }

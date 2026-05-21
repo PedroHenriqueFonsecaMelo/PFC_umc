@@ -10,7 +10,8 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
 import umc.exs.controller.web.AuditController;
-import umc.exs.dto.user.ClienteDTO;
+import umc.exs.model.entidades.usuario.Cliente;
+
 import umc.exs.model.entidades.logic.LogAuditoria;
 import umc.exs.service.core.cliente.ClienteService;
 import umc.exs.service.log.LogAuditoriaService;
@@ -43,9 +44,10 @@ class AuditControllerUnitTest {
     @Test
     void deveRetornarLogsJsonQuandoPrincipalValido() {
         Principal principal = () -> "user@example.com";
-        ClienteDTO clienteDTO = new ClienteDTO();
+        Cliente clienteDTO = new Cliente();
         clienteDTO.setId(10L);
         clienteDTO.setEmail("user@example.com");
+
 
         List<LogAuditoria> logs = List.of(new LogAuditoria());
         when(clienteService.buscarClientePorEmail("user@example.com")).thenReturn(Optional.of(clienteDTO));

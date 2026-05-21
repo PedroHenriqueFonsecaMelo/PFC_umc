@@ -1,10 +1,10 @@
 package umc.exs.design.strategy;
 
-import umc.exs.dto.compra.CompraTokensRequestDTO;
+import umc.exs.dto.request.compra.CompraTokensRequest;
 
 public interface PagamentoStrategy {
 
-    boolean processar(double valor, CompraTokensRequestDTO dados);
+    boolean processar(double valor, CompraTokensRequest dados);
 
     String getTipoPagamento();
 }

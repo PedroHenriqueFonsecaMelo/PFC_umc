@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.dto.gamificacao.RankingPublicoDTO;
+import umc.exs.dto.response.gamificacao.RankingPublicResponse;
 import umc.exs.service.gamificacao.GamificacaoService;
 
 /**
@@ -33,7 +33,7 @@ public class RankingController {
      * @param periodo "mes", "ano" ou "todos" (padrão "todos")
      */
     @GetMapping("/top")
-    public ResponseEntity<List<RankingPublicoDTO>> top(
+    public ResponseEntity<List<RankingPublicResponse>> top(
             @RequestParam(defaultValue = "100") int limite,
             @RequestParam(defaultValue = "todos") String periodo) {
 

@@ -10,15 +10,11 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.dto.auth.SignupDTO;
-import umc.exs.dto.user.CartaoDTO;
-import umc.exs.dto.user.ClienteDTO;
-import umc.exs.dto.user.ClienteUpdateDTO;
-import umc.exs.dto.user.EnderecoDTO;
-import umc.exs.mappers.ClienteMapper;
+import umc.exs.dto.mapper.ClienteMapper;
+import umc.exs.dto.request.cliente.ClienteUpdateRequest;
+import umc.exs.dto.request.cliente.SignupRequest;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.logic.RecuperacaoSenha;
-import umc.exs.model.entidades.usuario.Cartao;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.repository.usuario.RecuperacaoSenhaRepository;
@@ -34,40 +30,39 @@ public class ClienteDomainService {
 
     private final ClienteRepositoryService repositoryService;
     private final EnderecoService enderecoService;
-    private final CartaoService cartaoService;
     private final CarteiraService carteiraService;
     private final ClienteMapper clienteMapper;
+
     private final PasswordEncoder passwordEncoder;
     private final SenhaService senhaService;
     private final RecuperacaoSenhaRepository tokenRepository;
 
     @Transactional
-    public ClienteDTO cadastrarCliente(SignupDTO signupDTO) {
-        Cliente cliente = clienteMapper.paraEntidade(signupDTO);
-        cliente.setSenha(passwordEncoder.encode(signupDTO.getSenha()));
+    public Cliente cadastrarCliente(SignupRequest SignupRequest) {
+
+        Cliente cliente = clienteMapper.paraEntidade(SignupRequest);
+        cliente.setSenha(passwordEncoder.encode(SignupRequest.getSenha()));
         cliente.setSaldoTokens(0.0);
-        return clienteMapper.paraDTO(repositoryService.salvar(cliente));
+        return repositoryService.salvar(cliente);
     }
 
     @Transactional
-    public ClienteDTO cadastrarClienteCompleto(SignupDTO signupDTO, EnderecoDTO enderecoDTO, CartaoDTO cartaoDTO) {
-        Cliente cliente = clienteMapper.paraEntidade(signupDTO);
-        cliente.setSenha(passwordEncoder.encode(signupDTO.getSenha()));
+    public Cliente cadastrarClienteCompleto(SignupRequest SignupRequest, Endereco enderecoDTO) {
+
+        Cliente cliente = clienteMapper.paraEntidade(SignupRequest);
+        cliente.setSenha(passwordEncoder.encode(SignupRequest.getSenha()));
         cliente.setSaldoTokens(0.0);
 
         Endereco endereco = enderecoService.saveOrReuseEndereco(enderecoDTO);
         cliente.getEnderecos().add(endereco);
         endereco.getClientes().add(cliente);
 
-        Cartao cartao = cartaoService.saveOrReuseCartao(cartaoDTO);
-        cliente.getCartoes().add(cartao);
-        cartao.getClientes().add(cliente);
-
-        return clienteMapper.paraDTO(repositoryService.salvar(cliente));
+        return repositoryService.salvar(cliente);
     }
 
     @Transactional
-    public ClienteDTO atualizarDados(@NonNull Long id, ClienteUpdateDTO dto) {
+    public Cliente atualizarDados(@NonNull Long id, ClienteUpdateRequest dto) {
+
         Cliente cliente = repositoryService.buscarPorId(id);
 
         cliente.setNome(FieldValidation.sanitize(dto.getNome()));
@@ -79,9 +74,8 @@ public class ClienteDomainService {
         }
 
         enderecoService.sincronizarEnderecos(cliente, dto.getEnderecos());
-        // cartaoService.sincronizarCartoes(cliente, dto.getCartoes()); // cartões removidos da UI
 
-        return clienteMapper.paraDTO(repositoryService.salvar(cliente));
+        return repositoryService.salvar(cliente);
     }
 
     @Transactional
@@ -96,7 +90,8 @@ public class ClienteDomainService {
     }
 
     @Transactional
-    public ClienteDTO processarAutenticacao(String email, String senha) {
+    public Cliente processarAutenticacao(String email, String senha) {
+
         Cliente cliente = repositoryService.encontrarPorEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("E-mail ou senha inválidos."));
 
@@ -119,11 +114,12 @@ public class ClienteDomainService {
         }
 
         repositoryService.resetarTentativasLogin(cliente);
-        return clienteMapper.paraDTO(cliente);
+        return cliente;
     }
 
     @Transactional
-    public ClienteDTO adicionarTokens(@NonNull Long clienteId, Double valor) {
+    public Cliente adicionarTokens(@NonNull Long clienteId, Double valor) {
+
         Cliente cliente = repositoryService.buscarPorId(clienteId);
 
         if (valor <= 0) {
@@ -135,7 +131,7 @@ public class ClienteDomainService {
 
         carteiraService.adicionarTokens(cliente, valor, "PIX", null);
 
-        return clienteMapper.paraDTO(repositoryService.salvar(cliente));
+        return repositoryService.salvar(cliente);
     }
 
     @Transactional
@@ -160,7 +156,7 @@ public class ClienteDomainService {
         log.info("Senha redefinida com sucesso para: {}", cliente.getEmail());
         return cliente;
     }
-    
+
     @Transactional
     public void alterarSenhaComVerificacao(String email, String senhaAtual, String novaSenha) {
         Cliente cliente = repositoryService.buscarPorEmailOuFalhar(email);
@@ -191,10 +187,6 @@ public class ClienteDomainService {
 
     public List<Transacao> listarHistoricoTransacoes(Cliente cliente) {
         return carteiraService.listarHistoricoPorCliente(cliente.getId());
-    }
-
-    public ClienteDTO converterParaDTO(Cliente cliente) {
-        return clienteMapper.paraDTO(cliente);
     }
 
     public boolean validarToken(String token) {

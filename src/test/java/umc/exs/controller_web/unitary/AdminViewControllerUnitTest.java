@@ -10,7 +10,7 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
 import umc.exs.controller.web.AdminViewController;
-import umc.exs.dto.auth.LoginDTO;
+import umc.exs.dto.request.cliente.LoginRequest;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
 import umc.exs.service.log.LogAuditoriaService;
@@ -56,14 +56,14 @@ class AdminViewControllerUnitTest {
         when(passwordEncoder.matches("senha", "encoded-password")).thenReturn(true);
         when(jwtUtil.generateToken("admin@example.com")).thenReturn("token-value");
 
-        LoginDTO loginDTO = new LoginDTO();
-        loginDTO.setEmail("admin@example.com");
-        loginDTO.setSenha("senha");
+        LoginRequest LoginRequest = new LoginRequest();
+        LoginRequest.setEmail("admin@example.com");
+        LoginRequest.setSenha("senha");
 
         Model model = new ExtendedModelMap();
         HttpServletResponse response = mock(HttpServletResponse.class);
 
-        String view = controller.processLogin(loginDTO, "admin@example.com", "senha", model, response);
+        String view = controller.processLogin(LoginRequest, "admin@example.com", "senha", model, response);
 
         assertEquals("redirect:/admin/painel", view);
         verify(jwtUtil).addTokenCookie(response, "token-value");
@@ -80,11 +80,11 @@ class AdminViewControllerUnitTest {
         when(userDetailsService.loadUserByUsername("admin@example.com")).thenReturn(admin);
         when(passwordEncoder.matches("senhaErrada", "encoded-password")).thenReturn(false);
 
-        LoginDTO loginDTO = new LoginDTO();
+        LoginRequest LoginRequest = new LoginRequest();
         Model model = new ExtendedModelMap();
         HttpServletResponse response = mock(HttpServletResponse.class);
 
-        String view = controller.processLogin(loginDTO, "admin@example.com", "senhaErrada", model, response);
+        String view = controller.processLogin(LoginRequest, "admin@example.com", "senhaErrada", model, response);
 
         assertEquals("admin/admin_login", view);
         assertEquals("E-mail ou senha inválidos.", model.asMap().get("erro"));

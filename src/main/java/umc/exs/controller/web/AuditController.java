@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import umc.exs.dto.user.ClienteDTO;
 import umc.exs.model.entidades.logic.LogAuditoria;
+import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.service.core.cliente.ClienteService;
 import umc.exs.service.log.LogAuditoriaService;
 
@@ -39,7 +39,7 @@ public class AuditController {
         String email = principal.getName();
 
         Long clienteId = clienteService.buscarClientePorEmail(email)
-                .map(ClienteDTO::getId)
+                .map(Cliente::getId)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
 
         List<LogAuditoria> logs = logAuditoriaService.buscarLogsDoCliente(clienteId);
@@ -67,7 +67,7 @@ public class AuditController {
         String email = principal.getName();
 
         Long clienteId = clienteService.buscarClientePorEmail(email)
-                .map(ClienteDTO::getId)
+                .map(Cliente::getId)
                 .orElse(0L);
 
         return logAuditoriaService.buscarLogsDoCliente(clienteId);

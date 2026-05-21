@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import umc.exs.dto.livro.AvaliacaoLivroDTO;
-import umc.exs.dto.shared.ComentarioRequestDTO;
+import umc.exs.dto.request.cliente.ComentarioRequest;
+import umc.exs.dto.request.livro.AvaliacaoLivroRequest;
 import umc.exs.model.entidades.livro.AvaliacaoLivro;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.livro.Obra;
@@ -33,7 +33,7 @@ public class AvaliacaoLivroService {
     private final LogAuditoriaService logAuditoria;
     private final GamificacaoService gamificacaoService;
 
-    public AvaliacaoLivro criarAvaliacao(String email, AvaliacaoLivroDTO dto) {
+    public AvaliacaoLivro criarAvaliacao(String email, AvaliacaoLivroRequest dto) {
 
         Cliente avaliador = clienteRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
@@ -129,7 +129,7 @@ public class AvaliacaoLivroService {
         }
     }
 
-    public Livro criarLivroReferencia(ComentarioRequestDTO dto) {
+    public Livro criarLivroReferencia(ComentarioRequest dto) {
 
         return livroRepository.findByIsbn(dto.getIsbn())
                 .orElseGet(() -> {

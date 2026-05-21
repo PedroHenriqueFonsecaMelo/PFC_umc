@@ -10,16 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
+import umc.exs.dto.request.admin.CriarCupomRequest;
 import umc.exs.model.entidades.foundation.Cupom;
 import umc.exs.model.entidades.foundation.CupomUso;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.negocios.CupomRepository;
 import umc.exs.repository.negocios.CupomUsoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
-import umc.exs.dto.compra.CriarCupomDTO;
-import umc.exs.dto.compra.cupom.CupomDTO;
-import umc.exs.mappers.CupomMapper;
 
 @Slf4j
 @Service
@@ -35,7 +32,6 @@ public class CupomService {
     private final CupomRepository cupomRepository;
     private final CupomUsoRepository cupomUsoRepository;
     private final ClienteRepository clienteRepository;
-    private final CupomMapper cupomMapper;
 
     // ───────────────────────── XP (Cupons Gerados por Gamificação)
     // ─────────────────────────
@@ -62,7 +58,7 @@ public class CupomService {
 
     @SuppressWarnings("null")
     @Transactional
-    public Cupom criarCupom(CriarCupomDTO dto, LocalDateTime dataValidade) {
+    public Cupom criarCupom(CriarCupomRequest dto, LocalDateTime dataValidade) {
         // Validações básicas
         validarPercentual(dto.getPercentualDesconto());
         validarData(dataValidade);
@@ -132,8 +128,7 @@ public class CupomService {
                 "percentual", cupom.getPercentualDesconto(),
                 "totalOriginal", total,
                 "desconto", desconto,
-                "totalComDesconto", totalComDesconto
-        );
+                "totalComDesconto", totalComDesconto);
     }
 
     /**
@@ -222,14 +217,14 @@ public class CupomService {
     }
 
     // Listagens
-    public List<CupomDTO> listarTodosCupons() {
-        return cupomRepository.findAllByOrderByDataCriacaoDesc().stream().map(cupomMapper::toDTO).toList();
+    public List<Cupom> listarTodosCupons() {
+        return cupomRepository.findAllByOrderByDataCriacaoDesc().stream().toList();
     }
 
-    public List<CupomDTO> listarCuponsDisponiveis(String emailCliente) {
+    public List<Cupom> listarCuponsDisponiveis(String emailCliente) {
         Cliente cliente = clienteRepository.findByEmail(emailCliente)
                 .orElseThrow(() -> new RuntimeException(CLIENTE_NAO_ENCONTRADO));
         return cupomRepository.findByClienteIdAndUsadoFalseAndExpiracaoAfter(cliente.getId(), LocalDateTime.now())
-                .stream().map(cupomMapper::toDTO).toList();
+                .stream().toList();
     }
 }

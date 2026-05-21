@@ -15,9 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.dto.cancelamento.RespostaAdminDTO;
-import umc.exs.dto.cancelamento.SolicitacaoCancelamentoRequestDTO;
-import umc.exs.dto.cancelamento.SolicitacaoCancelamentoResponseDTO;
+import umc.exs.dto.mapper.CancelamentoMapper;
+import umc.exs.dto.request.admin.CancelamentoRequest;
+import umc.exs.dto.response.compras.CancelamentoResponse;
+import umc.exs.model.entidades.foundation.SolicitacaoCancelamento;
 import umc.exs.service.cancelamento.CancelamentoService;
 
 @Slf4j
@@ -26,6 +27,7 @@ import umc.exs.service.cancelamento.CancelamentoService;
 public class CancelamentoController {
 
     private final CancelamentoService cancelamentoService;
+    private final CancelamentoMapper mapper;
 
     // ─────────────────────────────────────────────────────────────────
     // CLIENTE: solicitar cancelamento
@@ -34,11 +36,11 @@ public class CancelamentoController {
     @PostMapping("/api/pedidos/{pedidoId}/solicitar-cancelamento")
     public ResponseEntity<?> solicitar(
             @PathVariable Long pedidoId,
-            @RequestBody SolicitacaoCancelamentoRequestDTO request,
+            @RequestBody CancelamentoRequest request,
             @AuthenticationPrincipal UserDetails user) {
         try {
-            SolicitacaoCancelamentoResponseDTO dto =
-                    cancelamentoService.solicitarCancelamento(pedidoId, user.getUsername(), request);
+            SolicitacaoCancelamento cancelamento = cancelamentoService.solicitarCancelamento(pedidoId, user.getUsername(), request);
+            CancelamentoResponse dto = mapper.toResponse(cancelamento);
             return ResponseEntity.ok(dto);
         } catch (IllegalStateException | IllegalArgumentException e) {
             log.warn("Falha ao solicitar cancelamento pedido={}: {}", pedidoId, e.getMessage());
@@ -52,15 +54,17 @@ public class CancelamentoController {
 
     @GetMapping("/api/admin/cancelamentos")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<SolicitacaoCancelamentoResponseDTO>> listarTodas() {
-        return ResponseEntity.ok(cancelamentoService.listarTodas());
+    public ResponseEntity<List<CancelamentoResponse>> listarTodas() {
+        return ResponseEntity.ok(mapper.toResponseList(cancelamentoService.listarTodas()));
     }
 
     @GetMapping("/api/admin/cancelamentos/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok(cancelamentoService.buscarPorId(id));
+            SolicitacaoCancelamento cancelamento = cancelamentoService.buscarPorId(id);
+            CancelamentoResponse dto = mapper.toResponse(cancelamento);
+            return ResponseEntity.ok(dto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(Map.of("message", e.getMessage()));
         }
@@ -68,8 +72,8 @@ public class CancelamentoController {
 
     @GetMapping("/api/admin/cancelamentos/pendentes")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<SolicitacaoCancelamentoResponseDTO>> listarPendentes() {
-        return ResponseEntity.ok(cancelamentoService.listarPendentes());
+    public ResponseEntity<List<CancelamentoResponse>> listarPendentes() {
+        return ResponseEntity.ok(mapper.toResponseList(cancelamentoService.listarPendentes()));
     }
 
     /** Badge counter: GET /api/admin/cancelamentos/pendentes/count */
@@ -83,9 +87,11 @@ public class CancelamentoController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> aprovar(
             @PathVariable Long id,
-            @RequestBody(required = false) RespostaAdminDTO body) {
+            @RequestBody(required = false) Map<String, String> body) {
         try {
-            String comentario = (body != null) ? body.getComentarioAdmin() : null;
+            String comentario = body != null
+                    ? body.get("comentario")
+                    : null;
             return ResponseEntity.ok(cancelamentoService.aprovarCancelamento(id, comentario));
         } catch (IllegalStateException | IllegalArgumentException e) {
             log.error("Falha ao aprovar cancelamento id={}: {}", id, e.getMessage());
@@ -97,9 +103,11 @@ public class CancelamentoController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> recusar(
             @PathVariable Long id,
-            @RequestBody(required = false) RespostaAdminDTO body) {
+            @RequestBody(required = false) Map<String, String> body) {
         try {
-            String comentario = (body != null) ? body.getComentarioAdmin() : null;
+            String comentario = body != null
+                    ? body.get("comentario")
+                    : null;
             return ResponseEntity.ok(cancelamentoService.recusarCancelamento(id, comentario));
         } catch (IllegalStateException | IllegalArgumentException e) {
             log.error("Falha ao recusar cancelamento id={}: {}", id, e.getMessage());

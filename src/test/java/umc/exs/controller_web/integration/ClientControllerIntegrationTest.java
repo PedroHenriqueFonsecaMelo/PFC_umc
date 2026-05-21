@@ -11,7 +11,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import umc.exs.controller.web.ClientController;
-import umc.exs.dto.user.ClienteDTO;
+import umc.exs.dto.mapper.ClienteMapper;
+import umc.exs.model.entidades.usuario.Cliente;
+
 import umc.exs.security.JwtUtil;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.service.core.cliente.ClienteService;
@@ -59,6 +61,9 @@ class ClientControllerIntegrationTest {
         @MockitoBean
         private GamificacaoService gamificacaoService;
 
+        @MockitoBean
+        private ClienteMapper clienteMapper;
+
         @Test
         void exibirNovoCadastroRetornaViewCadastroCliente() throws Exception {
                 mockMvc.perform(get("/clientes/novo-cadastro"))
@@ -77,9 +82,10 @@ class ClientControllerIntegrationTest {
         @Test
         void postarLoginClienteValidoRedirecionaHomepage() throws Exception {
 
-                ClienteDTO cliente = new ClienteDTO();
+                Cliente cliente = new Cliente();
                 cliente.setId(1L);
                 cliente.setEmail("client@example.com");
+
 
                 when(clienteService.autenticarCliente(anyString(), anyString()))
                                 .thenReturn(cliente);

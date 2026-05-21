@@ -101,7 +101,7 @@ São formas mais específicas de `@RequestMapping`.
 
 ```java
 @PostMapping("/login")
-public String realizarLogin(@Valid @ModelAttribute LoginDTO loginDTO, ...) { ... }
+public String realizarLogin(@Valid @ModelAttribute LoginRequest LoginRequest, ...) { ... }
 
 @GetMapping("/meu-perfil")
 public String exibirPerfil(@AuthenticationPrincipal UserDetails user, Model model) { ... }
@@ -171,8 +171,8 @@ REST para receber JSON.
 
 ```java
 @PostMapping("/login")
-public ResponseEntity<?> login(@RequestBody LoginDTO loginDto, HttpServletResponse response) {
-    // O JSON do corpo da requisição é convertido para LoginDTO automaticamente
+public ResponseEntity<?> login(@RequestBody LoginRequest LoginRequest, HttpServletResponse response) {
+    // O JSON do corpo da requisição é convertido para LoginRequest automaticamente
 }
 ```
 
@@ -206,7 +206,7 @@ etc.
 ```java
 @PostMapping("/login")
 public String realizarLogin(
-    @Valid @ModelAttribute("loginData") LoginDTO loginDTO, 
+    @Valid @ModelAttribute("loginData") LoginRequest LoginRequest, 
     BindingResult result, ...
 ) { ... }
 ```
@@ -227,10 +227,10 @@ de banco de dados. O Spring gerencia o commit/rollback automaticamente.
 
 ```java
 @Transactional
-public ClienteDTO salvarCliente(SignupDTO signupDTO) {
-    validarDadosSignup(signupDTO);
-    Cliente cliente = clienteMapper.toEntity(signupDTO);
-    cliente.setSenha(passwordEncoder.encode(signupDTO.getSenha()));
+public ClienteDTO salvarCliente(SignupRequest SignupRequest) {
+    validarDadosSignup(SignupRequest);
+    Cliente cliente = clienteMapper.toEntity(SignupRequest);
+    cliente.setSenha(passwordEncoder.encode(SignupRequest.getSenha()));
     return clienteMapper.toDTO(clienteRepository.save(cliente));
 }
 ```
@@ -671,7 +671,7 @@ converter entre objetos.
 ```java
 @Mapper(componentModel = "spring", uses = {EnderecoMapper.class, CartaoMapper.class})
 public interface ClienteMapper {
-    Cliente toEntity(SignupDTO dto);
+    Cliente toEntity(SignupRequest dto);
     ClienteDTO toDTO(Cliente cliente);
 }
 ```
@@ -687,7 +687,7 @@ public interface ClienteMapper {
 ```java
 @Mapping(target = "id", ignore = true)
 @Mapping(target = "senha", ignore = true)
-Cliente toEntity(SignupDTO dto);
+Cliente toEntity(SignupRequest dto);
 ```
 
 ---

@@ -11,13 +11,17 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import umc.exs.controller.web.ClientController;
-import umc.exs.dto.auth.SignupDTO;
-import umc.exs.dto.user.ClienteDTO;
+import umc.exs.model.entidades.usuario.Cliente;
+
+
 import umc.exs.security.JwtUtil;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.service.core.cliente.ClienteService;
 import umc.exs.service.core.control.AuthHelper;
+import umc.exs.dto.mapper.ClienteMapper;
+import umc.exs.dto.request.cliente.SignupRequest;
 import umc.exs.service.gamificacao.GamificacaoService;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,8 +34,10 @@ class ClientControllerUnitTest {
     private JwtUserDetailsService userDetailsService;
     private PasswordEncoder passwordEncoder;
     private GamificacaoService gamificacaoService;
+    private ClienteMapper clienteMapper;
 
     private ClientController controller;
+
 
     @BeforeEach
     void setUp() {
@@ -41,15 +47,19 @@ class ClientControllerUnitTest {
         userDetailsService = mock(JwtUserDetailsService.class);
         passwordEncoder = mock(PasswordEncoder.class);
         gamificacaoService = mock(GamificacaoService.class);
+        clienteMapper = mock(ClienteMapper.class);
 
         controller = new ClientController(
+
                 clienteService,
                 authHelper,
                 jwtUtil,
                 userDetailsService,
                 passwordEncoder,
-                gamificacaoService
+                gamificacaoService,
+                clienteMapper
         );
+
     }
 
     @Test
@@ -67,7 +77,7 @@ class ClientControllerUnitTest {
 
     @Test
     void deveRegistrarClienteComSucesso() {
-        SignupDTO dto = new SignupDTO();
+        SignupRequest dto = new SignupRequest();
         dto.setEmail("client@example.com");
         dto.setSenha("senha123");
         dto.setConfirmPassword("senha123");
@@ -76,9 +86,11 @@ class ClientControllerUnitTest {
         Model model = new ExtendedModelMap();
         HttpServletResponse response = mock(HttpServletResponse.class);
 
-        ClienteDTO salvo = new ClienteDTO();
+        Cliente salvo = new Cliente();
         salvo.setId(1L);
+
         salvo.setEmail("client@example.com");
+
 
         when(clienteService.salvarCliente(dto)).thenReturn(salvo);
 
@@ -111,9 +123,10 @@ class ClientControllerUnitTest {
 
     @Test
     void deveFazerLoginClienteComSucesso() {
-        ClienteDTO cliente = new ClienteDTO();
+Cliente cliente = new Cliente();
         cliente.setId(1L);
         cliente.setEmail("client@example.com");
+
 
         Model model = new ExtendedModelMap();
         HttpServletResponse response = mock(HttpServletResponse.class);

@@ -15,9 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
-import umc.exs.dto.auth.LoginDTO;
-import umc.exs.dto.auth.SignupDTO;
-import umc.exs.dto.user.ClienteDTO;
+import umc.exs.dto.request.cliente.LoginRequest;
+import umc.exs.dto.request.cliente.SignupRequest;
 import umc.exs.model.entidades.foundation.EmailVerificacao;
 import umc.exs.model.entidades.usuario.Cliente;
 
@@ -46,14 +45,14 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(
-            @Valid @RequestBody LoginDTO loginDto,
+            @Valid @RequestBody LoginRequest LoginRequest,
             HttpServletResponse response,
             HttpServletRequest request) {
 
         try {
-            ClienteDTO cliente = clienteService.autenticarCliente(
-                    loginDto.getEmail(),
-                    loginDto.getSenha());
+            Cliente cliente = clienteService.autenticarCliente(
+                    LoginRequest.getEmail(),
+                    LoginRequest.getSenha());
 
             String token = jwtUtil.generateToken(cliente.getEmail());
             authHelper.addTokenCookie(response, token);
@@ -180,10 +179,10 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(
-            @Valid @RequestBody SignupDTO signupDTO,
+            @Valid @RequestBody SignupRequest SignupRequest,
             HttpServletResponse response) {
 
-        ClienteDTO clienteSalvo = clienteService.salvarCliente(signupDTO);
+        Cliente clienteSalvo = clienteService.salvarCliente(SignupRequest);
 
         String token = jwtUtil.generateToken(clienteSalvo.getEmail());
         authHelper.addTokenCookie(response, token);

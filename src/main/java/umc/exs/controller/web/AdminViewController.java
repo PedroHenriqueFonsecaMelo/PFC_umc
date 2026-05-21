@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import umc.exs.dto.auth.LoginDTO;
+import umc.exs.dto.request.cliente.LoginRequest;
 import umc.exs.model.entidades.logic.LogAuditoria;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
@@ -49,15 +49,15 @@ public class AdminViewController {
 
     /**
      * Exibe página login admin.
-     * Prepara LoginDTO model.
+     * Prepara LoginRequest model.
      * 
-     * @param model LoginDTO
+     * @param model LoginRequest
      * @return admin_login.html
      */
     @GetMapping("/login")
     public String loginPage(Model model) {
         if (!model.containsAttribute("loginData")) {
-            model.addAttribute("loginData", new LoginDTO());
+            model.addAttribute("loginData", new LoginRequest());
         }
         return ADMIN_LOGIN;
     }
@@ -70,7 +70,7 @@ public class AdminViewController {
      */
     @PostMapping("/login")
     public String processLogin(
-            @ModelAttribute("loginData") LoginDTO loginDTO,
+            @ModelAttribute("loginData") LoginRequest LoginRequest,
             @RequestParam String email,
             @RequestParam String senha,
             Model model,

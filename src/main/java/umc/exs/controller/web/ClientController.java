@@ -22,15 +22,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import umc.exs.dto.auth.LoginDTO;
-import umc.exs.dto.auth.SignupDTO;
-import umc.exs.dto.gamificacao.MeuPerfilGamificacaoDTO;
-import umc.exs.dto.user.ClienteDTO;
-import umc.exs.dto.user.ClienteUpdateDTO;
-import umc.exs.dto.user.EnderecoDTO;
-import umc.exs.dto.user.SenhaResetDTO;
+import umc.exs.dto.mapper.ClienteMapper;
+import umc.exs.dto.request.cliente.ClienteUpdateRequest;
+import umc.exs.dto.request.cliente.LoginRequest;
+import umc.exs.dto.request.cliente.SenhaResetRequest;
+import umc.exs.dto.request.cliente.SignupRequest;
+import umc.exs.dto.response.cliente.ClientePerfilResponse;
+import umc.exs.dto.response.gamificacao.MeuPerfilGameResponse;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.social.PontuacaoUsuario;
+import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
 import umc.exs.service.core.cliente.ClienteService;
@@ -49,6 +51,9 @@ public class ClientController {
     private final PasswordEncoder passwordEncoder;
     private final GamificacaoService gamificacaoService;
 
+    private final ClienteMapper clienteMapper;
+
+
     // Constantes para evitar duplicação de literais (Code Smells)
     private static final String ATTR_CLIENTE = "cliente";
     private static final String ATTR_SUCESSO = "sucesso";
@@ -65,7 +70,7 @@ public class ClientController {
     @GetMapping("/novo-cadastro")
     public String exibirFormularioCadastro(HttpServletResponse response, Model model) {
         if (!model.containsAttribute(ATTR_CLIENTE)) {
-            model.addAttribute(ATTR_CLIENTE, new SignupDTO());
+            model.addAttribute(ATTR_CLIENTE, new SignupRequest());
         }
         jwtUtil.clearJwtCookie(response);
         return VIEW_CADASTRO;
@@ -73,25 +78,25 @@ public class ClientController {
 
     @PostMapping("/novo-cadastro")
     public String registrarCliente(
-            @Valid @ModelAttribute(ATTR_CLIENTE) SignupDTO signupDTO,
+            @Valid @ModelAttribute(ATTR_CLIENTE) SignupRequest SignupRequest,
             BindingResult result,
             @RequestParam String confirmPassword,
             Model model,
             HttpServletResponse response) {
 
         if (result.hasErrors()) {
-            signupDTO.setSenha("");
-            signupDTO.setConfirmPassword("");
+            SignupRequest.setSenha("");
+            SignupRequest.setConfirmPassword("");
             return VIEW_CADASTRO;
         }
 
-        if (!signupDTO.getSenha().equals(confirmPassword)) {
+        if (!SignupRequest.getSenha().equals(confirmPassword)) {
             result.rejectValue("senha", "error.senha", "As senhas não coincidem.");
             return VIEW_CADASTRO;
         }
 
         try {
-            clienteService.salvarCliente(signupDTO);
+            clienteService.salvarCliente(SignupRequest);
             return REDIRECT_LOGIN + "?cadastro=ok";
         } catch (Exception e) {
             model.addAttribute("erro", e.getMessage());
@@ -102,7 +107,7 @@ public class ClientController {
     @GetMapping("/login")
     public String exibirLogin(Model model) {
         if (!model.containsAttribute("loginData")) {
-            model.addAttribute("loginData", new LoginDTO());
+            model.addAttribute("loginData", new LoginRequest());
         }
         return VIEW_LOGIN;
     }
@@ -136,7 +141,7 @@ public class ClientController {
         }
 
         try {
-            ClienteDTO cliente = clienteService.autenticarCliente(email, senha);
+            Cliente cliente = clienteService.autenticarCliente(email, senha);
             if (cliente.getId() != null) {
                 Long safeId = Objects.requireNonNull(cliente.getId(),
                         "ID do cliente não pode ser nulo após autenticação");
@@ -157,9 +162,9 @@ public class ClientController {
         if (user == null)
             return REDIRECT_LOGIN;
 
-        ClienteDTO clienteDTO = clienteService.buscarClientePorEmail(user.getUsername())
+        Cliente cliente = clienteService.buscarClientePorEmail(user.getUsername())
                 .orElseThrow(() -> new RuntimeException("Perfil não encontrado."));
-        model.addAttribute(ATTR_CLIENTE, clienteDTO);
+        model.addAttribute(ATTR_CLIENTE, cliente);
         return "cliente/homepage";
     }
 
@@ -184,12 +189,12 @@ public class ClientController {
         if (isAdmin)
             return "redirect:/admin/painel";
 
-        ClienteDTO clienteDTO = clienteService.buscarClientePorEmail(user.getUsername())
+        Cliente cliente = clienteService.buscarClientePorEmail(user.getUsername())
                 .orElseThrow(() -> new RuntimeException("Perfil não encontrado."));
 
-        MeuPerfilGamificacaoDTO perfilGamificacao = gamificacaoService.obterMeuPerfil(user.getUsername());
+        MeuPerfilGameResponse perfilGamificacao = gamificacaoService.obterMeuPerfil(user.getUsername());
 
-        model.addAttribute(ATTR_CLIENTE, clienteDTO);
+        model.addAttribute(ATTR_CLIENTE, cliente);
         model.addAttribute("perfilGamificacao", perfilGamificacao);
 
         try {
@@ -213,10 +218,11 @@ public class ClientController {
 
     @GetMapping("/meu-perfil-json")
     @ResponseBody
-    public ResponseEntity<ClienteDTO> perfilJson(@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<ClientePerfilResponse> perfilJson(@AuthenticationPrincipal UserDetails user) {
         if (user == null)
             return ResponseEntity.status(401).build();
         return clienteService.buscarClientePorEmail(user.getUsername())
+                .map(clienteMapper::toPerfilResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -248,7 +254,7 @@ public class ClientController {
     }
 
     @PostMapping("/atualizar")
-    public String atualizarCliente(@ModelAttribute(ATTR_CLIENTE) ClienteUpdateDTO dto,
+    public String atualizarCliente(@ModelAttribute(ATTR_CLIENTE) ClienteUpdateRequest dto,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
         clienteService.atualizarDadosLogados(user.getUsername(), dto);
         ra.addFlashAttribute(ATTR_SUCESSO, "Informações atualizadas!");
@@ -266,7 +272,7 @@ public class ClientController {
     }
 
     @PostMapping("/enderecos/novo")
-    public String cadastrarEndereco(@ModelAttribute("endereco") EnderecoDTO enderecoDTO,
+    public String cadastrarEndereco(@ModelAttribute("endereco") Endereco enderecoDTO,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
         try {
             clienteService.adicionarEnderecoParaUsuarioLogado(user.getUsername(), enderecoDTO);
@@ -278,10 +284,10 @@ public class ClientController {
     }
 
     @PostMapping("/enderecos/editar")
-    public String editarEndereco(@ModelAttribute EnderecoDTO enderecoDTO,
+    public String editarEndereco(@ModelAttribute Endereco enderecoDTO,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
         try {
-            ClienteDTO cliente = clienteService.buscarClientePorEmail(user.getUsername()).orElseThrow();
+            Cliente cliente = clienteService.buscarClientePorEmail(user.getUsername()).orElseThrow();
             clienteService.atualizarEnderecoDoCliente(cliente.getId(), enderecoDTO);
             ra.addFlashAttribute(ATTR_SUCESSO, "Endereço atualizado com sucesso!");
         } catch (Exception e) {
@@ -294,7 +300,7 @@ public class ClientController {
     public String removerEndereco(@RequestParam Long enderecoId,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
         try {
-            ClienteDTO cliente = clienteService.buscarClientePorEmail(user.getUsername()).orElseThrow();
+            Cliente cliente = clienteService.buscarClientePorEmail(user.getUsername()).orElseThrow();
             clienteService.deletarEnderecoDoCliente(cliente.getId(), enderecoId);
             ra.addFlashAttribute(ATTR_SUCESSO, "Endereço removido com sucesso!");
         } catch (Exception e) {
@@ -336,7 +342,7 @@ public class ClientController {
 
     @GetMapping("/carteira")
     public String exibirCarteira(@AuthenticationPrincipal UserDetails user, Model model) {
-        ClienteDTO cliente = clienteService.buscarClientePorEmail(user.getUsername()).orElseThrow();
+        Cliente cliente = clienteService.buscarClientePorEmail(user.getUsername()).orElseThrow();
         List<Transacao> historico = clienteService.listarHistoricoTransacoes(cliente.getEmail());
 
         model.addAttribute(ATTR_CLIENTE, cliente);
@@ -378,7 +384,7 @@ public class ClientController {
             ra.addFlashAttribute("erro", "Link inválido ou expirado.");
             return REDIRECT_LOGIN;
         }
-        model.addAttribute("resetData", new SenhaResetDTO(token, null, null));
+        model.addAttribute("resetData", new SenhaResetRequest(token, null, null));
         return "cliente/reset_senha";
     }
 
@@ -395,7 +401,7 @@ public class ClientController {
     }
 
     @PostMapping("/alterar-senha")
-    public String alterarSenha(@ModelAttribute("resetData") SenhaResetDTO resetDTO, RedirectAttributes ra) {
+    public String alterarSenha(@ModelAttribute("resetData") SenhaResetRequest resetDTO, RedirectAttributes ra) {
         if (!resetDTO.getNovaSenha().equals(resetDTO.getConfirmarSenha())) {
             ra.addFlashAttribute("erro", "As senhas não conferem.");
             return "redirect:/clientes/reset-senha?token=" + resetDTO.getToken();

@@ -19,11 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import lombok.RequiredArgsConstructor;
-import umc.exs.dto.livro.MinhaVendaDTO;
-import umc.exs.dto.livro.MinhaVendaDetalheDTO;
-import umc.exs.dto.user.ClienteDTO;
-import umc.exs.dto.user.EnderecoDTO;
+import umc.exs.dto.mapper.ClienteMapper;
+import umc.exs.dto.response.admin.VendaResponse;
+import umc.exs.dto.response.cliente.ClientePerfilResponse;
 import umc.exs.model.entidades.foundation.Transacao;
+import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.service.core.bussiness.MinhasVendasService;
 import umc.exs.service.core.cliente.ClienteService;
 
@@ -37,19 +38,30 @@ public class ClientControllerApi {
     private final ClienteService clienteService;
     private final MinhasVendasService minhasVendasService;
 
+    private final ClienteMapper clienteMapper;
+
     /** Retorna dados do perfil para atualizar saldo/nome via JS */
     @GetMapping("/meu-perfil")
-    public ResponseEntity<ClienteDTO> getPerfilJson(@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<ClientePerfilResponse> getPerfilJson(
+            @AuthenticationPrincipal UserDetails user) {
+
         return clienteService.buscarClientePorEmail(user.getUsername())
+                .map(clienteMapper::toPerfilResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     /** Retorna histórico de transações em JSON */
     @GetMapping("/transacoes")
-    public ResponseEntity<List<Transacao>> getHistorico(@AuthenticationPrincipal UserDetails user) {
-        Long id = clienteService.buscarClientePorEmail(user.getUsername()).map(ClienteDTO::getId).orElseThrow();
-        return ResponseEntity.ok(clienteService.listarHistoricoTransacoes(id));
+    public ResponseEntity<List<Transacao>> getHistorico(
+            @AuthenticationPrincipal UserDetails user) {
+
+        Long id = clienteService.buscarClientePorEmail(user.getUsername())
+                .map(Cliente::getId)
+                .orElseThrow();
+
+        return ResponseEntity.ok(
+                clienteService.listarHistoricoTransacoes(id));
     }
 
     /**
@@ -66,32 +78,34 @@ public class ClientControllerApi {
      * Usado pelo frontend para exibir saldo e nome sem recarregar a página.
      */
     @GetMapping("/meu-perfil-json")
-    public ResponseEntity<ClienteDTO> perfilJson(@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<ClientePerfilResponse> perfilJson(@AuthenticationPrincipal UserDetails user) {
 
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
 
         return clienteService.buscarClientePorEmail(user.getUsername())
+                .map(clienteMapper::toPerfilResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(404).build());
     }
 
     /** Retorna o endereço selecionado para entrega do cliente logado */
     @GetMapping("/endereco-selecionado")
-    public ResponseEntity<EnderecoDTO> getEnderecoSelecionado(@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<Endereco> getEnderecoSelecionado(
+            @AuthenticationPrincipal UserDetails user) {
+
         return clienteService.buscarClientePorEmail(user.getUsername())
                 .flatMap(c -> c.getEnderecos().stream()
-                        .filter(e -> e.getId() != null && e.getId().equals(c.getEnderecoSelecionadoId()))
+                        .filter(e -> e.getId() != null &&
+                                e.getId().equals(c.getEnderecoSelecionadoId()))
                         .findFirst()
                         .map(ResponseEntity::ok))
-                .orElseGet(() ->
-                        // Se nenhum selecionado mas tem endereço, retorna o primeiro
-                        clienteService.buscarClientePorEmail(user.getUsername())
-                                .filter(c -> !c.getEnderecos().isEmpty())
-                                .map(c -> ResponseEntity.ok(c.getEnderecos().get(0)))
-                                .orElse(ResponseEntity.noContent().build())
-                );
+                .orElseGet(() -> clienteService.buscarClientePorEmail(user.getUsername())
+                        .filter(c -> !c.getEnderecos().isEmpty())
+                        .map(c -> ResponseEntity.ok(
+                                c.getEnderecos().iterator().next()))
+                        .orElse(ResponseEntity.noContent().build()));
     }
 
     /**
@@ -100,29 +114,29 @@ public class ClientControllerApi {
      */
     @PostMapping("/enderecos")
     public ResponseEntity<Void> adicionarEndereco(
-            @RequestBody EnderecoDTO enderecoDTO,
+            @RequestBody Endereco endereco,
             @AuthenticationPrincipal UserDetails user) {
 
-        if (user == null) return ResponseEntity.status(401).build();
+        if (user == null)
+            return ResponseEntity.status(401).build();
 
         // Captura IDs existentes antes de adicionar, para identificar o novo
         Set<Long> idsAntes = clienteService.buscarClientePorEmail(user.getUsername())
                 .map(c -> c.getEnderecos().stream()
-                        .map(EnderecoDTO::getId)
+                        .map(Endereco::getId)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toSet()))
                 .orElse(Set.of());
 
-        clienteService.adicionarEnderecoParaUsuarioLogado(user.getUsername(), enderecoDTO);
+        clienteService.adicionarEnderecoParaUsuarioLogado(user.getUsername(), endereco);
 
         // Seleciona o novo endereço automaticamente
         clienteService.buscarClientePorEmail(user.getUsername())
                 .flatMap(c -> c.getEnderecos().stream()
                         .filter(e -> e.getId() != null && !idsAntes.contains(e.getId()))
                         .findFirst()
-                        .map(EnderecoDTO::getId))
-                .ifPresent(id ->
-                        clienteService.selecionarEnderecoParaUsuarioLogado(user.getUsername(), id));
+                        .map(Endereco::getId))
+                .ifPresent(id -> clienteService.selecionarEnderecoParaUsuarioLogado(user.getUsername(), id));
 
         return ResponseEntity.ok().build();
     }
@@ -133,7 +147,7 @@ public class ClientControllerApi {
         try {
             String emailDoClienteLogado = principal.getName();
             Long clienteId = clienteService.buscarClientePorEmail(emailDoClienteLogado)
-                    .map(ClienteDTO::getId)
+                    .map(Cliente::getId)
                     .orElseThrow(() -> new RuntimeException(CLIENTE_NAO_ENCONTRADO));
 
             clienteService.deletarEnderecoDoCliente(clienteId, enderecoId);
@@ -155,7 +169,7 @@ public class ClientControllerApi {
 
             // Busca o ID do cliente ou lança exceção se não encontrar
             Long clienteId = clienteService.buscarClientePorEmail(emailDoClienteLogado)
-                    .map(ClienteDTO::getId)
+                    .map(Cliente::getId)
                     .orElseThrow(() -> new RuntimeException(CLIENTE_NAO_ENCONTRADO));
 
             // Chama o serviço para deletar o cartão específico do cliente
@@ -173,27 +187,31 @@ public class ClientControllerApi {
 
     /**
      * Lista todos os livros anunciados pelo cliente autenticado.
-     * Segurança: o email é extraído do JWT — o cliente só vê seus próprios anúncios.
+     * Segurança: o email é extraído do JWT — o cliente só vê seus próprios
+     * anúncios.
      */
     @GetMapping("/minhas-vendas")
-    public ResponseEntity<List<MinhaVendaDTO>> listarMinhasVendas(
+    public ResponseEntity<List<VendaResponse.resumo>> listarMinhasVendas(
             @AuthenticationPrincipal UserDetails user) {
-        if (user == null) return ResponseEntity.status(401).build();
-        List<MinhaVendaDTO> vendas = minhasVendasService.listarMinhasVendas(user.getUsername());
+        if (user == null)
+            return ResponseEntity.status(401).build();
+        List<VendaResponse.resumo> vendas = minhasVendasService.listarMinhasVendas(user.getUsername());
         return ResponseEntity.ok(vendas);
     }
 
     /**
      * Detalhe de um anúncio específico.
-     * Segurança: valida que o livro pertence ao cliente autenticado antes de retornar.
+     * Segurança: valida que o livro pertence ao cliente autenticado antes de
+     * retornar.
      */
     @GetMapping("/minhas-vendas/{id}")
     public ResponseEntity<Object> detalharMinhaVenda(
             @AuthenticationPrincipal UserDetails user,
             @PathVariable Long id) {
-        if (user == null) return ResponseEntity.status(401).build();
+        if (user == null)
+            return ResponseEntity.status(401).build();
         try {
-            MinhaVendaDetalheDTO dto = minhasVendasService.detalharMinhaVenda(id, user.getUsername());
+            VendaResponse dto = minhasVendasService.detalharMinhaVenda(id, user.getUsername());
             return ResponseEntity.ok(dto);
         } catch (jakarta.persistence.EntityNotFoundException e) {
             return ResponseEntity.status(404).body(e.getMessage());

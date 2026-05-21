@@ -3,6 +3,7 @@ package umc.exs.controller.api.contas;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -18,19 +19,22 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Objects;
 
 import umc.exs.service.core.control.ClienteAdminService;
-import umc.exs.dto.admin.AdminAprovacaoDTO;
-import umc.exs.dto.admin.ClienteListaDTO;
-import umc.exs.dto.admin.ClientePerfilDTO;
-import umc.exs.dto.admin.DashboardMetricasDTO;
-import umc.exs.dto.admin.LivroAdminRequest;
-import umc.exs.dto.admin.RejeicaoLivroDTO;
-import umc.exs.dto.compra.AtualizarEnvioDTO;
-import umc.exs.dto.compra.CriarCupomDTO;
-import umc.exs.dto.compra.PedidoDTO;
-import umc.exs.dto.compra.cupom.CupomDTO;
-import umc.exs.dto.compra.lote.LoteExibicaoDTO;
-import umc.exs.dto.livro.LivroDTO;
-import umc.exs.dto.shared.ApiResponseDTO;
+import umc.exs.dto.mapper.CupomMapper;
+import umc.exs.dto.mapper.LivroMapper;
+import umc.exs.dto.mapper.PedidoMapper;
+import umc.exs.dto.request.admin.AdminAprovacaoRequest;
+import umc.exs.dto.request.admin.AtualizarEnvioRequest;
+import umc.exs.dto.request.admin.CriarCupomRequest;
+import umc.exs.dto.request.admin.LivroAdminRequest;
+import umc.exs.dto.request.livro.RejeicaoLivroRequest;
+import umc.exs.dto.response.admin.ExternApiResponse;
+import umc.exs.dto.response.admin.DashboardResponse;
+import umc.exs.dto.response.cliente.ClienteListaResponse;
+import umc.exs.dto.response.cliente.ClientePerfilResponse;
+import umc.exs.dto.response.compras.CupomResponse;
+import umc.exs.dto.response.compras.LivroExibicaoResponse;
+import umc.exs.dto.response.compras.LoteResponse;
+import umc.exs.dto.response.compras.PedidoResponse;
 import umc.exs.model.entidades.foundation.Cupom;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.logic.Administrador;
@@ -62,18 +66,22 @@ public class AdminControllerApi {
     private static final String NAO_AUTENTICADO = "Acesso negado: Admin não autenticado.";
     private static final String ADMIN_NAO_ENCONTRADO = "Conta de administrador não encontrada.";
 
+    private final LivroMapper livroMapper;
+    private final PedidoMapper pedidoMapper;
+    private final CupomMapper cupomMapper;
+
     // ==========================================================
     // LOTES
     // ==========================================================
 
     @GetMapping("/lotes/pendentes")
-    public ResponseEntity<List<LoteExibicaoDTO>> listarLotesPendentes() {
-        List<LoteExibicaoDTO> dtos = loteService.listarPendentesComCliente().stream()
+    public ResponseEntity<List<LoteResponse>> listarLotesPendentes() {
+        List<LoteResponse> dtos = loteService.listarPendentesComCliente().stream()
                 .map(lote -> {
                     long qtd = livroRepository.countByLoteId(lote.getId());
                     String nome  = lote.getCliente() != null ? lote.getCliente().getNome()  : "—";
                     String email = lote.getCliente() != null ? lote.getCliente().getEmail() : "—";
-                    return new LoteExibicaoDTO(lote.getId(), lote.getCodigoProtocolo(),
+                    return new LoteResponse(lote.getId(), lote.getCodigoProtocolo(),
                             lote.getStatus().toString(), lote.getDataCriacao(), nome, email, qtd);
                 })
                 .toList();
@@ -83,9 +91,8 @@ public class AdminControllerApi {
     @GetMapping("/lotes/{id}/detalhes")
     public ResponseEntity<Map<String, Object>> detalharLote(@PathVariable Long id) {
         Lote lote = loteService.findByIdComCliente(id);
-        List<LivroDTO> livros = livroService.listarLivrosPorLote(id);
 
-        java.util.LinkedHashMap<String, Object> resp = new java.util.LinkedHashMap<>();
+        LinkedHashMap<String, Object> resp = new LinkedHashMap<>();
         resp.put("id", lote.getId());
         resp.put("codigoProtocolo", lote.getCodigoProtocolo());
         resp.put("status", lote.getStatus().toString());
@@ -94,7 +101,7 @@ public class AdminControllerApi {
         resp.put("emailVendedor", lote.getCliente() != null ? lote.getCliente().getEmail() : "—");
         resp.put("vendedorId",    lote.getCliente() != null ? lote.getCliente().getId()     : null);
 
-        List<Map<String, Object>> livrosMaps = livros.stream().map(b -> {
+        List<Map<String, Object>> livrosMaps = livroService.listarLivrosPorLote(id).stream().map(b -> {
             Map<String, Object> map = new java.util.HashMap<>();
             map.put("id",        b.getId());
             map.put("titulo",    b.getTitulo());
@@ -110,8 +117,7 @@ public class AdminControllerApi {
 
     @GetMapping("/lotes/{id}")
     public ResponseEntity<List<Map<String, Object>>> listarLivrosLote(@PathVariable Long id) {
-        List<LivroDTO> livros = livroService.listarLivrosPorLote(id);
-        List<Map<String, Object>> resposta = livros.stream().map(b -> {
+        List<Map<String, Object>> resposta = livroService.listarLivrosPorLote(id).stream().map(b -> {
             Map<String, Object> map = new java.util.HashMap<>();
             map.put("id", b.getId());
             map.put("titulo", b.getTitulo());
@@ -128,54 +134,54 @@ public class AdminControllerApi {
     // ==========================================================
 
     @GetMapping("/livros/pendentes")
-    public ResponseEntity<List<LivroDTO>> listarLivrosPendentes() {
-        return ResponseEntity.ok(livroService.listarLivrosPendentes());
+    public ResponseEntity<List<LivroExibicaoResponse>> listarLivrosPendentes() {
+        return ResponseEntity.ok(livroMapper.toResponseList(livroService.listarLivrosPendentes()));
     }
 
     @PostMapping("/livros/{id}/aprovar")
-    public ResponseEntity<ApiResponseDTO> aprovarLivro(
+    public ResponseEntity<ExternApiResponse> aprovarLivro(
             @PathVariable Long id,
-            @RequestBody AdminAprovacaoDTO dto,
+            @RequestBody AdminAprovacaoRequest dto,
             @AuthenticationPrincipal UserDetails user) {
 
         if (user == null)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponseDTO(false, NAO_AUTENTICADO));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExternApiResponse.fail(NAO_AUTENTICADO));
 
         Administrador admin = adminRepository.findByEmail(user.getUsername())
                 .orElseThrow(() -> new RuntimeException(ADMIN_NAO_ENCONTRADO));
 
         livroService.aprovarLivro(id, admin.getId(), dto);
-        return ResponseEntity.ok(new ApiResponseDTO(true, "Livro aprovado com sucesso"));
+        return ResponseEntity.ok(ExternApiResponse.ok("Livro aprovado com sucesso"));
     }
 
     @PostMapping("/livros/{id}/rejeitar")
-    public ResponseEntity<ApiResponseDTO> rejeitarLivro(
+    public ResponseEntity<ExternApiResponse> rejeitarLivro(
             @PathVariable Long id,
-            @RequestBody RejeicaoLivroDTO dto,
+            @RequestBody RejeicaoLivroRequest dto,
             @AuthenticationPrincipal UserDetails user) {
 
         if (user == null)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponseDTO(false, NAO_AUTENTICADO));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExternApiResponse.fail(NAO_AUTENTICADO));
 
         Administrador admin = adminRepository.findByEmail(user.getUsername())
                 .orElseThrow(() -> new RuntimeException(ADMIN_NAO_ENCONTRADO));
 
         livroService.rejeitarLivro(id, admin.getId(), dto.getEstado(), dto.getComentario());
-        return ResponseEntity.ok(new ApiResponseDTO(true, "Livro rejeitado com sucesso"));
+        return ResponseEntity.ok(ExternApiResponse.ok("Livro rejeitado com sucesso"));
     }
 
     @GetMapping("/livros/aprovados")
-    public ResponseEntity<List<LivroDTO>> listarLivrosAprovados() {
-        return ResponseEntity.ok(livroService.listarLivrosAprovados());
+    public ResponseEntity<List<LivroExibicaoResponse>> listarLivrosAprovados() {
+        return ResponseEntity.ok(livroMapper.toResponseList(livroService.listarLivrosAprovados()));
     }
 
     @PostMapping("/livros/novo")
-    public ResponseEntity<ApiResponseDTO> adicionarLivro(
+    public ResponseEntity<ExternApiResponse> adicionarLivro(
             @RequestBody LivroAdminRequest request, // Use o Request aqui
             @AuthenticationPrincipal UserDetails user) {
 
         if (user == null)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponseDTO(false, NAO_AUTENTICADO));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExternApiResponse.fail(NAO_AUTENTICADO));
 
         Administrador admin = adminRepository.findByEmail(user.getUsername())
                 .orElseThrow(() -> new RuntimeException(ADMIN_NAO_ENCONTRADO));
@@ -184,33 +190,33 @@ public class AdminControllerApi {
 
         livroService.adicionarLivroAdmin(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponseDTO(true, "Livro adicionado ao estoque"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ExternApiResponse.ok("Livro adicionado ao estoque"));
     }
 
     @PutMapping("/livros/{id}")
-    public ResponseEntity<ApiResponseDTO> editarLivro(
+    public ResponseEntity<ExternApiResponse> editarLivro(
             @PathVariable @NonNull Long id,
             @RequestBody LivroAdminRequest request,
             @AuthenticationPrincipal UserDetails user) {
 
         if (user == null)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponseDTO(false, NAO_AUTENTICADO));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExternApiResponse.fail(NAO_AUTENTICADO));
 
         livroService.editarLivroAdmin(id, request);
 
-        return ResponseEntity.ok(new ApiResponseDTO(true, "Livro atualizado"));
+        return ResponseEntity.ok(ExternApiResponse.ok("Livro atualizado"));
     }
 
     @DeleteMapping("/livros/{id}")
-    public ResponseEntity<ApiResponseDTO> deletarLivro(
+    public ResponseEntity<ExternApiResponse> deletarLivro(
             @PathVariable @NonNull Long id,
             @AuthenticationPrincipal UserDetails user) {
 
         if (user == null)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponseDTO(false, NAO_AUTENTICADO));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ExternApiResponse.fail(NAO_AUTENTICADO));
 
         livroService.deletarLivroAdmin(id);
-        return ResponseEntity.ok(new ApiResponseDTO(true, "Livro removido"));
+        return ResponseEntity.ok(ExternApiResponse.ok("Livro removido"));
     }
 
     // ==========================================================
@@ -218,20 +224,20 @@ public class AdminControllerApi {
     // ==========================================================
 
     @GetMapping("/pedidos")
-    public ResponseEntity<List<PedidoDTO>> listarPedidos() {
-        return ResponseEntity.ok(pedidoService.listarTodos());
+    public ResponseEntity<List<PedidoResponse>> listarPedidos() {
+        return ResponseEntity.ok(pedidoMapper.toResponseList(pedidoService.listarTodos()));
     }
 
     @PostMapping("/pedidos/{id}/envio")
-    public ResponseEntity<PedidoDTO> atualizarEnvio(
+    public ResponseEntity<PedidoResponse> atualizarEnvio(
             @PathVariable Long id,
-            @RequestBody AtualizarEnvioDTO dto,
+            @RequestBody AtualizarEnvioRequest dto,
             @AuthenticationPrincipal UserDetails user) {
 
         if (user == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, NAO_AUTENTICADO);
 
-        return ResponseEntity.ok(pedidoService.atualizarStatus(id, dto.getStatusEnvio(), dto.getCodigoRastreio()));
+        return ResponseEntity.ok(pedidoMapper.toResponse(pedidoService.atualizarStatus(id, dto.getStatusEnvio(), dto.getCodigoRastreio())));
     }
 
     // ==========================================================
@@ -239,21 +245,21 @@ public class AdminControllerApi {
     // ==========================================================
 
     @GetMapping("/cupons")
-    public ResponseEntity<List<CupomDTO>> listarCupons() {
-        return ResponseEntity.ok(cupomService.listarTodosCupons());
+    public ResponseEntity<List<CupomResponse>> listarCupons() {
+        return ResponseEntity.ok(cupomMapper.toResponseList(cupomService.listarTodosCupons()));
     }
 
     @DeleteMapping("/cupons/{id}")
-    public ResponseEntity<ApiResponseDTO> invalidarCupom(@PathVariable @NonNull Long id) {
+    public ResponseEntity<ExternApiResponse> invalidarCupom(@PathVariable @NonNull Long id) {
         cupomService.invalidarCupom(Objects.requireNonNull(id, "ID não pode ser nulo"));
-        return ResponseEntity.ok(new ApiResponseDTO(true, "Cupom invalidado"));
+        return ResponseEntity.ok(ExternApiResponse.ok("Cupom invalidado"));
     }
 
     @PostMapping("/cupons")
-    public ResponseEntity<?> criarCupom(@RequestBody CriarCupomDTO dto) {
+    public ResponseEntity<?> criarCupom(@RequestBody CriarCupomRequest dto) {
         try {
             if (dto.getDataValidade() == null) {
-                return ResponseEntity.badRequest().body(new ApiResponseDTO(false, "Data de validade obrigatória"));
+                return ResponseEntity.badRequest().body(ExternApiResponse.fail("Data de validade obrigatória"));
             }
             LocalDateTime data = LocalDateTime.parse(dto.getDataValidade());
             Cupom cupom = cupomService.criarCupom(dto, data);
@@ -261,9 +267,9 @@ public class AdminControllerApi {
 
         } catch (DateTimeParseException e) {
             return ResponseEntity.badRequest()
-                    .body(new ApiResponseDTO(false, "Formato de data inválido. Use ISO-8601."));
+                    .body(ExternApiResponse.fail("Formato de data inválido. Use ISO-8601."));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new ApiResponseDTO(false, e.getMessage()));
+            return ResponseEntity.badRequest().body(ExternApiResponse.fail(e.getMessage()));
         }
     }
 
@@ -272,7 +278,7 @@ public class AdminControllerApi {
     // ==========================================================
 
     @GetMapping("/dashboard/metricas")
-    public ResponseEntity<DashboardMetricasDTO> getMetricas() {
+    public ResponseEntity<DashboardResponse> getMetricas() {
         return ResponseEntity.ok(dashboardService.getMetricas());
     }
 
@@ -293,18 +299,18 @@ public class AdminControllerApi {
     // ==========================================================
 
     @GetMapping("/clientes")
-    public ResponseEntity<List<ClienteListaDTO>> listarClientes() {
+    public ResponseEntity<List<ClienteListaResponse>> listarClientes() {
         return ResponseEntity.ok(clienteAdminService.listarClientes());
     }
 
     @GetMapping("/clientes/{id}")
     public ResponseEntity<?> getPerfilCliente(@PathVariable Long id) {
         try {
-            ClientePerfilDTO perfil = clienteAdminService.getPerfilCliente(id);
+            ClientePerfilResponse perfil = clienteAdminService.getPerfilCliente(id);
             return ResponseEntity.ok(perfil);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponseDTO(false, e.getMessage()));
+                    .body(ExternApiResponse.fail(e.getMessage()));
         }
     }
 

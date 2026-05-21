@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
-import umc.exs.dto.admin.EmailDestinatarioDTO;
-import umc.exs.dto.admin.EmailDisparoDTO;
-import umc.exs.dto.admin.EmailHistoricoDTO;
+import umc.exs.dto.request.admin.EmailDisparoRequest;
+import umc.exs.dto.response.email.EmailDestinatarioResponse;
+import umc.exs.dto.response.email.EmailHistoricoResponse;
 import umc.exs.model.entidades.foundation.EmailEnviado;
 import umc.exs.model.entidades.social.PontuacaoUsuario;
 import umc.exs.model.entidades.usuario.Cliente;
@@ -45,7 +45,7 @@ public class NotificacaoEmailService {
 
     // ── Filtrar destinatários ────────────────────────────────────────────────
 
-    public List<EmailDestinatarioDTO> filtrarDestinatarios(String filtro, Integer limite) {
+    public List<EmailDestinatarioResponse> filtrarDestinatarios(String filtro, Integer limite) {
         int lim = (limite == null || limite <= 0) ? Integer.MAX_VALUE : limite;
 
         List<Cliente> clientes = clienteRepository.findAll();
@@ -78,7 +78,7 @@ public class NotificacaoEmailService {
         return clientes.stream()
                 .sorted(comparator)
                 .limit(lim)
-                .map(c -> new EmailDestinatarioDTO(
+                .map(c -> new EmailDestinatarioResponse(
                         c.getId(),
                         c.getNome(),
                         c.getEmail(),
@@ -92,11 +92,11 @@ public class NotificacaoEmailService {
     // ── Disparar ou agendar ──────────────────────────────────────────────────
 
     @SuppressWarnings("null")
-public String dispararOuAgendar(EmailDisparoDTO dto) {
+public String dispararOuAgendar(EmailDisparoRequest dto) {
         log.info("dispararOuAgendar — filtro='{}', limite={}, assunto='{}'",
                 dto.getFiltro(), dto.getLimite(), dto.getAssunto());
 
-        List<EmailDestinatarioDTO> destinatarios =
+        List<EmailDestinatarioResponse> destinatarios =
                 filtrarDestinatarios(dto.getFiltro(), dto.getLimite());
 
         if (destinatarios.isEmpty()) {
@@ -111,7 +111,7 @@ public String dispararOuAgendar(EmailDisparoDTO dto) {
             log.info(">>> Iniciando disparo: assunto='{}', {} destinatário(s)",
                     dto.getAssunto(), destinatarios.size());
             int enviados = 0, erros = 0;
-            for (EmailDestinatarioDTO dest : destinatarios) {
+            for (EmailDestinatarioResponse dest : destinatarios) {
                 try {
                     emailService.enviarHtml(
                             dest.getEmail(),
@@ -183,10 +183,10 @@ public String dispararOuAgendar(EmailDisparoDTO dto) {
 
     // ── Histórico de e-mails disparados ─────────────────────────────────────
 
-    public List<EmailHistoricoDTO> listarHistorico() {
+    public List<EmailHistoricoResponse> listarHistorico() {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm");
         return emailEnviadoRepository.findAllByOrderByDataRegistroDesc().stream()
-                .map(e -> new EmailHistoricoDTO(
+                .map(e -> new EmailHistoricoResponse(
                         e.getId(),
                         e.getAssunto(),
                         e.getCorpo(),

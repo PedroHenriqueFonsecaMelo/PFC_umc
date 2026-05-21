@@ -19,12 +19,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.dto.compra.lote.LoteRequestDTO;
-import umc.exs.dto.livro.GoogleBookResponse;
-import umc.exs.dto.livro.LivroDTO;
-import umc.exs.dto.livro.LivroItemDTO;
-import umc.exs.dto.livro.LivroRequestDTO;
-import umc.exs.mappers.LivroMapper;
+import umc.exs.dto.extern.GoogleBookData;
+import umc.exs.dto.request.compra.LoteRequest;
+import umc.exs.dto.request.livro.LivroItemRequest;
+import umc.exs.dto.request.livro.LivroRequest;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.livro.Obra;
@@ -33,6 +31,7 @@ import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.livro.ObraRpository;
 import umc.exs.repository.negocios.LoteRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.api.ExternApi;
 import umc.exs.service.core.control.LoteService;
 import umc.exs.service.log.LogAuditoriaService;
 
@@ -51,14 +50,13 @@ public class LivroAnuncioService {
 
     private final LogAuditoriaService logAuditoria;
     private final LoteService loteService;
-    private final GoogleBooksService googleBooksService;
+    private final ExternApi googleBooksService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final LivroMapper livroMapper;
 
     @SuppressWarnings("null")
     @Transactional
-    public LivroDTO cadastrarVenda(String email, LivroRequestDTO dto, MultipartFile foto) {
+    public Livro cadastrarVenda(String email, LivroRequest dto, MultipartFile foto) {
 
         if (foto == null || foto.isEmpty()) {
             throw new IllegalArgumentException("A foto é obrigatória para venda individual");
@@ -71,7 +69,7 @@ public class LivroAnuncioService {
 
         String jsonFotos = converterParaJson(List.of(urlFoto));
 
-        GoogleBookResponse response = googleBooksService.buscarPorIsbnAsync(dto.getIsbn()).join();
+        GoogleBookData response = googleBooksService.buscarPorIsbnAsync(dto.getIsbn()).join();
 
         if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
             throw new IllegalArgumentException("Livro não encontrado na API externa para o ISBN: " + dto.getIsbn());
@@ -112,12 +110,12 @@ public class LivroAnuncioService {
                 vendedor.getEmail(),
                 "Livro " + salvo.getId() + " - aguardando aprovação");
 
-        return livroMapper.paraDTO(salvo);
+        return salvo;
     }
 
     @SuppressWarnings("null")
     @Transactional
-    public Lote criarLote(String email, LoteRequestDTO dto, List<MultipartFile> fotos) {
+    public Lote criarLote(String email, LoteRequest dto, List<MultipartFile> fotos) {
 
         Cliente cliente = clienteRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("Cliente não encontrado"));
@@ -137,7 +135,7 @@ public class LivroAnuncioService {
 
         int fotoIndex = 0;
 
-        for (LivroItemDTO item : dto.getLivros()) {
+        for (LivroItemRequest item : dto.getLivros()) {
 
             List<String> urls = new ArrayList<>();
 
@@ -178,9 +176,9 @@ public class LivroAnuncioService {
 
     @SuppressWarnings("null")
     @Transactional
-    public LivroDTO cadastrarPorIsbn(String isbn) {
+    public Livro cadastrarPorIsbn(String isbn) {
         // 1. Tenta Google Books (nunca lança exceção — retorna null se indisponível)
-        GoogleBookResponse response = googleBooksService.buscarPorIsbnAsync(isbn).join();
+        GoogleBookData response = googleBooksService.buscarPorIsbnAsync(isbn).join();
 
         if (response != null && response.getItems() != null && !response.getItems().isEmpty()) {
             var info = response.getItems().get(0).getVolumeInfo();
@@ -189,7 +187,7 @@ public class LivroAnuncioService {
                     ? info.getAuthors().get(0)
                     : "Autor Desconhecido";
 
-            Livro anuncio = Livro.builder()
+            return Livro.builder()
                     .titulo(info.getTitle())
                     .autor(primeiroAutor)
                     .isbn(isbn)
@@ -199,8 +197,6 @@ public class LivroAnuncioService {
                     .aprovado(false)
                     .obra(null)
                     .build();
-
-            return livroMapper.paraDTO(anuncio);
         }
 
         // 2. Fallback: OpenLibrary
@@ -265,7 +261,7 @@ public class LivroAnuncioService {
         }
     }
 
-    private int calcularFotosPorLivro(LivroItemDTO item, LoteRequestDTO dto, List<MultipartFile> fotos) {
+    private int calcularFotosPorLivro(LivroItemRequest item, LoteRequest dto, List<MultipartFile> fotos) {
 
         int quantidade = item.getQuantidadedeFotos();
 
@@ -277,13 +273,13 @@ public class LivroAnuncioService {
         return quantidade;
     }
 
-    public List<LivroDTO> listarPromocoesAtivas() {
+    public List<Livro> listarPromocoesAtivas() {
         List<Livro> livros = livroRepository.findPromocoesAtivas(LocalDateTime.now());
 
-        List<LivroDTO> lista = new ArrayList<>();
+        List<Livro> lista = new ArrayList<>();
 
         for (Livro livro : livros) {
-            LivroDTO dto = new LivroDTO();
+            Livro dto = new Livro();
 
             dto.setId(livro.getId());
             dto.setTitulo(livro.getTitulo());
@@ -297,9 +293,8 @@ public class LivroAnuncioService {
         return lista;
     }
 
-    public LivroDTO buscarPorIdAtivo(Long id) {
+    public Livro buscarPorIdAtivo(Long id) {
         return livroRepository.findByIdAndAprovadoTrue(id)
-                .map(livro -> livroMapper.paraDTO(livro))
                 .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado"));
     }
 

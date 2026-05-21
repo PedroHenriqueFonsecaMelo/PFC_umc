@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import umc.exs.dto.gamificacao.MeuPerfilGamificacaoDTO;
-import umc.exs.dto.gamificacao.RankingItemDTO;
+import umc.exs.dto.response.gamificacao.MeuPerfilGameResponse;
+import umc.exs.dto.response.gamificacao.RankingDetalhadoResponse;
 import umc.exs.service.gamificacao.GamificacaoService;
 
 import java.util.List;
@@ -32,7 +32,7 @@ public class GamificacaoController {
      * Endpoint público — usado pelo widget da homepage.
      */
     @GetMapping("/ranking")
-    public ResponseEntity<List<RankingItemDTO>> obterRanking() {
+    public ResponseEntity<List<RankingDetalhadoResponse>> obterRanking() {
         return ResponseEntity.ok(gamificacaoService.obterRankingTop5());
     }
 
@@ -45,7 +45,7 @@ public class GamificacaoController {
         if (user == null) {
             return ResponseEntity.status(401).body("Usuário não autenticado.");
         }
-        MeuPerfilGamificacaoDTO perfil = gamificacaoService.obterMeuPerfil(user.getUsername());
+        MeuPerfilGameResponse perfil = gamificacaoService.obterMeuPerfil(user.getUsername());
         return ResponseEntity.ok(perfil);
     }
 }

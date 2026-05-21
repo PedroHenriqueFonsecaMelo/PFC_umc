@@ -402,9 +402,9 @@ de dados.
 **O que são**: Data Transfer Objects - objetos para transferência de dados entre
 camadas.
 
-### 1. SignupDTO
+### 1. SignupRequest
 
-**Localização**: `src/main/java/umc/exs/model/dtos/auth/SignupDTO.java`
+**Localização**: `src/main/java/umc/exs/model/dtos/auth/SignupRequest.java`
 
 **Uso**: Cadastro de novos clientes.
 
@@ -423,9 +423,9 @@ camadas.
 
 ---
 
-### 2. LoginDTO
+### 2. LoginRequest
 
-**Localização**: `src/main/java/umc/exs/model/dtos/auth/LoginDTO.java`
+**Localização**: `src/main/java/umc/exs/model/dtos/auth/LoginRequest.java`
 
 **Uso**: Autenticação de clientes.
 
@@ -531,7 +531,7 @@ DTOs.
 
 | Método                                                    | Descrição                        |
 | --------------------------------------------------------- | -------------------------------- |
-| `toEntity(SignupDTO)`                                     | Converte SignupDTO para Cliente  |
+| `toEntity(SignupRequest)`                                     | Converte SignupRequest para Cliente  |
 | `toDTO(Cliente)`                                          | Converte Cliente para ClienteDTO |
 | `updateEntityFromDto(ClienteDTO, @MappingTarget Cliente)` | Atualiza entidade existente      |
 

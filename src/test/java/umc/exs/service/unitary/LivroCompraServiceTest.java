@@ -5,19 +5,15 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
-import java.util.Set;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import umc.exs.mappers.LivroMapper;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.livro.Obra;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.usuario.ClienteRepository;
-import umc.exs.service.core.bussiness.GoogleBooksService;
 import umc.exs.service.core.bussiness.LivroCompraService;
 import umc.exs.service.core.control.PedidoService;
 import umc.exs.service.cupom.CupomService;
@@ -36,8 +32,7 @@ class LivroCompraServiceTest {
         private GamificacaoService gamificacaoService;
         private LogAuditoriaService logAuditoriaService;
         private NotificacaoService notificacaoService;
-        private GoogleBooksService googleBooksService;
-        private LivroMapper livroMapper;
+
 
         private LivroCompraService service;
 

@@ -15,12 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import umc.exs.dto.compra.ItemResultadoDTO;
-import umc.exs.dto.compra.carrinho.CarrinhoCompraRequestDTO;
-import umc.exs.dto.compra.carrinho.CarrinhoCompraResponseDTO;
-import umc.exs.dto.livro.GoogleBookResponse;
-import umc.exs.dto.livro.LivroDTO;
-import umc.exs.mappers.LivroMapper;
+import umc.exs.dto.extern.GoogleBookData;
+import umc.exs.dto.extern.ItemResultadoDTO;
+import umc.exs.dto.request.compra.CarrinhoCompraRequest;
+import umc.exs.dto.response.compras.CarrinhoCompraResponse;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.livro.LivroRepository;
@@ -118,7 +116,7 @@ public class LivroCompraService {
     }
 
     @Transactional
-    public CarrinhoCompraResponseDTO comprarCarrinho(String emailComprador, CarrinhoCompraRequestDTO request) {
+    public CarrinhoCompraResponse comprarCarrinho(String emailComprador, CarrinhoCompraRequest request) {
         Cliente comprador = validarCompradorCarrinho(emailComprador);
 
         List<Long> ids = Objects.requireNonNull(request.getLivroIds(), "Lista de IDs não pode ser nula");
@@ -182,7 +180,7 @@ public class LivroCompraService {
             }
         }
 
-        return CarrinhoCompraResponseDTO.builder()
+        return CarrinhoCompraResponse.builder()
                 .totalSolicitados(ids.size())
                 .totalComprados(comprados.size())
                 .totalOriginal(totalOriginal)

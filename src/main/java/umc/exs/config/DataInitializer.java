@@ -1,5 +1,6 @@
 package umc.exs.config;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -133,7 +134,7 @@ public class DataInitializer implements CommandLineRunner {
         c.setSenha(encoder.encode("admin123"));
         c.setSaldoTokens(100.0);
         c.setCpf(cpf);
-        c.setDatanasc("1995-05-10");
+        c.setDatanasc(LocalDate.parse("1995-05-10"));
         c.setGen(Genero.M);
         c.setBloqueada(false);
         c.setDataCriacao(LocalDateTime.now());

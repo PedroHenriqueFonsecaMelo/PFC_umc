@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import umc.exs.dto.compra.lote.ListaDesejosDTO;
 import umc.exs.model.entidades.foundation.ListaDesejos;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.negocios.ListaDesejosRepository;
@@ -33,7 +32,7 @@ public class ListaDesejosService {
     private final NotificacaoService notificacaoService;
 
     @Transactional
-    public ListaDesejosDTO adicionarDesejo(String emailCliente, String isbn) {
+    public ListaDesejos adicionarDesejo(String emailCliente, String isbn) {
         Cliente cliente = clienteRepository.findByEmail(emailCliente)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
@@ -48,8 +47,7 @@ public class ListaDesejosService {
                 .build();
 
         if (desejo != null) {
-            ListaDesejos salvo = listaDesejosRepository.save(desejo);
-            return toDTO(salvo);
+            return listaDesejosRepository.save(desejo);
         } else {
             return null;
         }
@@ -72,18 +70,17 @@ public class ListaDesejosService {
     }
 
     @Transactional(readOnly = true)
-    public List<ListaDesejosDTO> listarDesejos(String emailCliente) {
+    public List<ListaDesejos> listarDesejos(String emailCliente) {
         Cliente cliente = clienteRepository.findByEmail(emailCliente)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
         return listaDesejosRepository.findByClienteId(cliente.getId())
-                .stream()
-                .map(this::toDTO)
-                .toList();
+                .stream().toList();
     }
 
     /**
-     * Notifica via e-mail e dashboard todos os clientes que têm o ISBN na lista de desejos
+     * Notifica via e-mail e dashboard todos os clientes que têm o ISBN na lista de
+     * desejos
      * quando um livro com esse ISBN é aprovado e fica disponível na vitrine.
      */
     @SuppressWarnings("null")
@@ -133,10 +130,12 @@ public class ListaDesejosService {
      */
     @Transactional
     public void notificarClientesSeEmPromocao(String isbn, String titulo, double precoPromo) {
-        if (isbn == null || isbn.isBlank()) return;
+        if (isbn == null || isbn.isBlank())
+            return;
 
         List<ListaDesejos> interessados = listaDesejosRepository.findByIsbn(isbn);
-        if (interessados.isEmpty()) return;
+        if (interessados.isEmpty())
+            return;
 
         log.info("Notificando {} cliente(s) sobre promoção do livro ISBN {}", interessados.size(), isbn);
 
@@ -154,7 +153,7 @@ public class ListaDesejosService {
     }
 
     @Transactional
-    public ListaDesejosDTO togglePreReserva(String emailCliente, @NonNull Long desejoId) {
+    public ListaDesejos togglePreReserva(String emailCliente, @NonNull Long desejoId) {
         Cliente cliente = clienteRepository.findByEmail(emailCliente)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
@@ -166,15 +165,6 @@ public class ListaDesejosService {
         }
 
         desejo.setPreReservaAtiva(!desejo.isPreReservaAtiva());
-        return toDTO(listaDesejosRepository.save(desejo));
-    }
-
-    private ListaDesejosDTO toDTO(ListaDesejos l) {
-        return ListaDesejosDTO.builder()
-                .id(l.getId())
-                .isbn(l.getIsbn())
-                .dataAdicao(l.getDataAdicao())
-                .preReservaAtiva(l.isPreReservaAtiva())
-                .build();
+        return listaDesejosRepository.save(desejo);
     }
 }
