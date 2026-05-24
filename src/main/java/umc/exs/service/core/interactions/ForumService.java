@@ -111,6 +111,15 @@ public class ForumService {
         topicoRepo.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
+    public boolean isAutorResposta(Long respostaId, String emailUsuario) {
+        return respostaRepo.findById(respostaId)
+            .map(r -> r.getAutor() != null &&
+                      r.getAutor().getEmail() != null &&
+                      r.getAutor().getEmail().equals(emailUsuario))
+            .orElse(false);
+    }
+
     @SuppressWarnings("null")
     @Transactional
     public void deletarResposta(Long id) {

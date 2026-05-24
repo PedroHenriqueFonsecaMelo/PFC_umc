@@ -65,19 +65,41 @@ public class BlogController {
     @GetMapping("/{postId}/comentarios")
     public ResponseEntity<List<Map<String, Object>>> listarComentarios(@PathVariable Long postId) {
         List<Map<String, Object>> comentarios = postBlogService.listarComentarios(postId).stream()
-                .map(c -> Map.<String, Object>of(
-                        "id", c.getId(),
-                        AUTOR_NOME, c.getAutorNome() != null ? c.getAutorNome() : "Anônimo",
-                        CONTEUDO, c.getConteudo(),
-                        "dataCriacao", c.getDataCriacao().format(FMT)))
+                .<Map<String, Object>>map(c -> {
+                    java.util.LinkedHashMap<String, Object> m = new java.util.LinkedHashMap<>();
+                    m.put("id", c.getId());
+                    m.put(AUTOR_NOME, c.getAutorNome() != null ? c.getAutorNome() : "Anônimo");
+                    m.put(CONTEUDO, c.getConteudo());
+                    m.put("dataCriacao", c.getDataCriacao().format(FMT));
+                    return m;
+                })
                 .toList();
         return ResponseEntity.ok(comentarios);
     }
 
     @PostMapping("/{postId}/curtir")
-    public ResponseEntity<Map<String, Integer>> curtirPost(@PathVariable Long postId) {
-        int curtidas = postBlogService.curtirPost(postId);
-        return ResponseEntity.ok(Map.of("curtidas", curtidas));
+    public ResponseEntity<Map<String, Object>> curtirPost(
+            @PathVariable Long postId,
+            @RequestBody(required = false) Map<String, Object> body,
+            @AuthenticationPrincipal UserDetails user) {
+        if (user == null) return ResponseEntity.status(401).build();
+        boolean descurtir = body != null && Boolean.TRUE.equals(body.get("descurtir"));
+        Map<String, Object> resultado = postBlogService.toggleCurtir(postId, descurtir);
+        return ResponseEntity.ok(resultado);
+    }
+
+    @DeleteMapping("/{postId}/comentarios/{comentarioId}")
+    public ResponseEntity<Map<String, String>> deletarComentario(
+            @PathVariable Long postId,
+            @PathVariable Long comentarioId,
+            @AuthenticationPrincipal UserDetails user) {
+        if (user == null) return ResponseEntity.status(401).build();
+        try {
+            postBlogService.deletarComentario(comentarioId, user.getUsername());
+            return ResponseEntity.ok(Map.of(MENSAGEM, "Comentário removido."));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(403).body(Map.of(ERRO, e.getMessage()));
+        }
     }
 
     @PostMapping("/{postId}/comentarios")

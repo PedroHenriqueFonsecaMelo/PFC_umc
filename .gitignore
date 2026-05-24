@@ -31,4 +31,6 @@ TODO.md
 /.classpath
 /.project
 /.problems.claude/
-.claude
+.claudesrc/main/resources/application-local.yml
+
+.claude/

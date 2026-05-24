@@ -150,6 +150,119 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // ── Modal de confirmação ────────────────────────────────────────────────
+
+    // Injeta modal no DOM
+    if (!document.getElementById('forumModalExcluir')) {
+        document.body.insertAdjacentHTML('beforeend', `
+            <div id="forumModalExcluir" style="
+                display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+                background:rgba(44,36,27,.45);z-index:9999;
+                align-items:center;justify-content:center;">
+                <div style="background:#f9f6f0;border-radius:14px;padding:2rem 2rem 1.5rem;
+                    max-width:380px;width:90%;box-shadow:0 8px 40px rgba(44,36,27,.22);text-align:center;">
+                    <div style="font-size:2rem;color:#722f37;margin-bottom:.75rem;">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </div>
+                    <div style="font-family:'Playfair Display',serif;font-size:1.15rem;
+                        font-weight:700;color:#2c241b;margin-bottom:.5rem;">
+                        Excluir resposta?
+                    </div>
+                    <div style="font-size:.85rem;color:#7a6e65;margin-bottom:1.5rem;line-height:1.5;">
+                        Esta ação não pode ser desfeita.
+                    </div>
+                    <div style="display:flex;gap:.75rem;justify-content:center;">
+                        <button id="forumModalCancelar" style="
+                            padding:.55rem 1.4rem;background:transparent;
+                            border:1px solid rgba(44,36,27,.22);color:#7a6e65;
+                            border-radius:8px;font-size:.85rem;cursor:pointer;
+                            font-family:'DM Sans',sans-serif;">Cancelar</button>
+                        <button id="forumModalConfirmar" style="
+                            padding:.55rem 1.4rem;background:#722f37;color:#f9f6f0;
+                            border:none;border-radius:8px;font-size:.85rem;
+                            cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;">
+                            Excluir</button>
+                    </div>
+                </div>
+            </div>`);
+
+        var forumModal = document.getElementById('forumModalExcluir');
+        var forumModalCallback = null;
+
+        document.getElementById('forumModalCancelar').addEventListener('click', function() {
+            forumModal.style.display = 'none';
+            forumModalCallback = null;
+        });
+        document.getElementById('forumModalConfirmar').addEventListener('click', function() {
+            forumModal.style.display = 'none';
+            if (typeof forumModalCallback === 'function') {
+                forumModalCallback();
+                forumModalCallback = null;
+            }
+        });
+        forumModal.addEventListener('click', function(e) {
+            if (e.target === forumModal) {
+                forumModal.style.display = 'none';
+                forumModalCallback = null;
+            }
+        });
+
+        window.abrirForumModal = function(callback) {
+            forumModalCallback = callback;
+            forumModal.style.display = 'flex';
+        };
+    }
+
+    // ── Excluir própria resposta ─────────────────────────────────────────────
+
+    document.querySelectorAll('.btn-del-resposta-proprio').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var respostaId = this.dataset.respostaId;
+            window.abrirForumModal(function() {
+                fetch('/api/forum/respostas/' + respostaId, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                })
+                .then(function(res) { return res.json(); })
+                .then(function() {
+                    var card = document.getElementById('resposta-card-' + respostaId);
+                    if (card) {
+                        card.style.transition = 'opacity .3s';
+                        card.style.opacity = '0';
+                        setTimeout(function() { card.remove(); }, 300);
+                    }
+                })
+                .catch(function() { alert('Erro ao excluir resposta.'); });
+            });
+        });
+    });
+
+    // Também usar modal nos botões admin existentes
+    document.querySelectorAll('.btn-del-resposta').forEach(function(btn) {
+        btn.replaceWith(btn.cloneNode(true));
+    });
+    document.querySelectorAll('.btn-del-resposta').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var respostaId = this.dataset.respostaId;
+            window.abrirForumModal(function() {
+                fetch('/api/forum/respostas/' + respostaId, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                })
+                .then(function(res) { return res.json(); })
+                .then(function() {
+                    var card = document.getElementById('resposta-card-' + respostaId);
+                    if (card) {
+                        card.style.transition = 'opacity .3s';
+                        card.style.opacity = '0';
+                        setTimeout(function() { card.remove(); }, 300);
+                    }
+                })
+                .catch(function() { });
+            });
+        });
+    });
+
     // ── Auto-resize textareas ────────────────────────────────────────────────
 
     document.querySelectorAll('textarea.form-control').forEach(function (ta) {

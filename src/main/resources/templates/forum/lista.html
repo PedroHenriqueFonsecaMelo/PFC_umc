@@ -80,7 +80,7 @@
                                                      th:src="${t.autor.fotoPerfil}"
                                                      class="forum-avatar-mini-img" alt="foto" />
                                                 <span th:unless="${t.autor.fotoPerfil != null}"
-                                                      th:text="${t.autor.nome.substring(0,1).toUpperCase()}">?</span>
+                                                      th:text="${t.autor != null and t.autor.nome != null ? t.autor.nome.substring(0,1).toUpperCase() : '?'}">?</span>
                                             </span>
                                             <span th:text="${t.autor.nome}">Autor</span>
                                         </span>
@@ -189,7 +189,7 @@
                                              th:src="${t.autor.fotoPerfil}"
                                              class="forum-avatar-mini-img" alt="foto" />
                                         <span th:unless="${t.autor.fotoPerfil != null}"
-                                              th:text="${t.autor.nome.substring(0,1).toUpperCase()}">?</span>
+                                              th:text="${t.autor != null and t.autor.nome != null ? t.autor.nome.substring(0,1).toUpperCase() : '?'}">?</span>
                                     </span>
                                     <span th:text="${t.autor.nome}">Autor</span>
                                 </span>

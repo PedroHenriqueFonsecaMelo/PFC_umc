@@ -98,10 +98,15 @@ public class JwtUtil {
     public void addTokenCookie(HttpServletResponse response, String token) {
         Cookie c = new Cookie(cookieName, token);
         c.setHttpOnly(true);
-        c.setSecure(true); // obrigatório em HTTPS
+        c.setSecure(true);
         c.setPath("/");
-        c.setMaxAge(7 * 24 * 60 * 60); // 7 dias
+        c.setMaxAge(7 * 24 * 60 * 60);
         response.addCookie(c);
+        // Adiciona SameSite=Strict via header para proteção CSRF
+        String cookieHeader = cookieName + "=" + token
+                + "; Path=/; HttpOnly; Secure; SameSite=Strict"
+                + "; Max-Age=" + (7 * 24 * 60 * 60);
+        response.addHeader("Set-Cookie", cookieHeader);
     }
 
     public void clearJwtCookie(HttpServletResponse response) {
@@ -111,6 +116,11 @@ public class JwtUtil {
         c.setPath("/");
         c.setMaxAge(0);
         response.addCookie(c);
+        // Limpa cookie com SameSite=Strict
+        String cookieHeader = cookieName + "="
+                + "; Path=/; HttpOnly; Secure; SameSite=Strict"
+                + "; Max-Age=0";
+        response.addHeader("Set-Cookie", cookieHeader);
     }
 }
 

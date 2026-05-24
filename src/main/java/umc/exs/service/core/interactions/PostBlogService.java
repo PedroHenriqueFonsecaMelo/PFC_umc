@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,6 +21,7 @@ import umc.exs.model.entidades.social.PostBlog;
 import umc.exs.model.enums.StatusPost;
 import umc.exs.repository.negocios.ComentarioBlogRepository;
 import umc.exs.repository.negocios.PostBlogRepository;
+import umc.exs.repository.usuario.ClienteRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class PostBlogService {
 
     private final PostBlogRepository postBlogRepository;
     private final ComentarioBlogRepository comentarioRepository;
+    private final ClienteRepository clienteRepository;
     private static final String POST_N_ENCONTRADO = "Post não encontrado";
 
     public List<PostBlog> listarTodos() {
@@ -136,11 +139,31 @@ public class PostBlogService {
 
     @SuppressWarnings("null")
     @Transactional
-    public int curtirPost(Long postId) {
+    public Map<String, Object> toggleCurtir(Long postId, boolean descurtir) {
         PostBlog post = postBlogRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException(POST_N_ENCONTRADO));
-        post.setCurtidas(post.getCurtidas() + 1);
-        return postBlogRepository.save(post).getCurtidas();
+        if (descurtir) {
+            post.setCurtidas(Math.max(0, post.getCurtidas() - 1));
+        } else {
+            post.setCurtidas(post.getCurtidas() + 1);
+        }
+        int total = postBlogRepository.save(post).getCurtidas();
+        return Map.of("curtidas", total, "curtiu", !descurtir);
+    }
+
+    @SuppressWarnings("null")
+    @Transactional
+    public void deletarComentario(Long comentarioId, String emailUsuario) {
+        ComentarioBlog comentario = comentarioRepository.findById(comentarioId)
+                .orElseThrow(() -> new RuntimeException("Comentário não encontrado."));
+        // Verifica se o autor é o mesmo que está deletando
+        String nomeAutor = clienteRepository.findByEmail(emailUsuario)
+                .map(c -> c.getNome())
+                .orElse(null);
+        if (nomeAutor == null || !nomeAutor.equals(comentario.getAutorNome())) {
+            throw new IllegalStateException("Você não tem permissão para excluir este comentário.");
+        }
+        comentarioRepository.deleteById(comentarioId);
     }
 
     @SuppressWarnings("null")

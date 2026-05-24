@@ -14,6 +14,7 @@
         />
         <link rel="stylesheet" th:href="@{/css/forum/forum.css}" />
         <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     </head>
     <body>
         <!-- ============================================================
@@ -280,7 +281,17 @@
                                 >
                                     ✕
                                 </button>
+                                <!-- Excluir própria resposta -->
+                                <button
+                                    th:if="${clienteLogado and !isAdmin and clienteId != null and clienteId.equals(resposta.autor.id)}"
+                                    class="btn-del-resposta-proprio"
+                                    th:data-resposta-id="${resposta.id}"
+                                    title="Excluir minha resposta"
+                                >
+                                    🗑
+                                </button>
                             </div>
+
                         </article>
                     </th:block>
                 </th:block>

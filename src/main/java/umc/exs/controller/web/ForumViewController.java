@@ -123,14 +123,13 @@ public class ForumViewController {
     public String criarResposta(
             @PathVariable Long id,
             @RequestParam("conteudo") String conteudo,
-            BindingResult result,
             @AuthenticationPrincipal UserDetails user,
             RedirectAttributes ra) {
 
         if (user == null)
             return "redirect:/clientes/login";
 
-        if (result.hasErrors()) {
+        if (conteudo == null || conteudo.isBlank()) {
             ra.addFlashAttribute("erro", "A resposta não pode estar vazia.");
             return "redirect:/forum/topicos/" + id;
         }

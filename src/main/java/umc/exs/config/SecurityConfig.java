@@ -121,12 +121,15 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.POST, "/api/blog/*/curtir").authenticated()
                                                 .requestMatchers(HttpMethod.POST, "/api/blog/*/comentarios")
                                                 .authenticated()
+                                                .requestMatchers(HttpMethod.DELETE, "/api/blog/*/comentarios/*").authenticated()
                                                 .requestMatchers("/api/blog/**").hasAuthority(ROLE_ADMIN)
                                                 .requestMatchers(HttpMethod.GET, "/forum/**", "/api/forum/topicos")
                                                 .permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/forum/topicos/**").authenticated()
-                                                .requestMatchers(HttpMethod.DELETE, "/api/forum/**")
+                                                .requestMatchers(HttpMethod.DELETE, "/api/forum/topicos/**")
                                                 .hasAuthority(ROLE_ADMIN)
+                                                .requestMatchers(HttpMethod.DELETE, "/api/forum/respostas/**")
+                                                .authenticated()
 
                                                 // 4. Rotas da Central de Opiniões (Consulta pública, Salvar
                                                 // autenticado)

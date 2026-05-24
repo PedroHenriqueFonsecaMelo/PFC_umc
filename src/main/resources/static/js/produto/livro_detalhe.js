@@ -489,6 +489,33 @@ function atualizarBadgeNav(adicionou) {
 window.handleAdicionarEstante = function() {
     if (!_livroAtual) return;
 
+    // Verifica se usuário está logado antes de adicionar
+    fetch('/clientes/meu-perfil-json', { credentials: 'include', redirect: 'manual' })
+        .then(function(r) {
+            // status 0 = redirect bloqueado (não logado)
+            // status 200 = logado
+            // qualquer outro = não logado
+            if (r.type === 'opaqueredirect' || r.status === 0 || r.status === 302 || !r.ok) {
+                window.location.href = '/clientes/login';
+                return;
+            }
+            return r.json().then(function(data) {
+                if (!data || !data.email) {
+                    window.location.href = '/clientes/login';
+                    return;
+                }
+                _executarAdicionarEstante();
+            });
+        })
+        .catch(function() {
+            window.location.href = '/clientes/login';
+        });
+    return;
+};
+
+function _executarAdicionarEstante() {
+    if (!_livroAtual) return;
+
     if (jaEstaNoCarrinho(_livroAtual.id)) {
         // Remove do carrinho
         saveCarrinho(getCarrinho().filter(i => i.id !== _livroAtual.id));
@@ -505,7 +532,7 @@ window.handleAdicionarEstante = function() {
             'info'
         );
     }
-};
+}
 
 /* ── Handler: Comprar agora ── */
 window.handleComprarAgora = function() {

@@ -112,11 +112,25 @@ public class ForumController {
                 return ResponseEntity.ok(Map.of("mensagem", "Tópico removido."));
         }
 
-        // ── DELETE /api/forum/respostas/{id} — Admin ──────────────────────────────
-
+        // ── DELETE /api/forum/respostas/{id} — Admin ou próprio autor ─────────────
         @DeleteMapping("/respostas/{id}")
-        public ResponseEntity<?> deletarResposta(@PathVariable Long id) {
-                forumService.deletarResposta(id);
-                return ResponseEntity.ok(Map.of("mensagem", "Resposta removida."));
+        public ResponseEntity<?> deletarResposta(
+                @PathVariable Long id,
+                @AuthenticationPrincipal UserDetails user) {
+
+            boolean isAdmin = user.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ADMIN"));
+
+            if (!isAdmin) {
+                // Verifica se é o próprio autor
+                boolean ehAutor = forumService.isAutorResposta(id, user.getUsername());
+                if (!ehAutor) {
+                    return ResponseEntity.status(403)
+                        .body(Map.of("erro", "Sem permissão para excluir esta resposta."));
+                }
+            }
+
+            forumService.deletarResposta(id);
+            return ResponseEntity.ok(Map.of("mensagem", "Resposta removida."));
         }
 }

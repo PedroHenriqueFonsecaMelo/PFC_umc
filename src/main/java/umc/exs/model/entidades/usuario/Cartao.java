@@ -4,11 +4,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import umc.exs.converter.CpfConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -34,6 +37,8 @@ public class Cartao {
     private Long id;
 
     @Column(nullable = false, unique = true)
+    @Convert(converter = CpfConverter.class)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String numero;
 
     @Column(nullable = false)
@@ -45,7 +50,9 @@ public class Cartao {
     @Column(nullable = false)
     private String validade;
 
-    @Column(nullable = false, length = 14)
+    @Column(nullable = false, length = 255)
+    @Convert(converter = CpfConverter.class)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String cpfTitular;
 
     // Lado inverso da relação Many-to-Many

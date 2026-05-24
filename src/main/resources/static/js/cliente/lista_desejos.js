@@ -317,8 +317,27 @@ function atualizarBotoesResultados() {
         const isbn = isbnEl.textContent.trim();
         const btnWrap = item.querySelector('.btn-adicionar, .btn-ja-adicionado');
         if (!btnWrap) return;
+
         if (isbnsSalvos.has(isbn)) {
-            btnWrap.outerHTML = `<span class="btn-ja-adicionado"><i class="fa-solid fa-check"></i> Salvo</span>`;
+            // Marca como salvo
+            if (!btnWrap.classList.contains('btn-ja-adicionado')) {
+                btnWrap.outerHTML = `<span class="btn-ja-adicionado"><i class="fa-solid fa-check"></i> Salvo</span>`;
+            }
+        } else {
+            // Volta para botão de salvar
+            if (!btnWrap.classList.contains('btn-adicionar')) {
+                const tituloEl = item.querySelector('.resultado-titulo');
+                const autorEl  = item.querySelector('.resultado-autor');
+                const titulo   = tituloEl ? tituloEl.textContent.trim() : '';
+                const autores  = autorEl  ? autorEl.textContent.trim()  : '';
+                btnWrap.outerHTML = `<button class="btn-adicionar"
+                    data-isbn="${escHtml(isbn)}"
+                    data-titulo="${escHtml(titulo)}"
+                    data-autores="${escHtml(autores)}"
+                    onclick="adicionarDesejo(this.dataset.isbn, this.dataset.titulo, this.dataset.autores, this)">
+                    <i class="fa-solid fa-heart"></i> Salvar
+                </button>`;
+            }
         }
     });
 }
