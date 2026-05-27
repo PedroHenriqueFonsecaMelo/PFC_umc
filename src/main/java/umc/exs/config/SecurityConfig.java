@@ -213,6 +213,7 @@ public class SecurityConfig {
                         "/clientes/lista-desejos",
                         "/clientes/cancelamento/**",
                         "/api/clientes/minhas-vendas", "/api/clientes/minhas-vendas/**",
-                        "/clientes/minhas-vendas/**"
+                        "/clientes/minhas-vendas/**",
+                        "/api/checkout/**"
         };
 }

@@ -487,3 +487,20 @@ body { font-family: "DM Sans", sans-serif; background: var(--paper); color: var(
   .checkout-layout { grid-template-columns: 1fr; }
   .checkout-pagamento { border-top: 2px solid var(--ink); padding-top: 1.5rem; }
 }
+
+/* ── Countdown de reserva ── */
+#reservaCountdown {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    padding: .6rem 1.2rem;
+    background: #f0ebe3;
+    border: 1px solid rgba(114,47,55,.2);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    color: #2c241b;
+    margin-bottom: 1rem;
+    text-align: center;
+}

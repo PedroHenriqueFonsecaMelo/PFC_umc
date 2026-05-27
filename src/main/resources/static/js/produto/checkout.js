@@ -359,6 +359,9 @@ window.confirmarCompra = async function() {
         };
         sessionStorage.setItem('bibliotroca_confirmacao', JSON.stringify(confirmacaoData));
 
+        // Limpa reserva sem incrementar tentativas (compra efetuada)
+        _livrosReservados = [];
+
         setTimeout(() => { window.location.href = '/livros/pedido-confirmado'; }, 900);
 
     } catch (err) {
@@ -482,6 +485,128 @@ window.salvarEnderecoCheckout = async function() {
     }
 };
 
+/* ── Reserva de checkout ── */
+const LIMITE_LIVROS_CHECKOUT = 5;
+let _countdownInterval = null;
+let _livrosReservados  = [];
+
+function mostrarModalExpirada() {
+    const modal = document.getElementById('modalReservaExpirada');
+    if (modal) modal.style.display = 'flex';
+    const btn = document.getElementById('btnConfirmar');
+    if (btn) btn.disabled = true;
+    setTimeout(() => { window.location.href = '/livros/vitrine'; }, 5000);
+}
+
+function mostrarModalIndisponivel(mensagem) {
+    const modal = document.getElementById('modalIndisponivel');
+    const msg   = document.getElementById('modalIndisonivel-msg');
+    if (msg) msg.textContent = mensagem || 'Este produto está temporariamente reservado.';
+    if (modal) modal.style.display = 'flex';
+}
+
+window.fecharModalIndisponivel = function() {
+    const modal = document.getElementById('modalIndisponivel');
+    if (modal) modal.style.display = 'none';
+    window.location.href = '/livros/estante';
+};
+
+function iniciarCountdown(segundos) {
+    const el = document.getElementById('reservaCountdown');
+    if (!el) return;
+
+    el.style.display = 'flex';
+
+    if (_countdownInterval) clearInterval(_countdownInterval);
+
+    let restantes = segundos;
+
+    const atualizar = () => {
+        if (restantes <= 0) {
+            clearInterval(_countdownInterval);
+            el.innerHTML = '⏰ Reserva expirada';
+            el.style.color = '#c0392b';
+            liberarReservasSemContagem();
+            mostrarModalExpirada();
+            return;
+        }
+        const min = Math.floor(restantes / 60);
+        const sec = restantes % 60;
+        el.innerHTML = `⏱ Produto reservado por: <strong>${min}:${sec.toString().padStart(2,'0')}</strong>`;
+        if (restantes <= 60) el.style.color = '#c0392b';
+        restantes--;
+    };
+
+    atualizar();
+    _countdownInterval = setInterval(atualizar, 1000);
+}
+
+async function reservarLivros(livroIds) {
+    try {
+        const res = await fetch('/api/checkout/reservar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ livroIds })
+        });
+
+        if (res.status === 401) { window.location.href = '/clientes/login'; return; }
+        const data = await res.json();
+
+        if (!data.reservado) {
+            if (data.motivo === 'LIMITE_EXCEDIDO') {
+                mostrarToast(data.mensagem, 'erro');
+                const btn = document.getElementById('btnConfirmar');
+                if (btn) btn.disabled = true;
+            } else if (data.motivo === 'BLOQUEADO') {
+                mostrarModalIndisponivel(data.mensagem);
+            } else if (data.motivo === 'INDISPONIVEL') {
+                mostrarModalIndisponivel(data.mensagem);
+            }
+            return;
+        }
+
+        _livrosReservados = livroIds;
+        iniciarCountdown(data.duracaoSegundos || 300);
+
+    } catch (_) {
+        mostrarToast('Não foi possível reservar o produto. Tente novamente.', 'aviso');
+    }
+}
+
+async function liberarReservas() {
+    if (_livrosReservados.length === 0) return;
+    try {
+        await fetch('/api/checkout/reservar', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ livroIds: _livrosReservados })
+        });
+    } catch (_) {}
+}
+
+async function liberarReservasSemContagem() {
+    if (_livrosReservados.length === 0) return;
+    try {
+        await fetch('/api/checkout/reservar', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ livroIds: _livrosReservados, semContagem: true })
+        });
+    } catch (_) {}
+}
+
+// Libera ao sair da página sem comprar
+window.addEventListener('beforeunload', () => {
+    if (_livrosReservados.length > 0) {
+        navigator.sendBeacon('/api/checkout/reservar',
+            new Blob([JSON.stringify({ livroIds: _livrosReservados })],
+                { type: 'application/json' }));
+    }
+});
+
 /* ── Init ── */
 document.addEventListener('DOMContentLoaded', async () => {
 
@@ -541,6 +666,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 5. Renderiza itens
     renderItens(_itensSelecionados);
+
+    // Verifica limite de livros
+    if (_itensSelecionados.length > LIMITE_LIVROS_CHECKOUT) {
+        mostrarToast(
+            `Limite de ${LIMITE_LIVROS_CHECKOUT} livros por compra. Remova alguns itens para continuar.`,
+            'aviso'
+        );
+        const btn = document.getElementById('btnConfirmar');
+        if (btn) btn.disabled = true;
+    } else {
+        // Inicia reserva
+        const livroIds = _itensSelecionados.map(i => Number(i.id));
+        reservarLivros(livroIds);
+    }
 
     // 6. Carrega perfil, valida endereço e calcula financeiro
     const perfil = await carregarPerfil();

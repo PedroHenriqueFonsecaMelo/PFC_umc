@@ -34,6 +34,8 @@
 
     <main class="checkout-main">
 
+        <div id="reservaCountdown"></div>
+
         <!-- Indicador de etapas -->
         <div class="checkout-steps">
             <div class="step done">
@@ -201,6 +203,62 @@
         </div>
 
     </main>
+
+    <!-- Modal de reserva expirada -->
+    <div id="modalReservaExpirada" style="
+        display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+        background:rgba(44,36,27,.5);z-index:9999;
+        align-items:center;justify-content:center;">
+        <div style="background:#f9f6f0;border-radius:14px;padding:2rem 2rem 1.5rem;
+            max-width:400px;width:90%;box-shadow:0 8px 40px rgba(44,36,27,.22);text-align:center;">
+            <div style="font-size:2.5rem;margin-bottom:.75rem;">⏰</div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;
+                font-weight:700;color:#2c241b;margin-bottom:.5rem;">
+                Reserva expirada
+            </div>
+            <div style="font-size:.88rem;color:#7a6e65;margin-bottom:1.5rem;line-height:1.6;">
+                Seu tempo de reserva expirou e o produto voltou à vitrine.
+                Você será redirecionado em instantes.
+            </div>
+            <button onclick="window.location.href='/livros/vitrine'"
+                style="padding:.6rem 1.6rem;background:#722f37;color:#f9f6f0;
+                border:none;border-radius:8px;font-size:.88rem;font-weight:700;
+                cursor:pointer;font-family:'DM Sans',sans-serif;">
+                Ir para a Vitrine
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal produto indisponível -->
+    <div id="modalIndisponivel" style="
+        display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+        background:rgba(44,36,27,.5);z-index:9999;
+        align-items:center;justify-content:center;">
+        <div style="background:#f9f6f0;border-radius:14px;padding:2rem 2rem 1.5rem;
+            max-width:400px;width:90%;box-shadow:0 8px 40px rgba(44,36,27,.22);text-align:center;">
+            <div style="font-size:2.5rem;margin-bottom:.75rem;">🔒</div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;
+                font-weight:700;color:#2c241b;margin-bottom:.5rem;">
+                Produto indisponível
+            </div>
+            <div id="modalIndisonivel-msg" style="font-size:.88rem;color:#7a6e65;
+                margin-bottom:1.5rem;line-height:1.6;">
+                Este produto está temporariamente reservado por outro usuário.
+            </div>
+            <div style="display:flex;gap:.75rem;justify-content:center;">
+                <button onclick="fecharModalIndisponivel()"
+                    style="padding:.6rem 1.4rem;background:transparent;
+                    border:1px solid rgba(44,36,27,.22);color:#7a6e65;
+                    border-radius:8px;font-size:.85rem;cursor:pointer;
+                    font-family:'DM Sans',sans-serif;">Fechar</button>
+                <button onclick="window.location.href='/livros/vitrine'"
+                    style="padding:.6rem 1.4rem;background:#722f37;color:#f9f6f0;
+                    border:none;border-radius:8px;font-size:.85rem;font-weight:700;
+                    cursor:pointer;font-family:'DM Sans',sans-serif;">
+                    Ver Vitrine</button>
+            </div>
+        </div>
+    </div>
 
     <script th:src="@{/js/produto/checkout.js}"></script>
 </body>
