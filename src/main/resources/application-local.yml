@@ -60,7 +60,7 @@ mercadopago:
 
 google:
   books:
-    api-key: "AIzaSyCLtdElTKODoIsXYwx1Gu64_jBs63ri-LA"
+    api-key: "AIzaSyAmJa3QnPI5JAL2-dUi6IHZbG2PzBABtYs"
 
 logging:
   level:

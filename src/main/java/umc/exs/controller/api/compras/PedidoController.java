@@ -1,5 +1,7 @@
 package umc.exs.controller.api.compras;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import umc.exs.dto.mapper.PedidoMapper;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.service.core.cliente.ClienteService;
+import umc.exs.service.core.control.EtiquetaService;
 import umc.exs.service.core.control.PedidoService;
 
 @RestController
@@ -19,6 +22,7 @@ public class PedidoController {
     private final PedidoService pedidoService;
     private final ClienteService clienteService;
     private final PedidoMapper pedidoMapper;
+    private final EtiquetaService etiquetaService;
 
     @GetMapping("/pendentes")
     public ResponseEntity<?> listarPendentes(@AuthenticationPrincipal UserDetails user) {
@@ -79,6 +83,22 @@ public class PedidoController {
                 .map(pedidoMapper::toResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/etiqueta")
+    public ResponseEntity<byte[]> gerarEtiqueta(@PathVariable Long id) {
+        try {
+            byte[] pdf = etiquetaService.gerarEtiqueta(id);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData(
+                "attachment", "etiqueta-pedido-" + id + ".pdf");
+            return ResponseEntity.ok().headers(headers).body(pdf);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     private Long resolverId(String email) {

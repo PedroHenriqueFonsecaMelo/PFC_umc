@@ -504,6 +504,8 @@ function buildPedidoRow(p) {
   const proximos = PROXIMOS_STATUS[p.statusEnvio] || [];
   const podeAtualizar = proximos.length > 0;
 
+  const btnEtiqueta = `<a href="/api/pedidos/${p.id}/etiqueta" target="_blank" class="btn-etiqueta" title="Gerar Etiqueta de Envio">📦 Etiqueta</a>`;
+
   const acoesHtml = podeAtualizar
     ? `<div style="display:flex;flex-direction:column;gap:.4rem;max-width:460px">
         <input class="rastreio-input" id="rastreio-${p.id}" type="text"
@@ -516,6 +518,7 @@ function buildPedidoRow(p) {
           <button class="btn-salvar-envio" onclick="salvarEnvio(${p.id})" style="white-space:nowrap;flex-shrink:0">
             <i class="fa-solid fa-floppy-disk"></i> Atualizar
           </button>
+          ${p.statusEnvio === "AGUARDANDO_ENVIO" ? btnEtiqueta : ""}
         </div>
       </div>`
     : `<span style="font-size:.75rem;color:#7A6E65;font-style:italic">Status final — sem ações disponíveis</span>`;
