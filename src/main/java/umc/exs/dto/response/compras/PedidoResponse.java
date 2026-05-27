@@ -18,6 +18,7 @@ import umc.exs.model.enums.StatusEnvio;
 public class PedidoResponse {
 
     private Long id;
+    private String codigoPedido;
     private Long livroId;
     private String tituloLivro;
     private String autorLivro;

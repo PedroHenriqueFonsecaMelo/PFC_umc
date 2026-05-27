@@ -58,6 +58,9 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     /** Verifica se um livro foi comprado (livroId é snapshot no Pedido). */
     boolean existsByLivroId(Long livroId);
 
+    /** Verifica unicidade do código de pedido antes de persistir. */
+    boolean existsByCodigoPedido(String codigoPedido);
+
     /** Retorna o pedido de compra de um livro, se existir. */
     java.util.Optional<Pedido> findByLivroId(Long livroId);
 }

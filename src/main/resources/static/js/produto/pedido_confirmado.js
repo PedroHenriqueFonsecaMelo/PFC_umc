@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="pedido-card-topo">
             <div class="pedido-id-wrap">
               <span class="pedido-id-label">Pedido</span>
-              <strong class="pedido-id">#${item.pedidoId || '—'}</strong>
+              <strong class="pedido-id">${item.codigoPedido || ('#' + (item.pedidoId || '—'))}</strong>
             </div>
             <span class="status-badge">Aguardando envio</span>
           </div>

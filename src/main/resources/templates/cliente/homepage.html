@@ -1104,7 +1104,7 @@
                     '<div class="pedido-autor">' + (p.autorLivro||'') + '</div></div>' +
                     '<span class="status-badge status-' + p.statusEnvio + '">' + (p.statusEnvioDescricao||p.statusEnvio) + '</span>' +
                 '</div>' +
-                '<div class="pedido-meta"><span>Pedido #' + p.id + '</span><span>·</span>' +
+                '<div class="pedido-meta"><span>' + (p.codigoPedido || ('#' + p.id)) + '</span><span>·</span>' +
                     '<span>' + fmtDataComp(p.dataCompra) + '</span><span>·</span>' +
                     '<span class="pedido-preco">T$ ' + (p.precoLivro||0).toFixed(2) + '</span>' +
                     (p.statusEnvio === 'CANCELADO' ? '<span>·</span><span class="pedido-estorno">↩ T$ ' + (p.precoLivro||0).toFixed(2) + ' estornados</span>' : '') +

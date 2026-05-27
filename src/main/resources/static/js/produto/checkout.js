@@ -345,11 +345,12 @@ window.confirmarCompra = async function() {
                     if (Array.isArray(arr) && arr.length > 0) foto = arr[0];
                 } catch (_) {}
                 return {
-                    pedidoId: c.pedidoId,
-                    livroId:  c.livroId,
-                    titulo:   c.titulo || itemLocal.titulo || '',
-                    autor:    itemLocal.autor || '',
-                    preco:    c.preco,
+                    pedidoId:     c.pedidoId,
+                    codigoPedido: c.codigoPedido || null,
+                    livroId:      c.livroId,
+                    titulo:       c.titulo || itemLocal.titulo || '',
+                    autor:        itemLocal.autor || '',
+                    preco:        c.preco,
                     foto
                 };
             }),

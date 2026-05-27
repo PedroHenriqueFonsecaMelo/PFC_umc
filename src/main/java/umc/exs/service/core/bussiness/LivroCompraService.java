@@ -231,11 +231,17 @@ public class LivroCompraService {
                 final Cliente vendedorFinal = vendedor;
                 
                 livro.setAprovado(false);
-                pedidoService.registrarPedido(comprador, livro);
+                umc.exs.model.entidades.foundation.Pedido pedidoRegistrado =
+                        pedidoService.registrarPedido(comprador, livro);
 
                 livroRepository.save(livro);
                 sucesso.add(ItemResultadoDTO.builder()
-                        .livroId(livro.getId()).titulo(titulo).preco(livro.getPrecoAprovado()).build());
+                        .livroId(livro.getId())
+                        .pedidoId(pedidoRegistrado.getId())
+                        .codigoPedido(pedidoRegistrado.getCodigoPedido())
+                        .titulo(titulo)
+                        .preco(livro.getPrecoAprovado())
+                        .build());
                 gamificacaoService.xpCompra(comprador.getId());
 
                 // Notificação dashboard: livro vendido (vendedor)

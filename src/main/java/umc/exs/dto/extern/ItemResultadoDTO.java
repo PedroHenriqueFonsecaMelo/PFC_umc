@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ItemResultadoDTO {
     private Long livroId;
+    private Long pedidoId;
+    private String codigoPedido;
     private String titulo;
     private Double preco;
     private String motivo;

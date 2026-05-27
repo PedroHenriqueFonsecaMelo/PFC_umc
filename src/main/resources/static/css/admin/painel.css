@@ -1155,10 +1155,23 @@ input[type="text"].search-input.pedidos-search {
 }
 
 .pedido-td-id {
+  white-space: nowrap;
+}
+
+.pedido-codigo {
+  display: block;
   font-family: 'Courier New', monospace;
   font-size: .78rem;
-  color: #7a6e65;
-  white-space: nowrap;
+  font-weight: 700;
+  color: #5C4B3A;
+  letter-spacing: .02em;
+}
+
+.pedido-id-sub {
+  display: block;
+  font-family: 'Courier New', monospace;
+  font-size: .68rem;
+  color: #b0a99f;
 }
 
 .pedido-livro-titulo {

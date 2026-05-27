@@ -464,7 +464,8 @@ function renderPedidos() {
       p.tituloLivro.toLowerCase().includes(busca) ||
       (p.compradorNome || "").toLowerCase().includes(busca) ||
       (p.compradorEmail || "").toLowerCase().includes(busca) ||
-      String(p.id).includes(busca)
+      String(p.id).includes(busca) ||
+      (p.codigoPedido || "").toLowerCase().includes(busca)
     );
   }
 
@@ -509,7 +510,10 @@ function buildPedidoRow(p) {
 
   return `
   <tr class="pedido-tr" id="row-${p.id}">
-    <td class="pedido-td pedido-td-id">#${p.id}</td>
+    <td class="pedido-td pedido-td-id">
+      <span class="pedido-codigo">${p.codigoPedido || ('BIB-' + String(p.id).padStart(5,'0'))}</span>
+      <span class="pedido-id-sub">#${p.id}</span>
+    </td>
     <td class="pedido-td pedido-td-livro">
       <div class="pedido-livro-titulo">${esc(p.tituloLivro)}</div>
       <div class="pedido-livro-autor">${esc(p.autorLivro || "—")}</div>
@@ -611,7 +615,7 @@ function abrirModalPedido(pedidoId) {
   if (!p) return;
   garantirModalPedido();
 
-  document.getElementById("mpPedidoId").textContent = "#" + p.id;
+  document.getElementById("mpPedidoId").textContent = p.codigoPedido || ("#" + p.id);
   document.getElementById("mpTitulo").textContent   = p.tituloLivro;
   document.getElementById("mpAutor").textContent    = p.autorLivro || "—";
   document.getElementById("mpComprador").textContent = p.compradorNome || "—";

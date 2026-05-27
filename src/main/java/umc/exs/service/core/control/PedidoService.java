@@ -1,6 +1,8 @@
 package umc.exs.service.core.control;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +41,25 @@ public class PedidoService {
         private final EmailService emailService;
         private final NotificacaoService notificacaoService;
 
+        private static final String CHARSET_CODIGO = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        private static final SecureRandom RNG = new SecureRandom();
+
+        /** Gera um código único no formato BIB-YYYYMMDD-XXXX (não sequencial). */
+        private String gerarCodigoPedido() {
+                String data = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+                for (int tentativa = 0; tentativa < 100; tentativa++) {
+                        StringBuilder sufixo = new StringBuilder(4);
+                        for (int i = 0; i < 4; i++) {
+                                sufixo.append(CHARSET_CODIGO.charAt(RNG.nextInt(CHARSET_CODIGO.length())));
+                        }
+                        String codigo = "BIB-" + data + "-" + sufixo;
+                        if (!pedidoRepository.existsByCodigoPedido(codigo)) {
+                                return codigo;
+                        }
+                }
+                throw new IllegalStateException("Não foi possível gerar um código de pedido único.");
+        }
+
         // ==========================================================
         // CRIAÇÃO
         // ==========================================================
@@ -61,6 +82,7 @@ public class PedidoService {
                                 .fotosUrls(livro.getFotosUrls())
                                 .precoLivro(livro.getPrecoAprovado())
                                 .statusEnvio(StatusEnvio.AGUARDANDO_ENVIO)
+                                .codigoPedido(gerarCodigoPedido())
                                 .dataCompra(agora)
                                 .dataRetencaoExpira(agora.toLocalDate().plusYears(5))
                                 .build();

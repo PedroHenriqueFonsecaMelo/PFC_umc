@@ -76,6 +76,11 @@ public class Pedido {
 
     private LocalDateTime dataAtualizacaoStatus;
 
+    // Código único de pedido — formato BIB-YYYYMMDD-XXXX
+    // Não sequencial para não expor volume de vendas
+    @Column(unique = true, length = 20)
+    private String codigoPedido;
+
     // Código de rastreio (preenchido quando EM_TRANSITO)
     private String codigoRastreio;
 

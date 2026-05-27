@@ -203,8 +203,11 @@ public class EtiquetaService {
             pedidoNumCell.setBorderColor(new Color(200, 200, 200));
             pedidoNumCell.setPadding(6);
             Paragraph pedidoNumPara = new Paragraph();
+            String codigoPedidoLabel = pedido.getCodigoPedido() != null
+                ? pedido.getCodigoPedido()
+                : "#" + String.format("%05d", pedido.getId());
             pedidoNumPara.add(new Chunk("Pedido Nº\n", fSmall));
-            pedidoNumPara.add(new Chunk("#" + String.format("%05d", pedido.getId()), fBold));
+            pedidoNumPara.add(new Chunk(codigoPedidoLabel, fBold));
             pedidoNumCell.addElement(pedidoNumPara);
             pedidoTable.addCell(pedidoNumCell);
 
