@@ -391,6 +391,41 @@ public final class EmailHtmlBuilder {
         return base("Cancelamento não aprovado — Bibliotroca", corpo);
     }
 
+    /** Cancelamento de pedido PELO ADMIN (com estorno). */
+    public static String cancelamentoAdmin(
+            String nomeCliente,
+            Long pedidoId,
+            String tituloLivro,
+            double preco,
+            String dataCompra,
+            String dataCancelamento,
+            String motivoCategoria,
+            String justificativa) {
+
+        String corpo =
+            paragrafo("Olá, <strong>" + escHtml(nomeCliente) + "</strong>.") +
+            paragrafo("Informamos que o seu pedido foi <strong>cancelado</strong> pela nossa equipe administrativa. Os tokens referentes à compra foram <strong>estornados</strong> para o seu saldo.") +
+            "<table style='width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.88rem;'>" +
+            "<tr style='background:#f5f0e8;'><td style='padding:.6rem 1rem;font-weight:700;border:1px solid #e0d9d0;width:40%'>Pedido</td><td style='padding:.6rem 1rem;border:1px solid #e0d9d0;'>#" + pedidoId + "</td></tr>" +
+            "<tr><td style='padding:.6rem 1rem;font-weight:700;border:1px solid #e0d9d0;'>Livro</td><td style='padding:.6rem 1rem;border:1px solid #e0d9d0;'>" + escHtml(tituloLivro) + "</td></tr>" +
+            "<tr style='background:#f5f0e8;'><td style='padding:.6rem 1rem;font-weight:700;border:1px solid #e0d9d0;'>Valor estornado</td><td style='padding:.6rem 1rem;border:1px solid #e0d9d0;color:#722f37;font-weight:700;'>T$ " + String.format("%.2f", preco) + "</td></tr>" +
+            "<tr><td style='padding:.6rem 1rem;font-weight:700;border:1px solid #e0d9d0;'>Data da compra</td><td style='padding:.6rem 1rem;border:1px solid #e0d9d0;'>" + escHtml(dataCompra) + "</td></tr>" +
+            "<tr style='background:#f5f0e8;'><td style='padding:.6rem 1rem;font-weight:700;border:1px solid #e0d9d0;'>Data do cancelamento</td><td style='padding:.6rem 1rem;border:1px solid #e0d9d0;'>" + escHtml(dataCancelamento) + "</td></tr>" +
+            "<tr><td style='padding:.6rem 1rem;font-weight:700;border:1px solid #e0d9d0;'>Motivo</td><td style='padding:.6rem 1rem;border:1px solid #e0d9d0;'>" + escHtml(motivoCategoria) + "</td></tr>" +
+            "<tr style='background:#f5f0e8;'><td style='padding:.6rem 1rem;font-weight:700;border:1px solid #e0d9d0;'>Detalhes</td><td style='padding:.6rem 1rem;border:1px solid #e0d9d0;'>" + escHtml(justificativa) + "</td></tr>" +
+            "</table>" +
+            paragrafo("Pedimos sinceras desculpas pelo transtorno causado. Os tokens já foram creditados em sua conta e estão disponíveis para novas compras.") +
+            paragrafo("Se tiver dúvidas, entre em contato com nossa equipe pelo e-mail <a href='mailto:bibliotroca.noreply@gmail.com' style='color:#722f37;'>bibliotroca.noreply@gmail.com</a>.") +
+            paragrafo("Atenciosamente,<br><strong>Equipe Bibliotroca</strong>");
+
+        return base("Pedido cancelado — Bibliotroca", corpo);
+    }
+
+    private static String escHtml(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
     /** Aviso de pontos XP próximos ao vencimento. */
     public static String xpExpirando(String nome, long xpTotal, String dataExpiracao) {
         String corpo = saudacao(nome) +

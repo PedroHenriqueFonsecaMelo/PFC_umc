@@ -1,7 +1,11 @@
 package umc.exs.service.cancelamento;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -257,5 +261,135 @@ public class CancelamentoService {
     public SolicitacaoCancelamento buscarPorId(Long solicitacaoId) {
         return cancelamentoRepository.findById(solicitacaoId)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitação não encontrada: " + solicitacaoId));
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // ADMIN: cancelar pedido diretamente (sem solicitação prévia do cliente)
+    // ──────────────────────────────────────────────────────────────────────
+
+    @Transactional
+    public Map<String, Object> cancelarPeloAdmin(
+            Long pedidoId,
+            umc.exs.model.enums.MotivoCategoria motivo,
+            String justificativa) {
+
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+            .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
+
+        if (pedido.getStatusEnvio() == StatusEnvio.CANCELADO ||
+            pedido.getStatusEnvio() == StatusEnvio.ENTREGUE) {
+            throw new IllegalArgumentException("Este pedido não pode ser cancelado.");
+        }
+
+        // Estorna tokens ao comprador
+        Cliente comprador = pedido.getComprador();
+        double preco = pedido.getPrecoLivro() != null ? pedido.getPrecoLivro() : 0.0;
+        double saldoAnterior = comprador.getSaldoTokens() != null ? comprador.getSaldoTokens() : 0.0;
+        comprador.setSaldoTokens(saldoAnterior + preco);
+        clienteRepository.save(comprador);
+
+        // Devolve livro à vitrine
+        livroRepository.findById(pedido.getLivroId()).ifPresent(livro -> {
+            livro.setAprovado(true);
+            livroRepository.save(livro);
+        });
+
+        // Atualiza status do pedido
+        pedido.setStatusEnvio(StatusEnvio.CANCELADO);
+        pedido.setDataAtualizacaoStatus(LocalDateTime.now());
+        pedidoRepository.save(pedido);
+
+        // Cria registro de cancelamento
+        SolicitacaoCancelamento registro = SolicitacaoCancelamento.builder()
+            .pedido(pedido)
+            .cliente(comprador)
+            .motivoCategoria(motivo)
+            .motivoDescricao(justificativa)
+            .status(StatusSolicitacao.APROVADO)
+            .comentarioAdmin("Cancelamento realizado pelo administrador.")
+            .dataResposta(LocalDateTime.now())
+            .build();
+        cancelamentoRepository.save(registro);
+
+        logAuditoria.registrarLog("CANCELAMENTO_ADMIN", comprador.getId(), comprador.getEmail(),
+            String.format("Pedido #%d cancelado pelo admin — T$ %.2f estornados. Motivo: %s",
+                pedidoId, preco, motivo.getDescricao()));
+
+        // Envia email ao comprador
+        try {
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            String dataCompra = pedido.getDataCompra() != null
+                ? pedido.getDataCompra().format(fmt) : "—";
+            String dataCancelamento = LocalDateTime.now().format(fmt);
+
+            emailService.enviarHtml(
+                comprador.getEmail(),
+                "Pedido cancelado — Bibliotroca",
+                EmailHtmlBuilder.cancelamentoAdmin(
+                    comprador.getNome(),
+                    pedidoId,
+                    pedido.getTituloLivro(),
+                    preco,
+                    dataCompra,
+                    dataCancelamento,
+                    motivo.getDescricao(),
+                    justificativa
+                )
+            );
+        } catch (Exception e) {
+            log.warn("Falha ao enviar email de cancelamento admin: {}", e.getMessage());
+        }
+
+        // Notificação no sininho
+        try {
+            notificacaoService.criarNotificacaoDashboard(
+                comprador,
+                "Seu pedido #" + pedidoId + " (" + pedido.getTituloLivro() +
+                ") foi cancelado pelo administrador. Motivo: " + motivo.getDescricao() +
+                ". T$ " + String.format("%.2f", preco) + " estornados.",
+                "/clientes/homepage?aba=cancelamentos"
+            );
+        } catch (Exception e) {
+            log.warn("Falha ao criar notificacao: {}", e.getMessage());
+        }
+
+        return Map.of(
+            "cancelado", true,
+            "pedidoId", pedidoId,
+            "precoLivro", preco,
+            "saldoAposEstorno", comprador.getSaldoTokens()
+        );
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // CLIENTE: listar seus cancelamentos
+    // ──────────────────────────────────────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> listarCancelamentosCliente(String email) {
+        Cliente cliente = clienteRepository.findByEmail(email)
+            .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado."));
+
+        return cancelamentoRepository.findByClienteIdOrderByDataSolicitacaoDesc(cliente.getId())
+            .stream()
+            .map(c -> {
+                Map<String, Object> m = new LinkedHashMap<>();
+                m.put("id", c.getId());
+                m.put("pedidoId", c.getPedido().getId());
+                m.put("tituloLivro", c.getPedido().getTituloLivro());
+                m.put("precoLivro", c.getPedido().getPrecoLivro());
+                m.put("motivoCategoria", c.getMotivoCategoria() != null
+                    ? c.getMotivoCategoria().getDescricao() : "—");
+                m.put("motivoDescricao", c.getMotivoDescricao());
+                m.put("status", c.getStatus() != null ? c.getStatus().getDescricao() : "—");
+                m.put("comentarioAdmin", c.getComentarioAdmin());
+                m.put("dataSolicitacao", c.getDataSolicitacao());
+                m.put("dataResposta", c.getDataResposta());
+                m.put("canceladoPeloAdmin",
+                    c.getComentarioAdmin() != null &&
+                    c.getComentarioAdmin().contains("administrador"));
+                return m;
+            })
+            .collect(Collectors.toList());
     }
 }

@@ -419,7 +419,9 @@ let filtroAtual = "TODOS";
 
 async function carregarPedidos() {
   const lista = document.getElementById("listaPedidos");
-  lista.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
+  lista.innerHTML = `<tr><td colspan="7" class="skel-cell"><div class="skel"></div></td></tr>
+    <tr><td colspan="7" class="skel-cell"><div class="skel"></div></td></tr>
+    <tr><td colspan="7" class="skel-cell"><div class="skel"></div></td></tr>`;
   try {
     const res = await fetch("/api/admin/pedidos");
     if (!res.ok) throw new Error();
@@ -467,10 +469,10 @@ function renderPedidos() {
   }
 
   if (pedidos.length === 0) {
-    lista.innerHTML = `<div style="text-align:center;padding:3rem;color:#7A6E65">
+    lista.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:3rem;color:#7A6E65">
       <div style="font-size:2.5rem;margin-bottom:.75rem">📭</div>
       <p style="font-style:italic">Nenhum pedido encontrado para este filtro.</p>
-    </div>`;
+    </td></tr>`;
     return;
   }
 
@@ -491,121 +493,387 @@ const LABEL_STATUS = {
 };
 
 function buildPedidoRow(p) {
-  let foto = "https://via.placeholder.com/52x70?text=📚";
-  try {
-    const arr = JSON.parse(p.fotosUrls || "[]");
-    if (arr.length > 0) foto = arr[0];
-  } catch (_) {}
-
   const dataCompra = p.dataCompra
     ? new Date(p.dataCompra).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })
     : "—";
 
   const proximos = PROXIMOS_STATUS[p.statusEnvio] || [];
-  const podeAtualizar = proximos.length > 0;
+  const temAcao  = proximos.length > 0;
 
-  const btnEtiqueta = `<a href="/api/pedidos/${p.id}/etiqueta" target="_blank" class="btn-etiqueta" title="Gerar Etiqueta de Envio">📦 Etiqueta</a>`;
-
-  const acoesHtml = podeAtualizar
-    ? `<div style="display:flex;flex-direction:column;gap:.4rem;max-width:460px">
-        <input class="rastreio-input" id="rastreio-${p.id}" type="text"
-               placeholder="Cód. rastreio (opcional)" value="${p.codigoRastreio || ""}"
-               style="width:100%" />
-        <div style="display:flex;gap:.4rem;align-items:center">
-          <select class="select-status" id="status-${p.id}" style="flex:1;margin:0">
-            ${proximos.map((s) => `<option value="${s}">${LABEL_STATUS[s]}</option>`).join("")}
-          </select>
-          <button class="btn-salvar-envio" onclick="salvarEnvio(${p.id})" style="white-space:nowrap;flex-shrink:0">
-            <i class="fa-solid fa-floppy-disk"></i> Atualizar
-          </button>
-          ${p.statusEnvio === "AGUARDANDO_ENVIO" ? btnEtiqueta : ""}
-        </div>
-      </div>`
-    : `<span style="font-size:.75rem;color:#7A6E65;font-style:italic">Status final — sem ações disponíveis</span>`;
-
-  const rastreioInfo = p.codigoRastreio && p.statusEnvio === "EM_TRANSITO"
-    ? `<div style="font-size:.75rem;color:#4A5D23;font-family:monospace;background:rgba(74,93,35,.08);padding:.2rem .6rem;border:1px solid rgba(74,93,35,.2);display:inline-flex;align-items:center;gap:.35rem;margin-top:.35rem">
-        <i class="fa-solid fa-truck-fast"></i>${p.codigoRastreio}
-      </div>`
-    : "";
+  const pillClass = {
+    "AGUARDANDO_ENVIO": "pill-aguardando",
+    "EM_TRANSITO":      "pill-transito",
+    "ENTREGUE":         "pill-entregue",
+    "CANCELADO":        "pill-cancelado",
+  }[p.statusEnvio] || "";
 
   return `
-  <div class="pedido-row" id="row-${p.id}">
-    <img class="pedido-capa" src="${foto}" onerror="this.src='https://via.placeholder.com/52x70?text=📚'"/>
-    <div style="flex:1;min-width:0">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;flex-wrap:wrap">
-        <div>
-          <div style="font-weight:700;color:#2C241B">${p.tituloLivro}</div>
-          <div style="font-size:.75rem;color:#7A6E65">${p.autorLivro}</div>
-        </div>
-        <span class="status-pill s-${p.statusEnvio}">${p.statusEnvioDescricao}</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:#7A6E65;margin-top:.35rem;flex-wrap:wrap">
-        <span>Pedido <strong style="color:#2C241B">#${p.id}</strong></span>
-        <span>·</span>
-        <span>📅 ${dataCompra}</span>
-        <span>·</span>
-        <span class="pedido-preco">T$ ${p.precoLivro.toFixed(2)}</span>
-        ${p.compradorNome ? `<span>·</span><span>👤 ${p.compradorNome}</span>` : ""}
-        ${p.compradorEmail ? `<span style="font-family:monospace">(${p.compradorEmail})</span>` : ""}
-      </div>
-      ${p.compradorEndereco ? `
-      <div style="display:inline-flex;align-items:center;gap:.4rem;font-size:.75rem;color:#4A5D23;background:rgba(74,93,35,.07);border:1px solid rgba(74,93,35,.2);padding:.25rem .65rem;margin-top:.35rem;max-width:100%">
-        <i class="fa-solid fa-location-dot" style="flex-shrink:0"></i>
-        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.compradorEndereco}</span>
-      </div>` : `
-      <div style="display:inline-flex;align-items:center;gap:.4rem;font-size:.75rem;color:#9C968F;background:#F5F2ED;border:1px solid #E0D9D0;padding:.25rem .65rem;margin-top:.35rem">
-        <i class="fa-solid fa-location-dot" style="flex-shrink:0"></i>
-        <span>Endereço não cadastrado</span>
-      </div>`}
-      ${rastreioInfo}
-      <div style="margin-top:.6rem">${acoesHtml}</div>
-    </div>
-  </div>`;
+  <tr class="pedido-tr" id="row-${p.id}">
+    <td class="pedido-td pedido-td-id">#${p.id}</td>
+    <td class="pedido-td pedido-td-livro">
+      <div class="pedido-livro-titulo">${esc(p.tituloLivro)}</div>
+      <div class="pedido-livro-autor">${esc(p.autorLivro || "—")}</div>
+    </td>
+    <td class="pedido-td pedido-td-comprador">
+      <div class="pedido-comprador-nome">${esc(p.compradorNome || "—")}</div>
+      <div class="pedido-comprador-email">${esc(p.compradorEmail || "")}</div>
+    </td>
+    <td class="pedido-td pedido-td-data">${dataCompra}</td>
+    <td class="pedido-td pedido-td-preco">T$ ${p.precoLivro.toFixed(2)}</td>
+    <td class="pedido-td pedido-td-status">
+      <span class="status-pill ${pillClass}">${esc(p.statusEnvioDescricao || p.statusEnvio)}</span>
+    </td>
+    <td class="pedido-td pedido-td-acao">
+      ${temAcao
+        ? `<button class="btn-abrir-pedido" onclick="abrirModalPedido(${p.id})">
+             <i class="fa-solid fa-pen-to-square"></i> Gerir
+           </button>`
+        : `<span class="pedido-final-label">Finalizado</span>`
+      }
+    </td>
+  </tr>`;
 }
 
-async function salvarEnvio(pedidoId) {
-  const novoStatus = document.getElementById(`status-${pedidoId}`).value;
-  const codigoRastreio = document.getElementById(`rastreio-${pedidoId}`).value.trim();
+/* ── Modal de Detalhes / Gestão do Pedido ── */
+function garantirModalPedido() {
+  if (document.getElementById("modalPedido")) return;
+  const el = document.createElement("div");
+  el.id = "modalPedido";
+  el.style.cssText = "display:none;position:fixed;inset:0;background:rgba(44,36,27,.55);z-index:9998;align-items:center;justify-content:center;padding:1rem;overflow-y:auto";
+  el.addEventListener("click", e => { if (e.target === el) fecharModalPedido(); });
+  el.innerHTML = `
+    <div class="mp-card">
+      <div class="mp-header">
+        <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+          <div class="mp-titulo-pedido">Pedido <span id="mpPedidoId"></span></div>
+          <span id="mpStatus" class="status-pill"></span>
+        </div>
+        <button class="mp-fechar" onclick="fecharModalPedido()">✕</button>
+      </div>
 
-  if (novoStatus === "CANCELADO") {
-    if (!confirm("Tem certeza que deseja CANCELAR este pedido? O valor será estornado ao comprador. Esta operação não pode ser desfeita.")) {
-      return;
-    }
+      <div class="mp-body">
+        <div class="mp-section">
+          <div class="mp-section-label">Livro</div>
+          <div class="mp-livro-titulo" id="mpTitulo"></div>
+          <div class="mp-livro-autor" id="mpAutor"></div>
+          <div class="mp-row"><span class="mp-label">Total pago</span><span class="mp-value-strong" id="mpPreco"></span></div>
+          <div class="mp-row"><span class="mp-label">Data da compra</span><span id="mpData"></span></div>
+        </div>
+        <div class="mp-section">
+          <div class="mp-section-label">Comprador</div>
+          <div class="mp-row"><span class="mp-label">Nome</span><span id="mpComprador"></span></div>
+          <div class="mp-row"><span class="mp-label">E-mail</span><span id="mpEmail" class="mp-mono"></span></div>
+          <div class="mp-row mp-row-endereco"><span class="mp-label">Endereço</span><span id="mpEndereco" class="mp-endereco-val"></span></div>
+        </div>
+      </div>
+
+      <div class="mp-divider"></div>
+
+      <div class="mp-acoes">
+        <div class="mp-section-label">Atualizar status</div>
+        <div class="mp-acao-row">
+          <input id="mpRastreio" type="text" placeholder="Código de rastreio (opcional)" class="mp-rastreio-input"/>
+          <select id="mpNovoStatus" class="mp-status-sel"></select>
+          <button id="mpBtnSalvar" class="mp-btn-salvar" onclick="salvarEnvioModal()">
+            <i class="fa-solid fa-floppy-disk"></i> Salvar alteração
+          </button>
+          <a id="mpBtnEtiqueta" href="#" target="_blank" class="btn-etiqueta" style="display:none">
+            📦 Etiqueta
+          </a>
+        </div>
+        <div id="mpCancelBloco" style="display:none;margin-top:.85rem">
+          <div class="mp-cancel-aviso">
+            ⚠️ Ao cancelar, o valor será estornado ao comprador. Esta ação não pode ser desfeita.
+          </div>
+          <label class="mp-label" style="display:block;margin:.6rem 0 .35rem">
+            Justificativa do cancelamento <span style="color:#b91c1c">*</span>
+          </label>
+          <textarea id="mpJustificativa" rows="3" class="mp-justificativa" placeholder="Descreva o motivo do cancelamento…"></textarea>
+          <div id="mpErroJust" style="display:none;font-size:.75rem;color:#b91c1c;margin-top:.25rem">
+            <i class="fa-solid fa-circle-exclamation"></i> A justificativa é obrigatória.
+          </div>
+          <div style="display:flex;gap:.65rem;margin-top:.75rem">
+            <button onclick="document.getElementById('mpCancelBloco').style.display='none'" class="mp-btn-voltar">
+              ← Voltar
+            </button>
+            <button onclick="confirmarCancelamento()" class="mp-btn-confirmar-cancel">
+              <i class="fa-solid fa-xmark"></i> Confirmar Cancelamento
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+}
+
+function abrirModalPedido(pedidoId) {
+  const p = todosPedidos.find(x => x.id === pedidoId);
+  if (!p) return;
+  garantirModalPedido();
+
+  document.getElementById("mpPedidoId").textContent = "#" + p.id;
+  document.getElementById("mpTitulo").textContent   = p.tituloLivro;
+  document.getElementById("mpAutor").textContent    = p.autorLivro || "—";
+  document.getElementById("mpComprador").textContent = p.compradorNome || "—";
+  document.getElementById("mpEmail").textContent    = p.compradorEmail || "—";
+  document.getElementById("mpEndereco").textContent = p.compradorEndereco || "Não cadastrado";
+  document.getElementById("mpPreco").textContent    = "T$ " + p.precoLivro.toFixed(2);
+  document.getElementById("mpData").textContent     = p.dataCompra
+    ? new Date(p.dataCompra).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
+    : "—";
+
+  const pillClass = { "AGUARDANDO_ENVIO": "pill-aguardando", "EM_TRANSITO": "pill-transito",
+                      "ENTREGUE": "pill-entregue", "CANCELADO": "pill-cancelado" }[p.statusEnvio] || "";
+  const statusEl = document.getElementById("mpStatus");
+  statusEl.className = "status-pill " + pillClass;
+  statusEl.textContent = p.statusEnvioDescricao || p.statusEnvio;
+
+  document.getElementById("mpRastreio").value = p.codigoRastreio || "";
+  const proximos = PROXIMOS_STATUS[p.statusEnvio] || [];
+  document.getElementById("mpNovoStatus").innerHTML =
+    proximos.map(s => `<option value="${s}">${LABEL_STATUS[s]}</option>`).join("");
+
+  const btnEtiqueta = document.getElementById("mpBtnEtiqueta");
+  if (p.statusEnvio === "AGUARDANDO_ENVIO") {
+    btnEtiqueta.href = `/api/pedidos/${p.id}/etiqueta`;
+    btnEtiqueta.style.display = "inline-flex";
+  } else {
+    btnEtiqueta.style.display = "none";
   }
 
-  const btn = document.querySelector(`#row-${pedidoId} .btn-salvar-envio`);
+  document.getElementById("mpBtnSalvar").dataset.pedidoId = pedidoId;
+  document.getElementById("mpCancelBloco").style.display = "none";
+  document.getElementById("mpJustificativa").value = "";
+  document.getElementById("mpErroJust").style.display = "none";
+
+  document.getElementById("modalPedido").style.display = "flex";
+}
+
+function fecharModalPedido() {
+  const el = document.getElementById("modalPedido");
+  if (el) el.style.display = "none";
+}
+
+async function salvarEnvioModal() {
+  const btn        = document.getElementById("mpBtnSalvar");
+  const pedidoId   = parseInt(btn.dataset.pedidoId);
+  const novoStatus = document.getElementById("mpNovoStatus").value;
+  const rastreio   = document.getElementById("mpRastreio").value.trim();
+
+  if (novoStatus === "CANCELADO") {
+    const bloco = document.getElementById("mpCancelBloco");
+    bloco.innerHTML = buildCancelarHtml(pedidoId);
+    bloco.style.display = "block";
+    bloco.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    return;
+  }
+
+  await _executarAtualizacaoPedido(pedidoId, novoStatus, rastreio, null);
+}
+
+/* ── Cancelamento pelo Admin — fluxo com motivo + confirmação ── */
+
+const MOTIVOS_ADMIN = [
+  { value: "PRODUTO_NAO_DISPONIVEL",  label: "Produto não disponível para envio" },
+  { value: "DADOS_INCORRETOS",        label: "Dados do comprador incorretos ou incompletos" },
+  { value: "SUSPEITA_FRAUDE",         label: "Suspeita de fraude ou abuso" },
+  { value: "PROBLEMA_LOGISTICA",      label: "Problema logístico" },
+  { value: "PEDIDO_DUPLICADO",        label: "Pedido duplicado" },
+  { value: "DECISAO_ADMINISTRATIVA",  label: "Decisão administrativa" },
+  { value: "OUTRO",                   label: "Outro motivo" }
+];
+
+function buildCancelarHtml(pedidoId) {
+  const opcoesHtml = MOTIVOS_ADMIN.map(m =>
+    `<label class="motivo-opcao">
+      <input type="radio" name="motivo-cancel-${pedidoId}" value="${m.value}">
+      <span>${esc(m.label)}</span>
+     </label>`
+  ).join("");
+
+  return `
+    <div class="mp-cancelar-bloco">
+      <div class="mp-section-label" style="color:#b91c1c;font-size:.7rem;margin-bottom:.5rem;">
+        <i class="fa-solid fa-ban"></i> Cancelar Pedido
+      </div>
+      <div class="mp-cancel-aviso">
+        ⚠️ O valor será estornado ao comprador e o livro voltará à vitrine.
+        Esta ação não pode ser desfeita.
+      </div>
+      <div class="mp-motivos-grupo" id="motivos-${pedidoId}">
+        ${opcoesHtml}
+      </div>
+      <textarea id="justificativa-${pedidoId}"
+                class="mp-justificativa"
+                placeholder="Descreva os detalhes do cancelamento (obrigatório, mín. 10 caracteres)..."
+                rows="3"></textarea>
+      <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:.5rem;">
+        <button class="mp-btn-voltar"
+                onclick="document.getElementById('mpCancelBloco').style.display='none'">
+          Voltar
+        </button>
+        <button class="mp-btn-confirmar-cancel"
+                onclick="executarCancelamentoAdmin(${pedidoId})">
+          <i class="fa-solid fa-ban"></i> Confirmar Cancelamento
+        </button>
+      </div>
+    </div>`;
+}
+
+async function executarCancelamentoAdmin(pedidoId) {
+  const motivoSel = document.querySelector(
+    `input[name="motivo-cancel-${pedidoId}"]:checked`);
+  if (!motivoSel) {
+    mostrarToast("Selecione o motivo do cancelamento.", "aviso");
+    return;
+  }
+
+  const justEl = document.getElementById(`justificativa-${pedidoId}`);
+  const justificativa = justEl ? justEl.value.trim() : "";
+  if (justificativa.length < 10) {
+    if (justEl) justEl.style.borderColor = "#b91c1c";
+    mostrarToast("Informe a justificativa (mínimo 10 caracteres).", "aviso");
+    return;
+  }
+  if (justEl) justEl.style.borderColor = "";
+
+  abrirConfirmacaoCancelamento(pedidoId, motivoSel.value, justificativa);
+}
+
+function abrirConfirmacaoCancelamento(pedidoId, motivo, justificativa) {
+  garantirModalConfirmCancel();
+  const overlay = document.getElementById("modalConfirmCancelOverlay");
+  const p = todosPedidos.find(x => x.id === pedidoId);
+
+  document.getElementById("confirmCancelMsg").innerHTML =
+    `Tem certeza que deseja cancelar o pedido <strong>#${String(pedidoId).padStart(5,"0")}</strong>
+     — <em>${esc(p ? p.tituloLivro : "")}</em>?<br><br>
+     O valor de <strong>T$ ${p ? p.precoLivro.toFixed(2) : "—"}</strong> será
+     estornado ao comprador e o livro voltará à vitrine.<br><br>
+     O comprador será notificado por e-mail.`;
+
+  document.getElementById("confirmCancelBtn").onclick = async () => {
+    fecharConfirmacaoCancelamento();
+    await _executarCancelamentoAdminFetch(pedidoId, motivo, justificativa);
+  };
+
+  overlay.style.display = "flex";
+}
+
+function fecharConfirmacaoCancelamento() {
+  const el = document.getElementById("modalConfirmCancelOverlay");
+  if (el) el.style.display = "none";
+}
+
+function garantirModalConfirmCancel() {
+  if (document.getElementById("modalConfirmCancelOverlay")) return;
+  const el = document.createElement("div");
+  el.id = "modalConfirmCancelOverlay";
+  el.style.cssText = "display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(20,16,12,.65);z-index:10000;align-items:center;justify-content:center;";
+  el.innerHTML = `
+    <div style="background:#f9f6f0;border-radius:14px;max-width:460px;width:90%;
+        box-shadow:0 12px 60px rgba(20,16,12,.35);overflow:hidden;">
+      <div style="background:#b91c1c;padding:1.1rem 1.5rem;
+          display:flex;align-items:center;gap:.65rem;">
+        <i class="fa-solid fa-triangle-exclamation" style="color:#fff;font-size:1.1rem;"></i>
+        <span style="font-family:'Playfair Display',serif;font-size:1rem;
+            font-weight:700;color:#fff;">Confirmar Cancelamento</span>
+      </div>
+      <div style="padding:1.5rem;">
+        <p id="confirmCancelMsg" style="font-size:.88rem;color:#2c241b;
+            line-height:1.7;margin:0 0 1.5rem;"></p>
+        <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+          <button onclick="fecharConfirmacaoCancelamento()"
+              style="padding:.5rem 1.2rem;background:transparent;
+              border:1.5px solid rgba(44,36,27,.2);color:#7a6e65;
+              border-radius:6px;font-size:.85rem;cursor:pointer;
+              font-family:'DM Sans',sans-serif;width:auto;margin:0;">
+            Voltar
+          </button>
+          <button id="confirmCancelBtn"
+              style="padding:.5rem 1.2rem;background:#b91c1c;color:#fff;
+              border:none;border-radius:6px;font-size:.85rem;font-weight:700;
+              cursor:pointer;font-family:'DM Sans',sans-serif;
+              display:inline-flex;align-items:center;gap:.4rem;width:auto;margin:0;">
+            <i class="fa-solid fa-ban"></i> Sim, cancelar
+          </button>
+        </div>
+      </div>
+    </div>`;
+  el.addEventListener("click", e => { if (e.target === el) fecharConfirmacaoCancelamento(); });
+  document.body.appendChild(el);
+}
+
+async function _executarCancelamentoAdminFetch(pedidoId, motivo, justificativa) {
+  try {
+    const res = await fetch(`/api/admin/pedidos/${pedidoId}/cancelar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ motivoCategoria: motivo, justificativa })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.erro || "Erro ao cancelar pedido.");
+    }
+
+    const data = await res.json();
+    const idx = todosPedidos.findIndex(p => p.id === pedidoId);
+    if (idx !== -1) {
+      todosPedidos[idx].statusEnvio = "CANCELADO";
+      todosPedidos[idx].statusEnvioDescricao = "Cancelado";
+    }
+
+    fecharModalPedido();
+    renderPedidos();
+    mostrarToast(
+      `Pedido #${pedidoId} cancelado. T$ ${data.precoLivro ? data.precoLivro.toFixed(2) : "—"} estornados. Comprador notificado por e-mail.`,
+      "sucesso"
+    );
+  } catch (e) {
+    mostrarToast(e.message || "Erro ao cancelar pedido.", "erro");
+  }
+}
+
+async function _executarAtualizacaoPedido(pedidoId, novoStatus, codigoRastreio, justificativa) {
+  const btn = document.getElementById("mpBtnSalvar");
   btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando…';
 
   try {
+    const body = { statusEnvio: novoStatus, codigoRastreio: codigoRastreio || null };
+    if (justificativa) body.justificativa = justificativa;
+
     const res = await fetch(`/api/admin/pedidos/${pedidoId}/envio`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ statusEnvio: novoStatus, codigoRastreio: codigoRastreio || null }),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) throw new Error(await res.text());
     const atualizado = await res.json();
 
-    const idx = todosPedidos.findIndex((p) => p.id === pedidoId);
+    const idx = todosPedidos.findIndex(p => p.id === pedidoId);
     if (idx !== -1) todosPedidos[idx] = atualizado;
+
+    fecharModalPedido();
 
     if (novoStatus === "CANCELADO" && atualizado.saldoAposEstorno != null) {
       mostrarToast(
-        `✅ Pedido #${pedidoId} cancelado — T$ ${atualizado.precoLivro.toFixed(2)} estornados. ` +
-        `Novo saldo do comprador: T$ ${atualizado.saldoAposEstorno.toFixed(2)}`,
+        `Pedido #${pedidoId} cancelado — T$ ${atualizado.precoLivro.toFixed(2)} estornados. ` +
+        `Novo saldo: T$ ${atualizado.saldoAposEstorno.toFixed(2)}`,
         "sucesso",
       );
     } else {
-      mostrarToast(`✅ Pedido #${pedidoId} atualizado para "${LABEL_STATUS[novoStatus]}"`, "sucesso");
+      mostrarToast(`Pedido #${pedidoId} atualizado para "${LABEL_STATUS[novoStatus]}"`, "sucesso");
     }
 
     renderPedidos();
   } catch (e) {
-    mostrarToast("❌ Erro: " + e.message, "erro");
+    mostrarToast("Erro: " + e.message, "erro");
+  } finally {
     btn.disabled = false;
-    btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar alteração';
   }
 }
 

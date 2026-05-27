@@ -214,6 +214,7 @@ public class SecurityConfig {
                         "/clientes/cancelamento/**",
                         "/api/clientes/minhas-vendas", "/api/clientes/minhas-vendas/**",
                         "/clientes/minhas-vendas/**",
-                        "/api/checkout/**"
+                        "/api/checkout/**",
+                        "/api/cancelamentos/meus"
         };
 }

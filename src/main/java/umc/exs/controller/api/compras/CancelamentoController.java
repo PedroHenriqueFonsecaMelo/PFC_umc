@@ -114,4 +114,51 @@ public class CancelamentoController {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
+
+    // ─────────────────────────────────────────────────────────────────
+    // ADMIN: cancelar pedido diretamente (com motivo + justificativa)
+    // ─────────────────────────────────────────────────────────────────
+
+    @PostMapping("/api/admin/pedidos/{pedidoId}/cancelar")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> cancelarPeloAdmin(
+            @PathVariable Long pedidoId,
+            @RequestBody Map<String, String> body) {
+
+        String motivoCategoriaStr = body.get("motivoCategoria");
+        String justificativa      = body.get("justificativa");
+
+        if (justificativa == null || justificativa.trim().length() < 10) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("erro", "Justificativa obrigatória (mínimo 10 caracteres)."));
+        }
+
+        try {
+            umc.exs.model.enums.MotivoCategoria motivo =
+                umc.exs.model.enums.MotivoCategoria.valueOf(
+                    motivoCategoriaStr != null ? motivoCategoriaStr : "DECISAO_ADMINISTRATIVA");
+
+            var resultado = cancelamentoService.cancelarPeloAdmin(
+                pedidoId, motivo, justificativa.trim());
+            return ResponseEntity.ok(resultado);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // CLIENTE: listar seus cancelamentos
+    // ─────────────────────────────────────────────────────────────────
+
+    @GetMapping("/api/cancelamentos/meus")
+    public ResponseEntity<?> meusCancelamentos(
+            @AuthenticationPrincipal UserDetails user) {
+        if (user == null) return ResponseEntity.status(401).build();
+        try {
+            var lista = cancelamentoService.listarCancelamentosCliente(user.getUsername());
+            return ResponseEntity.ok(lista);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }

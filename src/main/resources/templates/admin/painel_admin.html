@@ -86,13 +86,25 @@
                 </div>
               </div>
 
-              <div
-                id="listaPedidos"
-                style="display: flex; flex-direction: column; gap: 0.75rem"
-              >
-                <div class="skel"></div>
-                <div class="skel"></div>
-                <div class="skel"></div>
+              <div class="pedidos-table-wrap">
+                <table class="pedidos-table">
+                  <thead>
+                    <tr class="pedidos-thead-tr">
+                      <th class="pedidos-th">#</th>
+                      <th class="pedidos-th">Livro</th>
+                      <th class="pedidos-th">Comprador</th>
+                      <th class="pedidos-th">Data</th>
+                      <th class="pedidos-th">Total</th>
+                      <th class="pedidos-th">Status</th>
+                      <th class="pedidos-th" style="text-align:center">Ação</th>
+                    </tr>
+                  </thead>
+                  <tbody id="listaPedidos">
+                    <tr><td colspan="7" class="skel-cell"><div class="skel"></div></td></tr>
+                    <tr><td colspan="7" class="skel-cell"><div class="skel"></div></td></tr>
+                    <tr><td colspan="7" class="skel-cell"><div class="skel"></div></td></tr>
+                  </tbody>
+                </table>
               </div>
             </div>
 

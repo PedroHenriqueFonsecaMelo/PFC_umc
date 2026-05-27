@@ -194,6 +194,32 @@
         }
         .pix-sucesso-titulo { font-size:1.15rem; font-weight:700; color:var(--forest,#4a5d23); margin-bottom:.4rem; }
         .pix-sucesso-sub { font-size:.85rem; color:var(--muted,#7a6e65); margin-bottom:1.25rem; }
+
+        /* ── Cards de cancelamento ────────────────────────── */
+        .cancel-card {
+            border:1px solid rgba(44,36,27,.12); border-radius:10px;
+            padding:1rem 1.1rem; margin-bottom:.75rem; background:#fff;
+            cursor:pointer; transition:box-shadow .18s, border-color .18s;
+        }
+        .cancel-card:hover {
+            border-color:rgba(114,47,55,.3);
+            box-shadow:0 2px 12px rgba(114,47,55,.1);
+        }
+        .cancel-card-header {
+            display:flex; align-items:flex-start; justify-content:space-between;
+            gap:.5rem; margin-bottom:.5rem; flex-wrap:wrap;
+        }
+        .cancel-card-titulo { font-weight:600; font-size:.92rem; color:#2c241b; display:block; }
+        .cancel-card-pedido { font-size:.75rem; color:#9c968f; font-family:monospace; display:block; }
+        .cancel-card-meta {
+            display:flex; gap:.75rem; font-size:.78rem; color:#7a6e65;
+            flex-wrap:wrap; margin-bottom:.5rem;
+        }
+        .cancel-card-footer {
+            display:flex; justify-content:space-between; align-items:center;
+            flex-wrap:wrap; gap:.5rem; padding-top:.5rem;
+            border-top:1px solid #f0ebe3;
+        }
     </style>
 </head>
 <body>
@@ -305,6 +331,9 @@
         </button>
         <button class="tab-btn" data-tab="historico">
             <span class="tab-icon">≡</span> Histórico
+        </button>
+        <button class="tab-btn" data-tab="cancelamentos">
+            <span class="tab-icon">✕</span> Cancelamentos
         </button>
         <button class="tab-btn" data-tab="ranking">
             <span class="tab-icon">▲</span> Ranking
@@ -786,7 +815,50 @@
             </div>
         </div>
 
+        <!-- ------------------------------------------------
+             PANEL 7 · CANCELAMENTOS
+             ------------------------------------------------ -->
+        <div id="panel-cancelamentos" class="tab-panel">
+            <div class="panel-card">
+                <div style="display:flex;align-items:center;justify-content:space-between;
+                    margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;">
+                    <h2 class="panel-title" style="margin:0;">
+                        <span class="panel-title-accent">✕</span> Meus Cancelamentos
+                    </h2>
+                    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                        <button class="csub-btn active" onclick="filtrarCancelamentos('TODOS', this)">Todos</button>
+                        <button class="csub-btn" onclick="filtrarCancelamentos('ADMIN', this)">Pelo Administrador</button>
+                        <button class="csub-btn" onclick="filtrarCancelamentos('CLIENTE', this)">Solicitados por mim</button>
+                    </div>
+                </div>
+                <div id="cancelamentos-loading" style="text-align:center;padding:2rem;
+                    color:#9c968f;font-style:italic;">Carregando...</div>
+                <div id="cancelamentos-lista"></div>
+            </div>
+        </div>
+
     </div><!-- /cliente not null -->
+
+    <!-- Modal detalhes cancelamento -->
+    <div id="modalCancelDetalheOverlay" style="
+        display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+        background:rgba(44,36,27,.5);z-index:9999;
+        align-items:center;justify-content:center;padding:1rem;"
+         onclick="if(event.target===this)document.getElementById('modalCancelDetalheOverlay').style.display='none'">
+      <div style="background:#f9f6f0;border-radius:14px;max-width:520px;width:100%;
+          box-shadow:0 8px 40px rgba(44,36,27,.22);overflow:hidden;"
+           onclick="event.stopPropagation()">
+        <div style="background:#2c241b;padding:1.1rem 1.5rem;
+            display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-family:'Playfair Display',serif;font-size:1rem;
+              font-weight:700;color:#f9f6f0;">Detalhes do Cancelamento</span>
+          <button onclick="document.getElementById('modalCancelDetalheOverlay').style.display='none'"
+              style="background:rgba(255,255,255,.1);border:none;cursor:pointer;
+              color:#f9f6f0;width:30px;height:30px;border-radius:50%;font-size:.9rem;">✕</button>
+        </div>
+        <div id="modalCancelDetalheConteudo" style="padding:1.5rem;"></div>
+      </div>
+    </div>
 
     <!-- PIX MODAL -->
     <div id="cwModalPix" class="pix-modal-overlay">
@@ -917,6 +989,7 @@
 
     /* ── Lazy-load flags ───────────────────────────────────── */
     var comprasLoaded = false, historicoLoaded = false, carteiraLoaded = false, vendasLoaded = false;
+    var _todosCanc = [];
 
     /* ── Tab switching ─────────────────────────────────────── */
     document.querySelectorAll('.tab-btn').forEach(function(btn) {
@@ -936,6 +1009,7 @@
             else if (tabId === 'vendas' && !vendasLoaded) { vendasLoaded = true; initVendas(); }
             else if (tabId === 'historico' && !historicoLoaded) { historicoLoaded = true; initHistorico(); }
             else if (tabId === 'carteira' && !carteiraLoaded) { carteiraLoaded = true; initCarteira(); }
+            else if (tabId === 'cancelamentos' && _todosCanc.length === 0) { carregarCancelamentos(); }
         });
     });
 
@@ -1393,8 +1467,132 @@
         if (e.key === 'Escape') {
             fecharModalRemoverEndereco();
             fecharModalDeletarConta();
+            var ov = document.getElementById('modalCancelDetalheOverlay');
+            if (ov) ov.style.display = 'none';
         }
     });
+
+    /* ============================================================
+       CANCELAMENTOS — inline
+       ============================================================ */
+    function escHtml(s) {
+        if (!s) return '';
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    async function carregarCancelamentos() {
+        var loading = document.getElementById('cancelamentos-loading');
+        var lista   = document.getElementById('cancelamentos-lista');
+        try {
+            var res = await fetch('/api/cancelamentos/meus', { credentials: 'include' });
+            if (!res.ok) throw new Error();
+            _todosCanc = await res.json();
+            if (loading) loading.style.display = 'none';
+            renderCancelamentos(_todosCanc);
+        } catch(_) {
+            if (loading) loading.textContent = 'Erro ao carregar cancelamentos.';
+        }
+    }
+
+    function filtrarCancelamentos(tipo, btn) {
+        document.querySelectorAll('#panel-cancelamentos .csub-btn')
+            .forEach(function(b) { b.classList.remove('active'); });
+        if (btn) btn.classList.add('active');
+        var filtrados = tipo === 'TODOS' ? _todosCanc
+            : tipo === 'ADMIN' ? _todosCanc.filter(function(c) { return c.canceladoPeloAdmin; })
+            : _todosCanc.filter(function(c) { return !c.canceladoPeloAdmin; });
+        renderCancelamentos(filtrados);
+    }
+
+    function renderCancelamentos(lista) {
+        var el = document.getElementById('cancelamentos-lista');
+        if (!el) return;
+
+        if (!lista || lista.length === 0) {
+            el.innerHTML = '<div style="text-align:center;padding:3rem;color:#9c968f;font-style:italic;">Nenhum cancelamento encontrado.</div>';
+            return;
+        }
+
+        el.innerHTML = lista.map(function(c) {
+            var dataCanc = c.dataResposta
+                ? new Date(c.dataResposta).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' })
+                : '—';
+            var dataSolic = c.dataSolicitacao
+                ? new Date(c.dataSolicitacao).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' })
+                : '—';
+            var tipoBadge = c.canceladoPeloAdmin
+                ? '<span style="background:#fee2e2;color:#991b1b;font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:20px;white-space:nowrap;">Cancelado pelo Admin</span>'
+                : '<span style="background:#fef9c3;color:#854d0e;font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:20px;white-space:nowrap;">Solicitado por mim</span>';
+
+            return '<div class="cancel-card" onclick="verDetalhesCancelamento(' + c.id + ')">' +
+                '<div class="cancel-card-header">' +
+                    '<div>' +
+                        '<span class="cancel-card-titulo">' + escHtml(c.tituloLivro || 'Livro') + '</span>' +
+                        '<span class="cancel-card-pedido">Pedido #' + String(c.pedidoId || '').padStart(5,'0') + '</span>' +
+                    '</div>' +
+                    tipoBadge +
+                '</div>' +
+                '<div class="cancel-card-meta">' +
+                    '<span>📅 Solicitado em: ' + dataSolic + '</span>' +
+                    (c.dataResposta ? '<span>🔁 Processado em: ' + dataCanc + '</span>' : '') +
+                    '<span style="color:#722f37;font-weight:600;">T$ ' + (c.precoLivro || 0).toFixed(2) + ' estornados</span>' +
+                '</div>' +
+                '<div class="cancel-card-footer">' +
+                    '<span style="font-size:.78rem;color:#7a6e65;">Motivo: <strong>' + escHtml(c.motivoDescricao || c.motivoCategoria || '—') + '</strong></span>' +
+                    '<span style="font-size:.78rem;color:#722f37;font-weight:600;">Ver detalhes →</span>' +
+                '</div>' +
+                '</div>';
+        }).join('');
+    }
+
+    function verDetalhesCancelamento(id) {
+        var c = _todosCanc.find(function(x) { return x.id === id; });
+        if (!c) return;
+
+        var dataCanc = c.dataResposta
+            ? new Date(c.dataResposta).toLocaleDateString('pt-BR',
+                { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' })
+            : '—';
+        var dataSolic = c.dataSolicitacao
+            ? new Date(c.dataSolicitacao).toLocaleDateString('pt-BR',
+                { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' })
+            : '—';
+
+        var overlay = document.getElementById('modalCancelDetalheOverlay');
+        document.getElementById('modalCancelDetalheConteudo').innerHTML =
+            '<div style="margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid #ede8e0;">' +
+                '<div style="font-family:\'Playfair Display\',serif;font-size:1.05rem;font-weight:700;color:#2c241b;margin-bottom:.25rem;">' + escHtml(c.tituloLivro || 'Livro') + '</div>' +
+                '<div style="font-size:.82rem;color:#7a6e65;font-style:italic;">Pedido #' + String(c.pedidoId || '').padStart(5,'0') + '</div>' +
+            '</div>' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem;">' +
+                '<div><div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9c968f;">Tipo</div>' +
+                    '<div style="font-size:.85rem;color:#2c241b;margin-top:.15rem;">' + (c.canceladoPeloAdmin ? '🔴 Cancelado pelo Administrador' : '🟡 Solicitado por mim') + '</div>' +
+                '</div>' +
+                '<div><div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9c968f;">Valor estornado</div>' +
+                    '<div style="font-size:.85rem;color:#722f37;font-weight:700;margin-top:.15rem;">T$ ' + (c.precoLivro || 0).toFixed(2) + '</div>' +
+                '</div>' +
+                '<div><div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9c968f;">Data da solicitação</div>' +
+                    '<div style="font-size:.85rem;color:#2c241b;margin-top:.15rem;">' + dataSolic + '</div>' +
+                '</div>' +
+                '<div><div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9c968f;">Data do cancelamento</div>' +
+                    '<div style="font-size:.85rem;color:#2c241b;margin-top:.15rem;">' + dataCanc + '</div>' +
+                '</div>' +
+                '<div style="grid-column:1/-1;"><div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9c968f;">Motivo</div>' +
+                    '<div style="font-size:.85rem;color:#2c241b;margin-top:.15rem;">' + escHtml(c.motivoDescricao || c.motivoCategoria || '—') + '</div>' +
+                '</div>' +
+                (c.comentarioAdmin
+                    ? '<div style="grid-column:1/-1;background:#fff7ed;border-left:3px solid #d97706;padding:.75rem;border-radius:4px;">' +
+                        '<div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9c968f;margin-bottom:.35rem;">Observação do Administrador</div>' +
+                        '<div style="font-size:.85rem;color:#2c241b;">' + escHtml(c.comentarioAdmin) + '</div>' +
+                        '</div>'
+                    : '') +
+            '</div>' +
+            '<div style="text-align:center;font-size:.78rem;color:#9c968f;padding-top:1rem;border-top:1px solid #ede8e0;">' +
+                'Em caso de dúvidas, entre em contato: <a href="mailto:bibliotroca.noreply@gmail.com" style="color:#722f37;">bibliotroca.noreply@gmail.com</a>' +
+            '</div>';
+
+        overlay.style.display = 'flex';
+    }
 
 </script>
 
