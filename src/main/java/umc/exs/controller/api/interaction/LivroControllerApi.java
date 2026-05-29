@@ -1,6 +1,8 @@
 package umc.exs.controller.api.interaction;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +37,10 @@ public class LivroControllerApi {
     private final LivroMapper livroMapper;
 
     private static final String MSG_USUARIO_NAO_LOGADO = "Usuário precisa estar logado.";
+
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+    private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
+            "image/jpeg", "image/jpg", "image/png", "image/webp");
 
     /**
      * Lista livros aprovados para a vitrine pública.
@@ -93,6 +99,36 @@ public class LivroControllerApi {
             return ResponseEntity.badRequest().body("É necessário adicionar pelo menos uma foto do livro.");
         }
 
+        for (MultipartFile arquivo : fotos) {
+            if (arquivo == null || arquivo.isEmpty()) continue;
+
+            if (arquivo.getSize() > MAX_FILE_SIZE) {
+                return ResponseEntity.badRequest().body(
+                        Map.of("erro", "Arquivo '" + arquivo.getOriginalFilename() +
+                                "' excede o limite de 10 MB."));
+            }
+
+            String contentType = arquivo.getContentType();
+            if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase())) {
+                return ResponseEntity.badRequest().body(
+                        Map.of("erro", "Formato inválido: '" + arquivo.getOriginalFilename() +
+                                "'. Apenas JPEG, PNG e WebP são aceitos."));
+            }
+
+            try {
+                byte[] header = arquivo.getBytes();
+                if (!isImagemValida(header)) {
+                    return ResponseEntity.badRequest().body(
+                            Map.of("erro", "Arquivo '" + arquivo.getOriginalFilename() +
+                                    "' não é uma imagem válida."));
+                }
+            } catch (java.io.IOException e) {
+                return ResponseEntity.badRequest().body(
+                        Map.of("erro", "Não foi possível verificar o arquivo: " +
+                                arquivo.getOriginalFilename()));
+            }
+        }
+
         try {
             Lote lote = livroService.criarLote(user.getUsername(), loteDados, fotos);
             return ResponseEntity.ok(lote);
@@ -112,6 +148,35 @@ public class LivroControllerApi {
 
         if (user == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MSG_USUARIO_NAO_LOGADO);
+
+        if (foto == null || foto.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "É necessário enviar uma foto do livro."));
+        }
+
+        if (foto.getSize() > MAX_FILE_SIZE) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("erro", "Arquivo '" + foto.getOriginalFilename() +
+                            "' excede o limite de 10 MB."));
+        }
+
+        String contentType = foto.getContentType();
+        if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase())) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("erro", "Formato inválido: '" + foto.getOriginalFilename() +
+                            "'. Apenas JPEG, PNG e WebP são aceitos."));
+        }
+
+        try {
+            byte[] header = foto.getBytes();
+            if (!isImagemValida(header)) {
+                return ResponseEntity.badRequest().body(
+                        Map.of("erro", "Arquivo '" + foto.getOriginalFilename() +
+                                "' não é uma imagem válida."));
+            }
+        } catch (java.io.IOException e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("erro", "Não foi possível verificar o arquivo: " + foto.getOriginalFilename()));
+        }
 
         try {
             return ResponseEntity.ok(livroMapper.toResponse(livroService.cadastrarVenda(user.getUsername(), dados, foto)));
@@ -181,5 +246,29 @@ public class LivroControllerApi {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Livro não encontrado automaticamente. Preencha os dados manualmente.");
         }
+    }
+
+    /** Valida magic bytes do arquivo para confirmar que é uma imagem real. */
+    private boolean isImagemValida(byte[] bytes) {
+        if (bytes == null || bytes.length < 4) return false;
+
+        // JPEG: FF D8 FF
+        if (bytes[0] == (byte) 0xFF && bytes[1] == (byte) 0xD8 && bytes[2] == (byte) 0xFF)
+            return true;
+
+        // PNG: 89 50 4E 47
+        if (bytes[0] == (byte) 0x89 && bytes[1] == (byte) 0x50 &&
+                bytes[2] == (byte) 0x4E && bytes[3] == (byte) 0x47)
+            return true;
+
+        // WebP: 52 49 46 46 ... 57 45 42 50
+        if (bytes.length >= 12 &&
+                bytes[0] == (byte) 0x52 && bytes[1] == (byte) 0x49 &&
+                bytes[2] == (byte) 0x46 && bytes[3] == (byte) 0x46 &&
+                bytes[8] == (byte) 0x57 && bytes[9] == (byte) 0x45 &&
+                bytes[10] == (byte) 0x42 && bytes[11] == (byte) 0x50)
+            return true;
+
+        return false;
     }
 }
