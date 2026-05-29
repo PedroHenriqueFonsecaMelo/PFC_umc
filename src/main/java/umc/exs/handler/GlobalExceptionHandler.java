@@ -60,8 +60,15 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public Object handleNoResourceFoundException(
+            NoResourceFoundException ex,
+            HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        if (uri.startsWith("/api/")) {
+            return ResponseEntity.status(404)
+                    .body(Map.of("status", 404, "error", "Recurso não encontrado."));
+        }
+        return new ModelAndView("error/404");
     }
 
     // ==========================================================
