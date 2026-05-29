@@ -106,23 +106,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('.btn-del-topico').forEach(function (btn) {
         btn.addEventListener('click', function () {
-            if (!confirm('Tem certeza que deseja excluir este tópico? Esta ação não pode ser desfeita.')) return;
             var topicoId = this.dataset.topicoId;
 
-            fetch('/api/forum/topicos/' + topicoId, {
-                method: 'DELETE',
-                credentials: 'include'
-            })
-                .then(function (res) { return res.json(); })
-                .then(function (data) {
-                    var card = document.getElementById('topico-card-' + topicoId);
-                    if (card) {
-                        card.style.transition = 'opacity .3s';
-                        card.style.opacity = '0';
-                        setTimeout(function () { card.remove(); }, 300);
-                    }
+            window.abrirForumModal(function() {
+                fetch('/api/forum/topicos/' + topicoId, {
+                    method: 'DELETE',
+                    credentials: 'include'
                 })
-                .catch(function () { });
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        var card = document.getElementById('topico-card-' + topicoId);
+                        if (card) {
+                            card.style.transition = 'opacity .3s';
+                            card.style.opacity = '0';
+                            setTimeout(function () { card.remove(); }, 300);
+                        }
+                    })
+                    .catch(function () { });
+            });
         });
     });
 
@@ -130,23 +131,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('.btn-del-resposta').forEach(function (btn) {
         btn.addEventListener('click', function () {
-            if (!confirm('Excluir esta resposta?')) return;
             var respostaId = this.dataset.respostaId;
 
-            fetch('/api/forum/respostas/' + respostaId, {
-                method: 'DELETE',
-                credentials: 'include'
-            })
-                .then(function (res) { return res.json(); })
-                .then(function (data) {
-                    var card = document.getElementById('resposta-card-' + respostaId);
-                    if (card) {
-                        card.style.transition = 'opacity .3s';
-                        card.style.opacity = '0';
-                        setTimeout(function () { card.remove(); }, 300);
-                    }
+            window.abrirForumModal(function() {
+                fetch('/api/forum/respostas/' + respostaId, {
+                    method: 'DELETE',
+                    credentials: 'include'
                 })
-                .catch(function () { });
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        var card = document.getElementById('resposta-card-' + respostaId);
+                        if (card) {
+                            card.style.transition = 'opacity .3s';
+                            card.style.opacity = '0';
+                            setTimeout(function () { card.remove(); }, 300);
+                        }
+                    })
+                    .catch(function () { });
+            });
         });
     });
 
