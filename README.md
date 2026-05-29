@@ -365,8 +365,10 @@ PFC_umc-main/
 
 | Nome | Função |
 |------|--------|
+| Guilherme Fernando Pires dos Santos | Desenvolvimento |
+| João da Cruz Gallo Junior | Desenvolvimento |
 | Pedro Henrique Fonseca Melo | Desenvolvimento |
-| Thiago Henrique | Desenvolvimento |
+| Thiago Henrique Yaginuma Okabayashi | Desenvolvimento |
 
 **Instituição:** Universidade de Mogi das Cruzes (UMC)  
 **Curso:** Engenharia de Software  
