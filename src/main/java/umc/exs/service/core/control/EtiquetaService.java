@@ -212,7 +212,9 @@ public class EtiquetaService {
             pedidoTable.addCell(pedidoNumCell);
 
             // Rastreio
-            // TODO: integrar com API dos Correios para código real
+            // EXTENSÃO FUTURA: integração com API dos Correios (SRO) para geração
+            // automática de código de rastreio. Atualmente o código é inserido
+            // manualmente pelo administrador via painel de pedidos.
             String rastreio = pedido.getCodigoRastreio() != null
                 ? pedido.getCodigoRastreio() : "—";
             PdfPCell rastreioCell = new PdfPCell();
