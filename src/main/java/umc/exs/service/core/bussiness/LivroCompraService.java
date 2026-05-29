@@ -59,6 +59,12 @@ public class LivroCompraService {
         Cliente comprador = clienteRepository.findByEmail(emailComprador)
                 .orElseThrow(() -> new IllegalStateException("Comprador não encontrado."));
 
+        // Bloqueia auto-compra
+        if (livro.getVendedor() != null &&
+                livro.getVendedor().getId().equals(comprador.getId())) {
+            throw new IllegalStateException("Você não pode comprar seu próprio livro.");
+        }
+
         if (comprador.getEnderecos() == null || comprador.getEnderecos().isEmpty()) {
             throw new IllegalStateException("É necessário cadastrar um endereço de entrega antes de comprar.");
         }
@@ -221,6 +227,16 @@ public class LivroCompraService {
             List<ItemResultadoDTO> falhas) {
         List<ItemResultadoDTO> sucesso = new ArrayList<>();
         for (Livro livro : livros) {
+            if (livro.getVendedor() != null &&
+                    livro.getVendedor().getId().equals(comprador.getId())) {
+                falhas.add(ItemResultadoDTO.builder()
+                        .livroId(livro.getId())
+                        .titulo(livro.getTitulo())
+                        .motivo("Você não pode comprar seu próprio livro.")
+                        .build());
+                continue;
+            }
+
             try {
                 // Captura vendedor e título antes de deletar o livro
                 final String titulo = livro.getTitulo();
