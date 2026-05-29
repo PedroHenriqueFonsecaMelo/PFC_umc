@@ -86,8 +86,12 @@ class GlobalExceptionHandlerTest {
             new org.springframework.web.servlet.resource.NoResourceFoundException(
                 org.springframework.http.HttpMethod.GET, "/pagina-inexistente");
 
-        ResponseEntity<Object> response = handler.handleNoResourceFoundException(ex);
+        when(request.getRequestURI()).thenReturn("/api/pagina-inexistente");
 
+        Object result = handler.handleNoResourceFoundException(ex, request);
+
+        assertInstanceOf(ResponseEntity.class, result);
+        ResponseEntity<?> response = (ResponseEntity<?>) result;
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 }
