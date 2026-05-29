@@ -2,8 +2,6 @@
    minhas-compras.js — Minha Estante · Bibliotroca
    ================================================================ */
 
-const token = localStorage.getItem("token");
-const authHeader = token ? { "Authorization": `Bearer ${token}` } : {};
 
 const CARRINHO_KEY = "bibliotroca_carrinho";
 
@@ -62,6 +60,7 @@ async function finalizarCompraEstante() {
         const res = await fetch("/api/livros/carrinho/comprar", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: 'include',
             body: JSON.stringify({ livroIds: itens.map(i => i.id) }),
         });
 
@@ -198,7 +197,8 @@ async function enviarSolicitacaoCancelamento() {
     try {
         const res = await fetch(`/api/pedidos/${pedidoId}/solicitar-cancelamento`, {
             method: "POST",
-            headers: { "Content-Type": "application/json", ...authHeader },
+            headers: { "Content-Type": "application/json" },
+            credentials: 'include',
             body: JSON.stringify({ motivoCategoria: categoria, motivoDescricao: descricao }),
         });
 
@@ -319,7 +319,7 @@ function emptyState(msg) {
 async function carregarLista(endpoint, containerId) {
     const container = document.getElementById(containerId);
     try {
-        const res = await fetch(endpoint, { headers: authHeader });
+        const res = await fetch(endpoint, { credentials: 'include' });
         if (res.status === 401) { window.location.href = "/clientes/login"; return []; }
         if (!res.ok) throw new Error("Falha na API");
         return await res.json();
@@ -340,7 +340,7 @@ function renderLista(lista, containerId, mensagemVazia) {
 
 async function carregarPerfil() {
     try {
-        const res = await fetch("/clientes/meu-perfil-json", { headers: authHeader });
+        const res = await fetch("/clientes/meu-perfil-json", { credentials: 'include' });
         if (res.ok) {
             const c = await res.json();
             const navSaldo = document.getElementById("navSaldo");
