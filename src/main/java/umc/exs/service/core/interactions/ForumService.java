@@ -18,6 +18,7 @@ import umc.exs.model.enums.CategoriaForum;
 import umc.exs.repository.negocios.RespostaForumRepository;
 import umc.exs.repository.negocios.TopicoForumRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.gamificacao.GamificacaoService;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class ForumService {
     private final TopicoForumRepository topicoRepo;
     private final RespostaForumRepository respostaRepo;
     private final ClienteRepository clienteRepo;
+    private final GamificacaoService gamificacaoService;
 
     // ── Listagem ──────────────────────────────────────────────────────────────
 
@@ -180,6 +182,10 @@ public class ForumService {
         boolean novoEstado = !resposta.isMelhorResposta();
         resposta.setMelhorResposta(novoEstado);
         respostaRepo.save(resposta);
+
+        if (novoEstado) {
+            gamificacaoService.xpAvaliacao(resposta.getAutor().getId());
+        }
 
         topico.setResolvido(novoEstado);
         topicoRepo.save(topico);
