@@ -3,6 +3,7 @@ package umc.exs.service.gamificacao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.lang.NonNull;
@@ -33,10 +34,17 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class GamificacaoService {
 
-    private static final int XP_LIVRO_APROVADO = 50;
-    private static final int XP_COMPRA = 30;
-    private static final int XP_AVALIACAO = 10;
-    private static final int XP_THRESHOLD_CUPOM = 500;
+    @Value("${gamificacao.xp.livro-aprovado:50}")
+    private int xpLivroAprovado;
+
+    @Value("${gamificacao.xp.compra:30}")
+    private int xpCompra;
+
+    @Value("${gamificacao.xp.avaliacao:10}")
+    private int xpAvaliacao;
+
+    @Value("${gamificacao.xp.cupom-threshold:500}")
+    private int xpCupomThreshold;
 
     private final PontuacaoUsuarioRepository pontuacaoRepository;
     private final ClienteRepository clienteRepository;
@@ -79,7 +87,7 @@ public class GamificacaoService {
         int xpDepois = pontuacao.getXpTotal();
 
         // Regra de Cupom
-        if ((xpDepois / XP_THRESHOLD_CUPOM) > (xpAntes / XP_THRESHOLD_CUPOM)) {
+        if ((xpDepois / xpCupomThreshold) > (xpAntes / xpCupomThreshold)) {
             try {
                 cupomService.gerarCupomPorPontuacao(clienteId);
             } catch (Exception e) {
@@ -109,15 +117,15 @@ public class GamificacaoService {
     }
 
     public void xpLivroAprovado(Long clienteId) {
-        self.adicionarXp(clienteId, XP_LIVRO_APROVADO, "LIVRO_APROVADO");
+        self.adicionarXp(clienteId, xpLivroAprovado, "LIVRO_APROVADO");
     }
 
     public void xpCompra(Long clienteId) {
-        self.adicionarXp(clienteId, XP_COMPRA, "COMPRA");
+        self.adicionarXp(clienteId, xpCompra, "COMPRA");
     }
 
     public void xpAvaliacao(Long clienteId) {
-        self.adicionarXp(clienteId, XP_AVALIACAO, "AVALIACAO");
+        self.adicionarXp(clienteId, xpAvaliacao, "AVALIACAO");
     }
 
     // ==========================================
