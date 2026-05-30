@@ -10,6 +10,55 @@ if (dataHojeEl) {
   });
 }
 
+// ── Tradução de nomes de ação ────────────────────────────────────
+const ACOES_LABEL = {
+  'LOGIN_SUCESSO':            'Login realizado',
+  'AUTENT_FALHA':             'Falha na autenticação',
+  'ALTERACAO_SENHA':          'Senha alterada',
+  'SENHA_ALTERADA':           'Senha alterada',
+  'CADASTRO_USUARIO':         'Cadastro iniciado',
+  'CADASTRO_COMPLETO':        'Cadastro concluído',
+  'UPLOAD_FOTO':              'Foto de perfil atualizada',
+  'COMPRA_LIVRO_SUCESSO':     'Compra realizada',
+  'COMPRA_CARRINHO':          'Compra via carrinho',
+  'PEDIDO_STATUS_ATUALIZADO': 'Status do pedido atualizado',
+  'PEDIDO_CANCELADO_ESTORNO': 'Pedido cancelado com estorno',
+  'CANCELAMENTO_SOLICITADO':  'Cancelamento solicitado',
+  'CANCELAMENTO_APROVADO':    'Cancelamento aprovado',
+  'CANCELAMENTO_RECUSADO':    'Cancelamento recusado',
+  'CANCELAMENTO_ADMIN':       'Cancelamento pelo administrador',
+  'LIVRO_CADASTRADO':         'Livro cadastrado',
+  'LOTE_CADASTRADO':          'Lote cadastrado',
+  'LIVRO_APROVADO':           'Livro aprovado',
+  'LIVRO_REJEITADO':          'Livro rejeitado',
+  'TOKENS_ADICIONADOS':       'Tokens adicionados',
+  'TOKENS_DEBITADOS':         'Tokens debitados',
+  'RECARGA_TOKENS':           'Recarga de tokens',
+  'PIX_FALHA':                'Falha no pagamento via Pix',
+  'NIVEL_SUBIU':              'Nível aumentado',
+  'XP_ZERADO':                'XP zerado por inatividade',
+  'ERRO_CUPOM':               'Erro ao aplicar cupom',
+  'EXPORTACAO_CSV':           'Exportação CSV',
+  'EXPORTACAO_PDF':           'Exportação PDF',
+};
+
+function traduzirAcao(acao) {
+  if (!acao) return '—';
+  return ACOES_LABEL[acao.toUpperCase()]
+    || acao.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function formatarDataHora(valor) {
+  if (!valor) return '—';
+  try {
+    const d = new Date(valor);
+    if (isNaN(d.getTime())) return valor;
+    const pad = n => String(n).padStart(2, '0');
+    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear()
+      + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  } catch (_) { return valor; }
+}
+
 // ── Classificação de badge por ação ──────────────────────────────
 function classeBadge(acao) {
   if (!acao) return 'badge-info';
@@ -78,13 +127,13 @@ function renderTabela() {
     return `
       <tr class="${suspeito}" id="row-${inicio + idx}">
         <td>${num}</td>
-        <td><span class="badge-acao ${badge}">${log.acao || '—'}</span></td>
+        <td><span class="badge-acao ${badge}">${traduzirAcao(log.acao)}</span></td>
         <td>
           <div class="user-name">${log.emailUsuario || '—'}</div>
           <div class="user-email">ID: ${log.idUsuario || '—'}</div>
         </td>
         <td>${truncar(log.detalhes, 60)}</td>
-        <td class="col-data">${log.dataHora || '—'}</td>
+        <td class="col-data">${formatarDataHora(log.dataHora)}</td>
         <td>
           <button class="btn-expandir" onclick="toggleDetalhe('det-${inicio + idx}')" title="Ver detalhes">
             <i class="fa-solid fa-chevron-down"></i>

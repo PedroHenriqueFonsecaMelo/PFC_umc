@@ -427,7 +427,9 @@ async function carregarPedidos() {
     if (!res.ok) throw new Error();
     todosPedidos = await res.json();
 
-    const pendentes = todosPedidos.filter((p) => p.statusEnvio === "AGUARDANDO_ENVIO").length;
+    // Conta pedidos (ordens agrupadas), não itens individuais
+    const pendentes = agruparPorCodigo(todosPedidos)
+      .filter(g => g.some(p => p.statusEnvio === "AGUARDANDO_ENVIO")).length;
     const badge = document.getElementById("badgePedidos");
     if (badge) {
       if (pendentes > 0) {
@@ -444,6 +446,24 @@ async function carregarPedidos() {
   }
 }
 
+function agruparPorCodigo(pedidos) {
+  const map = new Map();
+  pedidos.forEach(p => {
+    const key = p.codigoPedido || ("__" + p.id);
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(p);
+  });
+  return Array.from(map.values());
+}
+
+function statusAgregado(itens) {
+  const prioridade = ["AGUARDANDO_ENVIO", "EM_TRANSITO", "CANCELADO", "ENTREGUE"];
+  for (const s of prioridade) {
+    if (itens.some(i => i.statusEnvio === s)) return s;
+  }
+  return itens[0].statusEnvio;
+}
+
 function filtrarPedidos(status, btn) {
   filtroAtual = status;
   document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
@@ -455,21 +475,23 @@ function renderPedidos() {
   const lista = document.getElementById("listaPedidos");
   const busca = (document.getElementById("buscaPedido").value || "").toLowerCase();
 
-  let pedidos = todosPedidos;
+  // Agrupa todos os pedidos por codigoPedido antes de filtrar
+  let grupos = agruparPorCodigo(todosPedidos);
+
   if (filtroAtual !== "TODOS") {
-    pedidos = pedidos.filter((p) => p.statusEnvio === filtroAtual);
+    grupos = grupos.filter(g => g.some(p => p.statusEnvio === filtroAtual));
   }
   if (busca) {
-    pedidos = pedidos.filter((p) =>
+    grupos = grupos.filter(g => g.some(p =>
       p.tituloLivro.toLowerCase().includes(busca) ||
       (p.compradorNome || "").toLowerCase().includes(busca) ||
       (p.compradorEmail || "").toLowerCase().includes(busca) ||
       String(p.id).includes(busca) ||
       (p.codigoPedido || "").toLowerCase().includes(busca)
-    );
+    ));
   }
 
-  if (pedidos.length === 0) {
+  if (grupos.length === 0) {
     lista.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:3rem;color:#7A6E65">
       <div style="font-size:2.5rem;margin-bottom:.75rem">📭</div>
       <p style="font-style:italic">Nenhum pedido encontrado para este filtro.</p>
@@ -477,7 +499,7 @@ function renderPedidos() {
     return;
   }
 
-  lista.innerHTML = pedidos.map((p) => buildPedidoRow(p)).join("");
+  lista.innerHTML = grupos.map(g => buildGrupoRow(g)).join("");
 }
 
 const PROXIMOS_STATUS = {
@@ -536,6 +558,314 @@ function buildPedidoRow(p) {
       }
     </td>
   </tr>`;
+}
+
+function buildGrupoRow(itens) {
+  if (itens.length === 1) return buildPedidoRow(itens[0]);
+
+  const primeiro   = itens[0];
+  const codigo     = primeiro.codigoPedido || ("BIB-" + String(primeiro.id).padStart(5, "0"));
+  const safeId     = codigo.replace(/[^a-zA-Z0-9]/g, "_");
+  const dataCompra = primeiro.dataCompra
+    ? new Date(primeiro.dataCompra).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })
+    : "—";
+  const totalPreco  = itens.reduce((sum, i) => sum + (i.precoLivro || 0), 0);
+  const statusGeral = statusAgregado(itens);
+  const pillClass   = { "AGUARDANDO_ENVIO": "pill-aguardando", "EM_TRANSITO": "pill-transito",
+                        "ENTREGUE": "pill-entregue", "CANCELADO": "pill-cancelado" }[statusGeral] || "";
+  const temAcao     = itens.some(i => (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0);
+  const codigoEsc   = esc(codigo);
+
+  // Linha principal do pedido (expande/recolhe ao clicar)
+  let html = `
+  <tr class="pedido-tr" id="grupo-${safeId}" style="cursor:pointer" onclick="toggleGrupo('${safeId}')">
+    <td class="pedido-td pedido-td-id">
+      <span class="pedido-codigo">${codigoEsc}</span>
+      <span class="pedido-id-sub">${itens.length} livros</span>
+    </td>
+    <td class="pedido-td pedido-td-livro">
+      ${itens.map(i => `<div class="pedido-livro-titulo" style="font-size:.82rem;line-height:1.4">${esc(i.tituloLivro)}</div>`).join("")}
+    </td>
+    <td class="pedido-td pedido-td-comprador">
+      <div class="pedido-comprador-nome">${esc(primeiro.compradorNome || "—")}</div>
+      <div class="pedido-comprador-email">${esc(primeiro.compradorEmail || "")}</div>
+    </td>
+    <td class="pedido-td pedido-td-data">${dataCompra}</td>
+    <td class="pedido-td pedido-td-preco">T$ ${totalPreco.toFixed(2)}</td>
+    <td class="pedido-td pedido-td-status">
+      <span class="status-pill ${pillClass}">${esc(LABEL_STATUS[statusGeral] || statusGeral)}</span>
+    </td>
+    <td class="pedido-td pedido-td-acao">
+      ${temAcao
+        ? `<button class="btn-abrir-pedido" onclick="event.stopPropagation();abrirModalGrupo('${codigoEsc}')">
+             <i class="fa-solid fa-pen-to-square"></i> Gerir
+           </button>`
+        : `<span class="pedido-final-label">Finalizado</span>`
+      }
+    </td>
+  </tr>`;
+
+  // Sub-linhas informativas (sem botão Gerir individual)
+  itens.forEach(p => {
+    const pPill = { "AGUARDANDO_ENVIO": "pill-aguardando", "EM_TRANSITO": "pill-transito",
+                    "ENTREGUE": "pill-entregue", "CANCELADO": "pill-cancelado" }[p.statusEnvio] || "";
+    html += `
+    <tr class="pedido-tr" id="sub-${safeId}-${p.id}" style="display:none;background:rgba(249,246,240,.6)">
+      <td class="pedido-td pedido-td-id" style="padding-left:2.25rem">
+        <span class="pedido-id-sub">#${p.id}</span>
+      </td>
+      <td class="pedido-td pedido-td-livro">
+        <div class="pedido-livro-titulo">${esc(p.tituloLivro)}</div>
+        <div class="pedido-livro-autor">${esc(p.autorLivro || "—")}</div>
+      </td>
+      <td class="pedido-td" style="color:#b0a49a">—</td>
+      <td class="pedido-td" style="color:#b0a49a">—</td>
+      <td class="pedido-td pedido-td-preco">T$ ${(p.precoLivro || 0).toFixed(2)}</td>
+      <td class="pedido-td pedido-td-status" colspan="2">
+        <span class="status-pill ${pPill}">${esc(p.statusEnvioDescricao || p.statusEnvio)}</span>
+      </td>
+    </tr>`;
+  });
+
+  return html;
+}
+
+function toggleGrupo(safeId) {
+  const subrows = document.querySelectorAll(`tr[id^="sub-${safeId}-"]`);
+  const aberto  = subrows[0] && subrows[0].style.display !== "none";
+  subrows.forEach(r => r.style.display = aberto ? "none" : "");
+}
+
+/* ── Modal de gestão de pedido com múltiplos itens ── */
+function garantirModalGrupo() {
+  if (document.getElementById("modalGrupo")) return;
+  const el = document.createElement("div");
+  el.id = "modalGrupo";
+  el.style.cssText = "display:none;position:fixed;inset:0;background:rgba(44,36,27,.55);z-index:9998;align-items:center;justify-content:center;padding:1rem;overflow-y:auto";
+  el.addEventListener("click", e => { if (e.target === el) fecharModalGrupo(); });
+  el.innerHTML = `
+    <div class="mp-card">
+      <div class="mp-header">
+        <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+          <div class="mp-titulo-pedido">Pedido <span id="mpGCodigo"></span></div>
+          <span id="mpGStatus" class="status-pill"></span>
+        </div>
+        <button class="mp-fechar" onclick="fecharModalGrupo()">✕</button>
+      </div>
+      <div class="mp-body">
+        <div class="mp-section">
+          <div class="mp-section-label">Livros do pedido</div>
+          <div id="mpGLivros"></div>
+          <div class="mp-row" style="margin-top:.5rem">
+            <span class="mp-label">Total pago</span>
+            <span class="mp-value-strong" id="mpGTotal"></span>
+          </div>
+          <div class="mp-row">
+            <span class="mp-label">Data da compra</span>
+            <span id="mpGData"></span>
+          </div>
+        </div>
+        <div class="mp-section">
+          <div class="mp-section-label">Comprador</div>
+          <div class="mp-row"><span class="mp-label">Nome</span><span id="mpGComprador"></span></div>
+          <div class="mp-row"><span class="mp-label">E-mail</span><span id="mpGEmail" class="mp-mono"></span></div>
+          <div class="mp-row mp-row-endereco"><span class="mp-label">Endereço</span><span id="mpGEndereco" class="mp-endereco-val"></span></div>
+        </div>
+      </div>
+      <div class="mp-divider"></div>
+      <div class="mp-acoes" id="mpGAcoes">
+        <div class="mp-section-label">Atualizar status de todos os itens</div>
+        <div class="mp-acao-row">
+          <input id="mpGRastreio" type="text" placeholder="Código de rastreio (opcional)" class="mp-rastreio-input"/>
+          <select id="mpGNovoStatus" class="mp-status-sel"></select>
+          <button id="mpGBtnSalvar" class="mp-btn-salvar" onclick="salvarGrupoModal()">
+            <i class="fa-solid fa-floppy-disk"></i> Salvar alteração
+          </button>
+        </div>
+        <div id="mpGCancelBloco" style="display:none;margin-top:.85rem"></div>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+}
+
+function abrirModalGrupo(codigoPedido) {
+  const itens = todosPedidos.filter(p => p.codigoPedido === codigoPedido);
+  if (!itens.length) return;
+  garantirModalGrupo();
+
+  const primeiro    = itens[0];
+  const total       = itens.reduce((sum, i) => sum + (i.precoLivro || 0), 0);
+  const statusGeral = statusAgregado(itens);
+  const pillClass   = { "AGUARDANDO_ENVIO": "pill-aguardando", "EM_TRANSITO": "pill-transito",
+                        "ENTREGUE": "pill-entregue", "CANCELADO": "pill-cancelado" }[statusGeral] || "";
+
+  document.getElementById("mpGCodigo").textContent    = codigoPedido;
+  document.getElementById("mpGComprador").textContent = primeiro.compradorNome || "—";
+  document.getElementById("mpGEmail").textContent     = primeiro.compradorEmail || "—";
+  document.getElementById("mpGEndereco").textContent  = primeiro.compradorEndereco || "Não cadastrado";
+  document.getElementById("mpGTotal").textContent     = "T$ " + total.toFixed(2);
+  document.getElementById("mpGData").textContent      = primeiro.dataCompra
+    ? new Date(primeiro.dataCompra).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
+    : "—";
+
+  const statusEl = document.getElementById("mpGStatus");
+  statusEl.className   = "status-pill " + pillClass;
+  statusEl.textContent = LABEL_STATUS[statusGeral] || statusGeral;
+
+  document.getElementById("mpGLivros").innerHTML = itens.map(i => {
+    const iPill = { "AGUARDANDO_ENVIO": "pill-aguardando", "EM_TRANSITO": "pill-transito",
+                    "ENTREGUE": "pill-entregue", "CANCELADO": "pill-cancelado" }[i.statusEnvio] || "";
+    return `<div class="mp-row" style="padding:.35rem 0;border-bottom:1px solid rgba(44,36,27,.06)">
+      <span class="mp-label" style="flex:1;font-weight:500">${esc(i.tituloLivro)}</span>
+      <span class="status-pill ${iPill}" style="font-size:.65rem;flex-shrink:0">${esc(i.statusEnvioDescricao || i.statusEnvio)}</span>
+    </div>`;
+  }).join("");
+
+  const ativos  = itens.filter(i => (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0);
+  const proximos = PROXIMOS_STATUS[statusGeral] || [];
+
+  document.getElementById("mpGRastreio").value = primeiro.codigoRastreio || "";
+  document.getElementById("mpGNovoStatus").innerHTML =
+    proximos.map(s => `<option value="${s}">${LABEL_STATUS[s]}</option>`).join("");
+  document.getElementById("mpGBtnSalvar").dataset.codigoPedido = codigoPedido;
+  document.getElementById("mpGCancelBloco").style.display = "none";
+  document.getElementById("mpGAcoes").style.display = ativos.length > 0 ? "block" : "none";
+
+  document.getElementById("modalGrupo").style.display = "flex";
+}
+
+function fecharModalGrupo() {
+  const el = document.getElementById("modalGrupo");
+  if (el) el.style.display = "none";
+}
+
+async function salvarGrupoModal() {
+  const btn          = document.getElementById("mpGBtnSalvar");
+  const codigoPedido = btn.dataset.codigoPedido;
+  const novoStatus   = document.getElementById("mpGNovoStatus").value;
+  const rastreio     = document.getElementById("mpGRastreio").value.trim();
+
+  if (novoStatus === "CANCELADO") {
+    const itens  = todosPedidos.filter(p => p.codigoPedido === codigoPedido);
+    const ativos = itens.filter(i => (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0);
+    const bloco  = document.getElementById("mpGCancelBloco");
+    bloco.innerHTML = buildCancelarGrupoHtml(codigoPedido, ativos, itens);
+    bloco.style.display = "block";
+    bloco.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando…';
+
+  try {
+    const itens  = todosPedidos.filter(p => p.codigoPedido === codigoPedido);
+    const ativos = itens.filter(i => (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0);
+
+    for (const item of ativos) {
+      const res = await fetch(`/api/admin/pedidos/${item.id}/envio`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ statusEnvio: novoStatus, codigoRastreio: rastreio || null }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const atualizado = await res.json();
+      const idx = todosPedidos.findIndex(p => p.id === item.id);
+      if (idx !== -1) todosPedidos[idx] = atualizado;
+    }
+
+    fecharModalGrupo();
+    mostrarToast(`${ativos.length} item(s) atualizados para "${LABEL_STATUS[novoStatus]}"`, "sucesso");
+    renderPedidos();
+  } catch (e) {
+    mostrarToast("Erro: " + e.message, "erro");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar alteração';
+  }
+}
+
+function buildCancelarGrupoHtml(codigoPedido, ativos, todosItens) {
+  const totalEstorno = todosItens.reduce((sum, i) => sum + (i.precoLivro || 0), 0);
+  const safe = codigoPedido.replace(/[^a-zA-Z0-9]/g, "_");
+  const opcoesHtml = MOTIVOS_ADMIN.map(m =>
+    `<label class="motivo-opcao">
+       <input type="radio" name="motivo-cancel-g-${safe}" value="${m.value}">
+       <span>${esc(m.label)}</span>
+     </label>`
+  ).join("");
+  return `
+    <div class="mp-cancelar-bloco">
+      <div class="mp-section-label" style="color:#b91c1c;font-size:.7rem;margin-bottom:.5rem;">
+        <i class="fa-solid fa-ban"></i> Cancelar Pedido Completo
+      </div>
+      <div class="mp-cancel-aviso">
+        ⚠️ Todos os ${ativos.length} item(s) serão cancelados e T$ ${totalEstorno.toFixed(2)} serão estornados ao comprador.
+        Esta ação não pode ser desfeita.
+      </div>
+      <div class="mp-motivos-grupo" id="motivos-g-${safe}">${opcoesHtml}</div>
+      <textarea id="just-g-${safe}" class="mp-justificativa" rows="3"
+                placeholder="Descreva os detalhes do cancelamento (obrigatório, mín. 10 caracteres)…"></textarea>
+      <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:.5rem">
+        <button class="mp-btn-voltar"
+                onclick="document.getElementById('mpGCancelBloco').style.display='none'">Voltar</button>
+        <button class="mp-btn-confirmar-cancel"
+                onclick="confirmarCancelamentoGrupo('${esc(codigoPedido)}','${safe}')">
+          <i class="fa-solid fa-ban"></i> Confirmar Cancelamento
+        </button>
+      </div>
+    </div>`;
+}
+
+function confirmarCancelamentoGrupo(codigoPedido, safe) {
+  const motivoEl = document.querySelector(`input[name="motivo-cancel-g-${safe}"]:checked`);
+  if (!motivoEl) { mostrarToast("Selecione o motivo do cancelamento.", "aviso"); return; }
+  const justEl = document.getElementById(`just-g-${safe}`);
+  const justificativa = justEl ? justEl.value.trim() : "";
+  if (justificativa.length < 10) {
+    if (justEl) justEl.style.borderColor = "#b91c1c";
+    mostrarToast("Informe a justificativa (mínimo 10 caracteres).", "aviso");
+    return;
+  }
+
+  const itens       = todosPedidos.filter(p => p.codigoPedido === codigoPedido);
+  const ativos      = itens.filter(i => (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0);
+  const totalEstorno = itens.reduce((sum, i) => sum + (i.precoLivro || 0), 0);
+
+  garantirModalConfirmCancel();
+  document.getElementById("confirmCancelMsg").innerHTML =
+    `Tem certeza que deseja cancelar o pedido <strong>${esc(codigoPedido)}</strong>?<br><br>
+     <strong>${ativos.length} livro(s)</strong> serão cancelados e
+     <strong>T$ ${totalEstorno.toFixed(2)}</strong> serão estornados ao comprador.<br><br>
+     O comprador será notificado por e-mail.`;
+  document.getElementById("confirmCancelBtn").onclick = async () => {
+    fecharConfirmacaoCancelamento();
+    await _cancelarGrupoFetch(ativos.map(i => i.id), motivoEl.value, justificativa, codigoPedido);
+  };
+  document.getElementById("modalConfirmCancelOverlay").style.display = "flex";
+}
+
+async function _cancelarGrupoFetch(ids, motivo, justificativa, codigoPedido) {
+  let totalEstornado = 0;
+  try {
+    for (const pedidoId of ids) {
+      const res = await fetch(`/api/admin/pedidos/${pedidoId}/cancelar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ motivoCategoria: motivo, justificativa }),
+      });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.erro || `Erro no item #${pedidoId}`); }
+      const data = await res.json();
+      totalEstornado += data.precoLivro || 0;
+      const idx = todosPedidos.findIndex(p => p.id === pedidoId);
+      if (idx !== -1) { todosPedidos[idx].statusEnvio = "CANCELADO"; todosPedidos[idx].statusEnvioDescricao = "Cancelado"; }
+    }
+    fecharModalGrupo();
+    renderPedidos();
+    mostrarToast(`Pedido ${codigoPedido} cancelado. T$ ${totalEstornado.toFixed(2)} estornados.`, "sucesso");
+  } catch (e) {
+    mostrarToast(e.message || "Erro ao cancelar pedido.", "erro");
+  }
 }
 
 /* ── Modal de Detalhes / Gestão do Pedido ── */

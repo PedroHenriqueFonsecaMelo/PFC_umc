@@ -285,7 +285,7 @@
 
             <!-- Level: loaded async via JS -->
             <div class="stat-chip stat-nivel">
-                <span id="hero-badge" class="stat-icon">🔰</span>
+                <span id="hero-badge" class="stat-icon"></span>
                 <div>
                     <span class="stat-label">Nível</span>
                     <span class="stat-value" id="hero-nivel-value">—</span>
@@ -736,8 +736,7 @@
                 <div class="csub-bar" id="vendas-filtros">
                     <button class="csub-btn active" data-vfiltro="TODOS" onclick="vendasFiltro('TODOS',this)">Todos</button>
                     <button class="csub-btn" data-vfiltro="AGUARDANDO_APROVACAO" onclick="vendasFiltro('AGUARDANDO_APROVACAO',this)">Aguardando</button>
-                    <button class="csub-btn" data-vfiltro="NA_VITRINE" onclick="vendasFiltro('NA_VITRINE',this)">Na Vitrine</button>
-                    <button class="csub-btn" data-vfiltro="VENDIDO" onclick="vendasFiltro('VENDIDO',this)">Vendidos</button>
+                    <button class="csub-btn" data-vfiltro="NA_VITRINE" onclick="vendasFiltro('NA_VITRINE',this)">Aprovados</button>
                     <button class="csub-btn" data-vfiltro="REJEITADO" onclick="vendasFiltro('REJEITADO',this)">Rejeitados</button>
                 </div>
 
@@ -1065,9 +1064,19 @@
         var d = new Date(iso);
         return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
     }
-    function primeiraFoto(fotosUrls) {
+    function primeiraFoto(fotosUrls, isbn) {
         try { var a = JSON.parse(fotosUrls); if (Array.isArray(a) && a.length) return a[0]; } catch(_){}
+        if (isbn) return 'https://covers.openlibrary.org/b/isbn/' + String(isbn).replace(/-/g,'') + '-L.jpg';
         return null;
+    }
+    function agruparPedidosPorCodigo(pedidos) {
+        var map = new Map();
+        pedidos.forEach(function(p) {
+            var key = p.codigoPedido || ('__' + p.id);
+            if (!map.has(key)) map.set(key, []);
+            map.get(key).push(p);
+        });
+        return Array.from(map.values());
     }
     var PASSOS_ENVIO = [
         { key:'AGUARDANDO_ENVIO', label:'Aguardando' },
@@ -1084,7 +1093,7 @@
         }).join('') + '</div>';
     }
     function buildPedidoCard(p) {
-        var foto = primeiraFoto(p.fotosUrls);
+        var foto = primeiraFoto(p.fotosUrls, p.isbnLivro);
         var imgSrc = foto || 'https://placehold.co/64x86?text=%F0%9F%93%9A';
         var cancelBtn = '';
         if (p.statusEnvio === 'AGUARDANDO_ENVIO' && p.temCancelamentoPendente) {
@@ -1093,8 +1102,11 @@
                 '<div style="font-size:.72rem;color:#7a6e65;margin-top:4px">Aguardando análise da equipe Bibliotroca.</div>' +
                 '</div>';
         } else if (p.statusEnvio === 'AGUARDANDO_ENVIO') {
-            cancelBtn = '<a class="btn-solicitar-cancel" href="/clientes/cancelamento/' + p.id + '">' +
-                '<i class="fa-solid fa-ban" style="font-size:.7rem"></i> Solicitar Cancelamento</a>';
+            cancelBtn = '<button class="btn-solicitar-cancel" onclick="abrirModalCancelOrdem(\'' + (p.codigoPedido || String(p.id)) + '\')">' +
+                '<i class="fa-solid fa-ban" style="font-size:.7rem"></i> Solicitar Cancelamento</button>';
+        } else if (p.statusEnvio === 'EM_TRANSITO') {
+            cancelBtn = '<div style="margin-top:.4rem;font-size:.74rem;color:#9c968f;display:flex;align-items:center;gap:.35rem">' +
+                '<i class="fa-solid fa-lock" style="font-size:.65rem"></i> Cancelamento indisponível — pedido em trânsito</div>';
         }
         return '<div class="pedido-card">' +
             '<img class="pedido-capa" src="' + imgSrc + '" alt="' + (p.tituloLivro||'') + '" onerror="this.style.display=\'none\'" />' +
@@ -1145,18 +1157,198 @@
             fetchPedidos('/api/pedidos/todos', todosEl)
         ]);
 
-        pendentesEl.innerHTML = pendentes.length ? pendentes.map(buildPedidoCard).join('') : emptyState('Nenhuma compra em andamento.');
-        concluidosEl.innerHTML = concluidos.length ? concluidos.map(buildPedidoCard).join('') : emptyState('Nenhuma compra concluída ainda.');
-        todosEl.innerHTML = todos.length ? todos.map(buildPedidoCard).join('') : emptyState('Você ainda não realizou nenhuma compra.');
+        // Armazena todos os pedidos para o modal de cancelamento
+        _pedidosCarregados = todos;
 
-        if (pendentes.length > 0) {
+        function renderGrupos(lista) {
+            if (!lista.length) return null;
+            return agruparPedidosPorCodigo(lista).map(function(g) {
+                return g.length === 1 ? buildPedidoCard(g[0]) : buildGrupoPedidoCard(g);
+            }).join('');
+        }
+
+        pendentesEl.innerHTML = pendentes.length ? renderGrupos(pendentes) : emptyState('Nenhuma compra em andamento.');
+        concluidosEl.innerHTML = concluidos.length ? renderGrupos(concluidos) : emptyState('Nenhuma compra concluída ainda.');
+        todosEl.innerHTML = todos.length ? renderGrupos(todos) : emptyState('Você ainda não realizou nenhuma compra.');
+
+        var gpend = agruparPedidosPorCodigo(pendentes);
+        if (gpend.length > 0) {
             var b = document.getElementById('badge-pendentes');
-            if (b) { b.textContent = pendentes.length; b.style.display = 'inline-flex'; }
+            if (b) { b.textContent = gpend.length; b.style.display = 'inline-flex'; }
         }
-        if (concluidos.length > 0) {
+        var gconc = agruparPedidosPorCodigo(concluidos);
+        if (gconc.length > 0) {
             var bc = document.getElementById('badge-concluidos');
-            if (bc) { bc.textContent = concluidos.length; bc.style.display = 'inline-flex'; }
+            if (bc) { bc.textContent = gconc.length; bc.style.display = 'inline-flex'; }
         }
+    }
+
+    var _pedidosCarregados = [];
+
+    function buildGrupoPedidoCard(itens) {
+        var primeiro   = itens[0];
+        var codigoPedido = primeiro.codigoPedido || ('BIB-' + primeiro.id);
+        var safeId     = codigoPedido.replace(/[^a-zA-Z0-9]/g,'_');
+        var totalPreco = itens.reduce(function(sum,i){ return sum+(i.precoLivro||0); }, 0);
+        var prioridade = ['AGUARDANDO_ENVIO','EM_TRANSITO','CANCELADO','ENTREGUE'];
+        var statusGeral = itens[0].statusEnvio;
+        for (var pi=0;pi<prioridade.length;pi++) {
+            if (itens.some(function(i){return i.statusEnvio===prioridade[pi];})) { statusGeral=prioridade[pi]; break; }
+        }
+        var foto   = primeiraFoto(primeiro.fotosUrls, primeiro.isbnLivro);
+        var imgSrc = foto || 'https://placehold.co/64x86?text=%F0%9F%93%9A';
+
+        // Lista de livros colapsável
+        var livrosHtml = itens.map(function(i){
+            return '<div style="display:flex;justify-content:space-between;font-size:.8rem;padding:.3rem 0;border-bottom:1px solid rgba(44,36,27,.06)">' +
+                '<span style="color:#2c241b">'+(i.tituloLivro||'—')+'</span>' +
+                '<span style="color:#7a6e65;white-space:nowrap;margin-left:.5rem">T$ '+(i.precoLivro||0).toFixed(2)+'</span></div>';
+        }).join('');
+        var toggleHtml =
+            '<button onclick="toggleLivrosPedido(\''+safeId+'\')" ' +
+            'style="margin-top:.35rem;background:none;border:1px solid rgba(44,36,27,.18);border-radius:6px;' +
+            'padding:.3rem .75rem;font-size:.73rem;color:#7a6e65;cursor:pointer;display:inline-flex;align-items:center;gap:.35rem">' +
+            '<i class="fa-solid fa-chevron-down" id="icon-g-'+safeId+'"></i>' +
+            '<span id="txt-g-'+safeId+'">Ver '+itens.length+' livros</span></button>' +
+            '<div id="livros-g-'+safeId+'" style="display:none;margin-top:.4rem">'+livrosHtml+'</div>';
+
+        // Botão de cancelamento
+        var cancelBtn = '';
+        if (statusGeral === 'AGUARDANDO_ENVIO') {
+            var todosPend  = itens.every(function(i){return i.temCancelamentoPendente;});
+            var nenhumPend = !itens.some(function(i){return i.temCancelamentoPendente;});
+            if (todosPend) {
+                cancelBtn = '<div style="margin-top:.5rem"><span class="status-badge status-CANCELAMENTO_SOLICITADO">Cancelamento Solicitado</span>' +
+                    '<div style="font-size:.72rem;color:#7a6e65;margin-top:4px">Aguardando análise da equipe Bibliotroca.</div></div>';
+            } else if (nenhumPend) {
+                cancelBtn = '<button class="btn-solicitar-cancel" onclick="abrirModalCancelOrdem(\'' + codigoPedido + '\')">' +
+                    '<i class="fa-solid fa-ban" style="font-size:.7rem"></i> Solicitar Cancelamento do Pedido</button>';
+            }
+        } else if (statusGeral === 'EM_TRANSITO') {
+            cancelBtn = '<div style="margin-top:.4rem;font-size:.74rem;color:#9c968f;display:flex;align-items:center;gap:.35rem">' +
+                '<i class="fa-solid fa-lock" style="font-size:.65rem"></i> Cancelamento indisponível — pedido em trânsito</div>';
+        }
+
+        var estorno = statusGeral==='CANCELADO' ? '<span>·</span><span class="pedido-estorno">↩ T$ '+totalPreco.toFixed(2)+' estornados</span>' : '';
+        return '<div class="pedido-card">' +
+            '<img class="pedido-capa" src="'+imgSrc+'" alt="'+(primeiro.tituloLivro||'')+'" onerror="this.style.display=\'none\'" />' +
+            '<div class="pedido-info" style="flex:1">' +
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;flex-wrap:wrap;margin-bottom:.3rem">' +
+                    '<div><div class="pedido-titulo">'+codigoPedido+'</div>' +
+                    '<div class="pedido-autor">'+itens.length+' livro(s)</div></div>' +
+                    '<span class="status-badge status-'+statusGeral+'">'+(itens[0].statusEnvioDescricao||statusGeral)+'</span>' +
+                '</div>' +
+                toggleHtml +
+                '<div class="pedido-meta" style="margin-top:.45rem"><span>'+fmtDataComp(primeiro.dataCompra)+'</span><span>·</span>' +
+                    '<span class="pedido-preco">Total: T$ '+totalPreco.toFixed(2)+'</span>'+estorno+'</div>' +
+                buildTimeline(statusGeral) +
+                cancelBtn +
+            '</div></div>';
+    }
+
+    function toggleLivrosPedido(safeId) {
+        var lista = document.getElementById('livros-g-'+safeId);
+        var icon  = document.getElementById('icon-g-'+safeId);
+        var txt   = document.getElementById('txt-g-'+safeId);
+        if (!lista) return;
+        var aberto = lista.style.display !== 'none';
+        lista.style.display = aberto ? 'none' : 'block';
+        if (icon) icon.className = aberto ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-up';
+        if (txt)  txt.textContent = aberto ? txt.textContent.replace('Ocultar','Ver') : txt.textContent.replace('Ver','Ocultar');
+    }
+
+    function garantirModalCancelOrdem() {
+        if (document.getElementById('modalCancelOrdemOverlay')) return;
+        var el = document.createElement('div');
+        el.id = 'modalCancelOrdemOverlay';
+        el.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(44,36,27,.5);z-index:9999;align-items:center;justify-content:center;padding:1rem';
+        el.onclick = function(e){ if(e.target===el) fecharModalCancelOrdem(); };
+        el.innerHTML =
+            '<div style="background:#f9f6f0;border-radius:14px;max-width:480px;width:100%;box-shadow:0 8px 40px rgba(44,36,27,.22);overflow:hidden">' +
+            '<div style="background:#722f37;padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between">' +
+                '<span style="font-family:\'Playfair Display\',serif;font-size:.95rem;font-weight:700;color:#f9f6f0">Solicitar Cancelamento do Pedido</span>' +
+                '<button onclick="fecharModalCancelOrdem()" style="background:rgba(255,255,255,.1);border:none;cursor:pointer;color:#f9f6f0;width:28px;height:28px;border-radius:50%;font-size:.85rem">✕</button>' +
+            '</div>' +
+            '<div style="padding:1.25rem">' +
+                '<div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9c968f;margin-bottom:.3rem">Pedido</div>' +
+                '<div id="cancelOrdemCodigo" style="font-family:\'Playfair Display\',serif;font-size:.9rem;font-weight:700;color:#2c241b;margin-bottom:.65rem"></div>' +
+                '<div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9c968f;margin-bottom:.3rem">Livros</div>' +
+                '<div id="cancelOrdemLivros" style="margin-bottom:.85rem;max-height:110px;overflow-y:auto"></div>' +
+                '<div style="margin-bottom:.65rem">' +
+                    '<label style="display:block;font-size:.78rem;font-weight:600;color:#2c241b;margin-bottom:.3rem">Motivo <span style="color:#722f37">*</span></label>' +
+                    '<select id="cancelOrdemCategoria" style="width:100%;padding:.55rem .75rem;border:1.5px solid rgba(44,36,27,.18);border-radius:8px;background:#f9f6f0;font-size:.84rem;color:#2c241b">' +
+                        '<option value="">Selecione...</option>' +
+                        '<option value="COMPREI_POR_ENGANO">Comprei por engano</option>' +
+                        '<option value="ENCONTREI_MAIS_BARATO">Encontrei mais barato</option>' +
+                        '<option value="PRODUTO_NAO_ESPERADO">Produto não era o esperado</option>' +
+                        '<option value="OUTRO">Outro motivo</option>' +
+                    '</select>' +
+                '</div>' +
+                '<div style="margin-bottom:.65rem">' +
+                    '<label style="display:block;font-size:.78rem;font-weight:600;color:#2c241b;margin-bottom:.3rem">Detalhes <span style="color:#722f37">*</span></label>' +
+                    '<textarea id="cancelOrdemDescricao" rows="3" placeholder="Explique o motivo..." style="width:100%;padding:.55rem .75rem;border:1.5px solid rgba(44,36,27,.18);border-radius:8px;background:#f9f6f0;font-size:.84rem;color:#2c241b;resize:vertical;box-sizing:border-box"></textarea>' +
+                '</div>' +
+                '<div id="cancelOrdemFeedback" style="display:none;font-size:.78rem;color:#722f37;margin-bottom:.5rem"></div>' +
+                '<div style="font-size:.74rem;color:#7a6e65;background:#fff3cd;padding:.55rem .8rem;border-radius:8px;border-left:3px solid #d97706;margin-bottom:.85rem">' +
+                    '<i class="fa-solid fa-circle-info"></i> A solicitação será analisada pela equipe. O cancelamento pode ser recusado caso o pedido já tenha sido encaminhado.' +
+                '</div>' +
+                '<div style="display:flex;gap:.65rem;justify-content:flex-end">' +
+                    '<button onclick="fecharModalCancelOrdem()" style="padding:.55rem 1.1rem;background:transparent;border:1.5px solid rgba(44,36,27,.18);border-radius:8px;color:#7a6e65;font-size:.83rem;cursor:pointer">Fechar</button>' +
+                    '<button id="btnCancelOrdemEnviar" onclick="enviarCancelOrdem()" style="padding:.55rem 1.25rem;background:#722f37;border:none;border-radius:8px;color:#f9f6f0;font-size:.83rem;font-weight:700;cursor:pointer"><i class="fa-solid fa-ban"></i> Enviar Solicitação</button>' +
+                '</div>' +
+            '</div></div>';
+        document.body.appendChild(el);
+    }
+
+    function abrirModalCancelOrdem(codigoPedido) {
+        garantirModalCancelOrdem();
+        var itens = _pedidosCarregados.filter(function(p){ return (p.codigoPedido||String(p.id))===codigoPedido; });
+        if (!itens.length) return;
+        document.getElementById('cancelOrdemCodigo').textContent = codigoPedido;
+        document.getElementById('cancelOrdemLivros').innerHTML = itens.map(function(i){
+            return '<div style="padding:.2rem 0;font-size:.83rem;color:#2c241b;border-bottom:1px solid rgba(44,36,27,.06)">'+(i.tituloLivro||'—')+'</div>';
+        }).join('');
+        document.getElementById('cancelOrdemCategoria').value = '';
+        document.getElementById('cancelOrdemDescricao').value = '';
+        document.getElementById('cancelOrdemFeedback').style.display = 'none';
+        var overlay = document.getElementById('modalCancelOrdemOverlay');
+        overlay.dataset.codigoPedido = codigoPedido;
+        overlay.style.display = 'flex';
+    }
+
+    function fecharModalCancelOrdem() {
+        var el = document.getElementById('modalCancelOrdemOverlay');
+        if (el) el.style.display = 'none';
+    }
+
+    async function enviarCancelOrdem() {
+        var overlay  = document.getElementById('modalCancelOrdemOverlay');
+        var codigo   = overlay.dataset.codigoPedido;
+        var categoria = document.getElementById('cancelOrdemCategoria').value;
+        var descricao = document.getElementById('cancelOrdemDescricao').value.trim();
+        var feedback  = document.getElementById('cancelOrdemFeedback');
+        var btn       = document.getElementById('btnCancelOrdemEnviar');
+        if (!categoria) { feedback.textContent='Selecione um motivo.'; feedback.style.display='block'; return; }
+        if (!descricao) { feedback.textContent='Descreva o motivo com detalhes.'; feedback.style.display='block'; return; }
+        var itens = _pedidosCarregados.filter(function(p){ return (p.codigoPedido||String(p.id))===codigo; });
+        btn.disabled = true; btn.textContent = 'Enviando...';
+        try {
+            for (var i=0;i<itens.length;i++) {
+                var res = await fetch('/api/pedidos/'+itens[i].id+'/solicitar-cancelamento', {
+                    method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+                    body: JSON.stringify({motivoCategoria:categoria, motivoDescricao:descricao})
+                });
+                if (!res.ok) { var d=await res.json().catch(function(){return{};}); throw new Error(d.message||'Erro ao enviar.'); }
+            }
+            fecharModalCancelOrdem();
+            var t=document.getElementById('toastGlobal');
+            if(t){t.textContent='Solicitação enviada! Aguarde análise da equipe.';t.className='toast-global toast-global-ok';t.style.display='block';setTimeout(function(){t.style.display='none';},5000);}
+            initCompras();
+        } catch(e) {
+            feedback.textContent = e.message||'Erro de conexão.';
+            feedback.style.display = 'block';
+        }
+        btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-ban"></i> Enviar Solicitação';
     }
 
     /* ============================================================
@@ -1166,8 +1358,7 @@
 
     var VENDA_STATUS_LABEL = {
         AGUARDANDO_APROVACAO: 'Aguardando Aprovação',
-        NA_VITRINE:           'Na Vitrine',
-        VENDIDO:              'Vendido',
+        NA_VITRINE:           'Aprovado',
         REJEITADO:            'Rejeitado'
     };
 
@@ -1226,7 +1417,9 @@
         try {
             var res = await fetch('/api/clientes/minhas-vendas', { credentials:'include' });
             if (!res.ok) { el.innerHTML = '<p style="color:#722f37;padding:1rem">Erro ao carregar anúncios.</p>'; return; }
-            _todasVendas = await res.json();
+            _todasVendas = (await res.json()).filter(function(v) {
+                return v.statusVenda !== 'VENDIDO';
+            });
 
             var countEl = document.getElementById('vendas-count-title');
             if (countEl && _todasVendas.length > 0) countEl.textContent = '(' + _todasVendas.length + ')';
@@ -1248,6 +1441,40 @@
     /* ============================================================
        HISTÓRICO — inline
        ============================================================ */
+    var HIST_ACOES_LABEL = {
+        'LOGIN_SUCESSO':'Login realizado','AUTENT_FALHA':'Falha na autenticação',
+        'ALTERACAO_SENHA':'Senha alterada','SENHA_ALTERADA':'Senha alterada',
+        'CADASTRO_USUARIO':'Cadastro iniciado','CADASTRO_COMPLETO':'Cadastro concluído',
+        'UPLOAD_FOTO':'Foto de perfil atualizada',
+        'COMPRA_LIVRO_SUCESSO':'Compra realizada','COMPRA_CARRINHO':'Compra via carrinho',
+        'PEDIDO_STATUS_ATUALIZADO':'Status do pedido atualizado',
+        'PEDIDO_CANCELADO_ESTORNO':'Pedido cancelado com estorno',
+        'CANCELAMENTO_SOLICITADO':'Cancelamento solicitado',
+        'CANCELAMENTO_APROVADO':'Cancelamento aprovado',
+        'CANCELAMENTO_RECUSADO':'Cancelamento recusado',
+        'CANCELAMENTO_ADMIN':'Cancelamento pelo administrador',
+        'LIVRO_CADASTRADO':'Livro cadastrado','LOTE_CADASTRADO':'Lote cadastrado',
+        'LIVRO_APROVADO':'Livro aprovado','LIVRO_REJEITADO':'Livro rejeitado',
+        'TOKENS_ADICIONADOS':'Tokens adicionados','TOKENS_DEBITADOS':'Tokens debitados',
+        'RECARGA_TOKENS':'Recarga de tokens','PIX_FALHA':'Falha no pagamento via Pix',
+        'NIVEL_SUBIU':'Nível aumentado','XP_ZERADO':'XP zerado por inatividade',
+        'ERRO_CUPOM':'Erro ao aplicar cupom',
+        'EXPORTACAO_CSV':'Exportação CSV','EXPORTACAO_PDF':'Exportação PDF'
+    };
+    function histTraduzirAcao(a) {
+        if (!a) return '—';
+        return HIST_ACOES_LABEL[a.toUpperCase()]
+            || a.replace(/_/g,' ').toLowerCase().replace(/\b\w/g,function(c){return c.toUpperCase();});
+    }
+    function histFmtData(v) {
+        if (!v) return '—';
+        try {
+            var d = new Date(v); if (isNaN(d.getTime())) return v;
+            var p = function(n){return String(n).padStart(2,'0');};
+            return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()
+                +' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
+        } catch(_){return v;}
+    }
     async function initHistorico() {
         var el = document.getElementById('historico-content');
         try {
@@ -1259,8 +1486,8 @@
                 '<th>Data/Hora</th><th>Ação</th><th>Detalhes</th>' +
                 '</tr></thead><tbody>' +
                 logs.map(function(l){
-                    return '<tr><td class="audit-data">' + (l.dataHora||'—') + '</td>' +
-                        '<td><span class="audit-acao">' + (l.acao||'—') + '</span></td>' +
+                    return '<tr><td class="audit-data">' + histFmtData(l.dataHora) + '</td>' +
+                        '<td><span class="audit-acao">' + histTraduzirAcao(l.acao) + '</span></td>' +
                         '<td>' + (l.detalhes||'') + '</td></tr>';
                 }).join('') +
                 '</tbody></table>';

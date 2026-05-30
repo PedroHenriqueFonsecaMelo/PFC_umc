@@ -62,13 +62,17 @@ function criarCard(id, index) {
                     </div>
                 </div>
             </div>
-            <div class="upload-area" id="upload-area-${id}">
-                <input type="file" multiple accept="image/*" id="fotos-${id}" data-id="${id}"/>
-                <div class="upload-placeholder" id="upload-placeholder-${id}">
-                    Clique para adicionar fotos do livro
-                    <small>até 3 imagens · JPG ou PNG</small>
+            <div class="fotos-area">
+                <label class="fotos-label">
+                    Fotos do livro <small>até 3 imagens · JPG ou PNG</small>
+                </label>
+                <div class="fotos-grid" id="fotos-grid-${id}">
+                    <label class="foto-add-btn" for="foto-input-${id}" title="Adicionar foto">
+                        <span class="foto-add-icon">+</span>
+                    </label>
                 </div>
-                <div class="upload-previews" id="upload-previews-${id}" style="display:none"></div>
+                <input type="file" accept="image/*" multiple
+                       id="foto-input-${id}" data-id="${id}" style="display:none"/>
             </div>
         </div>`;
     return card;
@@ -105,6 +109,7 @@ function removerLivro(id) {
 function limparLivro(id) {
     const livro = livros.find((l) => l.id === id);
     if (!livro) return;
+    livro.arquivos.forEach((f) => { f._dataUrl = null; });
     livro.isbn = "";
     livro.titulo = "";
     livro.autor = "";
@@ -113,11 +118,9 @@ function limparLivro(id) {
     document.getElementById(`isbn-${id}`).value = "";
     document.getElementById(`titulo-${id}`).value = "";
     document.getElementById(`autor-${id}`).value = "";
-    document.getElementById(`fotos-${id}`).value = "";
-    document.getElementById(`upload-placeholder-${id}`).style.display = "";
-    const prev = document.getElementById(`upload-previews-${id}`);
-    prev.innerHTML = "";
-    prev.style.display = "none";
+    const inp = document.getElementById(`foto-input-${id}`);
+    if (inp) inp.value = "";
+    renderFotosGrid(id);
 }
 
 function atualizarUI() {
@@ -184,48 +187,82 @@ function validarArquivo(file) {
     return null; // ok
 }
 
-function handleFotos(id, files) {
-    const todos = Array.from(files);
-
-    // Valida cada arquivo antes de aceitar
-    const erros = [];
-    const validos = [];
-    for (const f of todos) {
-        const erro = validarArquivo(f);
-        if (erro) erros.push(erro);
-        else validos.push(f);
-    }
-
-    if (erros.length > 0) {
-        mostrarErro(erros.join("<br>"));
-        // Limpa o input para forçar re-seleção
-        const input = document.getElementById(`fotos-${id}`);
-        if (input) input.value = "";
-    }
-
-    const selecionados = validos.slice(0, 3);
+function renderFotosGrid(id) {
     const livro = livros.find((l) => l.id === id);
-    if (livro) {
-        livro.arquivos = selecionados;
-        livro.quantidadedeFotos = selecionados.length;
+    if (!livro) return;
+    const grid = document.getElementById(`fotos-grid-${id}`);
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    livro.arquivos.forEach((f, idx) => {
+        const slot = document.createElement("div");
+        slot.className = "foto-slot";
+
+        const img = document.createElement("img");
+        img.alt = "";
+        // Usa dataURL já cacheado ou lê do arquivo
+        if (f._dataUrl) {
+            img.src = f._dataUrl;
+        } else {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                f._dataUrl = e.target.result;
+                img.src = f._dataUrl;
+            };
+            reader.readAsDataURL(f);
+        }
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "foto-remove-btn";
+        btn.title = "Remover foto";
+        btn.textContent = "×";
+        btn.onclick = () => removerFotoSlot(id, idx);
+
+        slot.appendChild(img);
+        slot.appendChild(btn);
+        grid.appendChild(slot);
+    });
+
+    if (livro.arquivos.length < 3) {
+        const label = document.createElement("label");
+        label.className = "foto-add-btn";
+        label.htmlFor = `foto-input-${id}`;
+        label.title = livro.arquivos.length === 0
+            ? "Adicionar fotos (até 3)"
+            : "Adicionar mais uma foto";
+        label.innerHTML = '<span class="foto-add-icon">+</span>';
+        grid.appendChild(label);
     }
-    const placeholder = document.getElementById(`upload-placeholder-${id}`);
-    const previews = document.getElementById(`upload-previews-${id}`);
-    if (selecionados.length > 0) {
-        placeholder.style.display = "none";
-        previews.innerHTML = "";
-        selecionados.forEach((f) => {
-            const img = document.createElement("img");
-            img.src = URL.createObjectURL(f);
-            img.alt = "";
-            previews.appendChild(img);
-        });
-        previews.style.display = "flex";
-    } else {
-        placeholder.style.display = "";
-        previews.style.display = "none";
-        previews.innerHTML = "";
+}
+
+function handleFotos(id, files) {
+    const livro = livros.find((l) => l.id === id);
+    if (!livro) return;
+    const vagasRestantes = 3 - livro.arquivos.length;
+    if (vagasRestantes <= 0) return;
+
+    let adicionados = 0;
+    for (const file of Array.from(files)) {
+        if (adicionados >= vagasRestantes) break;
+        const erro = validarArquivo(file);
+        if (erro) { mostrarErro(erro); continue; }
+        livro.arquivos.push(file);
+        adicionados++;
     }
+
+    if (adicionados > 0) {
+        livro.quantidadedeFotos = livro.arquivos.length;
+        renderFotosGrid(id);
+    }
+}
+
+function removerFotoSlot(id, idx) {
+    const livro = livros.find((l) => l.id === id);
+    if (!livro) return;
+    livro.arquivos.splice(idx, 1);
+    livro.quantidadedeFotos = livro.arquivos.length;
+    renderFotosGrid(id);
 }
 
 document.getElementById("livrosContainer").addEventListener("click", (e) => {
@@ -287,9 +324,10 @@ async function consultarBackendIsbn(id, isbn) {
 
 document.getElementById("livrosContainer").addEventListener("change", (e) => {
     const el = e.target;
-    if (el.type !== "file") return;
+    if (el.type !== "file" || !el.files.length) return;
     const id = Number(el.dataset.id);
     handleFotos(id, el.files);
+    el.value = ""; // permite re-selecionar os mesmos arquivos
 });
 
 document.getElementById("btnAdicionar").addEventListener(

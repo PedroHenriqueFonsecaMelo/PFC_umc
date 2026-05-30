@@ -59,11 +59,16 @@ function renderEstante() {
     if (conteudo) conteudo.style.display = 'block';
 
     lista.innerHTML = itens.map(item => {
-        let foto = 'https://via.placeholder.com/54x72?text=📚';
+        let foto = null;
         try {
-            const arr = JSON.parse(item.fotosUrls);
+            const src = item.fotosUrls || item.fotoUrl;
+            const arr = JSON.parse(src);
             if (Array.isArray(arr) && arr.length > 0) foto = arr[0];
         } catch (_) {}
+        if (!foto && item.isbn) {
+            foto = 'https://covers.openlibrary.org/b/isbn/' + item.isbn.replace(/-/g, '') + '-L.jpg';
+        }
+        if (!foto) foto = 'https://via.placeholder.com/54x72?text=📚';
 
         const estado    = item.estadoAprovado || 'BOM';
         const preco     = (item.precoAprovado || 0).toFixed(2);

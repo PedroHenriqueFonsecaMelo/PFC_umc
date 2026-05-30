@@ -44,8 +44,8 @@ public class PedidoService {
         private static final String CHARSET_CODIGO = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         private static final SecureRandom RNG = new SecureRandom();
 
-        /** Gera um código único no formato BIB-YYYYMMDD-XXXX (não sequencial). */
-        private String gerarCodigoPedido() {
+        /** Gera um código no formato BIB-YYYYMMDD-XXXX (não sequencial). */
+        public String gerarCodigoPedido() {
                 String data = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
                 for (int tentativa = 0; tentativa < 100; tentativa++) {
                         StringBuilder sufixo = new StringBuilder(4);
@@ -90,6 +90,34 @@ public class PedidoService {
                 Pedido salvo = pedidoRepository.save(pedido);
                 log.info("Pedido #{} registrado — livro '{}' para cliente ID {}",
                                 salvo.getId(), livro.getTitulo(), comprador.getId());
+                return salvo;
+        }
+
+        /**
+         * Registra um pedido com código de compra pré-gerado.
+         * Usado em compras de carrinho para que todos os itens compartilhem o mesmo código.
+         */
+        @SuppressWarnings("null")
+        @Transactional
+        public Pedido registrarPedido(Cliente comprador, Livro livro, String codigoPedido) {
+                LocalDateTime agora = LocalDateTime.now();
+                Pedido pedido = Pedido.builder()
+                                .comprador(comprador)
+                                .livroId(livro.getId())
+                                .tituloLivro(livro.getTitulo())
+                                .autorLivro(livro.getAutor())
+                                .isbnLivro(livro.getIsbn())
+                                .fotosUrls(livro.getFotosUrls())
+                                .precoLivro(livro.getPrecoAprovado())
+                                .statusEnvio(StatusEnvio.AGUARDANDO_ENVIO)
+                                .codigoPedido(codigoPedido)
+                                .dataCompra(agora)
+                                .dataRetencaoExpira(agora.toLocalDate().plusYears(5))
+                                .build();
+
+                Pedido salvo = pedidoRepository.save(pedido);
+                log.info("Pedido #{} registrado — livro '{}' para cliente ID {} (compra #{})",
+                                salvo.getId(), livro.getTitulo(), comprador.getId(), codigoPedido);
                 return salvo;
         }
 

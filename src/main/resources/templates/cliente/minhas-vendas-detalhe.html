@@ -94,7 +94,7 @@
         .mv-badge-estado { background: #f3ede8; color: #5c4a3a; border: 1px solid #d4c4b4; }
         .mv-badge-AGUARDANDO_APROVACAO { background:#fef9c3; color:#854d0e; }
         .mv-badge-NA_VITRINE           { background:#d1fae5; color:#065f46; }
-        .mv-badge-VENDIDO              { background:#dbeafe; color:#1e40af; }
+        .mv-badge-VENDIDO              { background:#d1fae5; color:#065f46; }
         .mv-badge-REJEITADO            { background:#fee2e2; color:#991b1b; }
 
         .mv-preco {
@@ -270,31 +270,31 @@
         var s = v.statusVenda;
         var passos = [];
 
-        // Passo 1 — sempre marcado
+        // Passo 1 — sempre marcado (envio)
         passos.push({ done: true, label: 'Enviado para análise', sub: fmtData(v.dataAnuncio) });
         passos.push({ connector: true });
 
-        // Passo 2 — marcado se saiu de AGUARDANDO
+        // Passo 2 — análise pelo admin
         var passou = (s === 'NA_VITRINE' || s === 'VENDIDO' || s === 'REJEITADO');
         passos.push({ done: passou, active: !passou, label: 'Em análise pelo admin', sub: passou ? 'Concluída' : 'Aguardando revisão' });
         passos.push({ connector: true });
 
+        // Passo 3 — resultado: aprovado ou rejeitado (fim da timeline)
         if (s === 'REJEITADO') {
             passos.push({ rejected: true, label: 'Rejeitado', sub: v.dataAprovacao ? fmtData(v.dataAprovacao) : '', motivo: v.motivoRejeicao });
         } else {
             var aprovado = (s === 'NA_VITRINE' || s === 'VENDIDO');
-            passos.push({ done: aprovado, active: !aprovado && passou, label: 'Aprovado e na vitrine', sub: aprovado && v.dataAprovacao ? fmtData(v.dataAprovacao) : (aprovado ? '' : 'Pendente') });
-            if (aprovado) {
-                passos.push({ connector: true });
-                var vendido = (s === 'VENDIDO');
-                var subVendido = vendido ? 'em ' + fmtData(v.dataVenda) + (v.tokensRecebidos ? ' · T$ ' + Number(v.tokensRecebidos).toFixed(2) + ' recebidos' : '') : 'Aguardando comprador';
-                passos.push({ done: vendido, active: !vendido, label: vendido ? 'Vendido!' : 'Aguardando venda', sub: subVendido });
-            }
+            passos.push({
+                done:   aprovado,
+                active: !aprovado && passou,
+                label:  'Aprovado',
+                sub:    aprovado && v.dataAprovacao ? fmtData(v.dataAprovacao) : (aprovado ? '' : 'Pendente')
+            });
         }
 
         return passos.map(function(p) {
             if (p.connector) return '<div class="mv-tl-connector"></div>';
-            var cls = p.done ? 'done' : p.active ? 'active' : p.rejected ? 'rejected' : '';
+            var cls  = p.done ? 'done' : p.active ? 'active' : p.rejected ? 'rejected' : '';
             var icon = p.done ? '<i class="fa-solid fa-check"></i>' : (p.rejected ? '<i class="fa-solid fa-xmark"></i>' : '•');
             var motivo = p.motivo ? '<div class="mv-tl-motivo"><i class="fa-solid fa-circle-exclamation"></i> ' + p.motivo + '</div>' : '';
             return '<div class="mv-tl-step ' + cls + '">' +
@@ -358,7 +358,7 @@
             document.getElementById('mv-autor').textContent = v.autor || '';
 
             // Badges
-            var statusLabel = { AGUARDANDO_APROVACAO:'Aguardando Aprovação', NA_VITRINE:'Na Vitrine', VENDIDO:'Vendido', REJEITADO:'Rejeitado' };
+            var statusLabel = { AGUARDANDO_APROVACAO:'Aguardando Aprovação', NA_VITRINE:'Aprovado', VENDIDO:'Aprovado', REJEITADO:'Rejeitado' };
             var badgeEl = document.getElementById('mv-badge-status');
             badgeEl.textContent = statusLabel[v.statusVenda] || v.statusVenda;
             badgeEl.classList.add('mv-badge-' + v.statusVenda);

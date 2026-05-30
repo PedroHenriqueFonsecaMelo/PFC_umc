@@ -259,6 +259,11 @@
                             item.precoAprovado = precoNovo;
                             alterados++;
                         }
+                        if (livro.fotosUrls && !item.fotosUrls) {
+                            item.fotosUrls = livro.fotosUrls;
+                            item.fotoUrl   = livro.fotoUrl;
+                            alterados++;
+                        }
                     })
                     .catch(function() {})
                     .finally(function() {
@@ -328,11 +333,16 @@
 
             var total = 0;
             lista.innerHTML = itens.map(function(item) {
-                var foto = 'https://via.placeholder.com/40x54?text=📚';
+                var foto = null;
                 try {
-                    var arr = JSON.parse(item.fotosUrls);
+                    var src = item.fotosUrls || item.fotoUrl;
+                    var arr = JSON.parse(src);
                     if (Array.isArray(arr) && arr.length > 0) foto = arr[0];
                 } catch(_) {}
+                if (!foto && item.isbn) {
+                    foto = 'https://covers.openlibrary.org/b/isbn/' + item.isbn.replace(/-/g, '') + '-L.jpg';
+                }
+                if (!foto) foto = 'https://via.placeholder.com/40x54?text=📚';
                 var preco = item.precoAprovado || 0;
                 total += preco;
                 return '<div style="display:flex;align-items:center;gap:.6rem;' +

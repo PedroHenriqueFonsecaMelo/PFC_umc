@@ -258,13 +258,14 @@ body {
   flex-wrap: nowrap;
   overflow-x: auto;
   scrollbar-width: none;
+  padding-right: 0.5rem;
 }
 .tab-bar::-webkit-scrollbar {
   display: none;
 }
 
 .tab-btn {
-  padding: 0.6rem 0.9rem;
+  padding: 0.6rem 0.6rem;
   background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
@@ -277,6 +278,7 @@ body {
   color: #7a6e65;
   transition: all 0.2s;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tab-btn.active {

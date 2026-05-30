@@ -62,7 +62,6 @@
       container.innerHTML = `
         <div class="gami-perfil-card">
           <div class="gami-perfil-topo">
-            <span class="gami-badge-grande">${p.badge}</span>
             <div class="gami-perfil-info">
               <strong class="gami-perfil-nome">${p.nome}</strong>
               <span class="gami-perfil-nivel">${p.nivel}</span>
@@ -124,7 +123,6 @@
           return `
           <li class="gami-rank-item${eVoce ? " gami-rank-voce" : ""}" style="--pos:${u.posicao}">
             <span class="gami-rank-medal">${medalha(u.posicao)}</span>
-            <span class="gami-rank-badge">${u.badge}</span>
             <div class="gami-rank-info">
               <span class="gami-rank-nome">${nomeCurto}${eVoce ? ' <span class="gami-voce-pill">Você</span>' : ""}</span>
               <div class="gami-rank-barra-track">

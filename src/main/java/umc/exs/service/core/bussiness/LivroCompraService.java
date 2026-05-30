@@ -59,12 +59,6 @@ public class LivroCompraService {
         Cliente comprador = clienteRepository.findByEmail(emailComprador)
                 .orElseThrow(() -> new IllegalStateException("Comprador não encontrado."));
 
-        // Bloqueia auto-compra
-        if (livro.getVendedor() != null &&
-                livro.getVendedor().getId().equals(comprador.getId())) {
-            throw new IllegalStateException("Você não pode comprar seu próprio livro.");
-        }
-
         if (comprador.getEnderecos() == null || comprador.getEnderecos().isEmpty()) {
             throw new IllegalStateException("É necessário cadastrar um endereço de entrega antes de comprar.");
         }
@@ -167,6 +161,14 @@ public class LivroCompraService {
         // Processa cada livro (registra pedido + remove), SEM debitar por item
         List<ItemResultadoDTO> comprados = registrarLivrosCarrinho(comprador, livrosParaComprar, falhas);
 
+        // Se nenhum item foi processado com sucesso, não debitar tokens
+        if (comprados.isEmpty()) {
+            String motivo = falhas.isEmpty()
+                    ? "Não foi possível processar a compra."
+                    : falhas.get(0).getMotivo().replaceFirst("^Erro: ", "");
+            throw new IllegalStateException(motivo);
+        }
+
         // Debita o total (com desconto) de uma vez
         comprador.setSaldoTokens(saldoAnterior - totalComDesconto);
         clienteRepository.save(comprador);
@@ -226,17 +228,9 @@ public class LivroCompraService {
     private List<ItemResultadoDTO> registrarLivrosCarrinho(Cliente comprador, List<Livro> livros,
             List<ItemResultadoDTO> falhas) {
         List<ItemResultadoDTO> sucesso = new ArrayList<>();
+        // Um único código agrupa todos os itens desta compra de carrinho
+        String codigoCompra = pedidoService.gerarCodigoPedido();
         for (Livro livro : livros) {
-            if (livro.getVendedor() != null &&
-                    livro.getVendedor().getId().equals(comprador.getId())) {
-                falhas.add(ItemResultadoDTO.builder()
-                        .livroId(livro.getId())
-                        .titulo(livro.getTitulo())
-                        .motivo("Você não pode comprar seu próprio livro.")
-                        .build());
-                continue;
-            }
-
             try {
                 // Captura vendedor e título antes de deletar o livro
                 final String titulo = livro.getTitulo();
@@ -245,10 +239,10 @@ public class LivroCompraService {
                     vendedor = livro.getLote().getCliente();
                 }
                 final Cliente vendedorFinal = vendedor;
-                
+
                 livro.setAprovado(false);
                 umc.exs.model.entidades.foundation.Pedido pedidoRegistrado =
-                        pedidoService.registrarPedido(comprador, livro);
+                        pedidoService.registrarPedido(comprador, livro, codigoCompra);
 
                 livroRepository.save(livro);
                 sucesso.add(ItemResultadoDTO.builder()

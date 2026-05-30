@@ -2,10 +2,10 @@ package umc.exs.model.enums;
 
 public enum NivelUsuario {
 
-    INICIANTE("Leitor Iniciante", "📗", 0, 199),
-    BRONZE("Leitor Bronze", "📘", 200, 499),
-    PRATA("Leitor Prata", "📙", 500, 999),
-    OURO("Leitor Ouro", "📕", 1000, Integer.MAX_VALUE);
+    INICIANTE("Leitor Iniciante", "", 0, 199),
+    BRONZE("Leitor Bronze", "", 200, 499),
+    PRATA("Leitor Prata", "", 500, 999),
+    OURO("Leitor Ouro", "", 1000, Integer.MAX_VALUE);
 
     private final String descricao;
     private final String badge;

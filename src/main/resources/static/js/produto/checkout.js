@@ -97,11 +97,16 @@ function renderItens(itens) {
     if (!lista) return;
 
     lista.innerHTML = itens.map(item => {
-        let foto = 'https://via.placeholder.com/50x66?text=📚';
+        let foto = null;
         try {
-            const arr = JSON.parse(item.fotosUrls);
+            const src = item.fotosUrls || item.fotoUrl;
+            const arr = JSON.parse(src);
             if (Array.isArray(arr) && arr.length > 0) foto = arr[0];
         } catch (_) {}
+        if (!foto && item.isbn) {
+            foto = 'https://covers.openlibrary.org/b/isbn/' + item.isbn.replace(/-/g, '') + '-L.jpg';
+        }
+        if (!foto) foto = 'https://via.placeholder.com/50x66?text=📚';
 
         return `
         <div class="checkout-item">
@@ -296,7 +301,9 @@ window.confirmarCompra = async function() {
 
         if (!res.ok) {
             // Erro retornado pelo backend (saldo insuficiente, livro indisponível, etc.)
-            const msg = typeof data === 'string' ? data : (data.falhas?.[0]?.motivo || 'Erro ao processar a compra.');
+            const msg = typeof data === 'string'
+                ? data
+                : (data.error || data.message || data.falhas?.[0]?.motivo || 'Erro ao processar a compra.');
             const alertaErro = document.getElementById('alertaErro');
             const alertaMsg  = document.getElementById('alertaErroMsg');
 
@@ -341,9 +348,13 @@ window.confirmarCompra = async function() {
                 const itemLocal = _itensSelecionados.find(i => i.id === c.livroId) || {};
                 let foto = null;
                 try {
-                    const arr = JSON.parse(itemLocal.fotosUrls);
+                    const src = itemLocal.fotosUrls || itemLocal.fotoUrl;
+                    const arr = JSON.parse(src);
                     if (Array.isArray(arr) && arr.length > 0) foto = arr[0];
                 } catch (_) {}
+                if (!foto && itemLocal.isbn) {
+                    foto = 'https://covers.openlibrary.org/b/isbn/' + itemLocal.isbn.replace(/-/g, '') + '-L.jpg';
+                }
                 return {
                     pedidoId:     c.pedidoId,
                     codigoPedido: c.codigoPedido || null,

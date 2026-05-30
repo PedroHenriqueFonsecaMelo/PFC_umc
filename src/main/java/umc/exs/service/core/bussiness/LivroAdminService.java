@@ -67,7 +67,8 @@ public class LivroAdminService {
     }
 
     public List<Livro> listarLivrosPorLote(Long loteId) {
-        return livroRepository.findByLoteId(loteId);
+        // Retorna apenas livros ainda sem decisão (exclui aprovados e rejeitados)
+        return livroRepository.findByLoteIdAndAprovadoFalseAndAdminAprovadorIdIsNull(loteId);
     }
 
     // ========================= APROVAÇÃO =========================
@@ -220,15 +221,23 @@ public class LivroAdminService {
             }
         }
 
+        // Marca o livro como rejeitado (mantém no banco para o vendedor consultar)
+        anuncio.setMotivoRejeicao(comentario);
+        anuncio.setAdminAprovadorId(adminId);
+        livroRepository.save(anuncio);
+
         Lote lote = anuncio.getLote();
 
-        livroRepository.delete(anuncio);
-
         if (lote != null) {
-            long pending = livroRepository.countByLoteIdAndAprovadoFalse(lote.getId());
+            // Conta apenas livros ainda sem decisão (exclui rejeitados e aprovados)
+            long pending = livroRepository
+                    .countByLoteIdAndAprovadoFalseAndAdminAprovadorIdIsNull(lote.getId());
 
             if (pending == 0) {
-                long aprovados = livroRepository.findByLoteId(lote.getId()).size();
+                // Conta apenas os aprovados para definir o status final do lote
+                long aprovados = livroRepository.findByLoteId(lote.getId()).stream()
+                        .filter(l -> Boolean.TRUE.equals(l.getAprovado()))
+                        .count();
 
                 lote.setStatus(aprovados == 0
                         ? Lote.LoteStatus.REJEITADO

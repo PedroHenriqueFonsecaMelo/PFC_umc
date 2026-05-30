@@ -60,9 +60,15 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
 
         List<Livro> findByLoteIdAndAprovadoFalse(Long loteId);
 
+        /** Livros do lote ainda sem decisão do admin — exibidos na fila de auditoria. */
+        List<Livro> findByLoteIdAndAprovadoFalseAndAdminAprovadorIdIsNull(Long loteId);
+
         long countByLoteId(Long loteId);
 
         long countByLoteIdAndAprovadoFalse(Long loteId);
+
+        /** Conta livros do lote ainda aguardando decisão do admin. */
+        long countByLoteIdAndAprovadoFalseAndAdminAprovadorIdIsNull(Long loteId);
 
         // =========================================================
         // OBRA
