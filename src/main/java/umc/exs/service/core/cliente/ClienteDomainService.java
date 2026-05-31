@@ -1,5 +1,7 @@
 package umc.exs.service.core.cliente;
 
+import java.time.Period;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -64,6 +66,14 @@ public class ClienteDomainService {
     public Cliente atualizarDados(@NonNull Long id, ClienteUpdateRequest dto) {
 
         Cliente cliente = repositoryService.buscarPorId(id);
+
+        if (dto.getDatanasc() != null) {
+            int idade = Period.between(dto.getDatanasc(), LocalDate.now()).getYears();
+            if (idade < 18)
+                throw new IllegalArgumentException("É necessário ser maior de 18 anos.");
+            if (idade > 120)
+                throw new IllegalArgumentException("Digite uma data de nascimento válida.");
+        }
 
         cliente.setNome(FieldValidation.sanitize(dto.getNome()));
         cliente.setDatanasc(dto.getDatanasc());

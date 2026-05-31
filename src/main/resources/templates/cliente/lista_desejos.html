@@ -28,44 +28,74 @@
     <p>Busque livros por título, encontre o ISBN e salve para ser notificado quando chegarem à vitrine.</p>
   </div>
 
-  <!-- SEÇÃO: BUSCA -->
-  <div class="section-title"><i class="fa-solid fa-magnifying-glass"></i> Buscar Livro</div>
-  <div class="search-card">
-    <div class="search-row">
-      <input
-        id="inputBusca"
-        class="search-input"
-        type="text"
-        placeholder="Ex: Dom Casmurro, Harry Potter, O Hobbit..."
-        maxlength="120"
-        autocomplete="off"
-      />
-      <button id="btnBuscar" class="btn-buscar" onclick="buscarLivros()">
-        <i class="fa-solid fa-search"></i> Buscar
-      </button>
+  <!-- Visitante: aviso de login -->
+  <th:block th:unless="${clienteLogado}">
+    <div style="text-align:center;padding:3rem 1rem;max-width:480px;margin:0 auto;">
+      <div style="font-size:3rem;margin-bottom:1rem;">🤍</div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:#2c241b;margin-bottom:.75rem;">
+        Entre na sua conta para usar a Lista de Desejos
+      </h2>
+      <p style="font-family:'DM Sans',sans-serif;color:#7a6e65;font-size:.95rem;margin-bottom:1.75rem;line-height:1.6;">
+        Salve os livros que você quer encontrar e receba uma notificação quando eles chegarem à vitrine.
+      </p>
+      <a th:href="@{/clientes/login}"
+         style="display:inline-block;padding:.75rem 2rem;background:#722f37;color:#f9f6f0;
+                font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;
+                letter-spacing:.06em;text-transform:uppercase;text-decoration:none;
+                border-radius:8px;transition:background .2s;">
+        Entrar na conta
+      </a>
+      <p style="margin-top:1rem;font-size:.84rem;color:#b0a49a;font-family:'DM Sans',sans-serif;">
+        Não tem conta?
+        <a th:href="@{/clientes/novo-cadastro}"
+           style="color:#722f37;font-weight:600;text-decoration:none;">Cadastre-se grátis</a>
+      </p>
     </div>
-    <div id="resultadosBusca">
-      <p class="search-hint">Digite o título do livro e clique em Buscar.</p>
-    </div>
-  </div>
+  </th:block>
 
-  <!-- SEÇÃO: LISTA SALVA -->
-  <div class="section-title">
-    <i class="fa-solid fa-bookmark"></i> Livros Salvos
-    <span id="badgeTotal" style="display:none; background:var(--accent); color:var(--paper);
-      font-size:0.65rem; font-weight:700; padding:0.1rem 0.5rem; margin-left:0.25rem;">0</span>
-  </div>
-  <div id="wishlistContainer">
-    <div class="skeleton"></div>
-    <div class="skeleton"></div>
-    <div class="skeleton" style="height:60px"></div>
-  </div>
+  <!-- Usuário logado: conteúdo da lista de desejos -->
+  <th:block th:if="${clienteLogado}">
+    <!-- SEÇÃO: BUSCA -->
+    <div class="section-title"><i class="fa-solid fa-magnifying-glass"></i> Buscar Livro</div>
+    <div class="search-card">
+      <div class="search-row">
+        <input
+          id="inputBusca"
+          class="search-input"
+          type="text"
+          placeholder="Ex: Dom Casmurro, Harry Potter, O Hobbit..."
+          maxlength="120"
+          autocomplete="off"
+        />
+        <button id="btnBuscar" class="btn-buscar" onclick="buscarLivros()">
+          <i class="fa-solid fa-search"></i> Buscar
+        </button>
+      </div>
+      <div id="resultadosBusca">
+        <p class="search-hint">Digite o título do livro e clique em Buscar.</p>
+      </div>
+    </div>
+
+    <!-- SEÇÃO: LISTA SALVA -->
+    <div class="section-title">
+      <i class="fa-solid fa-bookmark"></i> Livros Salvos
+      <span id="badgeTotal" style="display:none; background:var(--accent); color:var(--paper);
+        font-size:0.65rem; font-weight:700; padding:0.1rem 0.5rem; margin-left:0.25rem;">0</span>
+    </div>
+    <div id="wishlistContainer">
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton" style="height:60px"></div>
+    </div>
+  </th:block>
 </main>
 
 <!-- TOAST -->
 <div id="toast"></div>
 
-<script th:src="@{/js/cliente/lista_desejos.js}"></script>
+<th:block th:if="${clienteLogado}">
+  <script th:src="@{/js/cliente/lista_desejos.js}"></script>
+</th:block>
 
 </body>
 </html>

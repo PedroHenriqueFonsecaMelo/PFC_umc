@@ -95,6 +95,10 @@ public class LivroService {
         livroAdminService.deletarLivroAdmin(id);
     }
 
+    public String salvarFotoLivro(MultipartFile foto) {
+        return livroAdminService.salvarFotoLivro(foto);
+    }
+
     @Transactional
     public Livro adicionarLivroAdmin(LivroAdminRequest req) {
 

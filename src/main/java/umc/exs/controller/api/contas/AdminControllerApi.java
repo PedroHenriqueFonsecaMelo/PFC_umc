@@ -11,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import lombok.RequiredArgsConstructor;
@@ -335,5 +337,14 @@ public class AdminControllerApi {
                     return (Map<String, Object>) m;
                 }).toList();
         return ResponseEntity.ok(posts);
+    }
+
+    @PostMapping(value = "/livros/upload-foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, String>> uploadFotoLivro(
+            @RequestParam("foto") MultipartFile foto,
+            @AuthenticationPrincipal UserDetails user) {
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        String url = livroService.salvarFotoLivro(foto);
+        return ResponseEntity.ok(Map.of("url", url));
     }
 }

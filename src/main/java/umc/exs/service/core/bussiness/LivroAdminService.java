@@ -1,14 +1,20 @@
 package umc.exs.service.core.bussiness;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +52,27 @@ public class LivroAdminService {
     private final ExternApi googleBooksService;
 
     private static final double TOKEN_REWARD = 10.0;
+    private static final String URL_UPLOAD   = "uploads/livros/";
     private String message = "Livro não encontrado";
+
+    public String salvarFotoLivro(MultipartFile foto) {
+        String nome = UUID.randomUUID() + "_" + sanitizarNome(foto.getOriginalFilename());
+        Path caminho = Paths.get(URL_UPLOAD + nome);
+        try {
+            Files.createDirectories(caminho.getParent());
+            Files.copy(foto.getInputStream(), caminho);
+            return "/" + URL_UPLOAD + nome;
+        } catch (IOException e) {
+            throw new IllegalStateException("Erro ao salvar foto: " + e.getMessage());
+        }
+    }
+
+    private String sanitizarNome(String nome) {
+        if (nome == null || nome.isBlank()) return "imagem.jpg";
+        String base = Paths.get(nome).getFileName().toString();
+        String s = base.replaceAll("[^a-zA-Z0-9.\\-_]", "_");
+        return s.isBlank() ? "imagem.jpg" : s;
+    }
 
     // ========================= LISTAGENS =========================
 

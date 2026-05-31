@@ -29,27 +29,55 @@
         </p>
       </header>
 
-      <div class="alert alert-erro" id="alertErro"></div>
-      <div class="alert alert-ok" id="alertOk"></div>
+      <!-- Visitante: aviso de login -->
+      <th:block th:unless="${clienteLogado}">
+        <div style="text-align:center;padding:3rem 1rem;max-width:480px;margin:0 auto;">
+          <div style="font-size:3rem;margin-bottom:1rem;">📚</div>
+          <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:#2c241b;margin-bottom:.75rem;">
+            Entre na sua conta para vender livros
+          </h2>
+          <p style="font-family:'DM Sans',sans-serif;color:#7a6e65;font-size:.95rem;margin-bottom:1.75rem;line-height:1.6;">
+            Você precisa estar logado para anunciar livros na Bibliotroca.
+          </p>
+          <a th:href="@{/clientes/login}"
+             style="display:inline-block;padding:.75rem 2rem;background:#722f37;color:#f9f6f0;
+                    font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;
+                    letter-spacing:.06em;text-transform:uppercase;text-decoration:none;
+                    border-radius:8px;transition:background .2s;">
+            Entrar na conta
+          </a>
+          <p style="margin-top:1rem;font-size:.84rem;color:#b0a49a;font-family:'DM Sans',sans-serif;">
+            Não tem conta?
+            <a th:href="@{/clientes/novo-cadastro}"
+               style="color:#722f37;font-weight:600;text-decoration:none;">Cadastre-se grátis</a>
+          </p>
+        </div>
+      </th:block>
 
-      <div class="toolbar">
-        <span class="toolbar-count">
-          <strong id="countAtual">1</strong> / 10 livros adicionados
-        </span>
-        <button class="btn-add" id="btnAdicionar" type="button">
-          + Adicionar livro
-        </button>
-      </div>
+      <!-- Usuário logado: formulário de venda -->
+      <th:block th:if="${clienteLogado}">
+        <div class="alert alert-erro" id="alertErro"></div>
+        <div class="alert alert-ok" id="alertOk"></div>
 
-      <form id="formVenda" novalidate>
-        <div id="livrosContainer"></div>
-
-        <div class="submit-area">
-          <button class="btn-submit" id="btnSubmit" type="submit">
-            Enviar para avaliação
+        <div class="toolbar">
+          <span class="toolbar-count">
+            <strong id="countAtual">1</strong> / 10 livros adicionados
+          </span>
+          <button class="btn-add" id="btnAdicionar" type="button">
+            + Adicionar livro
           </button>
         </div>
-      </form>
+
+        <form id="formVenda" novalidate>
+          <div id="livrosContainer"></div>
+
+          <div class="submit-area">
+            <button class="btn-submit" id="btnSubmit" type="submit">
+              Enviar para avaliação
+            </button>
+          </div>
+        </form>
+      </th:block>
     </div>
 
     <!-- FOOTER -->
@@ -126,7 +154,9 @@
     <!-- Área exclusiva para impressão (oculta na tela) -->
     <div class="print-area" id="printArea" aria-hidden="true"></div>
 
-    <script th:src="@{/js/produto/venda_livro.js}"></script>
-    <script th:src="@{/js/cliente/alerta-endereco.js}"></script>
+    <th:block th:if="${clienteLogado}">
+      <script th:src="@{/js/produto/venda_livro.js}"></script>
+      <script th:src="@{/js/cliente/alerta-endereco.js}"></script>
+    </th:block>
   </body>
 </html>

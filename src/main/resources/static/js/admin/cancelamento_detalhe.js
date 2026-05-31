@@ -158,21 +158,7 @@ function renderDetalhe(s) {
         </div>` : '';
 
     const html = `
-        <!-- BREADCRUMB -->
-        <div class="breadcrumb">
-            <a href="/admin/dashboard"><i class="fa-solid fa-gauge"></i> Painel Admin</a>
-            <i class="fa-solid fa-chevron-right sep"></i>
-            <a href="/admin/cancelamentos">Cancelamentos</a>
-            <i class="fa-solid fa-chevron-right sep"></i>
-            <span>Solicitação #${s.id}</span>
-        </div>
-
         <div class="detalhe-area">
-
-            <!-- BOTÃO VOLTAR -->
-            <a href="/admin/cancelamentos" class="btn-voltar">
-                <i class="fa-solid fa-arrow-left"></i> Voltar para Cancelamentos
-            </a>
 
             <!-- SEÇÃO LIVRO -->
             <div class="section-card">

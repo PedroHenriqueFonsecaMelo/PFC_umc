@@ -10,7 +10,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		SpringApplication.run(Main.class, args);
-		// ProjetoEstruturaPrinter.main(args);
+		// ProjetoEstruturaPrinter.main(args);ch
 	}
 
 }

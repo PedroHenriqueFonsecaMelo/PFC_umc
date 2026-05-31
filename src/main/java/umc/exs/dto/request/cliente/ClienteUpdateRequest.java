@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import umc.exs.model.entidades.usuario.Endereco;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class ClienteUpdateRequest {
     private String email;
 
     @Past(message = "A data de nascimento deve ser no passado.")
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
     private LocalDate datanasc;
 
     @Size(min = 8, message = "A senha deve ter pelo menos 8 caracteres.")

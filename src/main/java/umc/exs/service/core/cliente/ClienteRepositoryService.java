@@ -227,12 +227,20 @@ public class ClienteRepositoryService {
 
         Cliente cliente = buscarPorId(clienteId);
 
+        Long idAntigo = dto.getId();
+
         /**
          * Remove vínculo antigo.
          */
         enderecoService.deletarEnderecoDoCliente(
                 cliente,
-                dto.getId());
+                idAntigo);
+
+        /**
+         * Zera o ID para forçar INSERT e evitar conflito
+         * com o registro recém-deletado na mesma transação.
+         */
+        dto.setId(null);
 
         /**
          * Cria/reutiliza novo endereço.
@@ -244,7 +252,7 @@ public class ClienteRepositoryService {
         /**
          * Atualiza endereço selecionado.
          */
-        if (dto.getId().equals(cliente.getEnderecoSelecionadoId())) {
+        if (idAntigo.equals(cliente.getEnderecoSelecionadoId())) {
 
             cliente.getEnderecos().stream()
                     .map(Endereco::getId)

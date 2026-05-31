@@ -16,6 +16,13 @@
 .breadcrumb a:hover { text-decoration: underline; }
 .breadcrumb i.sep { font-size: 9px; color: #c8bdb5; }
 
+/* Alinha o breadcrumb-wrap estático com a área centrada */
+.content .breadcrumb-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    width: 100%;
+}
+
 /* ── LAYOUT DETALHE ─────────────────────────────────────────── */
 .detalhe-area {
     padding: 16px 28px 48px;
@@ -23,6 +30,8 @@
     grid-template-columns: 1fr;
     gap: 16px;
     max-width: 860px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 /* ── BOTÃO VOLTAR ────────────────────────────────────────────── */

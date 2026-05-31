@@ -351,7 +351,7 @@
         <div id="panel-perfil" class="tab-panel active">
 
             <!-- Dados Pessoais -->
-            <form th:action="@{/clientes/atualizar}" method="post" th:object="${cliente}">
+            <form th:action="@{/clientes/atualizar}" method="post" th:object="${cliente}" onsubmit="return validarFormPerfil()">
                 <input type="hidden" th:field="*{id}" />
                 <div class="panel-card">
                     <h2 class="panel-title">
@@ -364,19 +364,26 @@
                         </div>
                         <div class="form-group-2">
                             <label>E-mail</label>
-                            <input type="email" th:field="*{email}" required />
+                            <input type="email" th:field="*{email}"
+                                   readonly
+                                   style="background:rgba(44,36,27,0.04);color:var(--muted,#7a6e65);
+                                          cursor:default;border-style:dashed;" />
                         </div>
                         <div class="form-group-2">
                             <label>Data de Nascimento</label>
                             <input type="text"
                                    id="datanasc" name="datanasc"
-                                   th:value="${cliente != null && cliente.datanasc != null ? cliente.datanasc : ''}"
-                                   maxlength="10" placeholder="DD/MM/AAAA" autocomplete="off" />
+                                   th:value="${cliente != null && cliente.datanasc != null ? #temporals.format(cliente.datanasc, 'dd/MM/yyyy') : ''}"
+                                   maxlength="10" placeholder="DD/MM/AAAA" autocomplete="off"
+                                   oninput="this.value=mascaraDataNasc(this.value); validarDataNasc(this.value)" />
                             <p id="aviso-data-futura" style="display:none; margin-top:4px; font-size:0.8rem; color:#722f37;">
                                 Data inválida: essa data ainda não aconteceu.
                             </p>
                             <p id="aviso-menor-idade" style="display:none; margin-top:4px; font-size:0.8rem; color:#722f37;">
                                 Atenção: é necessário ser maior de 18 anos para se cadastrar.
+                            </p>
+                            <p id="aviso-data-invalida" style="display:none; margin-top:4px; font-size:0.8rem; color:#722f37;">
+                                Digite uma data válida.
                             </p>
                         </div>
                         <div class="form-group-2">
@@ -475,20 +482,24 @@
         <div id="panel-enderecos" class="tab-panel">
 
             <!-- Barra superior: título + botão adicionar -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                <h3 style="margin:0; font-size:.95rem; color:var(--muted,#7a6e65);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+                <h3 style="margin:0; font-size:.9rem; color:var(--muted,#7a6e65); font-weight:500;">
                     <span th:text="${#lists.size(cliente.enderecos)}">0</span> endereço(s) cadastrado(s)
                 </h3>
-                <button type="button" onclick="toggleFormNovoEndereco()" class="btn-tech-secondary">
+                <button type="button" onclick="toggleFormNovoEndereco()" class="end-btn-add">
                     + Adicionar Endereço
                 </button>
             </div>
 
             <!-- Formulário novo endereço (oculto por padrão) -->
-            <div id="form-novo-endereco" class="endereco-item item-card" style="display:none; margin-bottom:1rem;">
-                <form th:action="@{/clientes/enderecos/novo}" method="post">
-                    <fieldset style="border:none; padding:0; margin:0;">
-                        <legend style="font-weight:600; margin-bottom:.75rem; font-size:.9rem;">Novo Endereço</legend>
+            <div id="form-novo-endereco" class="end-form-card" style="display:none; margin-bottom:1.25rem;">
+                <div class="end-form-header">
+                    <span>Novo Endereço</span>
+                    <button type="button" onclick="toggleFormNovoEndereco()" class="end-form-close">✕</button>
+                </div>
+                <form th:action="@{/clientes/enderecos/novo}" method="post" onsubmit="return validarFormEndereco(this)">
+                    <div class="end-form-body">
+                        <p class="erro-endereco"></p>
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>CEP</label>
@@ -500,7 +511,8 @@
                             </div>
                             <div class="form-group">
                                 <label>Número</label>
-                                <input type="text" name="numero" required />
+                                <input type="text" name="numero" required inputmode="numeric"
+                                       oninput="this.value=this.value.replace(/\D/g,'')" />
                             </div>
                             <div class="form-group">
                                 <label>Bairro</label>
@@ -527,11 +539,11 @@
                                 <input type="text" name="tipoResidencia" placeholder="Ex: Casa, Apto" />
                             </div>
                         </div>
-                        <div class="form-submit-row">
-                            <button type="button" onclick="toggleFormNovoEndereco()" class="btn-cancelar-js">✕ Cancelar</button>
-                            <button type="submit" class="btn-tech-primary">▶ Salvar</button>
-                        </div>
-                    </fieldset>
+                    </div>
+                    <div class="end-form-footer">
+                        <button type="button" onclick="toggleFormNovoEndereco()" class="end-btn-cancel">Cancelar</button>
+                        <button type="submit" class="end-btn-save">▶ Salvar</button>
+                    </div>
                 </form>
             </div>
 
@@ -543,21 +555,17 @@
 
             <!-- Lista de todos os endereços -->
             <div th:each="end,stat : ${cliente.enderecos}"
-                 class="endereco-item item-card"
-                 th:style="${end.id == cliente.enderecoSelecionadoId} ? 'border:2px solid var(--accent,#722f37); position:relative;' : 'position:relative;'"
+                 class="end-card"
+                 th:classappend="${end.id == cliente.enderecoSelecionadoId} ? ' end-card--ativo' : ''"
                  style="margin-bottom:.85rem;">
 
                 <!-- Badge de selecionado -->
-                <div th:if="${end.id == cliente.enderecoSelecionadoId}"
-                     style="position:absolute; top:.6rem; right:.75rem; background:var(--accent,#722f37);
-                            color:#fff; font-size:.7rem; font-weight:600; padding:.2rem .55rem;
-                            border-radius:20px; letter-spacing:.03em;">
+                <div th:if="${end.id == cliente.enderecoSelecionadoId}" class="end-badge-ativo">
                     ✓ Endereço de entrega
                 </div>
 
-                <!-- Número do endereço -->
-                <div style="font-size:.72rem; color:var(--muted,#7a6e65); font-weight:600;
-                            text-transform:uppercase; letter-spacing:.05em; margin-bottom:.5rem;">
+                <!-- Rótulo -->
+                <div class="end-rotulo">
                     Endereço <span th:text="${stat.index + 1}">1</span>
                 </div>
 
@@ -575,7 +583,7 @@
                     </div>
                     <div class="endereco-linha">
                         <strong>Cidade / Estado:</strong>
-                        <span th:text="${end.cidade} + ' - ' + ${end.estado}"></span>
+                        <span th:text="${end.cidade} + ' — ' + ${end.estado}"></span>
                     </div>
                     <div class="endereco-linha">
                         <strong>CEP:</strong> <span th:text="${end.cep}"></span>
@@ -585,75 +593,78 @@
                     </div>
                 </div>
 
-                <!-- Ações -->
-                <div class="endereco-acoes" style="margin-top:.75rem; display:flex; flex-wrap:wrap; gap:.5rem;">
-                    <!-- Selecionar para entrega (só se não for o atual) -->
+                <!-- Ações do cartão -->
+                <div class="end-acoes">
                     <form th:unless="${end.id == cliente.enderecoSelecionadoId}"
                           th:action="@{/clientes/enderecos/selecionar}" method="post" style="display:inline;">
                         <input type="hidden" name="enderecoId" th:value="${end.id}" />
-                        <button type="submit" class="btn-tech-secondary" style="font-size:.8rem;">
-                            ◎ Usar para entrega
-                        </button>
+                        <button type="submit" class="end-btn-acao end-btn-acao--outline">◎ Usar para entrega</button>
                     </form>
-
-                    <!-- Editar -->
                     <button type="button"
                             th:onclick="'toggleEditarEndereco(' + ${stat.index} + ')'"
-                            class="btn-tech-secondary" style="font-size:.8rem;">✎ Editar</button>
-
-                    <!-- Remover -->
-                    <button type="button" class="btn-remover-endereco"
-                            style="font-size:.8rem;"
+                            class="end-btn-acao end-btn-acao--outline">✎ Editar</button>
+                    <button type="button"
+                            class="end-btn-acao end-btn-acao--danger"
                             th:onclick="'abrirModalRemoverEndereco(' + ${end.id} + ')'">✕ Remover</button>
                 </div>
 
                 <!-- Formulário de edição (oculto por padrão) -->
-                <div th:id="'form-editar-' + ${stat.index}" style="display:none; margin-top:1rem; border-top:1px solid var(--border,rgba(44,36,27,.15)); padding-top:1rem;">
-                    <form th:action="@{/clientes/enderecos/editar}" method="post">
+                <div th:id="'form-editar-' + ${stat.index}" class="end-form-card" style="display:none; margin-top:1rem;">
+                    <div class="end-form-header">
+                        <span>Editar Endereço</span>
+                        <button type="button"
+                                th:onclick="'toggleEditarEndereco(' + ${stat.index} + ')'"
+                                class="end-form-close">✕</button>
+                    </div>
+                    <form th:action="@{/clientes/enderecos/editar}" method="post" onsubmit="return validarFormEndereco(this)">
                         <input type="hidden" name="id" th:value="${end.id}" />
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>CEP</label>
-                                <input type="text" name="cep" th:value="${end.cep}" onblur="buscarCep(this)" placeholder="00000-000" required />
-                            </div>
-                            <div class="form-group">
-                                <label>Rua</label>
-                                <input type="text" name="rua" th:value="${end.rua}" data-cep-field="rua" required />
-                            </div>
-                            <div class="form-group">
-                                <label>Número</label>
-                                <input type="text" name="numero" th:value="${end.numero}" required />
-                            </div>
-                            <div class="form-group">
-                                <label>Bairro</label>
-                                <input type="text" name="bairro" th:value="${end.bairro}" data-cep-field="bairro" required />
-                            </div>
-                            <div class="form-group">
-                                <label>Cidade</label>
-                                <input type="text" name="cidade" th:value="${end.cidade}" data-cep-field="cidade" required />
-                            </div>
-                            <div class="form-group">
-                                <label>Estado</label>
-                                <input type="text" name="estado" th:value="${end.estado}" maxlength="2" required />
-                            </div>
-                            <div class="form-group">
-                                <label>País</label>
-                                <input type="text" name="pais" th:value="${end.pais}" required />
-                            </div>
-                            <div class="form-group">
-                                <label>Complemento</label>
-                                <input type="text" name="complemento" th:value="${end.complemento}" />
-                            </div>
-                            <div class="form-group">
-                                <label>Tipo de Residência</label>
-                                <input type="text" name="tipoResidencia" th:value="${end.tipoResidencia}" placeholder="Ex: Casa, Apto" />
+                        <div class="end-form-body">
+                            <p class="erro-endereco"></p>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>CEP</label>
+                                    <input type="text" name="cep" th:value="${end.cep}" onblur="buscarCep(this)" placeholder="00000-000" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Rua</label>
+                                    <input type="text" name="rua" th:value="${end.rua}" data-cep-field="rua" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Número</label>
+                                    <input type="text" name="numero" th:value="${end.numero}" required inputmode="numeric"
+                                           oninput="this.value=this.value.replace(/\D/g,'')" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Bairro</label>
+                                    <input type="text" name="bairro" th:value="${end.bairro}" data-cep-field="bairro" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Cidade</label>
+                                    <input type="text" name="cidade" th:value="${end.cidade}" data-cep-field="cidade" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Estado</label>
+                                    <input type="text" name="estado" th:value="${end.estado}" maxlength="2" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>País</label>
+                                    <input type="text" name="pais" th:value="${end.pais}" required />
+                                </div>
+                                <div class="form-group">
+                                    <label>Complemento</label>
+                                    <input type="text" name="complemento" th:value="${end.complemento}" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Tipo de Residência</label>
+                                    <input type="text" name="tipoResidencia" th:value="${end.tipoResidencia}" placeholder="Ex: Casa, Apto" />
+                                </div>
                             </div>
                         </div>
-                        <div class="form-submit-row">
+                        <div class="end-form-footer">
                             <button type="button"
                                     th:onclick="'toggleEditarEndereco(' + ${stat.index} + ')'"
-                                    class="btn-cancelar-js">✕ Cancelar</button>
-                            <button type="submit" class="btn-tech-primary">▶ Salvar Alterações</button>
+                                    class="end-btn-cancel">Cancelar</button>
+                            <button type="submit" class="end-btn-save">▶ Salvar Alterações</button>
                         </div>
                     </form>
                 </div>
@@ -1819,6 +1830,107 @@
             '</div>';
 
         overlay.style.display = 'flex';
+    }
+
+    /* ── Validação de formulário de endereço ── */
+    function validarFormEndereco(form) {
+        var erroEl = form.querySelector('.erro-endereco');
+        if (erroEl) erroEl.style.display = 'none';
+
+        var campos = [
+            { name: 'cep',    label: 'CEP' },
+            { name: 'rua',    label: 'Rua' },
+            { name: 'numero', label: 'Número' },
+            { name: 'bairro', label: 'Bairro' },
+            { name: 'cidade', label: 'Cidade' },
+            { name: 'estado', label: 'Estado' },
+            { name: 'pais',   label: 'País' },
+        ];
+
+        for (var i = 0; i < campos.length; i++) {
+            var input = form.elements[campos[i].name];
+            if (input && !input.value.trim()) {
+                if (erroEl) { erroEl.textContent = 'O campo "' + campos[i].label + '" é obrigatório.'; erroEl.style.display = 'block'; }
+                input.focus();
+                return false;
+            }
+        }
+
+        var numero = form.elements['numero'];
+        if (numero && !/^\d+$/.test(numero.value.trim())) {
+            if (erroEl) { erroEl.textContent = 'O campo "Número" aceita apenas dígitos.'; erroEl.style.display = 'block'; }
+            numero.focus();
+            return false;
+        }
+
+        return true;
+    }
+
+    /* ── Validação da data de nascimento ── */
+    function mascaraDataNasc(v) {
+        var d = v.replace(/\D/g, '').substring(0, 8);
+        var o = '';
+        if (d.length > 0) o = d.substring(0, 2);
+        if (d.length > 2) o += '/' + d.substring(2, 4);
+        if (d.length > 4) o += '/' + d.substring(4, 8);
+        return o;
+    }
+
+    function _idadeAnos(dataNasc) {
+        var hoje = new Date();
+        var idade = hoje.getFullYear() - dataNasc.getFullYear();
+        var m = hoje.getMonth() - dataNasc.getMonth();
+        if (m < 0 || (m === 0 && hoje.getDate() < dataNasc.getDate())) idade--;
+        return idade;
+    }
+
+    function _esconderAvisos() {
+        ['aviso-data-futura', 'aviso-menor-idade', 'aviso-data-invalida'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+    }
+
+    function _mostrar(id) {
+        var el = document.getElementById(id);
+        if (el) el.style.display = 'block';
+    }
+
+    function _parseDDMMYYYY(valor) {
+        var m = valor.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (!m) return null;
+        var d = new Date(parseInt(m[3]), parseInt(m[2]) - 1, parseInt(m[1]));
+        if (d.getFullYear() !== parseInt(m[3]) ||
+            d.getMonth()    !== parseInt(m[2]) - 1 ||
+            d.getDate()     !== parseInt(m[1])) return null;
+        return d;
+    }
+
+    function validarDataNasc(valor) {
+        _esconderAvisos();
+        if (!valor || valor.length < 10) return;
+        var data = _parseDDMMYYYY(valor);
+        if (!data) { _mostrar('aviso-data-invalida'); return; }
+        if (data >= new Date()) { _mostrar('aviso-data-futura'); return; }
+        var idade = _idadeAnos(data);
+        if (idade < 18) { _mostrar('aviso-menor-idade'); return; }
+        if (idade > 120) { _mostrar('aviso-data-invalida'); }
+    }
+
+    function validarFormPerfil() {
+        _esconderAvisos();
+        var input = document.getElementById('datanasc');
+        if (!input) return true;
+        var valor = input.value.trim();
+        if (!valor) return true; // campo vazio: backend decide
+
+        var data = _parseDDMMYYYY(valor);
+        if (!data) { _mostrar('aviso-data-invalida'); input.focus(); return false; }
+        if (data >= new Date()) { _mostrar('aviso-data-futura'); input.focus(); return false; }
+        var idade = _idadeAnos(data);
+        if (idade < 18) { _mostrar('aviso-menor-idade'); input.focus(); return false; }
+        if (idade > 120) { _mostrar('aviso-data-invalida'); input.focus(); return false; }
+        return true;
     }
 
 </script>

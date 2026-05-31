@@ -4,7 +4,7 @@ async function buscarCep(cepInput) {
 
     if (cep.length !== 8) return;
 
-    const container = cepInput.closest('.endereco-item');
+    const container = cepInput.closest('form') || cepInput.closest('.endereco-item');
     if (!container) return;
 
     function preencherCampo(field, valor) {

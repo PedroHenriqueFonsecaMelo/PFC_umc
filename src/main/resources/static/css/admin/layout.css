@@ -24,7 +24,7 @@ html, body {
 
 /* ── Sidebar ── */
 .sidebar {
-  width: 240px;
+  width: 260px;
   flex-shrink: 0;
   background: #2c241b;
   color: #f9f6f0;
@@ -35,27 +35,33 @@ html, body {
 .sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 20px;
+  gap: 12px;
+  padding: 30px 22px;
   border-bottom: 1px solid rgba(249, 246, 240, 0.08);
+  min-height: 108px;
 }
 .sidebar-icon {
-  font-size: 22px;
+  font-size: 28px;
 }
 .sidebar-name {
   font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
   font-weight: 700;
-  font-size: 30px;
-  line-height: 1.2;
+  font-size: 36px;
+  line-height: 1.1;
   color: #f9f6f0;
+  letter-spacing: -0.01em;
 }
 .sidebar-sub {
   font-size: 11px;
-  color: rgba(249, 246, 240, 0.4);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(249, 246, 240, 0.35);
+  margin-top: 3px;
 }
 .sidebar-nav {
   flex: 1;
-  padding: 12px 10px;
+  padding: 16px 12px;
   overflow-y: auto;
 }
 .nav-label {
@@ -64,18 +70,18 @@ html, body {
   color: rgba(249, 246, 240, 0.3);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  padding: 0 8px;
-  margin-bottom: 8px;
+  padding: 0 10px;
+  margin-bottom: 10px;
   display: block;
 }
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
+  gap: 12px;
+  padding: 11px 14px;
   border-radius: 10px;
-  margin-bottom: 2px;
-  font-size: 13px;
+  margin-bottom: 3px;
+  font-size: 14px;
   font-weight: 500;
   text-decoration: none;
   color: rgba(249, 246, 240, 0.55);
@@ -87,7 +93,7 @@ html, body {
   cursor: pointer;
 }
 .nav-item i {
-  width: 16px;
+  width: 17px;
   text-align: center;
   flex-shrink: 0;
 }
@@ -100,7 +106,7 @@ html, body {
   color: #f9f6f0;
 }
 .sidebar-footer {
-  padding: 10px;
+  padding: 12px;
   border-top: 1px solid rgba(249, 246, 240, 0.08);
 }
 .nav-sair:hover {

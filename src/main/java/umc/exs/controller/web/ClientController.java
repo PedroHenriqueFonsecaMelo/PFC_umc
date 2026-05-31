@@ -256,8 +256,12 @@ public class ClientController {
     @PostMapping("/atualizar")
     public String atualizarCliente(@ModelAttribute(ATTR_CLIENTE) ClienteUpdateRequest dto,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
-        clienteService.atualizarDadosLogados(user.getUsername(), dto);
-        ra.addFlashAttribute(ATTR_SUCESSO, "Informações atualizadas!");
+        try {
+            clienteService.atualizarDadosLogados(user.getUsername(), dto);
+            ra.addFlashAttribute(ATTR_SUCESSO, "Informações atualizadas!");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("erro", e.getMessage());
+        }
         return REDIRECT_PERFIL;
     }
 
@@ -334,9 +338,8 @@ public class ClientController {
     }
 
     @GetMapping("/lista-desejos")
-    public String exibirListaDesejos(@AuthenticationPrincipal UserDetails user) {
-        if (user == null)
-            return REDIRECT_LOGIN;
+    public String exibirListaDesejos(@AuthenticationPrincipal UserDetails user, Model model) {
+        model.addAttribute("clienteLogado", user != null);
         return "cliente/lista_desejos";
     }
 

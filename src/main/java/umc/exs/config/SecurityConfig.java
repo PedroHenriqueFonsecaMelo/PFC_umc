@@ -185,6 +185,7 @@ public class SecurityConfig {
                         "/livros/vitrine", "/clientes/termo", "/clientes/politica", "/clientes/sobre",
                         "/clientes/recuperar-senha/**", "/clientes/reset-senha/**", "/clientes/alterar-senha/**",
                         "/blog", "/blog/**",
+                        "/clientes/lista-desejos",
                         // Ranking público
                         "/ranking", "/api/ranking/top",
                         // Proxy Google Books (sem chave exposta no frontend)
@@ -210,7 +211,6 @@ public class SecurityConfig {
                         "/api/tokens/comprar", "/api/tokens/historico", "/api/tokens/**",
                         "/api/pedidos/**", "/api/forum/respostas/*/curtir", "/api/forum/respostas/*/melhor",
                         "/api/lista-desejos", "/api/lista-desejos/**",
-                        "/clientes/lista-desejos",
                         "/clientes/cancelamento/**",
                         "/api/clientes/minhas-vendas", "/api/clientes/minhas-vendas/**",
                         "/clientes/minhas-vendas/**",

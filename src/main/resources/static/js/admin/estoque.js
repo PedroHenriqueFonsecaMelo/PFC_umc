@@ -21,10 +21,14 @@ function promoValida(promocaoExpira) {
 }
 
 function primeiraFoto(fotosUrls) {
+    if (!fotosUrls || fotosUrls === '[]') return null;
     try {
         const arr = JSON.parse(fotosUrls);
         if (Array.isArray(arr) && arr.length > 0) return arr[0];
-    } catch (_) {}
+    } catch (_) {
+        // String não é JSON: assume que é URL direta
+        if (fotosUrls.startsWith('http')) return fotosUrls;
+    }
     return null;
 }
 
@@ -62,7 +66,7 @@ function renderGrid(livros) {
     vazio.style.display = "none";
 
     tbody.innerHTML = livros.map((l, idx) => {
-        const foto   = l.fotoUrl || primeiraFoto(l.fotosUrls) || "";
+        const foto   = primeiraFoto(l.fotosUrls) || primeiraFoto(l.fotoUrl) || null;
         const estado = l.estadoAprovado || "BOM";
         const promoAtiva = l.emPromocao && l.precoOriginal != null && promoValida(l.promocaoExpira);
 
@@ -95,12 +99,13 @@ function renderGrid(livros) {
         // Capa miniatura
         const capaHtml = foto
             ? `<img src="${foto}" alt="${l.titulo}"
-                    style="width:36px;height:52px;object-fit:cover;border-radius:3px;
-                           box-shadow:0 2px 6px rgba(0,0,0,0.2);flex-shrink:0;"
-                    onerror="this.style.display='none'">`
-            : `<div style="width:36px;height:52px;background:#f0ebe4;border-radius:3px;
+                    style="width:56px;height:76px;object-fit:cover;border-radius:5px;
+                           box-shadow:0 2px 8px rgba(0,0,0,0.18);flex-shrink:0;
+                           border:1px solid rgba(0,0,0,0.08);"
+                    onerror="this.outerHTML='<div style=&quot;width:56px;height:76px;background:#f0ebe4;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;&quot;>📚</div>'">`
+            : `<div style="width:56px;height:76px;background:#f0ebe4;border-radius:5px;
                            display:flex;align-items:center;justify-content:center;
-                           font-size:1.1rem;">📚</div>`;
+                           font-size:1.5rem;flex-shrink:0;">📚</div>`;
 
         return `
         <tr class="estoque-row" id="adm-card-${l.id}">
@@ -239,6 +244,80 @@ function limparCamposPromo() {
     document.getElementById("fPromoExpira").value   = "";
 }
 
+/* ── FOTOS DO MODAL ── */
+let modalFotos = []; // { url: string, uploading: boolean }
+const MODAL_MAX_FOTOS = 3;
+
+function renderModalFotos() {
+    const grid = document.getElementById("modalFotosGrid");
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    modalFotos.forEach((foto, idx) => {
+        const slot = document.createElement("div");
+        slot.className = "modal-foto-slot";
+        if (foto.uploading) {
+            slot.innerHTML = `<div class="modal-foto-uploading">
+                <i class="fa-solid fa-spinner fa-spin"></i></div>`;
+        } else {
+            slot.innerHTML = `
+                <img src="${foto.url}" alt="foto"
+                     onerror="this.style.opacity='.3'" />
+                <button type="button" class="modal-foto-remove"
+                        onclick="removerFotoModal(${idx})">×</button>`;
+        }
+        grid.appendChild(slot);
+    });
+
+    const temUpload = modalFotos.some(f => f.uploading);
+    if (modalFotos.length < MODAL_MAX_FOTOS && !temUpload) {
+        const label = document.createElement("label");
+        label.className = "modal-foto-add";
+        label.htmlFor = "modalFotoInput";
+        label.title = "Adicionar foto";
+        label.innerHTML = `<i class="fa-solid fa-plus"></i>`;
+        grid.appendChild(label);
+    }
+}
+
+async function handleModalFotos(files) {
+    const input = document.getElementById("modalFotoInput");
+    if (input) input.value = "";
+
+    const vagas = MODAL_MAX_FOTOS - modalFotos.filter(f => !f.uploading).length;
+    if (vagas <= 0) return;
+
+    const lista = Array.from(files).slice(0, vagas);
+    for (const file of lista) {
+        const placeholder = { url: "", uploading: true };
+        modalFotos.push(placeholder);
+        renderModalFotos();
+
+        try {
+            const fd = new FormData();
+            fd.append("foto", file);
+            const res = await fetch("/api/admin/livros/upload-foto", {
+                method: "POST",
+                credentials: "include",
+                body: fd
+            });
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            placeholder.url = data.url;
+            placeholder.uploading = false;
+        } catch (_) {
+            modalFotos.splice(modalFotos.indexOf(placeholder), 1);
+            mostrarErro("Erro ao enviar foto. Tente novamente.");
+        }
+        renderModalFotos();
+    }
+}
+
+function removerFotoModal(idx) {
+    modalFotos.splice(idx, 1);
+    renderModalFotos();
+}
+
 /* ── BUSCA ISBN VIA OPEN LIBRARY (mesmo padrão de venda_livro.js) ── */
 // Guarda o último ISBN enviado à API para evitar sobrescrever com resposta desatualizada
 let _isbnUltimoBuscado = "";
@@ -257,13 +336,11 @@ async function buscarIsbnModal() {
     const tituloEl = document.getElementById("fTitulo");
     const autorEl  = document.getElementById("fAutor");
 
-    // Mostra "Buscando..." como placeholder no campo Título enquanto aguarda
     const placeholderOriginal = tituloEl.placeholder;
     tituloEl.placeholder = "Buscando...";
     if (statusEl) statusEl.style.display = "none";
 
     try {
-        // Mesmo endpoint e parâmetros usados em venda_livro.js
         const res  = await fetch(
             `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`
         );
@@ -274,15 +351,12 @@ async function buscarIsbnModal() {
 
         if (info) {
             const titulo = info.title || "";
-            // Mesmo mapeamento de venda_livro.js: authors[0].name
             const autor  = (info.authors && info.authors.length > 0) ? info.authors[0].name : "";
 
             if (!modoEdicao) {
-                // Modo Adicionar: sempre preenche título e autor
                 tituloEl.value = titulo;
                 autorEl.value  = autor;
             } else {
-                // Modo Editar: preenche apenas campos ainda vazios
                 if (!tituloEl.value.trim()) tituloEl.value = titulo;
                 if (!autorEl.value.trim())  autorEl.value  = autor;
             }
@@ -294,9 +368,8 @@ async function buscarIsbnModal() {
                 setTimeout(() => { if (statusEl) statusEl.style.display = "none"; }, 2500);
             }
         }
-        // Não encontrado → campos ficam em branco; sem mensagem de erro
     } catch (_) {
-        // Falha de conexão ou API → silencioso, usuário preenche manualmente
+        // Falha de conexão → silencioso
     } finally {
         tituloEl.placeholder = placeholderOriginal;
     }
@@ -314,6 +387,9 @@ function abrirModalAdd() {
     document.getElementById("fEstado").value = "BOM";
     document.getElementById("fResumo").value = "";
     document.getElementById("fGenero").value = "";
+    modalFotos = [];
+    renderModalFotos();
+    _isbnUltimoBuscado = "";
     const statusEl = document.getElementById("fIsbnStatus");
     if (statusEl) statusEl.style.display = "none";
     limparCamposPromo();
@@ -350,6 +426,18 @@ function abrirModalEdit(livro) {
     } else {
         limparCamposPromo();
     }
+
+    // Popula fotos existentes do livro
+    modalFotos = [];
+    try {
+        const arr = JSON.parse(livro.fotosUrls || "[]");
+        if (Array.isArray(arr)) arr.forEach(url => modalFotos.push({ url, uploading: false }));
+    } catch (_) {
+        if (livro.fotosUrls && livro.fotosUrls.startsWith("http")) {
+            modalFotos.push({ url: livro.fotosUrls, uploading: false });
+        }
+    }
+    renderModalFotos();
 
     document.getElementById("btnSalvar").textContent = "Salvar alterações";
     esconderErro();
@@ -427,6 +515,9 @@ async function salvarLivro(e) {
         promocaoExpira = isoConvertido;
     }
 
+    const urlsFotos = modalFotos.filter(f => !f.uploading && f.url).map(f => f.url);
+    const capa = urlsFotos.length > 0 ? JSON.stringify(urlsFotos) : null;
+
     const payload = {
         titulo:              document.getElementById("fTitulo").value.trim(),
         autor:               document.getElementById("fAutor").value.trim(),
@@ -435,6 +526,7 @@ async function salvarLivro(e) {
         estado:              document.getElementById("fEstado").value,
         resumo:              document.getElementById("fResumo").value.trim(),
         genero:              document.getElementById("fGenero").value.trim() || null,
+        capa:                capa,
         emPromocao:          emPromocao,
         percentualDesconto:  emPromocao ? desconto : null,
         promocaoExpira:      emPromocao ? promocaoExpira : null,
