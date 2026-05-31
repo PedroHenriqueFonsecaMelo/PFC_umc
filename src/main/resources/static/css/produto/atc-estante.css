@@ -1,7 +1,7 @@
 @property --atce-complete {
   initial-value: 0;
   inherits: false;
-  syntax: '<number>';
+  syntax: "<number>";
 }
 
 .atc-estante {
@@ -13,7 +13,7 @@
   border: 2px solid #c5b9b0;
   background: #fbfaf6;
   color: #2c241b;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
@@ -22,7 +22,9 @@
   min-width: 180px;
 }
 
-.atc-estante:hover { border-color: #722f37; }
+.atc-estante:hover {
+  border-color: #722f37;
+}
 
 .atce__content {
   display: flex;
@@ -36,7 +38,7 @@
 }
 
 .atce__content::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
@@ -81,8 +83,12 @@
   display: none;
 }
 
-.atce__cart-content { fill: #722f37; }
-.atce__check { stroke: #16a34a; }
+.atce__cart-content {
+  fill: #722f37;
+}
+.atce__check {
+  stroke: #16a34a;
+}
 
 .atce__icon {
   width: 100%;
@@ -121,9 +127,21 @@
   pointer-events: none;
 }
 
-.atce__border--static   { opacity: 0; border-color: #722f37; }
-.atce__border--complete { border-color: #16a34a; opacity: 0; }
+.atce__border--static {
+  opacity: 0;
+  border-color: #722f37;
+}
+.atce__border--complete {
+  border-color: #16a34a;
+  opacity: 0;
+}
 
-.atce__border--animated::after { display: none; }
+.atce__border--animated::after {
+  display: none;
+}
 
-@keyframes atce-spin { to { rotate: 360deg; } }
+@keyframes atce-spin {
+  to {
+    rotate: 360deg;
+  }
+}

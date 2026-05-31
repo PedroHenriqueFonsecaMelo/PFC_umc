@@ -16,7 +16,7 @@ import umc.exs.model.entidades.usuario.Cliente;
 
 import umc.exs.security.JwtUtil;
 import umc.exs.security.JwtUserDetailsService;
-import umc.exs.service.core.cliente.ClienteService;
+import umc.exs.service.cliente.ClienteService;
 import umc.exs.service.core.control.AuthHelper;
 import umc.exs.service.core.interactions.VisitaSiteService;
 import umc.exs.service.gamificacao.GamificacaoService;
@@ -30,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import java.util.Collection;
 import java.util.List;
 
 @WebMvcTest(ClientController.class)
@@ -78,7 +77,6 @@ class ClientControllerIntegrationTest {
                                 .andExpect(view().name("cliente/login_cliente"));
         }
 
-        @SuppressWarnings("null")
         @Test
         void postarLoginClienteValidoRedirecionaHomepage() throws Exception {
 
@@ -86,16 +84,15 @@ class ClientControllerIntegrationTest {
                 cliente.setId(1L);
                 cliente.setEmail("client@example.com");
 
-
                 when(clienteService.autenticarCliente(anyString(), anyString()))
                                 .thenReturn(cliente);
 
                 doNothing().when(authHelper)
-                                .authenticateAndSetCookie(anyString(), anyLong(), any(), any());
+                                .authenticate(anyString(), any());
 
                 UserDetails userDetails = mock(UserDetails.class);
                 when(userDetails.getAuthorities())
-                                .thenReturn((Collection) List.of(new SimpleGrantedAuthority("CLIENTE")));
+                                .thenAnswer(invocation -> List.of(new SimpleGrantedAuthority("CLIENTE")));
 
                 when(jwtUserDetailsService.loadUserByUsername(anyString()))
                                 .thenReturn(userDetails);
@@ -107,10 +104,8 @@ class ClientControllerIntegrationTest {
                                 .andExpect(status().is3xxRedirection())
                                 .andExpect(redirectedUrl("/clientes/homepage"));
 
-                verify(authHelper).authenticateAndSetCookie(
+                verify(authHelper).authenticate(
                                 eq("client@example.com"),
-                                eq(1L),
-                                any(),
                                 any());
         }
 }

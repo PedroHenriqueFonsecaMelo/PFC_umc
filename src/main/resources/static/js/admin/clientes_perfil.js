@@ -7,69 +7,83 @@ let _periodoDias = 30;
 
 /* ── UTILS ──────────────────────────────────────────────────── */
 function fmtData(iso) {
-    if (!iso) return '—';
+    if (!iso) return "—";
     const d = new Date(iso);
-    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+    });
 }
 function fmtDataHora(iso) {
-    if (!iso) return '—';
+    if (!iso) return "—";
     const d = new Date(iso);
-    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }) +
-           ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+    }) +
+        " " +
+        d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
 function fmtTokens(v) {
-    if (v == null) return '0';
-    return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (v == null) return "0";
+    return Number(v).toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
 }
 function inicial(nome) {
-    if (!nome) return '?';
+    if (!nome) return "?";
     return nome.trim().charAt(0).toUpperCase();
 }
 function esc(str) {
-    if (str == null) return '';
+    if (str == null) return "";
     return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 function mostrarToast(cls, msg) {
-    const t = document.getElementById('toast');
-    t.className = 'toast ' + cls;
+    const t = document.getElementById("toast");
+    t.className = "toast " + cls;
     t.textContent = msg;
-    t.style.display = 'block';
-    setTimeout(() => { t.style.display = 'none'; }, 4000);
+    t.style.display = "block";
+    setTimeout(() => {
+        t.style.display = "none";
+    }, 4000);
 }
 function abrirMenu() {
-    document.getElementById('sidebar')?.classList.add('open');
-    document.getElementById('overlay')?.classList.add('show');
+    document.getElementById("sidebar")?.classList.add("open");
+    document.getElementById("overlay")?.classList.add("show");
 }
 function fecharMenu() {
-    document.getElementById('sidebar')?.classList.remove('open');
-    document.getElementById('overlay')?.classList.remove('show');
+    document.getElementById("sidebar")?.classList.remove("open");
+    document.getElementById("overlay")?.classList.remove("show");
 }
 
 /* ── FETCH ──────────────────────────────────────────────────── */
 function carregarPerfil() {
     const id = window._CLIENTE_ID;
     if (!id) {
-        document.getElementById('perfilContent').innerHTML =
+        document.getElementById("perfilContent").innerHTML =
             '<div class="loading-placeholder" style="margin-top:60px"><i class="fa-solid fa-triangle-exclamation"></i> ID do cliente não encontrado.</div>';
         return;
     }
 
-    fetch(`/api/admin/clientes/${id}`, { credentials: 'include' })
-        .then(r => {
-            if (!r.ok) throw new Error('Não encontrado');
+    fetch(`/api/admin/clientes/${id}`, { credentials: "include" })
+        .then((r) => {
+            if (!r.ok) throw new Error("Não encontrado");
             return r.json();
         })
-        .then(data => {
+        .then((data) => {
             _perfil = data;
             renderPerfil(data);
         })
-        .catch(err => {
-            document.getElementById('perfilContent').innerHTML =
+        .catch((err) => {
+            document.getElementById("perfilContent").innerHTML =
                 `<div class="loading-placeholder" style="margin-top:60px">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                     Erro ao carregar perfil. <a href="/admin/clientes" style="color:#722F37">Voltar para a lista</a>
@@ -81,17 +95,22 @@ function carregarPerfil() {
 /* ── RENDER COMPLETO ─────────────────────────────────────────── */
 function renderPerfil(p) {
     // Atualiza breadcrumb no topbar
-    const tt = document.getElementById('topbarTitle');
+    const tt = document.getElementById("topbarTitle");
     if (tt) tt.textContent = esc(p.nome);
 
-    const nivelCls = { Bronze: 'nivel-Bronze', Prata: 'nivel-Prata', Ouro: 'nivel-Ouro', Platina: 'nivel-Platina' };
-    const nivel = p.nivel || 'Bronze';
+    const nivelCls = {
+        Bronze: "nivel-Bronze",
+        Prata: "nivel-Prata",
+        Ouro: "nivel-Ouro",
+        Platina: "nivel-Platina",
+    };
+    const nivel = p.nivel || "Bronze";
     const statusBadge = p.ativo
         ? `<span class="badge-status status-ativo"><i class="fa-solid fa-circle" style="font-size:7px"></i> Ativo</span>`
         : `<span class="badge-status status-inativo"><i class="fa-solid fa-circle" style="font-size:7px"></i> Inativo</span>`;
 
     // Atualiza breadcrumb padronizado com o nome do cliente
-    const bcrNome = document.getElementById('bcrNomeCliente');
+    const bcrNome = document.getElementById("bcrNomeCliente");
     if (bcrNome) bcrNome.textContent = p.nome;
 
     const html = `
@@ -102,11 +121,27 @@ function renderPerfil(p) {
                 <div class="perfil-nome">${esc(p.nome)}</div>
                 <div class="perfil-email">${esc(p.email)}</div>
                 <div class="perfil-meta">
-                    <span class="badge-nivel ${nivelCls[nivel] || 'nivel-Bronze'}">${nivel}</span>
+                    <span class="badge-nivel ${
+        nivelCls[nivel] || "nivel-Bronze"
+    }">${nivel}</span>
                     ${statusBadge}
-                    <span class="perfil-meta-item"><i class="fa-solid fa-calendar"></i> Cadastro em ${fmtData(p.dataCadastro)}</span>
-                    ${p.dataNascimento ? `<span class="perfil-meta-item"><i class="fa-solid fa-cake-candles"></i> ${esc(p.dataNascimento)}</span>` : ''}
-                    ${p.cpfMascarado ? `<span class="perfil-meta-item"><i class="fa-solid fa-id-card"></i> CPF: ${esc(p.cpfMascarado)}</span>` : ''}
+                    <span class="perfil-meta-item"><i class="fa-solid fa-calendar"></i> Cadastro em ${
+        fmtData(p.dataCadastro)
+    }</span>
+                    ${
+        p.dataNascimento
+            ? `<span class="perfil-meta-item"><i class="fa-solid fa-cake-candles"></i> ${
+                esc(p.dataNascimento)
+            }</span>`
+            : ""
+    }
+                    ${
+        p.cpfMascarado
+            ? `<span class="perfil-meta-item"><i class="fa-solid fa-id-card"></i> CPF: ${
+                esc(p.cpfMascarado)
+            }</span>`
+            : ""
+    }
                 </div>
             </div>
         </div>
@@ -125,7 +160,9 @@ function renderPerfil(p) {
             </div>
             <div class="summary-card">
                 <div class="summary-icon" style="background:#4a5d23"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                <div class="summary-value">${fmtTokens(p.totalRecarregado)}</div>
+                <div class="summary-value">${
+        fmtTokens(p.totalRecarregado)
+    }</div>
                 <div class="summary-label">Total Recarregado</div>
             </div>
             <div class="summary-card">
@@ -223,15 +260,21 @@ function renderPerfil(p) {
                     <div class="info-grid">
                         <div class="info-item">
                             <div class="info-label">Saldo Atual (tokens)</div>
-                            <div class="info-value">${fmtTokens(p.saldoTokens)}</div>
+                            <div class="info-value">${
+        fmtTokens(p.saldoTokens)
+    }</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Total Gasto (tokens)</div>
-                            <div class="info-value">${fmtTokens(p.totalGasto)}</div>
+                            <div class="info-value">${
+        fmtTokens(p.totalGasto)
+    }</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Total Recarregado</div>
-                            <div class="info-value">${fmtTokens(p.totalRecarregado)}</div>
+                            <div class="info-value">${
+        fmtTokens(p.totalRecarregado)
+    }</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Cupons Utilizados</div>
@@ -263,7 +306,7 @@ function renderPerfil(p) {
         </div><!-- /tabs-area -->
     `;
 
-    document.getElementById('perfilContent').innerHTML = html;
+    document.getElementById("perfilContent").innerHTML = html;
 
     // Renderiza tabela de compras inicial
     renderTabelaCompras(_perfil.pedidos || [], _periodoDias);
@@ -271,31 +314,33 @@ function renderPerfil(p) {
 
 /* ── TABELA DE COMPRAS ──────────────────────────────────────── */
 const STATUS_ENVIO_LABEL = {
-    AGUARDANDO_ENVIO: 'Aguardando Envio',
-    EM_TRANSITO: 'Em Trânsito',
-    ENTREGUE: 'Entregue',
-    CANCELADO: 'Cancelado',
+    AGUARDANDO_ENVIO: "Aguardando Envio",
+    EM_TRANSITO: "Em Trânsito",
+    ENTREGUE: "Entregue",
+    CANCELADO: "Cancelado",
 };
 
 function filtrarPeriodo(dias) {
     _periodoDias = dias;
     // Atualiza botões
-    document.querySelectorAll('.period-btn').forEach(btn => {
-        const btnDias = parseInt(btn.getAttribute('onclick').match(/\d+/) || [0]);
-        btn.classList.toggle('ativo', btnDias === dias);
+    document.querySelectorAll(".period-btn").forEach((btn) => {
+        const btnDias = parseInt(
+            btn.getAttribute("onclick").match(/\d+/) || [0],
+        );
+        btn.classList.toggle("ativo", btnDias === dias);
     });
     if (_perfil) renderTabelaCompras(_perfil.pedidos || [], dias);
 }
 
 function renderTabelaCompras(pedidos, dias) {
-    const container = document.getElementById('tabelaCompras');
+    const container = document.getElementById("tabelaCompras");
     if (!container) return;
 
     let lista = pedidos;
     if (dias > 0) {
         const corte = new Date();
         corte.setDate(corte.getDate() - dias);
-        lista = pedidos.filter(p => new Date(p.dataCompra) >= corte);
+        lista = pedidos.filter((p) => new Date(p.dataCompra) >= corte);
     }
 
     if (lista.length === 0) {
@@ -307,22 +352,32 @@ function renderTabelaCompras(pedidos, dias) {
         return;
     }
 
-    const linhas = lista.map(p => {
+    const linhas = lista.map((p) => {
         const statusLabel = STATUS_ENVIO_LABEL[p.status] || p.status;
-        const statusCls = 'envio-' + (p.status || 'AGUARDANDO_ENVIO');
+        const statusCls = "envio-" + (p.status || "AGUARDANDO_ENVIO");
         return `
             <tr>
                 <td>#${p.id}</td>
                 <td>
                     <div style="font-weight:600">${esc(p.titulo)}</div>
-                    <div style="font-size:11px;color:#7a6e65">${esc(p.autor)}</div>
+                    <div style="font-size:11px;color:#7a6e65">${
+            esc(p.autor)
+        }</div>
                 </td>
                 <td>${fmtTokens(p.preco)} tk</td>
-                <td><span class="badge-envio ${statusCls}">${esc(statusLabel)}</span></td>
-                <td>${p.codigoRastreio ? `<span style="font-family:monospace;font-size:12px">${esc(p.codigoRastreio)}</span>` : '—'}</td>
+                <td><span class="badge-envio ${statusCls}">${
+            esc(statusLabel)
+        }</span></td>
+                <td>${
+            p.codigoRastreio
+                ? `<span style="font-family:monospace;font-size:12px">${
+                    esc(p.codigoRastreio)
+                }</span>`
+                : "—"
+        }</td>
                 <td>${fmtDataHora(p.dataCompra)}</td>
             </tr>`;
-    }).join('');
+    }).join("");
 
     container.innerHTML = `
         <table class="inner-table">
@@ -342,21 +397,28 @@ function renderTabelaCompras(pedidos, dias) {
 
 /* ── TABS ───────────────────────────────────────────────────── */
 function ativarAba(nome) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('ativo'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('ativo'));
+    document.querySelectorAll(".tab-btn").forEach((b) =>
+        b.classList.remove("ativo")
+    );
+    document.querySelectorAll(".tab-panel").forEach((p) =>
+        p.classList.remove("ativo")
+    );
 
-    const btn = document.getElementById('tab-' + nome);
-    const panel = document.getElementById('panel-' + nome);
-    if (btn) btn.classList.add('ativo');
-    if (panel) panel.classList.add('ativo');
+    const btn = document.getElementById("tab-" + nome);
+    const panel = document.getElementById("panel-" + nome);
+    if (btn) btn.classList.add("ativo");
+    if (panel) panel.classList.add("ativo");
 }
 
 /* ── INIT ───────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => {
-    const hoje = document.getElementById('dataHoje');
+document.addEventListener("DOMContentLoaded", () => {
+    const hoje = document.getElementById("dataHoje");
     if (hoje) {
-        hoje.textContent = new Date().toLocaleDateString('pt-BR', {
-            weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+        hoje.textContent = new Date().toLocaleDateString("pt-BR", {
+            weekday: "long",
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
         });
     }
     carregarPerfil();

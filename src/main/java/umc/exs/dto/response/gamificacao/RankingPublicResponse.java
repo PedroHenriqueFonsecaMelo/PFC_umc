@@ -25,7 +25,7 @@ public class RankingPublicResponse {
     /** Descrição do nível. Ex: "Leitor Ouro" */
     private String nivel;
 
-    /** Emoji do badge. Ex: "📕" */
+    /** Emoji do badge. Ex: "" */
     private String badge;
 
     /** XP acumulado total. */

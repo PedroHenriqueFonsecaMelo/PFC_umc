@@ -1,93 +1,106 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Erro interno · Bibliotroca</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: #f9f6f0;
-            color: #2c241b;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-        .error-card {
-            background: #fff;
-            border: 1px solid rgba(44,36,27,.12);
-            border-radius: 16px;
-            padding: 3rem 2.5rem;
-            max-width: 480px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 4px 24px rgba(44,36,27,.08);
-        }
-        .error-code {
-            font-family: 'Playfair Display', serif;
-            font-size: 6rem;
-            font-weight: 700;
-            color: #722f37;
-            line-height: 1;
-            margin-bottom: 0.5rem;
-            letter-spacing: -2px;
-        }
-        .error-icon { font-size: 2.5rem; margin-bottom: 1rem; }
-        .error-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-        }
-        .error-msg {
-            font-size: 0.95rem;
-            color: #7a6e65;
-            line-height: 1.6;
-            margin-bottom: 2rem;
-        }
-        .btn-home {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: #722f37;
-            color: #f9f6f0;
-            border: none;
-            border-radius: 8px;
-            padding: 0.7rem 1.75rem;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn-home:hover { background: #5c2530; }
-        .brand {
-            margin-bottom: 2rem;
-            font-family: 'Playfair Display', serif;
-            font-size: 1.1rem;
-            color: #9c968f;
-        }
-    </style>
-</head>
-<body>
-    <div class="error-card">
-        <div class="brand">📚 Bibliotroca</div>
-        <div class="error-code">500</div>
-        <div class="error-icon">⚙️</div>
-        <div class="error-title">Algo deu errado</div>
-        <div class="error-msg">
-            Ocorreu um erro interno no servidor.<br>
-            Os nossos escribas já foram notificados — por favor, tente novamente em alguns instantes.
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Erro interno · Bibliotroca</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            *, *::before, *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                font-family: "DM Sans", sans-serif;
+                background: #f9f6f0;
+                color: #2c241b;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 2rem;
+            }
+            .error-card {
+                background: #fff;
+                border: 1px solid rgba(44, 36, 27, 0.12);
+                border-radius: 16px;
+                padding: 3rem 2.5rem;
+                max-width: 480px;
+                width: 100%;
+                text-align: center;
+                box-shadow: 0 4px 24px rgba(44, 36, 27, 0.08);
+            }
+            .error-code {
+                font-family: "Playfair Display", serif;
+                font-size: 6rem;
+                font-weight: 700;
+                color: #722f37;
+                line-height: 1;
+                margin-bottom: 0.5rem;
+                letter-spacing: -2px;
+            }
+            .error-icon {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+            .error-title {
+                font-family: "Playfair Display", serif;
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin-bottom: 0.75rem;
+            }
+            .error-msg {
+                font-size: 0.95rem;
+                color: #7a6e65;
+                line-height: 1.6;
+                margin-bottom: 2rem;
+            }
+            .btn-home {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                background: #722f37;
+                color: #f9f6f0;
+                border: none;
+                border-radius: 8px;
+                padding: 0.7rem 1.75rem;
+                font-family: "DM Sans", sans-serif;
+                font-size: 0.9rem;
+                font-weight: 600;
+                text-decoration: none;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+            .btn-home:hover {
+                background: #5c2530;
+            }
+            .brand {
+                margin-bottom: 2rem;
+                font-family: "Playfair Display", serif;
+                font-size: 1.1rem;
+                color: #9c968f;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="error-card">
+            <div class="brand">📚 Bibliotroca</div>
+            <div class="error-code">500</div>
+            <div class="error-icon">⚙️</div>
+            <div class="error-title">Algo deu errado</div>
+            <div class="error-msg">
+                Ocorreu um erro interno no servidor.<br>
+                Os nossos escribas já foram notificados — por favor, tente
+                novamente em alguns instantes.
+            </div>
+            <a href="/" class="btn-home">← Voltar ao início</a>
         </div>
-        <a href="/" class="btn-home">← Voltar ao início</a>
-    </div>
-</body>
+    </body>
 </html>

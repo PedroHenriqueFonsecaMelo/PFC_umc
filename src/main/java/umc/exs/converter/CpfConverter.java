@@ -40,7 +40,8 @@ public class CpfConverter implements AttributeConverter<String, String> {
 
     @Override
     public String convertToDatabaseColumn(String cpf) {
-        if (cpf == null) return null;
+        if (cpf == null)
+            return null;
 
         try {
             byte[] iv = new byte[IV_SIZE];
@@ -51,8 +52,7 @@ public class CpfConverter implements AttributeConverter<String, String> {
                     new GCMParameterSpec(TAG_LENGTH, iv));
 
             byte[] encrypted = cipher.doFinal(
-                    cpf.getBytes(StandardCharsets.UTF_8)
-            );
+                    cpf.getBytes(StandardCharsets.UTF_8));
 
             return Base64.getEncoder().encodeToString(iv)
                     + ":"
@@ -81,14 +81,12 @@ public class CpfConverter implements AttributeConverter<String, String> {
 
             return new String(
                     cipher.doFinal(encrypted),
-                    StandardCharsets.UTF_8
-            );
+                    StandardCharsets.UTF_8);
 
         } catch (Exception e) {
             throw new IllegalStateException(
                     "Erro ao descriptografar CPF",
-                    e
-            );
+                    e);
         }
     }
 }

@@ -2,7 +2,6 @@
    minhas-compras.js — Minha Estante · Bibliotroca
    ================================================================ */
 
-
 const CARRINHO_KEY = "bibliotroca_carrinho";
 
 /* ── UTILS ──────────────────────────────────────────────────────── */
@@ -10,13 +9,20 @@ const CARRINHO_KEY = "bibliotroca_carrinho";
 function fmtData(iso) {
     if (!iso) return "—";
     const d = new Date(iso);
-    return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+    return d.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+    });
 }
 
 function fmtHora(iso) {
     if (!iso) return "";
     const d = new Date(iso);
-    return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+    });
 }
 
 function primeiraFoto(fotosUrls) {
@@ -30,12 +36,15 @@ function primeiraFoto(fotosUrls) {
 /* ── ESTANTE (localStorage) ──────────────────────────────────────── */
 
 function getEstante() {
-    try { return JSON.parse(localStorage.getItem(CARRINHO_KEY)) || []; }
-    catch (_) { return []; }
+    try {
+        return JSON.parse(localStorage.getItem(CARRINHO_KEY)) || [];
+    } catch (_) {
+        return [];
+    }
 }
 
 function removerDaEstante(id) {
-    const itens = getEstante().filter(i => i.id !== id);
+    const itens = getEstante().filter((i) => i.id !== id);
     localStorage.setItem(CARRINHO_KEY, JSON.stringify(itens));
     renderEstante();
 }
@@ -53,47 +62,70 @@ async function finalizarCompraEstante() {
         toast.className = "toast-estante " + cls;
         toast.innerHTML = msg;
         toast.style.display = "block";
-        setTimeout(() => { toast.style.display = "none"; }, 6000);
+        setTimeout(() => {
+            toast.style.display = "none";
+        }, 6000);
     }
 
     try {
         const res = await fetch("/api/livros/carrinho/comprar", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            credentials: 'include',
-            body: JSON.stringify({ livroIds: itens.map(i => i.id) }),
+            credentials: "include",
+            body: JSON.stringify({ livroIds: itens.map((i) => i.id) }),
         });
 
         const data = await res.json();
 
         if (!res.ok) {
-            mostrarToast("toast-estante-erro", "❌ " + (data.message || data.error || "Erro ao finalizar compra."));
+            mostrarToast(
+                "toast-estante-erro",
+                "❌ " +
+                    (data.message || data.error || "Erro ao finalizar compra."),
+            );
             btn.disabled = false;
             btn.textContent = "Finalizar Compra";
             return;
         }
 
-        const ok   = data.totalComprados || 0;
+        const ok = data.totalComprados || 0;
         const fail = (data.falhas || []).length;
 
         if (ok > 0) {
-            const idsComprados = new Set(data.comprados.map(c => c.livroId));
-            localStorage.setItem(CARRINHO_KEY, JSON.stringify(getEstante().filter(i => !idsComprados.has(i.id))));
+            const idsComprados = new Set(data.comprados.map((c) => c.livroId));
+            localStorage.setItem(
+                CARRINHO_KEY,
+                JSON.stringify(
+                    getEstante().filter((i) => !idsComprados.has(i.id)),
+                ),
+            );
             renderEstante();
             carregarPerfil();
         }
 
         if (ok > 0 && fail === 0) {
-            mostrarToast("toast-estante-ok", `✅ ${ok} livro(s) comprado(s)! Saldo restante: T$ ${data.saldoRestante.toFixed(2)}`);
+            mostrarToast(
+                "toast-estante-ok",
+                `✅ ${ok} livro(s) comprado(s)! Saldo restante: T$ ${
+                    data.saldoRestante.toFixed(2)
+                }`,
+            );
         } else if (ok > 0 && fail > 0) {
-            mostrarToast("toast-estante-aviso", `⚠️ ${ok} comprado(s), ${fail} não concluído(s). Saldo: T$ ${data.saldoRestante.toFixed(2)}`);
+            mostrarToast(
+                "toast-estante-aviso",
+                `⚠️ ${ok} comprado(s), ${fail} não concluído(s). Saldo: T$ ${
+                    data.saldoRestante.toFixed(2)
+                }`,
+            );
         } else {
             const motivo = data.falhas?.[0]?.motivo || "Falha desconhecida.";
             mostrarToast("toast-estante-erro", "❌ " + motivo);
         }
-
     } catch (_) {
-        mostrarToast("toast-estante-erro", "❌ Erro de conexão. Tente novamente.");
+        mostrarToast(
+            "toast-estante-erro",
+            "❌ Erro de conexão. Tente novamente.",
+        );
     }
 
     btn.disabled = false;
@@ -102,10 +134,10 @@ async function finalizarCompraEstante() {
 
 function renderEstante() {
     const itens = getEstante();
-    const lista   = document.getElementById("estanteLista");
-    const vazio   = document.getElementById("estanteVazio");
-    const acoes   = document.getElementById("estanteAcoes");
-    const badge   = document.getElementById("estanteBadge");
+    const lista = document.getElementById("estanteLista");
+    const vazio = document.getElementById("estanteVazio");
+    const acoes = document.getElementById("estanteAcoes");
+    const badge = document.getElementById("estanteBadge");
     const totalEl = document.getElementById("estanteTotal");
 
     if (!lista) return;
@@ -125,8 +157,9 @@ function renderEstante() {
     if (vazio) vazio.style.display = "none";
     if (acoes) acoes.style.display = "block";
 
-    lista.innerHTML = itens.map(item => {
-        const foto = primeiraFoto(item.fotosUrls) || "https://via.placeholder.com/40x54?text=📚";
+    lista.innerHTML = itens.map((item) => {
+        const foto = primeiraFoto(item.fotosUrls) ||
+            "https://via.placeholder.com/40x54?text=📚";
         return `
         <div class="estante-item">
             <img class="estante-item-img" src="${foto}" alt="${item.titulo}"
@@ -134,7 +167,9 @@ function renderEstante() {
             <div class="estante-item-info">
                 <div class="estante-item-titulo">${item.titulo}</div>
                 <div class="estante-item-autor">${item.autor}</div>
-                <div class="estante-item-preco">T$ ${(item.precoAprovado || 0).toFixed(2)}</div>
+                <div class="estante-item-preco">T$ ${
+            (item.precoAprovado || 0).toFixed(2)
+        }</div>
             </div>
             <button class="estante-item-remover" onclick="removerDaEstante(${item.id})" title="Remover">✕</button>
         </div>`;
@@ -148,17 +183,17 @@ function renderEstante() {
 
 const PASSOS = [
     { key: "AGUARDANDO_ENVIO", label: "Aguardando" },
-    { key: "EM_TRANSITO",      label: "Em trânsito" },
-    { key: "ENTREGUE",         label: "Entregue"    },
+    { key: "EM_TRANSITO", label: "Em trânsito" },
+    { key: "ENTREGUE", label: "Entregue" },
 ];
 
 /* ── CANCELAMENTO ────────────────────────────────────────────────── */
 
 function abrirModalCancelamento(pedidoId, titulo) {
-    document.getElementById("cancelPedidoId").value   = pedidoId;
+    document.getElementById("cancelPedidoId").value = pedidoId;
     document.getElementById("cancelTituloLivro").textContent = titulo;
-    document.getElementById("cancelCategoria").value  = "";
-    document.getElementById("cancelDescricao").value  = "";
+    document.getElementById("cancelCategoria").value = "";
+    document.getElementById("cancelDescricao").value = "";
     document.getElementById("cancelFeedback").textContent = "";
     document.getElementById("cancelFeedback").style.display = "none";
 
@@ -172,10 +207,10 @@ function fecharModalCancelamento() {
 }
 
 async function enviarSolicitacaoCancelamento() {
-    const pedidoId  = document.getElementById("cancelPedidoId").value;
+    const pedidoId = document.getElementById("cancelPedidoId").value;
     const categoria = document.getElementById("cancelCategoria").value;
     const descricao = document.getElementById("cancelDescricao").value.trim();
-    const feedback  = document.getElementById("cancelFeedback");
+    const feedback = document.getElementById("cancelFeedback");
     const btnEnviar = document.getElementById("btnEnviarCancel");
 
     if (!categoria) {
@@ -195,20 +230,30 @@ async function enviarSolicitacaoCancelamento() {
     btnEnviar.textContent = "Enviando...";
 
     try {
-        const res = await fetch(`/api/pedidos/${pedidoId}/solicitar-cancelamento`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: 'include',
-            body: JSON.stringify({ motivoCategoria: categoria, motivoDescricao: descricao }),
-        });
+        const res = await fetch(
+            `/api/pedidos/${pedidoId}/solicitar-cancelamento`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    motivoCategoria: categoria,
+                    motivoDescricao: descricao,
+                }),
+            },
+        );
 
         if (res.ok) {
             fecharModalCancelamento();
-            mostrarToastGlobal("Solicitação de cancelamento enviada! Aguarde análise da equipe.", "ok");
+            mostrarToastGlobal(
+                "Solicitação de cancelamento enviada! Aguarde análise da equipe.",
+                "ok",
+            );
             await init();
         } else {
             const data = await res.json().catch(() => ({}));
-            feedback.textContent = data.message || "Não foi possível enviar a solicitação. Tente novamente.";
+            feedback.textContent = data.message ||
+                "Não foi possível enviar a solicitação. Tente novamente.";
             feedback.style.color = "#722F37";
             feedback.style.display = "block";
         }
@@ -226,9 +271,11 @@ function mostrarToastGlobal(msg, tipo) {
     const t = document.getElementById("toastGlobal");
     if (!t) return;
     t.textContent = msg;
-    t.className   = "toast-global toast-global-" + tipo;
+    t.className = "toast-global toast-global-" + tipo;
     t.style.display = "block";
-    setTimeout(() => { t.style.display = "none"; }, 5000);
+    setTimeout(() => {
+        t.style.display = "none";
+    }, 5000);
 }
 
 function buildTimeline(status) {
@@ -240,20 +287,26 @@ function buildTimeline(status) {
     const ordemAtual = PASSOS.findIndex((p) => p.key === status);
     return `
         <div class="timeline">
-            ${PASSOS.map((p, i) => {
-                const cls  = i < ordemAtual ? "done" : i === ordemAtual ? "active" : "";
-                const icon = i < ordemAtual ? "✓" : i + 1;
-                return `
+            ${
+        PASSOS.map((p, i) => {
+            const cls = i < ordemAtual
+                ? "done"
+                : i === ordemAtual
+                ? "active"
+                : "";
+            const icon = i < ordemAtual ? "✓" : i + 1;
+            return `
                     <div class="tl-step ${cls}">
                         <div class="tl-dot">${icon}</div>
                         <div class="tl-label">${p.label}</div>
                     </div>`;
-            }).join("")}
+        }).join("")
+    }
         </div>`;
 }
 
 function buildCard(p) {
-    const foto   = primeiraFoto(p.fotosUrls);
+    const foto = primeiraFoto(p.fotosUrls);
     const imgSrc = foto || "https://via.placeholder.com/72x96?text=📚";
 
     const rastreio = (p.codigoRastreio && p.statusEnvio === "EM_TRANSITO")
@@ -263,7 +316,9 @@ function buildCard(p) {
         : "";
 
     const dataAtual = p.dataAtualizacaoStatus
-        ? `<span style="font-size:.75rem;color:#7A6E65">Atualizado em ${fmtData(p.dataAtualizacaoStatus)}</span>`
+        ? `<span style="font-size:.75rem;color:#7A6E65">Atualizado em ${
+            fmtData(p.dataAtualizacaoStatus)
+        }</span>`
         : "";
 
     let btnCancelar = "";
@@ -274,7 +329,9 @@ function buildCard(p) {
         </div>`;
     } else if (p.statusEnvio === "AGUARDANDO_ENVIO") {
         btnCancelar = `<button class="btn-solicitar-cancelamento"
-               onclick="abrirModalCancelamento(${p.id}, ${JSON.stringify(p.tituloLivro)})">
+               onclick="abrirModalCancelamento(${p.id}, ${
+            JSON.stringify(p.tituloLivro)
+        })">
                <i class="fa-solid fa-ban"></i> Solicitar Cancelamento
            </button>`;
     }
@@ -294,12 +351,20 @@ function buildCard(p) {
                 <div class="pedido-meta">
                     <span>Pedido #${p.id}</span>
                     <span>·</span>
-                    <span>${fmtData(p.dataCompra)} ${fmtHora(p.dataCompra)}</span>
+                    <span>${fmtData(p.dataCompra)} ${
+        fmtHora(p.dataCompra)
+    }</span>
                     <span>·</span>
-                    <span class="pedido-preco">T$ ${p.precoLivro.toFixed(2)}</span>
-                    ${p.statusEnvio === "CANCELADO"
-                        ? `<span>·</span><span class="pedido-estorno">↩ T$ ${p.precoLivro.toFixed(2)} estornados</span>`
-                        : ""}
+                    <span class="pedido-preco">T$ ${
+        p.precoLivro.toFixed(2)
+    }</span>
+                    ${
+        p.statusEnvio === "CANCELADO"
+            ? `<span>·</span><span class="pedido-estorno">↩ T$ ${
+                p.precoLivro.toFixed(2)
+            } estornados</span>`
+            : ""
+    }
                 </div>
                 ${rastreio}
                 ${dataAtual}
@@ -319,12 +384,16 @@ function emptyState(msg) {
 async function carregarLista(endpoint, containerId) {
     const container = document.getElementById(containerId);
     try {
-        const res = await fetch(endpoint, { credentials: 'include' });
-        if (res.status === 401) { window.location.href = "/clientes/login"; return []; }
+        const res = await fetch(endpoint, { credentials: "include" });
+        if (res.status === 401) {
+            window.location.href = "/clientes/login";
+            return [];
+        }
         if (!res.ok) throw new Error("Falha na API");
         return await res.json();
     } catch (e) {
-        container.innerHTML = `<p style="text-align:center;color:#722F37;padding:2rem">Erro ao carregar pedidos.</p>`;
+        container.innerHTML =
+            `<p style="text-align:center;color:#722F37;padding:2rem">Erro ao carregar pedidos.</p>`;
         return [];
     }
 }
@@ -340,18 +409,26 @@ function renderLista(lista, containerId, mensagemVazia) {
 
 async function carregarPerfil() {
     try {
-        const res = await fetch("/clientes/meu-perfil-json", { credentials: 'include' });
+        const res = await fetch("/clientes/meu-perfil-json", {
+            credentials: "include",
+        });
         if (res.ok) {
             const c = await res.json();
             const navSaldo = document.getElementById("navSaldo");
-            if (navSaldo) navSaldo.textContent = `T$ ${(c.saldoTokens || 0).toFixed(2)}`;
+            if (navSaldo) {
+                navSaldo.textContent = `T$ ${(c.saldoTokens || 0).toFixed(2)}`;
+            }
         }
     } catch (_) {}
 }
 
 function trocarTab(nome, btn) {
-    document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
-    document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach((b) =>
+        b.classList.remove("active")
+    );
+    document.querySelectorAll(".tab-panel").forEach((p) =>
+        p.classList.remove("active")
+    );
     btn.classList.add("active");
     document.getElementById("panel-" + nome).classList.add("active");
 }
@@ -363,14 +440,26 @@ async function init() {
     renderEstante();
 
     const [pendentes, concluidos, todos] = await Promise.all([
-        carregarLista("/api/pedidos/pendentes",  "lista-pendentes"),
+        carregarLista("/api/pedidos/pendentes", "lista-pendentes"),
         carregarLista("/api/pedidos/concluidos", "lista-concluidos"),
-        carregarLista("/api/pedidos/todos",      "lista-todos"),
+        carregarLista("/api/pedidos/todos", "lista-todos"),
     ]);
 
-    renderLista(pendentes,  "lista-pendentes",  "Nenhuma compra em andamento no momento.");
-    renderLista(concluidos, "lista-concluidos", "Nenhuma compra concluída ainda.");
-    renderLista(todos,      "lista-todos",      "Você ainda não realizou nenhuma compra.");
+    renderLista(
+        pendentes,
+        "lista-pendentes",
+        "Nenhuma compra em andamento no momento.",
+    );
+    renderLista(
+        concluidos,
+        "lista-concluidos",
+        "Nenhuma compra concluída ainda.",
+    );
+    renderLista(
+        todos,
+        "lista-todos",
+        "Você ainda não realizou nenhuma compra.",
+    );
 
     if (pendentes.length > 0) {
         const b = document.getElementById("badgePendentes");

@@ -10,20 +10,31 @@
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
     <link rel="stylesheet" th:href="@{/css/index.css}" />
     <link rel="stylesheet" th:href="@{/css/book-wall.css}" />
-    <link rel="stylesheet" th:href="@{/css/social-icons.css}"/>
+    <link rel="stylesheet" th:href="@{/css/social-icons.css}" />
   </head>
   <body>
     <!-- FLASH: lote enviado -->
-    <div id="flashEnviado" class="flash-enviado" role="alert" aria-live="polite" style="display:none">
+    <div
+      id="flashEnviado"
+      class="flash-enviado"
+      role="alert"
+      aria-live="polite"
+      style="display: none"
+    >
       <span class="flash-icon">✓</span>
       <div class="flash-text">
         <strong>Lote enviado para avaliação!</strong>
         Você receberá uma notificação quando seus livros forem aprovados.
       </div>
-      <button class="flash-close" id="flashClose" aria-label="Fechar">&times;</button>
+      <button class="flash-close" id="flashClose" aria-label="Fechar">
+        &times;
+      </button>
     </div>
 
     <!-- MASTHEAD -->
@@ -34,7 +45,10 @@
         <div class="masthead-actions">
           <div class="nav-guest" id="navGuest">
             <a class="btn-classic" th:href="@{/entrar}">Entrar</a>
-            <a class="btn-classic btn-classic-filled" th:href="@{/clientes/novo-cadastro}">Cadastrar</a>
+            <a
+              class="btn-classic btn-classic-filled"
+              th:href="@{/clientes/novo-cadastro}"
+            >Cadastrar</a>
           </div>
           <div class="nav-user" id="navUser">
             <a class="btn-logout" th:href="@{/clientes/meu-perfil}">Perfil</a>
@@ -90,12 +104,13 @@
       </div>
     </section>
 
-
     <!-- BOOK WALL -->
     <section class="book-wall-section">
       <div class="book-wall-heading">
         <h2>Livros esperando por você</h2>
-        <p>Uma curadoria de títulos que encontraram novos lares pela Bibliotroca.</p>
+        <p>
+          Uma curadoria de títulos que encontraram novos lares pela Bibliotroca.
+        </p>
       </div>
       <div class="book-wall" id="bookWall"></div>
     </section>
@@ -103,15 +118,30 @@
     <!-- STATS -->
     <div class="stats-bar">
       <div class="stat-item">
-        <div class="stat-number" th:text="${#numbers.formatInteger(statLivros, 0, 'DEFAULT')}">0</div>
+        <div
+          class="stat-number"
+          th:text="${#numbers.formatInteger(statLivros, 0, 'DEFAULT')}"
+        >
+          0
+        </div>
         <div class="stat-label">Livros disponíveis</div>
       </div>
       <div class="stat-item">
-        <div class="stat-number" th:text="${#numbers.formatInteger(statLeitores, 0, 'DEFAULT')}">0</div>
+        <div
+          class="stat-number"
+          th:text="${#numbers.formatInteger(statLeitores, 0, 'DEFAULT')}"
+        >
+          0
+        </div>
         <div class="stat-label">Leitores cadastrados</div>
       </div>
       <div class="stat-item">
-        <div class="stat-number" th:text="${#numbers.formatInteger(statTrocas, 0, 'DEFAULT')}">0</div>
+        <div
+          class="stat-number"
+          th:text="${#numbers.formatInteger(statTrocas, 0, 'DEFAULT')}"
+        >
+          0
+        </div>
         <div class="stat-label">Trocas realizadas</div>
       </div>
       <div class="stat-item">
@@ -142,19 +172,41 @@
           </div>
           <!-- Controles -->
           <div class="carousel-controls">
-            <button class="carousel-btn" id="carrosselPrev" aria-label="Anterior">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2.2"
-                   stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"/>
+            <button
+              class="carousel-btn"
+              id="carrosselPrev"
+              aria-label="Anterior"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6" />
               </svg>
             </button>
             <div class="carousel-dots" id="carrosselDots"></div>
-            <button class="carousel-btn" id="carrosselNext" aria-label="Próximo">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2.2"
-                   stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"/>
+            <button
+              class="carousel-btn"
+              id="carrosselNext"
+              aria-label="Próximo"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
               </svg>
             </button>
           </div>
@@ -228,10 +280,16 @@
         <div class="blog-grid" id="blogGrid">
           <div class="blog-vazio">Carregando posts...</div>
         </div>
-        <div style="text-align:center;margin-top:2rem;display:none" id="blogVerTodos">
-          <a href="/blog" style="display:inline-block;padding:.6rem 1.8rem;border:1.5px solid #c9a96e;border-radius:8px;color:#c9a96e;text-decoration:none;font-size:.92rem;font-family:'DM Sans',sans-serif;transition:background .15s,color .15s"
-             onmouseover="this.style.background='#c9a96e';this.style.color='#0e0f14'"
-             onmouseout="this.style.background='';this.style.color='#c9a96e'">
+        <div
+          style="text-align: center; margin-top: 2rem; display: none"
+          id="blogVerTodos"
+        >
+          <a
+            href="/blog"
+            style="display: inline-block; padding: 0.6rem 1.8rem; border: 1.5px solid #c9a96e; border-radius: 8px; color: #c9a96e; text-decoration: none; font-size: 0.92rem; font-family: 'DM Sans', sans-serif; transition: background 0.15s, color 0.15s"
+            onmouseover="this.style.background='#c9a96e';this.style.color='#0e0f14'"
+            onmouseout="this.style.background='';this.style.color='#c9a96e'"
+          >
             Ver todas as publicações →
           </a>
         </div>
@@ -250,8 +308,12 @@
               mais sobe no ranking.
             </p>
           </div>
-          <a id="rankingCtaBtn" class="btn-secondary" style="align-self: flex-end"
-             href="/clientes/login">Ranking Completo</a>
+          <a
+            id="rankingCtaBtn"
+            class="btn-secondary"
+            style="align-self: flex-end"
+            href="/clientes/login"
+          >Ranking Completo</a>
         </div>
         <div class="ranking-podio" id="rankingList">
           <div class="rank-skeleton"></div>
@@ -296,10 +358,34 @@
         <a th:href="@{/clientes/politica}">Política de Privacidade</a>
       </div>
       <div class="social-footer-icons">
-        <a href="https://facebook.com" class="sf-social sf-facebook" target="_blank" rel="noopener" aria-label="Facebook"></a>
-        <a href="https://twitter.com" class="sf-social sf-twitter" target="_blank" rel="noopener" aria-label="Twitter"></a>
-        <a href="https://instagram.com" class="sf-social sf-instagram" target="_blank" rel="noopener" aria-label="Instagram"></a>
-        <a href="https://linkedin.com" class="sf-social sf-linkedin" target="_blank" rel="noopener" aria-label="LinkedIn"></a>
+        <a
+          href="https://facebook.com"
+          class="sf-social sf-facebook"
+          target="_blank"
+          rel="noopener"
+          aria-label="Facebook"
+        ></a>
+        <a
+          href="https://twitter.com"
+          class="sf-social sf-twitter"
+          target="_blank"
+          rel="noopener"
+          aria-label="Twitter"
+        ></a>
+        <a
+          href="https://instagram.com"
+          class="sf-social sf-instagram"
+          target="_blank"
+          rel="noopener"
+          aria-label="Instagram"
+        ></a>
+        <a
+          href="https://linkedin.com"
+          class="sf-social sf-linkedin"
+          target="_blank"
+          rel="noopener"
+          aria-label="LinkedIn"
+        ></a>
       </div>
     </footer>
 

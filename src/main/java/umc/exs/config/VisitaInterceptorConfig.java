@@ -12,7 +12,6 @@ public class VisitaInterceptorConfig implements WebMvcConfigurer {
 
     private final VisitaInterceptor visitaInterceptor;
 
-    @SuppressWarnings("null")
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(visitaInterceptor);

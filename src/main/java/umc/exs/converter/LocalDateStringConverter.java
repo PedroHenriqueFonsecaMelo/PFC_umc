@@ -14,7 +14,8 @@ public class LocalDateStringConverter implements AttributeConverter<LocalDate, S
 
     @Override
     public LocalDate convertToEntityAttribute(String dbData) {
-        if (dbData == null || dbData.isBlank()) return null;
+        if (dbData == null || dbData.isBlank())
+            return null;
         // Tenta formato padrão ISO (yyyy-MM-dd)
         try {
             return LocalDate.parse(dbData);
@@ -22,7 +23,7 @@ public class LocalDateStringConverter implements AttributeConverter<LocalDate, S
             // Tenta formato brasileiro (dd/MM/yyyy)
             try {
                 return LocalDate.parse(dbData,
-                    java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                        java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             } catch (Exception e2) {
                 // Tenta formato com hora (yyyy-MM-dd HH:mm:ss)
                 try {

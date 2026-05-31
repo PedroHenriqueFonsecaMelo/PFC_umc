@@ -2,8 +2,6 @@ package umc.exs.service.carteira;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,197 +10,192 @@ import lombok.extern.slf4j.Slf4j;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.negocios.TransacaoRepository;
-import umc.exs.repository.usuario.ClienteRepository;
-import umc.exs.service.email.EmailHtmlBuilder;
-import umc.exs.service.email.EmailService;
+import umc.exs.service.carteira.delegado.CarteiraEmailService;
+import umc.exs.service.carteira.delegado.CarteiraNotificacaoService;
+import umc.exs.service.cliente.delegado.ClienteRepositoryService;
 import umc.exs.service.log.LogAuditoriaService;
-import umc.exs.service.notificacao.NotificacaoService;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CarteiraService {
 
         private final TransacaoRepository transacaoRepository;
-        private final ClienteRepository clienteRepository;
-        private final LogAuditoriaService logAuditoriaService;
-        private final EmailService emailService;
-        private final NotificacaoService notificacaoService;
+        private final ClienteRepositoryService clienteRepositoryService;
+        private final CarteiraEmailService carteiraEmailService;
+        private final CarteiraNotificacaoService carteiraNotificacaoService;
+        private final LogAuditoriaService auditoria;
 
         private static final String STATUS_CONCLUIDO = "CONCLUIDO";
         private static final String STATUS_PENDENTE = "PENDENTE";
-        private static final String ASSUNTO_EMAIL = "Atualização de saldo — Bibliotroca";
-        private static final String METODO_PIX = "PIX";
 
         @Transactional
-        public void adicionarTokens(Cliente cliente, Double valor, String metodo, String infoAdicional) {
-                double saldoAnterior = (cliente.getSaldoTokens() != null) ? cliente.getSaldoTokens() : 0.0;
+        public void adicionarTokens(
+                        Cliente cliente,
+                        Double valor,
+                        String metodo,
+                        String infoAdicional) {
+
+                double saldoAnterior = saldo(cliente);
+
                 cliente.setSaldoTokens(saldoAnterior + valor);
 
-                Transacao t = Transacao.builder()
-                                .cliente(cliente)
-                                .valor(valor)
-                                .dataHora(LocalDateTime.now())
-                                .metodoPagamento(metodo)
-                                .status(STATUS_CONCLUIDO)
-                                .finalCartao(infoAdicional)
-                                .build();
+                transacaoRepository.save(
+                                Transacao.criarTransacao(
+                                                cliente,
+                                                valor,
+                                                metodo,
+                                                STATUS_CONCLUIDO,
+                                                infoAdicional));
 
-                // Linha 53: Conversão segura para satisfazer @NonNull
-                transacaoRepository.save(Objects.requireNonNull(t));
-                clienteRepository.save(cliente);
+                clienteRepositoryService.salvar(cliente);
 
-                notificacaoService.notificarSaldo(cliente.getId(), cliente.getSaldoTokens(),
-                                "Recarga de T$ " + String.format("%.2f", valor) + " via " + metodo);
+                carteiraNotificacaoService.notificarRecarga(
+                                cliente,
+                                valor,
+                                metodo);
 
-                // Notificação dashboard: recarga confirmada
-                try {
-                        notificacaoService.criarNotificacaoDashboard(
-                                        cliente,
-                                        String.format("Recarga confirmada! T$ %.2f adicionados ao seu saldo.", valor),
-                                        "/clientes/carteira");
-                } catch (Exception e) {
-                        log.error("Erro ao criar notificação de recarga: {}", e.getMessage());
-                }
+                auditoria.registrarLog(
+                                "TOKENS_ADICIONADOS",
+                                cliente.getId(),
+                                cliente.getEmail(),
+                                String.format(
+                                                "Método: %s | Valor: T$%.2f",
+                                                metodo,
+                                                valor));
 
-                logAuditoriaService.registrarLog("TOKENS_ADICIONADOS", cliente.getId(), cliente.getEmail(),
-                                String.format("Método: %s | Valor: T$%.2f | Info: %s", metodo, valor, infoAdicional));
-
-                enviarEmailSaldo(cliente, saldoAnterior, valor, metodo, infoAdicional, true);
+                carteiraEmailService.enviarCredito(
+                                cliente,
+                                saldoAnterior,
+                                valor,
+                                metodo);
         }
 
-        @SuppressWarnings("null")
         @Transactional
-        public void debitarTokens(Cliente cliente, Double valor, String descricao) {
-                double saldoAtual = (cliente.getSaldoTokens() != null) ? cliente.getSaldoTokens() : 0.0;
+        public void debitarTokens(
+                        Cliente cliente,
+                        Double valor,
+                        String descricao) {
+
+                double saldoAtual = saldo(cliente);
+
                 if (saldoAtual < valor) {
-                        throw new IllegalArgumentException("Saldo insuficiente.");
+                        throw new IllegalArgumentException(
+                                        "Saldo insuficiente.");
                 }
-                cliente.setSaldoTokens(saldoAtual - valor);
 
-                Transacao t = Transacao.builder()
-                                .cliente(cliente)
-                                .valor(-valor)
-                                .dataHora(LocalDateTime.now())
-                                .metodoPagamento("DEBITO_TOKENS")
-                                .status(STATUS_CONCLUIDO)
-                                .finalCartao(descricao)
-                                .build();
+                cliente.setSaldoTokens(
+                                saldoAtual - valor);
 
-                // Linha 86: Conversão segura
-                transacaoRepository.save(Objects.requireNonNull(t));
-                clienteRepository.save(cliente);
+                transacaoRepository.save(
+                                Transacao.criarTransacao(
+                                                cliente,
+                                                -valor,
+                                                "DEBITO_TOKENS",
+                                                STATUS_CONCLUIDO,
+                                                descricao));
 
-                notificacaoService.notificarSaldo(cliente.getId(), cliente.getSaldoTokens(),
-                                "Débito de T$ " + String.format("%.2f", valor) + ": " + descricao);
+                clienteRepositoryService.salvar(cliente);
 
-                logAuditoriaService.registrarLog("TOKENS_DEBITADOS", cliente.getId(), cliente.getEmail(),
-                                String.format("Valor: T$%.2f | Descrição: %s", valor, descricao));
+                carteiraNotificacaoService.notificarDebito(
+                                cliente,
+                                valor,
+                                descricao);
 
-                try {
-                        // Linha 99-101: Conversão segura das Strings de e-mail e nome
-                        emailService.enviarHtml(
-                                        Objects.requireNonNull(cliente.getEmail()),
-                                        Objects.requireNonNull(ASSUNTO_EMAIL),
-                                        EmailHtmlBuilder.atualizacaoSaldo(
-                                                        Objects.requireNonNull(cliente.getNome()),
-                                                        saldoAtual, valor, cliente.getSaldoTokens(),
-                                                        descricao, false, LocalDateTime.now()));
-                } catch (Exception e) {
-                        log.error("Erro no e-mail: {}", e.getMessage());
-                }
+                auditoria.registrarLog(
+                                "TOKENS_DEBITADOS",
+                                cliente.getId(),
+                                cliente.getEmail(),
+                                String.format(
+                                                "Valor: T$%.2f | Descrição: %s",
+                                                valor,
+                                                descricao));
+
+                carteiraEmailService.enviarDebito(
+                                cliente,
+                                saldoAtual,
+                                valor,
+                                descricao);
         }
 
         @Transactional
-        public void registrarIntencaoPagamento(Cliente cliente, Double valor, String pagamentoId) {
-                Transacao t = Transacao.builder()
+        public void registrarIntencaoPagamento(
+                        Cliente cliente,
+                        Double valor,
+                        String pagamentoId) {
+
+                Transacao transacao = Transacao.builder()
                                 .cliente(cliente)
                                 .valor(valor)
                                 .pagamentoId(pagamentoId)
                                 .status(STATUS_PENDENTE)
-                                .metodoPagamento(METODO_PIX)
+                                .metodoPagamento("PIX")
                                 .dataHora(LocalDateTime.now())
                                 .build();
 
-                // Linha 124: Conversão segura
-                transacaoRepository.save(Objects.requireNonNull(t));
+                transacaoRepository.save(transacao);
         }
 
-        @SuppressWarnings("null")
         @Transactional
-        public void confirmarPagamentoPix(String pagamentoId) {
+        public void confirmarPagamentoPix(
+                        String pagamentoId) {
+
                 Transacao transacao = transacaoRepository.findByPagamentoId(pagamentoId);
+
                 if (transacao == null) {
-                        throw new IllegalStateException("Transação não localizada: " + pagamentoId);
+                        throw new IllegalStateException(
+                                        "Transação não localizada: " + pagamentoId);
                 }
 
-                if (STATUS_PENDENTE.equals(transacao.getStatus())) {
-                        transacao.setStatus(STATUS_CONCLUIDO);
-                        Cliente cliente = Objects.requireNonNull(transacao.getCliente());
-                        double saldoAnterior = (cliente.getSaldoTokens() != null) ? cliente.getSaldoTokens() : 0.0;
-                        double valorPix = transacao.getValor();
-                        cliente.setSaldoTokens(saldoAnterior + valorPix);
-
-                        transacaoRepository.save(transacao);
-                        clienteRepository.save(cliente);
-
-                        try {
-                                // Linha 156-159: Conversão segura
-                                emailService.enviarHtml(
-                                                Objects.requireNonNull(cliente.getEmail()),
-                                                Objects.requireNonNull(ASSUNTO_EMAIL),
-                                                EmailHtmlBuilder.atualizacaoSaldo(
-                                                                Objects.requireNonNull(cliente.getNome()),
-                                                                saldoAnterior, valorPix, cliente.getSaldoTokens(),
-                                                                "Recarga via PIX confirmada", true,
-                                                                LocalDateTime.now()));
-                        } catch (Exception e) {
-                                log.error("Erro no e-mail PIX: {}", e.getMessage());
-                        }
-
-                        // Notificação dashboard: PIX confirmado
-                        try {
-                                notificacaoService.criarNotificacaoDashboard(
-                                                cliente,
-                                                String.format("Recarga confirmada! T$ %.2f adicionados ao seu saldo via PIX.",
-                                                                valorPix),
-                                                "/clientes/carteira");
-                        } catch (Exception e) {
-                                log.error("Erro ao criar notificação de PIX: {}", e.getMessage());
-                        }
+                if (!STATUS_PENDENTE.equals(
+                                transacao.getStatus())) {
+                        return;
                 }
-        }
 
-        @SuppressWarnings("null")
-        private void enviarEmailSaldo(Cliente cliente, double saldoAnterior, Double valor, String metodo, String info,
-                        boolean isCredito) {
-                try {
-                        String motivoEmail = switch (metodo.toUpperCase()) {
-                                case METODO_PIX -> "Recarga via PIX";
-                                case "CUPOM" -> "Resgate de cupom";
-                                default -> "Crédito — " + metodo;
-                        };
-                        // Linha 183-185: Conversão segura
-                        emailService.enviarHtml(
-                                        Objects.requireNonNull(cliente.getEmail()),
-                                        Objects.requireNonNull(ASSUNTO_EMAIL),
-                                        EmailHtmlBuilder.atualizacaoSaldo(
-                                                        Objects.requireNonNull(cliente.getNome()),
-                                                        saldoAnterior, valor, cliente.getSaldoTokens(),
-                                                        motivoEmail, isCredito, LocalDateTime.now()));
-                } catch (Exception e) {
-                        log.error("Erro e-mail saldo: {}", e.getMessage());
-                }
+                Cliente cliente = transacao.getCliente();
+
+                double saldoAnterior = saldo(cliente);
+
+                transacao.setStatus(STATUS_CONCLUIDO);
+
+                cliente.setSaldoTokens(
+                                saldoAnterior + transacao.getValor());
+
+                transacaoRepository.save(transacao);
+                clienteRepositoryService.salvar(cliente);
+
+                carteiraEmailService.enviarConfirmacaoPix(
+                                cliente,
+                                saldoAnterior,
+                                transacao.getValor());
+
+                carteiraNotificacaoService.notificarPixConfirmado(
+                                cliente,
+                                transacao.getValor());
         }
 
         @Transactional(readOnly = true)
-        public List<Transacao> listarHistoricoPorCliente(Long clienteId) {
-                return transacaoRepository.findByClienteIdOrderByDataHoraDesc(clienteId);
+        public List<Transacao> listarHistoricoPorCliente(
+                        Long clienteId) {
+
+                return transacaoRepository
+                                .findByClienteIdOrderByDataHoraDesc(clienteId);
         }
 
         @Transactional(readOnly = true)
-        public boolean verificarStatusPagamento(String pagamentoId) {
-                Transacao t = transacaoRepository.findByPagamentoId(pagamentoId);
-                return (t != null && STATUS_CONCLUIDO.equals(t.getStatus()));
+        public boolean verificarStatusPagamento(
+                        String pagamentoId) {
+
+                Transacao transacao = transacaoRepository.findByPagamentoId(pagamentoId);
+
+                return transacao != null
+                                && STATUS_CONCLUIDO.equals(
+                                                transacao.getStatus());
+        }
+
+        private double saldo(Cliente cliente) {
+                return cliente.getSaldoTokens() == null
+                                ? 0.0
+                                : cliente.getSaldoTokens();
         }
 }

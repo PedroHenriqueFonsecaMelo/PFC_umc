@@ -529,11 +529,11 @@ DTOs.
 
 **Métodos**:
 
-| Método                                                    | Descrição                        |
-| --------------------------------------------------------- | -------------------------------- |
-| `toEntity(SignupRequest)`                                     | Converte SignupRequest para Cliente  |
-| `toDTO(Cliente)`                                          | Converte Cliente para ClienteDTO |
-| `updateEntityFromDto(ClienteDTO, @MappingTarget Cliente)` | Atualiza entidade existente      |
+| Método                                                    | Descrição                           |
+| --------------------------------------------------------- | ----------------------------------- |
+| `toEntity(SignupRequest)`                                 | Converte SignupRequest para Cliente |
+| `toDTO(Cliente)`                                          | Converte Cliente para ClienteDTO    |
+| `updateEntityFromDto(ClienteDTO, @MappingTarget Cliente)` | Atualiza entidade existente         |
 
 ---
 

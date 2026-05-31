@@ -21,7 +21,7 @@ WORKDIR /app
 
 COPY --from=build /app/target/*.jar app.jar
 
-EXPOSE 8080
+EXPOSE ${PORT}
 
 # --enable-native-access=ALL-UNNAMED suprime o warning do sqlite-jdbc no Java 21+
 ENTRYPOINT ["java", "--enable-native-access=ALL-UNNAMED", "-jar", "app.jar"]

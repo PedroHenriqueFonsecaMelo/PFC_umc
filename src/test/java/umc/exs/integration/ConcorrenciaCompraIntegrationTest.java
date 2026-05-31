@@ -22,7 +22,9 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.usuario.ClienteRepository;
-import umc.exs.service.core.bussiness.LivroService;
+import umc.exs.service.core.livros.LivroService;
+import umc.exs.service.email.EmailService;
+import umc.exs.service.email.facade.EmailFacade;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -44,7 +46,10 @@ class ConcorrenciaCompraIntegrationTest {
     private TransactionTemplate transactionTemplate;
 
     @MockitoBean
-    private umc.exs.service.email.EmailService emailService;
+    private EmailFacade emailFacade;
+
+    @MockitoBean
+    private EmailService emailService;
 
     /**
      * Limpa o banco de dados desabilitando temporariamente as FKs.
@@ -70,7 +75,6 @@ class ConcorrenciaCompraIntegrationTest {
         });
     }
 
-    @SuppressWarnings("null")
     @Test
     void duasComprasConcorrentesMesmoLivro_UmaSucedeOutraFalha() throws InterruptedException {
         // --- ARRANGE ---

@@ -45,7 +45,7 @@ public class LogAuditoria {
 
     // Data e hora da ocorrência do log
     @Column(name = "data_hora", nullable = false)
-    private LocalDateTime  dataHora;
+    private LocalDateTime dataHora;
 
     public LogAuditoria(Long idUsuario, String emailUsuario, String acao, String detalhes, LocalDateTime dataHora) {
         this.idUsuario = idUsuario;
@@ -57,36 +57,64 @@ public class LogAuditoria {
 
     /** Retorna o nome legível da ação para exibição no frontend/Thymeleaf. */
     public String getAcaoDescricao() {
-        if (acao == null) return "—";
+        if (acao == null)
+            return "—";
         switch (acao) {
-            case "LOGIN_SUCESSO":            return "Login realizado";
-            case "AUTENT_FALHA":             return "Falha na autenticação";
+            case "LOGIN_SUCESSO":
+                return "Login realizado";
+            case "AUTENT_FALHA":
+                return "Falha na autenticação";
             case "ALTERACAO_SENHA":
-            case "SENHA_ALTERADA":           return "Senha alterada";
-            case "CADASTRO_USUARIO":         return "Cadastro iniciado";
-            case "CADASTRO_COMPLETO":        return "Cadastro concluído";
-            case "UPLOAD_FOTO":              return "Foto de perfil atualizada";
-            case "COMPRA_LIVRO_SUCESSO":     return "Compra realizada";
-            case "COMPRA_CARRINHO":          return "Compra via carrinho";
-            case "PEDIDO_STATUS_ATUALIZADO": return "Status do pedido atualizado";
-            case "PEDIDO_CANCELADO_ESTORNO": return "Pedido cancelado com estorno";
-            case "CANCELAMENTO_SOLICITADO":  return "Cancelamento solicitado";
-            case "CANCELAMENTO_APROVADO":    return "Cancelamento aprovado";
-            case "CANCELAMENTO_RECUSADO":    return "Cancelamento recusado";
-            case "CANCELAMENTO_ADMIN":       return "Cancelamento pelo administrador";
-            case "LIVRO_CADASTRADO":         return "Livro cadastrado";
-            case "LOTE_CADASTRADO":          return "Lote cadastrado";
-            case "LIVRO_APROVADO":           return "Livro aprovado";
-            case "LIVRO_REJEITADO":          return "Livro rejeitado";
-            case "TOKENS_ADICIONADOS":       return "Tokens adicionados";
-            case "TOKENS_DEBITADOS":         return "Tokens debitados";
-            case "RECARGA_TOKENS":           return "Recarga de tokens";
-            case "PIX_FALHA":               return "Falha no pagamento via Pix";
-            case "NIVEL_SUBIU":              return "Nível aumentado";
-            case "XP_ZERADO":               return "XP zerado por inatividade";
-            case "ERRO_CUPOM":              return "Erro ao aplicar cupom";
-            case "EXPORTACAO_CSV":           return "Exportação CSV";
-            case "EXPORTACAO_PDF":           return "Exportação PDF";
+            case "SENHA_ALTERADA":
+                return "Senha alterada";
+            case "CADASTRO_USUARIO":
+                return "Cadastro iniciado";
+            case "CADASTRO_COMPLETO":
+                return "Cadastro concluído";
+            case "UPLOAD_FOTO":
+                return "Foto de perfil atualizada";
+            case "COMPRA_LIVRO_SUCESSO":
+                return "Compra realizada";
+            case "COMPRA_CARRINHO":
+                return "Compra via carrinho";
+            case "PEDIDO_STATUS_ATUALIZADO":
+                return "Status do pedido atualizado";
+            case "PEDIDO_CANCELADO_ESTORNO":
+                return "Pedido cancelado com estorno";
+            case "CANCELAMENTO_SOLICITADO":
+                return "Cancelamento solicitado";
+            case "CANCELAMENTO_APROVADO":
+                return "Cancelamento aprovado";
+            case "CANCELAMENTO_RECUSADO":
+                return "Cancelamento recusado";
+            case "CANCELAMENTO_ADMIN":
+                return "Cancelamento pelo administrador";
+            case "LIVRO_CADASTRADO":
+                return "Livro cadastrado";
+            case "LOTE_CADASTRADO":
+                return "Lote cadastrado";
+            case "LIVRO_APROVADO":
+                return "Livro aprovado";
+            case "LIVRO_REJEITADO":
+                return "Livro rejeitado";
+            case "TOKENS_ADICIONADOS":
+                return "Tokens adicionados";
+            case "TOKENS_DEBITADOS":
+                return "Tokens debitados";
+            case "RECARGA_TOKENS":
+                return "Recarga de tokens";
+            case "PIX_FALHA":
+                return "Falha no pagamento via Pix";
+            case "NIVEL_SUBIU":
+                return "Nível aumentado";
+            case "XP_ZERADO":
+                return "XP zerado por inatividade";
+            case "ERRO_CUPOM":
+                return "Erro ao aplicar cupom";
+            case "EXPORTACAO_CSV":
+                return "Exportação CSV";
+            case "EXPORTACAO_PDF":
+                return "Exportação PDF";
             default:
                 return acao.replace('_', ' ').toLowerCase();
         }

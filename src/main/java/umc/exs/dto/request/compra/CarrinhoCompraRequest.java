@@ -9,7 +9,8 @@ import java.util.List;
 
 /**
  * DTO para compra em lote via carrinho.
- * Recebe lista de IDs de livros e, opcionalmente, um cupom de desconto aplicado ao total.
+ * Recebe lista de IDs de livros e, opcionalmente, um cupom de desconto aplicado
+ * ao total.
  */
 @Getter
 @Setter

@@ -69,7 +69,6 @@ public class ForumService {
 
     // ── Criação ───────────────────────────────────────────────────────────────
 
-    @SuppressWarnings("null")
     @Transactional
     public TopicoForum criarTopico(NovoTopicoRequest dto, Long autorId) {
         Cliente autor = clienteRepo.findById(autorId)
@@ -84,7 +83,6 @@ public class ForumService {
         return topicoRepo.save(topico);
     }
 
-    @SuppressWarnings("null")
     @Transactional
     public RespostaForum criarResposta(Long topicoId, String dto, Long autorId) {
         TopicoForum topico = topicoRepo.findById(topicoId)
@@ -107,7 +105,6 @@ public class ForumService {
 
     // ── Moderação ─────────────────────────────────────────────────────────────
 
-    @SuppressWarnings("null")
     @Transactional
     public void deletarTopico(Long id) {
         topicoRepo.deleteById(id);
@@ -116,13 +113,12 @@ public class ForumService {
     @Transactional(readOnly = true)
     public boolean isAutorResposta(Long respostaId, String emailUsuario) {
         return respostaRepo.findById(respostaId)
-            .map(r -> r.getAutor() != null &&
-                      r.getAutor().getEmail() != null &&
-                      r.getAutor().getEmail().equals(emailUsuario))
-            .orElse(false);
+                .map(r -> r.getAutor() != null &&
+                        r.getAutor().getEmail() != null &&
+                        r.getAutor().getEmail().equals(emailUsuario))
+                .orElse(false);
     }
 
-    @SuppressWarnings("null")
     @Transactional
     public void deletarResposta(Long id) {
         RespostaForum resposta = respostaRepo.findById(id)
@@ -137,7 +133,6 @@ public class ForumService {
 
     // ── Curtidas ──────────────────────────────────────────────────────────────
 
-    @SuppressWarnings("null")
     @Transactional
     public Map<String, Object> curtirResposta(Long respostaId, Long clienteId) {
         RespostaForum resposta = respostaRepo.findById(respostaId)
@@ -160,7 +155,6 @@ public class ForumService {
 
     // ── Melhor Resposta ───────────────────────────────────────────────────────
 
-    @SuppressWarnings("null")
     @Transactional
     public void marcarMelhorResposta(Long respostaId, Long clienteId, boolean isAdmin) {
         RespostaForum resposta = respostaRepo.findById(respostaId)

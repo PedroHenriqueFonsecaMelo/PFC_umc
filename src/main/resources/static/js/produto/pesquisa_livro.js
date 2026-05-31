@@ -1,15 +1,15 @@
 document.addEventListener("DOMContentLoaded", async () => {
     // 1. Captura as configurações injetadas pelo Thymeleaf no HTML
-    const configElem = document.getElementById('config-pag');
+    const configElem = document.getElementById("config-pag");
 
     if (!configElem) {
         console.error("Erro: Elemento #config-pag não encontrado no HTML.");
         return;
     }
 
-    const isbn = configElem.getAttribute('data-isbn');
+    const isbn = configElem.getAttribute("data-isbn");
     // Converte a string "true"/"false" do atributo para booleano real
-    const unificado = configElem.getAttribute('data-unificado') === 'true';
+    const unificado = configElem.getAttribute("data-unificado") === "true";
 
     console.log("Iniciando carregamento:", { isbn, unificado });
 
@@ -20,7 +20,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         // 3. Busca dados do seu banco local (Resumo oficial e Resenhas)
         await carregarDadosInternos(isbn, unificado);
     } else {
-        document.getElementById('tituloLivro').innerText = "ISBN Inválido ou não informado";
+        document.getElementById("tituloLivro").innerText =
+            "ISBN Inválido ou não informado";
     }
 });
 
@@ -35,26 +36,42 @@ async function carregarDadosLivroAPI(isbn) {
 
     try {
         // Tentativa 1: Open Library
-        const resOL = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`);
+        const resOL = await fetch(
+            `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`,
+        );
         const dataOL = await resOL.json();
         const infoOL = dataOL[`ISBN:${isbn}`];
 
         if (infoOL) {
             tituloEncontrado = infoOL.title || tituloEncontrado;
-            autorEncontrado = infoOL.authors ? infoOL.authors.map(a => a.name).join(", ") : autorEncontrado;
-            capaUrl = infoOL.cover ? (infoOL.cover.large || infoOL.cover.medium) : "";
-            resumoEncontrado = infoOL.description ? (typeof infoOL.description === 'string' ? infoOL.description : infoOL.description.value) : "";
+            autorEncontrado = infoOL.authors
+                ? infoOL.authors.map((a) => a.name).join(", ")
+                : autorEncontrado;
+            capaUrl = infoOL.cover
+                ? (infoOL.cover.large || infoOL.cover.medium)
+                : "";
+            resumoEncontrado = infoOL.description
+                ? (typeof infoOL.description === "string"
+                    ? infoOL.description
+                    : infoOL.description.value)
+                : "";
         }
 
         // Tentativa 2: Google Books (para complementar resumo)
-        const resGB = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`);
+        const resGB = await fetch(
+            `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`,
+        );
         if (resGB.ok) {
             const dataGB = await resGB.json();
             if (dataGB.totalItems > 0) {
                 const vol = dataGB.items[0].volumeInfo;
                 resumoEncontrado = vol.description || resumoEncontrado;
-                if (tituloEncontrado.includes("não encontrado")) tituloEncontrado = vol.title;
-                if (autorEncontrado === "Autor Desconhecido" && vol.authors) autorEncontrado = vol.authors.join(", ");
+                if (tituloEncontrado.includes("não encontrado")) {
+                    tituloEncontrado = vol.title;
+                }
+                if (autorEncontrado === "Autor Desconhecido" && vol.authors) {
+                    autorEncontrado = vol.authors.join(", ");
+                }
             }
         }
     } catch (err) {
@@ -62,14 +79,15 @@ async function carregarDadosLivroAPI(isbn) {
     }
 
     // Atualiza a interface básica
-    document.getElementById('tituloLivro').innerText = tituloEncontrado;
-    document.getElementById('autorLivro').innerText = autorEncontrado;
+    document.getElementById("tituloLivro").innerText = tituloEncontrado;
+    document.getElementById("autorLivro").innerText = autorEncontrado;
 
     if (resumoEncontrado) {
-        document.getElementById('containerResumo').innerHTML = `<p>${resumoEncontrado}</p>`;
+        document.getElementById("containerResumo").innerHTML =
+            `<p>${resumoEncontrado}</p>`;
     }
 
-    const capaElem = document.getElementById('containerCapa');
+    const capaElem = document.getElementById("containerCapa");
     capaElem.innerHTML = capaUrl
         ? `<img src="${capaUrl}" alt="Capa do Livro" style="max-width:200px; box-shadow: 5px 5px 15px rgba(0,0,0,0.2);">`
         : `<div style="padding:20px; border:1px solid #ccc; background:#eee;">Capa não disponível</div>`;
@@ -91,21 +109,27 @@ async function carregarDadosInternos(isbn, unificado) {
         if (!response.ok) throw new Error("Falha na resposta da API local");
 
         const data = await response.json();
-        const lista = document.getElementById('listaComentarios');
+        const lista = document.getElementById("listaComentarios");
 
         // Se houver resumo oficial cadastrado pelo Admin, ele sobrescreve o da API externa
-        if (data.resumoOficial && data.resumoOficial.trim() !== "" && !data.resumoOficial.includes("Conteúdo compartilhado")) {
-            document.getElementById('containerResumo').innerHTML = `<p><strong>Sinopse Oficial:</strong><br>${data.resumoOficial}</p>`;
+        if (
+            data.resumoOficial && data.resumoOficial.trim() !== "" &&
+            !data.resumoOficial.includes("Conteúdo compartilhado")
+        ) {
+            document.getElementById("containerResumo").innerHTML =
+                `<p><strong>Sinopse Oficial:</strong><br>${data.resumoOficial}</p>`;
         }
 
         // Renderização das Avaliações
         if (data.avaliacoes && data.avaliacoes.length > 0) {
             lista.innerHTML = ""; // Limpa o "Nenhuma resenha"
 
-            data.avaliacoes.forEach(av => {
+            data.avaliacoes.forEach((av) => {
                 // Importante: usamos 'isbnOriginalNoAto' que é o nome do campo no seu Java/JSON
                 const isbnEdicao = av.isbnOriginalNoAto || isbn;
-                const nomeUsuario = av.avaliador ? av.avaliador.nome : "Leitor Anônimo";
+                const nomeUsuario = av.avaliador
+                    ? av.avaliador.nome
+                    : "Leitor Anônimo";
 
                 lista.innerHTML += `
                     <div class="resenha-item" style="border-bottom: 1px solid #ddd; padding: 15px 0;">
@@ -117,16 +141,24 @@ async function carregarDadosInternos(isbn, unificado) {
                         </div>
                         <p style="margin: 10px 0;">${av.comentario}</p>
                         <small style="color: #666;">
-                            Postado em: ${new Date(av.dataAvaliacao).toLocaleDateString('pt-BR')}
-                            ${unificado ? ` | <span style="color:#4a5d23">Edição: ${isbnEdicao}</span>` : ''}
+                            Postado em: ${
+                    new Date(av.dataAvaliacao).toLocaleDateString("pt-BR")
+                }
+                            ${
+                    unificado
+                        ? ` | <span style="color:#4a5d23">Edição: ${isbnEdicao}</span>`
+                        : ""
+                }
                         </small>
                     </div>
                 `;
             });
         } else {
-            lista.innerHTML = `<p style="font-style: italic; color: #7a6e65;">Ainda não há resenhas para esta ${unificado ? 'obra' : 'edição'}. Seja o primeiro!</p>`;
+            lista.innerHTML =
+                `<p style="font-style: italic; color: #7a6e65;">Ainda não há resenhas para esta ${
+                    unificado ? "obra" : "edição"
+                }. Seja o primeiro!</p>`;
         }
-
     } catch (err) {
         console.error("Erro ao carregar dados do banco local:", err);
     }
@@ -136,13 +168,13 @@ async function carregarDadosInternos(isbn, unificado) {
  * ENVIA UMA NOVA RESENHA PARA O BANCO
  */
 async function enviarResenha() {
-    const texto = document.getElementById('textoComentario').value;
-    const nota = document.getElementById('notaLivro').value;
-    const titulo = document.getElementById('tituloLivro').innerText.trim();
-    const autor = document.getElementById('autorLivro').innerText.trim();
+    const texto = document.getElementById("textoComentario").value;
+    const nota = document.getElementById("notaLivro").value;
+    const titulo = document.getElementById("tituloLivro").innerText.trim();
+    const autor = document.getElementById("autorLivro").innerText.trim();
 
     // Pega o ISBN da URL
-    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const pathParts = window.location.pathname.split("/").filter(Boolean);
     const isbn = pathParts[1];
 
     if (!texto.trim()) {
@@ -150,7 +182,9 @@ async function enviarResenha() {
         return;
     }
 
-    const autorTratado = (autor === "Autor Desconhecido" || !autor) ? "Não informado" : autor;
+    const autorTratado = (autor === "Autor Desconhecido" || !autor)
+        ? "Não informado"
+        : autor;
 
     // Payload ÚNICO e corrigido
     const payload = {
@@ -158,14 +192,14 @@ async function enviarResenha() {
         titulo: titulo,
         autor: autorTratado,
         comentario: texto,
-        nota: parseInt(nota)
+        nota: parseInt(nota),
     };
 
     try {
-        const response = await fetch('/api/avaliacoes/salvar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+        const response = await fetch("/api/avaliacoes/salvar", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
         });
 
         if (response.ok) {

@@ -24,8 +24,7 @@ import umc.exs.model.entidades.usuario.Cliente;
  * só use o mesmo cupom uma única vez.
  */
 @Entity
-@Table(name = "cupom_uso",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"cupom_id", "cliente_id"}))
+@Table(name = "cupom_uso", uniqueConstraints = @UniqueConstraint(columnNames = { "cupom_id", "cliente_id" }))
 @DTO
 @Data
 @Builder

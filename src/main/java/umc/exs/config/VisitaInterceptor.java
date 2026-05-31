@@ -18,7 +18,6 @@ public class VisitaInterceptor implements HandlerInterceptor {
 
     private final VisitaSiteService visitaSiteService;
 
-    @SuppressWarnings("null")
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         if (!"GET".equalsIgnoreCase(request.getMethod()))

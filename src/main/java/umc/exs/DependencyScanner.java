@@ -11,7 +11,6 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 public class DependencyScanner {
 
     // Regex para capturar o nome da variável dentro de @Value("${NOME}") ou

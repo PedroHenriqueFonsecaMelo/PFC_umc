@@ -19,6 +19,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import umc.exs.security.JwtAuthenticationEntryPoint;
 import umc.exs.security.JwtRequestFilter;
 import umc.exs.security.RateLimitFilter;
 
@@ -49,7 +50,7 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http, JwtRequestFilter jwtRequestFilter,
                         RateLimitFilter rateLimitFilter,
-                        umc.exs.security.JwtAuthenticationEntryPoint entryPoint) throws Exception {
+                        JwtAuthenticationEntryPoint entryPoint) throws Exception {
                 http
                                 .headers(headers -> headers
                                                 .contentSecurityPolicy(csp -> csp
@@ -99,6 +100,7 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 // 1. RECURSOS ESTÁTICOS
                                                 .requestMatchers(STATIC_RESOURCES).permitAll()
+                                                .requestMatchers("/error", "/error/**").permitAll()
 
                                                 // 2. EXCEÇÃO DE BLOQUEIO (Específicos da API)
                                                 .requestMatchers(HttpMethod.POST, "/api/livros/carrinho/comprar")
@@ -107,9 +109,11 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/livros/vender").authenticated()
                                                 .requestMatchers("/api/livros/lotes/**").authenticated()
 
-                                                // 3. Páginas da loja que exigem autenticação (antes do catch-all /livros/**)
+                                                // 3. Páginas da loja que exigem autenticação (antes do catch-all
+                                                // /livros/**)
                                                 .requestMatchers("/livros/estante", "/livros/checkout").authenticated()
-                                                // Endpoint público para detalhes de livro via API (GET /api/livros/{id})
+                                                // Endpoint público para detalhes de livro via API (GET
+                                                // /api/livros/{id})
                                                 .requestMatchers(HttpMethod.GET, "/api/livros/*").permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/uploads/**").authenticated()
 
@@ -121,7 +125,8 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.POST, "/api/blog/*/curtir").authenticated()
                                                 .requestMatchers(HttpMethod.POST, "/api/blog/*/comentarios")
                                                 .authenticated()
-                                                .requestMatchers(HttpMethod.DELETE, "/api/blog/*/comentarios/*").authenticated()
+                                                .requestMatchers(HttpMethod.DELETE, "/api/blog/*/comentarios/*")
+                                                .authenticated()
                                                 .requestMatchers("/api/blog/**").hasAuthority(ROLE_ADMIN)
                                                 .requestMatchers(HttpMethod.GET, "/forum/**", "/api/forum/topicos")
                                                 .permitAll()
@@ -159,7 +164,7 @@ public class SecurityConfig {
 
                 // Adição dos Filtros de JWT e Rate Limit
                 http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-                http.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class);
+                http.addFilterBefore(rateLimitFilter, JwtRequestFilter.class);
 
                 return http.build();
         }

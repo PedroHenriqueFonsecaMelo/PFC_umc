@@ -1,6 +1,9 @@
 // Função para buscar CEP usando a API ViaCEP
 async function buscarCep(index) {
-    const cep = document.getElementById(`cep-${index}`).value.replace(/\D/g, '');
+    const cep = document.getElementById(`cep-${index}`).value.replace(
+        /\D/g,
+        "",
+    );
 
     if (cep.length !== 8) return;
 
@@ -26,7 +29,7 @@ async function buscarCep(index) {
 
 // Função para adicionar novo bloco de endereço
 function adicionarEndereco() {
-    const container = document.getElementById('enderecos-list-container');
+    const container = document.getElementById("enderecos-list-container");
     const index = enderecoIndex; // Usa a variável global iniciada no HTML
 
     const novoEnderecoHtml = `
@@ -75,13 +78,13 @@ function adicionarEndereco() {
         </div>
     `;
 
-    container.insertAdjacentHTML('beforeend', novoEnderecoHtml);
+    container.insertAdjacentHTML("beforeend", novoEnderecoHtml);
     enderecoIndex++; // Incrementa para o próximo endereço
 }
 
 // Função para adicionar novo cartão (mantendo a lógica do seu formulário)
 function adicionarCartao() {
-    const container = document.getElementById('cartoes-list-container');
+    const container = document.getElementById("cartoes-list-container");
     const index = cartaoIndex;
 
     const novoCartaoHtml = `
@@ -109,6 +112,6 @@ function adicionarCartao() {
         </div>
     `;
 
-    container.insertAdjacentHTML('beforeend', novoCartaoHtml);
+    container.insertAdjacentHTML("beforeend", novoCartaoHtml);
     cartaoIndex++;
 }

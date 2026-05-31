@@ -21,7 +21,9 @@
   </head>
   <body>
     <div class="layout">
-      <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('notificacoes')}"></th:block>
+      <th:block
+        th:replace="~{fragments/admin-sidebar :: adminSidebar('notificacoes')}"
+      ></th:block>
 
       <div class="content">
         <header class="topbar">
@@ -30,7 +32,8 @@
             <div class="topbar-date" id="dataHoje"></div>
           </div>
           <div class="topbar-right">
-            <span class="badge-online"><span class="dot"></span> Sistema Online</span>
+            <span class="badge-online"><span class="dot"></span> Sistema
+              Online</span>
             <div class="avatar"><i class="fa-solid fa-user"></i></div>
           </div>
         </header>
@@ -39,10 +42,8 @@
           <div class="section-label">Filtrar usuários e compor mensagem</div>
 
           <div class="notif-grid">
-
             <!-- COLUNA ESQUERDA: filtros + composição -->
-            <div style="display:flex;flex-direction:column;gap:20px;">
-
+            <div style="display: flex; flex-direction: column; gap: 20px">
               <!-- Card: Filtros -->
               <div class="notif-card">
                 <div class="notif-card-title">
@@ -77,18 +78,32 @@
                 </div>
 
                 <label class="notif-label">Assunto</label>
-                <input type="text" class="notif-input" id="assunto" placeholder="Ex: Novidades da Bibliotroca!" />
+                <input
+                  type="text"
+                  class="notif-input"
+                  id="assunto"
+                  placeholder="Ex: Novidades da Bibliotroca!"
+                />
 
                 <label class="notif-label">Mensagem</label>
-                <textarea class="notif-textarea" id="corpo" placeholder="Escreva aqui o conteúdo do e-mail..."></textarea>
+                <textarea
+                  class="notif-textarea"
+                  id="corpo"
+                  placeholder="Escreva aqui o conteúdo do e-mail..."
+                ></textarea>
 
                 <label class="notif-label">Agendar envio (opcional)</label>
-                <input type="text" class="notif-input" id="agendamento"
-                       placeholder="DD/MM/AAAA HH:MM"
-                       maxlength="16"
-                       autocomplete="off"
-                       oninput="mascaraDataHora(this)" />
-                <span class="notif-hint">Deixe em branco para envio imediato.</span>
+                <input
+                  type="text"
+                  class="notif-input"
+                  id="agendamento"
+                  placeholder="DD/MM/AAAA HH:MM"
+                  maxlength="16"
+                  autocomplete="off"
+                  oninput="mascaraDataHora(this)"
+                />
+                <span class="notif-hint"
+                >Deixe em branco para envio imediato.</span>
 
                 <div class="notif-actions">
                   <button class="btn-notif-send" onclick="disparar(false)">
@@ -99,14 +114,14 @@
                   </button>
                 </div>
               </div>
-
             </div>
 
             <!-- COLUNA DIREITA: histórico de e-mails -->
             <div class="notif-card">
               <div class="preview-header">
-                <div class="notif-card-title" style="margin-bottom:0;">
-                  <i class="fa-solid fa-clock-rotate-left"></i> Histórico de E-mails
+                <div class="notif-card-title" style="margin-bottom: 0">
+                  <i class="fa-solid fa-clock-rotate-left"></i> Histórico de
+                  E-mails
                 </div>
               </div>
 
@@ -123,70 +138,89 @@
                   </thead>
                   <tbody id="historicoBody">
                     <tr>
-                      <td colspan="5" class="preview-empty">Carregando histórico...</td>
+                      <td colspan="5" class="preview-empty">
+                        Carregando histórico...
+                      </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
             </div>
-
-          </div><!-- /notif-grid -->
-        </div><!-- /main -->
-      </div><!-- /content -->
-    </div><!-- /layout -->
+          </div>
+          <!-- /notif-grid -->
+        </div>
+        <!-- /main -->
+      </div>
+      <!-- /content -->
+    </div>
+    <!-- /layout -->
 
     <!-- Toast de feedback -->
     <div class="notif-toast" id="toast"></div>
 
     <script>
       // Topbar date
-      const dataHoje = document.getElementById('dataHoje');
+      const dataHoje = document.getElementById("dataHoje");
       if (dataHoje) {
         const now = new Date();
-        dataHoje.textContent = now.toLocaleDateString('pt-BR', {
-          weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+        dataHoje.textContent = now.toLocaleDateString("pt-BR", {
+          weekday: "long",
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
         });
       }
 
       function mostrarToast(msg, cor) {
-        const t = document.getElementById('toast');
+        const t = document.getElementById("toast");
         t.textContent = msg;
-        t.style.display = 'block';
-        t.style.background = cor || '#2c241b';
-        setTimeout(() => { t.style.display = 'none'; }, 5000);
+        t.style.display = "block";
+        t.style.background = cor || "#2c241b";
+        setTimeout(() => {
+          t.style.display = "none";
+        }, 5000);
       }
 
       // ── Máscara de data/hora DD/MM/AAAA HH:MM ────────────────────────────────
       function mascaraDataHora(el) {
-        let v = el.value.replace(/\D/g, '').slice(0, 12);
-        if (v.length > 10)      v = v.replace(/(\d{2})(\d{2})(\d{4})(\d{2})(\d{0,2})/, '$1/$2/$3 $4:$5');
-        else if (v.length > 8)  v = v.replace(/(\d{2})(\d{2})(\d{4})(\d{0,2})/,        '$1/$2/$3 $4');
-        else if (v.length > 4)  v = v.replace(/(\d{2})(\d{2})(\d{0,4})/,                '$1/$2/$3');
-        else if (v.length > 2)  v = v.replace(/(\d{2})(\d{0,2})/,                       '$1/$2');
+        let v = el.value.replace(/\D/g, "").slice(0, 12);
+        if (v.length > 10) {
+          v = v.replace(/(\d{2})(\d{2})(\d{4})(\d{2})(\d{0,2})/, "$1/$2/$3 $4:$5");
+        } else if (v.length > 8) {
+          v = v.replace(/(\d{2})(\d{2})(\d{4})(\d{0,2})/, "$1/$2/$3 $4");
+        } else if (v.length > 4) {
+          v = v.replace(/(\d{2})(\d{2})(\d{0,4})/, "$1/$2/$3");
+        } else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,2})/, "$1/$2");
         el.value = v;
       }
 
       // ── Histórico de e-mails ──────────────────────────────────────────────────
       function carregarHistorico() {
-        const tbody = document.getElementById('historicoBody');
-        tbody.innerHTML = '<tr><td colspan="5" class="preview-empty">Carregando...</td></tr>';
+        const tbody = document.getElementById("historicoBody");
+        tbody.innerHTML =
+          '<tr><td colspan="5" class="preview-empty">Carregando...</td></tr>';
 
-        fetch('/admin/notificacoes/historico')
-          .then(r => r.json())
-          .then(data => {
+        fetch("/admin/notificacoes/historico")
+          .then((r) => r.json())
+          .then((data) => {
             if (!data.length) {
-              tbody.innerHTML = '<tr><td colspan="5" class="preview-empty">Nenhum e-mail enviado ainda.</td></tr>';
+              tbody.innerHTML =
+                '<tr><td colspan="5" class="preview-empty">Nenhum e-mail enviado ainda.</td></tr>';
               return;
             }
-            tbody.innerHTML = data.map(e => {
-              const tipo = e.tipo === 'AGENDADO'
+            tbody.innerHTML = data.map((e) => {
+              const tipo = e.tipo === "AGENDADO"
                 ? '<span style="background:rgba(13,148,136,.12);color:#0f766e;font-size:.72rem;font-weight:700;padding:.15rem .45rem;border-radius:4px;">Agendado</span>'
                 : '<span style="background:rgba(74,93,35,.12);color:#4a5d23;font-size:.72rem;font-weight:700;padding:.15rem .45rem;border-radius:4px;">Imediato</span>';
               const agendadoPara = e.agendadoPara
                 ? `<span style="font-size:.78rem;">${e.agendadoPara}</span>`
                 : '<span style="color:#b0a49a;">—</span>';
-              const assuntoTrunc = e.assunto.length > 40 ? e.assunto.substring(0, 40) + '…' : e.assunto;
-              const corpoPreview = e.corpo.length > 60 ? e.corpo.substring(0, 60) + '…' : e.corpo;
+              const assuntoTrunc = e.assunto.length > 40
+                ? e.assunto.substring(0, 40) + "…"
+                : e.assunto;
+              const corpoPreview = e.corpo.length > 60
+                ? e.corpo.substring(0, 60) + "…"
+                : e.corpo;
               return `<tr>
                 <td style="white-space:nowrap;font-size:.78rem;">${e.dataRegistro}</td>
                 <td>
@@ -197,47 +231,59 @@
                 <td>${tipo}</td>
                 <td>${agendadoPara}</td>
               </tr>`;
-            }).join('');
+            }).join("");
           })
           .catch(() => {
-            tbody.innerHTML = '<tr><td colspan="5" class="preview-empty">Erro ao carregar histórico.</td></tr>';
-            mostrarToast('Erro ao buscar histórico.', '#b91c1c');
+            tbody.innerHTML =
+              '<tr><td colspan="5" class="preview-empty">Erro ao carregar histórico.</td></tr>';
+            mostrarToast("Erro ao buscar histórico.", "#b91c1c");
           });
       }
 
       // ── Disparar / agendar ────────────────────────────────────────────────────
       function disparar(comAgendamento) {
-        const filtro      = document.getElementById('filtro').value;
-        const limite      = parseInt(document.getElementById('limite').value);
-        const assunto     = document.getElementById('assunto').value.trim();
-        const corpo       = document.getElementById('corpo').value.trim();
-        const agendamento = document.getElementById('agendamento').value.trim();
+        const filtro = document.getElementById("filtro").value;
+        const limite = parseInt(document.getElementById("limite").value);
+        const assunto = document.getElementById("assunto").value.trim();
+        const corpo = document.getElementById("corpo").value.trim();
+        const agendamento = document.getElementById("agendamento").value.trim();
 
-        if (!assunto) { mostrarToast('Preencha o assunto do e-mail.', '#b45309'); return; }
-        if (!corpo)   { mostrarToast('Preencha a mensagem do e-mail.', '#b45309'); return; }
+        if (!assunto) {
+          mostrarToast("Preencha o assunto do e-mail.", "#b45309");
+          return;
+        }
+        if (!corpo) {
+          mostrarToast("Preencha a mensagem do e-mail.", "#b45309");
+          return;
+        }
         if (comAgendamento && !agendamento) {
-          mostrarToast('Informe a data e hora para agendamento.', '#b45309');
+          mostrarToast("Informe a data e hora para agendamento.", "#b45309");
           return;
         }
 
-        const payload = { filtro, limite, assunto, corpo,
-          agendamento: comAgendamento ? agendamento : '' };
+        const payload = {
+          filtro,
+          limite,
+          assunto,
+          corpo,
+          agendamento: comAgendamento ? agendamento : "",
+        };
 
-        fetch('/admin/notificacoes/disparar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+        fetch("/admin/notificacoes/disparar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         })
-        .then(r => r.json())
-        .then(data => {
-          mostrarToast(data.mensagem, '#2c6e49');
-          carregarHistorico();
-        })
-        .catch(() => mostrarToast('Erro ao processar o disparo.', '#b91c1c'));
+          .then((r) => r.json())
+          .then((data) => {
+            mostrarToast(data.mensagem, "#2c6e49");
+            carregarHistorico();
+          })
+          .catch(() => mostrarToast("Erro ao processar o disparo.", "#b91c1c"));
       }
 
       // Carrega histórico ao abrir a página
-      document.addEventListener('DOMContentLoaded', carregarHistorico);
+      document.addEventListener("DOMContentLoaded", carregarHistorico);
     </script>
   </body>
 </html>

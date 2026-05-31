@@ -1,17 +1,43 @@
 /* ── Constantes ── */
 const CORES_VENDAS = [
-  "#722F37", "#8a3a44", "#a04550", "#b85060", "#5a2530",
-  "#3d1820", "#c46070", "#d47080", "#6b2b32", "#7a3038", "#903545", "#a03a48",
+  "#722F37",
+  "#8a3a44",
+  "#a04550",
+  "#b85060",
+  "#5a2530",
+  "#3d1820",
+  "#c46070",
+  "#d47080",
+  "#6b2b32",
+  "#7a3038",
+  "#903545",
+  "#a03a48",
 ];
 const CORES_POSTS = [
-  "#4A5D23", "#5a7029", "#6b8535", "#3d4e1d", "#7a9a40",
-  "#8aaa4a", "#2e3b18", "#526625", "#638030", "#74943c", "#496020", "#557028",
+  "#4A5D23",
+  "#5a7029",
+  "#6b8535",
+  "#3d4e1d",
+  "#7a9a40",
+  "#8aaa4a",
+  "#2e3b18",
+  "#526625",
+  "#638030",
+  "#74943c",
+  "#496020",
+  "#557028",
 ];
 
 /* ── Data ── */
-document.getElementById("dataHoje").textContent = new Date().toLocaleDateString("pt-BR", {
-  weekday: "long", day: "numeric", month: "long", year: "numeric",
-});
+document.getElementById("dataHoje").textContent = new Date().toLocaleDateString(
+  "pt-BR",
+  {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  },
+);
 
 /* ── Helpers ── */
 function fmt(n) {
@@ -56,7 +82,9 @@ function criarPizza(canvasId, labels, dados, cores, legendId) {
   const el = document.getElementById(legendId);
   el.innerHTML = labels.map((m, i) =>
     `<div class="pie-legend-item">
-      <span class="pie-dot" style="background:${cores[i % cores.length]}"></span>
+      <span class="pie-dot" style="background:${
+      cores[i % cores.length]
+    }"></span>
       <span style="color:#475569;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m}</span>
       <span style="color:#94a3b8;font-weight:600">${dados[i]}</span>
     </div>`
@@ -65,20 +93,29 @@ function criarPizza(canvasId, labels, dados, cores, legendId) {
 
 /* ── Renderiza tudo com dados da API ── */
 function renderDashboard(d) {
-  document.getElementById("valTotalClientes").textContent = fmt(d.totalClientes);
+  document.getElementById("valTotalClientes").textContent = fmt(
+    d.totalClientes,
+  );
   document.getElementById("valTotalLivros").textContent = fmt(d.totalLivros);
   document.getElementById("valTotalVisitas").textContent = fmt(d.totalVisitas);
-  document.getElementById("valTotalAdquiridos").textContent = fmt(d.totalAdquiridos);
-  document.getElementById("valTokensDisp").textContent = "T$ " + fmt(d.tokensDisponibilizados);
-  document.getElementById("valTokensUtil").textContent = "T$ " + fmt(d.tokensUtilizados);
+  document.getElementById("valTotalAdquiridos").textContent = fmt(
+    d.totalAdquiridos,
+  );
+  document.getElementById("valTokensDisp").textContent = "T$ " +
+    fmt(d.tokensDisponibilizados);
+  document.getElementById("valTokensUtil").textContent = "T$ " +
+    fmt(d.tokensUtilizados);
 
   const pct = d.tokensDisponibilizados > 0
-    ? ((d.tokensUtilizados / d.tokensDisponibilizados) * 100).toFixed(1) + "% dos disponíveis"
+    ? ((d.tokensUtilizados / d.tokensDisponibilizados) * 100).toFixed(1) +
+      "% dos disponíveis"
     : "—";
   document.getElementById("badgeTokensUtil").textContent = pct;
 
   document.getElementById("valPixGerados").textContent = fmt(d.pixGerados);
-  document.getElementById("valPixConvertidos").textContent = fmt(d.pixConvertidos);
+  document.getElementById("valPixConvertidos").textContent = fmt(
+    d.pixConvertidos,
+  );
 
   const taxaConv = d.pixGerados > 0
     ? ((d.pixConvertidos / d.pixGerados) * 100).toFixed(1) + "% de conversão"
@@ -89,8 +126,10 @@ function renderDashboard(d) {
   const ultimo = d.rotulos[d.rotulos.length - 1];
   const periodo = `Últimos 12 meses · ${primeiro} – ${ultimo}`;
   document.getElementById("subBarras").textContent = periodo;
-  document.getElementById("subPizzaVendas").textContent = `Distribuição · ${primeiro} – ${ultimo}`;
-  document.getElementById("subPizzaPostagens").textContent = `Distribuição · ${primeiro} – ${ultimo}`;
+  document.getElementById("subPizzaVendas").textContent =
+    `Distribuição · ${primeiro} – ${ultimo}`;
+  document.getElementById("subPizzaPostagens").textContent =
+    `Distribuição · ${primeiro} – ${ultimo}`;
 
   new Chart(document.getElementById("chartBarras"), {
     type: "bar",
@@ -113,8 +152,16 @@ function renderDashboard(d) {
         }),
       },
       scales: {
-        x: { grid: { display: false }, border: { display: false }, ticks: { color: "rgba(44,36,27,0.4)" } },
-        y: { grid: { color: "rgba(74,93,35,0.08)" }, border: { display: false }, ticks: { color: "rgba(44,36,27,0.4)" } },
+        x: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: { color: "rgba(44,36,27,0.4)" },
+        },
+        y: {
+          grid: { color: "rgba(74,93,35,0.08)" },
+          border: { display: false },
+          ticks: { color: "rgba(44,36,27,0.4)" },
+        },
       },
     },
   });
@@ -140,14 +187,34 @@ function renderDashboard(d) {
       responsive: true,
       plugins: { tooltip: tooltipBase() },
       scales: {
-        x: { grid: { display: false }, border: { display: false }, ticks: { color: "rgba(44,36,27,0.4)" } },
-        y: { grid: { color: "rgba(74,93,35,0.08)" }, border: { display: false }, ticks: { color: "rgba(44,36,27,0.4)" } },
+        x: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: { color: "rgba(44,36,27,0.4)" },
+        },
+        y: {
+          grid: { color: "rgba(74,93,35,0.08)" },
+          border: { display: false },
+          ticks: { color: "rgba(44,36,27,0.4)" },
+        },
       },
     },
   });
 
-  criarPizza("chartPizzaVendas", d.rotulos, d.vendasPorMes, CORES_VENDAS, "legendVendas");
-  criarPizza("chartPizzaPostagens", d.rotulos, d.postagensPorMes, CORES_POSTS, "legendPostagens");
+  criarPizza(
+    "chartPizzaVendas",
+    d.rotulos,
+    d.vendasPorMes,
+    CORES_VENDAS,
+    "legendVendas",
+  );
+  criarPizza(
+    "chartPizzaPostagens",
+    d.rotulos,
+    d.postagensPorMes,
+    CORES_POSTS,
+    "legendPostagens",
+  );
 
   const tbody = document.getElementById("tabelaCorpo");
   tbody.innerHTML = d.rotulos.map((mes, i) => {
@@ -160,7 +227,9 @@ function renderDashboard(d) {
       <td>${d.clientesPorMes[i]}</td>
       <td style="color:#722F37;font-weight:600">${vendas}</td>
       <td style="color:#4A5D23;font-weight:600">${postagens}</td>
-      <td><span class="pill ${alto ? "pill-green" : "pill-gray"}">${conv !== "—" ? conv + "%" : "—"}</span></td>
+      <td><span class="pill ${alto ? "pill-green" : "pill-gray"}">${
+      conv !== "—" ? conv + "%" : "—"
+    }</span></td>
     </tr>`;
   }).join("");
 

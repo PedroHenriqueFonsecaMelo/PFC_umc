@@ -109,7 +109,9 @@ function removerLivro(id) {
 function limparLivro(id) {
     const livro = livros.find((l) => l.id === id);
     if (!livro) return;
-    livro.arquivos.forEach((f) => { f._dataUrl = null; });
+    livro.arquivos.forEach((f) => {
+        f._dataUrl = null;
+    });
     livro.isbn = "";
     livro.titulo = "";
     livro.autor = "";
@@ -162,27 +164,38 @@ async function buscarIsbn(id, isbnBruto) {
 }
 
 // Tipos e extensões aceitos (HEIC/HEIF não são processáveis no backend)
-const TIPOS_ACEITOS  = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
-const EXT_ACEITAS    = /\.(jpe?g|png|webp|gif)$/i;
+const TIPOS_ACEITOS = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+];
+const EXT_ACEITAS = /\.(jpe?g|png|webp|gif)$/i;
 const TAMANHO_MAX_MB = 10;
 
 function validarArquivo(file) {
     // Verifica extensão pelo nome (mais confiável que MIME em iOS)
     const nomeOk = !file.name || EXT_ACEITAS.test(file.name);
-    const mimeOk = !file.type || TIPOS_ACEITOS.includes(file.type.toLowerCase());
+    const mimeOk = !file.type ||
+        TIPOS_ACEITOS.includes(file.type.toLowerCase());
 
     if (!nomeOk || !mimeOk) {
         // HEIC/HEIF comum em iPhones com "Alta Eficiência" ativado
         const isHeic = /\.(heic|heif)$/i.test(file.name) ||
-                       ["image/heic","image/heif"].includes(file.type.toLowerCase());
+            ["image/heic", "image/heif"].includes(file.type.toLowerCase());
         if (isHeic) {
             return `Formato HEIC/HEIF não suportado (${file.name}). No iPhone, vá em ` +
-                   `Ajustes → Câmera → Formatos → "Mais Compatível" e tire a foto novamente.`;
+                `Ajustes → Câmera → Formatos → "Mais Compatível" e tire a foto novamente.`;
         }
-        return `Formato não aceito: ${file.name || file.type}. Use JPG, PNG ou WebP.`;
+        return `Formato não aceito: ${
+            file.name || file.type
+        }. Use JPG, PNG ou WebP.`;
     }
     if (file.size > TAMANHO_MAX_MB * 1024 * 1024) {
-        return `Arquivo muito grande: ${file.name} (${(file.size/1024/1024).toFixed(1)} MB). Máximo: ${TAMANHO_MAX_MB} MB.`;
+        return `Arquivo muito grande: ${file.name} (${
+            (file.size / 1024 / 1024).toFixed(1)
+        } MB). Máximo: ${TAMANHO_MAX_MB} MB.`;
     }
     return null; // ok
 }
@@ -246,7 +259,10 @@ function handleFotos(id, files) {
     for (const file of Array.from(files)) {
         if (adicionados >= vagasRestantes) break;
         const erro = validarArquivo(file);
-        if (erro) { mostrarErro(erro); continue; }
+        if (erro) {
+            mostrarErro(erro);
+            continue;
+        }
         livro.arquivos.push(file);
         adicionados++;
     }

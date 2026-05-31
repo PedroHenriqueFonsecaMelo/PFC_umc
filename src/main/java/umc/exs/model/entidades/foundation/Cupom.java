@@ -42,7 +42,10 @@ public class Cupom {
     @Column(nullable = false)
     private Double percentualDesconto;
 
-    /** Mantido para compatibilidade com banco existente (coluna NOT NULL legada). Sempre 0.0. */
+    /**
+     * Mantido para compatibilidade com banco existente (coluna NOT NULL legada).
+     * Sempre 0.0.
+     */
     @Column(name = "valor_tokens", nullable = false)
     @Builder.Default
     private Double valorTokens = 0.0;
@@ -59,7 +62,8 @@ public class Cupom {
     private Integer quantidadeUsada = 0;
 
     /**
-     * Indica se o cupom está inativo (esgotado, invalidado ou expirado pelo scheduler).
+     * Indica se o cupom está inativo (esgotado, invalidado ou expirado pelo
+     * scheduler).
      */
     @Column(nullable = false)
     @Builder.Default

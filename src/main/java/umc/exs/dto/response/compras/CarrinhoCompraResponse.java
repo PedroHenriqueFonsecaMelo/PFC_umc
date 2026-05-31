@@ -1,6 +1,5 @@
 package umc.exs.dto.response.compras;
 
-
 import lombok.NoArgsConstructor;
 import umc.exs.dto.extern.ItemResultadoDTO;
 
@@ -45,7 +44,7 @@ public class CarrinhoCompraResponse {
         this.descontoAplicado = descontoAplicado;
         this.codigoCupomAplicado = codigoCupomAplicado;
 
-        // ✔ cópia defensiva SEM null
+        // cópia defensiva SEM null
         this.comprados = (comprados == null) ? new ArrayList<>() : new ArrayList<>(comprados);
         this.falhas = (falhas == null) ? new ArrayList<>() : new ArrayList<>(falhas);
     }
@@ -176,8 +175,7 @@ public class CarrinhoCompraResponse {
                     descontoAplicado,
                     codigoCupomAplicado,
                     comprados,
-                    falhas
-            );
+                    falhas);
         }
     }
 

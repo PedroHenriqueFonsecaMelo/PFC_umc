@@ -1,197 +1,335 @@
 <!DOCTYPE html>
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalhes do Livro — Bibliotroca</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
-          rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}"/>
-    <link rel="stylesheet" th:href="@{/css/produto/livro_detalhe.css}"/>
-    <link rel="stylesheet" th:href="@{/css/breadcrumb.css}"/>
-    <link rel="stylesheet" th:href="@{/css/produto/atc-estante.css}"/>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Detalhes do Livro — Bibliotroca</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+            rel="stylesheet"
+        >
+        <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+        <link rel="stylesheet" th:href="@{/css/produto/livro_detalhe.css}" />
+        <link rel="stylesheet" th:href="@{/css/breadcrumb.css}" />
+        <link rel="stylesheet" th:href="@{/css/produto/atc-estante.css}" />
+    </head>
+    <body>
+        <!-- NAV -->
+        <header th:replace="~{fragments/client-nav :: clientNav}"></header>
 
-    <!-- NAV -->
-    <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+        <!-- Toast de feedback -->
+        <div class="toast" id="toastDetalhe"></div>
 
-    <!-- Toast de feedback -->
-    <div class="toast" id="toastDetalhe"></div>
-
-    <!-- NAVEGAÇÃO CONTEXTUAL -->
-    <div class="breadcrumb-wrap">
-        <nav class="breadcrumb-nav">
-            <a href="/">Início</a>
-            <span class="breadcrumb-sep">›</span>
-            <a href="/livros/vitrine">Vitrine</a>
-            <span class="breadcrumb-sep">›</span>
-            <span class="breadcrumb-current" id="bcrTitulo">…</span>
-        </nav>
-        <a href="/livros/vitrine" class="btn-voltar">← Voltar para a Vitrine</a>
-    </div>
-
-    <!-- CONTEÚDO PRINCIPAL -->
-    <main class="detalhe-main" id="detalheMain">
-
-        <!-- Estado: carregando -->
-        <div id="estadoCarregando" class="estado-msg">
-            <p>Carregando livro…</p>
+        <!-- NAVEGAÇÃO CONTEXTUAL -->
+        <div class="breadcrumb-wrap">
+            <nav class="breadcrumb-nav">
+                <a href="/">Início</a>
+                <span class="breadcrumb-sep">›</span>
+                <a href="/livros/vitrine">Vitrine</a>
+                <span class="breadcrumb-sep">›</span>
+                <span class="breadcrumb-current" id="bcrTitulo">…</span>
+            </nav>
+            <a href="/livros/vitrine" class="btn-voltar"
+            >← Voltar para a Vitrine</a>
         </div>
 
-        <!-- Estado: não encontrado -->
-        <div id="estadoNaoEncontrado" class="estado-msg" style="display:none;">
-            <p style="font-family:'IM Fell English',serif;font-style:italic;color:#722f37;font-size:1.2rem;">
-                Este livro não está mais disponível.
-            </p>
-            <a href="/livros/vitrine" class="btn-primario" style="margin-top:1.5rem;">← Voltar para a Vitrine</a>
-        </div>
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="detalhe-main" id="detalheMain">
+            <!-- Estado: carregando -->
+            <div id="estadoCarregando" class="estado-msg">
+                <p>Carregando livro…</p>
+            </div>
 
-        <!-- Conteúdo do livro (mostrado após o carregamento) -->
-        <div id="conteudoLivro" style="display:none;">
+            <!-- Estado: não encontrado -->
+            <div
+                id="estadoNaoEncontrado"
+                class="estado-msg"
+                style="display: none"
+            >
+                <p
+                    style="font-family: 'IM Fell English', serif; font-style: italic; color: #722f37; font-size: 1.2rem"
+                >
+                    Este livro não está mais disponível.
+                </p>
+                <a
+                    href="/livros/vitrine"
+                    class="btn-primario"
+                    style="margin-top: 1.5rem"
+                >← Voltar para a Vitrine</a>
+            </div>
 
-            <!-- LIVRO 3D + FOTOS DO EXEMPLAR (coluna esquerda) -->
-            <section class="detalhe-galeria">
-                <!-- Badge de promoção -->
-                <span id="badgePromo" class="badge-promo" style="display:none;">PROMOÇÃO</span>
+            <!-- Conteúdo do livro (mostrado após o carregamento) -->
+            <div id="conteudoLivro" style="display: none">
+                <!-- LIVRO 3D + FOTOS DO EXEMPLAR (coluna esquerda) -->
+                <section class="detalhe-galeria">
+                    <!-- Badge de promoção -->
+                    <span
+                        id="badgePromo"
+                        class="badge-promo"
+                        style="display: none"
+                    >PROMOÇÃO</span>
 
-                <div class="book-container" id="bookContainer" onclick="toggleFlip()">
-                    <div class="book-inner" id="bookInner">
-                        <div class="book-spine"><div class="book-spine-text" id="bookSpineText"></div></div>
-                        <div class="book-front" id="bookFront">
-                            <img id="bookCoverImg" alt="Capa do livro" style="display:none" />
-                            <div class="placeholder" id="bookPlaceholder">
-                                <div class="placeholder-title" id="placeholderTitle"></div>
-                                <div class="placeholder-author" id="placeholderAuthor"></div>
+                    <div
+                        class="book-container"
+                        id="bookContainer"
+                        onclick="toggleFlip()"
+                    >
+                        <div class="book-inner" id="bookInner">
+                            <div class="book-spine">
+                                <div class="book-spine-text" id="bookSpineText">
+                                </div>
+                            </div>
+                            <div class="book-front" id="bookFront">
+                                <img
+                                    id="bookCoverImg"
+                                    alt="Capa do livro"
+                                    style="display: none"
+                                />
+                                <div class="placeholder" id="bookPlaceholder">
+                                    <div
+                                        class="placeholder-title"
+                                        id="placeholderTitle"
+                                    >
+                                    </div>
+                                    <div
+                                        class="placeholder-author"
+                                        id="placeholderAuthor"
+                                    >
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="book-back">
+                                <div class="book-back-ornament">"</div>
+                                <div class="book-back-text" id="bookBackText">
+                                </div>
+                                <div class="book-back-divider"></div>
+                                <div class="book-back-isbn" id="bookBackIsbn">
+                                </div>
                             </div>
                         </div>
-                        <div class="book-back">
-                            <div class="book-back-ornament">"</div>
-                            <div class="book-back-text" id="bookBackText"></div>
-                            <div class="book-back-divider"></div>
-                            <div class="book-back-isbn" id="bookBackIsbn"></div>
+                    </div>
+                    <p class="book-hint">
+                        Passe o mouse · Clique para ver o resumo
+                    </p>
+
+                    <!-- Fotos do exemplar: abaixo do livro 3D, dentro da coluna esquerda -->
+                    <div
+                        id="fotosVendedorSection"
+                        class="fotos-vendedor-section"
+                        style="display: none"
+                    >
+                        <h3 class="fotos-vendedor-titulo">Fotos do exemplar</h3>
+                        <div id="fotosVendedorGrid" class="fotos-vendedor-grid">
                         </div>
                     </div>
-                </div>
-                <p class="book-hint">Passe o mouse · Clique para ver o resumo</p>
+                </section>
 
-                <!-- Fotos do exemplar: abaixo do livro 3D, dentro da coluna esquerda -->
-                <div id="fotosVendedorSection" class="fotos-vendedor-section" style="display:none;">
-                    <h3 class="fotos-vendedor-titulo">Fotos do exemplar</h3>
-                    <div id="fotosVendedorGrid" class="fotos-vendedor-grid"></div>
-                </div>
-            </section>
+                <!-- INFORMAÇÕES -->
+                <section class="detalhe-info">
+                    <!-- Estado do livro -->
+                    <span id="badgeEstado" class="livro-estado-badge"></span>
 
-            <!-- INFORMAÇÕES -->
-            <section class="detalhe-info">
+                    <h1 id="livroTitulo" class="detalhe-titulo"></h1>
+                    <p id="livroAutor" class="detalhe-autor"></p>
+                    <p id="livroIsbn" class="detalhe-isbn"></p>
 
-                <!-- Estado do livro -->
-                <span id="badgeEstado" class="livro-estado-badge"></span>
+                    <!-- Tag de gênero -->
+                    <span
+                        id="livroGeneroTag"
+                        class="livro-genero-tag"
+                        style="display: none"
+                    ></span>
 
-                <h1 id="livroTitulo" class="detalhe-titulo"></h1>
-                <p id="livroAutor" class="detalhe-autor"></p>
-                <p id="livroIsbn" class="detalhe-isbn"></p>
-
-                <!-- Tag de gênero -->
-                <span id="livroGeneroTag" class="livro-genero-tag" style="display:none;"></span>
-
-                <!-- Preço -->
-                <div class="detalhe-preco-bloco">
-                    <div id="precoHtml" class="detalhe-preco"></div>
-                    <!-- Contador regressivo de promoção -->
-                    <div id="promoCountdown" class="promo-countdown" style="display:none;">
-                        🔥 Oferta expira em: <span id="promoTimer">…</span>
+                    <!-- Preço -->
+                    <div class="detalhe-preco-bloco">
+                        <div id="precoHtml" class="detalhe-preco"></div>
+                        <!-- Contador regressivo de promoção -->
+                        <div
+                            id="promoCountdown"
+                            class="promo-countdown"
+                            style="display: none"
+                        >
+                            🔥 Oferta expira em: <span id="promoTimer">…</span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Metadados Google Books -->
-                <div id="livroMetaGrid" class="livro-meta-grid" style="display:none;"></div>
+                    <!-- Metadados Google Books -->
+                    <div
+                        id="livroMetaGrid"
+                        class="livro-meta-grid"
+                        style="display: none"
+                    >
+                    </div>
 
-                <!-- Descrição/Resumo -->
-                <div id="livroResumo" class="detalhe-resumo" style="display:none;">
-                    <hr class="resumo-separador">
-                    <h3>Sobre o livro</h3>
-                    <p id="livroResumoTexto"></p>
-                    <button id="btnLerMais" class="btn-ler-mais" style="display:none;"
-                            onclick="toggleLerMais()">Ler mais</button>
-                </div>
+                    <!-- Descrição/Resumo -->
+                    <div
+                        id="livroResumo"
+                        class="detalhe-resumo"
+                        style="display: none"
+                    >
+                        <hr class="resumo-separador">
+                        <h3>Sobre o livro</h3>
+                        <p id="livroResumoTexto"></p>
+                        <button
+                            id="btnLerMais"
+                            class="btn-ler-mais"
+                            style="display: none"
+                            onclick="toggleLerMais()"
+                        >
+                            Ler mais
+                        </button>
+                    </div>
 
-                <!-- Ações -->
-                <div class="detalhe-acoes">
-                    <button id="btnEstante" class="atc-estante" aria-label="Adicionar à Estante">
-                        <span class="atce__content">
-                            <span class="atce__cart">
-                                <svg class="atce__icon" xmlns="http://www.w3.org/2000/svg"
-                                     viewBox="0 0 24 24" fill="currentColor">
-                                    <rect class="atce__cart-content" x="9" y="-1"
-                                          width="10" height="10" rx="2"/>
-                                    <path d="M2.25 2.25a.75.75 0 0 0 0 1.5h1.386c.17 0 .318.114
+                    <!-- Ações -->
+                    <div class="detalhe-acoes">
+                        <button
+                            id="btnEstante"
+                            class="atc-estante"
+                            aria-label="Adicionar à Estante"
+                        >
+                            <span class="atce__content">
+                                <span class="atce__cart">
+                                    <svg
+                                        class="atce__icon"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        fill="currentColor"
+                                    >
+                                        <rect
+                                            class="atce__cart-content"
+                                            x="9"
+                                            y="-1"
+                                            width="10"
+                                            height="10"
+                                            rx="2"
+                                        />
+                                        <path
+                                            d="M2.25 2.25a.75.75 0 0 0 0 1.5h1.386c.17 0 .318.114
                                     .362.278l2.558 9.592a3.752 3.752 0 0 0-2.806 3.63c0
                                     .414.336.75.75.75h15.75a.75.75 0 0 0 0-1.5H5.378A2.25 2.25
                                     0 0 1 7.5 15h11.218a.75.75 0 0 0 .674-.421 60.358 60.358 0
                                     0 0 2.96-7.228.75.75 0 0 0-.525-.965A60.864 60.864 0 0 0
                                     5.68 4.509l-.232-.867A1.875 1.875 0 0 0 3.636
                                     2.25H2.25ZM3.75 20.25a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0
-                                    1-3 0ZM16.5 20.25a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z"/>
-                                </svg>
-                            </span>
-                            <span class="atce__cart--dummy" aria-hidden="true">
-                                <svg class="atce__icon" xmlns="http://www.w3.org/2000/svg"
-                                     viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M2.25 2.25a.75.75 0 0 0 0 1.5h1.386c.17 0 .318.114
+                                    1-3 0ZM16.5 20.25a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z"
+                                        />
+                                    </svg>
+                                </span>
+                                <span
+                                    class="atce__cart--dummy"
+                                    aria-hidden="true"
+                                >
+                                    <svg
+                                        class="atce__icon"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        fill="currentColor"
+                                    >
+                                        <path
+                                            d="M2.25 2.25a.75.75 0 0 0 0 1.5h1.386c.17 0 .318.114
                                     .362.278l2.558 9.592a3.752 3.752 0 0 0-2.806 3.63c0
                                     .414.336.75.75.75h15.75a.75.75 0 0 0 0-1.5H5.378A2.25 2.25
                                     0 0 1 7.5 15h11.218a.75.75 0 0 0 .674-.421 60.358 60.358 0
                                     0 0 2.96-7.228.75.75 0 0 0-.525-.965A60.864 60.864 0 0 0
                                     5.68 4.509l-.232-.867A1.875 1.875 0 0 0 3.636
                                     2.25H2.25ZM3.75 20.25a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0
-                                    1-3 0ZM16.5 20.25a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z"/>
-                                </svg>
+                                    1-3 0ZM16.5 20.25a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z"
+                                        />
+                                    </svg>
+                                </span>
+                                <span class="atce__check" aria-hidden="true">
+                                    <svg
+                                        class="atce__icon"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke-width="1.5"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1
+                                          1-18 0 9 9 0 0 1 18 0Z"
+                                        />
+                                    </svg>
+                                </span>
+                                <span class="atce__text">Add Estante</span>
                             </span>
-                            <span class="atce__check" aria-hidden="true">
-                                <svg class="atce__icon" xmlns="http://www.w3.org/2000/svg"
-                                     fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                     stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1
-                                          1-18 0 9 9 0 0 1 18 0Z"/>
-                                </svg>
-                            </span>
-                            <span class="atce__text">Add Estante</span>
-                        </span>
-                        <span class="atce__border atce__border--animated"></span>
-                        <span class="atce__border atce__border--static"></span>
-                        <span class="atce__border atce__border--complete"></span>
-                    </button>
-                    <button id="btnComprarAgora" class="btn-primario" onclick="handleComprarAgora()">
-                        Comprar agora →
-                    </button>
-                </div>
+                            <span
+                                class="atce__border atce__border--animated"
+                            ></span>
+                            <span
+                                class="atce__border atce__border--static"
+                            ></span>
+                            <span
+                                class="atce__border atce__border--complete"
+                            ></span>
+                        </button>
+                        <button
+                            id="btnComprarAgora"
+                            class="btn-primario"
+                            onclick="handleComprarAgora()"
+                        >
+                            Comprar agora →
+                        </button>
+                    </div>
 
-                <!-- Aviso: já na estante -->
-                <p id="avisoEstante" class="aviso-estante" style="display:none;">
-                    ✓ Este livro já está na sua estante.
-                    <a href="/livros/estante">Ver estante</a>
-                </p>
-
-            </section>
-        </div>
-
-        <!-- LIGHTBOX -->
-        <div id="lightboxOverlay" class="lightbox-overlay" onclick="fecharLightboxClick(event)" style="display:none;">
-            <div class="lightbox-inner">
-                <button class="lightbox-close" onclick="fecharLightbox()" aria-label="Fechar">×</button>
-                <button class="lightbox-nav lightbox-prev" onclick="navegarLightbox(-1)" aria-label="Anterior">‹</button>
-                <img id="lightboxImg" class="lightbox-img" src="" alt="Foto do exemplar">
-                <button class="lightbox-nav lightbox-next" onclick="navegarLightbox(1)" aria-label="Próxima">›</button>
+                    <!-- Aviso: já na estante -->
+                    <p
+                        id="avisoEstante"
+                        class="aviso-estante"
+                        style="display: none"
+                    >
+                        ✓ Este livro já está na sua estante.
+                        <a href="/livros/estante">Ver estante</a>
+                    </p>
+                </section>
             </div>
-        </div>
-    </main>
 
-    <script th:src="@{/js/vendor/gsap.min.js}"></script>
-    <script th:src="@{/js/produto/livro_detalhe.js}"></script>
-    <script th:src="@{/js/cliente/alerta-endereco.js}"></script>
-</body>
+            <!-- LIGHTBOX -->
+            <div
+                id="lightboxOverlay"
+                class="lightbox-overlay"
+                onclick="fecharLightboxClick(event)"
+                style="display: none"
+            >
+                <div class="lightbox-inner">
+                    <button
+                        class="lightbox-close"
+                        onclick="fecharLightbox()"
+                        aria-label="Fechar"
+                    >
+                        ×
+                    </button>
+                    <button
+                        class="lightbox-nav lightbox-prev"
+                        onclick="navegarLightbox(-1)"
+                        aria-label="Anterior"
+                    >
+                        ‹
+                    </button>
+                    <img
+                        id="lightboxImg"
+                        class="lightbox-img"
+                        src=""
+                        alt="Foto do exemplar"
+                    >
+                    <button
+                        class="lightbox-nav lightbox-next"
+                        onclick="navegarLightbox(1)"
+                        aria-label="Próxima"
+                    >
+                        ›
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <script th:src="@{/js/vendor/gsap.min.js}"></script>
+        <script th:src="@{/js/produto/livro_detalhe.js}"></script>
+        <script th:src="@{/js/cliente/alerta-endereco.js}"></script>
+    </body>
 </html>

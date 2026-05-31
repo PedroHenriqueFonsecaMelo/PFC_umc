@@ -27,8 +27,7 @@ public class AsyncConfig implements AsyncConfigurer {
 
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return (ex, method, params) ->
-            org.slf4j.LoggerFactory.getLogger(AsyncConfig.class)
+        return (ex, method, params) -> org.slf4j.LoggerFactory.getLogger(AsyncConfig.class)
                 .error("Falha ao enviar e-mail [método={}]: {}", method.getName(), ex.getMessage(), ex);
     }
 }

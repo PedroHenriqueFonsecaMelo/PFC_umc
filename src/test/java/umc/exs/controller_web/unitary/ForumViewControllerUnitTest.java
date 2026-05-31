@@ -43,13 +43,13 @@ class ForumViewControllerUnitTest {
         controller = new ForumViewController(forumService, clienteRepository);
     }
 
-    @SuppressWarnings("null")
     @Test
     void deveListarTopicosSemUsuario() {
         // Preparação
         Page<TopicoForum> page = new PageImpl<>(List.of());
-        
-        // CORREÇÃO: Usar any() para garantir que o mock responda à chamada do controller
+
+        // CORREÇÃO: Usar any() para garantir que o mock responda à chamada do
+        // controller
         when(forumService.listarTopicos(any(), any(), any(PageRequest.class)))
                 .thenReturn(page);
 
@@ -60,13 +60,12 @@ class ForumViewControllerUnitTest {
         assertEquals("forum/lista", view);
         assertEquals(page, model.getAttribute("topicos"));
         assertEquals(false, model.getAttribute("clienteLogado"));
-        
-        // CORREÇÃO CRÍTICA: assertEquals em arrays compara referência. 
+
+        // CORREÇÃO CRÍTICA: assertEquals em arrays compara referência.
         // Use assertArrayEquals para comparar o conteúdo do Enum.
         assertArrayEquals(CategoriaForum.values(), (CategoriaForum[]) model.getAttribute("categorias"));
     }
 
-    @SuppressWarnings("null")
     @Test
     void deveVerTopicoComUsuarioAdmin() {
         // Preparação

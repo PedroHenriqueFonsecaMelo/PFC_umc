@@ -1,10 +1,11 @@
 // Função para buscar CEP usando a API ViaCEP
 async function buscarCep(cepInput) {
-    const cep = cepInput.value.replace(/\D/g, '');
+    const cep = cepInput.value.replace(/\D/g, "");
 
     if (cep.length !== 8) return;
 
-    const container = cepInput.closest('form') || cepInput.closest('.endereco-item');
+    const container = cepInput.closest("form") ||
+        cepInput.closest(".endereco-item");
     if (!container) return;
 
     function preencherCampo(field, valor) {
@@ -17,11 +18,11 @@ async function buscarCep(cepInput) {
         const data = await response.json();
 
         if (!data.erro) {
-            preencherCampo('rua', data.logradouro);
-            preencherCampo('bairro', data.bairro);
-            preencherCampo('cidade', data.localidade);
-            preencherCampo('estado', data.uf);
-            preencherCampo('pais', 'Brasil');
+            preencherCampo("rua", data.logradouro);
+            preencherCampo("bairro", data.bairro);
+            preencherCampo("cidade", data.localidade);
+            preencherCampo("estado", data.uf);
+            preencherCampo("pais", "Brasil");
             // data.complemento do ViaCEP é um intervalo técnico de numeração, não o complemento do usuário
             const numero = container.querySelector('[data-cep-field="numero"]');
             if (numero) numero.focus();
@@ -35,7 +36,7 @@ async function buscarCep(cepInput) {
 
 // Função para adicionar novo bloco de endereço
 function adicionarEndereco() {
-    const container = document.getElementById('enderecos-list-container');
+    const container = document.getElementById("enderecos-list-container");
     const index = enderecoIndex; // Usa a variável global iniciada no HTML
 
     const novoEnderecoHtml = `
@@ -88,13 +89,13 @@ function adicionarEndereco() {
         </div>
     `;
 
-    container.insertAdjacentHTML('beforeend', novoEnderecoHtml);
+    container.insertAdjacentHTML("beforeend", novoEnderecoHtml);
     enderecoIndex++; // Incrementa para o próximo endereço
 }
 
 // Função para adicionar novo cartão (mantendo a lógica do seu formulário)
 function adicionarCartao() {
-    const container = document.getElementById('cartoes-list-container');
+    const container = document.getElementById("cartoes-list-container");
     const index = cartaoIndex;
 
     const novoCartaoHtml = `
@@ -122,6 +123,6 @@ function adicionarCartao() {
         </div>
     `;
 
-    container.insertAdjacentHTML('beforeend', novoCartaoHtml);
+    container.insertAdjacentHTML("beforeend", novoCartaoHtml);
     cartaoIndex++;
 }

@@ -64,7 +64,8 @@ class JwtUtilTest {
     void deveGerarTokensDiferentesEmChamadasSuccessivas() {
         String token1 = jwtUtil.generateToken("usuario@teste.com");
         String token2 = jwtUtil.generateToken("usuario@teste.com");
-        // Tokens podem ser iguais (mesmo subject/expiration) — o que importa é que ambos são válidos
+        // Tokens podem ser iguais (mesmo subject/expiration) — o que importa é que
+        // ambos são válidos
         assertTrue(jwtUtil.validateToken(token1));
         assertTrue(jwtUtil.validateToken(token2));
     }

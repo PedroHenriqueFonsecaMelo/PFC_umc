@@ -21,12 +21,14 @@
 
         <!-- MAIN -->
         <main class="main-vitrine">
-
             <!-- Cabeçalho: título + botão promoção -->
             <div class="vitrine-header">
                 <div>
                     <h2 id="vitrineTitulo">Livros Disponíveis</h2>
-                    <p>Clique em um livro para ver detalhes e adicioná-lo à sua estante.</p>
+                    <p>
+                        Clique em um livro para ver detalhes e adicioná-lo à sua
+                        estante.
+                    </p>
                 </div>
                 <button id="btnPromo" class="btn-promo" onclick="togglePromo()">
                     🏷 Ver Promoções
@@ -37,23 +39,58 @@
             <div class="vitrine-busca-row">
                 <div class="vitrine-search-wrap">
                     <span class="vs-lupa" aria-hidden="true">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2.2"
-                             stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
                         </svg>
                     </span>
-                    <input type="text" id="vitrineBusca" class="vitrine-search-input"
-                           placeholder="Buscar por título, autor ou ISBN..."
-                           autocomplete="off" oninput="onBuscaInput()">
-                    <button id="btnLimparBusca" class="vs-clear"
-                            style="display:none;" onclick="limparBusca()" aria-label="Limpar busca">✕</button>
+                    <input
+                        type="text"
+                        id="vitrineBusca"
+                        class="vitrine-search-input"
+                        placeholder="Buscar por título, autor ou ISBN..."
+                        autocomplete="off"
+                        oninput="onBuscaInput()"
+                    >
+                    <button
+                        id="btnLimparBusca"
+                        class="vs-clear"
+                        style="display: none"
+                        onclick="limparBusca()"
+                        aria-label="Limpar busca"
+                    >
+                        ✕
+                    </button>
                 </div>
-                <button id="btnFiltros" class="btn-abrir-filtros" onclick="toggleFiltros()">
-                    <svg class="filtro-funil" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
-                         aria-hidden="true">
-                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                <button
+                    id="btnFiltros"
+                    class="btn-abrir-filtros"
+                    onclick="toggleFiltros()"
+                >
+                    <svg
+                        class="filtro-funil"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
+                        <polygon
+                            points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"
+                        />
                     </svg>
                     Filtros <span id="btnFiltrosArrow">▾</span>
                 </button>
@@ -62,18 +99,31 @@
             <!-- Painel de filtros (colapsável) -->
             <div id="painelFiltros" class="painel-filtros">
                 <div class="painel-filtros-inner">
-
                     <div class="filtro-colunas filtro-colunas-4">
-
                         <!-- Estado físico -->
                         <div class="filtro-grupo">
                             <span class="filtro-label">Estado físico</span>
                             <div class="filtro-checkboxes" id="filtroEstados">
-                                <label class="filtro-check-item"><input type="checkbox" value="NOVO">Novo</label>
-                                <label class="filtro-check-item"><input type="checkbox" value="OTIMO">Ótimo</label>
-                                <label class="filtro-check-item"><input type="checkbox" value="BOM">Bom</label>
-                                <label class="filtro-check-item"><input type="checkbox" value="REGULAR">Regular</label>
-                                <label class="filtro-check-item"><input type="checkbox" value="RUIM">Ruim</label>
+                                <label class="filtro-check-item"><input
+                                        type="checkbox"
+                                        value="NOVO"
+                                    >Novo</label>
+                                <label class="filtro-check-item"><input
+                                        type="checkbox"
+                                        value="OTIMO"
+                                    >Ótimo</label>
+                                <label class="filtro-check-item"><input
+                                        type="checkbox"
+                                        value="BOM"
+                                    >Bom</label>
+                                <label class="filtro-check-item"><input
+                                        type="checkbox"
+                                        value="REGULAR"
+                                    >Regular</label>
+                                <label class="filtro-check-item"><input
+                                        type="checkbox"
+                                        value="RUIM"
+                                    >Ruim</label>
                             </div>
                         </div>
 
@@ -86,17 +136,31 @@
                                 <div class="filtro-preco-row">
                                     <span class="filtro-preco-prefix">De</span>
                                     <div class="filtro-preco-input-wrap">
-                                        <span class="filtro-preco-moeda">T$</span>
-                                        <input type="number" id="filtroPrecoMin" class="filtro-preco-input"
-                                               min="0" step="0.01" placeholder="0">
+                                        <span class="filtro-preco-moeda"
+                                        >T$</span>
+                                        <input
+                                            type="number"
+                                            id="filtroPrecoMin"
+                                            class="filtro-preco-input"
+                                            min="0"
+                                            step="0.01"
+                                            placeholder="0"
+                                        >
                                     </div>
                                 </div>
                                 <div class="filtro-preco-row">
                                     <span class="filtro-preco-prefix">Até</span>
                                     <div class="filtro-preco-input-wrap">
-                                        <span class="filtro-preco-moeda">T$</span>
-                                        <input type="number" id="filtroPrecoMax" class="filtro-preco-input"
-                                               min="0" step="0.01" placeholder="∞">
+                                        <span class="filtro-preco-moeda"
+                                        >T$</span>
+                                        <input
+                                            type="number"
+                                            id="filtroPrecoMax"
+                                            class="filtro-preco-input"
+                                            min="0"
+                                            step="0.01"
+                                            placeholder="∞"
+                                        >
                                     </div>
                                 </div>
                             </div>
@@ -106,10 +170,13 @@
 
                         <!-- Gênero -->
                         <div class="filtro-grupo">
-                          <span class="filtro-label">Gênero</span>
-                          <div class="filtro-checkboxes filtro-generos" id="filtroGeneros">
-                            <!-- preenchido dinamicamente pelo JS -->
-                          </div>
+                            <span class="filtro-label">Gênero</span>
+                            <div
+                                class="filtro-checkboxes filtro-generos"
+                                id="filtroGeneros"
+                            >
+                                <!-- preenchido dinamicamente pelo JS -->
+                            </div>
                         </div>
 
                         <div class="filtro-sep" aria-hidden="true"></div>
@@ -126,15 +193,21 @@
                                 <option value="za">Z–A</option>
                             </select>
                         </div>
-
-                    </div><!-- /filtro-colunas -->
+                    </div>
+                    <!-- /filtro-colunas -->
 
                     <!-- Ações -->
                     <div class="filtro-acoes">
-                        <button class="btn-limpar"  onclick="limparFiltros()">Limpar</button>
-                        <button class="btn-aplicar" onclick="lerEAplicarFiltros()">Aplicar filtros</button>
+                        <button class="btn-limpar" onclick="limparFiltros()">
+                            Limpar
+                        </button>
+                        <button
+                            class="btn-aplicar"
+                            onclick="lerEAplicarFiltros()"
+                        >
+                            Aplicar filtros
+                        </button>
                     </div>
-
                 </div>
             </div>
 
@@ -149,7 +222,6 @@
 
             <!-- Paginação -->
             <div id="vitrinePaginacao" class="pagination"></div>
-
         </main>
 
         <script th:src="@{/js/produto/vitrine_livros.js}"></script>

@@ -13,25 +13,26 @@ import umc.exs.model.entidades.logic.LogAuditoria;
 @Repository
 public interface LogAuditoriaRepository extends JpaRepository<LogAuditoria, Long> {
 
-    List<LogAuditoria> findByIdUsuarioOrderByDataHoraDesc(Long idUsuario);
+        List<LogAuditoria> findByIdUsuarioOrderByDataHoraDesc(Long idUsuario);
 
-    List<LogAuditoria> findAllByOrderByDataHoraDesc();
+        List<LogAuditoria> findAllByOrderByDataHoraDesc();
 
-    @Query("SELECT l FROM LogAuditoria l WHERE " +
-            "(:emailUsuario IS NULL OR LOWER(l.emailUsuario) LIKE LOWER(CONCAT('%', :emailUsuario, '%'))) AND " +
-            "(:acao IS NULL OR l.acao = :acao) AND " +
-            "(:dataInicio IS NULL OR l.dataHora >= :dataInicio) AND " +
-            "(:dataFim IS NULL OR l.dataHora <= :dataFim) " +
-            "ORDER BY l.dataHora DESC")
-    List<LogAuditoria> buscarComFiltros(
-            @Param("emailUsuario") String emailUsuario,
-            @Param("acao") String acao,
-            @Param("dataInicio") LocalDateTime dataInicio,
-            @Param("dataFim") LocalDateTime dataFim);
+        @Query("SELECT l FROM LogAuditoria l WHERE " +
+                        "(:emailUsuario IS NULL OR LOWER(l.emailUsuario) LIKE LOWER(CONCAT('%', :emailUsuario, '%'))) AND "
+                        +
+                        "(:acao IS NULL OR l.acao = :acao) AND " +
+                        "(:dataInicio IS NULL OR l.dataHora >= :dataInicio) AND " +
+                        "(:dataFim IS NULL OR l.dataHora <= :dataFim) " +
+                        "ORDER BY l.dataHora DESC")
+        List<LogAuditoria> buscarComFiltros(
+                        @Param("emailUsuario") String emailUsuario,
+                        @Param("acao") String acao,
+                        @Param("dataInicio") LocalDateTime dataInicio,
+                        @Param("dataFim") LocalDateTime dataFim);
 
-    @Query("SELECT DISTINCT l.acao FROM LogAuditoria l ORDER BY l.acao ASC")
-    List<String> findAcoesDistintas();
+        @Query("SELECT DISTINCT l.acao FROM LogAuditoria l ORDER BY l.acao ASC")
+        List<String> findAcoesDistintas();
 
-    List<LogAuditoria> findByIdUsuarioAndDataHoraAfterOrderByDataHoraDesc(Long clienteId,
-            LocalDateTime dataCriacao);
+        List<LogAuditoria> findByIdUsuarioAndDataHoraAfterOrderByDataHoraDesc(Long clienteId,
+                        LocalDateTime dataCriacao);
 }

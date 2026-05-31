@@ -28,7 +28,9 @@
   animation: spin 0.8s linear infinite;
 }
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── Section label ── */
@@ -196,19 +198,29 @@ th {
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
-th:first-child { text-align: left; }
-th:not(:first-child) { text-align: right; }
+th:first-child {
+  text-align: left;
+}
+th:not(:first-child) {
+  text-align: right;
+}
 tbody tr {
   border-bottom: 1px solid rgba(249, 246, 240, 0.8);
   transition: background 0.15s;
 }
-tbody tr:hover { background: #f9f6f0; }
+tbody tr:hover {
+  background: #f9f6f0;
+}
 td {
   padding: 11px 10px;
   color: #2c241b;
 }
-td:first-child { font-weight: 600; }
-td:not(:first-child) { text-align: right; }
+td:first-child {
+  font-weight: 600;
+}
+td:not(:first-child) {
+  text-align: right;
+}
 .pill {
   font-size: 11px;
   font-weight: 700;
@@ -227,9 +239,16 @@ td:not(:first-child) { text-align: right; }
 
 /* ── Responsivo ── */
 @media (max-width: 768px) {
-  .cards-grid { grid-template-columns: 1fr 1fr; }
+  .cards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 @media (max-width: 480px) {
-  .cards-grid { grid-template-columns: 1fr; }
-  .main { padding: 16px; gap: 16px; }
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .main {
+    padding: 16px;
+    gap: 16px;
+  }
 }

@@ -82,7 +82,8 @@ public class BlogController {
             @PathVariable Long postId,
             @RequestBody(required = false) Map<String, Object> body,
             @AuthenticationPrincipal UserDetails user) {
-        if (user == null) return ResponseEntity.status(401).build();
+        if (user == null)
+            return ResponseEntity.status(401).build();
         boolean descurtir = body != null && Boolean.TRUE.equals(body.get("descurtir"));
         Map<String, Object> resultado = postBlogService.toggleCurtir(postId, descurtir);
         return ResponseEntity.ok(resultado);
@@ -93,7 +94,8 @@ public class BlogController {
             @PathVariable Long postId,
             @PathVariable Long comentarioId,
             @AuthenticationPrincipal UserDetails user) {
-        if (user == null) return ResponseEntity.status(401).build();
+        if (user == null)
+            return ResponseEntity.status(401).build();
         try {
             postBlogService.deletarComentario(comentarioId, user.getUsername());
             return ResponseEntity.ok(Map.of(MENSAGEM, "Comentário removido."));

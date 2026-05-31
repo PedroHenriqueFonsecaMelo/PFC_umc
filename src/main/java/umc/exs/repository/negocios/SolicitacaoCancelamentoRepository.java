@@ -23,4 +23,6 @@ public interface SolicitacaoCancelamentoRepository extends JpaRepository<Solicit
     boolean existsByPedidoIdAndStatus(Long pedidoId, StatusSolicitacao status);
 
     long countByStatus(StatusSolicitacao status);
+
+    long countByClienteId(Long clienteId);
 }

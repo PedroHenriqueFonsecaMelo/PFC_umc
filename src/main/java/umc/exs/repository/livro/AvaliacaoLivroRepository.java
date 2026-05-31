@@ -22,8 +22,9 @@ public interface AvaliacaoLivroRepository extends JpaRepository<AvaliacaoLivro, 
 
     // Busca por ISBN (caso precise no Controller)
     List<AvaliacaoLivro> findByIsbnOriginalNoAtoOrderByDataAvaliacaoDesc(String isbn);
-    
+
     List<AvaliacaoLivro> findAllByTituloLivroIgnoreCaseOrderByDataAvaliacaoDesc(String tituloLivro);
-    
-    List<AvaliacaoLivro> findAllByTituloLivroIgnoreCaseAndAutorLivroIgnoreCaseOrderByDataAvaliacaoDesc(String titulo, String autor);
+
+    List<AvaliacaoLivro> findAllByTituloLivroIgnoreCaseAndAutorLivroIgnoreCaseOrderByDataAvaliacaoDesc(String titulo,
+            String autor);
 }

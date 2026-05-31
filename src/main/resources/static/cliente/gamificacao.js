@@ -12,7 +12,8 @@
   ------------------------------------------------------- */
 
   function getToken() {
-    return localStorage.getItem("jwtToken") || sessionStorage.getItem("jwtToken") || null;
+    return localStorage.getItem("jwtToken") ||
+      sessionStorage.getItem("jwtToken") || null;
   }
 
   function medalha(posicao) {
@@ -29,12 +30,16 @@
 
   function renderBarraXp(xpAtual, xpProximo, nivel) {
     const nivelMaximo = xpProximo === 0;
-    const pct = nivelMaximo ? 100 : Math.min(100, Math.round((xpAtual / (xpAtual + xpProximo)) * 100));
+    const pct = nivelMaximo
+      ? 100
+      : Math.min(100, Math.round((xpAtual / (xpAtual + xpProximo)) * 100));
 
     return `
       <div class="gami-barra-label">
         <span>${nivel}</span>
-        <span>${nivelMaximo ? "Nível máximo!" : xpProximo + " XP para o próximo"}</span>
+        <span>${
+      nivelMaximo ? "Nível máximo!" : xpProximo + " XP para o próximo"
+    }</span>
       </div>
       <div class="gami-barra-track">
         <div class="gami-barra-fill" style="width:${pct}%"></div>
@@ -51,7 +56,8 @@
 
     const token = getToken();
     if (!token) {
-      container.innerHTML = `<p class="gami-aviso">Faça <a href="/login">login</a> para ver seu progresso.</p>`;
+      container.innerHTML =
+        `<p class="gami-aviso">Faça <a href="/login">login</a> para ver seu progresso.</p>`;
       return;
     }
 
@@ -92,7 +98,8 @@
           </div>
         </div>`;
     } catch {
-      container.innerHTML = `<p class="gami-aviso">Não foi possível carregar seu perfil.</p>`;
+      container.innerHTML =
+        `<p class="gami-aviso">Não foi possível carregar seu perfil.</p>`;
     }
   }
 
@@ -133,11 +140,12 @@
             </div>
           </div>
           <span class="gami-rank-xp">${u.xpTotal} XP</span>
-        </li>`
+        </li>`,
         )
         .join("");
     } catch {
-      lista.innerHTML = `<li class="gami-aviso">Não foi possível carregar o ranking.</li>`;
+      lista.innerHTML =
+        `<li class="gami-aviso">Não foi possível carregar o ranking.</li>`;
     }
   }
 

@@ -1,25 +1,33 @@
 /* ════════════════════════════════════════
    LOTES
    ════════════════════════════════════════ */
-const priceMap = { "NOVO": 50, "OTIMO": 40, "BOM": 30, "DESGASTADO": 20, "RUIM": 0 };
-let livrosCache     = [];
-let loteAtualMeta   = null; // { id, codigoProtocolo, nomeVendedor, emailVendedor, quantidadeLivros }
-let todosLotes      = [];
+const priceMap = {
+  "NOVO": 50,
+  "OTIMO": 40,
+  "BOM": 30,
+  "DESGASTADO": 20,
+  "RUIM": 0,
+};
+let livrosCache = [];
+let loteAtualMeta = null; // { id, codigoProtocolo, nomeVendedor, emailVendedor, quantidadeLivros }
+let todosLotes = [];
 let loteSearchTimer = null;
 
 async function loadLotes() {
   // Oculta breadcrumb de lote ao voltar para a lista
-  const bcLote = document.getElementById('breadcrumb-lote');
-  if (bcLote) bcLote.style.display = 'none';
+  const bcLote = document.getElementById("breadcrumb-lote");
+  if (bcLote) bcLote.style.display = "none";
 
   const container = document.getElementById("contentArea");
-  container.innerHTML = '<div class="loading">Carregando lotes pendentes...</div>';
+  container.innerHTML =
+    '<div class="loading">Carregando lotes pendentes...</div>';
   try {
     const res = await fetch("/api/admin/lotes/pendentes");
     todosLotes = await res.json();
     renderLotesTabela();
   } catch (e) {
-    container.innerHTML = '<p style="color:#722F37;padding:1rem">Erro ao conectar com o servidor.</p>';
+    container.innerHTML =
+      '<p style="color:#722F37;padding:1rem">Erro ao conectar com o servidor.</p>';
   }
 }
 
@@ -31,10 +39,10 @@ function renderLotesTabela(filtro) {
   // Filtro de texto
   if (filtro && filtro.trim()) {
     const q = filtro.trim().toLowerCase();
-    lotes = lotes.filter(l =>
+    lotes = lotes.filter((l) =>
       (l.codigoProtocolo || "").toLowerCase().includes(q) ||
-      (l.nomeVendedor    || "").toLowerCase().includes(q) ||
-      (l.emailVendedor   || "").toLowerCase().includes(q) ||
+      (l.nomeVendedor || "").toLowerCase().includes(q) ||
+      (l.emailVendedor || "").toLowerCase().includes(q) ||
       String(l.id).includes(q)
     );
   }
@@ -61,13 +69,14 @@ function renderLotesTabela(filtro) {
         <i class="fa-solid fa-magnifying-glass lotes-search-icon"></i>
         <input class="lotes-search-input" id="lotesSearchInput" type="text"
                placeholder="Buscar por protocolo, vendedor ou e-mail…"
-               value="${esc(filtro || '')}"
+               value="${esc(filtro || "")}"
                oninput="onLoteSearch(this.value)" />
       </div>
     </div>`;
 
   if (lotes.length === 0) {
-    html += `<div style="padding:2rem;text-align:center;color:#7a6e65;font-size:.88rem">Nenhum lote corresponde à busca.</div>`;
+    html +=
+      `<div style="padding:2rem;text-align:center;color:#7a6e65;font-size:.88rem">Nenhum lote corresponde à busca.</div>`;
     container.innerHTML = html;
     return;
   }
@@ -87,19 +96,29 @@ function renderLotesTabela(filtro) {
       </thead>
       <tbody>`;
 
-  lotes.forEach(lote => {
+  lotes.forEach((lote) => {
     const data = lote.dataCriacao
-      ? new Date(lote.dataCriacao).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })
+      ? new Date(lote.dataCriacao).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
       : "—";
     html += `
       <tr class="lotes-row" id="lote-row-${lote.id}">
         <td class="lotes-td lotes-td-id">#${lote.id}</td>
-        <td class="lotes-td"><span class="lote-protocolo-pill">${esc(lote.codigoProtocolo || "—")}</span></td>
+        <td class="lotes-td"><span class="lote-protocolo-pill">${
+      esc(lote.codigoProtocolo || "—")
+    }</span></td>
         <td class="lotes-td lotes-td-vendedor">
-          <span class="lotes-avatar">${esc((lote.nomeVendedor || "?").charAt(0).toUpperCase())}</span>
+          <span class="lotes-avatar">${
+      esc((lote.nomeVendedor || "?").charAt(0).toUpperCase())
+    }</span>
           ${esc(lote.nomeVendedor || "—")}
         </td>
-        <td class="lotes-td lotes-td-email">${esc(lote.emailVendedor || "—")}</td>
+        <td class="lotes-td lotes-td-email">${
+      esc(lote.emailVendedor || "—")
+    }</td>
         <td class="lotes-td" style="text-align:center">
           <span class="lotes-qtd-badge">${lote.quantidadeLivros}</span>
         </td>
@@ -126,64 +145,86 @@ function avatarInicial(nome) {
 }
 
 function esc(str) {
-  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(
+    />/g,
+    "&gt;",
+  ).replace(/"/g, "&quot;");
 }
 
 async function loadLivrosLote(loteId) {
   const container = document.getElementById("contentArea");
-  container.innerHTML = '<div class="loading">Carregando livros do lote...</div>';
+  container.innerHTML =
+    '<div class="loading">Carregando livros do lote...</div>';
   try {
     const res = await fetch("/api/admin/lotes/" + loteId + "/detalhes");
     const data = await res.json();
     loteAtualMeta = {
-      id:              data.id,
+      id: data.id,
       codigoProtocolo: data.codigoProtocolo,
-      nomeVendedor:    data.nomeVendedor,
-      emailVendedor:   data.emailVendedor,
+      nomeVendedor: data.nomeVendedor,
+      emailVendedor: data.emailVendedor,
       quantidadeLivros: data.quantidadeLivros,
     };
     livrosCache = data.livros || [];
 
     // Exibe e atualiza breadcrumb de lote
-    const bcLote = document.getElementById('breadcrumb-lote');
-    const bcrNum = document.getElementById('bcrLoteNumero');
-    if (bcLote) bcLote.style.display = 'block';
-    if (bcrNum) bcrNum.textContent = 'Lote #' + (data.codigoProtocolo || data.id);
+    const bcLote = document.getElementById("breadcrumb-lote");
+    const bcrNum = document.getElementById("bcrLoteNumero");
+    if (bcLote) bcLote.style.display = "block";
+    if (bcrNum) {
+      bcrNum.textContent = "Lote #" + (data.codigoProtocolo || data.id);
+    }
 
     renderLivros();
   } catch (e) {
-    container.innerHTML = '<p style="color:#722F37;padding:1rem">Erro ao carregar livros do lote.</p>';
+    container.innerHTML =
+      '<p style="color:#722F37;padding:1rem">Erro ao carregar livros do lote.</p>';
   }
 }
 
 const ESTADO_BADGE = {
-  NOVO:       { label: "Novo",       bg: "rgba(74,93,35,.12)",    color: "#4a5d23" },
-  OTIMO:      { label: "Ótimo",      bg: "rgba(74,93,35,.12)",    color: "#4a5d23" },
-  BOM:        { label: "Bom",        bg: "rgba(37,99,235,.1)",    color: "#1d4ed8" },
-  DESGASTADO: { label: "Desgastado", bg: "rgba(217,119,6,.12)",   color: "#b45309" },
-  RUIM:       { label: "Ruim",       bg: "rgba(185,28,28,.1)",    color: "#b91c1c" },
+  NOVO: { label: "Novo", bg: "rgba(74,93,35,.12)", color: "#4a5d23" },
+  OTIMO: { label: "Ótimo", bg: "rgba(74,93,35,.12)", color: "#4a5d23" },
+  BOM: { label: "Bom", bg: "rgba(37,99,235,.1)", color: "#1d4ed8" },
+  DESGASTADO: {
+    label: "Desgastado",
+    bg: "rgba(217,119,6,.12)",
+    color: "#b45309",
+  },
+  RUIM: { label: "Ruim", bg: "rgba(185,28,28,.1)", color: "#b91c1c" },
 };
 
 function renderLivros() {
   garantirModalRejeicao();
   const container = document.getElementById("contentArea");
 
-  const total      = loteAtualMeta ? loteAtualMeta.quantidadeLivros : livrosCache.length;
-  const restantes  = livrosCache.length;
-  const revisados  = total - restantes;
-  const pct        = total > 0 ? Math.round((revisados / total) * 100) : 0;
+  const total = loteAtualMeta
+    ? loteAtualMeta.quantidadeLivros
+    : livrosCache.length;
+  const restantes = livrosCache.length;
+  const revisados = total - restantes;
+  const pct = total > 0 ? Math.round((revisados / total) * 100) : 0;
 
-  const vendedorHtml = loteAtualMeta ? `
+  const vendedorHtml = loteAtualMeta
+    ? `
     <div class="audit-vendedor-bar">
       <div class="audit-vendedor-info">
-        <span class="audit-vendedor-avatar">${avatarInicial(loteAtualMeta.nomeVendedor)}</span>
+        <span class="audit-vendedor-avatar">${
+      avatarInicial(loteAtualMeta.nomeVendedor)
+    }</span>
         <div>
-          <div class="audit-vendedor-nome">${esc(loteAtualMeta.nomeVendedor)}</div>
-          <div class="audit-vendedor-email">${esc(loteAtualMeta.emailVendedor)}</div>
+          <div class="audit-vendedor-nome">${
+      esc(loteAtualMeta.nomeVendedor)
+    }</div>
+          <div class="audit-vendedor-email">${
+      esc(loteAtualMeta.emailVendedor)
+    }</div>
         </div>
       </div>
       <div class="audit-protocolo">
-        <i class="fa-solid fa-hashtag"></i> ${esc(loteAtualMeta.codigoProtocolo)}
+        <i class="fa-solid fa-hashtag"></i> ${
+      esc(loteAtualMeta.codigoProtocolo)
+    }
       </div>
     </div>
     <div class="audit-progress-wrap">
@@ -194,7 +235,8 @@ function renderLivros() {
       <div class="audit-progress-track">
         <div class="audit-progress-fill" style="width:${pct}%"></div>
       </div>
-    </div>` : "";
+    </div>`
+    : "";
 
   let html = `
     <div class="audit-topbar">
@@ -218,7 +260,9 @@ function renderLivros() {
     fotos.forEach((url, fotoIdx) => {
       fotosHtml += `
         <div class="foto-item">
-          <img src="${url}" alt="Foto ${fotoIdx + 1}" style="width:88px;height:88px;object-fit:cover;border-radius:2px;border:1px solid rgba(44,36,27,.12);cursor:pointer" onclick="ampliarFoto('${url}')">
+          <img src="${url}" alt="Foto ${
+        fotoIdx + 1
+      }" style="width:88px;height:88px;object-fit:cover;border-radius:2px;border:1px solid rgba(44,36,27,.12);cursor:pointer" onclick="ampliarFoto('${url}')">
           <button class="btn-del-foto" onclick="removerFoto(${bookIdx},${fotoIdx})" title="Remover foto">×</button>
         </div>`;
     });
@@ -239,7 +283,11 @@ function renderLivros() {
           <span style="flex-shrink:0;font-size:.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.2rem .65rem;border-radius:999px;background:${badge.bg};color:${badge.color};border:1px solid ${badge.color}22;white-space:nowrap">${badge.label}</span>
         </div>
         <p style="font-family:'DM Sans',sans-serif;font-size:.82rem;font-style:italic;color:#7a6e65;margin:0 0 .3rem">por ${b.autor}</p>
-        ${b.isbn ? `<p style="font-family:'Courier New',monospace;font-size:.72rem;color:rgba(44,36,27,.45);margin:0">ISBN ${b.isbn}</p>` : ""}
+        ${
+      b.isbn
+        ? `<p style="font-family:'Courier New',monospace;font-size:.72rem;color:rgba(44,36,27,.45);margin:0">ISBN ${b.isbn}</p>`
+        : ""
+    }
       </div>
 
       <div class="audit-divider"></div>
@@ -275,8 +323,10 @@ function renderLivros() {
 
 function ampliarFoto(url) {
   const overlay = document.createElement("div");
-  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:10000;display:flex;align-items:center;justify-content:center;cursor:zoom-out";
-  overlay.innerHTML = `<img src="${url}" style="max-width:90vw;max-height:90vh;object-fit:contain;border:2px solid rgba(255,255,255,.15)">`;
+  overlay.style.cssText =
+    "position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:10000;display:flex;align-items:center;justify-content:center;cursor:zoom-out";
+  overlay.innerHTML =
+    `<img src="${url}" style="max-width:90vw;max-height:90vh;object-fit:contain;border:2px solid rgba(255,255,255,.15)">`;
   overlay.addEventListener("click", () => overlay.remove());
   document.body.appendChild(overlay);
 }
@@ -286,7 +336,8 @@ function garantirModalRejeicao() {
   if (document.getElementById("modalRejeicao")) return;
   const el = document.createElement("div");
   el.id = "modalRejeicao";
-  el.style.cssText = "display:none;position:fixed;inset:0;background:rgba(44,36,27,.55);z-index:9998;align-items:center;justify-content:center;padding:1rem";
+  el.style.cssText =
+    "display:none;position:fixed;inset:0;background:rgba(44,36,27,.55);z-index:9998;align-items:center;justify-content:center;padding:1rem";
   el.innerHTML = `
     <div style="background:#fff;border:1.5px solid rgba(44,36,27,.12);border-top:3px solid #722f37;padding:2rem;max-width:480px;width:100%;position:relative;box-shadow:0 12px 40px rgba(44,36,27,.2)">
       <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
@@ -315,7 +366,9 @@ let _rejeicaoPendente = null;
 function abrirModalRejeicao(livroId, bookIdx) {
   const livro = livrosCache[bookIdx];
   _rejeicaoPendente = { livroId, bookIdx };
-  document.getElementById("modalRejeicaoSubtitle").textContent = livro ? `"${livro.titulo}"` : "";
+  document.getElementById("modalRejeicaoSubtitle").textContent = livro
+    ? `"${livro.titulo}"`
+    : "";
   document.getElementById("modalRejeicaoMotivo").value = "";
   document.getElementById("modalRejeicaoErro").style.display = "none";
   const modal = document.getElementById("modalRejeicao");
@@ -337,7 +390,9 @@ async function confirmarRejeicao() {
   document.getElementById("modalRejeicaoErro").style.display = "none";
 
   const { livroId, bookIdx } = _rejeicaoPendente;
-  const estado = document.getElementById(`sel-${livroId}`) ? document.getElementById(`sel-${livroId}`).value : "BOM";
+  const estado = document.getElementById(`sel-${livroId}`)
+    ? document.getElementById(`sel-${livroId}`).value
+    : "BOM";
 
   const btn = document.getElementById("btnConfirmarRejeicao");
   btn.disabled = true;
@@ -354,7 +409,10 @@ async function confirmarRejeicao() {
   fecharModalRejeicao();
 
   if (res.ok) {
-    mostrarToast("Livro rejeitado. E-mail de notificação enviado ao vendedor.", "aviso");
+    mostrarToast(
+      "Livro rejeitado. E-mail de notificação enviado ao vendedor.",
+      "aviso",
+    );
     livrosCache.splice(bookIdx, 1);
     if (livrosCache.length === 0) loadLotes();
     else renderLivros();
@@ -366,7 +424,9 @@ async function confirmarRejeicao() {
 
 function updatePrice(id) {
   const val = document.getElementById(`sel-${id}`).value;
-  document.getElementById(`price-${id}`).innerText = `Sugestão: T$ ${priceMap[val]}`;
+  document.getElementById(`price-${id}`).innerText = `Sugestão: T$ ${
+    priceMap[val]
+  }`;
 }
 
 function removerFoto(bookIdx, fotoIdx) {
@@ -410,7 +470,6 @@ async function finalizarAprovacao(bookIdx) {
   } else mostrarToast("❌ Erro ao aprovar livro.", "erro");
 }
 
-
 /* ════════════════════════════════════════
    PEDIDOS
    ════════════════════════════════════════ */
@@ -419,7 +478,8 @@ let filtroAtual = "TODOS";
 
 async function carregarPedidos() {
   const lista = document.getElementById("listaPedidos");
-  lista.innerHTML = `<tr><td colspan="7" class="skel-cell"><div class="skel"></div></td></tr>
+  lista.innerHTML =
+    `<tr><td colspan="7" class="skel-cell"><div class="skel"></div></td></tr>
     <tr><td colspan="7" class="skel-cell"><div class="skel"></div></td></tr>
     <tr><td colspan="7" class="skel-cell"><div class="skel"></div></td></tr>`;
   try {
@@ -429,7 +489,8 @@ async function carregarPedidos() {
 
     // Conta pedidos (ordens agrupadas), não itens individuais
     const pendentes = agruparPorCodigo(todosPedidos)
-      .filter(g => g.some(p => p.statusEnvio === "AGUARDANDO_ENVIO")).length;
+      .filter((g) => g.some((p) => p.statusEnvio === "AGUARDANDO_ENVIO"))
+      .length;
     const badge = document.getElementById("badgePedidos");
     if (badge) {
       if (pendentes > 0) {
@@ -442,13 +503,14 @@ async function carregarPedidos() {
 
     renderPedidos();
   } catch (e) {
-    lista.innerHTML = '<p style="text-align:center;color:#722F37;padding:2rem">Erro ao carregar pedidos.</p>';
+    lista.innerHTML =
+      '<p style="text-align:center;color:#722F37;padding:2rem">Erro ao carregar pedidos.</p>';
   }
 }
 
 function agruparPorCodigo(pedidos) {
   const map = new Map();
-  pedidos.forEach(p => {
+  pedidos.forEach((p) => {
     const key = p.codigoPedido || ("__" + p.id);
     if (!map.has(key)) map.set(key, []);
     map.get(key).push(p);
@@ -457,49 +519,60 @@ function agruparPorCodigo(pedidos) {
 }
 
 function statusAgregado(itens) {
-  const prioridade = ["AGUARDANDO_ENVIO", "EM_TRANSITO", "CANCELADO", "ENTREGUE"];
+  const prioridade = [
+    "AGUARDANDO_ENVIO",
+    "EM_TRANSITO",
+    "CANCELADO",
+    "ENTREGUE",
+  ];
   for (const s of prioridade) {
-    if (itens.some(i => i.statusEnvio === s)) return s;
+    if (itens.some((i) => i.statusEnvio === s)) return s;
   }
   return itens[0].statusEnvio;
 }
 
 function filtrarPedidos(status, btn) {
   filtroAtual = status;
-  document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+  document.querySelectorAll(".filter-btn").forEach((b) =>
+    b.classList.remove("active")
+  );
   btn.classList.add("active");
   renderPedidos();
 }
 
 function renderPedidos() {
   const lista = document.getElementById("listaPedidos");
-  const busca = (document.getElementById("buscaPedido").value || "").toLowerCase();
+  const busca = (document.getElementById("buscaPedido").value || "")
+    .toLowerCase();
 
   // Agrupa todos os pedidos por codigoPedido antes de filtrar
   let grupos = agruparPorCodigo(todosPedidos);
 
   if (filtroAtual !== "TODOS") {
-    grupos = grupos.filter(g => g.some(p => p.statusEnvio === filtroAtual));
+    grupos = grupos.filter((g) => g.some((p) => p.statusEnvio === filtroAtual));
   }
   if (busca) {
-    grupos = grupos.filter(g => g.some(p =>
-      p.tituloLivro.toLowerCase().includes(busca) ||
-      (p.compradorNome || "").toLowerCase().includes(busca) ||
-      (p.compradorEmail || "").toLowerCase().includes(busca) ||
-      String(p.id).includes(busca) ||
-      (p.codigoPedido || "").toLowerCase().includes(busca)
-    ));
+    grupos = grupos.filter((g) =>
+      g.some((p) =>
+        p.tituloLivro.toLowerCase().includes(busca) ||
+        (p.compradorNome || "").toLowerCase().includes(busca) ||
+        (p.compradorEmail || "").toLowerCase().includes(busca) ||
+        String(p.id).includes(busca) ||
+        (p.codigoPedido || "").toLowerCase().includes(busca)
+      )
+    );
   }
 
   if (grupos.length === 0) {
-    lista.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:3rem;color:#7A6E65">
+    lista.innerHTML =
+      `<tr><td colspan="7" style="text-align:center;padding:3rem;color:#7A6E65">
       <div style="font-size:2.5rem;margin-bottom:.75rem">📭</div>
       <p style="font-style:italic">Nenhum pedido encontrado para este filtro.</p>
     </td></tr>`;
     return;
   }
 
-  lista.innerHTML = grupos.map(g => buildGrupoRow(g)).join("");
+  lista.innerHTML = grupos.map((g) => buildGrupoRow(g)).join("");
 }
 
 const PROXIMOS_STATUS = {
@@ -517,23 +590,29 @@ const LABEL_STATUS = {
 
 function buildPedidoRow(p) {
   const dataCompra = p.dataCompra
-    ? new Date(p.dataCompra).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })
+    ? new Date(p.dataCompra).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
     : "—";
 
   const proximos = PROXIMOS_STATUS[p.statusEnvio] || [];
-  const temAcao  = proximos.length > 0;
+  const temAcao = proximos.length > 0;
 
   const pillClass = {
     "AGUARDANDO_ENVIO": "pill-aguardando",
-    "EM_TRANSITO":      "pill-transito",
-    "ENTREGUE":         "pill-entregue",
-    "CANCELADO":        "pill-cancelado",
+    "EM_TRANSITO": "pill-transito",
+    "ENTREGUE": "pill-entregue",
+    "CANCELADO": "pill-cancelado",
   }[p.statusEnvio] || "";
 
   return `
   <tr class="pedido-tr" id="row-${p.id}">
     <td class="pedido-td pedido-td-id">
-      <span class="pedido-codigo">${p.codigoPedido || ('BIB-' + String(p.id).padStart(5,'0'))}</span>
+      <span class="pedido-codigo">${
+    p.codigoPedido || ("BIB-" + String(p.id).padStart(5, "0"))
+  }</span>
       <span class="pedido-id-sub">#${p.id}</span>
     </td>
     <td class="pedido-td pedido-td-livro">
@@ -547,15 +626,18 @@ function buildPedidoRow(p) {
     <td class="pedido-td pedido-td-data">${dataCompra}</td>
     <td class="pedido-td pedido-td-preco">T$ ${p.precoLivro.toFixed(2)}</td>
     <td class="pedido-td pedido-td-status">
-      <span class="status-pill ${pillClass}">${esc(p.statusEnvioDescricao || p.statusEnvio)}</span>
+      <span class="status-pill ${pillClass}">${
+    esc(p.statusEnvioDescricao || p.statusEnvio)
+  }</span>
     </td>
     <td class="pedido-td pedido-td-acao">
-      ${temAcao
-        ? `<button class="btn-abrir-pedido" onclick="abrirModalPedido(${p.id})">
+      ${
+    temAcao
+      ? `<button class="btn-abrir-pedido" onclick="abrirModalPedido(${p.id})">
              <i class="fa-solid fa-pen-to-square"></i> Gerir
            </button>`
-        : `<span class="pedido-final-label">Finalizado</span>`
-      }
+      : `<span class="pedido-final-label">Finalizado</span>`
+  }
     </td>
   </tr>`;
 }
@@ -563,18 +645,30 @@ function buildPedidoRow(p) {
 function buildGrupoRow(itens) {
   if (itens.length === 1) return buildPedidoRow(itens[0]);
 
-  const primeiro   = itens[0];
-  const codigo     = primeiro.codigoPedido || ("BIB-" + String(primeiro.id).padStart(5, "0"));
-  const safeId     = codigo.replace(/[^a-zA-Z0-9]/g, "_");
+  const primeiro = itens[0];
+  const codigo = primeiro.codigoPedido ||
+    ("BIB-" + String(primeiro.id).padStart(5, "0"));
+  const safeId = codigo.replace(/[^a-zA-Z0-9]/g, "_");
   const dataCompra = primeiro.dataCompra
-    ? new Date(primeiro.dataCompra).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })
+    ? new Date(primeiro.dataCompra).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
     : "—";
-  const totalPreco  = itens.reduce((sum, i) => sum + (i.precoLivro || 0), 0);
+  const totalPreco = itens.reduce((sum, i) => sum + (i.precoLivro || 0), 0);
   const statusGeral = statusAgregado(itens);
-  const pillClass   = { "AGUARDANDO_ENVIO": "pill-aguardando", "EM_TRANSITO": "pill-transito",
-                        "ENTREGUE": "pill-entregue", "CANCELADO": "pill-cancelado" }[statusGeral] || "";
-  const temAcao     = itens.some(i => (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0);
-  const codigoEsc   = esc(codigo);
+  const pillClass =
+    {
+      "AGUARDANDO_ENVIO": "pill-aguardando",
+      "EM_TRANSITO": "pill-transito",
+      "ENTREGUE": "pill-entregue",
+      "CANCELADO": "pill-cancelado",
+    }[statusGeral] || "";
+  const temAcao = itens.some((i) =>
+    (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0
+  );
+  const codigoEsc = esc(codigo);
 
   // Linha principal do pedido (expande/recolhe ao clicar)
   let html = `
@@ -584,31 +678,49 @@ function buildGrupoRow(itens) {
       <span class="pedido-id-sub">${itens.length} livros</span>
     </td>
     <td class="pedido-td pedido-td-livro">
-      ${itens.map(i => `<div class="pedido-livro-titulo" style="font-size:.82rem;line-height:1.4">${esc(i.tituloLivro)}</div>`).join("")}
+      ${
+    itens.map((i) =>
+      `<div class="pedido-livro-titulo" style="font-size:.82rem;line-height:1.4">${
+        esc(i.tituloLivro)
+      }</div>`
+    ).join("")
+  }
     </td>
     <td class="pedido-td pedido-td-comprador">
-      <div class="pedido-comprador-nome">${esc(primeiro.compradorNome || "—")}</div>
-      <div class="pedido-comprador-email">${esc(primeiro.compradorEmail || "")}</div>
+      <div class="pedido-comprador-nome">${
+    esc(primeiro.compradorNome || "—")
+  }</div>
+      <div class="pedido-comprador-email">${
+    esc(primeiro.compradorEmail || "")
+  }</div>
     </td>
     <td class="pedido-td pedido-td-data">${dataCompra}</td>
     <td class="pedido-td pedido-td-preco">T$ ${totalPreco.toFixed(2)}</td>
     <td class="pedido-td pedido-td-status">
-      <span class="status-pill ${pillClass}">${esc(LABEL_STATUS[statusGeral] || statusGeral)}</span>
+      <span class="status-pill ${pillClass}">${
+    esc(LABEL_STATUS[statusGeral] || statusGeral)
+  }</span>
     </td>
     <td class="pedido-td pedido-td-acao">
-      ${temAcao
-        ? `<button class="btn-abrir-pedido" onclick="event.stopPropagation();abrirModalGrupo('${codigoEsc}')">
+      ${
+    temAcao
+      ? `<button class="btn-abrir-pedido" onclick="event.stopPropagation();abrirModalGrupo('${codigoEsc}')">
              <i class="fa-solid fa-pen-to-square"></i> Gerir
            </button>`
-        : `<span class="pedido-final-label">Finalizado</span>`
-      }
+      : `<span class="pedido-final-label">Finalizado</span>`
+  }
     </td>
   </tr>`;
 
   // Sub-linhas informativas (sem botão Gerir individual)
-  itens.forEach(p => {
-    const pPill = { "AGUARDANDO_ENVIO": "pill-aguardando", "EM_TRANSITO": "pill-transito",
-                    "ENTREGUE": "pill-entregue", "CANCELADO": "pill-cancelado" }[p.statusEnvio] || "";
+  itens.forEach((p) => {
+    const pPill =
+      {
+        "AGUARDANDO_ENVIO": "pill-aguardando",
+        "EM_TRANSITO": "pill-transito",
+        "ENTREGUE": "pill-entregue",
+        "CANCELADO": "pill-cancelado",
+      }[p.statusEnvio] || "";
     html += `
     <tr class="pedido-tr" id="sub-${safeId}-${p.id}" style="display:none;background:rgba(249,246,240,.6)">
       <td class="pedido-td pedido-td-id" style="padding-left:2.25rem">
@@ -620,9 +732,13 @@ function buildGrupoRow(itens) {
       </td>
       <td class="pedido-td" style="color:#b0a49a">—</td>
       <td class="pedido-td" style="color:#b0a49a">—</td>
-      <td class="pedido-td pedido-td-preco">T$ ${(p.precoLivro || 0).toFixed(2)}</td>
+      <td class="pedido-td pedido-td-preco">T$ ${
+      (p.precoLivro || 0).toFixed(2)
+    }</td>
       <td class="pedido-td pedido-td-status" colspan="2">
-        <span class="status-pill ${pPill}">${esc(p.statusEnvioDescricao || p.statusEnvio)}</span>
+        <span class="status-pill ${pPill}">${
+      esc(p.statusEnvioDescricao || p.statusEnvio)
+    }</span>
       </td>
     </tr>`;
   });
@@ -632,8 +748,8 @@ function buildGrupoRow(itens) {
 
 function toggleGrupo(safeId) {
   const subrows = document.querySelectorAll(`tr[id^="sub-${safeId}-"]`);
-  const aberto  = subrows[0] && subrows[0].style.display !== "none";
-  subrows.forEach(r => r.style.display = aberto ? "none" : "");
+  const aberto = subrows[0] && subrows[0].style.display !== "none";
+  subrows.forEach((r) => r.style.display = aberto ? "none" : "");
 }
 
 /* ── Modal de gestão de pedido com múltiplos itens ── */
@@ -641,8 +757,11 @@ function garantirModalGrupo() {
   if (document.getElementById("modalGrupo")) return;
   const el = document.createElement("div");
   el.id = "modalGrupo";
-  el.style.cssText = "display:none;position:fixed;inset:0;background:rgba(44,36,27,.55);z-index:9998;align-items:center;justify-content:center;padding:1rem;overflow-y:auto";
-  el.addEventListener("click", e => { if (e.target === el) fecharModalGrupo(); });
+  el.style.cssText =
+    "display:none;position:fixed;inset:0;background:rgba(44,36,27,.55);z-index:9998;align-items:center;justify-content:center;padding:1rem;overflow-y:auto";
+  el.addEventListener("click", (e) => {
+    if (e.target === el) fecharModalGrupo();
+  });
   el.innerHTML = `
     <div class="mp-card">
       <div class="mp-header">
@@ -689,47 +808,73 @@ function garantirModalGrupo() {
 }
 
 function abrirModalGrupo(codigoPedido) {
-  const itens = todosPedidos.filter(p => p.codigoPedido === codigoPedido);
+  const itens = todosPedidos.filter((p) => p.codigoPedido === codigoPedido);
   if (!itens.length) return;
   garantirModalGrupo();
 
-  const primeiro    = itens[0];
-  const total       = itens.reduce((sum, i) => sum + (i.precoLivro || 0), 0);
+  const primeiro = itens[0];
+  const total = itens.reduce((sum, i) => sum + (i.precoLivro || 0), 0);
   const statusGeral = statusAgregado(itens);
-  const pillClass   = { "AGUARDANDO_ENVIO": "pill-aguardando", "EM_TRANSITO": "pill-transito",
-                        "ENTREGUE": "pill-entregue", "CANCELADO": "pill-cancelado" }[statusGeral] || "";
+  const pillClass =
+    {
+      "AGUARDANDO_ENVIO": "pill-aguardando",
+      "EM_TRANSITO": "pill-transito",
+      "ENTREGUE": "pill-entregue",
+      "CANCELADO": "pill-cancelado",
+    }[statusGeral] || "";
 
-  document.getElementById("mpGCodigo").textContent    = codigoPedido;
-  document.getElementById("mpGComprador").textContent = primeiro.compradorNome || "—";
-  document.getElementById("mpGEmail").textContent     = primeiro.compradorEmail || "—";
-  document.getElementById("mpGEndereco").textContent  = primeiro.compradorEndereco || "Não cadastrado";
-  document.getElementById("mpGTotal").textContent     = "T$ " + total.toFixed(2);
-  document.getElementById("mpGData").textContent      = primeiro.dataCompra
-    ? new Date(primeiro.dataCompra).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
+  document.getElementById("mpGCodigo").textContent = codigoPedido;
+  document.getElementById("mpGComprador").textContent =
+    primeiro.compradorNome || "—";
+  document.getElementById("mpGEmail").textContent = primeiro.compradorEmail ||
+    "—";
+  document.getElementById("mpGEndereco").textContent =
+    primeiro.compradorEndereco || "Não cadastrado";
+  document.getElementById("mpGTotal").textContent = "T$ " + total.toFixed(2);
+  document.getElementById("mpGData").textContent = primeiro.dataCompra
+    ? new Date(primeiro.dataCompra).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })
     : "—";
 
   const statusEl = document.getElementById("mpGStatus");
-  statusEl.className   = "status-pill " + pillClass;
+  statusEl.className = "status-pill " + pillClass;
   statusEl.textContent = LABEL_STATUS[statusGeral] || statusGeral;
 
-  document.getElementById("mpGLivros").innerHTML = itens.map(i => {
-    const iPill = { "AGUARDANDO_ENVIO": "pill-aguardando", "EM_TRANSITO": "pill-transito",
-                    "ENTREGUE": "pill-entregue", "CANCELADO": "pill-cancelado" }[i.statusEnvio] || "";
+  document.getElementById("mpGLivros").innerHTML = itens.map((i) => {
+    const iPill =
+      {
+        "AGUARDANDO_ENVIO": "pill-aguardando",
+        "EM_TRANSITO": "pill-transito",
+        "ENTREGUE": "pill-entregue",
+        "CANCELADO": "pill-cancelado",
+      }[i.statusEnvio] || "";
     return `<div class="mp-row" style="padding:.35rem 0;border-bottom:1px solid rgba(44,36,27,.06)">
-      <span class="mp-label" style="flex:1;font-weight:500">${esc(i.tituloLivro)}</span>
-      <span class="status-pill ${iPill}" style="font-size:.65rem;flex-shrink:0">${esc(i.statusEnvioDescricao || i.statusEnvio)}</span>
+      <span class="mp-label" style="flex:1;font-weight:500">${
+      esc(i.tituloLivro)
+    }</span>
+      <span class="status-pill ${iPill}" style="font-size:.65rem;flex-shrink:0">${
+      esc(i.statusEnvioDescricao || i.statusEnvio)
+    }</span>
     </div>`;
   }).join("");
 
-  const ativos  = itens.filter(i => (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0);
+  const ativos = itens.filter((i) =>
+    (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0
+  );
   const proximos = PROXIMOS_STATUS[statusGeral] || [];
 
   document.getElementById("mpGRastreio").value = primeiro.codigoRastreio || "";
-  document.getElementById("mpGNovoStatus").innerHTML =
-    proximos.map(s => `<option value="${s}">${LABEL_STATUS[s]}</option>`).join("");
+  document.getElementById("mpGNovoStatus").innerHTML = proximos.map((s) =>
+    `<option value="${s}">${LABEL_STATUS[s]}</option>`
+  ).join("");
   document.getElementById("mpGBtnSalvar").dataset.codigoPedido = codigoPedido;
   document.getElementById("mpGCancelBloco").style.display = "none";
-  document.getElementById("mpGAcoes").style.display = ativos.length > 0 ? "block" : "none";
+  document.getElementById("mpGAcoes").style.display = ativos.length > 0
+    ? "block"
+    : "none";
 
   document.getElementById("modalGrupo").style.display = "flex";
 }
@@ -740,15 +885,17 @@ function fecharModalGrupo() {
 }
 
 async function salvarGrupoModal() {
-  const btn          = document.getElementById("mpGBtnSalvar");
+  const btn = document.getElementById("mpGBtnSalvar");
   const codigoPedido = btn.dataset.codigoPedido;
-  const novoStatus   = document.getElementById("mpGNovoStatus").value;
-  const rastreio     = document.getElementById("mpGRastreio").value.trim();
+  const novoStatus = document.getElementById("mpGNovoStatus").value;
+  const rastreio = document.getElementById("mpGRastreio").value.trim();
 
   if (novoStatus === "CANCELADO") {
-    const itens  = todosPedidos.filter(p => p.codigoPedido === codigoPedido);
-    const ativos = itens.filter(i => (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0);
-    const bloco  = document.getElementById("mpGCancelBloco");
+    const itens = todosPedidos.filter((p) => p.codigoPedido === codigoPedido);
+    const ativos = itens.filter((i) =>
+      (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0
+    );
+    const bloco = document.getElementById("mpGCancelBloco");
     bloco.innerHTML = buildCancelarGrupoHtml(codigoPedido, ativos, itens);
     bloco.style.display = "block";
     bloco.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -759,23 +906,31 @@ async function salvarGrupoModal() {
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando…';
 
   try {
-    const itens  = todosPedidos.filter(p => p.codigoPedido === codigoPedido);
-    const ativos = itens.filter(i => (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0);
+    const itens = todosPedidos.filter((p) => p.codigoPedido === codigoPedido);
+    const ativos = itens.filter((i) =>
+      (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0
+    );
 
     for (const item of ativos) {
       const res = await fetch(`/api/admin/pedidos/${item.id}/envio`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ statusEnvio: novoStatus, codigoRastreio: rastreio || null }),
+        body: JSON.stringify({
+          statusEnvio: novoStatus,
+          codigoRastreio: rastreio || null,
+        }),
       });
       if (!res.ok) throw new Error(await res.text());
       const atualizado = await res.json();
-      const idx = todosPedidos.findIndex(p => p.id === item.id);
+      const idx = todosPedidos.findIndex((p) => p.id === item.id);
       if (idx !== -1) todosPedidos[idx] = atualizado;
     }
 
     fecharModalGrupo();
-    mostrarToast(`${ativos.length} item(s) atualizados para "${LABEL_STATUS[novoStatus]}"`, "sucesso");
+    mostrarToast(
+      `${ativos.length} item(s) atualizados para "${LABEL_STATUS[novoStatus]}"`,
+      "sucesso",
+    );
     renderPedidos();
   } catch (e) {
     mostrarToast("Erro: " + e.message, "erro");
@@ -786,9 +941,12 @@ async function salvarGrupoModal() {
 }
 
 function buildCancelarGrupoHtml(codigoPedido, ativos, todosItens) {
-  const totalEstorno = todosItens.reduce((sum, i) => sum + (i.precoLivro || 0), 0);
+  const totalEstorno = todosItens.reduce(
+    (sum, i) => sum + (i.precoLivro || 0),
+    0,
+  );
   const safe = codigoPedido.replace(/[^a-zA-Z0-9]/g, "_");
-  const opcoesHtml = MOTIVOS_ADMIN.map(m =>
+  const opcoesHtml = MOTIVOS_ADMIN.map((m) =>
     `<label class="motivo-opcao">
        <input type="radio" name="motivo-cancel-g-${safe}" value="${m.value}">
        <span>${esc(m.label)}</span>
@@ -800,7 +958,9 @@ function buildCancelarGrupoHtml(codigoPedido, ativos, todosItens) {
         <i class="fa-solid fa-ban"></i> Cancelar Pedido Completo
       </div>
       <div class="mp-cancel-aviso">
-        ⚠️ Todos os ${ativos.length} item(s) serão cancelados e T$ ${totalEstorno.toFixed(2)} serão estornados ao comprador.
+        ⚠️ Todos os ${ativos.length} item(s) serão cancelados e T$ ${
+    totalEstorno.toFixed(2)
+  } serão estornados ao comprador.
         Esta ação não pode ser desfeita.
       </div>
       <div class="mp-motivos-grupo" id="motivos-g-${safe}">${opcoesHtml}</div>
@@ -810,7 +970,9 @@ function buildCancelarGrupoHtml(codigoPedido, ativos, todosItens) {
         <button class="mp-btn-voltar"
                 onclick="document.getElementById('mpGCancelBloco').style.display='none'">Voltar</button>
         <button class="mp-btn-confirmar-cancel"
-                onclick="confirmarCancelamentoGrupo('${esc(codigoPedido)}','${safe}')">
+                onclick="confirmarCancelamentoGrupo('${
+    esc(codigoPedido)
+  }','${safe}')">
           <i class="fa-solid fa-ban"></i> Confirmar Cancelamento
         </button>
       </div>
@@ -818,8 +980,13 @@ function buildCancelarGrupoHtml(codigoPedido, ativos, todosItens) {
 }
 
 function confirmarCancelamentoGrupo(codigoPedido, safe) {
-  const motivoEl = document.querySelector(`input[name="motivo-cancel-g-${safe}"]:checked`);
-  if (!motivoEl) { mostrarToast("Selecione o motivo do cancelamento.", "aviso"); return; }
+  const motivoEl = document.querySelector(
+    `input[name="motivo-cancel-g-${safe}"]:checked`,
+  );
+  if (!motivoEl) {
+    mostrarToast("Selecione o motivo do cancelamento.", "aviso");
+    return;
+  }
   const justEl = document.getElementById(`just-g-${safe}`);
   const justificativa = justEl ? justEl.value.trim() : "";
   if (justificativa.length < 10) {
@@ -828,19 +995,30 @@ function confirmarCancelamentoGrupo(codigoPedido, safe) {
     return;
   }
 
-  const itens       = todosPedidos.filter(p => p.codigoPedido === codigoPedido);
-  const ativos      = itens.filter(i => (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0);
+  const itens = todosPedidos.filter((p) => p.codigoPedido === codigoPedido);
+  const ativos = itens.filter((i) =>
+    (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0
+  );
   const totalEstorno = itens.reduce((sum, i) => sum + (i.precoLivro || 0), 0);
 
   garantirModalConfirmCancel();
   document.getElementById("confirmCancelMsg").innerHTML =
-    `Tem certeza que deseja cancelar o pedido <strong>${esc(codigoPedido)}</strong>?<br><br>
+    `Tem certeza que deseja cancelar o pedido <strong>${
+      esc(codigoPedido)
+    }</strong>?<br><br>
      <strong>${ativos.length} livro(s)</strong> serão cancelados e
-     <strong>T$ ${totalEstorno.toFixed(2)}</strong> serão estornados ao comprador.<br><br>
+     <strong>T$ ${
+      totalEstorno.toFixed(2)
+    }</strong> serão estornados ao comprador.<br><br>
      O comprador será notificado por e-mail.`;
   document.getElementById("confirmCancelBtn").onclick = async () => {
     fecharConfirmacaoCancelamento();
-    await _cancelarGrupoFetch(ativos.map(i => i.id), motivoEl.value, justificativa, codigoPedido);
+    await _cancelarGrupoFetch(
+      ativos.map((i) => i.id),
+      motivoEl.value,
+      justificativa,
+      codigoPedido,
+    );
   };
   document.getElementById("modalConfirmCancelOverlay").style.display = "flex";
 }
@@ -854,15 +1032,26 @@ async function _cancelarGrupoFetch(ids, motivo, justificativa, codigoPedido) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ motivoCategoria: motivo, justificativa }),
       });
-      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.erro || `Erro no item #${pedidoId}`); }
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}));
+        throw new Error(e.erro || `Erro no item #${pedidoId}`);
+      }
       const data = await res.json();
       totalEstornado += data.precoLivro || 0;
-      const idx = todosPedidos.findIndex(p => p.id === pedidoId);
-      if (idx !== -1) { todosPedidos[idx].statusEnvio = "CANCELADO"; todosPedidos[idx].statusEnvioDescricao = "Cancelado"; }
+      const idx = todosPedidos.findIndex((p) => p.id === pedidoId);
+      if (idx !== -1) {
+        todosPedidos[idx].statusEnvio = "CANCELADO";
+        todosPedidos[idx].statusEnvioDescricao = "Cancelado";
+      }
     }
     fecharModalGrupo();
     renderPedidos();
-    mostrarToast(`Pedido ${codigoPedido} cancelado. T$ ${totalEstornado.toFixed(2)} estornados.`, "sucesso");
+    mostrarToast(
+      `Pedido ${codigoPedido} cancelado. T$ ${
+        totalEstornado.toFixed(2)
+      } estornados.`,
+      "sucesso",
+    );
   } catch (e) {
     mostrarToast(e.message || "Erro ao cancelar pedido.", "erro");
   }
@@ -873,8 +1062,11 @@ function garantirModalPedido() {
   if (document.getElementById("modalPedido")) return;
   const el = document.createElement("div");
   el.id = "modalPedido";
-  el.style.cssText = "display:none;position:fixed;inset:0;background:rgba(44,36,27,.55);z-index:9998;align-items:center;justify-content:center;padding:1rem;overflow-y:auto";
-  el.addEventListener("click", e => { if (e.target === el) fecharModalPedido(); });
+  el.style.cssText =
+    "display:none;position:fixed;inset:0;background:rgba(44,36,27,.55);z-index:9998;align-items:center;justify-content:center;padding:1rem;overflow-y:auto";
+  el.addEventListener("click", (e) => {
+    if (e.target === el) fecharModalPedido();
+  });
   el.innerHTML = `
     <div class="mp-card">
       <div class="mp-header">
@@ -941,31 +1133,44 @@ function garantirModalPedido() {
 }
 
 function abrirModalPedido(pedidoId) {
-  const p = todosPedidos.find(x => x.id === pedidoId);
+  const p = todosPedidos.find((x) => x.id === pedidoId);
   if (!p) return;
   garantirModalPedido();
 
-  document.getElementById("mpPedidoId").textContent = p.codigoPedido || ("#" + p.id);
-  document.getElementById("mpTitulo").textContent   = p.tituloLivro;
-  document.getElementById("mpAutor").textContent    = p.autorLivro || "—";
+  document.getElementById("mpPedidoId").textContent = p.codigoPedido ||
+    ("#" + p.id);
+  document.getElementById("mpTitulo").textContent = p.tituloLivro;
+  document.getElementById("mpAutor").textContent = p.autorLivro || "—";
   document.getElementById("mpComprador").textContent = p.compradorNome || "—";
-  document.getElementById("mpEmail").textContent    = p.compradorEmail || "—";
-  document.getElementById("mpEndereco").textContent = p.compradorEndereco || "Não cadastrado";
-  document.getElementById("mpPreco").textContent    = "T$ " + p.precoLivro.toFixed(2);
-  document.getElementById("mpData").textContent     = p.dataCompra
-    ? new Date(p.dataCompra).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
+  document.getElementById("mpEmail").textContent = p.compradorEmail || "—";
+  document.getElementById("mpEndereco").textContent = p.compradorEndereco ||
+    "Não cadastrado";
+  document.getElementById("mpPreco").textContent = "T$ " +
+    p.precoLivro.toFixed(2);
+  document.getElementById("mpData").textContent = p.dataCompra
+    ? new Date(p.dataCompra).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })
     : "—";
 
-  const pillClass = { "AGUARDANDO_ENVIO": "pill-aguardando", "EM_TRANSITO": "pill-transito",
-                      "ENTREGUE": "pill-entregue", "CANCELADO": "pill-cancelado" }[p.statusEnvio] || "";
+  const pillClass =
+    {
+      "AGUARDANDO_ENVIO": "pill-aguardando",
+      "EM_TRANSITO": "pill-transito",
+      "ENTREGUE": "pill-entregue",
+      "CANCELADO": "pill-cancelado",
+    }[p.statusEnvio] || "";
   const statusEl = document.getElementById("mpStatus");
   statusEl.className = "status-pill " + pillClass;
   statusEl.textContent = p.statusEnvioDescricao || p.statusEnvio;
 
   document.getElementById("mpRastreio").value = p.codigoRastreio || "";
   const proximos = PROXIMOS_STATUS[p.statusEnvio] || [];
-  document.getElementById("mpNovoStatus").innerHTML =
-    proximos.map(s => `<option value="${s}">${LABEL_STATUS[s]}</option>`).join("");
+  document.getElementById("mpNovoStatus").innerHTML = proximos.map((s) =>
+    `<option value="${s}">${LABEL_STATUS[s]}</option>`
+  ).join("");
 
   const btnEtiqueta = document.getElementById("mpBtnEtiqueta");
   if (p.statusEnvio === "AGUARDANDO_ENVIO") {
@@ -989,10 +1194,10 @@ function fecharModalPedido() {
 }
 
 async function salvarEnvioModal() {
-  const btn        = document.getElementById("mpBtnSalvar");
-  const pedidoId   = parseInt(btn.dataset.pedidoId);
+  const btn = document.getElementById("mpBtnSalvar");
+  const pedidoId = parseInt(btn.dataset.pedidoId);
   const novoStatus = document.getElementById("mpNovoStatus").value;
-  const rastreio   = document.getElementById("mpRastreio").value.trim();
+  const rastreio = document.getElementById("mpRastreio").value.trim();
 
   if (novoStatus === "CANCELADO") {
     const bloco = document.getElementById("mpCancelBloco");
@@ -1008,17 +1213,23 @@ async function salvarEnvioModal() {
 /* ── Cancelamento pelo Admin — fluxo com motivo + confirmação ── */
 
 const MOTIVOS_ADMIN = [
-  { value: "PRODUTO_NAO_DISPONIVEL",  label: "Produto não disponível para envio" },
-  { value: "DADOS_INCORRETOS",        label: "Dados do comprador incorretos ou incompletos" },
-  { value: "SUSPEITA_FRAUDE",         label: "Suspeita de fraude ou abuso" },
-  { value: "PROBLEMA_LOGISTICA",      label: "Problema logístico" },
-  { value: "PEDIDO_DUPLICADO",        label: "Pedido duplicado" },
-  { value: "DECISAO_ADMINISTRATIVA",  label: "Decisão administrativa" },
-  { value: "OUTRO",                   label: "Outro motivo" }
+  {
+    value: "PRODUTO_NAO_DISPONIVEL",
+    label: "Produto não disponível para envio",
+  },
+  {
+    value: "DADOS_INCORRETOS",
+    label: "Dados do comprador incorretos ou incompletos",
+  },
+  { value: "SUSPEITA_FRAUDE", label: "Suspeita de fraude ou abuso" },
+  { value: "PROBLEMA_LOGISTICA", label: "Problema logístico" },
+  { value: "PEDIDO_DUPLICADO", label: "Pedido duplicado" },
+  { value: "DECISAO_ADMINISTRATIVA", label: "Decisão administrativa" },
+  { value: "OUTRO", label: "Outro motivo" },
 ];
 
 function buildCancelarHtml(pedidoId) {
-  const opcoesHtml = MOTIVOS_ADMIN.map(m =>
+  const opcoesHtml = MOTIVOS_ADMIN.map((m) =>
     `<label class="motivo-opcao">
       <input type="radio" name="motivo-cancel-${pedidoId}" value="${m.value}">
       <span>${esc(m.label)}</span>
@@ -1056,7 +1267,8 @@ function buildCancelarHtml(pedidoId) {
 
 async function executarCancelamentoAdmin(pedidoId) {
   const motivoSel = document.querySelector(
-    `input[name="motivo-cancel-${pedidoId}"]:checked`);
+    `input[name="motivo-cancel-${pedidoId}"]:checked`,
+  );
   if (!motivoSel) {
     mostrarToast("Selecione o motivo do cancelamento.", "aviso");
     return;
@@ -1077,10 +1289,12 @@ async function executarCancelamentoAdmin(pedidoId) {
 function abrirConfirmacaoCancelamento(pedidoId, motivo, justificativa) {
   garantirModalConfirmCancel();
   const overlay = document.getElementById("modalConfirmCancelOverlay");
-  const p = todosPedidos.find(x => x.id === pedidoId);
+  const p = todosPedidos.find((x) => x.id === pedidoId);
 
   document.getElementById("confirmCancelMsg").innerHTML =
-    `Tem certeza que deseja cancelar o pedido <strong>#${String(pedidoId).padStart(5,"0")}</strong>
+    `Tem certeza que deseja cancelar o pedido <strong>#${
+      String(pedidoId).padStart(5, "0")
+    }</strong>
      — <em>${esc(p ? p.tituloLivro : "")}</em>?<br><br>
      O valor de <strong>T$ ${p ? p.precoLivro.toFixed(2) : "—"}</strong> será
      estornado ao comprador e o livro voltará à vitrine.<br><br>
@@ -1103,7 +1317,8 @@ function garantirModalConfirmCancel() {
   if (document.getElementById("modalConfirmCancelOverlay")) return;
   const el = document.createElement("div");
   el.id = "modalConfirmCancelOverlay";
-  el.style.cssText = "display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(20,16,12,.65);z-index:10000;align-items:center;justify-content:center;";
+  el.style.cssText =
+    "display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(20,16,12,.65);z-index:10000;align-items:center;justify-content:center;";
   el.innerHTML = `
     <div style="background:#f9f6f0;border-radius:14px;max-width:460px;width:90%;
         box-shadow:0 12px 60px rgba(20,16,12,.35);overflow:hidden;">
@@ -1134,16 +1349,22 @@ function garantirModalConfirmCancel() {
         </div>
       </div>
     </div>`;
-  el.addEventListener("click", e => { if (e.target === el) fecharConfirmacaoCancelamento(); });
+  el.addEventListener("click", (e) => {
+    if (e.target === el) fecharConfirmacaoCancelamento();
+  });
   document.body.appendChild(el);
 }
 
-async function _executarCancelamentoAdminFetch(pedidoId, motivo, justificativa) {
+async function _executarCancelamentoAdminFetch(
+  pedidoId,
+  motivo,
+  justificativa,
+) {
   try {
     const res = await fetch(`/api/admin/pedidos/${pedidoId}/cancelar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ motivoCategoria: motivo, justificativa })
+      body: JSON.stringify({ motivoCategoria: motivo, justificativa }),
     });
 
     if (!res.ok) {
@@ -1152,7 +1373,7 @@ async function _executarCancelamentoAdminFetch(pedidoId, motivo, justificativa) 
     }
 
     const data = await res.json();
-    const idx = todosPedidos.findIndex(p => p.id === pedidoId);
+    const idx = todosPedidos.findIndex((p) => p.id === pedidoId);
     if (idx !== -1) {
       todosPedidos[idx].statusEnvio = "CANCELADO";
       todosPedidos[idx].statusEnvioDescricao = "Cancelado";
@@ -1161,21 +1382,31 @@ async function _executarCancelamentoAdminFetch(pedidoId, motivo, justificativa) 
     fecharModalPedido();
     renderPedidos();
     mostrarToast(
-      `Pedido #${pedidoId} cancelado. T$ ${data.precoLivro ? data.precoLivro.toFixed(2) : "—"} estornados. Comprador notificado por e-mail.`,
-      "sucesso"
+      `Pedido #${pedidoId} cancelado. T$ ${
+        data.precoLivro ? data.precoLivro.toFixed(2) : "—"
+      } estornados. Comprador notificado por e-mail.`,
+      "sucesso",
     );
   } catch (e) {
     mostrarToast(e.message || "Erro ao cancelar pedido.", "erro");
   }
 }
 
-async function _executarAtualizacaoPedido(pedidoId, novoStatus, codigoRastreio, justificativa) {
+async function _executarAtualizacaoPedido(
+  pedidoId,
+  novoStatus,
+  codigoRastreio,
+  justificativa,
+) {
   const btn = document.getElementById("mpBtnSalvar");
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando…';
 
   try {
-    const body = { statusEnvio: novoStatus, codigoRastreio: codigoRastreio || null };
+    const body = {
+      statusEnvio: novoStatus,
+      codigoRastreio: codigoRastreio || null,
+    };
     if (justificativa) body.justificativa = justificativa;
 
     const res = await fetch(`/api/admin/pedidos/${pedidoId}/envio`, {
@@ -1187,19 +1418,24 @@ async function _executarAtualizacaoPedido(pedidoId, novoStatus, codigoRastreio, 
     if (!res.ok) throw new Error(await res.text());
     const atualizado = await res.json();
 
-    const idx = todosPedidos.findIndex(p => p.id === pedidoId);
+    const idx = todosPedidos.findIndex((p) => p.id === pedidoId);
     if (idx !== -1) todosPedidos[idx] = atualizado;
 
     fecharModalPedido();
 
     if (novoStatus === "CANCELADO" && atualizado.saldoAposEstorno != null) {
       mostrarToast(
-        `Pedido #${pedidoId} cancelado — T$ ${atualizado.precoLivro.toFixed(2)} estornados. ` +
-        `Novo saldo: T$ ${atualizado.saldoAposEstorno.toFixed(2)}`,
+        `Pedido #${pedidoId} cancelado — T$ ${
+          atualizado.precoLivro.toFixed(2)
+        } estornados. ` +
+          `Novo saldo: T$ ${atualizado.saldoAposEstorno.toFixed(2)}`,
         "sucesso",
       );
     } else {
-      mostrarToast(`Pedido #${pedidoId} atualizado para "${LABEL_STATUS[novoStatus]}"`, "sucesso");
+      mostrarToast(
+        `Pedido #${pedidoId} atualizado para "${LABEL_STATUS[novoStatus]}"`,
+        "sucesso",
+      );
     }
 
     renderPedidos();
@@ -1215,25 +1451,39 @@ async function _executarAtualizacaoPedido(pedidoId, novoStatus, codigoRastreio, 
    TABS — usa URLSearchParams
    ════════════════════════════════════════ */
 function trocarTab(nome) {
-  document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
-  document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+  document.querySelectorAll(".tab-panel").forEach((p) =>
+    p.classList.remove("active")
+  );
+  document.querySelectorAll(".tab-btn").forEach((b) =>
+    b.classList.remove("active")
+  );
   const panel = document.getElementById("panel-" + nome);
   if (panel) panel.classList.add("active");
   const btn = document.querySelector(`.tab-btn[data-tab="${nome}"]`);
   if (btn) btn.classList.add("active");
-  if (nome === "lotes")   loadLotes();
+  if (nome === "lotes") loadLotes();
   if (nome === "pedidos") carregarPedidos();
-  if (nome === "blog")    carregarBlogAdmin();
+  if (nome === "blog") carregarBlogAdmin();
 
-  document.querySelectorAll(".sidebar .nav-item").forEach(a => a.classList.remove("ativo"));
+  document.querySelectorAll(".sidebar .nav-item").forEach((a) =>
+    a.classList.remove("ativo")
+  );
   const href = nome === "lotes" ? "/admin/painel" : `/admin/painel?tab=${nome}`;
-  const sidebarLink = document.querySelector(`.sidebar .nav-item[href="${href}"]`);
+  const sidebarLink = document.querySelector(
+    `.sidebar .nav-item[href="${href}"]`,
+  );
   if (sidebarLink) sidebarLink.classList.add("ativo");
 }
 
-document.getElementById("dataHoje").textContent = new Date().toLocaleDateString("pt-BR", {
-  weekday: "long", day: "numeric", month: "long", year: "numeric",
-});
+document.getElementById("dataHoje").textContent = new Date().toLocaleDateString(
+  "pt-BR",
+  {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  },
+);
 
 /* ════════════════════════════════════════
    TOAST
@@ -1267,19 +1517,28 @@ async function carregarBlogAdmin() {
     postsCache = await res.json();
 
     if (postsCache.length === 0) {
-      lista.innerHTML = '<p style="font-size:.875rem;color:#7A6E65;padding:1rem">Nenhum post publicado ainda.</p>';
+      lista.innerHTML =
+        '<p style="font-size:.875rem;color:#7A6E65;padding:1rem">Nenhum post publicado ainda.</p>';
       return;
     }
 
     lista.innerHTML = postsCache.map((p) => `
     <div class="blog-post-item" data-post-id="${p.id}">
-      ${p.imagemUrl
+      ${
+      p.imagemUrl
         ? `<img src="${p.imagemUrl}" alt="" class="blog-post-img"/>`
-        : '<div class="blog-post-img" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem">📝</div>'}
+        : '<div class="blog-post-img" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem">📝</div>'
+    }
       <div style="flex:1;min-width:0">
-        <div style="font-weight:700;color:#2C241B;font-size:.9rem;margin-bottom:.25rem">${escBlog(p.titulo)}</div>
-        <div style="font-size:.75rem;color:#7A6E65;margin-bottom:.5rem">Por ${escBlog(p.autorNome)} · ${p.dataPublicacao} · <span style="font-weight:600">${p.status}</span></div>
-        <div style="font-size:.85rem;color:#7A6E65;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${escBlog(p.conteudo)}</div>
+        <div style="font-weight:700;color:#2C241B;font-size:.9rem;margin-bottom:.25rem">${
+      escBlog(p.titulo)
+    }</div>
+        <div style="font-size:.75rem;color:#7A6E65;margin-bottom:.5rem">Por ${
+      escBlog(p.autorNome)
+    } · ${p.dataPublicacao} · <span style="font-weight:600">${p.status}</span></div>
+        <div style="font-size:.85rem;color:#7A6E65;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${
+      escBlog(p.conteudo)
+    }</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:.35rem;flex-shrink:0">
         <button onclick="blogAbrirEdicao(${p.id})" class="btn-editar-post" title="Editar post">
@@ -1291,19 +1550,24 @@ async function carregarBlogAdmin() {
       </div>
     </div>`).join("");
   } catch (e) {
-    lista.innerHTML = '<p style="font-size:.875rem;color:#722F37">Erro ao carregar posts.</p>';
+    lista.innerHTML =
+      '<p style="font-size:.875rem;color:#722F37">Erro ao carregar posts.</p>';
   }
 }
 
 function escBlog(str) {
-  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(
+    />/g,
+    "&gt;",
+  ).replace(/"/g, "&quot;");
 }
 
 function garantirModalEditarBlog() {
   if (document.getElementById("modalEditarBlog")) return;
   const overlay = document.createElement("div");
   overlay.id = "modalEditarBlog";
-  overlay.style.cssText = "display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center";
+  overlay.style.cssText =
+    "display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center";
   overlay.innerHTML = `
     <div style="background:#fff;border-radius:2px;width:min(560px,95vw);max-height:90vh;overflow-y:auto;padding:2rem;box-shadow:0 8px 32px rgba(0,0,0,.18);position:relative">
       <button onclick="fecharModalEditarBlog()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;cursor:pointer;font-size:1.1rem;color:#7A6E65">✕</button>
@@ -1334,13 +1598,15 @@ function garantirModalEditarBlog() {
         </div>
       </form>
     </div>`;
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) fecharModalEditarBlog(); });
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) fecharModalEditarBlog();
+  });
   document.body.appendChild(overlay);
 }
 
 function blogAbrirEdicao(id) {
   garantirModalEditarBlog();
-  const post = postsCache.find(p => p.id === id);
+  const post = postsCache.find((p) => p.id === id);
   if (!post) return;
   document.getElementById("editBlogId").value = id;
   document.getElementById("editBlogTitulo").value = post.titulo;
@@ -1368,12 +1634,19 @@ async function salvarEdicaoBlog(e) {
 
   const formData = new FormData();
   formData.append("titulo", document.getElementById("editBlogTitulo").value);
-  formData.append("conteudo", document.getElementById("editBlogConteudo").value);
+  formData.append(
+    "conteudo",
+    document.getElementById("editBlogConteudo").value,
+  );
   const img = document.getElementById("editBlogImagem").files[0];
   if (img) formData.append("imagem", img);
 
   try {
-    const res = await fetch("/api/blog/" + id, { method: "PUT", body: formData, credentials: "include" });
+    const res = await fetch("/api/blog/" + id, {
+      method: "PUT",
+      body: formData,
+      credentials: "include",
+    });
     if (!res.ok) throw new Error();
     fecharModalEditarBlog();
     mostrarToast("Post atualizado com sucesso!", "sucesso");
@@ -1393,13 +1666,19 @@ async function publicarPost(e) {
   const data = new FormData(form);
 
   try {
-    const res = await fetch("/api/blog", { method: "POST", body: data, credentials: "include" });
+    const res = await fetch("/api/blog", {
+      method: "POST",
+      body: data,
+      credentials: "include",
+    });
     if (!res.ok) throw new Error();
     msg.textContent = "Post publicado!";
     msg.style.display = "inline";
     form.reset();
     document.getElementById("blogImgPreview").innerHTML = "";
-    setTimeout(() => { msg.style.display = "none"; }, 3000);
+    setTimeout(() => {
+      msg.style.display = "none";
+    }, 3000);
     carregarBlogAdmin();
     mostrarToast("Post publicado com sucesso!", "sucesso");
   } catch (_) {
@@ -1408,16 +1687,16 @@ async function publicarPost(e) {
 }
 
 function blogCancelarDel(naoBtn) {
-  const item = naoBtn.closest('.blog-post-item');
-  naoBtn.closest('.blog-confirm-del').remove();
-  item.querySelector('.btn-remover-post').style.display = '';
+  const item = naoBtn.closest(".blog-post-item");
+  naoBtn.closest(".blog-confirm-del").remove();
+  item.querySelector(".btn-remover-post").style.display = "";
 }
 
 function blogConfirmarDel(id, btn) {
-  const item = btn.closest('.blog-post-item');
-  btn.style.display = 'none';
-  const div = document.createElement('div');
-  div.className = 'blog-confirm-del';
+  const item = btn.closest(".blog-post-item");
+  btn.style.display = "none";
+  const div = document.createElement("div");
+  div.className = "blog-confirm-del";
   div.innerHTML = `
     <span>Remover?</span>
     <button class="blog-confirm-sim" onclick="deletarPost(${id})">Sim</button>
@@ -1428,7 +1707,10 @@ function blogConfirmarDel(id, btn) {
 
 async function deletarPost(id) {
   try {
-    const res = await fetch("/api/blog/" + id, { method: "DELETE", credentials: "include" });
+    const res = await fetch("/api/blog/" + id, {
+      method: "DELETE",
+      credentials: "include",
+    });
     if (!res.ok) throw new Error();
     mostrarToast("Post removido.", "sucesso");
     carregarBlogAdmin();
@@ -1448,7 +1730,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const file = imgInput.files[0];
       if (file) {
         const url = URL.createObjectURL(file);
-        preview.innerHTML = `<img src="${url}" style="margin-top:.5rem;max-height:160px;border:1px solid rgba(44,36,27,.15)"/>`;
+        preview.innerHTML =
+          `<img src="${url}" style="margin-top:.5rem;max-height:160px;border:1px solid rgba(44,36,27,.15)"/>`;
       } else {
         preview.innerHTML = "";
       }

@@ -14,7 +14,8 @@
 
     <body>
         <div class="breadcrumb-wrap">
-            <a href="/clientes/login" class="btn-voltar">← Voltar para o login</a>
+            <a href="/clientes/login" class="btn-voltar"
+            >← Voltar para o login</a>
         </div>
 
         <div class="container">
@@ -48,32 +49,90 @@
                             required
                             autocomplete="new-password"
                         >
-                        <button type="button" class="btn-gerar-senha" title="Gerar senha forte"
-                                onclick="gerarEPreencher('novaSenha','confirmarSenha','btn-copiar-reset')">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/>
-                                <path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/>
+                        <button
+                            type="button"
+                            class="btn-gerar-senha"
+                            title="Gerar senha forte"
+                            onclick="gerarEPreencher('novaSenha','confirmarSenha','btn-copiar-reset')"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"
+                                />
+                                <path d="m14 7 3 3" />
+                                <path d="M5 6v4" />
+                                <path d="M19 14v4" />
+                                <path d="M10 2v2" />
+                                <path d="M7 8H3" />
+                                <path d="M21 16h-4" />
+                                <path d="M11 3H9" />
                             </svg>
                         </button>
-                        <button type="button" class="btn-toggle-senha" aria-label="Mostrar senha" onclick="toggleSenha('novaSenha', this)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                        <button
+                            type="button"
+                            class="btn-toggle-senha"
+                            aria-label="Mostrar senha"
+                            onclick="toggleSenha('novaSenha', this)"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                                />
+                                <circle cx="12" cy="12" r="3" />
                             </svg>
                         </button>
                     </div>
-                    <div class="copiar-container" id="copiar-reset-container" style="display:none;">
-                        <button type="button" id="btn-copiar-reset" class="btn-copiar-senha"
-                                onclick="copiarSenha('btn-copiar-reset')">Copiar</button>
+                    <div
+                        class="copiar-container"
+                        id="copiar-reset-container"
+                        style="display: none"
+                    >
+                        <button
+                            type="button"
+                            id="btn-copiar-reset"
+                            class="btn-copiar-senha"
+                            onclick="copiarSenha('btn-copiar-reset')"
+                        >
+                            Copiar
+                        </button>
                     </div>
-                    <ul id="senha-requisitos" style="display:none; list-style:none; padding:6px 0 0; margin:0; font-size:0.82rem; font-family:'DM Sans',sans-serif">
+                    <ul
+                        id="senha-requisitos"
+                        style="display: none; list-style: none; padding: 6px 0 0; margin: 0; font-size: 0.82rem; font-family: 'DM Sans', sans-serif"
+                    >
                         <li id="req-tamanho">✗ 8 a 20 caracteres</li>
                         <li id="req-maiuscula">✗ Uma letra maiúscula (A-Z)</li>
                         <li id="req-minuscula">✗ Uma letra minúscula (a-z)</li>
                         <li id="req-numero">✗ Um número (0-9)</li>
-                        <li id="req-especial">✗ Um caractere especial (@#$%^&amp;+=!)</li>
+                        <li id="req-especial">
+                            ✗ Um caractere especial (@#$%^&amp;+=!)
+                        </li>
                         <li id="req-espaco">✗ Sem espaços</li>
                     </ul>
-                    <div id="forca-nova-senha-container" style="display:none; margin-top:8px;">
+                    <div
+                        id="forca-nova-senha-container"
+                        style="display: none; margin-top: 8px"
+                    >
                         <div class="forca-segmentos">
                             <div class="forca-seg"></div>
                             <div class="forca-seg"></div>
@@ -96,37 +155,67 @@
                             required
                             autocomplete="new-password"
                         >
-                        <button type="button" class="btn-toggle-senha" aria-label="Mostrar confirmar senha" onclick="toggleSenha('confirmarSenha', this)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                        <button
+                            type="button"
+                            class="btn-toggle-senha"
+                            aria-label="Mostrar confirmar senha"
+                            onclick="toggleSenha('confirmarSenha', this)"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                                />
+                                <circle cx="12" cy="12" r="3" />
                             </svg>
                         </button>
                     </div>
-                    <div id="msg-confirmar-reset" style="font-size:0.82rem; font-family:'DM Sans',sans-serif; margin-top:4px; min-height:1.2em; font-weight:600;"></div>
+                    <div
+                        id="msg-confirmar-reset"
+                        style="font-size: 0.82rem; font-family: 'DM Sans', sans-serif; margin-top: 4px; min-height: 1.2em; font-weight: 600"
+                    >
+                    </div>
                 </div>
 
                 <div class="form-actions-main">
-                    <button type="submit" class="btn btn-primary" id="btn-redefinir">
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="btn-redefinir"
+                    >
                         Redefinir senha
                     </button>
                 </div>
             </form>
 
             <div class="account-links">
-                <a th:href="@{/clientes/login}" class="btn-link-secondary">Voltar ao login</a>
+                <a th:href="@{/clientes/login}" class="btn-link-secondary"
+                >Voltar ao login</a>
             </div>
         </div>
 
         <script th:src="@{/js/cliente/script.js}"></script>
         <script>
             // Guard de submit: bloqueia envio se o botão ainda estiver desabilitado (ex: JS parcialmente falhou)
-            document.addEventListener('DOMContentLoaded', function () {
-                const form = document.getElementById('form-reset');
+            document.addEventListener("DOMContentLoaded", function () {
+                const form = document.getElementById("form-reset");
                 if (form) {
-                    form.addEventListener('submit', function (e) {
-                        const novaSenha = document.getElementById('novaSenha');
-                        const confirmar = document.getElementById('confirmarSenha');
-                        if (novaSenha && confirmar && novaSenha.value !== confirmar.value) {
+                    form.addEventListener("submit", function (e) {
+                        const novaSenha = document.getElementById("novaSenha");
+                        const confirmar = document.getElementById("confirmarSenha");
+                        if (
+                            novaSenha && confirmar &&
+                            novaSenha.value !== confirmar.value
+                        ) {
                             e.preventDefault();
                             confirmar.focus();
                         }

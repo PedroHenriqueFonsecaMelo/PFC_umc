@@ -22,8 +22,8 @@ import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.negocios.PedidoRepository;
 import umc.exs.repository.negocios.SolicitacaoCancelamentoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
-import umc.exs.service.email.EmailHtmlBuilder;
-import umc.exs.service.email.EmailService;
+import umc.exs.service.email.facade.EmailFacade;
+import umc.exs.service.email.html.EmailHtmlBuilder;
 import umc.exs.service.log.LogAuditoriaService;
 import umc.exs.service.notificacao.NotificacaoService;
 
@@ -37,7 +37,7 @@ public class CancelamentoService {
     private final LivroRepository livroRepository;
     private final ClienteRepository clienteRepository;
     private final NotificacaoService notificacaoService;
-    private final EmailService emailService;
+    private final EmailFacade emailFacade;
     private final LogAuditoriaService logAuditoria;
 
     // ──────────────────────────────────────────────────────────────────────
@@ -179,7 +179,7 @@ public class CancelamentoService {
 
         // E-mail ao cliente
         try {
-            emailService.enviarHtml(
+            emailFacade.sendHtmlSafe(
                     cliente.getEmail(),
                     "Cancelamento aprovado — Bibliotroca",
                     EmailHtmlBuilder.cancelamentoAprovado(
@@ -228,7 +228,7 @@ public class CancelamentoService {
 
         // E-mail ao cliente
         try {
-            emailService.enviarHtml(
+            emailFacade.sendHtmlSafe(
                     cliente.getEmail(),
                     "Cancelamento não aprovado — Bibliotroca",
                     EmailHtmlBuilder.cancelamentoRecusado(
@@ -274,10 +274,10 @@ public class CancelamentoService {
             String justificativa) {
 
         Pedido pedido = pedidoRepository.findById(pedidoId)
-            .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
+                .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
 
         if (pedido.getStatusEnvio() == StatusEnvio.CANCELADO ||
-            pedido.getStatusEnvio() == StatusEnvio.ENTREGUE) {
+                pedido.getStatusEnvio() == StatusEnvio.ENTREGUE) {
             throw new IllegalArgumentException("Este pedido não pode ser cancelado.");
         }
 
@@ -301,41 +301,40 @@ public class CancelamentoService {
 
         // Cria registro de cancelamento
         SolicitacaoCancelamento registro = SolicitacaoCancelamento.builder()
-            .pedido(pedido)
-            .cliente(comprador)
-            .motivoCategoria(motivo)
-            .motivoDescricao(justificativa)
-            .status(StatusSolicitacao.APROVADO)
-            .comentarioAdmin("Cancelamento realizado pelo administrador.")
-            .dataResposta(LocalDateTime.now())
-            .build();
+                .pedido(pedido)
+                .cliente(comprador)
+                .motivoCategoria(motivo)
+                .motivoDescricao(justificativa)
+                .status(StatusSolicitacao.APROVADO)
+                .comentarioAdmin("Cancelamento realizado pelo administrador.")
+                .dataResposta(LocalDateTime.now())
+                .build();
         cancelamentoRepository.save(registro);
 
         logAuditoria.registrarLog("CANCELAMENTO_ADMIN", comprador.getId(), comprador.getEmail(),
-            String.format("Pedido #%d cancelado pelo admin — T$ %.2f estornados. Motivo: %s",
-                pedidoId, preco, motivo.getDescricao()));
+                String.format("Pedido #%d cancelado pelo admin — T$ %.2f estornados. Motivo: %s",
+                        pedidoId, preco, motivo.getDescricao()));
 
         // Envia email ao comprador
         try {
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
             String dataCompra = pedido.getDataCompra() != null
-                ? pedido.getDataCompra().format(fmt) : "—";
+                    ? pedido.getDataCompra().format(fmt)
+                    : "—";
             String dataCancelamento = LocalDateTime.now().format(fmt);
 
-            emailService.enviarHtml(
-                comprador.getEmail(),
-                "Pedido cancelado — Bibliotroca",
-                EmailHtmlBuilder.cancelamentoAdmin(
-                    comprador.getNome(),
-                    pedidoId,
-                    pedido.getTituloLivro(),
-                    preco,
-                    dataCompra,
-                    dataCancelamento,
-                    motivo.getDescricao(),
-                    justificativa
-                )
-            );
+            emailFacade.sendHtmlSafe(
+                    comprador.getEmail(),
+                    "Pedido cancelado — Bibliotroca",
+                    EmailHtmlBuilder.cancelamentoAdmin(
+                            comprador.getNome(),
+                            pedidoId,
+                            pedido.getTituloLivro(),
+                            preco,
+                            dataCompra,
+                            dataCancelamento,
+                            motivo.getDescricao(),
+                            justificativa));
         } catch (Exception e) {
             log.warn("Falha ao enviar email de cancelamento admin: {}", e.getMessage());
         }
@@ -343,22 +342,20 @@ public class CancelamentoService {
         // Notificação no sininho
         try {
             notificacaoService.criarNotificacaoDashboard(
-                comprador,
-                "Seu pedido #" + pedidoId + " (" + pedido.getTituloLivro() +
-                ") foi cancelado pelo administrador. Motivo: " + motivo.getDescricao() +
-                ". T$ " + String.format("%.2f", preco) + " estornados.",
-                "/clientes/homepage?aba=cancelamentos"
-            );
+                    comprador,
+                    "Seu pedido #" + pedidoId + " (" + pedido.getTituloLivro() +
+                            ") foi cancelado pelo administrador. Motivo: " + motivo.getDescricao() +
+                            ". T$ " + String.format("%.2f", preco) + " estornados.",
+                    "/clientes/homepage?aba=cancelamentos");
         } catch (Exception e) {
             log.warn("Falha ao criar notificacao: {}", e.getMessage());
         }
 
         return Map.of(
-            "cancelado", true,
-            "pedidoId", pedidoId,
-            "precoLivro", preco,
-            "saldoAposEstorno", comprador.getSaldoTokens()
-        );
+                "cancelado", true,
+                "pedidoId", pedidoId,
+                "precoLivro", preco,
+                "saldoAposEstorno", comprador.getSaldoTokens());
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -368,28 +365,29 @@ public class CancelamentoService {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> listarCancelamentosCliente(String email) {
         Cliente cliente = clienteRepository.findByEmail(email)
-            .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado."));
+                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado."));
 
         return cancelamentoRepository.findByClienteIdOrderByDataSolicitacaoDesc(cliente.getId())
-            .stream()
-            .map(c -> {
-                Map<String, Object> m = new LinkedHashMap<>();
-                m.put("id", c.getId());
-                m.put("pedidoId", c.getPedido().getId());
-                m.put("tituloLivro", c.getPedido().getTituloLivro());
-                m.put("precoLivro", c.getPedido().getPrecoLivro());
-                m.put("motivoCategoria", c.getMotivoCategoria() != null
-                    ? c.getMotivoCategoria().getDescricao() : "—");
-                m.put("motivoDescricao", c.getMotivoDescricao());
-                m.put("status", c.getStatus() != null ? c.getStatus().getDescricao() : "—");
-                m.put("comentarioAdmin", c.getComentarioAdmin());
-                m.put("dataSolicitacao", c.getDataSolicitacao());
-                m.put("dataResposta", c.getDataResposta());
-                m.put("canceladoPeloAdmin",
-                    c.getComentarioAdmin() != null &&
-                    c.getComentarioAdmin().contains("administrador"));
-                return m;
-            })
-            .collect(Collectors.toList());
+                .stream()
+                .map(c -> {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("id", c.getId());
+                    m.put("pedidoId", c.getPedido().getId());
+                    m.put("tituloLivro", c.getPedido().getTituloLivro());
+                    m.put("precoLivro", c.getPedido().getPrecoLivro());
+                    m.put("motivoCategoria", c.getMotivoCategoria() != null
+                            ? c.getMotivoCategoria().getDescricao()
+                            : "—");
+                    m.put("motivoDescricao", c.getMotivoDescricao());
+                    m.put("status", c.getStatus() != null ? c.getStatus().getDescricao() : "—");
+                    m.put("comentarioAdmin", c.getComentarioAdmin());
+                    m.put("dataSolicitacao", c.getDataSolicitacao());
+                    m.put("dataResposta", c.getDataResposta());
+                    m.put("canceladoPeloAdmin",
+                            c.getComentarioAdmin() != null &&
+                                    c.getComentarioAdmin().contains("administrador"));
+                    return m;
+                })
+                .collect(Collectors.toList());
     }
 }

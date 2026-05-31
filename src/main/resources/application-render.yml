@@ -1,12 +1,22 @@
 # ===============================
-# 📦 Application Configuration
+# 📦 Application Configuration (Render)
 # ===============================
 spring:
   application:
     name: PFC_Projeto
 
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    cache: false
+
   # ===============================
-  # 🗄️ Database Configuration (RENDER/PostgreSQL)
+  # 🗄️ Database (Render PostgreSQL)
   # ===============================
   datasource:
     url: "${DATABASE_URL_JDBC}"
@@ -16,33 +26,55 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-    # Desabilita open-in-view — evita overhead e LazyLoadingException indesejado
     open-in-view: false
-    # ⚠️ SEGURANÇA: Manter false em produção para não expor dados nos logs
     show-sql: false
 
   # ===============================
-  # 📧 Email Configuration
+  # 📧 Email
   # ===============================
   mail:
     host: "${MAIL_HOST}"
     port: "${MAIL_PORT}"
     username: "${MAIL_USERNAME}"
     password: "${MAIL_PASSWORD}"
+    from: "${MAIL_FROM}"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: smtp.gmail.com
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+
+
 
 # ===============================
-# 🌐 Server Settings
+# 🌐 Server (Render)
 # ===============================
 server:
-  servlet:
-    context-path: /
-  # Render define a porta AUTOMATICAMENTE via variável de ambiente PORT
-  port: "${PORT:8080}"
+  port: "${PORT}"
+
+  error:
+    include-stacktrace: never
+    include-message: never
+    whitelabel:
+      enabled: false
+    path: /error
 
 # ===============================
-# 🔐 JWT Security Configuration
+# 🔐 JWT
 # ===============================
 jwt:
   secret: "${JWT_SECRET}"
@@ -51,19 +83,44 @@ jwt:
     name: token
 
 # ===============================
-# 🚀 App Metadata
+# 🌍 App config
 # ===============================
 app:
   base-url: "${APP_BASE_URL}"
+  allowed-origin: "${APP_ALLOWED_ORIGIN}"
+  seed:
+    mode: stress
 
 # ===============================
-# 🧾 Logging Configuration
+# 💠 Gamificação — XP por ação
+# ===============================
+gamificacao:
+  xp:
+    livro-aprovado: 50
+    compra: 30
+    avaliacao: 10
+    cupom-threshold: 500
+
+# ===============================
+# 🧾 Mercado Pago
+# ===============================
+mercadopago:
+  access-token: "${MERCADOPAGO_ACCESS_TOKEN}"
+
+# ===============================
+# 🔎 Google Books
+# ===============================
+google:
+  books:
+    api-key: "${GOOGLE_BOOKS_API_KEY}"
+
+# ===============================
+# 🧾 Logging
 # ===============================
 logging:
   file:
     name: "./logs/application.log"
   level:
     root: WARN
-    # Configuração compacta para evitar erros de bloco
     umc:
       exs: INFO

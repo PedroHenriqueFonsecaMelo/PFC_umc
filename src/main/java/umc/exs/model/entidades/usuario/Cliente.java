@@ -101,12 +101,16 @@ public class Cliente {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    /** Verificação de e-mail — false até o usuário clicar no link de confirmação. */
+    /**
+     * Verificação de e-mail — false até o usuário clicar no link de confirmação.
+     */
     @Column(nullable = false)
     @Builder.Default
     private boolean emailVerificado = false;
 
-    /** ID do endereço padrão selecionado para entrega. Null se nenhum selecionado. */
+    /**
+     * ID do endereço padrão selecionado para entrega. Null se nenhum selecionado.
+     */
     @Column
     private Long enderecoSelecionadoId;
 

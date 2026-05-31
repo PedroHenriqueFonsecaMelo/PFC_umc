@@ -21,7 +21,6 @@ public interface TopicoForumRepository extends JpaRepository<TopicoForum, Long> 
         // LazyInitializationException
         // com open-in-view=false
 
-        @SuppressWarnings("null")
         @Override
         @EntityGraph(attributePaths = { "autor" })
         Page<TopicoForum> findAll(Pageable pageable);

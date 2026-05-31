@@ -47,7 +47,9 @@
   overflow-x: auto;
   scrollbar-width: none;
 }
-.cn-links::-webkit-scrollbar { display: none; }
+.cn-links::-webkit-scrollbar {
+  display: none;
+}
 
 /* ── Botões ── */
 .cn-btn {
@@ -97,12 +99,26 @@
 
 /* ── Responsivo ── */
 @media (max-width: 860px) {
-  .cn-brand  { font-size: 1.35rem; margin-right: 0.4rem; }
-  .cn-btn    { font-size: 0.61rem; padding: 0.22rem 0.5rem; }
-  .cn-saldo  { font-size: 0.72rem; padding: 0.2rem 0.5rem; }
+  .cn-brand {
+    font-size: 1.35rem;
+    margin-right: 0.4rem;
+  }
+  .cn-btn {
+    font-size: 0.61rem;
+    padding: 0.22rem 0.5rem;
+  }
+  .cn-saldo {
+    font-size: 0.72rem;
+    padding: 0.2rem 0.5rem;
+  }
 }
 
 @media (max-width: 560px) {
-  .cn-brand  { font-size: 1.2rem; }
-  .client-nav { padding: 0 4vw; gap: 0.3rem; }
+  .cn-brand {
+    font-size: 1.2rem;
+  }
+  .client-nav {
+    padding: 0 4vw;
+    gap: 0.3rem;
+  }
 }

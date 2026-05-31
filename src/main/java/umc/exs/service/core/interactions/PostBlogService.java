@@ -80,7 +80,6 @@ public class PostBlogService {
         return postBlogRepository.save(post);
     }
 
-    @SuppressWarnings({"null", "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"})
     public PostBlog criarPost(String titulo, String conteudo, String autorNome, MultipartFile imagem)
             throws IOException {
         String imagemUrl = null;
@@ -110,13 +109,14 @@ public class PostBlogService {
         return postBlogRepository.save(post);
     }
 
-    @SuppressWarnings({"null", "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"})
     @Transactional
     public PostBlog editarPost(Long id, String titulo, String conteudo, MultipartFile imagem) throws IOException {
         PostBlog post = postBlogRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException(POST_N_ENCONTRADO));
-        if (titulo != null && !titulo.isBlank()) post.setTitulo(titulo);
-        if (conteudo != null && !conteudo.isBlank()) post.setConteudo(conteudo);
+        if (titulo != null && !titulo.isBlank())
+            post.setTitulo(titulo);
+        if (conteudo != null && !conteudo.isBlank())
+            post.setConteudo(conteudo);
         if (imagem != null && !imagem.isEmpty()) {
             String ext = "";
             String original = imagem.getOriginalFilename();
@@ -132,12 +132,10 @@ public class PostBlogService {
         return postBlogRepository.save(post);
     }
 
-    @SuppressWarnings("null")
     public void deletarPost(Long id) {
         postBlogRepository.deleteById(id);
     }
 
-    @SuppressWarnings("null")
     @Transactional
     public Map<String, Object> toggleCurtir(Long postId, boolean descurtir) {
         PostBlog post = postBlogRepository.findById(postId)
@@ -151,7 +149,6 @@ public class PostBlogService {
         return Map.of("curtidas", total, "curtiu", !descurtir);
     }
 
-    @SuppressWarnings("null")
     @Transactional
     public void deletarComentario(Long comentarioId, String emailUsuario) {
         ComentarioBlog comentario = comentarioRepository.findById(comentarioId)
@@ -166,7 +163,6 @@ public class PostBlogService {
         comentarioRepository.deleteById(comentarioId);
     }
 
-    @SuppressWarnings("null")
     @Transactional
     public ComentarioBlog comentar(Long postId, String autorNome, String conteudo) {
         PostBlog post = postBlogRepository.findById(postId)

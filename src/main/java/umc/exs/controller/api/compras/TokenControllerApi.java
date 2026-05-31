@@ -21,7 +21,7 @@ import umc.exs.design.strategy.impl.PagamentoPixStrategy;
 import umc.exs.dto.request.compra.CompraTokensRequest;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cliente;
-import umc.exs.service.core.cliente.ClienteService;
+import umc.exs.service.cliente.ClienteService;
 import umc.exs.service.log.LogAuditoriaService;
 
 @Slf4j
@@ -85,8 +85,7 @@ public class TokenControllerApi {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        List<Transacao> historico =
-                clienteService.listarHistoricoTransacoes(userDetails.getUsername());
+        List<Transacao> historico = clienteService.listarHistoricoTransacoes(userDetails.getUsername());
 
         return ResponseEntity.ok(historico);
     }
@@ -128,6 +127,7 @@ public class TokenControllerApi {
                 return ResponseEntity.ok().build();
             }
 
+            @SuppressWarnings("unchecked")
             Map<String, Object> data = (Map<String, Object>) body.get("data");
             String paymentId = String.valueOf(data.get("id"));
 

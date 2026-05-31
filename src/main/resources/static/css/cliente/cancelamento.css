@@ -2,7 +2,11 @@
    cancelamento.css — Fluxo de Cancelamento · Bibliotroca
    ================================================================ */
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
 :root {
     --accent: #722f37;
@@ -10,7 +14,7 @@
     --ink: #2c241b;
     --muted: #7a6e65;
     --paper: #f9f6f0;
-    --border: rgba(44,36,27,.15);
+    --border: rgba(44, 36, 27, 0.15);
     --forest: #2e7d32;
 }
 
@@ -32,8 +36,8 @@ body {
 .cancel-breadcrumb {
     display: flex;
     align-items: center;
-    gap: .5rem;
-    font-size: .8rem;
+    gap: 0.5rem;
+    font-size: 0.8rem;
     color: var(--muted);
     margin-bottom: 1.75rem;
     flex-wrap: wrap;
@@ -42,39 +46,62 @@ body {
     color: var(--accent);
     text-decoration: none;
     font-weight: 500;
-    transition: opacity .2s;
+    transition: opacity 0.2s;
 }
-.cancel-breadcrumb a:hover { opacity: .75; }
-.bc-sep { font-size: .65rem; color: var(--muted); }
-.bc-current { color: var(--ink); font-weight: 600; }
+.cancel-breadcrumb a:hover {
+    opacity: 0.75;
+}
+.bc-sep {
+    font-size: 0.65rem;
+    color: var(--muted);
+}
+.bc-current {
+    color: var(--ink);
+    font-weight: 600;
+}
 
 /* ── LOADING / ERROR ─────────────────────────────────────────── */
 .cancel-loading, .cancel-error {
     text-align: center;
     padding: 3rem 1rem;
     color: var(--muted);
-    font-size: .95rem;
+    font-size: 0.95rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: .75rem;
+    gap: 0.75rem;
 }
-.cancel-error { color: var(--accent); }
-.cancel-error i { font-size: 2rem; }
-.cancel-error p { font-size: .95rem; }
+.cancel-error {
+    color: var(--accent);
+}
+.cancel-error i {
+    font-size: 2rem;
+}
+.cancel-error p {
+    font-size: 0.95rem;
+}
 
 /* ── CONTAINER ────────────────────────────────────────────────── */
-.cancel-container { display: flex; flex-direction: column; gap: 1.25rem; }
+.cancel-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
 
 /* ── HEADER ───────────────────────────────────────────────────── */
-.cancel-header { padding-bottom: .25rem; }
+.cancel-header {
+    padding-bottom: 0.25rem;
+}
 .cancel-title {
     font-family: "Playfair Display", Georgia, serif;
     font-size: 1.6rem;
     color: var(--accent);
-    margin-bottom: .35rem;
+    margin-bottom: 0.35rem;
 }
-.cancel-subtitle { font-size: .88rem; color: var(--muted); }
+.cancel-subtitle {
+    font-size: 0.88rem;
+    color: var(--muted);
+}
 
 /* ── CARD ─────────────────────────────────────────────────────── */
 .cancel-card {
@@ -82,7 +109,7 @@ body {
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 1.5rem;
-    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
 /* ── PEDIDO RESUMO ───────────────────────────────────────────── */
@@ -97,31 +124,33 @@ body {
     object-fit: cover;
     border-radius: 5px;
     flex-shrink: 0;
-    box-shadow: 0 2px 6px rgba(0,0,0,.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
-.cancel-pedido-info { flex: 1; }
+.cancel-pedido-info {
+    flex: 1;
+}
 .cancel-pedido-num {
-    font-size: .75rem;
+    font-size: 0.75rem;
     color: var(--muted);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: .04em;
-    margin-bottom: .3rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.3rem;
 }
 .cancel-pedido-titulo {
     font-family: "Playfair Display", Georgia, serif;
     font-size: 1.05rem;
     font-weight: 700;
     color: var(--ink);
-    margin-bottom: .2rem;
+    margin-bottom: 0.2rem;
 }
 .cancel-pedido-autor {
-    font-size: .82rem;
+    font-size: 0.82rem;
     color: var(--muted);
-    margin-bottom: .4rem;
+    margin-bottom: 0.4rem;
 }
 .cancel-pedido-preco {
-    font-size: .95rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: var(--accent);
 }
@@ -133,51 +162,53 @@ body {
     color: var(--ink);
     margin-bottom: 1.25rem;
 }
-.cancel-form-group { margin-bottom: 1.1rem; }
+.cancel-form-group {
+    margin-bottom: 1.1rem;
+}
 .cancel-form-group label {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: .82rem;
+    font-size: 0.82rem;
     font-weight: 600;
     color: var(--ink);
-    margin-bottom: .45rem;
+    margin-bottom: 0.45rem;
 }
 .cancel-char-count {
-    font-size: .75rem;
+    font-size: 0.75rem;
     font-weight: 400;
     color: var(--muted);
 }
 .cancel-form-group select,
 .cancel-form-group textarea {
     width: 100%;
-    padding: .65rem .85rem;
+    padding: 0.65rem 0.85rem;
     border: 1.5px solid var(--border);
     border-radius: 7px;
-    font-size: .88rem;
+    font-size: 0.88rem;
     color: var(--ink);
     font-family: "DM Sans", sans-serif;
     background: #fff;
-    transition: border-color .2s;
+    transition: border-color 0.2s;
     resize: vertical;
 }
 .cancel-form-group select:focus,
 .cancel-form-group textarea:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(114,47,55,.08);
+    box-shadow: 0 0 0 3px rgba(114, 47, 55, 0.08);
 }
 
 /* ── FEEDBACK ────────────────────────────────────────────────── */
 .cancel-feedback {
-    padding: .65rem .9rem;
+    padding: 0.65rem 0.9rem;
     border-radius: 7px;
-    font-size: .83rem;
+    font-size: 0.83rem;
     font-weight: 500;
     margin-bottom: 1rem;
 }
 .cancel-feedback-erro {
-    background: rgba(114,47,55,.07);
+    background: rgba(114, 47, 55, 0.07);
     border-left: 3px solid var(--accent);
     color: var(--accent);
 }
@@ -185,18 +216,22 @@ body {
 /* ── AVISO ───────────────────────────────────────────────────── */
 .cancel-aviso {
     display: flex;
-    gap: .6rem;
+    gap: 0.6rem;
     align-items: flex-start;
     background: #f9f6f0;
     border-radius: 7px;
-    padding: .75rem 1rem;
-    font-size: .8rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
     color: var(--muted);
     line-height: 1.55;
     border: 1px solid var(--border);
-    margin-top: .5rem;
+    margin-top: 0.5rem;
 }
-.cancel-aviso i { color: var(--accent); flex-shrink: 0; margin-top: .15rem; }
+.cancel-aviso i {
+    color: var(--accent);
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+}
 
 /* ── AÇÕES ───────────────────────────────────────────────────── */
 .cancel-actions {
@@ -209,39 +244,52 @@ body {
 .cancel-btn-back {
     display: inline-flex;
     align-items: center;
-    gap: .45rem;
-    padding: .65rem 1.25rem;
+    gap: 0.45rem;
+    padding: 0.65rem 1.25rem;
     border: 1.5px solid var(--border);
     border-radius: 7px;
     color: var(--muted);
-    font-size: .88rem;
+    font-size: 0.88rem;
     font-weight: 500;
     text-decoration: none;
     background: #fff;
-    transition: border-color .2s, color .2s;
+    transition: border-color 0.2s, color 0.2s;
 }
-.cancel-btn-back:hover { border-color: var(--accent); color: var(--accent); }
+.cancel-btn-back:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
 
 .cancel-btn-submit {
     display: inline-flex;
     align-items: center;
-    gap: .45rem;
-    padding: .7rem 1.75rem;
+    gap: 0.45rem;
+    padding: 0.7rem 1.75rem;
     background: var(--accent);
     color: #fff;
     border: none;
     border-radius: 7px;
-    font-size: .9rem;
+    font-size: 0.9rem;
     font-weight: 600;
     font-family: "DM Sans", sans-serif;
     cursor: pointer;
-    transition: opacity .2s;
-    letter-spacing: .02em;
+    transition: opacity 0.2s;
+    letter-spacing: 0.02em;
 }
-.cancel-btn-submit:hover { opacity: .87; }
-.cancel-btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+.cancel-btn-submit:hover {
+    opacity: 0.87;
+}
+.cancel-btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
 @media (max-width: 480px) {
-    .cancel-actions { flex-direction: column-reverse; }
-    .cancel-btn-submit, .cancel-btn-back { width: 100%; justify-content: center; }
+    .cancel-actions {
+        flex-direction: column-reverse;
+    }
+    .cancel-btn-submit, .cancel-btn-back {
+        width: 100%;
+        justify-content: center;
+    }
 }

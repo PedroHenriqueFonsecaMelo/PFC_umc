@@ -36,7 +36,6 @@ public class CupomService {
     // ───────────────────────── XP (Cupons Gerados por Gamificação)
     // ─────────────────────────
 
-    @SuppressWarnings("null")
     @Transactional
     public Cupom gerarCupomPorPontuacao(@NonNull Long clienteId) {
         Cliente cliente = clienteRepository.findById(clienteId)
@@ -56,7 +55,6 @@ public class CupomService {
     // ───────────────────────── ADMIN (Cupons Promocionais Estilo iFood)
     // ─────────────────────────
 
-    @SuppressWarnings("null")
     @Transactional
     public Cupom criarCupom(CriarCupomRequest dto, LocalDateTime dataValidade) {
         // Validações básicas
@@ -100,7 +98,7 @@ public class CupomService {
         cupom.setUsado(true);
         cupomRepository.save(cupom);
 
-        log.info("📢 Cupom ID {} foi invalidado manualmente.", id);
+        log.info(" Cupom ID {} foi invalidado manualmente.", id);
     }
 
     // ───────────────────────── VALIDAÇÃO E APLICAÇÃO ─────────────────────────
@@ -135,7 +133,7 @@ public class CupomService {
      * Aplica o cupom ao total do carrinho, registrando o uso único.
      * Retorna o total com desconto aplicado.
      */
-    @SuppressWarnings("null")
+
     @Transactional
     public double aplicarCupomCarrinho(String codigo, Cliente cliente, double totalOriginal) {
         Cupom cupom = cupomRepository.findByCodigo(codigo.toUpperCase())

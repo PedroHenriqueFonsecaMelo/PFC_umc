@@ -23,8 +23,7 @@ import java.time.LocalDate;
 public class SignupRequest {
 
     @NotBlank(message = "O CPF é obrigatório.")
-    @Pattern(regexp = "\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}",
-             message = "CPF inválido. Use 000.000.000-00 ou apenas números.")
+    @Pattern(regexp = "\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}", message = "CPF inválido. Use 000.000.000-00 ou apenas números.")
     private String cpf;
 
     @NotBlank(message = "O e-mail é obrigatório.")
@@ -54,7 +53,8 @@ public class SignupRequest {
 
     @AssertTrue(message = "As senhas não coincidem")
     public boolean isSenhaValida() {
-        if (senha == null || confirmPassword == null) return false;
+        if (senha == null || confirmPassword == null)
+            return false;
         return senha.equals(confirmPassword);
     }
 }

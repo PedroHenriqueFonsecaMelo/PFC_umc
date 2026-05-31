@@ -8,8 +8,7 @@ import umc.exs.model.entidades.usuario.Cliente;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "lista_desejos",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"cliente_id", "isbn"}))
+@Table(name = "lista_desejos", uniqueConstraints = @UniqueConstraint(columnNames = { "cliente_id", "isbn" }))
 @DTO
 @Data
 @Builder
@@ -31,7 +30,10 @@ public class ListaDesejos {
     @Column(nullable = false)
     private LocalDateTime dataAdicao;
 
-    /** Quando ativo, compra o livro automaticamente se o cliente tiver saldo ao receber notificação. */
+    /**
+     * Quando ativo, compra o livro automaticamente se o cliente tiver saldo ao
+     * receber notificação.
+     */
     @Builder.Default
     @Column(nullable = false)
     private boolean preReservaAtiva = false;

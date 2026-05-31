@@ -3,61 +3,76 @@
    ================================================================ */
 
 let _todos = [];
-let _filtroAtivo = 'todos';
+let _filtroAtivo = "todos";
 
 /* ── UTILS ──────────────────────────────────────────────────── */
 function fmtData(iso) {
-    if (!iso) return '—';
+    if (!iso) return "—";
     const d = new Date(iso);
-    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+    });
 }
 
 function fmtTokens(v) {
-    if (v == null) return '0';
-    return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    if (v == null) return "0";
+    return Number(v).toLocaleString("pt-BR", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    });
 }
 
 function inicial(nome) {
-    if (!nome) return '?';
+    if (!nome) return "?";
     return nome.trim().charAt(0).toUpperCase();
 }
 
 function mostrarToast(cls, msg) {
-    const t = document.getElementById('toast');
-    t.className = 'toast ' + cls;
+    const t = document.getElementById("toast");
+    t.className = "toast " + cls;
     t.textContent = msg;
-    t.style.display = 'block';
-    setTimeout(() => { t.style.display = 'none'; }, 4000);
+    t.style.display = "block";
+    setTimeout(() => {
+        t.style.display = "none";
+    }, 4000);
 }
 
 function abrirMenu() {
-    document.getElementById('sidebar')?.classList.add('open');
-    document.getElementById('overlay')?.classList.add('show');
+    document.getElementById("sidebar")?.classList.add("open");
+    document.getElementById("overlay")?.classList.add("show");
 }
 function fecharMenu() {
-    document.getElementById('sidebar')?.classList.remove('open');
-    document.getElementById('overlay')?.classList.remove('show');
+    document.getElementById("sidebar")?.classList.remove("open");
+    document.getElementById("overlay")?.classList.remove("show");
 }
 
 /* ── FETCH ──────────────────────────────────────────────────── */
 function carregarDados() {
-    const card = document.getElementById('tableCard');
-    card.innerHTML = '<div class="loading-placeholder"><i class="fa-solid fa-spinner fa-spin"></i> Carregando clientes...</div>';
+    const card = document.getElementById("tableCard");
+    card.innerHTML =
+        '<div class="loading-placeholder"><i class="fa-solid fa-spinner fa-spin"></i> Carregando clientes...</div>';
 
-    fetch('/api/admin/clientes', { credentials: 'include' })
-        .then(r => {
-            if (!r.ok) throw new Error('Falha ao carregar clientes');
+    fetch("/api/admin/clientes", { credentials: "include" })
+        .then((r) => {
+            if (!r.ok) throw new Error("Falha ao carregar clientes");
             return r.json();
         })
-        .then(data => {
+        .then((data) => {
             _todos = data;
             renderTabela(_todos);
-            const total = document.getElementById('totalLabel');
-            if (total) total.textContent = `${data.length} cliente${data.length !== 1 ? 's' : ''} cadastrado${data.length !== 1 ? 's' : ''}`;
+            const total = document.getElementById("totalLabel");
+            if (total) {
+                total.textContent = `${data.length} cliente${
+                    data.length !== 1 ? "s" : ""
+                } cadastrado${data.length !== 1 ? "s" : ""}`;
+            }
         })
-        .catch(err => {
-            card.innerHTML = '<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><p>Erro ao carregar dados. Tente novamente.</p></div>';
-            mostrarToast('toast-err', 'Erro ao carregar clientes.');
+        .catch((err) => {
+            card.innerHTML =
+                '<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><p>Erro ao carregar dados. Tente novamente.</p></div>';
+            mostrarToast("toast-err", "Erro ao carregar clientes.");
             console.error(err);
         });
 }
@@ -65,22 +80,23 @@ function carregarDados() {
 /* ── FILTROS ────────────────────────────────────────────────── */
 function setFiltro(filtro) {
     _filtroAtivo = filtro;
-    document.querySelectorAll('.filter-tab').forEach(el => {
-        el.classList.toggle('ativo', el.dataset.filtro === filtro);
+    document.querySelectorAll(".filter-tab").forEach((el) => {
+        el.classList.toggle("ativo", el.dataset.filtro === filtro);
     });
     aplicarFiltros();
 }
 
 function aplicarFiltros() {
-    const busca = (document.getElementById('busca')?.value || '').toLowerCase().trim();
+    const busca = (document.getElementById("busca")?.value || "").toLowerCase()
+        .trim();
 
     let lista = _todos;
-    if (_filtroAtivo === 'ativos')   lista = lista.filter(c => c.ativo);
-    if (_filtroAtivo === 'inativos') lista = lista.filter(c => !c.ativo);
+    if (_filtroAtivo === "ativos") lista = lista.filter((c) => c.ativo);
+    if (_filtroAtivo === "inativos") lista = lista.filter((c) => !c.ativo);
     if (busca) {
-        lista = lista.filter(c =>
-            (c.nome || '').toLowerCase().includes(busca) ||
-            (c.email || '').toLowerCase().includes(busca)
+        lista = lista.filter((c) =>
+            (c.nome || "").toLowerCase().includes(busca) ||
+            (c.email || "").toLowerCase().includes(busca)
         );
     }
     renderTabela(lista);
@@ -88,8 +104,15 @@ function aplicarFiltros() {
 
 /* ── RENDER ─────────────────────────────────────────────────── */
 function badgeNivel(nivel) {
-    const cls = { Bronze: 'nivel-Bronze', Prata: 'nivel-Prata', Ouro: 'nivel-Ouro', Platina: 'nivel-Platina' };
-    return `<span class="badge-nivel ${cls[nivel] || 'nivel-Bronze'}">${nivel || 'Bronze'}</span>`;
+    const cls = {
+        Bronze: "nivel-Bronze",
+        Prata: "nivel-Prata",
+        Ouro: "nivel-Ouro",
+        Platina: "nivel-Platina",
+    };
+    return `<span class="badge-nivel ${cls[nivel] || "nivel-Bronze"}">${
+        nivel || "Bronze"
+    }</span>`;
 }
 
 function badgeStatus(ativo) {
@@ -99,7 +122,7 @@ function badgeStatus(ativo) {
 }
 
 function renderTabela(lista) {
-    const card = document.getElementById('tableCard');
+    const card = document.getElementById("tableCard");
     if (lista.length === 0) {
         card.innerHTML = `
             <div class="empty-state">
@@ -109,7 +132,7 @@ function renderTabela(lista) {
         return;
     }
 
-    const linhas = lista.map(c => `
+    const linhas = lista.map((c) => `
         <tr>
             <td>
                 <div class="cliente-info">
@@ -131,7 +154,7 @@ function renderTabela(lista) {
                 </a>
             </td>
         </tr>
-    `).join('');
+    `).join("");
 
     card.innerHTML = `
         <table class="clientes-table">
@@ -151,21 +174,24 @@ function renderTabela(lista) {
 }
 
 function esc(str) {
-    if (str == null) return '';
+    if (str == null) return "";
     return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 
 /* ── INIT ───────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => {
-    const hoje = document.getElementById('dataHoje');
+document.addEventListener("DOMContentLoaded", () => {
+    const hoje = document.getElementById("dataHoje");
     if (hoje) {
-        hoje.textContent = new Date().toLocaleDateString('pt-BR', {
-            weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+        hoje.textContent = new Date().toLocaleDateString("pt-BR", {
+            weekday: "long",
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
         });
     }
     carregarDados();

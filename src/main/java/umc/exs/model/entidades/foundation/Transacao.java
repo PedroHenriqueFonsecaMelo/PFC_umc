@@ -65,4 +65,21 @@ public class Transacao {
             this.dataRetencaoExpira = this.dataHora.toLocalDate().plusYears(5);
         }
     }
+
+    public static Transacao criarTransacao(
+            Cliente cliente,
+            Double valor,
+            String metodo,
+            String status,
+            String descricao) {
+
+        return Transacao.builder()
+                .cliente(cliente)
+                .valor(valor)
+                .metodoPagamento(metodo)
+                .status(status)
+                .finalCartao(descricao)
+                .dataHora(LocalDateTime.now())
+                .build();
+    }
 }

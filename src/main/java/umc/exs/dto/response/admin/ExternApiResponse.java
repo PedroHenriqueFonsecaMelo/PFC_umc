@@ -23,7 +23,7 @@ public class ExternApiResponse<T> {
                 .build();
     }
 
-     public static ExternApiResponse<Void> ok(String message) {
+    public static ExternApiResponse<Void> ok(String message) {
         return ExternApiResponse.<Void>builder()
                 .success(true)
                 .message(message)

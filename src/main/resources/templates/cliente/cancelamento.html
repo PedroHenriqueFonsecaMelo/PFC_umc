@@ -1,242 +1,324 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Solicitar Cancelamento — Bibliotroca</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
-      rel="stylesheet"
-    >
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
-    <link rel="stylesheet" th:href="@{/css/cliente/cancelamento.css}" />
-    <link rel="stylesheet" th:href="@{/css/breadcrumb.css}" />
-</head>
-<body>
-<header th:replace="~{fragments/client-nav :: clientNav}"></header>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Solicitar Cancelamento — Bibliotroca</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
+            rel="stylesheet"
+        >
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+        <link rel="stylesheet" th:href="@{/css/cliente/cancelamento.css}" />
+        <link rel="stylesheet" th:href="@{/css/breadcrumb.css}" />
+    </head>
+    <body>
+        <header th:replace="~{fragments/client-nav :: clientNav}"></header>
 
-<!-- NAVEGAÇÃO CONTEXTUAL -->
-<div class="breadcrumb-wrap">
-    <nav class="breadcrumb-nav">
-        <a href="/">Início</a>
-        <span class="breadcrumb-sep">›</span>
-        <a href="/clientes/meu-perfil">Meu Perfil</a>
-        <span class="breadcrumb-sep">›</span>
-        <a href="/clientes/meu-perfil?tab=compras">Compras</a>
-        <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-current">Solicitar Cancelamento</span>
-    </nav>
-    <a href="/clientes/meu-perfil?tab=compras" class="btn-voltar">← Voltar para Minhas Compras</a>
-</div>
-
-<main class="cancel-main">
-
-    <div class="cancel-container">
-
-        <!-- LOADING STATE -->
-        <div id="loadingState" class="cancel-loading">
-            <i class="fa-solid fa-spinner fa-spin"></i> Carregando dados do pedido...
+        <!-- NAVEGAÇÃO CONTEXTUAL -->
+        <div class="breadcrumb-wrap">
+            <nav class="breadcrumb-nav">
+                <a href="/">Início</a>
+                <span class="breadcrumb-sep">›</span>
+                <a href="/clientes/meu-perfil">Meu Perfil</a>
+                <span class="breadcrumb-sep">›</span>
+                <a href="/clientes/meu-perfil?tab=compras">Compras</a>
+                <span class="breadcrumb-sep">›</span>
+                <span class="breadcrumb-current">Solicitar Cancelamento</span>
+            </nav>
+            <a href="/clientes/meu-perfil?tab=compras" class="btn-voltar"
+            >← Voltar para Minhas Compras</a>
         </div>
 
-        <!-- CONTENT (hidden while loading) -->
-        <div id="cancelContent" style="display:none">
+        <main class="cancel-main">
+            <div class="cancel-container">
+                <!-- LOADING STATE -->
+                <div id="loadingState" class="cancel-loading">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Carregando dados
+                    do pedido...
+                </div>
 
-            <!-- TÍTULO -->
-            <div class="cancel-header">
-                <h1 class="cancel-title">Solicitar Cancelamento</h1>
-                <p class="cancel-subtitle">Revise os dados do pedido antes de enviar a solicitação.</p>
-            </div>
+                <!-- CONTENT (hidden while loading) -->
+                <div id="cancelContent" style="display: none">
+                    <!-- TÍTULO -->
+                    <div class="cancel-header">
+                        <h1 class="cancel-title">Solicitar Cancelamento</h1>
+                        <p class="cancel-subtitle">
+                            Revise os dados do pedido antes de enviar a
+                            solicitação.
+                        </p>
+                    </div>
 
-            <!-- RESUMO DO PEDIDO -->
-            <div class="cancel-card">
-                <div class="cancel-pedido-row">
-                    <img id="pedidoCapa" class="cancel-capa" src="" alt="Capa do livro"
-                         onerror="this.style.display='none'" />
-                    <div class="cancel-pedido-info">
-                        <div class="cancel-pedido-num" id="pedidoNum">Pedido #—</div>
-                        <div class="cancel-pedido-titulo" id="pedidoTitulo">—</div>
-                        <div class="cancel-pedido-autor" id="pedidoAutor">—</div>
-                        <div class="cancel-pedido-preco" id="pedidoPreco">T$ —</div>
+                    <!-- RESUMO DO PEDIDO -->
+                    <div class="cancel-card">
+                        <div class="cancel-pedido-row">
+                            <img
+                                id="pedidoCapa"
+                                class="cancel-capa"
+                                src=""
+                                alt="Capa do livro"
+                                onerror="this.style.display='none'"
+                            />
+                            <div class="cancel-pedido-info">
+                                <div class="cancel-pedido-num" id="pedidoNum">
+                                    Pedido #—
+                                </div>
+                                <div
+                                    class="cancel-pedido-titulo"
+                                    id="pedidoTitulo"
+                                >
+                                    —
+                                </div>
+                                <div
+                                    class="cancel-pedido-autor"
+                                    id="pedidoAutor"
+                                >
+                                    —
+                                </div>
+                                <div
+                                    class="cancel-pedido-preco"
+                                    id="pedidoPreco"
+                                >
+                                    T$ —
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FORMULÁRIO -->
+                    <div class="cancel-card">
+                        <h2 class="cancel-form-title">Motivo da Solicitação</h2>
+
+                        <div class="cancel-form-group">
+                            <label for="motivoCategoria">Categoria *</label>
+                            <select id="motivoCategoria">
+                                <option value="">Selecione o motivo...</option>
+                                <option value="COMPREI_POR_ENGANO">
+                                    Comprei por engano
+                                </option>
+                                <option value="ENCONTREI_MAIS_BARATO">
+                                    Encontrei mais barato
+                                </option>
+                                <option value="PRODUTO_NAO_ESPERADO">
+                                    Produto não era o esperado
+                                </option>
+                                <option value="OUTRO">Outro motivo</option>
+                            </select>
+                        </div>
+
+                        <div class="cancel-form-group">
+                            <label for="motivoDescricao">Descrição detalhada *
+                                <span class="cancel-char-count" id="charCount"
+                                >0 / 20 mínimo</span></label>
+                            <textarea
+                                id="motivoDescricao"
+                                rows="5"
+                                placeholder="Descreva com detalhes o motivo do cancelamento (mínimo 20 caracteres)..."
+                                oninput="atualizarContador()"
+                            ></textarea>
+                        </div>
+
+                        <div
+                            id="cancelFeedback"
+                            class="cancel-feedback"
+                            style="display: none"
+                        >
+                        </div>
+
+                        <div class="cancel-aviso">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span>O cancelamento não é automático. A solicitação
+                                será analisada pela equipe Bibliotroca e pode
+                                ser recusada caso o pedido já tenha sido
+                                encaminhado para envio.</span>
+                        </div>
+                    </div>
+
+                    <!-- AÇÕES -->
+                    <div class="cancel-actions">
+                        <a
+                            href="/clientes/meu-perfil?aba=compras"
+                            class="cancel-btn-back"
+                        >
+                            <i class="fa-solid fa-arrow-left"></i> Voltar
+                        </a>
+                        <button
+                            id="btnEnviar"
+                            class="cancel-btn-submit"
+                            onclick="enviarSolicitacao()"
+                        >
+                            <i class="fa-solid fa-ban"></i> Enviar Solicitação
+                        </button>
                     </div>
                 </div>
-            </div>
+                <!-- /cancelContent -->
 
-            <!-- FORMULÁRIO -->
-            <div class="cancel-card">
-                <h2 class="cancel-form-title">Motivo da Solicitação</h2>
-
-                <div class="cancel-form-group">
-                    <label for="motivoCategoria">Categoria *</label>
-                    <select id="motivoCategoria">
-                        <option value="">Selecione o motivo...</option>
-                        <option value="COMPREI_POR_ENGANO">Comprei por engano</option>
-                        <option value="ENCONTREI_MAIS_BARATO">Encontrei mais barato</option>
-                        <option value="PRODUTO_NAO_ESPERADO">Produto não era o esperado</option>
-                        <option value="OUTRO">Outro motivo</option>
-                    </select>
-                </div>
-
-                <div class="cancel-form-group">
-                    <label for="motivoDescricao">Descrição detalhada * <span class="cancel-char-count" id="charCount">0 / 20 mínimo</span></label>
-                    <textarea id="motivoDescricao" rows="5"
-                              placeholder="Descreva com detalhes o motivo do cancelamento (mínimo 20 caracteres)..."
-                              oninput="atualizarContador()"></textarea>
-                </div>
-
-                <div id="cancelFeedback" class="cancel-feedback" style="display:none"></div>
-
-                <div class="cancel-aviso">
-                    <i class="fa-solid fa-circle-info"></i>
-                    <span>O cancelamento não é automático. A solicitação será analisada pela equipe Bibliotroca e pode ser recusada caso o pedido já tenha sido encaminhado para envio.</span>
+                <!-- ERRO AO CARREGAR -->
+                <div id="errorState" class="cancel-error" style="display: none">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <p>Não foi possível carregar os dados do pedido.</p>
+                    <a
+                        href="/clientes/meu-perfil?aba=compras"
+                        class="cancel-btn-back"
+                        style="margin-top: 1rem"
+                    >Voltar para Compras</a>
                 </div>
             </div>
+        </main>
 
-            <!-- AÇÕES -->
-            <div class="cancel-actions">
-                <a href="/clientes/meu-perfil?aba=compras" class="cancel-btn-back">
-                    <i class="fa-solid fa-arrow-left"></i> Voltar
-                </a>
-                <button id="btnEnviar" class="cancel-btn-submit" onclick="enviarSolicitacao()">
-                    <i class="fa-solid fa-ban"></i> Enviar Solicitação
-                </button>
-            </div>
+        <script th:inline="javascript">
+            const PEDIDO_ID = /*[[${pedidoId}]]*/ 0;
 
-        </div><!-- /cancelContent -->
+            // ── Carregar dados do pedido ─────────────────────────────────
+            async function carregarPedido() {
+                try {
+                    const res = await fetch("/api/pedidos/" + PEDIDO_ID, {
+                        credentials: "include",
+                    });
+                    if (!res.ok) throw new Error("not found");
+                    const p = await res.json();
 
-        <!-- ERRO AO CARREGAR -->
-        <div id="errorState" class="cancel-error" style="display:none">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <p>Não foi possível carregar os dados do pedido.</p>
-            <a href="/clientes/meu-perfil?aba=compras" class="cancel-btn-back" style="margin-top:1rem">Voltar para Compras</a>
-        </div>
+                    // Valida que está em AGUARDANDO_ENVIO e sem cancelamento pendente
+                    if (p.statusEnvio !== "AGUARDANDO_ENVIO") {
+                        document.getElementById("loadingState").style.display = "none";
+                        document.getElementById("errorState").style.display = "block";
+                        document.getElementById("errorState").querySelector("p")
+                            .textContent =
+                                "Este pedido não pode ser cancelado (status: " +
+                                (p.statusEnvioDescricao || p.statusEnvio) + ").";
+                        return;
+                    }
+                    if (p.temCancelamentoPendente) {
+                        document.getElementById("loadingState").style.display = "none";
+                        document.getElementById("errorState").style.display = "block";
+                        document.getElementById("errorState").querySelector("p")
+                            .textContent =
+                                "Já existe uma solicitação de cancelamento pendente para este pedido.";
+                        return;
+                    }
 
-    </div>
-</main>
+                    // Preenche resumo
+                    const fotos = parseFotos(p.fotosUrls);
+                    const capa = document.getElementById("pedidoCapa");
+                    if (fotos.length > 0) {
+                        capa.src = fotos[0];
+                    } else {
+                        capa.style.display = "none";
+                    }
+                    document.getElementById("pedidoNum").textContent = "Pedido #" +
+                        p.id;
+                    document.getElementById("pedidoTitulo").textContent =
+                        p.tituloLivro || "—";
+                    document.getElementById("pedidoAutor").textContent = p.autorLivro ||
+                        "";
+                    document.getElementById("pedidoPreco").textContent = "T$ " +
+                        (p.precoLivro || 0).toFixed(2);
 
-<script th:inline="javascript">
-    const PEDIDO_ID = /*[[${pedidoId}]]*/ 0;
-
-    // ── Carregar dados do pedido ─────────────────────────────────
-    async function carregarPedido() {
-        try {
-            const res = await fetch('/api/pedidos/' + PEDIDO_ID, { credentials: 'include' });
-            if (!res.ok) throw new Error('not found');
-            const p = await res.json();
-
-            // Valida que está em AGUARDANDO_ENVIO e sem cancelamento pendente
-            if (p.statusEnvio !== 'AGUARDANDO_ENVIO') {
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('errorState').style.display = 'block';
-                document.getElementById('errorState').querySelector('p').textContent =
-                    'Este pedido não pode ser cancelado (status: ' + (p.statusEnvioDescricao || p.statusEnvio) + ').';
-                return;
+                    document.getElementById("loadingState").style.display = "none";
+                    document.getElementById("cancelContent").style.display = "block";
+                } catch (e) {
+                    document.getElementById("loadingState").style.display = "none";
+                    document.getElementById("errorState").style.display = "block";
+                }
             }
-            if (p.temCancelamentoPendente) {
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('errorState').style.display = 'block';
-                document.getElementById('errorState').querySelector('p').textContent =
-                    'Já existe uma solicitação de cancelamento pendente para este pedido.';
-                return;
+
+            function parseFotos(fotosUrls) {
+                try {
+                    const arr = JSON.parse(fotosUrls);
+                    if (Array.isArray(arr)) return arr;
+                } catch (_) {}
+                return [];
             }
 
-            // Preenche resumo
-            const fotos = parseFotos(p.fotosUrls);
-            const capa  = document.getElementById('pedidoCapa');
-            if (fotos.length > 0) {
-                capa.src = fotos[0];
-            } else {
-                capa.style.display = 'none';
+            // ── Contador de caracteres ───────────────────────────────────
+            function atualizarContador() {
+                const len = document.getElementById("motivoDescricao").value.length;
+                const el = document.getElementById("charCount");
+                if (len >= 20) {
+                    el.textContent = len + " caracteres ✓";
+                    el.style.color = "#2e7d32";
+                } else {
+                    el.textContent = len + " / 20 mínimo";
+                    el.style.color = "#7a6e65";
+                }
             }
-            document.getElementById('pedidoNum').textContent    = 'Pedido #' + p.id;
-            document.getElementById('pedidoTitulo').textContent = p.tituloLivro || '—';
-            document.getElementById('pedidoAutor').textContent  = p.autorLivro  || '';
-            document.getElementById('pedidoPreco').textContent  = 'T$ ' + (p.precoLivro || 0).toFixed(2);
 
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('cancelContent').style.display = 'block';
+            // ── Enviar solicitação ───────────────────────────────────────
+            async function enviarSolicitacao() {
+                const categoria = document.getElementById("motivoCategoria").value;
+                const descricao = document.getElementById("motivoDescricao").value
+                    .trim();
+                const feedback = document.getElementById("cancelFeedback");
+                const btn = document.getElementById("btnEnviar");
 
-        } catch (e) {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('errorState').style.display = 'block';
-        }
-    }
+                feedback.style.display = "none";
 
-    function parseFotos(fotosUrls) {
-        try {
-            const arr = JSON.parse(fotosUrls);
-            if (Array.isArray(arr)) return arr;
-        } catch (_) {}
-        return [];
-    }
+                if (!categoria) {
+                    mostrarFeedback("Selecione uma categoria de motivo.", "erro");
+                    return;
+                }
+                if (descricao.length < 20) {
+                    mostrarFeedback(
+                        "A descrição deve ter pelo menos 20 caracteres.",
+                        "erro",
+                    );
+                    return;
+                }
 
-    // ── Contador de caracteres ───────────────────────────────────
-    function atualizarContador() {
-        const len = document.getElementById('motivoDescricao').value.length;
-        const el  = document.getElementById('charCount');
-        if (len >= 20) {
-            el.textContent = len + ' caracteres ✓';
-            el.style.color = '#2e7d32';
-        } else {
-            el.textContent = len + ' / 20 mínimo';
-            el.style.color = '#7a6e65';
-        }
-    }
+                btn.disabled = true;
+                btn.innerHTML =
+                    '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
 
-    // ── Enviar solicitação ───────────────────────────────────────
-    async function enviarSolicitacao() {
-        const categoria = document.getElementById('motivoCategoria').value;
-        const descricao = document.getElementById('motivoDescricao').value.trim();
-        const feedback  = document.getElementById('cancelFeedback');
-        const btn       = document.getElementById('btnEnviar');
+                try {
+                    const res = await fetch(
+                        "/api/pedidos/" + PEDIDO_ID + "/solicitar-cancelamento",
+                        {
+                            method: "POST",
+                            credentials: "include",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                motivoCategoria: categoria,
+                                motivoDescricao: descricao,
+                            }),
+                        },
+                    );
 
-        feedback.style.display = 'none';
-
-        if (!categoria) {
-            mostrarFeedback('Selecione uma categoria de motivo.', 'erro');
-            return;
-        }
-        if (descricao.length < 20) {
-            mostrarFeedback('A descrição deve ter pelo menos 20 caracteres.', 'erro');
-            return;
-        }
-
-        btn.disabled    = true;
-        btn.innerHTML   = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
-
-        try {
-            const res = await fetch('/api/pedidos/' + PEDIDO_ID + '/solicitar-cancelamento', {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ motivoCategoria: categoria, motivoDescricao: descricao }),
-            });
-
-            if (res.ok) {
-                window.location.href = '/clientes/meu-perfil?aba=compras&toast=cancelamento-solicitado';
-            } else {
-                const data = await res.json().catch(() => ({}));
-                mostrarFeedback(data.message || 'Não foi possível enviar a solicitação. Verifique e tente novamente.', 'erro');
-                btn.disabled  = false;
-                btn.innerHTML = '<i class="fa-solid fa-ban"></i> Enviar Solicitação';
+                    if (res.ok) {
+                        window.location.href =
+                            "/clientes/meu-perfil?aba=compras&toast=cancelamento-solicitado";
+                    } else {
+                        const data = await res.json().catch(() => ({}));
+                        mostrarFeedback(
+                            data.message ||
+                                "Não foi possível enviar a solicitação. Verifique e tente novamente.",
+                            "erro",
+                        );
+                        btn.disabled = false;
+                        btn.innerHTML =
+                            '<i class="fa-solid fa-ban"></i> Enviar Solicitação';
+                    }
+                } catch (_) {
+                    mostrarFeedback("Erro de conexão. Tente novamente.", "erro");
+                    btn.disabled = false;
+                    btn.innerHTML =
+                        '<i class="fa-solid fa-ban"></i> Enviar Solicitação';
+                }
             }
-        } catch (_) {
-            mostrarFeedback('Erro de conexão. Tente novamente.', 'erro');
-            btn.disabled  = false;
-            btn.innerHTML = '<i class="fa-solid fa-ban"></i> Enviar Solicitação';
-        }
-    }
 
-    function mostrarFeedback(msg, tipo) {
-        const el = document.getElementById('cancelFeedback');
-        el.textContent    = msg;
-        el.className      = 'cancel-feedback cancel-feedback-' + tipo;
-        el.style.display  = 'block';
-    }
+            function mostrarFeedback(msg, tipo) {
+                const el = document.getElementById("cancelFeedback");
+                el.textContent = msg;
+                el.className = "cancel-feedback cancel-feedback-" + tipo;
+                el.style.display = "block";
+            }
 
-    carregarPedido();
-</script>
-</body>
+            carregarPedido();
+        </script>
+    </body>
 </html>

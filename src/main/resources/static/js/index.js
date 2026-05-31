@@ -9,10 +9,10 @@ document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
 
 /* ── Livros em destaque ── */
 async function carregarLivrosDestaque() {
-  const track    = document.getElementById("carrosselTrack");
+  const track = document.getElementById("carrosselTrack");
   const dotsWrap = document.getElementById("carrosselDots");
-  const btnPrev  = document.getElementById("carrosselPrev");
-  const btnNext  = document.getElementById("carrosselNext");
+  const btnPrev = document.getElementById("carrosselPrev");
+  const btnNext = document.getElementById("carrosselNext");
   if (!track) return;
 
   try {
@@ -33,28 +33,32 @@ async function carregarLivrosDestaque() {
       } catch (_) {}
 
       // Tenta capa via OpenLibrary se não tiver foto
-      const capaUrl = foto
-        || (livro.isbn
-          ? `https://covers.openlibrary.org/b/isbn/${livro.isbn.replace(/-/g,'')}-M.jpg`
+      const capaUrl = foto ||
+        (livro.isbn
+          ? `https://covers.openlibrary.org/b/isbn/${
+            livro.isbn.replace(/-/g, "")
+          }-M.jpg`
           : null);
 
-      const slide = document.createElement('div');
-      slide.className = 'carousel-slide';
+      const slide = document.createElement("div");
+      slide.className = "carousel-slide";
       slide.dataset.index = i;
       slide.innerHTML = `
         <div class="carousel-slide-inner">
           <div class="carousel-img-wrap">
-            ${capaUrl
-              ? `<img src="${capaUrl}" alt="${livro.titulo}" loading="lazy"
+            ${
+        capaUrl
+          ? `<img src="${capaUrl}" alt="${livro.titulo}" loading="lazy"
                       onerror="this.parentElement.innerHTML='<span class=\\'carousel-no-img\\'>📚</span>'">`
-              : `<span class="carousel-no-img">📚</span>`}
+          : `<span class="carousel-no-img">📚</span>`
+      }
           </div>
           <div class="carousel-slide-info">
             <div class="carousel-slide-titulo">${livro.titulo}</div>
-            <div class="carousel-slide-autor">${livro.autor || ''}</div>
+            <div class="carousel-slide-autor">${livro.autor || ""}</div>
           </div>
         </div>`;
-      slide.addEventListener('click', () => {
+      slide.addEventListener("click", () => {
         if (parseInt(slide.dataset.index) !== activeIndex) {
           goTo(parseInt(slide.dataset.index));
         } else {
@@ -66,43 +70,43 @@ async function carregarLivrosDestaque() {
 
     // Dots
     destaque.forEach((_, i) => {
-      const dot = document.createElement('div');
-      dot.className = 'carousel-dot';
-      dot.addEventListener('click', () => goTo(i));
+      const dot = document.createElement("div");
+      dot.className = "carousel-dot";
+      dot.addEventListener("click", () => goTo(i));
       dotsWrap.appendChild(dot);
     });
 
     function updateCarousel() {
-      const slides = track.querySelectorAll('.carousel-slide');
-      const dots   = dotsWrap.querySelectorAll('.carousel-dot');
-      const total  = slides.length;
+      const slides = track.querySelectorAll(".carousel-slide");
+      const dots = dotsWrap.querySelectorAll(".carousel-dot");
+      const total = slides.length;
       const slideW = slides[0] ? slides[0].offsetWidth : 220;
-      const wrapW  = track.parentElement.offsetWidth;
+      const wrapW = track.parentElement.offsetWidth;
 
       // Centraliza o slide ativo na tela
       const offsetX = (wrapW / 2) - (activeIndex * slideW) - (slideW / 2);
       track.style.transform = `translateX(${offsetX}px)`;
 
       slides.forEach((slide, i) => {
-        const diff    = i - activeIndex;
-        const rotY    = diff * 45;
-        const scale   = i === activeIndex ? 1 : 0.82;
+        const diff = i - activeIndex;
+        const rotY = diff * 45;
+        const scale = i === activeIndex ? 1 : 0.82;
         const isActive = i === activeIndex;
         const opacity = Math.abs(diff) > 2 ? 0 : 1;
 
         slide.style.transform = `rotateY(${rotY}deg) scale(${scale})`;
-        slide.style.zIndex    = isActive ? 10 : Math.max(1, 8 - Math.abs(diff));
-        slide.style.opacity   = opacity;
+        slide.style.zIndex = isActive ? 10 : Math.max(1, 8 - Math.abs(diff));
+        slide.style.opacity = opacity;
 
-        const info = slide.querySelector('.carousel-slide-info');
+        const info = slide.querySelector(".carousel-slide-info");
         if (info) {
-          info.style.opacity = isActive ? '1' : '0';
-          info.style.filter  = isActive ? 'blur(0)' : 'blur(3px)';
+          info.style.opacity = isActive ? "1" : "0";
+          info.style.filter = isActive ? "blur(0)" : "blur(3px)";
         }
       });
 
       dots.forEach((dot, i) => {
-        dot.classList.toggle('active', i === activeIndex);
+        dot.classList.toggle("active", i === activeIndex);
       });
 
       if (btnPrev) btnPrev.disabled = activeIndex === 0;
@@ -114,23 +118,26 @@ async function carregarLivrosDestaque() {
       updateCarousel();
     }
 
-    if (btnPrev) btnPrev.addEventListener('click', () => goTo(activeIndex - 1));
-    if (btnNext) btnNext.addEventListener('click', () => goTo(activeIndex + 1));
+    if (btnPrev) btnPrev.addEventListener("click", () => goTo(activeIndex - 1));
+    if (btnNext) btnNext.addEventListener("click", () => goTo(activeIndex + 1));
 
     // Swipe touch
     let touchStartX = 0;
-    track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
-    track.addEventListener('touchend', e => {
+    track.addEventListener("touchstart", (e) => {
+      touchStartX = e.touches[0].clientX;
+    });
+    track.addEventListener("touchend", (e) => {
       const diff = touchStartX - e.changedTouches[0].clientX;
       if (Math.abs(diff) > 40) goTo(activeIndex + (diff > 0 ? 1 : -1));
     });
 
     updateCarousel();
-
   } catch (_) {
-    if (track) track.innerHTML = `<p style="grid-column:1/-1;text-align:center;
+    if (track) {
+      track.innerHTML = `<p style="grid-column:1/-1;text-align:center;
       color:var(--muted);padding:3rem 0;font-style:italic;">
       <a href="/livros/vitrine" style="color:var(--accent)">Ver vitrine completa →</a></p>`;
+    }
   }
 }
 
@@ -143,19 +150,27 @@ async function carregarRanking() {
     const ranking = await res.json();
 
     if (ranking.length === 0) {
-      container.innerHTML = `<p style="text-align:center;color:rgba(249,246,240,.3);padding:2rem 0;font-style:italic">
+      container.innerHTML =
+        `<p style="text-align:center;color:rgba(249,246,240,.3);padding:2rem 0;font-style:italic">
         Nenhum leitor no ranking ainda.</p>`;
       return;
     }
 
-    const medalha = (pos) => ["🥇","🥈","🥉"][pos-1] || "";
-    const inicial  = (nome) => (nome || "?").charAt(0).toUpperCase();
-    const esc      = (s) => String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    const medalha = (pos) => ["🥇", "🥈", "🥉"][pos - 1] || "";
+    const inicial = (nome) => (nome || "?").charAt(0).toUpperCase();
+    const esc = (s) =>
+      String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(
+        />/g,
+        "&gt;",
+      );
 
-    container.innerHTML = ranking.map(u => {
-      const nomeCurto = esc(u.primeiroNome) + (u.inicialSobrenome ? " " + esc(u.inicialSobrenome) : "");
+    container.innerHTML = ranking.map((u) => {
+      const nomeCurto = esc(u.primeiroNome) +
+        (u.inicialSobrenome ? " " + esc(u.inicialSobrenome) : "");
       const avatarHtml = u.fotoPerfil
-        ? `<img src="${esc(u.fotoPerfil)}" alt="${nomeCurto}" class="rhi-avatar-img">`
+        ? `<img src="${
+          esc(u.fotoPerfil)
+        }" alt="${nomeCurto}" class="rhi-avatar-img">`
         : `<div class="rhi-avatar">${inicial(u.primeiroNome)}</div>`;
       return `
       <div class="rhi-card pos-${u.posicao}">
@@ -168,7 +183,8 @@ async function carregarRanking() {
       </div>`;
     }).join("");
   } catch (_) {
-    container.innerHTML = `<p style="text-align:center;color:rgba(249,246,240,.3);padding:2rem 0;font-style:italic">
+    container.innerHTML =
+      `<p style="text-align:center;color:rgba(249,246,240,.3);padding:2rem 0;font-style:italic">
       Ranking indisponível no momento.</p>`;
   }
 }
@@ -176,7 +192,9 @@ async function carregarRanking() {
 /* ── Nav — detecta sessão e troca estado ── */
 async function carregarNavUsuario() {
   try {
-    const res = await fetch("/clientes/meu-perfil-json", { credentials: "include" });
+    const res = await fetch("/clientes/meu-perfil-json", {
+      credentials: "include",
+    });
 
     if (res.ok) {
       const cliente = await res.json();
@@ -184,7 +202,8 @@ async function carregarNavUsuario() {
       const fotoHtml = cliente.fotoPerfil
         ? `<img src="${cliente.fotoPerfil}" style="width:84px;height:84px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:.4rem;">`
         : "";
-      document.getElementById("mastheadTagline").innerHTML = fotoHtml + "Olá, <strong>" + primeiroNome + "</strong>";
+      document.getElementById("mastheadTagline").innerHTML = fotoHtml +
+        "Olá, <strong>" + primeiroNome + "</strong>";
       document.getElementById("navGuest").style.display = "none";
       document.getElementById("navUser").style.display = "flex";
       document.getElementById("navMinhaConta").href = "/clientes/meu-perfil";
@@ -192,7 +211,10 @@ async function carregarNavUsuario() {
       if (btn) btn.href = "/livros/vender";
       // Botão do ranking: usuário logado → "Ver ranking completo"
       const ctaRanking = document.getElementById("rankingCtaBtn");
-      if (ctaRanking) { ctaRanking.href = "/ranking"; ctaRanking.textContent = "Ranking Completo"; }
+      if (ctaRanking) {
+        ctaRanking.href = "/ranking";
+        ctaRanking.textContent = "Ranking Completo";
+      }
       return;
     }
 
@@ -202,24 +224,34 @@ async function carregarNavUsuario() {
       if (!adminRes.ok) return;
       const admin = await adminRes.json();
       const primeiroNome = (admin.nome || "Administrador").split(" ")[0];
-      document.getElementById("mastheadTagline").innerHTML = "Olá, <strong>" + primeiroNome + "</strong> · Admin";
+      document.getElementById("mastheadTagline").innerHTML = "Olá, <strong>" +
+        primeiroNome + "</strong> · Admin";
       document.getElementById("navGuest").style.display = "none";
       document.getElementById("navUser").style.display = "flex";
       // Redireciona links do nav para o painel
       const perfilLink = document.querySelector("#navUser a");
-      if (perfilLink) { perfilLink.href = "/admin/painel"; perfilLink.textContent = "Painel Admin"; }
+      if (perfilLink) {
+        perfilLink.href = "/admin/painel";
+        perfilLink.textContent = "Painel Admin";
+      }
       document.getElementById("navMinhaConta").href = "/admin/painel";
       document.getElementById("navMinhaConta").textContent = "— Painel Admin";
       // Oculta Vitrine e Vender — admin não é cliente
-      document.querySelectorAll(".masthead-nav a:not(#navMinhaConta)").forEach(function(el) {
-        el.style.display = "none";
-      });
+      document.querySelectorAll(".masthead-nav a:not(#navMinhaConta)").forEach(
+        function (el) {
+          el.style.display = "none";
+        },
+      );
       // Redireciona todos os CTAs de cliente para o painel admin
-      ["/livros/vitrine", "/livros/vender", "/clientes/novo-cadastro"].forEach(function(path) {
-        document.querySelectorAll('a[href="' + path + '"]').forEach(function(el) {
-          el.href = "/admin/painel";
-        });
-      });
+      ["/livros/vitrine", "/livros/vender", "/clientes/novo-cadastro"].forEach(
+        function (path) {
+          document.querySelectorAll('a[href="' + path + '"]').forEach(
+            function (el) {
+              el.href = "/admin/painel";
+            },
+          );
+        },
+      );
     }
   } catch (_) {}
 }
@@ -255,7 +287,9 @@ async function carregarBlog() {
               <span>${p.dataPublicacao}</span>
             </div>
             <div class="blog-card-titulo">${p.titulo}</div>
-            <div class="blog-card-conteudo">${p.conteudo.length > 120 ? p.conteudo.slice(0, 120) + '…' : p.conteudo}</div>
+            <div class="blog-card-conteudo">${
+        p.conteudo.length > 120 ? p.conteudo.slice(0, 120) + "…" : p.conteudo
+      }</div>
           </div>
         </article>
       </a>`;
@@ -268,20 +302,20 @@ async function carregarBlog() {
 
 /* ── Flash: lote enviado ── */
 (function () {
-    if (new URLSearchParams(window.location.search).get("enviado") === "1") {
-        const banner = document.getElementById("flashEnviado");
-        if (banner) {
-            banner.style.display = "flex";
-            // limpa o param da URL sem recarregar a página
-            history.replaceState(null, "", window.location.pathname);
-            // fecha automaticamente após 8 s
-            const timer = setTimeout(() => banner.style.display = "none", 8000);
-            document.getElementById("flashClose").addEventListener("click", () => {
-                clearTimeout(timer);
-                banner.style.display = "none";
-            });
-        }
+  if (new URLSearchParams(window.location.search).get("enviado") === "1") {
+    const banner = document.getElementById("flashEnviado");
+    if (banner) {
+      banner.style.display = "flex";
+      // limpa o param da URL sem recarregar a página
+      history.replaceState(null, "", window.location.pathname);
+      // fecha automaticamente após 8 s
+      const timer = setTimeout(() => banner.style.display = "none", 8000);
+      document.getElementById("flashClose").addEventListener("click", () => {
+        clearTimeout(timer);
+        banner.style.display = "none";
+      });
     }
+  }
 })();
 
 /* ── Init ── */

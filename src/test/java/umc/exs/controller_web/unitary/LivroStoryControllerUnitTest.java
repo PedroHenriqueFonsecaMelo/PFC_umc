@@ -39,4 +39,3 @@ class LivroStoryControllerUnitTest {
         assertEquals("produto/historia_livro", controller.teste());
     }
 }
-

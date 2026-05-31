@@ -26,7 +26,7 @@ import umc.exs.dto.request.livro.LivroRequest;
 import umc.exs.dto.response.compras.CarrinhoCompraResponse;
 import umc.exs.dto.response.compras.LivroExibicaoResponse;
 import umc.exs.model.entidades.foundation.Lote;
-import umc.exs.service.core.bussiness.LivroService;
+import umc.exs.service.core.livros.LivroService;
 
 @RestController
 @RequestMapping("/api/livros")
@@ -64,9 +64,9 @@ public class LivroControllerApi {
      */
     @GetMapping("/vitrine")
     public ResponseEntity<Page<LivroExibicaoResponse>> listarVitrine(
-            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false)    Boolean emPromocao) {
+            @RequestParam(required = false) Boolean emPromocao) {
 
         var pageable = PageRequest.of(page, Math.min(size, 50), Sort.by(Sort.Direction.DESC, "id"));
         if (Boolean.TRUE.equals(emPromocao)) {
@@ -100,7 +100,8 @@ public class LivroControllerApi {
         }
 
         for (MultipartFile arquivo : fotos) {
-            if (arquivo == null || arquivo.isEmpty()) continue;
+            if (arquivo == null || arquivo.isEmpty())
+                continue;
 
             if (arquivo.getSize() > MAX_FILE_SIZE) {
                 return ResponseEntity.badRequest().body(
@@ -179,7 +180,8 @@ public class LivroControllerApi {
         }
 
         try {
-            return ResponseEntity.ok(livroMapper.toResponse(livroService.cadastrarVenda(user.getUsername(), dados, foto)));
+            return ResponseEntity
+                    .ok(livroMapper.toResponse(livroService.cadastrarVenda(user.getUsername(), dados, foto)));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro ao criar anúncio: " + e.getMessage());
         }
@@ -240,7 +242,8 @@ public class LivroControllerApi {
             // Apenas busca e retorna os dados, sem salvar nada ainda
             return ResponseEntity.ok(livroMapper.toResponse(livroService.cadastrarPorIsbn(isbn)));
         } catch (jakarta.persistence.EntityNotFoundException e) {
-            // Google Books e OpenLibrary indisponíveis ou ISBN não encontrado em nenhuma delas
+            // Google Books e OpenLibrary indisponíveis ou ISBN não encontrado em nenhuma
+            // delas
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -250,7 +253,8 @@ public class LivroControllerApi {
 
     /** Valida magic bytes do arquivo para confirmar que é uma imagem real. */
     private boolean isImagemValida(byte[] bytes) {
-        if (bytes == null || bytes.length < 4) return false;
+        if (bytes == null || bytes.length < 4)
+            return false;
 
         // JPEG: FF D8 FF
         if (bytes[0] == (byte) 0xFF && bytes[1] == (byte) 0xD8 && bytes[2] == (byte) 0xFF)

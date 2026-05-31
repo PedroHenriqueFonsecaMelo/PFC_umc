@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 import umc.exs.dto.mapper.PedidoMapper;
 import umc.exs.model.entidades.usuario.Cliente;
-import umc.exs.service.core.cliente.ClienteService;
-import umc.exs.service.core.control.EtiquetaService;
-import umc.exs.service.core.control.PedidoService;
+import umc.exs.service.cliente.ClienteService;
+import umc.exs.service.core.dashboard.PedidoService;
+import umc.exs.service.storage.EtiquetaService;
 
 @RestController
 @RequestMapping("/api/pedidos")
@@ -35,8 +35,7 @@ public class PedidoController {
         var lista = pedidoService.listarPendentes(id);
 
         return ResponseEntity.ok(
-                pedidoMapper.toResponseList(lista)
-        );
+                pedidoMapper.toResponseList(lista));
     }
 
     @GetMapping("/concluidos")
@@ -50,8 +49,7 @@ public class PedidoController {
         var lista = pedidoService.listarConcluidos(id);
 
         return ResponseEntity.ok(
-                pedidoMapper.toResponseList(lista)
-        );
+                pedidoMapper.toResponseList(lista));
     }
 
     @GetMapping("/todos")
@@ -65,8 +63,7 @@ public class PedidoController {
         var lista = pedidoService.listarPorCliente(id);
 
         return ResponseEntity.ok(
-                pedidoMapper.toResponseList(lista)
-        );
+                pedidoMapper.toResponseList(lista));
     }
 
     @GetMapping("/{pedidoId}")
@@ -92,7 +89,7 @@ public class PedidoController {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
             headers.setContentDispositionFormData(
-                "attachment", "etiqueta-pedido-" + id + ".pdf");
+                    "attachment", "etiqueta-pedido-" + id + ".pdf");
             return ResponseEntity.ok().headers(headers).body(pdf);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();

@@ -101,7 +101,7 @@ public class GamificacaoService {
 
         if (!nivelAntes.equals(nivelDepois)) {
             logAuditoria.registrarLog("NIVEL_SUBIU", clienteId,
-                pontuacao.getCliente().getEmail(), "Subiu para " + nivelDepois.getDescricao());
+                    pontuacao.getCliente().getEmail(), "Subiu para " + nivelDepois.getDescricao());
 
             // Notificação dashboard: novo nível atingido
             try {
@@ -187,7 +187,8 @@ public class GamificacaoService {
 
     /**
      * Ranking público LGPD-compliant.
-     * Retorna posicao, primeiroNome, inicialSobrenome, nivel, badge, xpTotal, xpProximoNivel.
+     * Retorna posicao, primeiroNome, inicialSobrenome, nivel, badge, xpTotal,
+     * xpProximoNivel.
      * Nunca expõe e-mail, CPF ou sobrenome completo.
      *
      * @param limite  máximo de posições (capped em 100)
@@ -217,11 +218,13 @@ public class GamificacaoService {
         for (int i = 0; i < top.size(); i++) {
             PontuacaoUsuario p = top.get(i);
             String nomeCompleto = (p.getCliente() != null && p.getCliente().getNome() != null)
-                ? p.getCliente().getNome().trim() : "Leitor";
+                    ? p.getCliente().getNome().trim()
+                    : "Leitor";
             String[] partes = nomeCompleto.split("\\s+");
             String primeiroNome = partes[0];
             String inicialSobrenome = partes.length > 1
-                ? partes[partes.length - 1].substring(0, 1).toUpperCase() + "." : "";
+                    ? partes[partes.length - 1].substring(0, 1).toUpperCase() + "."
+                    : "";
 
             NivelUsuario nivel = p.getNivel();
             int xpAtual = p.getXpTotal() != null ? p.getXpTotal() : 0;
@@ -229,9 +232,8 @@ public class GamificacaoService {
             String fotoPerfil = (p.getCliente() != null) ? p.getCliente().getFotoPerfil() : null;
 
             result.add(new RankingPublicResponse(
-                i + 1, primeiroNome, inicialSobrenome,
-                nivel.getDescricao(), nivel.getBadge(), xpAtual, xpProximo, fotoPerfil
-            ));
+                    i + 1, primeiroNome, inicialSobrenome,
+                    nivel.getDescricao(), nivel.getBadge(), xpAtual, xpProximo, fotoPerfil));
         }
         return result;
     }

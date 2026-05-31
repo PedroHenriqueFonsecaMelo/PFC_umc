@@ -19,7 +19,9 @@
     --border: rgba(44, 36, 27, 0.15);
 }
 
-html, body { height: 100%; }
+html, body {
+    height: 100%;
+}
 
 body {
     background: var(--paper);
@@ -90,4 +92,7 @@ body {
     border: 2px solid var(--ink);
     transition: background 0.2s, color 0.2s;
 }
-.btn-voltar:hover { background: transparent; color: var(--ink); }
+.btn-voltar:hover {
+    background: transparent;
+    color: var(--ink);
+}

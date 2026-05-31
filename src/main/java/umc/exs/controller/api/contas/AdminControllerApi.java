@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import java.util.Objects;
 
-import umc.exs.service.core.control.ClienteAdminService;
 import umc.exs.dto.mapper.CupomMapper;
 import umc.exs.dto.mapper.LivroMapper;
 import umc.exs.dto.mapper.PedidoMapper;
@@ -42,12 +41,14 @@ import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.logic.Administrador;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.logic.AdminRepository;
-import umc.exs.service.core.bussiness.LivroService;
-import umc.exs.service.core.control.DashboardService;
-import umc.exs.service.core.control.LoteService;
-import umc.exs.service.core.control.PedidoService;
+import umc.exs.service.cliente.admin.ClienteAdminService;
+import umc.exs.service.core.dashboard.DashboardService;
+import umc.exs.service.core.dashboard.LoteService;
+import umc.exs.service.core.dashboard.PedidoService;
 import umc.exs.service.core.interactions.PostBlogService;
+import umc.exs.service.core.livros.LivroService;
 import umc.exs.service.cupom.CupomService;
+import umc.exs.service.storage.ArquivosService;
 
 @Slf4j
 @RestController
@@ -81,7 +82,7 @@ public class AdminControllerApi {
         List<LoteResponse> dtos = loteService.listarPendentesComCliente().stream()
                 .map(lote -> {
                     long qtd = livroRepository.countByLoteId(lote.getId());
-                    String nome  = lote.getCliente() != null ? lote.getCliente().getNome()  : "—";
+                    String nome = lote.getCliente() != null ? lote.getCliente().getNome() : "—";
                     String email = lote.getCliente() != null ? lote.getCliente().getEmail() : "—";
                     return new LoteResponse(lote.getId(), lote.getCodigoProtocolo(),
                             lote.getStatus().toString(), lote.getDataCriacao(), nome, email, qtd);
@@ -99,16 +100,16 @@ public class AdminControllerApi {
         resp.put("codigoProtocolo", lote.getCodigoProtocolo());
         resp.put("status", lote.getStatus().toString());
         resp.put("dataCriacao", lote.getDataCriacao());
-        resp.put("nomeVendedor",  lote.getCliente() != null ? lote.getCliente().getNome()  : "—");
+        resp.put("nomeVendedor", lote.getCliente() != null ? lote.getCliente().getNome() : "—");
         resp.put("emailVendedor", lote.getCliente() != null ? lote.getCliente().getEmail() : "—");
-        resp.put("vendedorId",    lote.getCliente() != null ? lote.getCliente().getId()     : null);
+        resp.put("vendedorId", lote.getCliente() != null ? lote.getCliente().getId() : null);
 
         List<Map<String, Object>> livrosMaps = livroService.listarLivrosPorLote(id).stream().map(b -> {
             Map<String, Object> map = new java.util.HashMap<>();
-            map.put("id",        b.getId());
-            map.put("titulo",    b.getTitulo());
-            map.put("autor",     b.getAutor());
-            map.put("isbn",      b.getIsbn());
+            map.put("id", b.getId());
+            map.put("titulo", b.getTitulo());
+            map.put("autor", b.getAutor());
+            map.put("isbn", b.getIsbn());
             map.put("fotosUrls", b.getFotosUrls() != null ? b.getFotosUrls() : "[]");
             return map;
         }).toList();
@@ -141,7 +142,7 @@ public class AdminControllerApi {
     }
 
     @PostMapping("/livros/{id}/aprovar")
-    public ResponseEntity<ExternApiResponse> aprovarLivro(
+    public ResponseEntity<ExternApiResponse<Void>> aprovarLivro(
             @PathVariable Long id,
             @RequestBody AdminAprovacaoRequest dto,
             @AuthenticationPrincipal UserDetails user) {
@@ -157,7 +158,7 @@ public class AdminControllerApi {
     }
 
     @PostMapping("/livros/{id}/rejeitar")
-    public ResponseEntity<ExternApiResponse> rejeitarLivro(
+    public ResponseEntity<ExternApiResponse<Void>> rejeitarLivro(
             @PathVariable Long id,
             @RequestBody RejeicaoLivroRequest dto,
             @AuthenticationPrincipal UserDetails user) {
@@ -178,7 +179,7 @@ public class AdminControllerApi {
     }
 
     @PostMapping("/livros/novo")
-    public ResponseEntity<ExternApiResponse> adicionarLivro(
+    public ResponseEntity<ExternApiResponse<Void>> adicionarLivro(
             @RequestBody LivroAdminRequest request, // Use o Request aqui
             @AuthenticationPrincipal UserDetails user) {
 
@@ -196,7 +197,7 @@ public class AdminControllerApi {
     }
 
     @PutMapping("/livros/{id}")
-    public ResponseEntity<ExternApiResponse> editarLivro(
+    public ResponseEntity<ExternApiResponse<Void>> editarLivro(
             @PathVariable @NonNull Long id,
             @RequestBody LivroAdminRequest request,
             @AuthenticationPrincipal UserDetails user) {
@@ -210,7 +211,7 @@ public class AdminControllerApi {
     }
 
     @DeleteMapping("/livros/{id}")
-    public ResponseEntity<ExternApiResponse> deletarLivro(
+    public ResponseEntity<ExternApiResponse<Void>> deletarLivro(
             @PathVariable @NonNull Long id,
             @AuthenticationPrincipal UserDetails user) {
 
@@ -239,7 +240,8 @@ public class AdminControllerApi {
         if (user == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, NAO_AUTENTICADO);
 
-        return ResponseEntity.ok(pedidoMapper.toResponse(pedidoService.atualizarStatus(id, dto.getStatusEnvio(), dto.getCodigoRastreio())));
+        return ResponseEntity.ok(pedidoMapper
+                .toResponse(pedidoService.atualizarStatus(id, dto.getStatusEnvio(), dto.getCodigoRastreio())));
     }
 
     // ==========================================================
@@ -252,7 +254,7 @@ public class AdminControllerApi {
     }
 
     @DeleteMapping("/cupons/{id}")
-    public ResponseEntity<ExternApiResponse> invalidarCupom(@PathVariable @NonNull Long id) {
+    public ResponseEntity<ExternApiResponse<Void>> invalidarCupom(@PathVariable @NonNull Long id) {
         cupomService.invalidarCupom(Objects.requireNonNull(id, "ID não pode ser nulo"));
         return ResponseEntity.ok(ExternApiResponse.ok("Cupom invalidado"));
     }
@@ -343,8 +345,9 @@ public class AdminControllerApi {
     public ResponseEntity<Map<String, String>> uploadFotoLivro(
             @RequestParam("foto") MultipartFile foto,
             @AuthenticationPrincipal UserDetails user) {
-        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        String url = livroService.salvarFotoLivro(foto);
+        if (user == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        String url = ArquivosService.salvarFotoLivro(foto, "uploads/livros/");
         return ResponseEntity.ok(Map.of("url", url));
     }
 }

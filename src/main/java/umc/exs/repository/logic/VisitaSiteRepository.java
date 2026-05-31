@@ -15,7 +15,8 @@ public interface VisitaSiteRepository extends JpaRepository<VisitaSite, Long> {
 
     Optional<VisitaSite> findByData(LocalDate data);
 
-    // COALESCE com literal inteiro causa ClassCastException no SQLite quando a tabela está vazia.
+    // COALESCE com literal inteiro causa ClassCastException no SQLite quando a
+    // tabela está vazia.
     // Retornamos null (tabela vazia) e tratamos no service.
     @Query("SELECT SUM(v.total) FROM VisitaSite v")
     Long sumTotalVisitas();

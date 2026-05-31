@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import umc.exs.dto.mapper.ListaDesejosMapper;
 import umc.exs.dto.response.cliente.ListaDesejosResponse;
-import umc.exs.service.core.control.ListaDesejosService;
+import umc.exs.service.core.dashboard.ListaDesejosService;
 
 import java.util.List;
 import java.util.Map;
@@ -41,7 +41,7 @@ public class ListaDesejosController {
         if (user == null)
             return ResponseEntity.status(401).build();
 
-         String isbn = dto != null ? dto.get("isbn") : null;
+        String isbn = dto != null ? dto.get("isbn") : null;
         return ResponseEntity.status(201)
                 .body(mapper.toDTO(listaDesejosService.adicionarDesejo(user.getUsername(), isbn)));
     }

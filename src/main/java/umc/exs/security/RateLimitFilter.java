@@ -10,40 +10,36 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Simple in-memory rate limiter: 10 requests/min per IP on auth paths.
- * Token bucket algo (refill 10 tokens/min).
- */
 @Slf4j
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {
 
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
-    private static final int CAPACITY = 10;
-    private static final long REFILL_INTERVAL_MS = 60_000; // 1 min
-    private static final String[] PROTECTED_PATHS = { "/auth/", "/clientes/login", "/api/login" };
+    private static final int CAPACITY = 100;
+    private static final long REFILL_INTERVAL_MS = 60_000;
 
-    private boolean isProtected(HttpServletRequest request) {
-        if (!"POST".equalsIgnoreCase(request.getMethod())) return false;
-        String path = request.getRequestURI();
-        for (String p : PROTECTED_PATHS) {
-            if (path.startsWith(p))
-                return true;
-        }
-        return false;
-    }
+    private static final String[] SKIP_PATHS = {
+            "/css/", "/js/", "/images/", "/favicon.ico", "/error",
+            "/actuator/", "/h2-console/", "/swagger-ui/", "/v3/api-docs/",
+            "/webjars/", "/static/", "/error/"
+    };
 
-    @SuppressWarnings("null")
     @Override
-    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
-        if (!isProtected(request)) {
+
+        if (request.getAttribute("jakarta.servlet.error.request_uri") != null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        if (shouldSkip(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -53,17 +49,55 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         if (bucket.tryConsume()) {
             filterChain.doFilter(request, response);
-        } else {
-            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            response.getWriter().write("{\"error\": \"Too many requests. Try again later.\"}");
-            log.warn("Rate limited IP: {}", ip);
+            return;
         }
+
+        if (isApiRequest(request)) {
+            response.setStatus(429);
+            response.setContentType("application/json;charset=UTF-8");
+            response.setCharacterEncoding("UTF-8");
+
+            response.getWriter().write("""
+                        {
+                          "status": 429,
+                          "error": "Too many requests. Try again later."
+                        }
+                    """);
+            return;
+        }
+
+        response.sendError(429);
+    }
+
+    private boolean isApiRequest(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        String accept = request.getHeader("Accept");
+
+        return uri.startsWith("/api/")
+                || uri.startsWith("/auth/")
+                || (accept != null && accept.contains("application/json"));
+    }
+
+    private boolean shouldSkip(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+
+        if (uri.startsWith("/error")) {
+            return true;
+        }
+
+        for (String p : SKIP_PATHS) {
+            if (uri.startsWith(p)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String getClientIp(HttpServletRequest request) {
         String xf = request.getHeader("X-Forwarded-For");
-        if (xf != null && !xf.isEmpty())
+        if (xf != null && !xf.isBlank()) {
             return xf.split(",")[0].trim();
+        }
         return request.getRemoteAddr();
     }
 
@@ -73,7 +107,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         public synchronized boolean tryConsume() {
             refill();
-            return tokens.get() > 0 && tokens.decrementAndGet() >= 0;
+            if (tokens.get() > 0) {
+                tokens.decrementAndGet();
+                return true;
+            }
+            return false;
         }
 
         private void refill() {

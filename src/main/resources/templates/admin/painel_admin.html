@@ -20,7 +20,9 @@
   </head>
   <body>
     <div class="layout">
-      <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('lotes')}"></th:block>
+      <th:block
+        th:replace="~{fragments/admin-sidebar :: adminSidebar('lotes')}"
+      ></th:block>
 
       <!-- CONTEÚDO -->
       <div class="content">
@@ -37,15 +39,17 @@
         </header>
 
         <!-- BREADCRUMB DE LOTE (visível quando auditoria de lote está aberta) -->
-        <div id="breadcrumb-lote" class="breadcrumb-wrap" style="display:none;">
-            <nav class="breadcrumb-nav">
-                <a href="/admin/painel">Painel Admin</a>
-                <span class="breadcrumb-sep">›</span>
-                <a href="#" onclick="loadLotes(); return false;">Lotes Pendentes</a>
-                <span class="breadcrumb-sep">›</span>
-                <span class="breadcrumb-current" id="bcrLoteNumero">Lote</span>
-            </nav>
-            <button onclick="loadLotes()" class="btn-voltar">← Voltar para Lotes</button>
+        <div id="breadcrumb-lote" class="breadcrumb-wrap" style="display: none">
+          <nav class="breadcrumb-nav">
+            <a href="/admin/painel">Painel Admin</a>
+            <span class="breadcrumb-sep">›</span>
+            <a href="#" onclick="loadLotes(); return false;">Lotes Pendentes</a>
+            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-current" id="bcrLoteNumero">Lote</span>
+          </nav>
+          <button onclick="loadLotes()" class="btn-voltar">
+            ← Voltar para Lotes
+          </button>
         </div>
 
         <div class="main">
@@ -59,7 +63,6 @@
 
             <!-- ════ PAINEL PEDIDOS ════ -->
             <div class="tab-panel" id="panel-pedidos">
-
               <!-- Toolbar de pedidos -->
               <div class="pedidos-toolbar">
                 <div class="pedidos-toolbar-top">
@@ -70,11 +73,36 @@
                 </div>
                 <div class="pedidos-toolbar-bottom">
                   <div class="filter-bar">
-                    <button class="filter-btn active" onclick="filtrarPedidos('TODOS', this)">Todos</button>
-                    <button class="filter-btn" onclick="filtrarPedidos('AGUARDANDO_ENVIO', this)">⏳ Aguardando</button>
-                    <button class="filter-btn" onclick="filtrarPedidos('EM_TRANSITO', this)">🚚 Em Trânsito</button>
-                    <button class="filter-btn" onclick="filtrarPedidos('ENTREGUE', this)">✅ Entregues</button>
-                    <button class="filter-btn" onclick="filtrarPedidos('CANCELADO', this)">❌ Cancelados</button>
+                    <button
+                      class="filter-btn active"
+                      onclick="filtrarPedidos('TODOS', this)"
+                    >
+                      Todos
+                    </button>
+                    <button
+                      class="filter-btn"
+                      onclick="filtrarPedidos('AGUARDANDO_ENVIO', this)"
+                    >
+                      ⏳ Aguardando
+                    </button>
+                    <button
+                      class="filter-btn"
+                      onclick="filtrarPedidos('EM_TRANSITO', this)"
+                    >
+                      🚚 Em Trânsito
+                    </button>
+                    <button
+                      class="filter-btn"
+                      onclick="filtrarPedidos('ENTREGUE', this)"
+                    >
+                      ✅ Entregues
+                    </button>
+                    <button
+                      class="filter-btn"
+                      onclick="filtrarPedidos('CANCELADO', this)"
+                    >
+                      ❌ Cancelados
+                    </button>
                   </div>
                   <input
                     type="text"
@@ -96,13 +124,27 @@
                       <th class="pedidos-th">Data</th>
                       <th class="pedidos-th">Total</th>
                       <th class="pedidos-th">Status</th>
-                      <th class="pedidos-th" style="text-align:center">Ação</th>
+                      <th class="pedidos-th" style="text-align: center">
+                        Ação
+                      </th>
                     </tr>
                   </thead>
                   <tbody id="listaPedidos">
-                    <tr><td colspan="7" class="skel-cell"><div class="skel"></div></td></tr>
-                    <tr><td colspan="7" class="skel-cell"><div class="skel"></div></td></tr>
-                    <tr><td colspan="7" class="skel-cell"><div class="skel"></div></td></tr>
+                    <tr>
+                      <td colspan="7" class="skel-cell">
+                        <div class="skel"></div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colspan="7" class="skel-cell">
+                        <div class="skel"></div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colspan="7" class="skel-cell">
+                        <div class="skel"></div>
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
               </div>

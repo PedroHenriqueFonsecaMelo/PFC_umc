@@ -35,7 +35,9 @@ nav.topnav {
     align-items: center;
     justify-content: space-between;
     position: fixed;
-    top: 0; left: 0; right: 0;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 30;
 }
 
@@ -51,7 +53,10 @@ nav.topnav {
     padding: 0.35rem 0.85rem;
     transition: background 0.2s, color 0.2s;
 }
-.nav-link-back:hover { background: var(--paper); color: var(--ink); }
+.nav-link-back:hover {
+    background: var(--paper);
+    color: var(--ink);
+}
 
 .nav-brand {
     font-family: "Playfair Display", serif;
@@ -88,8 +93,15 @@ nav.topnav {
     font-style: italic;
 }
 
-#containerCapa { margin-bottom: 1.5rem; text-align: center; }
-#containerCapa img { max-width: 200px; border: 1px solid var(--border); box-shadow: 8px 8px 0 var(--cream); }
+#containerCapa {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+#containerCapa img {
+    max-width: 200px;
+    border: 1px solid var(--border);
+    box-shadow: 8px 8px 0 var(--cream);
+}
 
 #containerResumo {
     font-family: "IM Fell English", serif;
@@ -99,17 +111,64 @@ nav.topnav {
     text-align: justify;
 }
 
-.opiniao-section { border-top: 2px double var(--border); padding-top: 2rem; }
-.opiniao-section h2 { font-family: "Playfair Display", serif; margin-bottom: 1.5rem; }
+.opiniao-section {
+    border-top: 2px double var(--border);
+    padding-top: 2rem;
+}
+.opiniao-section h2 {
+    font-family: "Playfair Display", serif;
+    margin-bottom: 1.5rem;
+}
 
-.form-resenha { background: var(--paper); padding: 1.5rem; border: 1px solid var(--border); margin-bottom: 2rem; }
-.form-resenha textarea { width: 100%; height: 120px; padding: 1rem; font-family: "DM Sans", sans-serif; border: 1px solid var(--border); background: var(--white); resize: vertical; margin-bottom: 1rem; }
+.form-resenha {
+    background: var(--paper);
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
+}
+.form-resenha textarea {
+    width: 100%;
+    height: 120px;
+    padding: 1rem;
+    font-family: "DM Sans", sans-serif;
+    border: 1px solid var(--border);
+    background: var(--white);
+    resize: vertical;
+    margin-bottom: 1rem;
+}
 
-.form-footer { display: flex; justify-content: space-between; align-items: center; }
+.form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-.btn-enviar { background: var(--ink); color: var(--paper); padding: 0.7rem 1.5rem; border: none; font-family: "DM Sans", sans-serif; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: opacity 0.2s; }
-.btn-enviar:hover { opacity: 0.9; }
+.btn-enviar {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0.7rem 1.5rem;
+    border: none;
+    font-family: "DM Sans", sans-serif;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.btn-enviar:hover {
+    opacity: 0.9;
+}
 
-.resenha-item { padding: 1.5rem 0; border-bottom: 1px solid var(--border); }
-.resenha-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
-.stars { color: var(--accent); letter-spacing: 2px; }
+.resenha-item {
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+}
+.resenha-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+.stars {
+    color: var(--accent);
+    letter-spacing: 2px;
+}

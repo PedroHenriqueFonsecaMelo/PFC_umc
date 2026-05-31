@@ -37,7 +37,8 @@ public class ExternApi {
         String url = "https://www.googleapis.com/books/v1/volumes?q=isbn:"
                 + isbn
                 + (googleBooksApiKey != null && !googleBooksApiKey.isBlank()
-                   ? "&key=" + googleBooksApiKey : "");
+                        ? "&key=" + googleBooksApiKey
+                        : "");
         try {
             GoogleBookData response = restTemplate.getForObject(url, GoogleBookData.class);
             return CompletableFuture.completedFuture(response);
@@ -52,17 +53,20 @@ public class ExternApi {
      * Retorna Optional vazio se o livro não for encontrado ou se a API falhar.
      */
     public String buscarGeneroPorIsbn(String isbn) {
-        if (isbn == null || isbn.isBlank()) return null;
+        if (isbn == null || isbn.isBlank())
+            return null;
         try {
             String url = "https://www.googleapis.com/books/v1/volumes?q=isbn:"
                     + isbn.replaceAll("[^0-9X]", "")
                     + (googleBooksApiKey != null && !googleBooksApiKey.isBlank()
-                       ? "&key=" + googleBooksApiKey : "");
+                            ? "&key=" + googleBooksApiKey
+                            : "");
             GoogleBookData response = restTemplate.getForObject(url, GoogleBookData.class);
             if (response == null || response.getItems() == null || response.getItems().isEmpty())
                 return null;
             var categories = response.getItems().get(0).getVolumeInfo().getCategories();
-            if (categories == null || categories.isEmpty()) return null;
+            if (categories == null || categories.isEmpty())
+                return null;
             return GeneroMapper.traduzir(categories.get(0));
         } catch (Exception e) {
             return null;
@@ -76,8 +80,8 @@ public class ExternApi {
                     url,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<Map<String, OpenLibraryData>>() {}
-            ).getBody();
+                    new ParameterizedTypeReference<Map<String, OpenLibraryData>>() {
+                    }).getBody();
 
             if (result == null || result.isEmpty()) {
                 return Optional.empty();

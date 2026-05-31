@@ -16,24 +16,30 @@
   <body>
     <header th:replace="~{fragments/client-nav :: clientNav}"></header>
 
-    <div class="page-wrap" style="position:relative;z-index:1;">
-
+    <div class="page-wrap" style="position: relative; z-index: 1">
       <!-- Estado vazio: sessão expirou ou acesso direto à URL -->
-      <div class="estado-vazio" id="estadoVazio" style="display:none">
+      <div class="estado-vazio" id="estadoVazio" style="display: none">
         <p>Nenhum pedido encontrado.</p>
         <a href="/livros/vitrine" class="btn-vitrine">Ver vitrine</a>
       </div>
 
       <!-- Conteúdo principal -->
-      <div id="conteudo" style="display:none">
-
+      <div id="conteudo" style="display: none">
         <!-- Hero de sucesso -->
         <div class="hero-sucesso">
           <div class="hero-icone">
-            <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34"
-                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="34"
+              height="34"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
             </svg>
           </div>
           <h1 class="hero-titulo">Compra <em>confirmada!</em></h1>
@@ -54,35 +60,51 @@
           </div>
           <div class="resumo-linha resumo-linha--destaque">
             <span class="resumo-label">Saldo restante</span>
-            <strong class="resumo-valor resumo-valor--saldo" id="resumoSaldo"></strong>
+            <strong
+              class="resumo-valor resumo-valor--saldo"
+              id="resumoSaldo"
+            ></strong>
           </div>
         </div>
 
         <!-- Aviso de envio -->
         <div class="aviso-envio">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
-               viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
-          <p>Um e-mail de confirmação foi enviado para você. Acompanhe o status
-             do envio em <a href="/clientes/minhas-compras">Minhas Compras</a>.</p>
+          <p>
+            Um e-mail de confirmação foi enviado para você. Acompanhe o status
+            do envio em <a href="/clientes/minhas-compras">Minhas Compras</a>.
+          </p>
         </div>
 
         <!-- Ações -->
         <div class="acoes">
-          <a href="/livros/vitrine" class="btn-vitrine">Voltar para a vitrine</a>
-          <a href="/clientes/minhas-compras" class="btn-pedidos">Ver todos os meus pedidos</a>
+          <a href="/livros/vitrine" class="btn-vitrine"
+          >Voltar para a vitrine</a>
+          <a href="/clientes/minhas-compras" class="btn-pedidos"
+          >Ver todos os meus pedidos</a>
         </div>
-
       </div>
     </div>
 
-    <footer style="position:relative;z-index:1;">
+    <footer style="position: relative; z-index: 1">
       <div class="footer-logo">Biblio<em>troca</em></div>
-      <p class="footer-copy">© 2025 Bibliotroca — Todos os direitos reservados</p>
+      <p class="footer-copy">
+        © 2025 Bibliotroca — Todos os direitos reservados
+      </p>
     </footer>
 
     <script th:src="@{/js/produto/pedido_confirmado.js}"></script>

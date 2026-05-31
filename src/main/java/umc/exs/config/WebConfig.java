@@ -18,7 +18,7 @@ public class WebConfig implements WebMvcConfigurer {
      * 
      * @param registry recursos web
      */
-    @SuppressWarnings("null")
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Define o caminho absoluto para a pasta de uploads

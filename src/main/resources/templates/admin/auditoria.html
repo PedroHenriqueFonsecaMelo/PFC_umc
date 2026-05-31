@@ -7,15 +7,23 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
 
     <link rel="stylesheet" th:href="@{/css/admin/layout.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/auditoria.css}" />
   </head>
   <body>
     <div class="layout">
-      <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('auditoria')}"></th:block>
+      <th:block
+        th:replace="~{fragments/admin-sidebar :: adminSidebar('auditoria')}"
+      ></th:block>
 
       <div class="content">
         <header class="topbar">
@@ -24,7 +32,8 @@
             <div class="topbar-date" id="dataHoje"></div>
           </div>
           <div class="topbar-right">
-            <span class="badge-online"><span class="dot"></span> Sistema Online</span>
+            <span class="badge-online"><span class="dot"></span> Sistema
+              Online</span>
             <div class="avatar"><i class="fa-solid fa-user"></i></div>
           </div>
         </header>
@@ -35,12 +44,21 @@
           <!-- PAINEL DE FILTROS -->
           <div class="filter-card">
             <div class="filter-card-header">
-              <span class="filter-card-title"><i class="fa-solid fa-filter"></i> Filtros</span>
+              <span class="filter-card-title"><i class="fa-solid fa-filter"></i>
+                Filtros</span>
               <div class="filter-shortcuts">
-                <button class="btn-shortcut" onclick="atalho('hoje')">Hoje</button>
-                <button class="btn-shortcut" onclick="atalho('7dias')">Últimos 7 dias</button>
-                <button class="btn-shortcut" onclick="atalho('mes')">Este mês</button>
-                <button class="btn-shortcut" onclick="atalho('todos')">Todos</button>
+                <button class="btn-shortcut" onclick="atalho('hoje')">
+                  Hoje
+                </button>
+                <button class="btn-shortcut" onclick="atalho('7dias')">
+                  Últimos 7 dias
+                </button>
+                <button class="btn-shortcut" onclick="atalho('mes')">
+                  Este mês
+                </button>
+                <button class="btn-shortcut" onclick="atalho('todos')">
+                  Todos
+                </button>
               </div>
             </div>
 
@@ -48,31 +66,55 @@
               <div class="filter-grid">
                 <div class="filter-group">
                   <label>Data inicial</label>
-                  <input type="date" class="filter-input" name="dataInicio" id="dataInicio"
-                         th:value="${filtroDataInicio}" />
+                  <input
+                    type="date"
+                    class="filter-input"
+                    name="dataInicio"
+                    id="dataInicio"
+                    th:value="${filtroDataInicio}"
+                  />
                 </div>
                 <div class="filter-group">
                   <label>Data final</label>
-                  <input type="date" class="filter-input" name="dataFim" id="dataFim"
-                         th:value="${filtroDataFim}" />
+                  <input
+                    type="date"
+                    class="filter-input"
+                    name="dataFim"
+                    id="dataFim"
+                    th:value="${filtroDataFim}"
+                  />
                 </div>
                 <div class="filter-group">
                   <label>Usuário (e-mail)</label>
-                  <input type="text" class="filter-input" name="emailUsuario" id="emailUsuario"
-                         placeholder="ex: joao@email.com"
-                         th:value="${filtroEmail}" />
+                  <input
+                    type="text"
+                    class="filter-input"
+                    name="emailUsuario"
+                    id="emailUsuario"
+                    placeholder="ex: joao@email.com"
+                    th:value="${filtroEmail}"
+                  />
                 </div>
                 <div class="filter-group">
                   <label>Tipo de ação</label>
                   <select class="filter-select" name="acao" id="acaoFiltro">
                     <option value="">Todas as ações</option>
-                    <option th:each="a : ${acoes}" th:value="${a}" th:text="${a}"
-                            th:selected="${a == filtroAcao}"></option>
+                    <option
+                      th:each="a : ${acoes}"
+                      th:value="${a}"
+                      th:text="${a}"
+                      th:selected="${a == filtroAcao}"
+                    >
+                    </option>
                   </select>
                 </div>
               </div>
               <div class="filter-actions">
-                <button type="button" class="btn-limpar" onclick="limparFiltros()">
+                <button
+                  type="button"
+                  class="btn-limpar"
+                  onclick="limparFiltros()"
+                >
                   <i class="fa-solid fa-xmark"></i> Limpar
                 </button>
                 <button type="submit" class="btn-filtrar">
@@ -86,13 +128,18 @@
           <div class="audit-header">
             <div class="audit-count">
               Exibindo <strong th:text="${totalLogs}">0</strong> registro(s)
-              <span th:if="${filtroEmail != '' or filtroAcao != '' or filtroDataInicio != '' or filtroDataFim != ''}">
+              <span
+                th:if="${filtroEmail != '' or filtroAcao != '' or filtroDataInicio != '' or filtroDataFim != ''}"
+              >
                 (filtrado)
               </span>
             </div>
             <div class="export-btns">
-              <a class="btn-export btn-export-csv" id="linkCSV"
-                 th:href="@{/admin/audit/exportar-csv(emailUsuario=${filtroEmail},acao=${filtroAcao},dataInicio=${filtroDataInicio},dataFim=${filtroDataFim})}">
+              <a
+                class="btn-export btn-export-csv"
+                id="linkCSV"
+                th:href="@{/admin/audit/exportar-csv(emailUsuario=${filtroEmail},acao=${filtroAcao},dataInicio=${filtroDataInicio},dataFim=${filtroDataFim})}"
+              >
                 <i class="fa-solid fa-file-csv"></i> Exportar CSV
               </a>
               <button class="btn-export btn-export-pdf" onclick="exportarPDF()">
@@ -110,9 +157,17 @@
 
             <div th:if="${!#lists.isEmpty(logs)}">
               <!-- Controle de registros por página -->
-              <div style="padding:12px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(74,93,35,.08);">
-                <span style="font-size:12px;color:rgba(44,36,27,.5);font-family:'DM Sans',sans-serif;">Registros por página:</span>
-                <select class="per-page-select" id="perPage" onchange="renderTabela()">
+              <div
+                style="padding: 12px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(74, 93, 35, 0.08)"
+              >
+                <span
+                  style="font-size: 12px; color: rgba(44, 36, 27, 0.5); font-family: 'DM Sans', sans-serif"
+                >Registros por página:</span>
+                <select
+                  class="per-page-select"
+                  id="perPage"
+                  onchange="renderTabela()"
+                >
                   <option value="25">25</option>
                   <option value="50">50</option>
                   <option value="100">100</option>
@@ -123,14 +178,26 @@
                 <thead>
                   <tr>
                     <th>#</th>
-                    <th class="sortable" data-col="acao" onclick="ordenar('acao')">
+                    <th
+                      class="sortable"
+                      data-col="acao"
+                      onclick="ordenar('acao')"
+                    >
                       Ação <span class="sort-icon"></span>
                     </th>
-                    <th class="sortable" data-col="emailUsuario" onclick="ordenar('emailUsuario')">
+                    <th
+                      class="sortable"
+                      data-col="emailUsuario"
+                      onclick="ordenar('emailUsuario')"
+                    >
                       Usuário <span class="sort-icon"></span>
                     </th>
                     <th>Detalhes</th>
-                    <th class="sortable" data-col="dataHora" onclick="ordenar('dataHora')">
+                    <th
+                      class="sortable"
+                      data-col="dataHora"
+                      onclick="ordenar('dataHora')"
+                    >
                       Data / Hora <span class="sort-icon"></span>
                     </th>
                     <th></th>
@@ -146,7 +213,6 @@
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>

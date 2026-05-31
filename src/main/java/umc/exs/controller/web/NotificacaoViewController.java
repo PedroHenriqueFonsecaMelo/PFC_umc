@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import umc.exs.dto.request.admin.EmailDisparoRequest;
 import umc.exs.dto.response.email.EmailDestinatarioResponse;
 import umc.exs.dto.response.email.EmailHistoricoResponse;
-import umc.exs.service.core.control.NotificacaoEmailService;
+import umc.exs.service.email.notificacao.NotificacaoEmailService;
 
 import java.util.List;
 import java.util.Map;

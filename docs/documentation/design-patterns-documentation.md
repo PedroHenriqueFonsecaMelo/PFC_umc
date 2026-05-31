@@ -402,16 +402,16 @@ public class ClienteService {
 
 ## 4. Resumo dos Patterns
 
-| Pattern       | Onde Usado               | Benefício                  |
-| ------------- | ------------------------ | -------------------------- |
-| **Strategy**  | Pagamentos (Pix, Cartão) | Algoritmos intercambiáveis |
-| **Factory**   | PagamentoFactory         | Criação centralizada       |
-| **Builder**   | Lombok @Builder          | Construção flexível        |
-| **DAO**       | JpaRepository            | Abstração de dados         |
-| **DTO**       | ClienteDTO, SignupRequest    | Transferência de dados     |
-| **Mapper**    | MapStruct                | Conversão automática       |
-| **Singleton** | Services Spring          | Uma única instância        |
-| **MVC**       | Controller/Service/Model | Separação de preocupações  |
+| Pattern       | Onde Usado                | Benefício                  |
+| ------------- | ------------------------- | -------------------------- |
+| **Strategy**  | Pagamentos (Pix, Cartão)  | Algoritmos intercambiáveis |
+| **Factory**   | PagamentoFactory          | Criação centralizada       |
+| **Builder**   | Lombok @Builder           | Construção flexível        |
+| **DAO**       | JpaRepository             | Abstração de dados         |
+| **DTO**       | ClienteDTO, SignupRequest | Transferência de dados     |
+| **Mapper**    | MapStruct                 | Conversão automática       |
+| **Singleton** | Services Spring           | Uma única instância        |
+| **MVC**       | Controller/Service/Model  | Separação de preocupações  |
 
 ---
 

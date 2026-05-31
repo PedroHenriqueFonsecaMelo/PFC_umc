@@ -158,8 +158,12 @@
 
 /* ── Keyframe do scroll infinito ── */
 @keyframes bwScroll {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-50%); }
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
 }
 
 /* ── Fade nas bordas superior e inferior ── */

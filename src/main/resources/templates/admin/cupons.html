@@ -10,19 +10,24 @@
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
     <link rel="stylesheet" th:href="@{/css/admin/layout.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/cupons.css}" />
   </head>
   <body>
     <div class="layout">
-      <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('cupons')}"></th:block>
+      <th:block
+        th:replace="~{fragments/admin-sidebar :: adminSidebar('cupons')}"
+      ></th:block>
 
       <div class="overlay" id="overlay" onclick="fecharMenu()"></div>
 
       <div class="content">
         <header class="topbar">
-          <div style="display:flex;align-items:center;gap:14px">
+          <div style="display: flex; align-items: center; gap: 14px">
             <button class="menu-btn" onclick="abrirMenu()">
               <i class="fa-solid fa-bars"></i>
             </button>
@@ -32,7 +37,8 @@
             </div>
           </div>
           <div class="topbar-right">
-            <span class="badge-online"><span class="dot"></span> Sistema Online</span>
+            <span class="badge-online"><span class="dot"></span> Sistema
+              Online</span>
             <div class="avatar"><i class="fa-solid fa-user"></i></div>
           </div>
         </header>
@@ -40,28 +46,36 @@
         <!-- STATS -->
         <div class="stats-strip" id="statsStrip">
           <div class="stat-card">
-            <div class="stat-icon" style="background:#4a5d23"><i class="fa-solid fa-ticket"></i></div>
+            <div class="stat-icon" style="background: #4a5d23">
+              <i class="fa-solid fa-ticket"></i>
+            </div>
             <div>
               <div class="stat-value" id="statTotal">—</div>
               <div class="stat-label">Total</div>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon" style="background:#065f46"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="stat-icon" style="background: #065f46">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
             <div>
               <div class="stat-value" id="statAtivos">—</div>
               <div class="stat-label">Disponíveis</div>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon" style="background:#7a6e65"><i class="fa-solid fa-check-double"></i></div>
+            <div class="stat-icon" style="background: #7a6e65">
+              <i class="fa-solid fa-check-double"></i>
+            </div>
             <div>
               <div class="stat-value" id="statUsados">—</div>
               <div class="stat-label">Utilizados</div>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon" style="background:#722f37"><i class="fa-solid fa-clock-rotate-left"></i></div>
+            <div class="stat-icon" style="background: #722f37">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
             <div>
               <div class="stat-value" id="statExpirados">—</div>
               <div class="stat-label">Expirados</div>
@@ -73,7 +87,12 @@
         <div class="cupons-toolbar">
           <div class="search-wrap">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="searchInput" placeholder="Buscar por código ou cliente..." oninput="filtrar()" />
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Buscar por código ou cliente..."
+              oninput="filtrar()"
+            />
           </div>
           <select id="filtroTipo" onchange="filtrar()" class="filtro-select">
             <option value="">Todos os tipos</option>
@@ -111,63 +130,111 @@
               </tr>
             </thead>
             <tbody id="cuponsBody">
-              <tr><td colspan="9" class="loading-row"><i class="fa-solid fa-spinner fa-spin"></i> Carregando...</td></tr>
+              <tr>
+                <td colspan="9" class="loading-row">
+                  <i class="fa-solid fa-spinner fa-spin"></i> Carregando...
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
 
-        <div id="cuponsVazio" class="vazio" style="display:none">
+        <div id="cuponsVazio" class="vazio" style="display: none">
           <i class="fa-solid fa-ticket-slash"></i>
           <p>Nenhum cupom encontrado.</p>
         </div>
-
-      </div><!-- /content -->
-    </div><!-- /layout -->
+      </div>
+      <!-- /content -->
+    </div>
+    <!-- /layout -->
 
     <!-- ════ MODAL NOVO CUPOM ════ -->
     <div class="modal-overlay" id="modalOverlay" onclick="fecharModal()"></div>
     <div class="modal" id="modal">
       <div class="modal-header">
         <h2>Novo Cupom Promocional</h2>
-        <button class="modal-close" onclick="fecharModal()"><i class="fa-solid fa-xmark"></i></button>
+        <button class="modal-close" onclick="fecharModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
       <form id="modalForm" onsubmit="criarCupom(event)">
         <div class="form-group">
           <label>% de Desconto *</label>
-          <input type="number" id="fPercentual" min="1" max="100" step="1" required placeholder="Ex: 10" />
+          <input
+            type="number"
+            id="fPercentual"
+            min="1"
+            max="100"
+            step="1"
+            required
+            placeholder="Ex: 10"
+          />
         </div>
         <div class="form-group">
           <label>Data de Validade *</label>
           <input type="datetime-local" id="fDataValidade" required />
         </div>
         <div class="form-group">
-          <label>Código <span style="font-weight:400;color:#9c968f">(gerado automaticamente se vazio)</span></label>
-          <input type="text" id="fCodigo" maxlength="40" placeholder="Ex: VERAO25" style="text-transform:uppercase;" />
+          <label>Código <span style="font-weight: 400; color: #9c968f"
+            >(gerado automaticamente se vazio)</span></label>
+          <input
+            type="text"
+            id="fCodigo"
+            maxlength="40"
+            placeholder="Ex: VERAO25"
+            style="text-transform: uppercase"
+          />
         </div>
         <div class="form-group">
-          <label>Qtd. Máxima de Usos <span style="font-weight:400;color:#9c968f">(vazio = ilimitado)</span></label>
-          <input type="number" id="fQtdMaxima" min="1" step="1" placeholder="Ex: 100" />
+          <label>Qtd. Máxima de Usos <span
+              style="font-weight: 400; color: #9c968f"
+            >(vazio = ilimitado)</span></label>
+          <input
+            type="number"
+            id="fQtdMaxima"
+            min="1"
+            step="1"
+            placeholder="Ex: 100"
+          />
         </div>
         <div class="form-group">
-          <label>ID do Cliente <span style="font-weight:400;color:#9c968f">(deixe vazio para cupom público)</span></label>
-          <input type="number" id="fClienteId" min="1" step="1" placeholder="Ex: 42" />
+          <label>ID do Cliente <span style="font-weight: 400; color: #9c968f"
+            >(deixe vazio para cupom público)</span></label>
+          <input
+            type="number"
+            id="fClienteId"
+            min="1"
+            step="1"
+            placeholder="Ex: 42"
+          />
         </div>
-        <div id="modalErro" class="modal-erro" style="display:none"></div>
+        <div id="modalErro" class="modal-erro" style="display: none"></div>
         <div class="modal-actions">
-          <button type="button" class="btn-cancel" onclick="fecharModal()">Cancelar</button>
-          <button type="submit" class="btn-save" id="btnSalvar">Gerar Cupom</button>
+          <button type="button" class="btn-cancel" onclick="fecharModal()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-save" id="btnSalvar">
+            Gerar Cupom
+          </button>
         </div>
       </form>
     </div>
 
     <!-- ════ MODAL CONFIRMAR INVALIDAÇÃO ════ -->
-    <div class="modal-overlay" id="confirmOverlay" onclick="fecharConfirm()"></div>
+    <div class="modal-overlay" id="confirmOverlay" onclick="fecharConfirm()">
+    </div>
     <div class="modal modal-sm" id="confirmModal">
       <div class="modal-header">
         <h2>Invalidar cupom</h2>
-        <button class="modal-close" onclick="fecharConfirm()"><i class="fa-solid fa-xmark"></i></button>
+        <button class="modal-close" onclick="fecharConfirm()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
-      <p id="confirmMsg" style="padding:0 1.5rem 1rem;color:#4b4540;font-size:.9rem"></p>
+      <p
+        id="confirmMsg"
+        style="padding: 0 1.5rem 1rem; color: #4b4540; font-size: 0.9rem"
+      >
+      </p>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="fecharConfirm()">Cancelar</button>
         <button class="btn-delete" id="btnConfirmDelete">Invalidar</button>

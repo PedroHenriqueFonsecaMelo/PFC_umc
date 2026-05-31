@@ -15,7 +15,8 @@
     </head>
     <body>
         <div class="breadcrumb-wrap">
-            <a href="/clientes/login" class="btn-voltar">← Já tenho uma conta</a>
+            <a href="/clientes/login" class="btn-voltar"
+            >← Já tenho uma conta</a>
         </div>
 
         <div class="container">
@@ -53,7 +54,11 @@
                             required
                             th:value="${cliente != null && cliente.email != null ? cliente.email : ''}"
                         />
-                        <p id="email-feedback" style="font-size:0.82rem; font-family:'DM Sans',sans-serif; margin-top:4px; min-height:1.2em;"></p>
+                        <p
+                            id="email-feedback"
+                            style="font-size: 0.82rem; font-family: 'DM Sans', sans-serif; margin-top: 4px; min-height: 1.2em"
+                        >
+                        </p>
                     </div>
 
                     <div class="form-group-2">
@@ -68,8 +73,19 @@
                             autocomplete="off"
                             th:value="${cliente != null && cliente.datanasc != null ? cliente.datanasc : ''}"
                         />
-                        <p id="aviso-data-futura" style="display:none; font-size:0.82rem; font-family:'DM Sans',sans-serif; margin-top:4px; color:#c62828;">✗ Data inválida: essa data ainda não aconteceu.</p>
-                        <p id="aviso-menor-idade" style="display:none; font-size:0.82rem; font-family:'DM Sans',sans-serif; margin-top:4px; color:#c62828;">✗ É necessário ser maior de 18 anos para se cadastrar.</p>
+                        <p
+                            id="aviso-data-futura"
+                            style="display: none; font-size: 0.82rem; font-family: 'DM Sans', sans-serif; margin-top: 4px; color: #c62828"
+                        >
+                            ✗ Data inválida: essa data ainda não aconteceu.
+                        </p>
+                        <p
+                            id="aviso-menor-idade"
+                            style="display: none; font-size: 0.82rem; font-family: 'DM Sans', sans-serif; margin-top: 4px; color: #c62828"
+                        >
+                            ✗ É necessário ser maior de 18 anos para se
+                            cadastrar.
+                        </p>
                     </div>
 
                     <!--
@@ -96,7 +112,11 @@
                             placeholder="000.000.000-00"
                             autocomplete="off"
                         />
-                        <p id="cpf-feedback" style="font-size:0.82rem; font-family:'DM Sans',sans-serif; margin-top:4px; min-height:1.2em;"></p>
+                        <p
+                            id="cpf-feedback"
+                            style="font-size: 0.82rem; font-family: 'DM Sans', sans-serif; margin-top: 4px; min-height: 1.2em"
+                        >
+                        </p>
                     </div>
 
                     <div class="form-group-2">
@@ -109,29 +129,89 @@
                                 required
                                 placeholder="Mínimo 8 caracteres"
                             />
-                            <button type="button" class="btn-gerar-senha" title="Gerar senha forte"
-                                    onclick="gerarEPreencher('senha','confirmPassword','btn-copiar-cadastro')">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/>
-                                    <path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/>
+                            <button
+                                type="button"
+                                class="btn-gerar-senha"
+                                title="Gerar senha forte"
+                                onclick="gerarEPreencher('senha','confirmPassword','btn-copiar-cadastro')"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path
+                                        d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"
+                                    />
+                                    <path d="m14 7 3 3" />
+                                    <path d="M5 6v4" />
+                                    <path d="M19 14v4" />
+                                    <path d="M10 2v2" />
+                                    <path d="M7 8H3" />
+                                    <path d="M21 16h-4" />
+                                    <path d="M11 3H9" />
                                 </svg>
                             </button>
-                            <button type="button" class="btn-toggle-senha" aria-label="Mostrar senha" onclick="toggleSenha('senha', this)">
-                                <svg id="ico-senha" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                            <button
+                                type="button"
+                                class="btn-toggle-senha"
+                                aria-label="Mostrar senha"
+                                onclick="toggleSenha('senha', this)"
+                            >
+                                <svg
+                                    id="ico-senha"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path
+                                        d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                                    />
+                                    <circle cx="12" cy="12" r="3" />
                                 </svg>
                             </button>
                         </div>
-                        <div class="copiar-container" id="copiar-cadastro-container" style="display:none;">
-                            <button type="button" id="btn-copiar-cadastro" class="btn-copiar-senha"
-                                    onclick="copiarSenha('btn-copiar-cadastro')">Copiar</button>
+                        <div
+                            class="copiar-container"
+                            id="copiar-cadastro-container"
+                            style="display: none"
+                        >
+                            <button
+                                type="button"
+                                id="btn-copiar-cadastro"
+                                class="btn-copiar-senha"
+                                onclick="copiarSenha('btn-copiar-cadastro')"
+                            >
+                                Copiar
+                            </button>
                         </div>
-                        <ul id="senha-requisitos" style="list-style:none; padding:4px 0 0; margin:0; font-size:0.82rem; font-family:'DM Sans',sans-serif; color:#c62828;">
+                        <ul
+                            id="senha-requisitos"
+                            style="list-style: none; padding: 4px 0 0; margin: 0; font-size: 0.82rem; font-family: 'DM Sans', sans-serif; color: #c62828"
+                        >
                             <li id="req-tamanho">✗ 8 a 20 caracteres</li>
-                            <li id="req-maiuscula">✗ Uma letra maiúscula (A-Z)</li>
-                            <li id="req-minuscula">✗ Uma letra minúscula (a-z)</li>
+                            <li id="req-maiuscula">
+                                ✗ Uma letra maiúscula (A-Z)
+                            </li>
+                            <li id="req-minuscula">
+                                ✗ Uma letra minúscula (a-z)
+                            </li>
                             <li id="req-numero">✗ Um número (0-9)</li>
-                            <li id="req-especial">✗ Um caractere especial (@#$%^&amp;+=!)</li>
+                            <li id="req-especial">
+                                ✗ Um caractere especial (@#$%^&amp;+=!)
+                            </li>
                             <li id="req-espaco">✗ Sem espaços</li>
                         </ul>
                     </div>
@@ -145,13 +225,35 @@
                                 required
                                 placeholder="Repita a Senha"
                             />
-                            <button type="button" class="btn-toggle-senha" aria-label="Mostrar confirmar senha" onclick="toggleSenha('confirmPassword', this)">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                            <button
+                                type="button"
+                                class="btn-toggle-senha"
+                                aria-label="Mostrar confirmar senha"
+                                onclick="toggleSenha('confirmPassword', this)"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path
+                                        d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                                    />
+                                    <circle cx="12" cy="12" r="3" />
                                 </svg>
                             </button>
                         </div>
-                        <div id="msg-confirmar-cadastro" style="font-size:0.82rem; font-family:'DM Sans',sans-serif; margin-top:4px; min-height:1.2em;"></div>
+                        <div
+                            id="msg-confirmar-cadastro"
+                            style="font-size: 0.82rem; font-family: 'DM Sans', sans-serif; margin-top: 4px; min-height: 1.2em"
+                        >
+                        </div>
                     </div>
                 </div>
                 <hr />
@@ -720,27 +822,39 @@
                 </div>
 
                 <div class="form-actions-main">
-                    <button type="submit" class="btn btn-primary" id="btnCadastrar">
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="btnCadastrar"
+                    >
                         Cadastrar
                     </button>
                 </div>
             </form>
             <script>
-                document.getElementById('cadastroForm').addEventListener('submit', function(e) {
-                    var terms   = document.getElementById('termsAccepted');
-                    var privacy = document.getElementById('privacyAccepted');
-                    if (!terms.checked || !privacy.checked) {
-                        e.preventDefault();
-                        var msg = document.getElementById('senhaErro');
-                        msg.textContent = 'Você deve aceitar os Termos de Uso e a Política de Privacidade.';
-                        msg.style.display = 'block';
-                        return false;
-                    }
-                });
+                document.getElementById("cadastroForm").addEventListener(
+                    "submit",
+                    function (e) {
+                        var terms = document.getElementById("termsAccepted");
+                        var privacy = document.getElementById("privacyAccepted");
+                        if (!terms.checked || !privacy.checked) {
+                            e.preventDefault();
+                            var msg = document.getElementById("senhaErro");
+                            msg.textContent =
+                                "Você deve aceitar os Termos de Uso e a Política de Privacidade.";
+                            msg.style.display = "block";
+                            return false;
+                        }
+                    },
+                );
             </script>
         </div>
         <!-- Estante decorativa rodapé -->
-        <div class="bookshelf-container" id="bookshelfContainer" aria-hidden="true">
+        <div
+            class="bookshelf-container"
+            id="bookshelfContainer"
+            aria-hidden="true"
+        >
             <div class="bookshelf-fade"></div>
             <div class="books-row" id="booksRow"></div>
             <div class="bookshelf-floor"></div>

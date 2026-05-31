@@ -19,13 +19,15 @@
   </head>
   <body>
     <div class="layout">
-      <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('estoque')}"></th:block>
+      <th:block
+        th:replace="~{fragments/admin-sidebar :: adminSidebar('estoque')}"
+      ></th:block>
 
       <div class="overlay" id="overlay" onclick="fecharMenu()"></div>
 
       <div class="content">
         <header class="topbar">
-          <div style="display:flex;align-items:center;gap:14px">
+          <div style="display: flex; align-items: center; gap: 14px">
             <button class="menu-btn" onclick="abrirMenu()">
               <i class="fa-solid fa-bars"></i>
             </button>
@@ -35,7 +37,8 @@
             </div>
           </div>
           <div class="topbar-right">
-            <span class="badge-online"><span class="dot"></span> Sistema Online</span>
+            <span class="badge-online"><span class="dot"></span> Sistema
+              Online</span>
             <div class="avatar"><i class="fa-solid fa-user"></i></div>
           </div>
         </header>
@@ -44,8 +47,12 @@
         <div class="estoque-toolbar">
           <div class="estoque-search-wrap">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="searchInput" placeholder="Buscar por título, autor ou ISBN..."
-                   oninput="filtrar()" />
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Buscar por título, autor ou ISBN..."
+              oninput="filtrar()"
+            />
           </div>
           <div class="estoque-contador" id="contadorLivros">— livros</div>
           <button class="btn-add" onclick="abrirModalAdd()">
@@ -58,13 +65,13 @@
           <table class="estoque-table" id="estoqueGrid">
             <thead>
               <tr>
-                <th style="width:48px">#</th>
+                <th style="width: 48px">#</th>
                 <th>Livro</th>
                 <th>ISBN</th>
                 <th>Estado</th>
                 <th>Preço</th>
                 <th>Promoção</th>
-                <th style="width:160px">Ações</th>
+                <th style="width: 160px">Ações</th>
               </tr>
             </thead>
             <tbody id="estoqueBody">
@@ -75,7 +82,7 @@
           </table>
         </div>
 
-        <div id="estoqueVazio" class="estoque-vazio" style="display:none">
+        <div id="estoqueVazio" class="estoque-vazio" style="display: none">
           <i class="fa-solid fa-box-open"></i>
           <p>Nenhum livro no estoque.</p>
         </div>
@@ -87,7 +94,9 @@
     <div class="modal" id="modal">
       <div class="modal-header">
         <h2 id="modalTitulo">Adicionar Livro</h2>
-        <button class="modal-close" onclick="fecharModal()"><i class="fa-solid fa-xmark"></i></button>
+        <button class="modal-close" onclick="fecharModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
       <form id="modalForm" onsubmit="salvarLivro(event)">
         <input type="hidden" id="livroId" />
@@ -95,28 +104,52 @@
         <!-- ISBN é o PRIMEIRO campo: busca automática ao digitar (≥10 dígitos) -->
         <div class="form-group">
           <label>ISBN</label>
-          <input type="text" id="fIsbn" placeholder="Ex: 978-3-16-148410-0"
-                 oninput="buscarIsbnModal()"
-                 onkeydown="if(event.key==='Enter'){event.preventDefault();buscarIsbnModal();}" />
-          <span id="fIsbnStatus"
-                style="display:none;font-size:.76rem;color:#7a6e65;margin-top:.3rem;">
+          <input
+            type="text"
+            id="fIsbn"
+            placeholder="Ex: 978-3-16-148410-0"
+            oninput="buscarIsbnModal()"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();buscarIsbnModal();}"
+          />
+          <span
+            id="fIsbnStatus"
+            style="display: none; font-size: 0.76rem; color: #7a6e65; margin-top: 0.3rem"
+          >
           </span>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label>Título *</label>
-            <input type="text" id="fTitulo" required placeholder="Ex: Dom Casmurro" />
+            <input
+              type="text"
+              id="fTitulo"
+              required
+              placeholder="Ex: Dom Casmurro"
+            />
           </div>
           <div class="form-group">
             <label>Autor *</label>
-            <input type="text" id="fAutor" required placeholder="Ex: Machado de Assis" />
+            <input
+              type="text"
+              id="fAutor"
+              required
+              placeholder="Ex: Machado de Assis"
+            />
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label>Preço (T$) *</label>
-            <input type="number" id="fPreco" required min="0" step="0.01" placeholder="Ex: 30.00" oninput="calcularPrecoPromo()" />
+            <input
+              type="number"
+              id="fPreco"
+              required
+              min="0"
+              step="0.01"
+              placeholder="Ex: 30.00"
+              oninput="calcularPrecoPromo()"
+            />
           </div>
           <div class="form-group">
             <label>Estado *</label>
@@ -131,7 +164,11 @@
         </div>
         <div class="form-group">
           <label>Resumo / Descrição</label>
-          <textarea id="fResumo" rows="3" placeholder="Breve descrição do livro..."></textarea>
+          <textarea
+            id="fResumo"
+            rows="3"
+            placeholder="Breve descrição do livro..."
+          ></textarea>
         </div>
         <div class="form-group">
           <label>Gênero</label>
@@ -172,19 +209,30 @@
             <option value="Medicina">Medicina</option>
             <option value="Educação">Educação</option>
           </select>
-          <span style="font-size:.75rem;color:#7a6e65;margin-top:.25rem;display:block;">
-            Deixe em branco para detectar automaticamente pelo ISBN via Google Books.
+          <span
+            style="font-size: 0.75rem; color: #7a6e65; margin-top: 0.25rem; display: block"
+          >
+            Deixe em branco para detectar automaticamente pelo ISBN via Google
+            Books.
           </span>
         </div>
 
         <!-- ── FOTOS ── -->
         <div class="form-group">
           <label>Fotos do livro
-            <small style="font-weight:400;color:#7a6e65;margin-left:.35rem;">até 3 imagens · JPG, PNG ou WebP</small>
+            <small
+              style="font-weight: 400; color: #7a6e65; margin-left: 0.35rem"
+            >até 3 imagens · JPG, PNG ou WebP</small>
           </label>
           <div class="modal-fotos-grid" id="modalFotosGrid"></div>
-          <input type="file" id="modalFotoInput" accept="image/jpeg,image/jpg,image/png,image/webp"
-                 multiple style="display:none" onchange="handleModalFotos(this.files)" />
+          <input
+            type="file"
+            id="modalFotoInput"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
+            multiple
+            style="display: none"
+            onchange="handleModalFotos(this.files)"
+          />
         </div>
 
         <!-- ── PROMOÇÃO ── -->
@@ -195,48 +243,74 @@
             Em promoção
           </label>
         </div>
-        <div id="promoSection" style="display:none">
+        <div id="promoSection" style="display: none">
           <div class="form-row">
             <div class="form-group">
               <label>Desconto (%)</label>
-              <input type="number" id="fDesconto" min="1" max="99" step="1"
-                     placeholder="Ex: 20" oninput="calcularPrecoPromo()" />
+              <input
+                type="number"
+                id="fDesconto"
+                min="1"
+                max="99"
+                step="1"
+                placeholder="Ex: 20"
+                oninput="calcularPrecoPromo()"
+              />
             </div>
             <div class="form-group">
               <label>Preço promocional (T$)</label>
-              <input type="text" id="fPrecoPromo" readonly placeholder="Calculado automaticamente"
-                     style="background:#f5f1eb;color:#722f37;font-weight:600" />
+              <input
+                type="text"
+                id="fPrecoPromo"
+                readonly
+                placeholder="Calculado automaticamente"
+                style="background: #f5f1eb; color: #722f37; font-weight: 600"
+              />
             </div>
           </div>
           <div class="form-group">
             <label>Validade da promoção</label>
-            <input type="text" id="fPromoExpira"
-                   placeholder="DD/MM/AAAA HH:MM"
-                   maxlength="16"
-                   autocomplete="off"
-                   oninput="mascaraDataHora(this)"
-                   style="font-variant-numeric: tabular-nums; letter-spacing: .04em;" />
-            <span id="fPromoExpiraErro"
-                  style="display:none;font-size:.75rem;color:#c0392b;margin-top:.25rem;display:none;"></span>
+            <input
+              type="text"
+              id="fPromoExpira"
+              placeholder="DD/MM/AAAA HH:MM"
+              maxlength="16"
+              autocomplete="off"
+              oninput="mascaraDataHora(this)"
+              style="font-variant-numeric: tabular-nums; letter-spacing: 0.04em"
+            />
+            <span
+              id="fPromoExpiraErro"
+              style="display: none; font-size: 0.75rem; color: #c0392b; margin-top: 0.25rem; display: none"
+            ></span>
           </div>
         </div>
 
-        <div id="modalErro" class="modal-erro" style="display:none"></div>
+        <div id="modalErro" class="modal-erro" style="display: none"></div>
         <div class="modal-actions">
-          <button type="button" class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+          <button type="button" class="btn-cancel" onclick="fecharModal()">
+            Cancelar
+          </button>
           <button type="submit" class="btn-save" id="btnSalvar">Salvar</button>
         </div>
       </form>
     </div>
 
     <!-- ════ MODAL CONFIRMAR EXCLUSÃO ════ -->
-    <div class="modal-overlay" id="confirmOverlay" onclick="fecharConfirm()"></div>
+    <div class="modal-overlay" id="confirmOverlay" onclick="fecharConfirm()">
+    </div>
     <div class="modal modal-sm" id="confirmModal">
       <div class="modal-header">
         <h2>Confirmar exclusão</h2>
-        <button class="modal-close" onclick="fecharConfirm()"><i class="fa-solid fa-xmark"></i></button>
+        <button class="modal-close" onclick="fecharConfirm()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
-      <p id="confirmMsg" style="padding:0 1.5rem 1rem;color:#4b4540;font-size:.9rem"></p>
+      <p
+        id="confirmMsg"
+        style="padding: 0 1.5rem 1rem; color: #4b4540; font-size: 0.9rem"
+      >
+      </p>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="fecharConfirm()">Cancelar</button>
         <button class="btn-delete" id="btnConfirmDelete">Excluir</button>

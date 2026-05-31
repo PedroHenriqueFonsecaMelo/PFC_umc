@@ -3,6 +3,7 @@ package umc.exs.controller_api.unitary;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import org.mapstruct.factory.Mappers;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,10 +17,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import umc.exs.controller.api.interaction.LivroControllerApi;
 import umc.exs.dto.response.compras.CarrinhoCompraResponse;
+import umc.exs.service.core.livros.LivroService;
 import umc.exs.dto.mapper.LivroMapper;
 import umc.exs.dto.request.compra.CarrinhoCompraRequest;
-import umc.exs.service.core.bussiness.LivroService;
-
 
 class LivroControllerApiUnitTest {
 
@@ -32,7 +32,7 @@ class LivroControllerApiUnitTest {
     @BeforeEach
     void setUp() {
         livroService = mock(LivroService.class);
-        livroMapper = mock(LivroMapper.class);
+        livroMapper = Mappers.getMapper(LivroMapper.class);
         controller = new LivroControllerApi(livroService, livroMapper);
 
         mockUser = User.withUsername("test@example.com")
@@ -123,7 +123,6 @@ class LivroControllerApiUnitTest {
         verifyNoInteractions(livroService);
     }
 
-    @SuppressWarnings("null")
     @Test
     void comprarCarrinho_ServiceThrowsSaldoInsuficiente_RetornaBadRequest() {
         // Arrange

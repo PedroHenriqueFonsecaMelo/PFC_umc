@@ -16,9 +16,9 @@ public interface ReservaCheckoutRepository extends JpaRepository<ReservaCheckout
     // Busca reserva ativa de outro usuário para este livro
     @Query("SELECT r FROM ReservaCheckout r WHERE r.livroId = :livroId AND r.clienteId != :clienteId AND r.expiraEm > :agora")
     Optional<ReservaCheckout> findReservaAtivaDeOutro(
-        @Param("livroId") Long livroId,
-        @Param("clienteId") Long clienteId,
-        @Param("agora") LocalDateTime agora);
+            @Param("livroId") Long livroId,
+            @Param("clienteId") Long clienteId,
+            @Param("agora") LocalDateTime agora);
 
     // Busca reserva do próprio usuário para este livro
     Optional<ReservaCheckout> findByLivroIdAndClienteId(Long livroId, Long clienteId);

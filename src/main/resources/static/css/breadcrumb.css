@@ -28,7 +28,7 @@
   align-items: center;
   gap: 0.3rem;
   flex-wrap: wrap;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-size: 0.79rem;
   color: #7a6e65;
   margin-bottom: 0.5rem;
@@ -64,7 +64,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-size: 0.82rem;
   font-weight: 500;
   color: var(--accent, #722f37);

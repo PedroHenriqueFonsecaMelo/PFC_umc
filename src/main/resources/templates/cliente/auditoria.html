@@ -47,7 +47,11 @@
                     <tr th:each="log : ${logs}">
                         <td th:text="${log.acaoDescricao}">AÇÃO</td>
                         <td th:text="${log.detalhes}">DETALHES</td>
-                        <td th:text="${#temporals.format(log.dataHora, 'dd/MM/yyyy HH:mm:ss')}">DATA</td>
+                        <td
+                            th:text="${#temporals.format(log.dataHora, 'dd/MM/yyyy HH:mm:ss')}"
+                        >
+                            DATA
+                        </td>
                     </tr>
                 </tbody>
             </table>

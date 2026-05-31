@@ -1,265 +1,405 @@
 <!DOCTYPE html>
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout — Bibliotroca</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
-          rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}"/>
-    <link rel="stylesheet" th:href="@{/css/produto/checkout.css}"/>
-    <link rel="stylesheet" th:href="@{/css/breadcrumb.css}"/>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Checkout — Bibliotroca</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+            rel="stylesheet"
+        >
+        <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+        <link rel="stylesheet" th:href="@{/css/produto/checkout.css}" />
+        <link rel="stylesheet" th:href="@{/css/breadcrumb.css}" />
+    </head>
+    <body>
+        <!-- NAV -->
+        <header th:replace="~{fragments/client-nav :: clientNav}"></header>
 
-    <!-- NAV -->
-    <header th:replace="~{fragments/client-nav :: clientNav}"></header>
+        <!-- Toast de feedback -->
+        <div class="toast" id="toastCheckout"></div>
 
-    <!-- Toast de feedback -->
-    <div class="toast" id="toastCheckout"></div>
+        <!-- NAVEGAÇÃO CONTEXTUAL -->
+        <div class="breadcrumb-wrap">
+            <nav class="breadcrumb-nav">
+                <a href="/">Início</a>
+                <span class="breadcrumb-sep">›</span>
+                <a href="/livros/estante">Minha Estante</a>
+                <span class="breadcrumb-sep">›</span>
+                <span class="breadcrumb-current">Checkout</span>
+            </nav>
+            <a href="/livros/estante" class="btn-voltar"
+            >← Voltar para a Estante</a>
+        </div>
 
-    <!-- NAVEGAÇÃO CONTEXTUAL -->
-    <div class="breadcrumb-wrap">
-        <nav class="breadcrumb-nav">
-            <a href="/">Início</a>
-            <span class="breadcrumb-sep">›</span>
-            <a href="/livros/estante">Minha Estante</a>
-            <span class="breadcrumb-sep">›</span>
-            <span class="breadcrumb-current">Checkout</span>
-        </nav>
-        <a href="/livros/estante" class="btn-voltar">← Voltar para a Estante</a>
-    </div>
+        <main class="checkout-main">
+            <div id="reservaCountdown"></div>
 
-    <main class="checkout-main">
-
-        <div id="reservaCountdown"></div>
-
-        <!-- Indicador de etapas -->
-        <div class="checkout-steps">
-            <div class="step done">
-                <span class="step-num">✓</span>
-                <span class="step-label">Estante</span>
+            <!-- Indicador de etapas -->
+            <div class="checkout-steps">
+                <div class="step done">
+                    <span class="step-num">✓</span>
+                    <span class="step-label">Estante</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step active">
+                    <span class="step-num">2</span>
+                    <span class="step-label">Checkout</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step">
+                    <span class="step-num">3</span>
+                    <span class="step-label">Concluído</span>
+                </div>
             </div>
-            <div class="step-line"></div>
-            <div class="step active">
-                <span class="step-num">2</span>
-                <span class="step-label">Checkout</span>
+
+            <!-- Estado: sem itens / redirecionando -->
+            <div id="estadoVazio" class="estado-msg" style="display: none">
+                <p
+                    style="font-family: 'IM Fell English', serif; font-style: italic"
+                >
+                    Nenhum livro selecionado para checkout.
+                </p>
+                <a
+                    href="/livros/estante"
+                    class="btn-primario"
+                    style="margin-top: 1rem"
+                >← Voltar para a Estante</a>
             </div>
-            <div class="step-line"></div>
-            <div class="step">
-                <span class="step-num">3</span>
-                <span class="step-label">Concluído</span>
+
+            <!-- Layout do checkout -->
+            <div
+                id="checkoutLayout"
+                style="display: none"
+                class="checkout-layout"
+            >
+                <!-- Coluna esquerda: resumo dos itens -->
+                <section class="checkout-resumo">
+                    <h2>Resumo do pedido</h2>
+
+                    <div id="listaCheckout" class="checkout-lista"></div>
+
+                    <!-- Link para voltar e ajustar seleção -->
+                    <a
+                        href="/livros/estante"
+                        class="btn-voltar"
+                        style="margin-top: 0.5rem"
+                    >← Alterar seleção</a>
+                </section>
+
+                <!-- Coluna direita: pagamento -->
+                <section class="checkout-pagamento">
+                    <h2>Pagamento em tokens</h2>
+
+                    <!-- Endereço de entrega -->
+                    <div
+                        id="enderecoEntregaBloco"
+                        style="margin-bottom: 1.25rem"
+                    >
+                        <h3
+                            style="font-size: 0.85rem; font-weight: 600; color: var(--muted, #7a6e65); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem"
+                        >
+                            Endereço de entrega
+                        </h3>
+                        <div
+                            id="enderecoEntregaCard"
+                            style="font-size: 0.85rem; padding: 0.75rem; border: 1px solid var(--border, rgba(44, 36, 27, 0.15)); border-radius: 8px; background: #faf8f5; line-height: 1.6"
+                        >
+                            <span style="color: var(--muted, #7a6e65)"
+                            >Carregando...</span>
+                        </div>
+
+                        <!-- Formulário inline para adicionar / usar outro endereço -->
+                        <div
+                            id="formEnderecoInline"
+                            class="form-endereco-inline"
+                            style="display: none"
+                        >
+                            <!-- CEP primeiro: preenche os demais campos automaticamente -->
+                            <div class="form-end-cep-bloco">
+                                <div class="form-end-group form-end-cep">
+                                    <label>CEP *</label>
+                                    <input
+                                        id="fEndCep"
+                                        type="text"
+                                        placeholder="00000-000"
+                                        maxlength="9"
+                                        oninput="mascaraCepCheckout(this)"
+                                        autocomplete="postal-code"
+                                    >
+                                </div>
+                                <span id="cepStatus" class="cep-status"></span>
+                            </div>
+
+                            <div class="form-end-row">
+                                <div class="form-end-group feg-flex">
+                                    <label>Rua / Logradouro *</label>
+                                    <input
+                                        id="fEndRua"
+                                        type="text"
+                                        placeholder="Preenchido pelo CEP"
+                                        autocomplete="address-line1"
+                                    >
+                                </div>
+                                <div class="form-end-group form-end-num">
+                                    <label>Número *</label>
+                                    <input
+                                        id="fEndNumero"
+                                        type="text"
+                                        placeholder="42"
+                                    >
+                                </div>
+                            </div>
+                            <div class="form-end-group">
+                                <label>Complemento</label>
+                                <input
+                                    id="fEndComplemento"
+                                    type="text"
+                                    placeholder="Apto, bloco, etc."
+                                    autocomplete="address-line2"
+                                >
+                            </div>
+                            <div class="form-end-group">
+                                <label>Bairro *</label>
+                                <input
+                                    id="fEndBairro"
+                                    type="text"
+                                    placeholder="Preenchido pelo CEP"
+                                >
+                            </div>
+                            <div class="form-end-row">
+                                <div class="form-end-group feg-flex">
+                                    <label>Cidade *</label>
+                                    <input
+                                        id="fEndCidade"
+                                        type="text"
+                                        placeholder="Preenchida pelo CEP"
+                                        autocomplete="address-level2"
+                                    >
+                                </div>
+                                <div class="form-end-group form-end-uf">
+                                    <label>Estado *</label>
+                                    <input
+                                        id="fEndEstado"
+                                        type="text"
+                                        placeholder="SP"
+                                        maxlength="2"
+                                        oninput="this.value=this.value.toUpperCase()"
+                                        autocomplete="address-level1"
+                                    >
+                                </div>
+                            </div>
+                            <div
+                                id="erroFormEndereco"
+                                class="erro-form-endereco"
+                                style="display: none"
+                            >
+                            </div>
+                            <div class="form-end-acoes">
+                                <button
+                                    type="button"
+                                    class="btn-end-cancelar"
+                                    onclick="fecharFormEndereco()"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn-end-salvar"
+                                    onclick="salvarEnderecoCheckout()"
+                                >
+                                    Salvar e usar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Campo de cupom (input + feedback + estado aplicado) -->
+                    <div class="checkout-cupom-section">
+                        <div id="checkoutCupomInputRow" class="cupom-row">
+                            <input
+                                type="text"
+                                id="checkoutCupomCodigo"
+                                class="cupom-input"
+                                placeholder="Código do cupom (opcional)"
+                                maxlength="30"
+                                autocomplete="off"
+                                onkeydown="if(event.key==='Enter') aplicarCupomCheckout()"
+                            >
+                            <button
+                                class="btn-cupom-aplicar"
+                                onclick="aplicarCupomCheckout()"
+                            >
+                                Aplicar
+                            </button>
+                        </div>
+                        <div
+                            id="checkoutCupomFeedback"
+                            class="cupom-feedback"
+                            style="display: none"
+                        >
+                        </div>
+                        <div
+                            id="checkoutCupomAplicado"
+                            class="cupom-aplicado-bloco"
+                            style="display: none"
+                        >
+                        </div>
+                    </div>
+
+                    <div class="pagamento-card">
+                        <div class="pagamento-linha">
+                            <span>Saldo atual</span>
+                            <span id="saldoAtual" class="pagamento-saldo"
+                            >T$ —</span>
+                        </div>
+                        <div
+                            id="linhaSubtotalOriginal"
+                            class="pagamento-linha"
+                            style="display: none"
+                        >
+                            <span>Subtotal original</span>
+                            <span
+                                id="subtotalOriginal"
+                                style="text-decoration: line-through; color: var(--muted)"
+                            >T$ —</span>
+                        </div>
+                        <div
+                            id="linhaDesconto"
+                            class="pagamento-linha"
+                            style="display: none"
+                        >
+                            <span id="labelDesconto">Desconto (cupom)</span>
+                            <span
+                                id="valorDesconto"
+                                style="color: #15803d; font-weight: 700"
+                            >-T$ —</span>
+                        </div>
+                        <div class="pagamento-linha">
+                            <span>Total a debitar</span>
+                            <span id="totalDebitar" class="pagamento-total"
+                            >T$ —</span>
+                        </div>
+                        <div class="pagamento-linha pagamento-linha-saldo-pos">
+                            <span>Saldo após compra</span>
+                            <span id="saldoApos" class="pagamento-saldo-pos"
+                            >T$ —</span>
+                        </div>
+                    </div>
+
+                    <!-- Alerta de saldo insuficiente -->
+                    <div
+                        id="alertaSaldo"
+                        class="alerta-saldo"
+                        style="display: none"
+                    >
+                        <strong>Saldo insuficiente.</strong>
+                        <span id="alertaSaldoMsg"></span>
+                        <a
+                            href="/clientes/meu-perfil?aba=carteira"
+                            class="link-carregar"
+                        >Recarregar tokens →</a>
+                    </div>
+
+                    <!-- Alerta genérico de erro -->
+                    <div
+                        id="alertaErro"
+                        class="alerta-erro"
+                        style="display: none"
+                    >
+                        <span id="alertaErroMsg"></span>
+                    </div>
+
+                    <!-- Botão de confirmação -->
+                    <div class="btn-confirmar-wrap" id="btnConfirmarWrap">
+                        <button
+                            id="btnConfirmar"
+                            class="btn-confirmar"
+                            onclick="confirmarCompra()"
+                        >
+                            Confirmar compra
+                        </button>
+                    </div>
+
+                    <p class="checkout-disclaimer">
+                        Os tokens serão debitados imediatamente. Em caso de
+                        falha, o saldo não é alterado.
+                    </p>
+                </section>
+            </div>
+        </main>
+
+        <!-- Modal de reserva expirada -->
+        <div
+            id="modalReservaExpirada"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 36, 27, 0.5); z-index: 9999; align-items: center; justify-content: center"
+        >
+            <div
+                style="background: #f9f6f0; border-radius: 14px; padding: 2rem 2rem 1.5rem; max-width: 400px; width: 90%; box-shadow: 0 8px 40px rgba(44, 36, 27, 0.22); text-align: center"
+            >
+                <div style="font-size: 2.5rem; margin-bottom: 0.75rem">⏰</div>
+                <div
+                    style="font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: #2c241b; margin-bottom: 0.5rem"
+                >
+                    Reserva expirada
+                </div>
+                <div
+                    style="font-size: 0.88rem; color: #7a6e65; margin-bottom: 1.5rem; line-height: 1.6"
+                >
+                    Seu tempo de reserva expirou e o produto voltou à vitrine.
+                    Você será redirecionado em instantes.
+                </div>
+                <button
+                    onclick="window.location.href='/livros/vitrine'"
+                    style="padding: 0.6rem 1.6rem; background: #722f37; color: #f9f6f0; border: none; border-radius: 8px; font-size: 0.88rem; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif"
+                >
+                    Ir para a Vitrine
+                </button>
             </div>
         </div>
 
-        <!-- Estado: sem itens / redirecionando -->
-        <div id="estadoVazio" class="estado-msg" style="display:none;">
-            <p style="font-family:'IM Fell English',serif;font-style:italic;">
-                Nenhum livro selecionado para checkout.
-            </p>
-            <a href="/livros/estante" class="btn-primario" style="margin-top:1rem;">← Voltar para a Estante</a>
-        </div>
-
-        <!-- Layout do checkout -->
-        <div id="checkoutLayout" style="display:none;" class="checkout-layout">
-
-            <!-- Coluna esquerda: resumo dos itens -->
-            <section class="checkout-resumo">
-                <h2>Resumo do pedido</h2>
-
-                <div id="listaCheckout" class="checkout-lista"></div>
-
-                <!-- Link para voltar e ajustar seleção -->
-                <a href="/livros/estante" class="btn-voltar" style="margin-top:0.5rem;">← Alterar seleção</a>
-            </section>
-
-            <!-- Coluna direita: pagamento -->
-            <section class="checkout-pagamento">
-                <h2>Pagamento em tokens</h2>
-
-                <!-- Endereço de entrega -->
-                <div id="enderecoEntregaBloco" style="margin-bottom:1.25rem;">
-                    <h3 style="font-size:.85rem; font-weight:600; color:var(--muted,#7a6e65);
-                               text-transform:uppercase; letter-spacing:.05em; margin-bottom:.5rem;">
-                        Endereço de entrega
-                    </h3>
-                    <div id="enderecoEntregaCard" style="font-size:.85rem; padding:.75rem;
-                         border:1px solid var(--border,rgba(44,36,27,.15)); border-radius:8px;
-                         background:#faf8f5; line-height:1.6;">
-                        <span style="color:var(--muted,#7a6e65);">Carregando...</span>
-                    </div>
-
-                    <!-- Formulário inline para adicionar / usar outro endereço -->
-                    <div id="formEnderecoInline" class="form-endereco-inline" style="display:none;">
-
-                        <!-- CEP primeiro: preenche os demais campos automaticamente -->
-                        <div class="form-end-cep-bloco">
-                            <div class="form-end-group form-end-cep">
-                                <label>CEP *</label>
-                                <input id="fEndCep" type="text" placeholder="00000-000" maxlength="9"
-                                       oninput="mascaraCepCheckout(this)" autocomplete="postal-code">
-                            </div>
-                            <span id="cepStatus" class="cep-status"></span>
-                        </div>
-
-                        <div class="form-end-row">
-                            <div class="form-end-group feg-flex">
-                                <label>Rua / Logradouro *</label>
-                                <input id="fEndRua" type="text" placeholder="Preenchido pelo CEP" autocomplete="address-line1">
-                            </div>
-                            <div class="form-end-group form-end-num">
-                                <label>Número *</label>
-                                <input id="fEndNumero" type="text" placeholder="42">
-                            </div>
-                        </div>
-                        <div class="form-end-group">
-                            <label>Complemento</label>
-                            <input id="fEndComplemento" type="text" placeholder="Apto, bloco, etc." autocomplete="address-line2">
-                        </div>
-                        <div class="form-end-group">
-                            <label>Bairro *</label>
-                            <input id="fEndBairro" type="text" placeholder="Preenchido pelo CEP">
-                        </div>
-                        <div class="form-end-row">
-                            <div class="form-end-group feg-flex">
-                                <label>Cidade *</label>
-                                <input id="fEndCidade" type="text" placeholder="Preenchida pelo CEP" autocomplete="address-level2">
-                            </div>
-                            <div class="form-end-group form-end-uf">
-                                <label>Estado *</label>
-                                <input id="fEndEstado" type="text" placeholder="SP" maxlength="2"
-                                       oninput="this.value=this.value.toUpperCase()" autocomplete="address-level1">
-                            </div>
-                        </div>
-                        <div id="erroFormEndereco" class="erro-form-endereco" style="display:none;"></div>
-                        <div class="form-end-acoes">
-                            <button type="button" class="btn-end-cancelar" onclick="fecharFormEndereco()">Cancelar</button>
-                            <button type="button" class="btn-end-salvar" onclick="salvarEnderecoCheckout()">Salvar e usar</button>
-                        </div>
-                    </div>
+        <!-- Modal produto indisponível -->
+        <div
+            id="modalIndisponivel"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 36, 27, 0.5); z-index: 9999; align-items: center; justify-content: center"
+        >
+            <div
+                style="background: #f9f6f0; border-radius: 14px; padding: 2rem 2rem 1.5rem; max-width: 400px; width: 90%; box-shadow: 0 8px 40px rgba(44, 36, 27, 0.22); text-align: center"
+            >
+                <div style="font-size: 2.5rem; margin-bottom: 0.75rem">🔒</div>
+                <div
+                    style="font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: #2c241b; margin-bottom: 0.5rem"
+                >
+                    Produto indisponível
                 </div>
-
-                <!-- Campo de cupom (input + feedback + estado aplicado) -->
-                <div class="checkout-cupom-section">
-                    <div id="checkoutCupomInputRow" class="cupom-row">
-                        <input type="text" id="checkoutCupomCodigo" class="cupom-input"
-                               placeholder="Código do cupom (opcional)" maxlength="30" autocomplete="off"
-                               onkeydown="if(event.key==='Enter') aplicarCupomCheckout()">
-                        <button class="btn-cupom-aplicar" onclick="aplicarCupomCheckout()">Aplicar</button>
-                    </div>
-                    <div id="checkoutCupomFeedback" class="cupom-feedback" style="display:none;"></div>
-                    <div id="checkoutCupomAplicado" class="cupom-aplicado-bloco" style="display:none;"></div>
+                <div
+                    id="modalIndisonivel-msg"
+                    style="font-size: 0.88rem; color: #7a6e65; margin-bottom: 1.5rem; line-height: 1.6"
+                >
+                    Este produto está temporariamente reservado por outro
+                    usuário.
                 </div>
-
-                <div class="pagamento-card">
-                    <div class="pagamento-linha">
-                        <span>Saldo atual</span>
-                        <span id="saldoAtual" class="pagamento-saldo">T$ —</span>
-                    </div>
-                    <div id="linhaSubtotalOriginal" class="pagamento-linha" style="display:none;">
-                        <span>Subtotal original</span>
-                        <span id="subtotalOriginal" style="text-decoration:line-through;color:var(--muted);">T$ —</span>
-                    </div>
-                    <div id="linhaDesconto" class="pagamento-linha" style="display:none;">
-                        <span id="labelDesconto">Desconto (cupom)</span>
-                        <span id="valorDesconto" style="color:#15803d;font-weight:700;">-T$ —</span>
-                    </div>
-                    <div class="pagamento-linha">
-                        <span>Total a debitar</span>
-                        <span id="totalDebitar" class="pagamento-total">T$ —</span>
-                    </div>
-                    <div class="pagamento-linha pagamento-linha-saldo-pos">
-                        <span>Saldo após compra</span>
-                        <span id="saldoApos" class="pagamento-saldo-pos">T$ —</span>
-                    </div>
-                </div>
-
-                <!-- Alerta de saldo insuficiente -->
-                <div id="alertaSaldo" class="alerta-saldo" style="display:none;">
-                    <strong>Saldo insuficiente.</strong>
-                    <span id="alertaSaldoMsg"></span>
-                    <a href="/clientes/meu-perfil?aba=carteira" class="link-carregar">Recarregar tokens →</a>
-                </div>
-
-                <!-- Alerta genérico de erro -->
-                <div id="alertaErro" class="alerta-erro" style="display:none;">
-                    <span id="alertaErroMsg"></span>
-                </div>
-
-                <!-- Botão de confirmação -->
-                <div class="btn-confirmar-wrap" id="btnConfirmarWrap">
-                    <button id="btnConfirmar" class="btn-confirmar" onclick="confirmarCompra()">
-                        Confirmar compra
+                <div
+                    style="display: flex; gap: 0.75rem; justify-content: center"
+                >
+                    <button
+                        onclick="fecharModalIndisponivel()"
+                        style="padding: 0.6rem 1.4rem; background: transparent; border: 1px solid rgba(44, 36, 27, 0.22); color: #7a6e65; border-radius: 8px; font-size: 0.85rem; cursor: pointer; font-family: 'DM Sans', sans-serif"
+                    >
+                        Fechar
+                    </button>
+                    <button
+                        onclick="window.location.href='/livros/vitrine'"
+                        style="padding: 0.6rem 1.4rem; background: #722f37; color: #f9f6f0; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif"
+                    >
+                        Ver Vitrine
                     </button>
                 </div>
-
-                <p class="checkout-disclaimer">
-                    Os tokens serão debitados imediatamente. Em caso de falha, o
-                    saldo não é alterado.
-                </p>
-            </section>
-        </div>
-
-    </main>
-
-    <!-- Modal de reserva expirada -->
-    <div id="modalReservaExpirada" style="
-        display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-        background:rgba(44,36,27,.5);z-index:9999;
-        align-items:center;justify-content:center;">
-        <div style="background:#f9f6f0;border-radius:14px;padding:2rem 2rem 1.5rem;
-            max-width:400px;width:90%;box-shadow:0 8px 40px rgba(44,36,27,.22);text-align:center;">
-            <div style="font-size:2.5rem;margin-bottom:.75rem;">⏰</div>
-            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;
-                font-weight:700;color:#2c241b;margin-bottom:.5rem;">
-                Reserva expirada
-            </div>
-            <div style="font-size:.88rem;color:#7a6e65;margin-bottom:1.5rem;line-height:1.6;">
-                Seu tempo de reserva expirou e o produto voltou à vitrine.
-                Você será redirecionado em instantes.
-            </div>
-            <button onclick="window.location.href='/livros/vitrine'"
-                style="padding:.6rem 1.6rem;background:#722f37;color:#f9f6f0;
-                border:none;border-radius:8px;font-size:.88rem;font-weight:700;
-                cursor:pointer;font-family:'DM Sans',sans-serif;">
-                Ir para a Vitrine
-            </button>
-        </div>
-    </div>
-
-    <!-- Modal produto indisponível -->
-    <div id="modalIndisponivel" style="
-        display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-        background:rgba(44,36,27,.5);z-index:9999;
-        align-items:center;justify-content:center;">
-        <div style="background:#f9f6f0;border-radius:14px;padding:2rem 2rem 1.5rem;
-            max-width:400px;width:90%;box-shadow:0 8px 40px rgba(44,36,27,.22);text-align:center;">
-            <div style="font-size:2.5rem;margin-bottom:.75rem;">🔒</div>
-            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;
-                font-weight:700;color:#2c241b;margin-bottom:.5rem;">
-                Produto indisponível
-            </div>
-            <div id="modalIndisonivel-msg" style="font-size:.88rem;color:#7a6e65;
-                margin-bottom:1.5rem;line-height:1.6;">
-                Este produto está temporariamente reservado por outro usuário.
-            </div>
-            <div style="display:flex;gap:.75rem;justify-content:center;">
-                <button onclick="fecharModalIndisponivel()"
-                    style="padding:.6rem 1.4rem;background:transparent;
-                    border:1px solid rgba(44,36,27,.22);color:#7a6e65;
-                    border-radius:8px;font-size:.85rem;cursor:pointer;
-                    font-family:'DM Sans',sans-serif;">Fechar</button>
-                <button onclick="window.location.href='/livros/vitrine'"
-                    style="padding:.6rem 1.4rem;background:#722f37;color:#f9f6f0;
-                    border:none;border-radius:8px;font-size:.85rem;font-weight:700;
-                    cursor:pointer;font-family:'DM Sans',sans-serif;">
-                    Ver Vitrine</button>
             </div>
         </div>
-    </div>
 
-    <script th:src="@{/js/produto/checkout.js}"></script>
-</body>
+        <script th:src="@{/js/produto/checkout.js}"></script>
+    </body>
 </html>

@@ -42,8 +42,7 @@ public class PenalidadeService {
             return;
         }
 
-        long diasDesdeUltimoXp =
-                java.time.temporal.ChronoUnit.DAYS.between(ultima, LocalDateTime.now());
+        long diasDesdeUltimoXp = java.time.temporal.ChronoUnit.DAYS.between(ultima, LocalDateTime.now());
 
         if (diasDesdeUltimoXp <= DIAS_GERAR_PENALIDADE) {
             return;
@@ -62,8 +61,7 @@ public class PenalidadeService {
 
             int xpAtual = pontuacao.getXpTotal();
 
-            double fator =
-                    (double) (DIAS_PARA_ZERAR - diasPenalidade) / DIAS_PARA_ZERAR;
+            double fator = (double) (DIAS_PARA_ZERAR - diasPenalidade) / DIAS_PARA_ZERAR;
 
             int xpNovo = (int) Math.round(xpAtual * fator);
 
@@ -74,13 +72,16 @@ public class PenalidadeService {
                 double ratio = (double) xpNovo / xpAtual;
 
                 int xpLivros = pontuacao.getXpLivrosAprovados() != null
-                        ? pontuacao.getXpLivrosAprovados() : 0;
+                        ? pontuacao.getXpLivrosAprovados()
+                        : 0;
 
                 int xpCompras = pontuacao.getXpCompras() != null
-                        ? pontuacao.getXpCompras() : 0;
+                        ? pontuacao.getXpCompras()
+                        : 0;
 
                 int xpAvaliacoes = pontuacao.getXpAvaliacoes() != null
-                        ? pontuacao.getXpAvaliacoes() : 0;
+                        ? pontuacao.getXpAvaliacoes()
+                        : 0;
 
                 pontuacao.setXpLivrosAprovados((int) (xpLivros * ratio));
                 pontuacao.setXpCompras((int) (xpCompras * ratio));

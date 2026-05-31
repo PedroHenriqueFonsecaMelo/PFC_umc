@@ -7,63 +7,84 @@ let _sol = null; // solicitação carregada
 /* ── UTILS ──────────────────────────────────────────────────────── */
 
 function fmtData(iso) {
-    if (!iso) return '—';
+    if (!iso) return "—";
     const d = new Date(iso);
-    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }) +
-           ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+    }) +
+        " às " +
+        d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
 
 function esc(str) {
-    if (str == null) return '';
+    if (str == null) return "";
     return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 
 function fmtTokens(v) {
-    if (v == null) return '0,00';
-    return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (v == null) return "0,00";
+    return Number(v).toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
 }
 
 function mostrarToast(cls, msg) {
-    const t = document.getElementById('toast');
-    t.className = 'toast ' + cls;
+    const t = document.getElementById("toast");
+    t.className = "toast " + cls;
     t.textContent = msg;
-    t.style.display = 'block';
-    setTimeout(() => { t.style.display = 'none'; }, 4500);
+    t.style.display = "block";
+    setTimeout(() => {
+        t.style.display = "none";
+    }, 4500);
 }
 
 function abrirMenu() {
-    document.getElementById('sidebar')?.classList.add('open');
-    document.getElementById('overlay')?.classList.add('show');
+    document.getElementById("sidebar")?.classList.add("open");
+    document.getElementById("overlay")?.classList.add("show");
 }
 function fecharMenu() {
-    document.getElementById('sidebar')?.classList.remove('open');
-    document.getElementById('overlay')?.classList.remove('show');
+    document.getElementById("sidebar")?.classList.remove("open");
+    document.getElementById("overlay")?.classList.remove("show");
 }
 
 /* ── MOTIVO BADGE ────────────────────────────────────────────────── */
 
 const MOTIVO_STYLE = {
-    COMPREI_POR_ENGANO:    { bg: '#fef3c7', color: '#92400e' },
-    ENCONTREI_MAIS_BARATO: { bg: '#dbeafe', color: '#1e40af' },
-    PRODUTO_NAO_ESPERADO:  { bg: '#ede9fe', color: '#5b21b6' },
-    OUTRO:                 { bg: '#f3f4f6', color: '#374151' },
+    COMPREI_POR_ENGANO: { bg: "#fef3c7", color: "#92400e" },
+    ENCONTREI_MAIS_BARATO: { bg: "#dbeafe", color: "#1e40af" },
+    PRODUTO_NAO_ESPERADO: { bg: "#ede9fe", color: "#5b21b6" },
+    OUTRO: { bg: "#f3f4f6", color: "#374151" },
 };
 
 function motivoBadge(s) {
-    const m = MOTIVO_STYLE[s.motivoCategoria] || { bg: '#f3f4f6', color: '#374151' };
+    const m = MOTIVO_STYLE[s.motivoCategoria] ||
+        { bg: "#f3f4f6", color: "#374151" };
     return `<span class="badge-motivo-pill" style="background:${m.bg};color:${m.color}">` +
-           esc(s.motivoCategoriaDescricao || s.motivoCategoria) + `</span>`;
+        esc(s.motivoCategoriaDescricao || s.motivoCategoria) + `</span>`;
 }
 
 function statusBadge(status) {
-    const cls = { PENDENTE: 'badge-PENDENTE', APROVADO: 'badge-APROVADO', RECUSADO: 'badge-RECUSADO' };
-    const label = { PENDENTE: 'Pendente', APROVADO: 'Aprovado', RECUSADO: 'Recusado' };
-    return `<span class="badge ${cls[status] || ''}">${label[status] || esc(status)}</span>`;
+    const cls = {
+        PENDENTE: "badge-PENDENTE",
+        APROVADO: "badge-APROVADO",
+        RECUSADO: "badge-RECUSADO",
+    };
+    const label = {
+        PENDENTE: "Pendente",
+        APROVADO: "Aprovado",
+        RECUSADO: "Recusado",
+    };
+    return `<span class="badge ${cls[status] || ""}">${
+        label[status] || esc(status)
+    }</span>`;
 }
 
 /* ── CARREGAR ────────────────────────────────────────────────────── */
@@ -71,27 +92,34 @@ function statusBadge(status) {
 function carregarSolicitacao() {
     const id = window._SOLICITACAO_ID;
     if (!id) {
-        document.getElementById('pageContent').innerHTML =
+        document.getElementById("pageContent").innerHTML =
             `<div class="loading-placeholder"><i class="fa-solid fa-triangle-exclamation"></i> Solicitação não especificada.</div>`;
         return;
     }
 
-    fetch(`/api/admin/cancelamentos/${id}`, { credentials: 'include' })
-        .then(r => {
-            if (r.status === 401 || r.status === 403) { window.location.href = '/admin/login'; return null; }
-            if (r.status === 404) throw new Error('Solicitação não encontrada.');
-            if (!r.ok) throw new Error('Erro ao carregar: HTTP ' + r.status);
+    fetch(`/api/admin/cancelamentos/${id}`, { credentials: "include" })
+        .then((r) => {
+            if (r.status === 401 || r.status === 403) {
+                window.location.href = "/admin/login";
+                return null;
+            }
+            if (r.status === 404) {
+                throw new Error("Solicitação não encontrada.");
+            }
+            if (!r.ok) throw new Error("Erro ao carregar: HTTP " + r.status);
             return r.json();
         })
-        .then(data => {
+        .then((data) => {
             if (!data) return;
             _sol = data;
             renderDetalhe(data);
         })
-        .catch(err => {
-            document.getElementById('pageContent').innerHTML =
+        .catch((err) => {
+            document.getElementById("pageContent").innerHTML =
                 `<div class="loading-placeholder">
-                    <i class="fa-solid fa-triangle-exclamation"></i> ${esc(err.message)}
+                    <i class="fa-solid fa-triangle-exclamation"></i> ${
+                    esc(err.message)
+                }
                     <br><br><a href="/admin/cancelamentos" style="color:#722F37;font-weight:600">← Voltar para Cancelamentos</a>
                  </div>`;
         });
@@ -105,12 +133,12 @@ function primeiraFoto(fotosUrls) {
         const parsed = JSON.parse(fotosUrls);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
     } catch (_) { /* não é JSON */ }
-    return fotosUrls.split(',')[0].trim() || null;
+    return fotosUrls.split(",")[0].trim() || null;
 }
 
 function renderDetalhe(s) {
     // Atualiza título do topbar
-    const tt = document.getElementById('topbarTitle');
+    const tt = document.getElementById("topbarTitle");
     if (tt) tt.textContent = `Solicitação #${s.id}`;
 
     const foto = primeiraFoto(s.fotosUrls);
@@ -118,10 +146,11 @@ function renderDetalhe(s) {
         ? `<img src="${esc(foto)}" alt="Capa" class="livro-foto">`
         : `<div class="livro-foto-ph"><i class="fa-solid fa-book"></i></div>`;
 
-    const isPendente = s.status === 'PENDENTE';
+    const isPendente = s.status === "PENDENTE";
 
     // Seção de decisão (se já decidida)
-    const decisaoHtml = !isPendente ? `
+    const decisaoHtml = !isPendente
+        ? `
         <div class="section-card">
             <div class="section-header">
                 <i class="fa-solid fa-gavel"></i>
@@ -135,19 +164,29 @@ function renderDetalhe(s) {
                     </div>
                     <div class="decisao-row">
                         <span class="decisao-label">Respondido em</span>
-                        <span class="decisao-valor">${fmtData(s.dataResposta)}</span>
+                        <span class="decisao-valor">${
+            fmtData(s.dataResposta)
+        }</span>
                     </div>
-                    ${s.comentarioAdmin ? `
+                    ${
+            s.comentarioAdmin
+                ? `
                     <div>
                         <span class="decisao-label">Comentário</span>
-                        <div class="comentario-admin-bloco" style="margin-top:8px">"${esc(s.comentarioAdmin)}"</div>
-                    </div>` : ''}
+                        <div class="comentario-admin-bloco" style="margin-top:8px">"${
+                    esc(s.comentarioAdmin)
+                }"</div>
+                    </div>`
+                : ""
+        }
                 </div>
             </div>
-        </div>` : '';
+        </div>`
+        : "";
 
     // Botões de ação (apenas se pendente)
-    const acoesHtml = isPendente ? `
+    const acoesHtml = isPendente
+        ? `
         <div class="acoes-area">
             <button class="btn-aprovar-full" id="btnAprovar" onclick="confirmarAprovacao()">
                 <i class="fa-solid fa-check"></i> Aprovar Cancelamento
@@ -155,7 +194,8 @@ function renderDetalhe(s) {
             <button class="btn-recusar-outline" id="btnRecusar" onclick="abrirModalRecusa()">
                 <i class="fa-solid fa-xmark"></i> Recusar
             </button>
-        </div>` : '';
+        </div>`
+        : "";
 
     const html = `
         <div class="detalhe-area">
@@ -170,17 +210,29 @@ function renderDetalhe(s) {
                     <div class="livro-layout">
                         ${fotoHtml}
                         <div style="flex:1;min-width:0">
-                            <div class="livro-titulo">${esc(s.tituloLivro)}</div>
-                            <div class="livro-autor">${esc(s.autorLivro || '—')}</div>
+                            <div class="livro-titulo">${
+        esc(s.tituloLivro)
+    }</div>
+                            <div class="livro-autor">${
+        esc(s.autorLivro || "—")
+    }</div>
                             <div class="livro-meta">
-                                ${s.isbnLivro ? `
+                                ${
+        s.isbnLivro
+            ? `
                                 <div class="meta-chip">
                                     <span class="meta-chip-label">ISBN</span>
-                                    <span class="meta-chip-value" style="font-family:monospace">${esc(s.isbnLivro)}</span>
-                                </div>` : ''}
+                                    <span class="meta-chip-value" style="font-family:monospace">${
+                esc(s.isbnLivro)
+            }</span>
+                                </div>`
+            : ""
+    }
                                 <div class="meta-chip">
                                     <span class="meta-chip-label">Valor do pedido</span>
-                                    <span class="meta-chip-value">T$ ${fmtTokens(s.precoLivro)}</span>
+                                    <span class="meta-chip-value">T$ ${
+        fmtTokens(s.precoLivro)
+    }</span>
                                 </div>
                             </div>
                         </div>
@@ -198,11 +250,15 @@ function renderDetalhe(s) {
                     <div class="fields-grid">
                         <div class="field">
                             <span class="field-label">Nome</span>
-                            <span class="field-value">${esc(s.clienteNome)}</span>
+                            <span class="field-value">${
+        esc(s.clienteNome)
+    }</span>
                         </div>
                         <div class="field">
                             <span class="field-label">E-mail</span>
-                            <span class="field-value">${esc(s.clienteEmail)}</span>
+                            <span class="field-value">${
+        esc(s.clienteEmail)
+    }</span>
                         </div>
                         <div class="field">
                             <span class="field-label">Pedido</span>
@@ -210,7 +266,9 @@ function renderDetalhe(s) {
                         </div>
                         <div class="field">
                             <span class="field-label">Data da compra</span>
-                            <span class="field-value">${fmtData(s.dataCompra)}</span>
+                            <span class="field-value">${
+        fmtData(s.dataCompra)
+    }</span>
                         </div>
                     </div>
                 </div>
@@ -225,9 +283,13 @@ function renderDetalhe(s) {
                 <div class="section-body">
                     <div class="motivo-categoria">${motivoBadge(s)}</div>
                     <div style="margin-top:4px;font-size:11px;color:#b0a49a;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Descrição do cliente</div>
-                    <div class="motivo-descricao">${esc(s.motivoDescricao || '—')}</div>
+                    <div class="motivo-descricao">${
+        esc(s.motivoDescricao || "—")
+    }</div>
                     <div style="margin-top:12px;font-size:12px;color:#7a6e65">
-                        <i class="fa-regular fa-calendar"></i> Solicitado em ${fmtData(s.dataSolicitacao)}
+                        <i class="fa-regular fa-calendar"></i> Solicitado em ${
+        fmtData(s.dataSolicitacao)
+    }
                     </div>
                 </div>
             </div>
@@ -242,12 +304,16 @@ function renderDetalhe(s) {
                     <div class="estorno-destaque">
                         <i class="fa-solid fa-coins"></i>
                         <div>
-                            <div class="estorno-valor">T$ ${fmtTokens(s.precoLivro)}</div>
+                            <div class="estorno-valor">T$ ${
+        fmtTokens(s.precoLivro)
+    }</div>
                             <div class="estorno-label">Valor a ser devolvido ao aprovar</div>
                         </div>
                         <div class="saldo-info">
                             <div class="saldo-label">Saldo atual do comprador</div>
-                            <div class="saldo-valor">T$ ${fmtTokens(s.saldoAtualComprador)}</div>
+                            <div class="saldo-valor">T$ ${
+        fmtTokens(s.saldoAtualComprador)
+    }</div>
                         </div>
                     </div>
                 </div>
@@ -260,45 +326,56 @@ function renderDetalhe(s) {
         </div>
     `;
 
-    document.getElementById('pageContent').innerHTML = html;
+    document.getElementById("pageContent").innerHTML = html;
 
     // Preenche o modal com info do livro
-    document.getElementById('modalInfo').innerHTML =
-        `<strong>${esc(s.tituloLivro)}</strong><br>
-         <span style="color:#7a6e65">Pedido #${s.pedidoId} — ${esc(s.clienteNome)}</span><br>
-         <span style="color:#7a6e65">Motivo: ${esc(s.motivoCategoriaDescricao)}</span>`;
+    document.getElementById("modalInfo").innerHTML = `<strong>${
+        esc(s.tituloLivro)
+    }</strong><br>
+         <span style="color:#7a6e65">Pedido #${s.pedidoId} — ${
+        esc(s.clienteNome)
+    }</span><br>
+         <span style="color:#7a6e65">Motivo: ${
+        esc(s.motivoCategoriaDescricao)
+    }</span>`;
 }
 
 /* ── APROVAR ─────────────────────────────────────────────────────── */
 
 async function confirmarAprovacao() {
-    const btn = document.getElementById('btnAprovar');
+    const btn = document.getElementById("btnAprovar");
     if (!btn || !_sol) return;
     btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processando...';
+    btn.innerHTML =
+        '<i class="fa-solid fa-spinner fa-spin"></i> Processando...';
 
     try {
         const res = await fetch(`/api/admin/cancelamentos/${_sol.id}/aprovar`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ comentarioAdmin: null }),
         });
 
-        if (res.status === 401 || res.status === 403) { window.location.href = '/admin/login'; return; }
+        if (res.status === 401 || res.status === 403) {
+            window.location.href = "/admin/login";
+            return;
+        }
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
-            throw new Error(err.message || 'Falha na API');
+            throw new Error(err.message || "Falha na API");
         }
 
-        mostrarToast('toast-ok', 'Cancelamento aprovado e estorno realizado.');
-        setTimeout(() => { window.location.href = '/admin/cancelamentos'; }, 1800);
-
+        mostrarToast("toast-ok", "Cancelamento aprovado e estorno realizado.");
+        setTimeout(() => {
+            window.location.href = "/admin/cancelamentos";
+        }, 1800);
     } catch (e) {
-        mostrarToast('toast-err', 'Erro: ' + (e.message || 'Tente novamente.'));
+        mostrarToast("toast-err", "Erro: " + (e.message || "Tente novamente."));
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> Aprovar Cancelamento';
+            btn.innerHTML =
+                '<i class="fa-solid fa-check"></i> Aprovar Cancelamento';
         }
     }
 }
@@ -306,46 +383,52 @@ async function confirmarAprovacao() {
 /* ── MODAL RECUSA ─────────────────────────────────────────────────── */
 
 function abrirModalRecusa() {
-    document.getElementById('comentarioAdmin').value = '';
-    document.getElementById('btnConfirmarRecusa').disabled = false;
-    document.getElementById('btnConfirmarRecusa').innerHTML = '<i class="fa-solid fa-xmark"></i> Confirmar Recusa';
-    document.getElementById('modal').classList.add('show');
-    document.getElementById('modalOverlay').classList.add('show');
-    document.getElementById('comentarioAdmin').focus();
+    document.getElementById("comentarioAdmin").value = "";
+    document.getElementById("btnConfirmarRecusa").disabled = false;
+    document.getElementById("btnConfirmarRecusa").innerHTML =
+        '<i class="fa-solid fa-xmark"></i> Confirmar Recusa';
+    document.getElementById("modal").classList.add("show");
+    document.getElementById("modalOverlay").classList.add("show");
+    document.getElementById("comentarioAdmin").focus();
 }
 
 function fecharModal() {
-    document.getElementById('modal').classList.remove('show');
-    document.getElementById('modalOverlay').classList.remove('show');
+    document.getElementById("modal").classList.remove("show");
+    document.getElementById("modalOverlay").classList.remove("show");
 }
 
 async function confirmarRecusa() {
     if (!_sol) return;
-    const comentario = document.getElementById('comentarioAdmin').value.trim();
-    const btn = document.getElementById('btnConfirmarRecusa');
+    const comentario = document.getElementById("comentarioAdmin").value.trim();
+    const btn = document.getElementById("btnConfirmarRecusa");
     btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processando...';
+    btn.innerHTML =
+        '<i class="fa-solid fa-spinner fa-spin"></i> Processando...';
 
     try {
         const res = await fetch(`/api/admin/cancelamentos/${_sol.id}/recusar`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ comentarioAdmin: comentario || null }),
         });
 
-        if (res.status === 401 || res.status === 403) { window.location.href = '/admin/login'; return; }
+        if (res.status === 401 || res.status === 403) {
+            window.location.href = "/admin/login";
+            return;
+        }
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
-            throw new Error(err.message || 'Falha na API');
+            throw new Error(err.message || "Falha na API");
         }
 
         fecharModal();
-        mostrarToast('toast-ok', 'Cancelamento recusado.');
-        setTimeout(() => { window.location.href = '/admin/cancelamentos'; }, 1800);
-
+        mostrarToast("toast-ok", "Cancelamento recusado.");
+        setTimeout(() => {
+            window.location.href = "/admin/cancelamentos";
+        }, 1800);
     } catch (e) {
-        mostrarToast('toast-err', 'Erro: ' + (e.message || 'Tente novamente.'));
+        mostrarToast("toast-err", "Erro: " + (e.message || "Tente novamente."));
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-xmark"></i> Confirmar Recusa';
     }
@@ -353,11 +436,14 @@ async function confirmarRecusa() {
 
 /* ── INIT ─────────────────────────────────────────────────────────── */
 
-document.addEventListener('DOMContentLoaded', () => {
-    const hoje = document.getElementById('dataHoje');
+document.addEventListener("DOMContentLoaded", () => {
+    const hoje = document.getElementById("dataHoje");
     if (hoje) {
-        hoje.textContent = new Date().toLocaleDateString('pt-BR', {
-            weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+        hoje.textContent = new Date().toLocaleDateString("pt-BR", {
+            weekday: "long",
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
         });
     }
     carregarSolicitacao();

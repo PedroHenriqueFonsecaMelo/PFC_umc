@@ -18,7 +18,7 @@ import umc.exs.service.notificacao.NotificacaoService;
 /**
  * Scheduler de pontos XP:
  * - Meia-noite: zera XP de pontuações expiradas e registra log de auditoria.
- * - 09h:        avisa (e-mail + dashboard) usuários com XP a vencer em 30 dias.
+ * - 09h: avisa (e-mail + dashboard) usuários com XP a vencer em 30 dias.
  */
 @Slf4j
 @Service
@@ -37,13 +37,14 @@ public class PontosSchedulerService {
     @Scheduled(cron = "0 0 9 * * *")
     public void avisarXpAExpirar() {
         LocalDateTime inicioDaJanela = LocalDateTime.now().minusDays(29);
-        LocalDateTime fimDaJanela    = LocalDateTime.now().minusDays(25);
+        LocalDateTime fimDaJanela = LocalDateTime.now().minusDays(25);
 
         List<PontuacaoUsuario> emRisco = pontuacaoRepository
                 .findAllByUltimaAtualizacaoBetween(inicioDaJanela, fimDaJanela);
 
         for (PontuacaoUsuario p : emRisco) {
-            if (p.getXpTotal() <= 0) continue;
+            if (p.getXpTotal() <= 0)
+                continue;
             try {
                 notificacaoService.criarNotificacaoDashboard(
                         p.getCliente(),
@@ -93,8 +94,10 @@ public class PontosSchedulerService {
         p.setXpLivrosAprovados(0);
         p.setXpCompras(0);
         p.setXpAvaliacoes(0);
-        
-        logAuditoria.registrarLog("XP_ZERADO", p.getCliente().getId(), p.getCliente().getEmail(), "XP zerado por 45 dias de inatividade.");
-        notificacaoService.criarNotificacaoDashboard(p.getCliente(), "Seu XP foi zerado por inatividade prolongada.", "/gamificacao");
+
+        logAuditoria.registrarLog("XP_ZERADO", p.getCliente().getId(), p.getCliente().getEmail(),
+                "XP zerado por 45 dias de inatividade.");
+        notificacaoService.criarNotificacaoDashboard(p.getCliente(), "Seu XP foi zerado por inatividade prolongada.",
+                "/gamificacao");
     }
 }

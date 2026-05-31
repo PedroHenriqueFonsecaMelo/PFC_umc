@@ -14,10 +14,10 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.usuario.ClienteRepository;
-import umc.exs.service.core.bussiness.LivroCompraService;
-import umc.exs.service.core.control.PedidoService;
+import umc.exs.service.core.dashboard.PedidoService;
+import umc.exs.service.core.livros.delegado.LivroCompraService;
 import umc.exs.service.cupom.CupomService;
-import umc.exs.service.email.EmailService;
+import umc.exs.service.email.facade.EmailFacade;
 import umc.exs.service.gamificacao.GamificacaoService;
 import umc.exs.service.log.LogAuditoriaService;
 import umc.exs.service.notificacao.NotificacaoService;
@@ -27,12 +27,11 @@ class LivroCompraServiceTest {
         private LivroRepository livroRepository;
         private ClienteRepository clienteRepository;
         private PedidoService pedidoService;
-        private EmailService emailService;
+        private EmailFacade emailFacade;
         private CupomService cupomService;
         private GamificacaoService gamificacaoService;
         private LogAuditoriaService logAuditoriaService;
         private NotificacaoService notificacaoService;
-
 
         private LivroCompraService service;
 
@@ -41,7 +40,7 @@ class LivroCompraServiceTest {
                 livroRepository = mock(LivroRepository.class);
                 clienteRepository = mock(ClienteRepository.class);
                 pedidoService = mock(PedidoService.class);
-                emailService = mock(EmailService.class);
+                emailFacade = mock(EmailFacade.class);
                 cupomService = mock(CupomService.class);
                 gamificacaoService = mock(GamificacaoService.class);
                 logAuditoriaService = mock(LogAuditoriaService.class);
@@ -50,7 +49,7 @@ class LivroCompraServiceTest {
                 service = new LivroCompraService(
                                 livroRepository,
                                 clienteRepository,
-                                emailService,
+                                emailFacade,
                                 pedidoService,
                                 cupomService,
                                 gamificacaoService,
@@ -121,10 +120,10 @@ class LivroCompraServiceTest {
 
                 assertEquals(10.0, buyer.getSaldoTokens());
 
-                verify(livroRepository).save(livro);                
+                verify(livroRepository).save(livro);
                 verify(clienteRepository, never()).save(any());
                 verify(pedidoService).registrarPedido(buyer, livro);
-                verify(emailService).enviar(
+                verify(emailFacade).sendHtmlSafe(
                                 buyer.getEmail(),
                                 "Compra realizada",
                                 "Seu livro foi comprado com sucesso");
@@ -156,6 +155,6 @@ class LivroCompraServiceTest {
 
                 assertEquals("Saldo insuficiente para completar a compra.", ex.getMessage());
 
-                 verify(livroRepository, never()).save(any());
+                verify(livroRepository, never()).save(any());
         }
 }

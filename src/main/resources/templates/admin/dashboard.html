@@ -24,7 +24,9 @@
   </head>
   <body>
     <div class="layout">
-      <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('dashboard')}"></th:block>
+      <th:block
+        th:replace="~{fragments/admin-sidebar :: adminSidebar('dashboard')}"
+      ></th:block>
 
       <div class="overlay" id="overlay" onclick="fecharMenu()"></div>
 

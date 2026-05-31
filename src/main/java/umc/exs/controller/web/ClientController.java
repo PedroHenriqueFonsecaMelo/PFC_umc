@@ -35,7 +35,7 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
-import umc.exs.service.core.cliente.ClienteService;
+import umc.exs.service.cliente.ClienteService;
 import umc.exs.service.core.control.AuthHelper;
 import umc.exs.service.gamificacao.GamificacaoService;
 
@@ -52,7 +52,6 @@ public class ClientController {
     private final GamificacaoService gamificacaoService;
 
     private final ClienteMapper clienteMapper;
-
 
     // Constantes para evitar duplicação de literais (Code Smells)
     private static final String ATTR_CLIENTE = "cliente";
@@ -143,10 +142,9 @@ public class ClientController {
         try {
             Cliente cliente = clienteService.autenticarCliente(email, senha);
             if (cliente.getId() != null) {
-                Long safeId = Objects.requireNonNull(cliente.getId(),
-                        "ID do cliente não pode ser nulo após autenticação");
+                Objects.requireNonNull(cliente.getId(), "ID do cliente não pode ser nulo após autenticação");
 
-                authHelper.authenticateAndSetCookie(cliente.getEmail(), safeId, response, "LOGIN_SUCESSO");
+                authHelper.authenticate(cliente.getEmail(), response);
                 return "redirect:/clientes/homepage";
             } else
                 return REDIRECT_LOGIN;
@@ -176,7 +174,7 @@ public class ClientController {
     }
 
     // ============================================================
-    // 🏠 PERFIL E CONTA
+    // PERFIL E CONTA
     // ============================================================
 
     @GetMapping("/meu-perfil")
@@ -326,7 +324,7 @@ public class ClientController {
     }
 
     // ============================================================
-    // 🪙 CARTEIRA E FINANÇAS
+    // CARTEIRA E FINANÇAS
     // ============================================================
 
     @GetMapping("/minhas-compras")
@@ -362,7 +360,7 @@ public class ClientController {
     }
 
     // ============================================================
-    // 🔑 RECUPERAÇÃO DE SENHA
+    // RECUPERAÇÃO DE SENHA
     // ============================================================
 
     @GetMapping("/recuperar-senha")
@@ -415,7 +413,7 @@ public class ClientController {
     }
 
     // ============================================================
-    // 📄 PÁGINAS INFORMATIVAS
+    // PÁGINAS INFORMATIVAS
     // ============================================================
 
     @GetMapping("/termo")

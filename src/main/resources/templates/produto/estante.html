@@ -1,96 +1,138 @@
 <!DOCTYPE html>
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Estante — Bibliotroca</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
-          rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/cliente/nav.css}"/>
-    <link rel="stylesheet" th:href="@{/css/produto/estante.css}"/>
-    <link rel="stylesheet" th:href="@{/css/breadcrumb.css}"/>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Minha Estante — Bibliotroca</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+            rel="stylesheet"
+        >
+        <link rel="stylesheet" th:href="@{/css/cliente/nav.css}" />
+        <link rel="stylesheet" th:href="@{/css/produto/estante.css}" />
+        <link rel="stylesheet" th:href="@{/css/breadcrumb.css}" />
+    </head>
+    <body>
+        <!-- NAV -->
+        <header th:replace="~{fragments/client-nav :: clientNav}"></header>
 
-    <!-- NAV -->
-    <header th:replace="~{fragments/client-nav :: clientNav}"></header>
-
-    <!-- NAVEGAÇÃO CONTEXTUAL -->
-    <div class="breadcrumb-wrap">
-        <nav class="breadcrumb-nav">
-            <a href="/">Início</a>
-            <span class="breadcrumb-sep">›</span>
-            <span class="breadcrumb-current">Minha Estante</span>
-        </nav>
-        <a href="/livros/vitrine" class="btn-voltar">← Continuar Comprando</a>
-    </div>
-
-    <main class="estante-main">
-
-        <!-- Cabeçalho da página -->
-        <div class="estante-header">
-            <div>
-                <h1>Minha Estante</h1>
-                <p>Selecione os livros que deseja comprar agora.</p>
-            </div>
+        <!-- NAVEGAÇÃO CONTEXTUAL -->
+        <div class="breadcrumb-wrap">
+            <nav class="breadcrumb-nav">
+                <a href="/">Início</a>
+                <span class="breadcrumb-sep">›</span>
+                <span class="breadcrumb-current">Minha Estante</span>
+            </nav>
+            <a href="/livros/vitrine" class="btn-voltar"
+            >← Continuar Comprando</a>
         </div>
 
-        <!-- Estado: estante vazia -->
-        <div id="estanteVazia" class="estante-vazia" style="display:none;">
-            <img src="/imagens/estante.png" alt="Estante vazia"
-                 onerror="this.style.display='none'"
-                 style="width:100px;height:100px;object-fit:contain;opacity:.5;margin-bottom:1.2rem;">
-            <p>Sua estante está vazia.</p>
-            <a href="/livros/vitrine" class="btn-primario" style="margin-top:1rem;">Explorar Vitrine</a>
-        </div>
-
-        <!-- Conteúdo da estante (com itens) -->
-        <div id="estanteConteudo" style="display:none;">
-
-            <!-- Barra de ações em lote -->
-            <div class="estante-acoes-lote">
-                <label class="checkbox-wrapper">
-                    <input type="checkbox" id="chkSelecionarTodos" onchange="toggleSelecionarTodos(this)">
-                    <span>Selecionar todos</span>
-                </label>
-                <button class="btn-remover-selecionados" onclick="removerSelecionados()"
-                        id="btnRemoverSelecionados" disabled>
-                    Remover selecionados
-                </button>
-            </div>
-
-            <!-- Lista de livros -->
-            <div id="listaEstante" class="estante-lista"></div>
-
-            <!-- Cupom de desconto -->
-            <div class="estante-cupom" id="estanteCupom">
-                <div class="cupom-row" id="cupomInputRow">
-                    <input type="text" id="cupomCodigo" class="cupom-input"
-                           placeholder="Código do cupom" maxlength="30" autocomplete="off"
-                           onkeydown="if(event.key==='Enter') aplicarCupom()">
-                    <button class="btn-cupom-aplicar" onclick="aplicarCupom()">Aplicar</button>
+        <main class="estante-main">
+            <!-- Cabeçalho da página -->
+            <div class="estante-header">
+                <div>
+                    <h1>Minha Estante</h1>
+                    <p>Selecione os livros que deseja comprar agora.</p>
                 </div>
-                <div id="cupomFeedback" class="cupom-feedback" style="display:none;"></div>
-                <div id="cupomAplicadoBloco" class="cupom-aplicado-bloco" style="display:none;"></div>
             </div>
 
-            <!-- Rodapé com subtotal e ação -->
-            <div class="estante-footer">
-                <div class="estante-subtotal">
-                    <span class="subtotal-label">Subtotal (<span id="qtdSelecionados">0</span> livro(s) selecionado(s))</span>
-                    <span class="subtotal-valor" id="subtotalValor">T$ 0,00</span>
+            <!-- Estado: estante vazia -->
+            <div id="estanteVazia" class="estante-vazia" style="display: none">
+                <img
+                    src="/imagens/estante.png"
+                    alt="Estante vazia"
+                    onerror="this.style.display='none'"
+                    style="width: 100px; height: 100px; object-fit: contain; opacity: 0.5; margin-bottom: 1.2rem"
+                >
+                <p>Sua estante está vazia.</p>
+                <a
+                    href="/livros/vitrine"
+                    class="btn-primario"
+                    style="margin-top: 1rem"
+                >Explorar Vitrine</a>
+            </div>
+
+            <!-- Conteúdo da estante (com itens) -->
+            <div id="estanteConteudo" style="display: none">
+                <!-- Barra de ações em lote -->
+                <div class="estante-acoes-lote">
+                    <label class="checkbox-wrapper">
+                        <input
+                            type="checkbox"
+                            id="chkSelecionarTodos"
+                            onchange="toggleSelecionarTodos(this)"
+                        >
+                        <span>Selecionar todos</span>
+                    </label>
+                    <button
+                        class="btn-remover-selecionados"
+                        onclick="removerSelecionados()"
+                        id="btnRemoverSelecionados"
+                        disabled
+                    >
+                        Remover selecionados
+                    </button>
                 </div>
-                <button class="btn-prosseguir" id="btnProsseguir"
-                        onclick="prosseguirCheckout()" disabled>
-                    Prosseguir com selecionados →
-                </button>
+
+                <!-- Lista de livros -->
+                <div id="listaEstante" class="estante-lista"></div>
+
+                <!-- Cupom de desconto -->
+                <div class="estante-cupom" id="estanteCupom">
+                    <div class="cupom-row" id="cupomInputRow">
+                        <input
+                            type="text"
+                            id="cupomCodigo"
+                            class="cupom-input"
+                            placeholder="Código do cupom"
+                            maxlength="30"
+                            autocomplete="off"
+                            onkeydown="if(event.key==='Enter') aplicarCupom()"
+                        >
+                        <button
+                            class="btn-cupom-aplicar"
+                            onclick="aplicarCupom()"
+                        >
+                            Aplicar
+                        </button>
+                    </div>
+                    <div
+                        id="cupomFeedback"
+                        class="cupom-feedback"
+                        style="display: none"
+                    >
+                    </div>
+                    <div
+                        id="cupomAplicadoBloco"
+                        class="cupom-aplicado-bloco"
+                        style="display: none"
+                    >
+                    </div>
+                </div>
+
+                <!-- Rodapé com subtotal e ação -->
+                <div class="estante-footer">
+                    <div class="estante-subtotal">
+                        <span class="subtotal-label"
+                        >Subtotal (<span id="qtdSelecionados">0</span> livro(s)
+                            selecionado(s))</span>
+                        <span class="subtotal-valor" id="subtotalValor"
+                        >T$ 0,00</span>
+                    </div>
+                    <button
+                        class="btn-prosseguir"
+                        id="btnProsseguir"
+                        onclick="prosseguirCheckout()"
+                        disabled
+                    >
+                        Prosseguir com selecionados →
+                    </button>
+                </div>
             </div>
-        </div>
+        </main>
 
-    </main>
-
-    <script th:src="@{/js/produto/estante.js}"></script>
-</body>
+        <script th:src="@{/js/produto/estante.js}"></script>
+    </body>
 </html>

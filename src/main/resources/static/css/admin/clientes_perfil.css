@@ -12,9 +12,18 @@
     gap: 6px;
     flex-wrap: wrap;
 }
-.breadcrumb a { color: #722F37; text-decoration: none; font-weight: 500; }
-.breadcrumb a:hover { text-decoration: underline; }
-.breadcrumb i { font-size: 9px; color: #c8bdb5; }
+.breadcrumb a {
+    color: #722f37;
+    text-decoration: none;
+    font-weight: 500;
+}
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+.breadcrumb i {
+    font-size: 9px;
+    color: #c8bdb5;
+}
 
 /* ── PERFIL HEADER ──────────────────────────────────────────── */
 .perfil-header {
@@ -26,14 +35,14 @@
     margin: 16px 28px 0;
     border-radius: 12px;
     border: 1px solid #f0e8e0;
-    box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
     flex-wrap: wrap;
 }
 .perfil-avatar {
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    background: #722F37;
+    background: #722f37;
     color: #fff;
     display: flex;
     align-items: center;
@@ -43,14 +52,21 @@
     flex-shrink: 0;
     text-transform: uppercase;
 }
-.perfil-info { flex: 1; min-width: 0; }
+.perfil-info {
+    flex: 1;
+    min-width: 0;
+}
 .perfil-nome {
     font-family: "Playfair Display", Georgia, serif;
     font-size: 22px;
     font-weight: 700;
     color: #2c241b;
 }
-.perfil-email { font-size: 14px; color: #7a6e65; margin-top: 3px; }
+.perfil-email {
+    font-size: 14px;
+    color: #7a6e65;
+    margin-top: 3px;
+}
 .perfil-meta {
     display: flex;
     align-items: center;
@@ -58,8 +74,18 @@
     margin-top: 8px;
     flex-wrap: wrap;
 }
-.perfil-meta-item { font-size: 12px; color: #7a6e65; display: flex; align-items: center; gap: 5px; }
-.perfil-meta-item i { color: #b0a49a; width: 14px; text-align: center; }
+.perfil-meta-item {
+    font-size: 12px;
+    color: #7a6e65;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.perfil-meta-item i {
+    color: #b0a49a;
+    width: 14px;
+    text-align: center;
+}
 
 .badge-nivel {
     display: inline-block;
@@ -68,10 +94,22 @@
     font-size: 11px;
     font-weight: 700;
 }
-.nivel-Bronze   { background: #f3ede6; color: #8a6336; }
-.nivel-Prata    { background: #e8edf5; color: #4a5d8a; }
-.nivel-Ouro     { background: #fef3c7; color: #92400e; }
-.nivel-Platina  { background: #f5e8f8; color: #7b2d8b; }
+.nivel-Bronze {
+    background: #f3ede6;
+    color: #8a6336;
+}
+.nivel-Prata {
+    background: #e8edf5;
+    color: #4a5d8a;
+}
+.nivel-Ouro {
+    background: #fef3c7;
+    color: #92400e;
+}
+.nivel-Platina {
+    background: #f5e8f8;
+    color: #7b2d8b;
+}
 
 .badge-status {
     display: inline-flex;
@@ -82,8 +120,14 @@
     font-size: 11px;
     font-weight: 600;
 }
-.status-ativo   { background: #d1e7dd; color: #0f5132; }
-.status-inativo { background: #f5c6c6; color: #7a1c1c; }
+.status-ativo {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+.status-inativo {
+    background: #f5c6c6;
+    color: #7a1c1c;
+}
 
 .btn-voltar {
     display: inline-flex;
@@ -94,14 +138,16 @@
     border: 1px solid #e8ddd4;
     border-radius: 8px;
     font-size: 13px;
-    color: #722F37;
+    color: #722f37;
     cursor: pointer;
     font-weight: 600;
     text-decoration: none;
-    transition: background .2s;
+    transition: background 0.2s;
     flex-shrink: 0;
 }
-.btn-voltar:hover { background: #e8ddd4; }
+.btn-voltar:hover {
+    background: #e8ddd4;
+}
 
 /* ── SUMMARY CARDS ──────────────────────────────────────────── */
 .summary-grid {
@@ -115,7 +161,7 @@
     border-radius: 10px;
     padding: 18px 20px;
     border: 1px solid #f0e8e0;
-    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -132,8 +178,16 @@
     flex-shrink: 0;
     margin-bottom: 4px;
 }
-.summary-value { font-size: 22px; font-weight: 700; color: #2c241b; }
-.summary-label { font-size: 11px; color: #7a6e65; font-weight: 500; }
+.summary-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #2c241b;
+}
+.summary-label {
+    font-size: 11px;
+    color: #7a6e65;
+    font-weight: 500;
+}
 
 /* ── TABS ───────────────────────────────────────────────────── */
 .tabs-area {
@@ -156,23 +210,32 @@
     cursor: pointer;
     border-bottom: 2px solid transparent;
     margin-bottom: -2px;
-    transition: color .15s, border-color .15s;
+    transition: color 0.15s, border-color 0.15s;
     display: flex;
     align-items: center;
     gap: 7px;
 }
-.tab-btn:hover { color: #2c241b; }
-.tab-btn.ativo { color: #722F37; border-bottom-color: #722F37; }
+.tab-btn:hover {
+    color: #2c241b;
+}
+.tab-btn.ativo {
+    color: #722f37;
+    border-bottom-color: #722f37;
+}
 
-.tab-panel { display: none; }
-.tab-panel.ativo { display: block; }
+.tab-panel {
+    display: none;
+}
+.tab-panel.ativo {
+    display: block;
+}
 
 /* ── PAINEL DE ABA ──────────────────────────────────────────── */
 .panel-card {
     background: #fff;
     border-radius: 12px;
     border: 1px solid #f0e8e0;
-    box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
     margin: 16px 0;
     overflow: hidden;
 }
@@ -193,10 +256,16 @@
     align-items: center;
     gap: 8px;
 }
-.panel-title i { color: #722F37; }
+.panel-title i {
+    color: #722f37;
+}
 
 /* Filtro de período nos pedidos */
-.period-filter { display: flex; gap: 4px; flex-wrap: wrap; }
+.period-filter {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
 .period-btn {
     padding: 5px 12px;
     border: 1px solid #ddd;
@@ -206,10 +275,16 @@
     cursor: pointer;
     background: #fff;
     color: #7a6e65;
-    transition: all .15s;
+    transition: all 0.15s;
 }
-.period-btn.ativo { background: #722F37; color: #fff; border-color: #722F37; }
-.period-btn:hover:not(.ativo) { background: #f3ede6; }
+.period-btn.ativo {
+    background: #722f37;
+    color: #fff;
+    border-color: #722f37;
+}
+.period-btn:hover:not(.ativo) {
+    background: #f3ede6;
+}
 
 /* Tabela interna */
 table.inner-table {
@@ -226,7 +301,7 @@ table.inner-table {
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .06em;
+    letter-spacing: 0.06em;
     color: #b0a49a;
     border-bottom: 1px solid #f0e8e0;
     white-space: nowrap;
@@ -237,8 +312,12 @@ table.inner-table {
     border-bottom: 1px solid #f9f4ef;
     vertical-align: middle;
 }
-.inner-table tbody tr:last-child td { border-bottom: none; }
-.inner-table tbody tr:hover { background: #fdf9f5; }
+.inner-table tbody tr:last-child td {
+    border-bottom: none;
+}
+.inner-table tbody tr:hover {
+    background: #fdf9f5;
+}
 
 /* Status envio badge */
 .badge-envio {
@@ -249,10 +328,22 @@ table.inner-table {
     font-weight: 600;
     white-space: nowrap;
 }
-.envio-AGUARDANDO_ENVIO  { background: #fff3cd; color: #856404; }
-.envio-EM_TRANSITO       { background: #cfe2ff; color: #084298; }
-.envio-ENTREGUE          { background: #d1e7dd; color: #0f5132; }
-.envio-CANCELADO         { background: #f5c6c6; color: #7a1c1c; }
+.envio-AGUARDANDO_ENVIO {
+    background: #fff3cd;
+    color: #856404;
+}
+.envio-EM_TRANSITO {
+    background: #cfe2ff;
+    color: #084298;
+}
+.envio-ENTREGUE {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+.envio-CANCELADO {
+    background: #f5c6c6;
+    color: #7a1c1c;
+}
 
 /* ── INFO GRID (vendas, engajamento) ──────────────────────────── */
 .info-grid {
@@ -261,9 +352,23 @@ table.inner-table {
     gap: 14px;
     padding: 20px 22px;
 }
-.info-item { display: flex; flex-direction: column; gap: 4px; }
-.info-label { font-size: 11px; color: #b0a49a; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
-.info-value { font-size: 20px; font-weight: 700; color: #2c241b; }
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.info-label {
+    font-size: 11px;
+    color: #b0a49a;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.info-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2c241b;
+}
 
 /* ── EMPTY / LOADING ─────────────────────────────────────────── */
 .empty-state-sm {
@@ -271,8 +376,15 @@ table.inner-table {
     padding: 32px 20px;
     color: #b0a49a;
 }
-.empty-state-sm i { font-size: 28px; margin-bottom: 10px; display: block; }
-.empty-state-sm p { font-size: 13px; margin: 0; }
+.empty-state-sm i {
+    font-size: 28px;
+    margin-bottom: 10px;
+    display: block;
+}
+.empty-state-sm p {
+    font-size: 13px;
+    margin: 0;
+}
 
 .loading-placeholder {
     text-align: center;
@@ -280,7 +392,9 @@ table.inner-table {
     color: #7a6e65;
     font-size: 15px;
 }
-.loading-placeholder i { margin-right: 8px; }
+.loading-placeholder i {
+    margin-right: 8px;
+}
 
 /* ── TOAST ──────────────────────────────────────────────────── */
 .toast {
@@ -291,21 +405,44 @@ table.inner-table {
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
-    box-shadow: 0 4px 16px rgba(0,0,0,.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     z-index: 2000;
     max-width: 360px;
 }
-.toast-ok  { background: #2e7d32; color: #fff; }
-.toast-err { background: #722F37; color: #fff; }
+.toast-ok {
+    background: #2e7d32;
+    color: #fff;
+}
+.toast-err {
+    background: #722f37;
+    color: #fff;
+}
 
 /* ── RESPONSIVO ─────────────────────────────────────────────── */
 @media (max-width: 900px) {
-    .breadcrumb, .perfil-header, .summary-grid, .tabs-area { padding-left: 16px; padding-right: 16px; }
-    .perfil-header { margin-left: 16px; margin-right: 16px; }
-    .summary-grid { padding-left: 16px; padding-right: 16px; }
+    .breadcrumb, .perfil-header, .summary-grid, .tabs-area {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    .perfil-header {
+        margin-left: 16px;
+        margin-right: 16px;
+    }
+    .summary-grid {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
 }
 @media (max-width: 600px) {
-    .perfil-avatar { width: 52px; height: 52px; font-size: 20px; }
-    .perfil-nome { font-size: 18px; }
-    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    .perfil-avatar {
+        width: 52px;
+        height: 52px;
+        font-size: 20px;
+    }
+    .perfil-nome {
+        font-size: 18px;
+    }
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }

@@ -19,7 +19,7 @@
 
 /* Fundo redondo colorido */
 .sf-social::before {
-  content: '';
+  content: "";
   display: inline-block;
   width: 40px;
   height: 40px;
@@ -35,7 +35,7 @@
 
 /* Ícone Font Awesome */
 .sf-social::after {
-  font-family: 'Font Awesome 6 Brands';
+  font-family: "Font Awesome 6 Brands";
   font-size: 22px;
   color: #fff;
   display: inline-block;
@@ -52,16 +52,32 @@
 }
 
 /* Cores de fundo por rede */
-.sf-facebook::before  { background: #3b5998; }
-.sf-twitter::before   { background: #1da1f2; }
-.sf-instagram::before { background: #784cac; }
-.sf-linkedin::before  { background: #007bb6; }
+.sf-facebook::before {
+  background: #3b5998;
+}
+.sf-twitter::before {
+  background: #1da1f2;
+}
+.sf-instagram::before {
+  background: #784cac;
+}
+.sf-linkedin::before {
+  background: #007bb6;
+}
 
 /* Ícones */
-.sf-facebook::after  { content: '\f09a'; }
-.sf-twitter::after   { content: '\f099'; }
-.sf-instagram::after { content: '\f16d'; }
-.sf-linkedin::after  { content: '\f0e1'; }
+.sf-facebook::after {
+  content: "\f09a";
+}
+.sf-twitter::after {
+  content: "\f099";
+}
+.sf-instagram::after {
+  content: "\f16d";
+}
+.sf-linkedin::after {
+  content: "\f0e1";
+}
 
 /* Hover: fundo cai para trás (bg-fall) */
 .sf-social:hover::before {
@@ -74,7 +90,15 @@
 }
 
 /* Hover: ícone muda para cor da rede (fg-color) */
-.sf-facebook:hover::after  { color: #3b5998; }
-.sf-twitter:hover::after   { color: #1da1f2; }
-.sf-instagram:hover::after { color: #784cac; }
-.sf-linkedin:hover::after  { color: #007bb6; }
+.sf-facebook:hover::after {
+  color: #3b5998;
+}
+.sf-twitter:hover::after {
+  color: #1da1f2;
+}
+.sf-instagram:hover::after {
+  color: #784cac;
+}
+.sf-linkedin:hover::after {
+  color: #007bb6;
+}

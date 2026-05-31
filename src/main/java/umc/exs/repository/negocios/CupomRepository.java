@@ -20,7 +20,9 @@ public interface CupomRepository extends JpaRepository<Cupom, Long> {
 
     List<Cupom> findByClienteIdAndUsadoFalse(Long clienteId);
 
-    /** Cupons não usados e não expirados de um cliente (para listar disponíveis). */
+    /**
+     * Cupons não usados e não expirados de um cliente (para listar disponíveis).
+     */
     List<Cupom> findByClienteIdAndUsadoFalseAndExpiracaoAfter(Long clienteId, LocalDateTime agora);
 
     /** Cupons públicos válidos (cliente = null). */
@@ -35,6 +37,8 @@ public interface CupomRepository extends JpaRepository<Cupom, Long> {
             @Param("inicio") LocalDateTime inicio,
             @Param("fim") LocalDateTime fim);
 
-    /** Todos os cupons ordenados do mais recente para o mais antigo (visão admin). */
+    /**
+     * Todos os cupons ordenados do mais recente para o mais antigo (visão admin).
+     */
     List<Cupom> findAllByOrderByDataCriacaoDesc();
 }

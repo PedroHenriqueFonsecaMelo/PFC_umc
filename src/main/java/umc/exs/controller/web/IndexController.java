@@ -19,13 +19,16 @@ public class IndexController {
 
     @GetMapping({ "/", "/index", "/home" })
     public String index(Model model) {
-        model.addAttribute("statLivros",   livroRepository.countByAprovadoTrue());
+        model.addAttribute("statLivros", livroRepository.countByAprovadoTrue());
         model.addAttribute("statLeitores", clienteRepository.count());
-        model.addAttribute("statTrocas",   pedidoRepository.count());
+        model.addAttribute("statTrocas", pedidoRepository.count());
         return "index";
     }
 
-    /** Mantida para não quebrar links existentes — redireciona para a tela unificada. */
+    /**
+     * Mantida para não quebrar links existentes — redireciona para a tela
+     * unificada.
+     */
     @GetMapping("/entrar")
     public String entrar() {
         return "redirect:/clientes/login";

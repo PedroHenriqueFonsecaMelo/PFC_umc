@@ -15,9 +15,11 @@ import umc.exs.service.gamificacao.GamificacaoService;
 /**
  * API pública de ranking da Bibliotroca.
  *
- * GET /api/ranking/top?limite=100&periodo=todos  → top N leitores (LGPD-compliant)
+ * GET /api/ranking/top?limite=100&periodo=todos → top N leitores
+ * (LGPD-compliant)
  *
- * Acesso: público (sem autenticação). Dados sensíveis (e-mail, CPF) nunca expostos.
+ * Acesso: público (sem autenticação). Dados sensíveis (e-mail, CPF) nunca
+ * expostos.
  */
 @RestController
 @RequestMapping("/api/ranking")

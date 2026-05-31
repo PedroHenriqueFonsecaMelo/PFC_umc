@@ -39,7 +39,8 @@ public class CancelamentoController {
             @RequestBody CancelamentoRequest request,
             @AuthenticationPrincipal UserDetails user) {
         try {
-            SolicitacaoCancelamento cancelamento = cancelamentoService.solicitarCancelamento(pedidoId, user.getUsername(), request);
+            SolicitacaoCancelamento cancelamento = cancelamentoService.solicitarCancelamento(pedidoId,
+                    user.getUsername(), request);
             CancelamentoResponse dto = mapper.toResponse(cancelamento);
             return ResponseEntity.ok(dto);
         } catch (IllegalStateException | IllegalArgumentException e) {
@@ -126,20 +127,19 @@ public class CancelamentoController {
             @RequestBody Map<String, String> body) {
 
         String motivoCategoriaStr = body.get("motivoCategoria");
-        String justificativa      = body.get("justificativa");
+        String justificativa = body.get("justificativa");
 
         if (justificativa == null || justificativa.trim().length() < 10) {
             return ResponseEntity.badRequest()
-                .body(Map.of("erro", "Justificativa obrigatória (mínimo 10 caracteres)."));
+                    .body(Map.of("erro", "Justificativa obrigatória (mínimo 10 caracteres)."));
         }
 
         try {
-            umc.exs.model.enums.MotivoCategoria motivo =
-                umc.exs.model.enums.MotivoCategoria.valueOf(
+            umc.exs.model.enums.MotivoCategoria motivo = umc.exs.model.enums.MotivoCategoria.valueOf(
                     motivoCategoriaStr != null ? motivoCategoriaStr : "DECISAO_ADMINISTRATIVA");
 
             var resultado = cancelamentoService.cancelarPeloAdmin(
-                pedidoId, motivo, justificativa.trim());
+                    pedidoId, motivo, justificativa.trim());
             return ResponseEntity.ok(resultado);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
@@ -153,7 +153,8 @@ public class CancelamentoController {
     @GetMapping("/api/cancelamentos/meus")
     public ResponseEntity<?> meusCancelamentos(
             @AuthenticationPrincipal UserDetails user) {
-        if (user == null) return ResponseEntity.status(401).build();
+        if (user == null)
+            return ResponseEntity.status(401).build();
         try {
             var lista = cancelamentoService.listarCancelamentosCliente(user.getUsername());
             return ResponseEntity.ok(lista);

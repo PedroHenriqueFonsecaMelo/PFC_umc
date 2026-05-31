@@ -25,12 +25,16 @@
 
   function renderBarraXp(xpAtual, xpProximo, nivel) {
     const nivelMaximo = xpProximo === 0;
-    const pct = nivelMaximo ? 100 : Math.min(100, Math.round((xpAtual / (xpAtual + xpProximo)) * 100));
+    const pct = nivelMaximo
+      ? 100
+      : Math.min(100, Math.round((xpAtual / (xpAtual + xpProximo)) * 100));
 
     return `
       <div class="gami-barra-label">
         <span>${nivel}</span>
-        <span>${nivelMaximo ? "Nível máximo!" : xpProximo + " XP para o próximo"}</span>
+        <span>${
+      nivelMaximo ? "Nível máximo!" : xpProximo + " XP para o próximo"
+    }</span>
       </div>
       <div class="gami-barra-track">
         <div class="gami-barra-fill" style="width:${pct}%"></div>
@@ -50,7 +54,8 @@
         credentials: "include",
       });
       if (res.status === 401) {
-        container.innerHTML = `<p class="gami-aviso">Faça <a href="/entrar">login</a> para ver seu progresso.</p>`;
+        container.innerHTML =
+          `<p class="gami-aviso">Faça <a href="/entrar">login</a> para ver seu progresso.</p>`;
         return;
       }
       if (!res.ok) throw new Error("erro");
@@ -88,7 +93,8 @@
           </div>
         </div>`;
     } catch {
-      container.innerHTML = `<p class="gami-aviso">Não foi possível carregar seu perfil.</p>`;
+      container.innerHTML =
+        `<p class="gami-aviso">Não foi possível carregar seu perfil.</p>`;
     }
   }
 
@@ -119,12 +125,17 @@
       lista.innerHTML = dados
         .map((u) => {
           const eVoce = _minhaPosRanking > 0 && u.posicao === _minhaPosRanking;
-          const nomeCurto = u.primeiroNome + (u.inicialSobrenome ? " " + u.inicialSobrenome : "");
+          const nomeCurto = u.primeiroNome +
+            (u.inicialSobrenome ? " " + u.inicialSobrenome : "");
           return `
-          <li class="gami-rank-item${eVoce ? " gami-rank-voce" : ""}" style="--pos:${u.posicao}">
+          <li class="gami-rank-item${
+            eVoce ? " gami-rank-voce" : ""
+          }" style="--pos:${u.posicao}">
             <span class="gami-rank-medal">${medalha(u.posicao)}</span>
             <div class="gami-rank-info">
-              <span class="gami-rank-nome">${nomeCurto}${eVoce ? ' <span class="gami-voce-pill">Você</span>' : ""}</span>
+              <span class="gami-rank-nome">${nomeCurto}${
+            eVoce ? ' <span class="gami-voce-pill">Você</span>' : ""
+          }</span>
               <div class="gami-rank-barra-track">
                 <div class="gami-rank-barra-fill"
                      style="width:${Math.round((u.xpTotal / xpMax) * 100)}%;
@@ -137,7 +148,8 @@
         })
         .join("");
     } catch {
-      lista.innerHTML = `<li class="gami-aviso">Não foi possível carregar o ranking.</li>`;
+      lista.innerHTML =
+        `<li class="gami-aviso">Não foi possível carregar o ranking.</li>`;
     }
   }
 

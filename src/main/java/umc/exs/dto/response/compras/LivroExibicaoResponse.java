@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import umc.exs.model.enums.EstadoLivro;
 
-
 @Data
 @Builder
 @AllArgsConstructor

@@ -13,7 +13,7 @@ import umc.exs.controller.web.AuditController;
 import umc.exs.model.entidades.usuario.Cliente;
 
 import umc.exs.model.entidades.logic.LogAuditoria;
-import umc.exs.service.core.cliente.ClienteService;
+import umc.exs.service.cliente.ClienteService;
 import umc.exs.service.log.LogAuditoriaService;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,7 +47,6 @@ class AuditControllerUnitTest {
         Cliente clienteDTO = new Cliente();
         clienteDTO.setId(10L);
         clienteDTO.setEmail("user@example.com");
-
 
         List<LogAuditoria> logs = List.of(new LogAuditoria());
         when(clienteService.buscarClientePorEmail("user@example.com")).thenReturn(Optional.of(clienteDTO));

@@ -5,8 +5,10 @@
 let todosCupons = [];
 
 /* ── DATA NO TOPBAR ── */
-document.getElementById("dataHoje").textContent =
-    new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+document.getElementById("dataHoje").textContent = new Date().toLocaleDateString(
+    "pt-BR",
+    { weekday: "long", day: "2-digit", month: "long", year: "numeric" },
+);
 
 /* ── UTILS ── */
 function statusCupom(c) {
@@ -17,7 +19,11 @@ function statusCupom(c) {
 
 function formatarData(iso) {
     if (!iso) return "—";
-    return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    return new Date(iso).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+    });
 }
 
 function venceBreve(iso) {
@@ -44,29 +50,29 @@ async function carregarCupons() {
 function atualizarStats() {
     const agora = new Date();
     let ativos = 0, usados = 0, expirados = 0;
-    todosCupons.forEach(c => {
+    todosCupons.forEach((c) => {
         if (c.usado) usados++;
         else if (new Date(c.expiracao) < agora) expirados++;
         else ativos++;
     });
-    document.getElementById("statTotal").textContent    = todosCupons.length;
-    document.getElementById("statAtivos").textContent   = ativos;
-    document.getElementById("statUsados").textContent   = usados;
+    document.getElementById("statTotal").textContent = todosCupons.length;
+    document.getElementById("statAtivos").textContent = ativos;
+    document.getElementById("statUsados").textContent = usados;
     document.getElementById("statExpirados").textContent = expirados;
 }
 
 /* ── FILTRAR ── */
 function filtrar() {
-    const q       = document.getElementById("searchInput").value.toLowerCase().trim();
-    const tipo    = document.getElementById("filtroTipo").value;
-    const status  = document.getElementById("filtroStatus").value;
+    const q = document.getElementById("searchInput").value.toLowerCase().trim();
+    const tipo = document.getElementById("filtroTipo").value;
+    const status = document.getElementById("filtroStatus").value;
 
-    let lista = todosCupons.filter(c => {
+    let lista = todosCupons.filter((c) => {
         const matchQ = !q ||
             c.codigo.toLowerCase().includes(q) ||
-            (c.clienteNome  || "").toLowerCase().includes(q) ||
+            (c.clienteNome || "").toLowerCase().includes(q) ||
             (c.clienteEmail || "").toLowerCase().includes(q);
-        const matchTipo   = !tipo   || c.tipo === tipo;
+        const matchTipo = !tipo || c.tipo === tipo;
         const matchStatus = !status || statusCupom(c) === status;
         return matchQ && matchTipo && matchStatus;
     });
@@ -78,7 +84,7 @@ function filtrar() {
 function renderTabela(lista) {
     const tbody = document.getElementById("cuponsBody");
     const vazio = document.getElementById("cuponsVazio");
-    const cont  = document.getElementById("contador");
+    const cont = document.getElementById("contador");
 
     cont.textContent = `${lista.length} cupom${lista.length !== 1 ? "s" : ""}`;
 
@@ -92,7 +98,7 @@ function renderTabela(lista) {
     document.getElementById("cuponsTable").style.display = "";
     vazio.style.display = "none";
 
-    tbody.innerHTML = lista.map(c => {
+    tbody.innerHTML = lista.map((c) => {
         const st = statusCupom(c);
 
         const badgeTipo = c.tipo === "PONTUACAO"
@@ -110,14 +116,18 @@ function renderTabela(lista) {
                <div class="cliente-email">${esc(c.clienteEmail || "")}</div>`
             : `<span class="badge-publico"><i class="fa-solid fa-globe"></i> Público</span>`;
 
-        const expClass = st === "expirado" ? "expirada" : (venceBreve(c.expiracao) ? "vence-breve" : "");
+        const expClass = st === "expirado"
+            ? "expirada"
+            : (venceBreve(c.expiracao) ? "vence-breve" : "");
 
         const usosHtml = c.quantidadeMaxima != null
             ? `${c.quantidadeUsada || 0}/${c.quantidadeMaxima}`
             : `${c.quantidadeUsada || 0}/∞`;
 
         const acaoHtml = st === "ativo"
-            ? `<button class="btn-invalidar" onclick="confirmarInvalidacao(${c.id}, '${esc(c.codigo)}')">
+            ? `<button class="btn-invalidar" onclick="confirmarInvalidacao(${c.id}, '${
+                esc(c.codigo)
+            }')">
                  <i class="fa-solid fa-ban"></i> Invalidar
                </button>`
             : `<span style="color:#9c968f;font-size:.78rem">—</span>`;
@@ -125,11 +135,15 @@ function renderTabela(lista) {
         return `<tr>
           <td><span class="codigo-cell">${esc(c.codigo)}</span></td>
           <td>${badgeTipo}</td>
-          <td><span class="valor-cell">${Number(c.percentualDesconto).toFixed(0)}% off</span></td>
+          <td><span class="valor-cell">${
+            Number(c.percentualDesconto).toFixed(0)
+        }% off</span></td>
           <td><span style="font-size:.82rem;color:#4b4540">${usosHtml}</span></td>
           <td>${clienteHtml}</td>
           <td><span class="data-cell">${formatarData(c.dataCriacao)}</span></td>
-          <td><span class="data-cell ${expClass}">${formatarData(c.expiracao)}</span></td>
+          <td><span class="data-cell ${expClass}">${
+            formatarData(c.expiracao)
+        }</span></td>
           <td>${badgeStatus}</td>
           <td>${acaoHtml}</td>
         </tr>`;
@@ -147,13 +161,13 @@ function esc(s) {
 
 /* ── MODAL NOVO CUPOM ── */
 function abrirModalNovo() {
-    document.getElementById("fPercentual").value   = "";
+    document.getElementById("fPercentual").value = "";
     document.getElementById("fDataValidade").value = "";
-    document.getElementById("fCodigo").value       = "";
-    document.getElementById("fQtdMaxima").value    = "";
-    document.getElementById("fClienteId").value    = "";
+    document.getElementById("fCodigo").value = "";
+    document.getElementById("fQtdMaxima").value = "";
+    document.getElementById("fClienteId").value = "";
     document.getElementById("modalErro").style.display = "none";
-    document.getElementById("btnSalvar").disabled  = false;
+    document.getElementById("btnSalvar").disabled = false;
     document.getElementById("btnSalvar").textContent = "Gerar Cupom";
     document.getElementById("modal").classList.add("open");
     document.getElementById("modalOverlay").classList.add("open");
@@ -172,19 +186,20 @@ async function criarCupom(e) {
     btn.textContent = "Gerando...";
     document.getElementById("modalErro").style.display = "none";
 
-    const percentual    = parseFloat(document.getElementById("fPercentual").value);
-    const dataValidade  = document.getElementById("fDataValidade").value; // "yyyy-MM-ddTHH:mm"
-    const codigo        = document.getElementById("fCodigo").value.trim().toUpperCase();
-    const qtdMaxima     = document.getElementById("fQtdMaxima").value.trim();
-    const clienteId     = document.getElementById("fClienteId").value.trim();
+    const percentual = parseFloat(document.getElementById("fPercentual").value);
+    const dataValidade = document.getElementById("fDataValidade").value; // "yyyy-MM-ddTHH:mm"
+    const codigo = document.getElementById("fCodigo").value.trim()
+        .toUpperCase();
+    const qtdMaxima = document.getElementById("fQtdMaxima").value.trim();
+    const clienteId = document.getElementById("fClienteId").value.trim();
 
     const payload = {
         percentualDesconto: percentual,
-        dataValidade: dataValidade + ":00"  // adiciona segundos para ISO-8601 completo
+        dataValidade: dataValidade + ":00", // adiciona segundos para ISO-8601 completo
     };
-    if (codigo)     payload.codigo          = codigo;
-    if (qtdMaxima)  payload.quantidadeMaxima = parseInt(qtdMaxima, 10);
-    if (clienteId)  payload.clienteId       = parseInt(clienteId, 10);
+    if (codigo) payload.codigo = codigo;
+    if (qtdMaxima) payload.quantidadeMaxima = parseInt(qtdMaxima, 10);
+    if (clienteId) payload.clienteId = parseInt(clienteId, 10);
 
     try {
         const res = await fetch("/api/admin/cupons", {
@@ -202,7 +217,12 @@ async function criarCupom(e) {
         }
 
         fecharModal();
-        mostrarToast(`Cupom ${data.codigo} criado — ${Number(data.percentualDesconto).toFixed(0)}% off`, "ok");
+        mostrarToast(
+            `Cupom ${data.codigo} criado — ${
+                Number(data.percentualDesconto).toFixed(0)
+            }% off`,
+            "ok",
+        );
         await carregarCupons();
     } catch (_) {
         mostrarErroModal("Erro de conexão. Tente novamente.");
@@ -221,7 +241,8 @@ function mostrarErroModal(msg) {
 function confirmarInvalidacao(id, codigo) {
     document.getElementById("confirmMsg").textContent =
         `Tem certeza que deseja invalidar o cupom "${codigo}"? Ele não poderá mais ser utilizado.`;
-    document.getElementById("btnConfirmDelete").onclick = () => invalidarCupom(id, codigo);
+    document.getElementById("btnConfirmDelete").onclick = () =>
+        invalidarCupom(id, codigo);
     document.getElementById("confirmModal").classList.add("open");
     document.getElementById("confirmOverlay").classList.add("open");
 }
@@ -234,7 +255,9 @@ function fecharConfirm() {
 async function invalidarCupom(id, codigo) {
     fecharConfirm();
     try {
-        const res = await fetch(`/api/admin/cupons/${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/admin/cupons/${id}`, {
+            method: "DELETE",
+        });
         const data = await res.json().catch(() => ({}));
 
         if (res.ok) {
@@ -255,7 +278,9 @@ function mostrarToast(msg, tipo) {
     el.textContent = msg;
     el.className = `toast show ${tipo}`;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { el.classList.remove("show"); }, 3500);
+    toastTimer = setTimeout(() => {
+        el.classList.remove("show");
+    }, 3500);
 }
 
 /* ── SIDEBAR MOBILE ── */

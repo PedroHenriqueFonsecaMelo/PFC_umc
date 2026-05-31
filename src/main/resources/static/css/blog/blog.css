@@ -14,12 +14,16 @@
     --radius: 12px;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
 body {
     background: var(--paper);
     color: var(--ink);
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 15px;
     line-height: 1.6;
     min-height: 100vh;
@@ -47,7 +51,7 @@ body {
 }
 
 .blog-page-title {
-    font-family: 'Playfair Display', serif;
+    font-family: "Playfair Display", serif;
     font-size: clamp(2rem, 5vw, 3rem);
     color: var(--ink);
     margin-bottom: 0.6rem;
@@ -76,7 +80,10 @@ body {
     border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        border-color 0.18s ease;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -132,7 +139,7 @@ body {
 }
 
 .blog-card-titulo {
-    font-family: 'Playfair Display', serif;
+    font-family: "Playfair Display", serif;
     font-size: 1.1rem;
     font-weight: 700;
     color: var(--ink);
@@ -239,7 +246,7 @@ body {
 }
 
 .post-titulo {
-    font-family: 'Playfair Display', serif;
+    font-family: "Playfair Display", serif;
     font-size: clamp(1.6rem, 4vw, 2.1rem);
     font-weight: 700;
     color: var(--ink);
@@ -274,7 +281,7 @@ body {
     padding: 0.42rem 1rem;
     cursor: pointer;
     transition: all 0.18s ease;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
 }
 
 .btn-curtir:hover:not(.btn-curtir-disabled) {
@@ -308,7 +315,7 @@ body {
 }
 
 .comentarios-titulo {
-    font-family: 'Playfair Display', serif;
+    font-family: "Playfair Display", serif;
     font-size: 1.15rem;
     color: var(--ink);
     margin-bottom: 1.5rem;
@@ -386,7 +393,7 @@ body {
     border: 1px solid var(--border);
     border-radius: 8px;
     color: var(--ink);
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.9rem;
     padding: 0.75rem 1rem;
     resize: vertical;
@@ -410,7 +417,7 @@ body {
     padding: 0.52rem 1.25rem;
     font-size: 0.88rem;
     font-weight: 600;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     cursor: pointer;
     transition: background 0.15s, opacity 0.15s;
 }

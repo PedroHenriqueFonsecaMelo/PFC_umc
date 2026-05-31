@@ -53,7 +53,6 @@ class ForumViewControllerIntegrationTest {
     @MockitoBean
     private JwtUserDetailsService jwtUserDetailsService;
 
-    @SuppressWarnings("null")
     @Test
     void listarForumRetornaViewLista() throws Exception {
         Page<TopicoForum> page = new PageImpl<>(List.of());

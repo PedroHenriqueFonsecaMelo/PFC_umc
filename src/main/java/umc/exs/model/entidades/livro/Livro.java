@@ -20,7 +20,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import io.github.manoelcampos.dtogen.DTO;
-import umc.exs.dto.response.compras.LivroExibicaoResponse;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.EstadoLivro;

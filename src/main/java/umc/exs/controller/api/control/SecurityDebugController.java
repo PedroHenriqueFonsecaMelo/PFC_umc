@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Endpoint de diagnóstico — RESTRITO A ADMIN.
- * ⚠️ Remover ou desabilitar completamente em produção.
+ * Remover ou desabilitar completamente em produção.
  */
 @Slf4j
 @RestController

@@ -27,7 +27,8 @@ public class CupomController {
     /** Lista os cupons disponíveis do usuário logado. */
     @GetMapping("/meus")
     public ResponseEntity<List<CupomResponse>> meusCupons(@AuthenticationPrincipal UserDetails user) {
-        if (user == null) return ResponseEntity.status(401).build();
+        if (user == null)
+            return ResponseEntity.status(401).build();
         return ResponseEntity.ok(mapper.toResponseList(cupomService.listarCuponsDisponiveis(user.getUsername())));
     }
 
@@ -38,7 +39,8 @@ public class CupomController {
      * @param codigo código do cupom
      * @param total  valor total da compra sobre o qual aplicar o desconto
      * @param user   usuário autenticado
-     * @return mapa com: valido, codigo, percentual, totalOriginal, desconto, totalComDesconto
+     * @return mapa com: valido, codigo, percentual, totalOriginal, desconto,
+     *         totalComDesconto
      */
     @GetMapping("/validar")
     public ResponseEntity<Map<String, Object>> validar(
@@ -46,7 +48,8 @@ public class CupomController {
             @RequestParam double total,
             @AuthenticationPrincipal UserDetails user) {
 
-        if (user == null) return ResponseEntity.status(401).build();
+        if (user == null)
+            return ResponseEntity.status(401).build();
 
         try {
             var result = cupomService.validarCupomParaTotal(codigo, user.getUsername(), total);

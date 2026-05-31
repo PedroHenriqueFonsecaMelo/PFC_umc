@@ -28,7 +28,7 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.livro.AvaliacaoLivroRepository;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.usuario.ClienteRepository;
-import umc.exs.service.core.interactions.AvaliacaoLivroService;
+import umc.exs.service.core.livros.avaliacao.LivroAvaliacaoService;
 
 @RestController
 @RequestMapping("/api/avaliacoes")
@@ -44,7 +44,7 @@ public class AvaliacaoLivroController {
     private static final String MESSAGE = "message";
     private static final String ERRO = "erro";
 
-    private final AvaliacaoLivroService avaliacaoService;
+    private final LivroAvaliacaoService avaliacaoService;
     private final AvaliacaoLivroRepository avaliacaoRepo;
     private final LivroRepository livroRepo;
     private final ClienteRepository clienteRepo;
@@ -128,7 +128,6 @@ public class AvaliacaoLivroController {
         }
     }
 
-    @SuppressWarnings("null")
     @PostMapping("/salvar")
     public ResponseEntity<Map<String, Object>> salvarComentario(
             @RequestBody ComentarioRequest payload,

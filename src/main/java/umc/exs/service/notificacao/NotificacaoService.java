@@ -27,7 +27,8 @@ public class NotificacaoService {
     private final NotificacaoDashboardRepository notificacaoDashboardRepository;
 
     /**
-     * Notifica o cliente sobre mudança de saldo via WebSocket (/topic/saldo/{clienteId}).
+     * Notifica o cliente sobre mudança de saldo via WebSocket
+     * (/topic/saldo/{clienteId}).
      * Também cria registro de notificação no dashboard.
      */
     public void notificarSaldo(Long clienteId, Double novoSaldo, String descricao) {
@@ -37,7 +38,7 @@ public class NotificacaoService {
                     "novoSaldo", novoSaldo,
                     "descricao", descricao != null ? descricao : "",
                     "timestamp", LocalDateTime.now().toString());
-                    
+
             if (payload.get("clienteId") == null || payload.get("novoSaldo") == null) {
                 log.error("Dados insuficientes para notificação de saldo: clienteId ou novoSaldo nulos.");
                 return;

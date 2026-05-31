@@ -15,12 +15,21 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             HttpServletResponse response,
             AuthenticationException authException) throws IOException {
 
-        if (request.getRequestURI().startsWith("/api/")) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+        String uri = request.getRequestURI();
+
+        if (uri.startsWith("/api/")) {
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"error\":\"Não autenticado\"}");
-        } else {
-            response.sendRedirect("/clientes/login");
+            response.getWriter().write("""
+                        {
+                          "status": 401,
+                          "error": "Não autenticado"
+                        }
+                    """);
+            return;
         }
+
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
     }
 }

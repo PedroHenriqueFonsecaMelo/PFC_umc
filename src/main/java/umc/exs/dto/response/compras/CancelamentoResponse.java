@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import umc.exs.model.enums.MotivoCategoria;
 import umc.exs.model.enums.StatusSolicitacao;
 
-
 @Data
 @Builder
 @AllArgsConstructor

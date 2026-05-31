@@ -53,7 +53,6 @@ class AdminViewControllerIntegrationTest {
                 .andExpect(view().name("admin/admin_login"));
     }
 
-    @SuppressWarnings("null")
     @Test
     void postarLoginAdminValidoRedirecionaPainel() throws Exception {
         UserDetails admin = User.withUsername("admin@example.com")
@@ -66,9 +65,9 @@ class AdminViewControllerIntegrationTest {
         when(jwtUtil.generateToken("admin@example.com")).thenReturn("token-value");
 
         mockMvc.perform(post("/admin/login")
-                        .param("email", "admin@example.com")
-                        .param("senha", "senha")
-                        .with(csrf()))
+                .param("email", "admin@example.com")
+                .param("senha", "senha")
+                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/painel"));
     }

@@ -25,8 +25,8 @@ import umc.exs.dto.response.cliente.ClientePerfilResponse;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.entidades.usuario.Endereco;
-import umc.exs.service.core.bussiness.MinhasVendasService;
-import umc.exs.service.core.cliente.ClienteService;
+import umc.exs.service.cliente.ClienteService;
+import umc.exs.service.core.livros.MinhasVendasService;
 
 @RestController
 @RequestMapping("/api/clientes")

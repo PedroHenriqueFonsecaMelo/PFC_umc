@@ -12,8 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import umc.exs.model.entidades.foundation.Cupom;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.negocios.CupomRepository;
-import umc.exs.service.email.EmailHtmlBuilder;
-import umc.exs.service.email.EmailService;
+import umc.exs.service.email.facade.EmailFacade;
+import umc.exs.service.email.html.EmailHtmlBuilder;
 import umc.exs.service.notificacao.NotificacaoService;
 
 /**
@@ -27,7 +27,7 @@ import umc.exs.service.notificacao.NotificacaoService;
 public class CupomSchedulerService {
 
     private final CupomRepository cupomRepository;
-    private final EmailService emailService;
+    private final EmailFacade emailFacade;
     private final NotificacaoService notificacaoService;
 
     // ── Feature 7: Limpeza diária à meia-noite ─────────────────────────
@@ -50,7 +50,6 @@ public class CupomSchedulerService {
 
     // ── Feature 8: Aviso diário às 09h — cupons a vencer em 7 dias ─────
 
-    @SuppressWarnings("null")
     @Transactional
     @Scheduled(cron = "0 0 9 * * *")
     public void avisarCuponsAVencer() {
@@ -69,10 +68,11 @@ public class CupomSchedulerService {
         for (Cupom cupom : aVencer) {
             // Apenas cupons nominais (vinculados a um cliente) recebem notificação
             Cliente cliente = cupom.getCliente();
-            if (cliente == null) continue;
+            if (cliente == null)
+                continue;
 
             try {
-                emailService.enviarHtml(
+                emailFacade.sendHtmlSafe(
                         cliente.getEmail(),
                         "Seu cupom vai expirar em breve! — Bibliotroca",
                         EmailHtmlBuilder.cupomExpirando(

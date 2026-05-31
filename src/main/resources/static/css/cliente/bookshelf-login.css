@@ -21,8 +21,9 @@
 /* ── Livro interativo ── */
 .bs-book {
     cursor: pointer;
-    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.25s ease;
+    transition:
+        transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.25s ease;
 }
 
 .bs-book:hover {
@@ -32,8 +33,9 @@
 
 .bs-book.active {
     transform: translateY(-14px);
-    box-shadow: 3px -3px 16px rgba(44, 36, 27, 0.28),
-                0 -2px 10px rgba(114, 47, 55, 0.14);
+    box-shadow:
+        3px -3px 16px rgba(44, 36, 27, 0.28),
+        0 -2px 10px rgba(114, 47, 55, 0.14);
     overflow: visible;
     z-index: 5;
 }
@@ -45,7 +47,7 @@
     left: 50%;
     transform: translateX(-50%);
     font-size: 0.68rem;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-weight: 500;
     color: rgba(114, 47, 55, 0.62);
     letter-spacing: 0.08em;
@@ -60,8 +62,12 @@
 }
 
 @keyframes bslPulse {
-    0%, 100% { opacity: 0.5; }
-    50%       { opacity: 1;   }
+    0%, 100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
 }
 
 .bsl-hint.bsl-hint-out {
@@ -69,7 +75,10 @@
 }
 
 @keyframes bslHintOut {
-    to { opacity: 0; transform: translateX(-50%) translateY(5px); }
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(5px);
+    }
 }
 
 /* ── Tooltip fixo posicionado via JS ── */
@@ -80,8 +89,9 @@
     background: #fff;
     border-left: 3px solid #722f37;
     border-radius: 6px;
-    box-shadow: 0 8px 28px rgba(44, 36, 27, 0.18),
-                0 2px 6px rgba(44, 36, 27, 0.08);
+    box-shadow:
+        0 8px 28px rgba(44, 36, 27, 0.18),
+        0 2px 6px rgba(44, 36, 27, 0.08);
     padding: 11px 13px;
     pointer-events: none;
     opacity: 0;
@@ -103,11 +113,11 @@
     letter-spacing: 0.1em;
     color: #722f37;
     margin-bottom: 6px;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
 }
 
 .bsl-tt-trecho {
-    font-family: 'IM Fell English', Georgia, serif;
+    font-family: "IM Fell English", Georgia, serif;
     font-style: italic;
     font-size: 0.8rem;
     line-height: 1.55;
@@ -118,7 +128,7 @@
 .bsl-tt-autor {
     font-size: 0.66rem;
     font-weight: 500;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     color: rgba(114, 47, 55, 0.65);
     text-align: right;
     letter-spacing: 0.05em;
@@ -126,5 +136,7 @@
 
 /* ── Mobile: remove padding, já tratado em bookshelf.css ── */
 @media (max-width: 680px) {
-    .bsl-hint { display: none; }
+    .bsl-hint {
+        display: none;
+    }
 }

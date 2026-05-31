@@ -15,4 +15,6 @@ public interface ListaDesejosRepository extends JpaRepository<ListaDesejos, Long
     Optional<ListaDesejos> findByClienteIdAndIsbn(Long clienteId, String isbn);
 
     boolean existsByClienteIdAndIsbn(Long clienteId, String isbn);
+
+    long countByClienteId(Long clienteId);
 }

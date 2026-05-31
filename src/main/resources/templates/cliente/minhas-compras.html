@@ -22,18 +22,28 @@
 
     <main>
       <div class="page-layout">
-
         <!-- COLUNA ESQUERDA: histórico de compras -->
         <div class="compras-col">
           <!-- TABS -->
           <div class="tabs-container">
-            <button class="tab-btn active" onclick="trocarTab('pendentes', this)">
+            <button
+              class="tab-btn active"
+              onclick="trocarTab('pendentes', this)"
+            >
               Em andamento
-              <span id="badgePendentes" class="badge-count" style="display: none"></span>
+              <span
+                id="badgePendentes"
+                class="badge-count"
+                style="display: none"
+              ></span>
             </button>
             <button class="tab-btn" onclick="trocarTab('concluidos', this)">
               Concluídas
-              <span id="badgeConcluidos" class="badge-count" style="display: none"></span>
+              <span
+                id="badgeConcluidos"
+                class="badge-count"
+                style="display: none"
+              ></span>
             </button>
             <button class="tab-btn" onclick="trocarTab('todos', this)">
               Todas
@@ -69,9 +79,17 @@
         <div class="estante-col">
           <div class="estante-box">
             <div class="estante-header">
-              <img src="/favicon.ico" alt="Estante" class="estante-header-icon"/>
+              <img
+                src="/favicon.ico"
+                alt="Estante"
+                class="estante-header-icon"
+              />
               Salvos na Estante
-              <span id="estanteBadge" class="badge-count" style="display: none"></span>
+              <span
+                id="estanteBadge"
+                class="badge-count"
+                style="display: none"
+              ></span>
             </div>
             <p class="estante-sub">Livros reservados para compra</p>
 
@@ -87,54 +105,94 @@
                 <span>Total</span>
                 <span id="estanteTotal">T$ 0,00</span>
               </div>
-              <button id="btnFinalizarEstante" class="btn-finalizar-estante" onclick="finalizarCompraEstante()">Finalizar Compra</button>
-              <a href="/livros/vitrine" class="btn-ir-vitrine">Ir para a Vitrine &rarr;</a>
+              <button
+                id="btnFinalizarEstante"
+                class="btn-finalizar-estante"
+                onclick="finalizarCompraEstante()"
+              >
+                Finalizar Compra
+              </button>
+              <a href="/livros/vitrine" class="btn-ir-vitrine"
+              >Ir para a Vitrine &rarr;</a>
             </div>
-            <div id="toastEstante" class="toast-estante" style="display:none"></div>
+            <div id="toastEstante" class="toast-estante" style="display: none">
+            </div>
           </div>
         </div>
-
       </div>
     </main>
 
     <!-- MODAL: Solicitar Cancelamento -->
-    <div id="modalCancelOverlay" class="modal-cancel-overlay" onclick="fecharModalCancelamento()" style="display:none"></div>
-    <div id="modalCancel" class="modal-cancel" style="display:none">
+    <div
+      id="modalCancelOverlay"
+      class="modal-cancel-overlay"
+      onclick="fecharModalCancelamento()"
+      style="display: none"
+    >
+    </div>
+    <div id="modalCancel" class="modal-cancel" style="display: none">
       <div class="modal-cancel-header">
         <span>Solicitar Cancelamento</span>
-        <button onclick="fecharModalCancelamento()" class="modal-cancel-close">&times;</button>
+        <button onclick="fecharModalCancelamento()" class="modal-cancel-close">
+          &times;
+        </button>
       </div>
       <div class="modal-cancel-body">
         <input type="hidden" id="cancelPedidoId" />
-        <p class="modal-cancel-titulo">Pedido: <strong id="cancelTituloLivro"></strong></p>
+        <p class="modal-cancel-titulo">
+          Pedido: <strong id="cancelTituloLivro"></strong>
+        </p>
         <div class="modal-cancel-group">
           <label for="cancelCategoria">Motivo da solicitação *</label>
           <select id="cancelCategoria">
             <option value="">Selecione...</option>
             <option value="COMPREI_POR_ENGANO">Comprei por engano</option>
             <option value="ENCONTREI_MAIS_BARATO">Encontrei mais barato</option>
-            <option value="PRODUTO_NAO_ESPERADO">Produto não era o esperado</option>
+            <option value="PRODUTO_NAO_ESPERADO">
+              Produto não era o esperado
+            </option>
             <option value="OUTRO">Outro motivo</option>
           </select>
         </div>
         <div class="modal-cancel-group">
           <label for="cancelDescricao">Descreva o motivo *</label>
-          <textarea id="cancelDescricao" rows="4" placeholder="Explique com detalhes o motivo do cancelamento..."></textarea>
+          <textarea
+            id="cancelDescricao"
+            rows="4"
+            placeholder="Explique com detalhes o motivo do cancelamento..."
+          ></textarea>
         </div>
-        <div id="cancelFeedback" class="modal-cancel-feedback" style="display:none"></div>
+        <div
+          id="cancelFeedback"
+          class="modal-cancel-feedback"
+          style="display: none"
+        >
+        </div>
         <div class="modal-cancel-aviso">
           <i class="fa-solid fa-circle-info"></i>
-          A solicitação será analisada pela equipe. O cancelamento não é garantido e pode ser recusado caso o pedido já tenha sido encaminhado.
+          A solicitação será analisada pela equipe. O cancelamento não é
+          garantido e pode ser recusado caso o pedido já tenha sido encaminhado.
         </div>
       </div>
       <div class="modal-cancel-footer">
-        <button class="modal-cancel-btn-sec" onclick="fecharModalCancelamento()">Fechar</button>
-        <button class="modal-cancel-btn-pri" id="btnEnviarCancel" onclick="enviarSolicitacaoCancelamento()">Enviar Solicitação</button>
+        <button
+          class="modal-cancel-btn-sec"
+          onclick="fecharModalCancelamento()"
+        >
+          Fechar
+        </button>
+        <button
+          class="modal-cancel-btn-pri"
+          id="btnEnviarCancel"
+          onclick="enviarSolicitacaoCancelamento()"
+        >
+          Enviar Solicitação
+        </button>
       </div>
     </div>
 
     <!-- TOAST GLOBAL -->
-    <div id="toastGlobal" class="toast-global" style="display:none"></div>
+    <div id="toastGlobal" class="toast-global" style="display: none"></div>
 
     <script th:src="@{/js/cliente/minhas-compras.js}"></script>
   </body>

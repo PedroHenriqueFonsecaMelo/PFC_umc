@@ -46,8 +46,7 @@ public class ProjetoEstruturaPrinter {
                 }
             }
         } else {
-            sb.append(arquivo.getName());
-            logger.info(sb.toString());
+
         }
     }
 }

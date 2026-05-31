@@ -31,25 +31,34 @@
 
       <!-- Visitante: aviso de login -->
       <th:block th:unless="${clienteLogado}">
-        <div style="text-align:center;padding:3rem 1rem;max-width:480px;margin:0 auto;">
-          <div style="font-size:3rem;margin-bottom:1rem;">📚</div>
-          <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;color:#2c241b;margin-bottom:.75rem;">
+        <div
+          style="text-align: center; padding: 3rem 1rem; max-width: 480px; margin: 0 auto"
+        >
+          <div style="font-size: 3rem; margin-bottom: 1rem">📚</div>
+          <h2
+            style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #2c241b; margin-bottom: 0.75rem"
+          >
             Entre na sua conta para vender livros
           </h2>
-          <p style="font-family:'DM Sans',sans-serif;color:#7a6e65;font-size:.95rem;margin-bottom:1.75rem;line-height:1.6;">
+          <p
+            style="font-family: 'DM Sans', sans-serif; color: #7a6e65; font-size: 0.95rem; margin-bottom: 1.75rem; line-height: 1.6"
+          >
             Você precisa estar logado para anunciar livros na Bibliotroca.
           </p>
-          <a th:href="@{/clientes/login}"
-             style="display:inline-block;padding:.75rem 2rem;background:#722f37;color:#f9f6f0;
-                    font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;
-                    letter-spacing:.06em;text-transform:uppercase;text-decoration:none;
-                    border-radius:8px;transition:background .2s;">
+          <a
+            th:href="@{/clientes/login}"
+            style="display: inline-block; padding: 0.75rem 2rem; background: #722f37; color: #f9f6f0; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; border-radius: 8px; transition: background 0.2s"
+          >
             Entrar na conta
           </a>
-          <p style="margin-top:1rem;font-size:.84rem;color:#b0a49a;font-family:'DM Sans',sans-serif;">
+          <p
+            style="margin-top: 1rem; font-size: 0.84rem; color: #b0a49a; font-family: 'DM Sans', sans-serif"
+          >
             Não tem conta?
-            <a th:href="@{/clientes/novo-cadastro}"
-               style="color:#722f37;font-weight:600;text-decoration:none;">Cadastre-se grátis</a>
+            <a
+              th:href="@{/clientes/novo-cadastro}"
+              style="color: #722f37; font-weight: 600; text-decoration: none"
+            >Cadastre-se grátis</a>
           </p>
         </div>
       </th:block>
@@ -89,11 +98,14 @@
     </footer>
 
     <!-- MODAL: COMPROVANTE DO LOTE ─────────────────────────── -->
-    <div class="modal-overlay" id="modalConfirmacao" role="dialog" aria-modal="true">
+    <div
+      class="modal-overlay"
+      id="modalConfirmacao"
+      role="dialog"
+      aria-modal="true"
+    >
       <div class="modal-box">
-
         <section class="recibo" id="recibo">
-
           <!-- cabeçalho escuro -->
           <div class="rec-header">
             <div class="rec-logo">Biblio<em>troca</em></div>
@@ -114,8 +126,8 @@
               <div class="rec-aviso-icone">!</div>
               <p>
                 Escreva ou imprima este código e
-                <strong>envie junto com os livros físicos</strong>.
-                Sem ele, não conseguimos identificar de qual cliente é este lote.
+                <strong>envie junto com os livros físicos</strong>. Sem ele, não
+                conseguimos identificar de qual cliente é este lote.
               </p>
             </div>
 
@@ -128,17 +140,24 @@
               avaliação for concluída.
             </p>
           </div>
-
         </section>
 
         <div class="modal-acoes">
           <button class="btn-imprimir" id="btnPdf" type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="2.5"
-                 stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
             Baixar / Imprimir PDF
           </button>
@@ -146,7 +165,6 @@
             Entendi — ir para minha conta
           </button>
         </div>
-
       </div>
     </div>
     <!-- ─────────────────────────────────────────────────────── -->

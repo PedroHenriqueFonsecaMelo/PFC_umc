@@ -14,53 +14,60 @@ import umc.exs.model.enums.StatusEnvio;
 @Repository
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
-    /** Todos os pedidos de um cliente, mais recente primeiro. */
-    List<Pedido> findByCompradorIdOrderByDataCompraDesc(Long compradorId);
+        /** Todos os pedidos de um cliente, mais recente primeiro. */
+        List<Pedido> findByCompradorIdOrderByDataCompraDesc(Long compradorId);
 
-    /** Pedidos de um cliente filtrando por status. */
-    List<Pedido> findByCompradorIdAndStatusEnvioOrderByDataCompraDesc(Long compradorId, StatusEnvio status);
+        /** Pedidos de um cliente filtrando por status. */
+        List<Pedido> findByCompradorIdAndStatusEnvioOrderByDataCompraDesc(Long compradorId, StatusEnvio status);
 
-    /** Pedidos pendentes (não entregues e não cancelados). */
-    List<Pedido> findByCompradorIdAndStatusEnvioNotInOrderByDataCompraDesc(
-            Long compradorId, List<StatusEnvio> statusExcluidos);
+        /** Pedidos pendentes (não entregues e não cancelados). */
+        List<Pedido> findByCompradorIdAndStatusEnvioNotInOrderByDataCompraDesc(
+                        Long compradorId, List<StatusEnvio> statusExcluidos);
 
-    /**
-     * Pedidos realizados a partir de uma data (para agrupamento mensal no
-     * dashboard).
-     */
-    List<Pedido> findByDataCompraAfter(LocalDateTime data);
+        /**
+         * Pedidos realizados a partir de uma data (para agrupamento mensal no
+         * dashboard).
+         */
+        List<Pedido> findByDataCompraAfter(LocalDateTime data);
 
-    /**
-     * Projeção usada pelo dashboard: retorna apenas as datas de compra,
-     * sem carregar as entidades relacionadas (comprador, etc.).
-     * Evita EntityNotFoundException quando o Cliente foi deletado do banco.
-     */
-    @Query("SELECT p.dataCompra FROM Pedido p WHERE p.dataCompra > :data")
-    List<LocalDateTime> findDataCompraAfterProjection(@Param("data") LocalDateTime data);
+        /**
+         * Projeção usada pelo dashboard: retorna apenas as datas de compra,
+         * sem carregar as entidades relacionadas (comprador, etc.).
+         * Evita EntityNotFoundException quando o Cliente foi deletado do banco.
+         */
+        @Query("SELECT p.dataCompra FROM Pedido p WHERE p.dataCompra > :data")
+        List<LocalDateTime> findDataCompraAfterProjection(@Param("data") LocalDateTime data);
 
-    /** Soma total de tokens gastos em pedidos (tokens utilizados).
-     *  Retorna null quando não há pedidos; o service trata com orElse(0.0). */
-    @Query("SELECT SUM(p.precoLivro) FROM Pedido p")
-    Double sumTokensUtilizados();
+        /**
+         * Soma total de tokens gastos em pedidos (tokens utilizados).
+         * Retorna null quando não há pedidos; o service trata com orElse(0.0).
+         */
+        @Query("SELECT SUM(p.precoLivro) FROM Pedido p")
+        Double sumTokensUtilizados();
 
-    /** Estatísticas agregadas de pedidos por comprador — usado pela listagem admin de clientes. */
-    @Query("SELECT p.comprador.id, COUNT(p), COALESCE(SUM(p.precoLivro), 0.0) FROM Pedido p GROUP BY p.comprador.id")
-    List<Object[]> statsGroupedByComprador();
+        /**
+         * Estatísticas agregadas de pedidos por comprador — usado pela listagem admin
+         * de clientes.
+         */
+        @Query("SELECT p.comprador.id, COUNT(p), COALESCE(SUM(p.precoLivro), 0.0) FROM Pedido p GROUP BY p.comprador.id")
+        List<Object[]> statsGroupedByComprador();
 
-    /** Total gasto por um cliente específico. */
-    @Query("SELECT COALESCE(SUM(p.precoLivro), 0.0) FROM Pedido p WHERE p.comprador.id = :clienteId")
-    Double sumGastoByClienteId(@Param("clienteId") Long clienteId);
+        /** Total gasto por um cliente específico. */
+        @Query("SELECT COALESCE(SUM(p.precoLivro), 0.0) FROM Pedido p WHERE p.comprador.id = :clienteId")
+        Double sumGastoByClienteId(@Param("clienteId") Long clienteId);
 
-    /** Pedidos de um cliente com filtro de data. */
-    List<Pedido> findByCompradorIdAndDataCompraAfterOrderByDataCompraDesc(
-            Long compradorId, LocalDateTime dataInicio);
+        /** Pedidos de um cliente com filtro de data. */
+        List<Pedido> findByCompradorIdAndDataCompraAfterOrderByDataCompraDesc(
+                        Long compradorId, LocalDateTime dataInicio);
 
-    /** Verifica se um livro foi comprado (livroId é snapshot no Pedido). */
-    boolean existsByLivroId(Long livroId);
+        /** Verifica se um livro foi comprado (livroId é snapshot no Pedido). */
+        boolean existsByLivroId(Long livroId);
 
-    /** Verifica unicidade do código de pedido antes de persistir. */
-    boolean existsByCodigoPedido(String codigoPedido);
+        /** Verifica unicidade do código de pedido antes de persistir. */
+        boolean existsByCodigoPedido(String codigoPedido);
 
-    /** Retorna o pedido de compra de um livro, se existir. */
-    java.util.Optional<Pedido> findByLivroId(Long livroId);
+        /** Retorna o pedido de compra de um livro, se existir. */
+        java.util.Optional<Pedido> findByLivroId(Long livroId);
+
+        List<Pedido> findAllByOrderByDataCompraDesc();
 }

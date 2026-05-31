@@ -25,7 +25,7 @@ public class LoteResponse {
     }
 
     public LoteResponse(Long id, String codigoProtocolo, String status, LocalDateTime dataCriacao,
-                           String nomeVendedor, String emailVendedor, long quantidadeLivros) {
+            String nomeVendedor, String emailVendedor, long quantidadeLivros) {
         this.id = id;
         this.codigoProtocolo = codigoProtocolo;
         this.status = status;

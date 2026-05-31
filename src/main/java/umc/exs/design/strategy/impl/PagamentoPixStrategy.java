@@ -79,8 +79,8 @@ public class PagamentoPixStrategy implements PagamentoStrategy {
         String id = "SIM-" + UUID.randomUUID().toString().replace("-", "").substring(0, 16).toUpperCase();
 
         String payload = String.format(
-            "00020126580014br.gov.bcb.pix0136%s5204000053039865802BR5925Bibliotroca Tokens6009Sao Paulo62070503***6304ABCD",
-            id);
+                "00020126580014br.gov.bcb.pix0136%s5204000053039865802BR5925Bibliotroca Tokens6009Sao Paulo62070503***6304ABCD",
+                id);
 
         dados.setPixCopiaECola(payload);
         dados.setQrCodeBase64(QR_API + java.net.URLEncoder.encode(payload, java.nio.charset.StandardCharsets.UTF_8));

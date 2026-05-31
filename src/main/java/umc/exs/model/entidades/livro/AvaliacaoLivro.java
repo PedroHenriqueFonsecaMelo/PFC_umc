@@ -27,7 +27,7 @@ public class AvaliacaoLivro {
     private String comentario;
 
     private Integer nota;
-    
+
     private LocalDateTime dataAvaliacao;
 
     @ManyToOne

@@ -24,7 +24,9 @@
 }
 
 @media (max-width: 960px) {
-  .notif-grid { grid-template-columns: 1fr; }
+  .notif-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .notif-card {
@@ -36,7 +38,7 @@
 }
 
 .notif-card-title {
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-size: 13px;
   font-weight: 700;
   color: rgba(44, 36, 27, 0.6);
@@ -50,7 +52,7 @@
 
 .notif-label {
   display: block;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-size: 12px;
   font-weight: 600;
   color: rgba(44, 36, 27, 0.65);
@@ -58,7 +60,9 @@
   margin-top: 14px;
 }
 
-.notif-label:first-of-type { margin-top: 0; }
+.notif-label:first-of-type {
+  margin-top: 0;
+}
 
 .notif-select,
 .notif-input,
@@ -68,7 +72,7 @@
   border: 1px solid rgba(74, 93, 35, 0.2);
   border-radius: 10px;
   font-size: 13px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   background: #fafaf8;
   color: #2c241b;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -111,13 +115,15 @@
   border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   color: #4a5d23;
   cursor: pointer;
   transition: background 0.2s;
 }
 
-.btn-notif-preview:hover { background: #ece9e1; }
+.btn-notif-preview:hover {
+  background: #ece9e1;
+}
 
 .btn-notif-send {
   flex: 1;
@@ -127,13 +133,15 @@
   border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   color: #fff;
   cursor: pointer;
   transition: background 0.2s;
 }
 
-.btn-notif-send:hover { background: #3a4a1b; }
+.btn-notif-send:hover {
+  background: #3a4a1b;
+}
 
 .btn-notif-schedule {
   flex: 1;
@@ -143,13 +151,15 @@
   border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   color: #fff;
   cursor: pointer;
   transition: background 0.2s;
 }
 
-.btn-notif-schedule:hover { background: #235c3a; }
+.btn-notif-schedule:hover {
+  background: #235c3a;
+}
 
 /* Tabela de preview */
 .preview-header {
@@ -166,7 +176,7 @@
   padding: 3px 10px;
   font-size: 12px;
   font-weight: 700;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 .preview-table-wrap {
@@ -180,7 +190,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 .preview-table th {
@@ -202,14 +212,16 @@
   color: #2c241b;
 }
 
-.preview-table tr:hover td { background: #fafaf8; }
+.preview-table tr:hover td {
+  background: #fafaf8;
+}
 
 .preview-empty {
   text-align: center;
   padding: 32px;
   color: rgba(44, 36, 27, 0.35);
   font-size: 13px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 /* Toast */
@@ -223,7 +235,7 @@
   padding: 14px 20px;
   border-radius: 12px;
   font-size: 13px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   z-index: 9999;
   max-width: 380px;
   box-shadow: 0 4px 20px rgba(44, 36, 27, 0.2);
@@ -231,6 +243,12 @@
 }
 
 @keyframes toastIn {
-  from { transform: translateY(12px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

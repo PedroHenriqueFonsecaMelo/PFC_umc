@@ -24,7 +24,7 @@ import umc.exs.repository.foundation.EmailVerificacaoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 
 import umc.exs.security.JwtUtil;
-import umc.exs.service.core.cliente.ClienteService;
+import umc.exs.service.cliente.ClienteService;
 import umc.exs.service.core.control.AuthHelper;
 
 @Slf4j

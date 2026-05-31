@@ -2,20 +2,20 @@
    blog_post.js — Detalhe do Post · Bibliotroca
    ================================================================ */
 
-const postId = document.getElementById('btnCurtir')?.dataset?.postId;
+const postId = document.getElementById("btnCurtir")?.dataset?.postId;
 let jaCurtiu = false;
 let nomeUsuarioLogado = null;
 
 function escHtml(str) {
-    if (!str) return '';
+    if (!str) return "";
     return String(str)
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
 /* ── CSS dinâmico ── */
-(function() {
-    const style = document.createElement('style');
+(function () {
+    const style = document.createElement("style");
     style.textContent = `
         .btn-excluir-comentario {
             background: none; border: none; cursor: pointer;
@@ -87,39 +87,46 @@ function escHtml(str) {
                 </div>
             </div>
         </div>`;
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    document.body.insertAdjacentHTML("beforeend", modalHtml);
 
-    const overlay = document.getElementById('blogModalExcluir');
-    document.getElementById('blogModalCancelar').addEventListener('click', () => {
-        overlay.classList.remove('open');
-        window._blogModalCallback = null;
-    });
-    overlay.addEventListener('click', (e) => {
+    const overlay = document.getElementById("blogModalExcluir");
+    document.getElementById("blogModalCancelar").addEventListener(
+        "click",
+        () => {
+            overlay.classList.remove("open");
+            window._blogModalCallback = null;
+        },
+    );
+    overlay.addEventListener("click", (e) => {
         if (e.target === overlay) {
-            overlay.classList.remove('open');
+            overlay.classList.remove("open");
             window._blogModalCallback = null;
         }
     });
-    document.getElementById('blogModalConfirmar').addEventListener('click', () => {
-        overlay.classList.remove('open');
-        if (typeof window._blogModalCallback === 'function') {
-            window._blogModalCallback();
-            window._blogModalCallback = null;
-        }
-    });
+    document.getElementById("blogModalConfirmar").addEventListener(
+        "click",
+        () => {
+            overlay.classList.remove("open");
+            if (typeof window._blogModalCallback === "function") {
+                window._blogModalCallback();
+                window._blogModalCallback = null;
+            }
+        },
+    );
 })();
 
 /* ── Init: carrega usuário logado PRIMEIRO, depois comentários ── */
 async function init() {
     try {
-        const res = await fetch('/clientes/meu-perfil-json', {
-            credentials: 'include', redirect: 'manual'
+        const res = await fetch("/clientes/meu-perfil-json", {
+            credentials: "include",
+            redirect: "manual",
         });
-        if (res.ok && res.type !== 'opaqueredirect') {
+        if (res.ok && res.type !== "opaqueredirect") {
             const data = await res.json();
             nomeUsuarioLogado = data.nome || null;
-            const el = document.getElementById('navSaldo');
-            if (el) el.textContent = 'T$ ' + (data.saldoTokens || 0).toFixed(2);
+            const el = document.getElementById("navSaldo");
+            if (el) el.textContent = "T$ " + (data.saldoTokens || 0).toFixed(2);
         }
     } catch (_) {}
     // Só carrega comentários depois de saber quem é o usuário
@@ -127,27 +134,31 @@ async function init() {
 }
 
 /* ── CURTIR / DESCURTIR ── */
-const btnCurtir = document.getElementById('btnCurtir');
+const btnCurtir = document.getElementById("btnCurtir");
 
-if (btnCurtir && !btnCurtir.classList.contains('btn-curtir-disabled')) {
-    btnCurtir.addEventListener('click', async () => {
+if (btnCurtir && !btnCurtir.classList.contains("btn-curtir-disabled")) {
+    btnCurtir.addEventListener("click", async () => {
         try {
             const res = await fetch(`/api/blog/${postId}/curtir`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ descurtir: jaCurtiu })
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ descurtir: jaCurtiu }),
             });
 
-            if (res.status === 401) { window.location.href = '/clientes/login'; return; }
+            if (res.status === 401) {
+                window.location.href = "/clientes/login";
+                return;
+            }
             if (!res.ok) return;
 
             const data = await res.json();
-            document.getElementById('curtidas-count').textContent = data.curtidas;
+            document.getElementById("curtidas-count").textContent =
+                data.curtidas;
 
             jaCurtiu = !jaCurtiu;
-            btnCurtir.classList.toggle('curtido', jaCurtiu);
-            btnCurtir.title = jaCurtiu ? 'Descurtir' : 'Curtir';
+            btnCurtir.classList.toggle("curtido", jaCurtiu);
+            btnCurtir.title = jaCurtiu ? "Descurtir" : "Curtir";
         } catch (_) {}
     });
 }
@@ -155,7 +166,7 @@ if (btnCurtir && !btnCurtir.classList.contains('btn-curtir-disabled')) {
 /* ── COMENTÁRIOS ── */
 async function carregarComentarios() {
     if (!postId) return;
-    const lista = document.getElementById('comentarios-lista');
+    const lista = document.getElementById("comentarios-lista");
     if (!lista) return;
 
     try {
@@ -164,109 +175,142 @@ async function carregarComentarios() {
         const comentarios = await res.json();
 
         if (comentarios.length === 0) {
-            lista.innerHTML = '<div class="comentario-vazio">Nenhum comentário ainda. Seja o primeiro!</div>';
+            lista.innerHTML =
+                '<div class="comentario-vazio">Nenhum comentário ainda. Seja o primeiro!</div>';
             return;
         }
 
-        lista.innerHTML = comentarios.map(c => {
-            const ehDono = nomeUsuarioLogado && c.autorNome === nomeUsuarioLogado;
+        lista.innerHTML = comentarios.map((c) => {
+            const ehDono = nomeUsuarioLogado &&
+                c.autorNome === nomeUsuarioLogado;
             const btnExcluir = ehDono
                 ? `<button class="btn-excluir-comentario" onclick="excluirComentario(${c.id}, this)" title="Excluir comentário">
                     <i class="fa-solid fa-trash"></i>
                    </button>`
-                : '';
+                : "";
             return `
             <div class="comentario-card" id="comentario-${c.id}">
                 <div class="comentario-header">
-                    <span class="comentario-autor">${escHtml(c.autorNome)}</span>
-                    <span class="comentario-data">${escHtml(c.dataCriacao)}</span>
+                    <span class="comentario-autor">${
+                escHtml(c.autorNome)
+            }</span>
+                    <span class="comentario-data">${
+                escHtml(c.dataCriacao)
+            }</span>
                     ${btnExcluir}
                 </div>
                 <div class="comentario-conteudo">${escHtml(c.conteudo)}</div>
             </div>`;
-        }).join('');
+        }).join("");
     } catch (_) {
-        lista.innerHTML = '<div class="comentario-vazio">Erro ao carregar comentários.</div>';
+        lista.innerHTML =
+            '<div class="comentario-vazio">Erro ao carregar comentários.</div>';
     }
 }
 
-window.excluirComentario = async function(comentarioId, btn) {
-    window._blogModalCallback = async function() {
+window.excluirComentario = async function (comentarioId, btn) {
+    window._blogModalCallback = async function () {
         btn.disabled = true;
         try {
-            const res = await fetch(`/api/blog/${postId}/comentarios/${comentarioId}`, {
-                method: 'DELETE', credentials: 'include'
-            });
-            if (res.status === 401) { window.location.href = '/clientes/login'; return; }
-            if (res.status === 403) { alert('Sem permissão para excluir.'); return; }
-            if (!res.ok) { alert('Erro ao excluir comentário.'); return; }
+            const res = await fetch(
+                `/api/blog/${postId}/comentarios/${comentarioId}`,
+                {
+                    method: "DELETE",
+                    credentials: "include",
+                },
+            );
+            if (res.status === 401) {
+                window.location.href = "/clientes/login";
+                return;
+            }
+            if (res.status === 403) {
+                alert("Sem permissão para excluir.");
+                return;
+            }
+            if (!res.ok) {
+                alert("Erro ao excluir comentário.");
+                return;
+            }
 
             const card = document.getElementById(`comentario-${comentarioId}`);
             if (card) {
-                card.style.transition = 'opacity 0.3s ease';
-                card.style.opacity = '0';
+                card.style.transition = "opacity 0.3s ease";
+                card.style.opacity = "0";
                 setTimeout(() => card.remove(), 300);
             }
         } catch (_) {
-            alert('Erro ao excluir comentário.');
+            alert("Erro ao excluir comentário.");
         } finally {
             btn.disabled = false;
         }
     };
-    document.getElementById('blogModalExcluir').classList.add('open');
+    document.getElementById("blogModalExcluir").classList.add("open");
 };
 
 /* ── FORM COMENTÁRIO ── */
-const formComentario = document.getElementById('formComentario');
+const formComentario = document.getElementById("formComentario");
 
 if (formComentario) {
-    formComentario.addEventListener('submit', async (e) => {
+    formComentario.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const input = document.getElementById('inputComentario');
-        const btn = document.getElementById('btnComentar');
+        const input = document.getElementById("inputComentario");
+        const btn = document.getElementById("btnComentar");
         const conteudo = input.value.trim();
-        if (!conteudo) { input.focus(); return; }
+        if (!conteudo) {
+            input.focus();
+            return;
+        }
 
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publicando...';
+        btn.innerHTML =
+            '<i class="fa-solid fa-spinner fa-spin"></i> Publicando...';
 
         try {
             const res = await fetch(`/api/blog/${postId}/comentarios`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ conteudo })
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ conteudo }),
             });
 
-            if (res.status === 401) { window.location.href = '/clientes/login'; return; }
+            if (res.status === 401) {
+                window.location.href = "/clientes/login";
+                return;
+            }
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
-                throw new Error(err.erro || 'Erro ao publicar');
+                throw new Error(err.erro || "Erro ao publicar");
             }
 
             const novo = await res.json();
-            const lista = document.getElementById('comentarios-lista');
-            const vazio = lista.querySelector('.comentario-vazio');
+            const lista = document.getElementById("comentarios-lista");
+            const vazio = lista.querySelector(".comentario-vazio");
             if (vazio) vazio.remove();
 
-            const card = document.createElement('div');
-            card.className = 'comentario-card';
+            const card = document.createElement("div");
+            card.className = "comentario-card";
             card.id = `comentario-${novo.id}`;
             card.innerHTML = `
                 <div class="comentario-header">
-                    <span class="comentario-autor">${escHtml(novo.autorNome)}</span>
-                    <span class="comentario-data">${escHtml(novo.dataCriacao)}</span>
+                    <span class="comentario-autor">${
+                escHtml(novo.autorNome)
+            }</span>
+                    <span class="comentario-data">${
+                escHtml(novo.dataCriacao)
+            }</span>
                     <button class="btn-excluir-comentario"
                             onclick="excluirComentario(${novo.id}, this)"
                             title="Excluir comentário">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
-                <div class="comentario-conteudo">${escHtml(novo.conteudo)}</div>`;
+                <div class="comentario-conteudo">${
+                escHtml(novo.conteudo)
+            }</div>`;
             lista.appendChild(card);
-            input.value = '';
+            input.value = "";
         } catch (err) {
-            alert(err.message || 'Erro ao publicar comentário.');
+            alert(err.message || "Erro ao publicar comentário.");
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Publicar';

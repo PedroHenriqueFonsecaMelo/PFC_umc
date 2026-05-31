@@ -49,7 +49,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-             <version>42.7.3</version>
+            <version>42.7.3</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -154,7 +154,7 @@
             <version>1.3.30</version>
         </dependency>
     </dependencies>
-        <build>
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -216,6 +216,40 @@
                         </exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.11</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/umc/exs/config/**/*</exclude>
+                                <exclude>**/umc/exs/converter/**/*</exclude>
+                                <exclude>**/umc/exs/design/**/*</exclude>
+                                <exclude>**/umc/exs/dto/**/*</exclude>
+                                <exclude>**/umc/exs/handler/**/*</exclude>
+                                <exclude>**/umc/exs/model/**/*</exclude>
+                                <exclude>**/umc/exs/repository/**/*</exclude>
+                                <exclude>**/umc/exs/security/**/*</exclude>
+                                <exclude>**/umc/exs/Main.*</exclude>
+                                <exclude>**/*Printer.*</exclude>                                <!-- Exclui a classe que printou o diagrama -->
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

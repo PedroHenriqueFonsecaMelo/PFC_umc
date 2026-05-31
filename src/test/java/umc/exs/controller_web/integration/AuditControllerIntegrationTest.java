@@ -27,7 +27,7 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.entidades.logic.LogAuditoria;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
-import umc.exs.service.core.cliente.ClienteService;
+import umc.exs.service.cliente.ClienteService;
 import umc.exs.service.core.interactions.VisitaSiteService;
 import umc.exs.service.log.LogAuditoriaService;
 
@@ -55,7 +55,6 @@ class AuditControllerIntegrationTest {
         @MockitoBean
         private JwtUserDetailsService jwtUserDetailsService;
 
-        @SuppressWarnings("null")
         @BeforeEach
         void setup() {
                 // Isso garante que o MockMvc respeite as configurações de segurança e usuários
@@ -69,11 +68,9 @@ class AuditControllerIntegrationTest {
         @Test
         @WithMockUser(username = "user@example.com")
         void listarAuditoriaClienteRetornaView() throws Exception {
-Cliente clienteDTO = new Cliente();
+                Cliente clienteDTO = new Cliente();
                 clienteDTO.setId(10L);
                 clienteDTO.setEmail("user@example.com");
-
-
 
                 // Use matchers genéricos para evitar erros de tipagem/conversão de String
                 when(clienteService.buscarClientePorEmail(anyString()))

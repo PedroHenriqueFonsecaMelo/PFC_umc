@@ -15,18 +15,17 @@
     <link rel="stylesheet" th:href="@{/css/breadcrumb.css}" />
   </head>
   <body>
-
     <!-- NAV -->
     <header th:replace="~{fragments/client-nav :: clientNav}"></header>
 
     <!-- NAVEGAÇÃO CONTEXTUAL -->
     <div class="breadcrumb-wrap">
-        <nav class="breadcrumb-nav">
-            <a href="/">Início</a>
-            <span class="breadcrumb-sep">›</span>
-            <span class="breadcrumb-current">Ranking Geral</span>
-        </nav>
-        <a href="/" class="btn-voltar">← Voltar para Início</a>
+      <nav class="breadcrumb-nav">
+        <a href="/">Início</a>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">Ranking Geral</span>
+      </nav>
+      <a href="/" class="btn-voltar">← Voltar para Início</a>
     </div>
 
     <!-- PAGE HEADER -->
@@ -35,11 +34,11 @@
         <div class="rk-kicker">Comunidade</div>
         <h1 class="rk-titulo">Ranking Geral <em>de Leitores</em></h1>
         <p class="rk-sub">
-          Os leitores mais ativos da plataforma. Quanto mais você participa — vendendo,
-          comprando e avaliando — mais sobe no ranking.
+          Os leitores mais ativos da plataforma. Quanto mais você participa —
+          vendendo, comprando e avaliando — mais sobe no ranking.
         </p>
         <!-- Badge do usuário logado -->
-        <div id="rkMinhaPosicao" style="display:none">
+        <div id="rkMinhaPosicao" style="display: none">
           <span class="rk-minha-pos-badge" id="rkMinhaPosicaoTexto"></span>
         </div>
       </div>
@@ -48,14 +47,31 @@
     <!-- FILTROS DE PERÍODO -->
     <div class="rk-filtros-wrap">
       <div class="rk-filtros">
-        <button class="rk-filtro-btn active" data-periodo="todos"  onclick="rkFiltrar('todos',  this)">Todos os tempos</button>
-        <button class="rk-filtro-btn"         data-periodo="ano"   onclick="rkFiltrar('ano',    this)">Este ano</button>
-        <button class="rk-filtro-btn"         data-periodo="mes"   onclick="rkFiltrar('mes',    this)">Este mês</button>
+        <button
+          class="rk-filtro-btn active"
+          data-periodo="todos"
+          onclick="rkFiltrar('todos',  this)"
+        >
+          Todos os tempos
+        </button>
+        <button
+          class="rk-filtro-btn"
+          data-periodo="ano"
+          onclick="rkFiltrar('ano',    this)"
+        >
+          Este ano
+        </button>
+        <button
+          class="rk-filtro-btn"
+          data-periodo="mes"
+          onclick="rkFiltrar('mes',    this)"
+        >
+          Este mês
+        </button>
       </div>
     </div>
 
     <div class="rk-main">
-
       <!-- PÓDIO TOP 3 -->
       <section class="rk-podio-section">
         <div class="rk-podio" id="rkPodio">
@@ -75,7 +91,6 @@
           <div class="rk-loading">Carregando ranking…</div>
         </div>
       </section>
-
     </div>
 
     <!-- FOOTER -->

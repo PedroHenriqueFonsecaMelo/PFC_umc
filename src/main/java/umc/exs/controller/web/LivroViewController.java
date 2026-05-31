@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 /**
  * Controller Thymeleaf para o módulo de livros.
  *
- * Rotas públicas  : /livros/vitrine, /livros/{id}
+ * Rotas públicas : /livros/vitrine, /livros/{id}
  * Rotas autenticadas: /livros/estante, /livros/checkout (ver SecurityConfig)
  *
  * NOTA: Spring MVC prioriza rotas literais (/vender, /vitrine, /estante,

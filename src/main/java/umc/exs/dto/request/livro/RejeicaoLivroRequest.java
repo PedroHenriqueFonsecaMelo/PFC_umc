@@ -11,4 +11,3 @@ public class RejeicaoLivroRequest {
     private String estado;
     private String comentario;
 }
-

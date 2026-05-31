@@ -1,11 +1,12 @@
 package umc.exs.controller.api.compras;
 
 import lombok.RequiredArgsConstructor;
+import umc.exs.service.core.dashboard.ReservaCheckoutService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import umc.exs.service.core.control.ReservaCheckoutService;
 
 import java.util.List;
 import java.util.Map;
@@ -22,16 +23,19 @@ public class ReservaCheckoutController {
             @RequestBody Map<String, Object> body,
             @AuthenticationPrincipal UserDetails user) {
 
-        if (user == null) return ResponseEntity.status(401).build();
+        if (user == null)
+            return ResponseEntity.status(401).build();
 
         @SuppressWarnings("unchecked")
         List<Integer> idsRaw = (List<Integer>) body.get("livroIds");
         if (idsRaw == null || idsRaw.isEmpty()) {
             return ResponseEntity.badRequest()
-                .body(Map.of("reservado", false, "mensagem", "Nenhum livro informado."));
+                    .body(Map.of("reservado", false, "mensagem", "Nenhum livro informado."));
         }
 
-        List<Long> livroIds = idsRaw.stream().map(Long::valueOf).toList();
+        List<Long> livroIds = idsRaw.stream()
+                .map(i -> Long.valueOf(i))
+                .toList();
         Map<String, Object> resultado = reservaService.reservar(livroIds, user.getUsername());
         return ResponseEntity.ok(resultado);
     }
@@ -41,7 +45,8 @@ public class ReservaCheckoutController {
             @RequestBody Map<String, Object> body,
             @AuthenticationPrincipal UserDetails user) {
 
-        if (user == null) return ResponseEntity.status(401).build();
+        if (user == null)
+            return ResponseEntity.status(401).build();
 
         @SuppressWarnings("unchecked")
         List<Integer> idsRaw = (List<Integer>) body.get("livroIds");
@@ -49,7 +54,9 @@ public class ReservaCheckoutController {
             return ResponseEntity.ok(Map.of("liberado", false));
         }
 
-        List<Long> livroIds = idsRaw.stream().map(Long::valueOf).toList();
+        List<Long> livroIds = idsRaw.stream()
+                .map(i -> Long.valueOf(i))
+                .toList();
         Map<String, Object> resultado = reservaService.liberarReservas(livroIds, user.getUsername());
         return ResponseEntity.ok(resultado);
     }
@@ -59,7 +66,8 @@ public class ReservaCheckoutController {
             @PathVariable Long livroId,
             @AuthenticationPrincipal UserDetails user) {
 
-        if (user == null) return ResponseEntity.status(401).build();
+        if (user == null)
+            return ResponseEntity.status(401).build();
         return ResponseEntity.ok(reservaService.statusReserva(livroId, user.getUsername()));
     }
 }

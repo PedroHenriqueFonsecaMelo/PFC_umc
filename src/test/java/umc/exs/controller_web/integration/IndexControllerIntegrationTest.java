@@ -17,7 +17,7 @@ import umc.exs.repository.negocios.PedidoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
-import umc.exs.service.core.cliente.ClienteService;
+import umc.exs.service.cliente.ClienteService;
 import umc.exs.service.core.control.AuthHelper;
 import umc.exs.service.core.interactions.VisitaSiteService;
 
