@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import java.util.Objects;
@@ -144,7 +145,7 @@ public class AdminControllerApi {
     @PostMapping("/livros/{id}/aprovar")
     public ResponseEntity<ExternApiResponse<Void>> aprovarLivro(
             @PathVariable Long id,
-            @RequestBody AdminAprovacaoRequest dto,
+            @RequestBody @Valid AdminAprovacaoRequest dto,
             @AuthenticationPrincipal UserDetails user) {
 
         if (user == null)
@@ -160,7 +161,7 @@ public class AdminControllerApi {
     @PostMapping("/livros/{id}/rejeitar")
     public ResponseEntity<ExternApiResponse<Void>> rejeitarLivro(
             @PathVariable Long id,
-            @RequestBody RejeicaoLivroRequest dto,
+            @RequestBody @Valid RejeicaoLivroRequest dto,
             @AuthenticationPrincipal UserDetails user) {
 
         if (user == null)
@@ -199,7 +200,7 @@ public class AdminControllerApi {
     @PutMapping("/livros/{id}")
     public ResponseEntity<ExternApiResponse<Void>> editarLivro(
             @PathVariable @NonNull Long id,
-            @RequestBody LivroAdminRequest request,
+            @RequestBody @Valid LivroAdminRequest request,
             @AuthenticationPrincipal UserDetails user) {
 
         if (user == null)
@@ -234,7 +235,7 @@ public class AdminControllerApi {
     @PostMapping("/pedidos/{id}/envio")
     public ResponseEntity<PedidoResponse> atualizarEnvio(
             @PathVariable Long id,
-            @RequestBody AtualizarEnvioRequest dto,
+            @RequestBody @Valid AtualizarEnvioRequest dto,
             @AuthenticationPrincipal UserDetails user) {
 
         if (user == null)
@@ -260,7 +261,7 @@ public class AdminControllerApi {
     }
 
     @PostMapping("/cupons")
-    public ResponseEntity<?> criarCupom(@RequestBody CriarCupomRequest dto) {
+    public ResponseEntity<?> criarCupom(@RequestBody @Valid CriarCupomRequest dto) {
         try {
             if (dto.getDataValidade() == null) {
                 return ResponseEntity.badRequest().body(ExternApiResponse.fail("Data de validade obrigatória"));

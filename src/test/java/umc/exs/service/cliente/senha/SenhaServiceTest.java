@@ -21,6 +21,7 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.repository.usuario.RecuperacaoSenhaRepository;
 import umc.exs.service.email.facade.EmailFacade;
+import umc.exs.service.log.AppLogger;
 import umc.exs.service.log.LogAuditoriaService;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +41,10 @@ class SenhaServiceTest {
 
     @Mock
     LogAuditoriaService logAuditoriaService;
+
+    @Mock
+    AppLogger appLogger;
+    
 
     @InjectMocks
     SenhaService service;
@@ -72,6 +77,7 @@ class SenhaServiceTest {
         assertThrows(IllegalStateException.class, () -> service.iniciarRecuperacao(cliente));
     }
 
+
     @Test
     void alterarSenhaComToken_deveAtualizarSenhaERemoverToken() {
         String token = UUID.randomUUID().toString();
@@ -94,8 +100,6 @@ class SenhaServiceTest {
 
         assertEquals("newHash", cliente.getSenha());
         verify(clienteRepository).save(cliente);
-        verify(logAuditoriaService).registrarLog(eq("SENHA_ALTERADA"), eq(cliente.getId()), eq(cliente.getEmail()),
-                anyString());
         verify(recuperacaoSenhaRepository).delete(rec);
     }
 

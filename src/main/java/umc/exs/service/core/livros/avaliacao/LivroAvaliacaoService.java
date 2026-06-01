@@ -26,6 +26,11 @@ import umc.exs.service.log.LogAuditoriaService;
 @Transactional
 public class LivroAvaliacaoService {
 
+    private static final String LOG_AVALIACAO_CRIADA = "LIVRO_AVALIACAO_CRIADA";
+    private static final String LOG_AVALIACAO_CONSULTA = "LIVRO_AVALIACAO_CONSULTA";
+    private static final String LOG_MEDIA_CALCULADA = "LIVRO_AVALIACAO_MEDIA_CALCULADA";
+    private static final String LOG_LIVRO_REFERENCIA_CRIADO = "LIVRO_REFERENCIA_CRIADO";
+
     private final AvaliacaoLivroRepository avaliacaoRepository;
     private final ClienteRepository clienteRepository;
     private final LivroRepository livroRepository;
@@ -46,18 +51,15 @@ public class LivroAvaliacaoService {
 
         validarNota(dto.getNota());
 
-        boolean jaAvaliouObra = avaliacaoRepository
-                .existsByObraIdAndAvaliadorId(
-                        obra != null ? obra.getId() : null,
-                        avaliador.getId());
-
         if (obra == null) {
             throw new IllegalStateException("Livro sem obra vinculada.");
         }
 
+        boolean jaAvaliouObra = avaliacaoRepository
+                .existsByObraIdAndAvaliadorId(obra.getId(), avaliador.getId());
+
         if (jaAvaliouObra) {
-            throw new IllegalStateException(
-                    "Você já avaliou esta obra (em outra edição ou tradução).");
+            throw new IllegalStateException("Você já avaliou esta obra.");
         }
 
         AvaliacaoLivro avaliacao = AvaliacaoLivro.builder()
@@ -75,16 +77,17 @@ public class LivroAvaliacaoService {
         gamificacaoService.xpAvaliacao(avaliador.getId());
 
         logAuditoria.registrarLog(
-                "AVALIACAO_CRIADA",
+                LOG_AVALIACAO_CRIADA,
                 avaliador.getId(),
                 avaliador.getEmail(),
-                "Avaliou a obra '" + obra.getTitulo() +
-                        "' via edição '" + dto.getTituloLivro() + "'");
+                "Obra=" + obra.getTitulo() + ", Livro=" + dto.getTituloLivro() + ", Nota=" + dto.getNota()
+        );
 
         return saved;
     }
 
     public List<AvaliacaoLivro> buscarAvaliacoesUnificadas(String isbn) {
+
         Livro livro = livroRepository.findByIsbn(isbn)
                 .orElseThrow(() -> new EntityNotFoundException("ISBN não encontrado"));
 
@@ -94,11 +97,21 @@ public class LivroAvaliacaoService {
             throw new IllegalStateException("Livro sem obra vinculada.");
         }
 
-        return avaliacaoRepository
+        List<AvaliacaoLivro> avaliacoes = avaliacaoRepository
                 .findByObraIdOrderByDataAvaliacaoDesc(obra.getId());
+
+        logAuditoria.registrarLog(
+                LOG_AVALIACAO_CONSULTA,
+                null,
+                null,
+                "ObraId=" + obra.getId() + ", Total=" + avaliacoes.size()
+        );
+
+        return avaliacoes;
     }
 
     public Double calcularMediaUnificada(String isbn) {
+
         Livro livro = livroRepository.findByIsbn(isbn)
                 .orElseThrow(() -> new EntityNotFoundException("ISBN não encontrado"));
 
@@ -108,16 +121,34 @@ public class LivroAvaliacaoService {
             return null;
         }
 
-        return avaliacaoRepository.getAverageRatingByObraId(obra.getId());
+        Double media = avaliacaoRepository.getAverageRatingByObraId(obra.getId());
+
+        logAuditoria.registrarLog(
+                LOG_MEDIA_CALCULADA,
+                null,
+                null,
+                "ObraId=" + obra.getId() + ", Media=" + media
+        );
+
+        return media;
     }
 
     public Double calcularMediaPorIsbn(String isbn) {
         return livroRepository.findByIsbn(isbn)
                 .map(livro -> {
                     Obra obra = livro.getObra();
-                    return obra != null
+                    Double media = obra != null
                             ? avaliacaoRepository.getAverageRatingByObraId(obra.getId())
                             : null;
+
+                    logAuditoria.registrarLog(
+                            LOG_MEDIA_CALCULADA,
+                            null,
+                            null,
+                            "ISBN=" + isbn + ", Media=" + media
+                    );
+
+                    return media;
                 })
                 .orElse(null);
     }
@@ -130,7 +161,7 @@ public class LivroAvaliacaoService {
 
     public Livro criarLivroReferencia(ComentarioRequest dto) {
 
-        return livroRepository.findByIsbn(dto.getIsbn())
+        Livro livro = livroRepository.findByIsbn(dto.getIsbn())
                 .orElseGet(() -> {
 
                     Obra novaObra = obraRepo.save(
@@ -139,14 +170,21 @@ public class LivroAvaliacaoService {
                                     .autor(dto.getAutor())
                                     .build());
 
-                    Livro novoLivro = livroRepository.save(
+                    return livroRepository.save(
                             Livro.builder()
                                     .isbn(dto.getIsbn())
                                     .titulo(dto.getTitulo())
                                     .obra(novaObra)
                                     .build());
-
-                    return novoLivro;
                 });
+
+        logAuditoria.registrarLog(
+                LOG_LIVRO_REFERENCIA_CRIADO,
+                null,
+                null,
+                "ISBN=" + dto.getIsbn() + ", Titulo=" + dto.getTitulo()
+        );
+
+        return livro;
     }
 }

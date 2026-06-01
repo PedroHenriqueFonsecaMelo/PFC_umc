@@ -270,7 +270,7 @@ public class LivroCompraService {
     }
 
     private void processarBaixaLivro(Cliente comprador, Livro livro) {
-        pedidoService.registrarPedido(comprador, livro);
+        pedidoService.registrarPedido(comprador, livro, "");
         comprador.setSaldoTokens(comprador.getSaldoTokens() - livro.getPrecoAprovado());
         livro.setAprovado(false);
         livroRepository.save(livro);

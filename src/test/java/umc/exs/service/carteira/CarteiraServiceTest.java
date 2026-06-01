@@ -61,7 +61,7 @@ class CarteiraServiceTest {
         verify(transacaoRepository).save(any(Transacao.class));
         verify(clienteRepositoryService).salvar(cliente);
         verify(carteiraNotificacaoService).notificarRecarga(cliente, 5.0, "PIX");
-        verify(auditoria).registrarLog(eq("TOKENS_ADICIONADOS"), eq(cliente.getId()), eq(cliente.getEmail()),
+        verify(auditoria).registrarLog(eq("CARTEIRA_TOKEN_ADICIONADO"), eq(cliente.getId()), eq(cliente.getEmail()),
                 contains("PIX"));
         verify(carteiraEmailService).enviarCredito(cliente, 10.0, 5.0, "PIX");
     }
@@ -86,7 +86,7 @@ class CarteiraServiceTest {
         verify(clienteRepositoryService).salvar(cliente);
         verify(carteiraNotificacaoService).notificarDebito(cliente, 4.0, "desc");
         verify(auditoria).registrarLog(
-                eq("TOKENS_DEBITADOS"),
+                eq("CARTEIRA_TOKEN_DEBITADO"),
                 eq(cliente.getId()),
                 eq(cliente.getEmail()),
                 contains("desc"));

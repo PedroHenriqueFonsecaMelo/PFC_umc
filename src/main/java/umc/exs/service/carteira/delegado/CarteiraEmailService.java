@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.service.email.facade.EmailFacade;
 import umc.exs.service.email.html.EmailHtmlBuilder;
+import umc.exs.service.log.AcaoAuditoria;
+import umc.exs.service.log.LogAuditoriaService;
 
 @Slf4j
 @Service
@@ -18,6 +20,7 @@ public class CarteiraEmailService {
     private static final String ASSUNTO_EMAIL = "Atualização de saldo — Bibliotroca";
 
     private final EmailFacade emailFacade;
+    private final LogAuditoriaService auditoria;
 
     public void enviarCredito(
             Cliente cliente,
@@ -45,8 +48,26 @@ public class CarteiraEmailService {
                             true,
                             LocalDateTime.now()));
 
+            auditoria.registrarLog(
+                    AcaoAuditoria.CARTEIRA_TOKEN_ADICIONADO.name(),
+                    cliente.getId(),
+                    cliente.getEmail(),
+                    String.format("E-mail de crédito enviado | Valor: %.2f | Método: %s",
+                            valor, metodo));
+
+            log.info("Email crédito enviado clienteId={} valor={} metodo={}",
+                    cliente.getId(), valor, metodo);
+
         } catch (Exception e) {
-            log.error("Erro ao enviar e-mail de crédito: {}", e.getMessage());
+
+            log.error("Erro ao enviar e-mail de crédito clienteId={} erro={}",
+                    cliente.getId(), e.getMessage());
+
+            auditoria.registrarLog(
+                    AcaoAuditoria.GENERICO.name(),
+                    cliente.getId(),
+                    cliente.getEmail(),
+                    "Falha ao enviar e-mail de crédito: " + e.getMessage());
         }
     }
 
@@ -70,8 +91,26 @@ public class CarteiraEmailService {
                             false,
                             LocalDateTime.now()));
 
+            auditoria.registrarLog(
+                    AcaoAuditoria.CARTEIRA_TOKEN_DEBITADO.name(),
+                    cliente.getId(),
+                    cliente.getEmail(),
+                    String.format("E-mail de débito enviado | Valor: %.2f | Descrição: %s",
+                            valor, descricao));
+
+            log.info("Email débito enviado clienteId={} valor={}",
+                    cliente.getId(), valor);
+
         } catch (Exception e) {
-            log.error("Erro ao enviar e-mail de débito: {}", e.getMessage());
+
+            log.error("Erro ao enviar e-mail de débito clienteId={} erro={}",
+                    cliente.getId(), e.getMessage());
+
+            auditoria.registrarLog(
+                    AcaoAuditoria.GENERICO.name(),
+                    cliente.getId(),
+                    cliente.getEmail(),
+                    "Falha ao enviar e-mail de débito: " + e.getMessage());
         }
     }
 
@@ -94,8 +133,25 @@ public class CarteiraEmailService {
                             true,
                             LocalDateTime.now()));
 
+            auditoria.registrarLog(
+                    AcaoAuditoria.PAGAMENTO_PIX_CONFIRMADO.name(),
+                    cliente.getId(),
+                    cliente.getEmail(),
+                    String.format("E-mail PIX enviado | Valor: %.2f", valorPix));
+
+            log.info("Email PIX enviado clienteId={} valor={}",
+                    cliente.getId(), valorPix);
+
         } catch (Exception e) {
-            log.error("Erro ao enviar e-mail PIX: {}", e.getMessage());
+
+            log.error("Erro ao enviar e-mail PIX clienteId={} erro={}",
+                    cliente.getId(), e.getMessage());
+
+            auditoria.registrarLog(
+                    AcaoAuditoria.GENERICO.name(),
+                    cliente.getId(),
+                    cliente.getEmail(),
+                    "Falha ao enviar e-mail PIX: " + e.getMessage());
         }
     }
 }

@@ -6,22 +6,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import umc.exs.model.entidades.logic.RecuperacaoSenha;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.repository.usuario.RecuperacaoSenhaRepository;
 import umc.exs.service.email.facade.EmailFacade;
 import umc.exs.service.email.html.EmailHtmlBuilder;
-import umc.exs.service.log.LogAuditoriaService;
+import umc.exs.service.log.AcaoAuditoria;
+import umc.exs.service.log.AppLogger;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * Responsabilidade: Ciclo de vida de segurança de credenciais,
- * geração de tokens de recuperação e redefinição de senhas.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,82 +27,121 @@ public class SenhaService {
     private final ClienteRepository clienteRepository;
     private final EmailFacade emailFacade;
     private final PasswordEncoder passwordEncoder;
-
-    private final LogAuditoriaService logAuditoriaService;
+    private final AppLogger appLogger;
 
     @Value("${app.base-url:https://localhost:8443}")
     private String baseUrl;
 
-    /**
-     * Inicia o fluxo de esqueci minha senha.
-     * Remove tokens antigos para evitar duplicidade e envia o link por e-mail.
-     */
-
     @Transactional
     public void iniciarRecuperacao(Cliente cliente) {
 
-        // Limpa solicitações anteriores do mesmo cliente
         recuperacaoSenhaRepository.deleteByCliente(cliente);
 
         String token = UUID.randomUUID().toString().replace("-", "");
 
-        // Expiração em 30 minutos
-        RecuperacaoSenha rec = new RecuperacaoSenha(token, cliente, LocalDateTime.now().plusMinutes(30));
-        rec.setEmail(cliente.getEmail()); // Garante o preenchimento do campo email se existir na entidade
+        RecuperacaoSenha rec = new RecuperacaoSenha(
+                token,
+                cliente,
+                LocalDateTime.now().plusMinutes(30));
+
+        rec.setEmail(cliente.getEmail());
 
         recuperacaoSenhaRepository.save(rec);
 
         String link = baseUrl + "/clientes/reset-senha?token=" + token;
 
         try {
+
             emailFacade.sendHtmlSafe(
                     cliente.getEmail(),
                     "Redefinição de senha — Bibliotroca",
                     EmailHtmlBuilder.recuperacaoSenha(cliente.getNome(), link));
-            log.info("E-mail de recuperação enviado com sucesso para {}", cliente.getEmail());
+
+            appLogger.success(
+                    AcaoAuditoria.RECUPERACAO_SENHA_SOLICITADA,
+                    cliente.getId(),
+                    cliente.getEmail(),
+                    "Token de recuperação gerado e e-mail enviado");
+
+            log.info(
+                    "RECUPERACAO_SENHA_SOLICITADA clienteId={} email={}",
+                    cliente.getId(),
+                    cliente.getEmail());
+
         } catch (Exception e) {
-            log.error("Falha ao enviar e-mail de recuperação para {}: {}", cliente.getEmail(), e.getMessage());
-            throw new IllegalStateException("Erro ao enviar e-mail de recuperação. Tente novamente mais tarde.", e);
+
+            appLogger.error(
+                    AcaoAuditoria.RECUPERACAO_SENHA_SOLICITADA,
+                    cliente.getId(),
+                    cliente.getEmail(),
+                    "Falha ao enviar e-mail de recuperação");
+
+            log.error(
+                    "RECUPERACAO_SENHA_ERRO_ENVIO_EMAIL clienteId={} email={}",
+                    cliente.getId(),
+                    cliente.getEmail(),
+                    e);
+
+            throw new IllegalStateException(
+                    "Erro ao enviar e-mail de recuperação. Tente novamente mais tarde.",
+                    e);
         }
     }
 
-    /**
-     * Valida o token e atualiza a senha do cliente.
-     */
     @Transactional
     public void alterarSenhaComToken(String token, String novaSenha) {
-        log.debug("Tentativa de alteração de senha com token: {}", token);
 
         RecuperacaoSenha rec = recuperacaoSenhaRepository.findByToken(token)
                 .filter(r -> LocalDateTime.now().isBefore(r.getDataExpiracao()))
                 .orElseThrow(() -> {
-                    log.warn("Tentativa de alteração de senha com token inválido ou expirado: {}", token);
-                    return new IllegalArgumentException("Link de recuperação inválido ou expirado.");
+
+                    appLogger.error(
+                            AcaoAuditoria.RECUPERACAO_SENHA_EXPIRADA,
+                            null,
+                            null,
+                            "Token inválido ou expirado");
+
+                    log.warn(
+                            "RECUPERACAO_SENHA_TOKEN_INVALIDO token={}",
+                            token);
+
+                    return new IllegalArgumentException(
+                            "Link de recuperação inválido ou expirado.");
                 });
 
         Cliente cliente = rec.getCliente();
 
-        // Criptografia da nova senha
         cliente.setSenha(passwordEncoder.encode(novaSenha));
+
         clienteRepository.save(cliente);
 
-        logAuditoriaService.registrarLog("SENHA_ALTERADA", cliente.getId(), cliente.getEmail(),
-                "Redefinida via token de recuperação");
-
-        // Remove o token após o uso (segurança)
         recuperacaoSenhaRepository.delete(rec);
 
-        log.info("Senha alterada com sucesso para o cliente: {}", cliente.getEmail());
+        appLogger.success(
+                AcaoAuditoria.RECUPERACAO_SENHA_CONCLUIDA,
+                cliente.getId(),
+                cliente.getEmail(),
+                "Senha redefinida via token");
+
+        log.info(
+                "RECUPERACAO_SENHA_CONCLUIDA clienteId={} email={}",
+                cliente.getId(),
+                cliente.getEmail());
     }
 
-    /**
-     * Apenas valida se o token ainda é útil (usado no carregamento da página de
-     * reset).
-     */
     @Transactional(readOnly = true)
     public boolean isTokenValido(String token) {
-        return recuperacaoSenhaRepository.findByToken(token)
+
+        boolean valido = recuperacaoSenhaRepository.findByToken(token)
                 .map(rec -> LocalDateTime.now().isBefore(rec.getDataExpiracao()))
                 .orElse(false);
+
+        if (!valido) {
+            log.debug(
+                    "RECUPERACAO_SENHA_TOKEN_INVALIDO token={}",
+                    token);
+        }
+
+        return valido;
     }
 }

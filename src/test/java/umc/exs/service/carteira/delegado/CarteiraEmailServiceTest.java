@@ -1,5 +1,6 @@
 package umc.exs.service.carteira.delegado;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.service.email.facade.EmailFacade;
+import umc.exs.service.log.AppLogger;
+import umc.exs.service.log.LogAuditoriaService;
 
 @ExtendWith(MockitoExtension.class)
 class CarteiraEmailServiceTest {
@@ -19,6 +22,12 @@ class CarteiraEmailServiceTest {
 
     @InjectMocks
     private CarteiraEmailService service;
+
+    @Mock
+    AppLogger appLogger;
+
+    @Mock
+    LogAuditoriaService logAuditoriaService;
 
     @Test
     void enviarCredito_deveEnviarMotivoPIX() {

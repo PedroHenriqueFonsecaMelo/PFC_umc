@@ -1,18 +1,18 @@
 package umc.exs.service.core.control;
 
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import jakarta.servlet.http.HttpServletResponse;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
-import umc.exs.service.log.LogAuditoriaService;
+import umc.exs.service.log.AcaoAuditoria;
+import umc.exs.service.log.AppLogger;
 
 @Service
 @RequiredArgsConstructor
@@ -20,50 +20,44 @@ public class AuthHelper {
 
     private final JwtUserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
-    private final LogAuditoriaService logAuditoriaService;
+    private final AppLogger appLogger;
     private final ClienteRepository clienteRepository;
 
-    /**
-     * Autentica usuário e define cookie JWT.
-     * Carrega UserDetails, gera token, set Auth context.
-     * Registra log auditoria ação específica.
-     * 
-     * @param email     usuário
-     * @param id        cliente
-     * @param response  cookie
-     * @param logAction tipo log
-     */
     public void authenticate(String email, HttpServletResponse response) {
 
-        UserDetails ud = userDetailsService.loadUserByUsername(email);
+        UserDetails userDetails =
+                userDetailsService.loadUserByUsername(email);
 
         String token = jwtUtil.generateToken(email);
+
         jwtUtil.addTokenCookie(response, token);
 
-        Authentication auth = new UsernamePasswordAuthenticationToken(
-                ud, null, ud.getAuthorities());
+        Authentication authentication =
+                new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities());
 
-        SecurityContextHolder.getContext().setAuthentication(auth);
+        SecurityContextHolder.getContext()
+                .setAuthentication(authentication);
 
         Cliente cliente = clienteRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+                .orElseThrow(() ->
+                        new RuntimeException("Cliente não encontrado"));
 
-        logAuditoriaService.registrarLog(
-                "LOGIN_OK",
+        appLogger.loginSuccess(email);
+
+        appLogger.success(
+                AcaoAuditoria.LOGIN_SUCESSO,
                 cliente.getId(),
-                email,
-                "Login via JWT");
+                cliente.getEmail(),
+                "Autenticado via JWT");
     }
 
-    public void addTokenCookie(HttpServletResponse response, String token) {
+    public void addTokenCookie(
+            HttpServletResponse response,
+            String token) {
+
         jwtUtil.addTokenCookie(response, token);
     }
 }
-
-/**
- * DESCRIÇÃO DO ARQUIVO:
- * Service helper autenticação cliente/admin.
- * Gera JWT token, seta cookie HTTP-only, Auth SecurityContext.
- * Registra logAuditoria sucesso/falha.
- * Usado controllers login/register.
- */

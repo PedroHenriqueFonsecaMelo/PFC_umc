@@ -20,6 +20,8 @@ import umc.exs.model.enums.CategoriaForum;
 import umc.exs.repository.negocios.RespostaForumRepository;
 import umc.exs.repository.negocios.TopicoForumRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.log.AppLogger;
+import umc.exs.service.log.LogAuditoriaService;
 
 @ExtendWith(MockitoExtension.class)
 class ForumServiceTest {
@@ -35,6 +37,12 @@ class ForumServiceTest {
 
     @InjectMocks
     ForumService service;
+
+    @Mock
+    AppLogger appLogger;
+
+    @Mock
+    LogAuditoriaService logAuditoriaService;
 
     @Test
     void criarTopico_quandoUsuarioExiste_salvaTopico() {

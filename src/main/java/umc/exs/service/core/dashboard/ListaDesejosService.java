@@ -13,6 +13,8 @@ import umc.exs.repository.negocios.ListaDesejosRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.email.facade.EmailFacade;
 import umc.exs.service.email.html.EmailHtmlBuilder;
+import umc.exs.service.log.AcaoAuditoria;
+import umc.exs.service.log.AppLogger;
 import umc.exs.service.notificacao.NotificacaoService;
 
 import java.time.LocalDateTime;
@@ -30,9 +32,11 @@ public class ListaDesejosService {
     private final ClienteRepository clienteRepository;
     private final EmailFacade emailFacade;
     private final NotificacaoService notificacaoService;
+    private final AppLogger appLogger;
 
     @Transactional
     public ListaDesejos adicionarDesejo(String emailCliente, String isbn) {
+
         Cliente cliente = clienteRepository.findByEmail(emailCliente)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
@@ -46,16 +50,26 @@ public class ListaDesejosService {
                 .dataAdicao(LocalDateTime.now())
                 .build();
 
-        if (desejo != null) {
-            return listaDesejosRepository.save(desejo);
-        } else {
-            return null;
-        }
+        ListaDesejos saved = listaDesejosRepository.save(desejo);
 
+        appLogger.success(
+                AcaoAuditoria.CLIENTE_DADOS_ATUALIZADOS,
+                cliente.getId(),
+                cliente.getEmail(),
+                "ISBN adicionado à lista de desejos: " + isbn);
+
+        log.info(
+                "LISTA_DESEJOS_ADICIONAR clienteId={} email={} isbn={}",
+                cliente.getId(),
+                cliente.getEmail(),
+                isbn);
+
+        return saved;
     }
 
     @Transactional
     public void removerDesejo(String emailCliente, @NonNull Long desejoId) {
+
         Cliente cliente = clienteRepository.findByEmail(emailCliente)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
@@ -67,93 +81,139 @@ public class ListaDesejosService {
         }
 
         listaDesejosRepository.delete(desejo);
+
+        appLogger.success(
+                AcaoAuditoria.CLIENTE_DADOS_ATUALIZADOS,
+                cliente.getId(),
+                cliente.getEmail(),
+                "ISBN removido da lista de desejos: " + desejo.getIsbn());
+
+        log.info(
+                "LISTA_DESEJOS_REMOVER clienteId={} email={} isbn={}",
+                cliente.getId(),
+                cliente.getEmail(),
+                desejo.getIsbn());
     }
 
     @Transactional(readOnly = true)
     public List<ListaDesejos> listarDesejos(String emailCliente) {
+
         Cliente cliente = clienteRepository.findByEmail(emailCliente)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
-        return listaDesejosRepository.findByClienteId(cliente.getId())
-                .stream().toList();
-    }
+        List<ListaDesejos> desejos =
+                listaDesejosRepository.findByClienteId(cliente.getId());
 
-    /**
-     * Notifica via e-mail e dashboard todos os clientes que têm o ISBN na lista de
-     * desejos
-     * quando um livro com esse ISBN é aprovado e fica disponível na vitrine.
-     */
+        log.debug(
+                "LISTA_DESEJOS_LISTAR clienteId={} total={}",
+                cliente.getId(),
+                desejos.size());
+
+        return desejos;
+    }
 
     @Transactional
     public void notificarClientesSeDisponivel(String isbn, String titulo) {
-        if (isbn == null || isbn.isBlank()) {
-            return;
-        }
 
-        List<ListaDesejos> interessados = listaDesejosRepository.findByIsbn(isbn);
-        if (interessados.isEmpty()) {
-            return;
-        }
+        if (isbn == null || isbn.isBlank()) return;
 
-        log.info("Notificando {} cliente(s) sobre disponibilidade do livro ISBN {}", interessados.size(), isbn);
+        List<ListaDesejos> interessados =
+                listaDesejosRepository.findByIsbn(isbn);
+
+        if (interessados.isEmpty()) return;
+
+        log.info(
+                "LISTA_DESEJOS_NOTIFICACAO_DISPONIBILIDADE isbn={} total={}",
+                isbn,
+                interessados.size());
 
         for (ListaDesejos desejo : interessados) {
+
             try {
                 Cliente cliente = desejo.getCliente();
-                String assunto = desejo.isPreReservaAtiva()
-                        ? "Pré-reserva ativada — Livro disponível! — Bibliotroca"
-                        : "Livro da sua lista de desejos disponível! — Bibliotroca";
 
                 emailFacade.sendHtmlSafe(
-                        cliente.getEmail(), assunto,
+                        cliente.getEmail(),
+                        "Livro da sua lista de desejos disponível!",
                         EmailHtmlBuilder.listaDesejosDisponivel(
-                                cliente.getNome(), titulo, isbn, desejo.isPreReservaAtiva(), baseUrl));
+                                cliente.getNome(),
+                                titulo,
+                                isbn,
+                                desejo.isPreReservaAtiva(),
+                                baseUrl));
 
-                // Notificação dashboard
                 notificacaoService.criarNotificacaoDashboard(
                         cliente,
-                        String.format("O livro '%s' da sua lista de desejos está disponível na vitrine!", titulo),
+                        "O livro '" + titulo + "' está disponível na vitrine!",
                         "/livros/vitrine");
 
-                log.info("Notificação enviada para {} sobre ISBN {} (pré-reserva: {})",
-                        cliente.getEmail(), isbn, desejo.isPreReservaAtiva());
+                appLogger.info(
+                        AcaoAuditoria.CLIENTE_PERFIL_VISUALIZADO,
+                        cliente.getId(),
+                        cliente.getEmail(),
+                        "Notificação de disponibilidade enviada ISBN: " + isbn);
+
+                log.info(
+                        "LISTA_DESEJOS_NOTIFICADO clienteId={} email={} isbn={}",
+                        cliente.getId(),
+                        cliente.getEmail(),
+                        isbn);
+
             } catch (Exception e) {
-                log.error("Falha ao notificar cliente {} sobre ISBN {}: {}", desejo.getCliente().getEmail(), isbn,
-                        e.getMessage());
+
+                log.error(
+                        "LISTA_DESEJOS_NOTIFICACAO_ERRO email={} isbn={}",
+                        desejo.getCliente().getEmail(),
+                        isbn,
+                        e);
             }
         }
     }
 
-    /**
-     * Notifica via dashboard todos os clientes que têm o ISBN na lista de desejos
-     * quando o livro entra em promoção.
-     */
     @Transactional
     public void notificarClientesSeEmPromocao(String isbn, String titulo, double precoPromo) {
-        if (isbn == null || isbn.isBlank())
-            return;
 
-        List<ListaDesejos> interessados = listaDesejosRepository.findByIsbn(isbn);
-        if (interessados.isEmpty())
-            return;
+        if (isbn == null || isbn.isBlank()) return;
 
-        log.info("Notificando {} cliente(s) sobre promoção do livro ISBN {}", interessados.size(), isbn);
+        List<ListaDesejos> interessados =
+                listaDesejosRepository.findByIsbn(isbn);
+
+        if (interessados.isEmpty()) return;
+
+        log.info(
+                "LISTA_DESEJOS_NOTIFICACAO_PROMOCAO isbn={} total={}",
+                isbn,
+                interessados.size());
 
         for (ListaDesejos desejo : interessados) {
+
             try {
+
                 notificacaoService.criarNotificacaoDashboard(
                         desejo.getCliente(),
-                        String.format("O livro '%s' que você deseja está em promoção por T$ %.2f!", titulo, precoPromo),
+                        "O livro '" + titulo + "' entrou em promoção por T$ " + precoPromo,
                         "/livros/vitrine");
+
+                appLogger.info(
+                        AcaoAuditoria.CLIENTE_PERFIL_VISUALIZADO,
+                        desejo.getCliente().getId(),
+                        desejo.getCliente().getEmail(),
+                        "Notificação de promoção ISBN: " + isbn);
+
             } catch (Exception e) {
-                log.error("Falha ao notificar cliente {} sobre promoção ISBN {}: {}",
-                        desejo.getCliente().getEmail(), isbn, e.getMessage());
+
+                log.error(
+                        "LISTA_DESEJOS_PROMOCAO_ERRO email={} isbn={}",
+                        desejo.getCliente().getEmail(),
+                        isbn,
+                        e);
             }
         }
     }
 
     @Transactional
     public ListaDesejos togglePreReserva(String emailCliente, @NonNull Long desejoId) {
+
         Cliente cliente = clienteRepository.findByEmail(emailCliente)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
@@ -165,6 +225,22 @@ public class ListaDesejosService {
         }
 
         desejo.setPreReservaAtiva(!desejo.isPreReservaAtiva());
-        return listaDesejosRepository.save(desejo);
+
+        ListaDesejos updated = listaDesejosRepository.save(desejo);
+
+        appLogger.success(
+                AcaoAuditoria.CLIENTE_DADOS_ATUALIZADOS,
+                cliente.getId(),
+                cliente.getEmail(),
+                "Toggle pré-reserva ISBN: " + desejo.getIsbn());
+
+        log.info(
+                "LISTA_DESEJOS_TOGGLE_PRE_RESERVA clienteId={} email={} isbn={} status={}",
+                cliente.getId(),
+                cliente.getEmail(),
+                desejo.getIsbn(),
+                desejo.isPreReservaAtiva());
+
+        return updated;
     }
 }

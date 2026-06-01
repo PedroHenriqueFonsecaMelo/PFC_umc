@@ -1,67 +1,86 @@
 package umc.exs.service.core.dashboard;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.repository.negocios.LoteRepository;
+import umc.exs.service.log.AcaoAuditoria;
+import umc.exs.service.log.AppLogger;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LoteService {
+
     private final LoteRepository loteRepository;
+    private final AppLogger appLogger;
 
-    /**
-     * Lista lotes com status PENDENTE.
-     * Para aprovação admin.
-     * 
-     * @return lista Lote pendentes
-     */
     public List<Lote> listarPendentes() {
-        return loteRepository.findByStatus(Lote.LoteStatus.PENDENTE);
+
+        List<Lote> lotes = loteRepository.findByStatus(Lote.LoteStatus.PENDENTE);
+
+        log.info("LOTE_LISTAR_PENDENTES total={}", lotes.size());
+
+        appLogger.info(
+                AcaoAuditoria.CLIENTE_LISTAGEM,
+                null,
+                "ADMIN",
+                "Listagem de lotes pendentes");
+
+        return lotes;
     }
 
-    /** Lista lotes pendentes com o cliente já carregado (JOIN FETCH — sem N+1). */
     public List<Lote> listarPendentesComCliente() {
-        return loteRepository.findByStatusWithCliente(Lote.LoteStatus.PENDENTE);
-    }
 
-    /**
-     * Busca lote por ID.
-     * Throw se não encontrado.
-     *
-     * @param id lote
-     * @return Lote
-     */
+        List<Lote> lotes =
+                loteRepository.findByStatusWithCliente(Lote.LoteStatus.PENDENTE);
+
+        log.info("LOTE_LISTAR_PENDENTES_FETCH_CLIENTE total={}", lotes.size());
+
+        appLogger.info(
+                AcaoAuditoria.CLIENTE_LISTAGEM,
+                null,
+                "ADMIN",
+                "Listagem de lotes pendentes com cliente (fetch join)");
+
+        return lotes;
+    }
 
     public Lote findById(Long id) {
-        return loteRepository.findById(id).orElseThrow(() -> new RuntimeException("Lote não encontrado"));
-    }
 
-    /** Busca lote por ID com cliente carregado. */
-    public Lote findByIdComCliente(Long id) {
-        return loteRepository.findByIdWithCliente(id)
+        Lote lote = loteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Lote não encontrado"));
+
+        log.info("LOTE_BUSCAR_ID id={}", id);
+
+        return lote;
     }
 
-    /**
-     * Conta pendentes por cliente ID.
-     * Limite cadastro lotes usuário.
-     * 
-     * @param clienteId
-     * @return count
-     */
+    public Lote findByIdComCliente(Long id) {
+
+        Lote lote = loteRepository.findByIdWithCliente(id)
+                .orElseThrow(() -> new RuntimeException("Lote não encontrado"));
+
+        log.info("LOTE_BUSCAR_ID_FETCH_CLIENTE id={}", id);
+
+        return lote;
+    }
+
     public long countPendingByCliente(Long clienteId) {
-        return loteRepository.countByClienteIdAndStatus(clienteId, Lote.LoteStatus.PENDENTE);
+
+        long count = loteRepository.countByClienteIdAndStatus(
+                clienteId,
+                Lote.LoteStatus.PENDENTE);
+
+        log.info(
+                "LOTE_COUNT_PENDENTES_CLIENTE clienteId={} total={}",
+                clienteId,
+                count);
+
+        return count;
     }
 }
-
-/**
- * DESCRIÇÃO DO ARQUIVO:
- * Service operações Lote (pacote livros venda).
- * Lista pendentes admin, busca ID, count cliente.
- * Usa LoteRepository Spring Data.
- * Status PENDENTE/TOTAL_APROVADO enum.
- */

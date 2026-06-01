@@ -42,6 +42,12 @@ public class LivroAnuncioService {
 
     private static final String URL_UPLOAD = "uploads/livros/";
 
+    private static final String LOG_LIVRO_CADASTRADO = "LIVRO_ANUNCIO_CADASTRADO";
+    private static final String LOG_LOTE_CADASTRADO = "LOTE_CADASTRO_CRIADO";
+    private static final String LOG_LIVRO_ISBN_CRIADO = "LIVRO_ISBN_PROCESSADO";
+    private static final String LOG_PROMO_LISTAGEM = "LIVRO_PROMOCOES_ATIVAS_LISTADAS";
+    private static final String LOG_LIVRO_BUSCA_ATIVA = "LIVRO_BUSCA_ATIVO";
+
     private final LivroRepository livroRepository;
     private final ClienteRepository clienteRepository;
     private final LoteRepository loteRepository;
@@ -53,42 +59,38 @@ public class LivroAnuncioService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    // ========================= VENDA INDIVIDUAL =========================
+
     @Transactional
     public Livro cadastrarVenda(String email, LivroRequest dto, MultipartFile foto) {
 
         if (foto == null || foto.isEmpty()) {
-            throw new IllegalArgumentException("A foto é obrigatória para venda individual");
+            throw new IllegalArgumentException("Foto obrigatória para anúncio individual");
         }
 
         Cliente vendedor = clienteRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("Cliente não localizado"));
 
         String urlFoto = salvarFoto(foto);
-
         String jsonFotos = converterParaJson(List.of(urlFoto));
 
         GoogleBookData response = googleBooksService.buscarPorIsbnAsync(dto.getIsbn()).join();
 
         if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
-            throw new IllegalArgumentException("Livro não encontrado na API externa para o ISBN: " + dto.getIsbn());
+            throw new IllegalArgumentException("ISBN não encontrado na API externa: " + dto.getIsbn());
         }
 
         var info = response.getItems().get(0).getVolumeInfo();
 
-        String primeiroAutor = (info.getAuthors() != null && !info.getAuthors().isEmpty())
+        String autor = (info.getAuthors() != null && !info.getAuthors().isEmpty())
                 ? info.getAuthors().get(0)
                 : "Autor Desconhecido";
 
-        String capaUrl = "";
+        String capaUrl = (info.getImageLinks() != null)
+                ? info.getImageLinks().getThumbnail()
+                : null;
 
-        if (info.getImageLinks() != null &&
-                info.getImageLinks().getThumbnail() != null) {
-
-            capaUrl = info.getImageLinks().getThumbnail();
-        }
-
-        Obra obra = obterOuCriarObra(info.getTitle(), primeiroAutor,
-                info.getLanguage(), capaUrl);
+        Obra obra = obterOuCriarObra(info.getTitle(), autor, info.getLanguage(), capaUrl);
 
         Livro anuncio = Livro.builder()
                 .titulo(dto.getTitulo())
@@ -103,13 +105,17 @@ public class LivroAnuncioService {
 
         Livro salvo = livroRepository.save(anuncio);
 
-        logAuditoria.registrarLog("LIVRO_CADASTRADO",
+        logAuditoria.registrarLog(
+                LOG_LIVRO_CADASTRADO,
                 vendedor.getId(),
                 vendedor.getEmail(),
-                "Livro " + salvo.getId() + " - aguardando aprovação");
+                "livroId=" + salvo.getId() + ", status=PENDENTE_APROVACAO"
+        );
 
         return salvo;
     }
+
+    // ========================= LOTE =========================
 
     @Transactional
     public Lote criarLote(String email, LoteRequest dto, List<MultipartFile> fotos) {
@@ -118,7 +124,7 @@ public class LivroAnuncioService {
                 .orElseThrow(() -> new IllegalStateException("Cliente não encontrado"));
 
         if (loteService.countPendingByCliente(cliente.getId()) >= 5) {
-            throw new IllegalStateException("Limite de 5 lotes pendentes atingido");
+            throw new IllegalStateException("Limite de lotes pendentes atingido");
         }
 
         Lote lote = Lote.builder()
@@ -163,90 +169,131 @@ public class LivroAnuncioService {
             livroRepository.save(anuncio);
         }
 
-        logAuditoria.registrarLog("LOTE_CADASTRADO",
+        logAuditoria.registrarLog(
+                LOG_LOTE_CADASTRADO,
                 cliente.getId(),
                 cliente.getEmail(),
-                "Lote " + lote.getId() + " - aguardando aprovação");
+                "loteId=" + lote.getId() + ", status=PENDENTE"
+        );
 
         return lote;
     }
 
+    // ========================= ISBN AUTO =========================
+
     @Transactional
     public Livro cadastrarPorIsbn(String isbn) {
-        // 1. Tenta Google Books (nunca lança exceção — retorna null se indisponível)
+
         GoogleBookData response = googleBooksService.buscarPorIsbnAsync(isbn).join();
 
         if (response != null && response.getItems() != null && !response.getItems().isEmpty()) {
+
             var info = response.getItems().get(0).getVolumeInfo();
 
-            String primeiroAutor = (info.getAuthors() != null && !info.getAuthors().isEmpty())
+            String autor = (info.getAuthors() != null && !info.getAuthors().isEmpty())
                     ? info.getAuthors().get(0)
                     : "Autor Desconhecido";
 
-            return Livro.builder()
+            Livro livro = Livro.builder()
                     .titulo(info.getTitle())
-                    .autor(primeiroAutor)
+                    .autor(autor)
                     .isbn(isbn)
                     .idioma(info.getLanguage())
                     .resumoOficial(info.getDescription())
                     .dataAnuncio(LocalDateTime.now())
                     .aprovado(false)
-                    .obra(null)
                     .build();
+
+            logAuditoria.registrarLog(
+                    LOG_LIVRO_ISBN_CRIADO,
+                    null,
+                    null,
+                    "isbn=" + isbn + ", origem=GOOGLE_BOOKS"
+            );
+
+            return livro;
         }
 
-        // 2. Fallback: OpenLibrary
-        log.info("Google Books não retornou dados para ISBN {}. Tentando OpenLibrary...", isbn);
-        var openLibraryResult = googleBooksService.buscarPorIsbnOpenLibrary(isbn);
-        if (openLibraryResult.isPresent()) {
-            return openLibraryResult.get();
+        log.info("Google Books falhou para ISBN {}. Tentando fallback OpenLibrary...", isbn);
+
+        var fallback = googleBooksService.buscarPorIsbnOpenLibrary(isbn);
+
+        if (fallback.isPresent()) {
+            return fallback.get();
         }
 
-        // 3. Ambas as APIs falharam — retorna 404 com mensagem amigável
-        throw new EntityNotFoundException(
-                "Livro não encontrado automaticamente. Preencha os dados manualmente.");
+        throw new EntityNotFoundException("Livro não encontrado automaticamente");
     }
 
-    // ========================= MÉTODOS AUXILIARES =========================
+    // ========================= PROMO LISTAGEM =========================
+
+    public List<Livro> listarPromocoesAtivas() {
+
+        List<Livro> livros = livroRepository.findPromocoesAtivas(LocalDateTime.now());
+
+        List<Livro> response = new ArrayList<>();
+
+        for (Livro livro : livros) {
+            Livro dto = new Livro();
+            dto.setId(livro.getId());
+            dto.setTitulo(livro.getTitulo());
+            dto.setAutor(livro.getAutor());
+            dto.setIsbn(livro.getIsbn());
+            dto.setPrecoAprovado(livro.getPrecoAprovado());
+            response.add(dto);
+        }
+
+        logAuditoria.registrarLog(
+                LOG_PROMO_LISTAGEM,
+                null,
+                null,
+                "total=" + response.size()
+        );
+
+        return response;
+    }
+
+    public Livro buscarPorIdAtivo(Long id) {
+
+        Livro livro = livroRepository.findByIdAndAprovadoTrue(id)
+                .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado"));
+
+        logAuditoria.registrarLog(
+                LOG_LIVRO_BUSCA_ATIVA,
+                null,
+                null,
+                "livroId=" + id
+        );
+
+        return livro;
+    }
+
+    // ========================= HELPERS =========================
 
     private String salvarFoto(MultipartFile foto) {
         String nomeOriginal = foto.getOriginalFilename();
-
-        // Sanitiza o nome: mantém apenas alfanuméricos, hífens, underscores e ponto.
-        // Também garante extensão ".jpg" quando o nome está ausente ou é vazio.
         String nomeSanitizado = sanitizarNomeArquivo(nomeOriginal);
         String nome = UUID.randomUUID() + "_" + nomeSanitizado;
 
-        // URL_UPLOAD é relativo ao working-directory — nunca começa com /
         Path caminho = Paths.get(URL_UPLOAD + nome);
 
         try {
             Files.createDirectories(caminho.getParent());
             Files.copy(foto.getInputStream(), caminho);
-            // A URL pública inicia com / para ser acessível pelo browser
             return "/" + URL_UPLOAD + nome;
         } catch (IOException e) {
-            log.error("Erro de I/O ao salvar foto '{}': {}", nome, e.getMessage(), e);
-            throw new IllegalStateException("Erro ao salvar foto: " + nome + " — " + e.getMessage());
+            log.error("UPLOAD_FALHA file={} erro={}", nome, e.getMessage(), e);
+            throw new IllegalStateException("Erro ao salvar foto");
         }
     }
 
-    /**
-     * Remove caracteres perigosos do nome de arquivo enviado pelo cliente.
-     * - Strips separadores de caminho (path traversal)
-     * - Mantém: letras, dígitos, hífen, underscore, ponto
-     * - Se o resultado ficar vazio ou sem extensão válida, usa "imagem.jpg"
-     */
     private String sanitizarNomeArquivo(String nomeOriginal) {
-        if (nomeOriginal == null || nomeOriginal.isBlank()) {
-            return "imagem.jpg";
-        }
-        // Remove qualquer componente de caminho (ex: ../../etc/passwd)
+        if (nomeOriginal == null || nomeOriginal.isBlank()) return "imagem.jpg";
+
         String base = Paths.get(nomeOriginal).getFileName().toString();
-        // Mantém apenas chars seguros
-        String seguro = base.replaceAll("[^a-zA-Z0-9.\\-_]", "_");
-        // Garante que tem pelo menos algum conteúdo
-        return seguro.isBlank() ? "imagem.jpg" : seguro;
+        String safe = base.replaceAll("[^a-zA-Z0-9.\\-_]", "_");
+
+        return safe.isBlank() ? "imagem.jpg" : safe;
     }
 
     private String converterParaJson(List<String> lista) {
@@ -263,51 +310,21 @@ public class LivroAnuncioService {
 
         if (quantidade == 0 && !dto.getLivros().isEmpty()) {
             quantidade = fotos.size() / dto.getLivros().size();
-            log.info("Fotos por livro ajustado para: {}", quantidade);
         }
 
         return quantidade;
     }
 
-    public List<Livro> listarPromocoesAtivas() {
-        List<Livro> livros = livroRepository.findPromocoesAtivas(LocalDateTime.now());
-
-        List<Livro> lista = new ArrayList<>();
-
-        for (Livro livro : livros) {
-            Livro dto = new Livro();
-
-            dto.setId(livro.getId());
-            dto.setTitulo(livro.getTitulo());
-            dto.setAutor(livro.getAutor());
-            dto.setIsbn(livro.getIsbn());
-            dto.setPrecoAprovado(livro.getPrecoAprovado());
-
-            lista.add(dto);
-        }
-
-        return lista;
-    }
-
-    public Livro buscarPorIdAtivo(Long id) {
-        return livroRepository.findByIdAndAprovadoTrue(id)
-                .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado"));
-    }
-
     private Obra obterOuCriarObra(String titulo, String autor, String idioma, String capa) {
 
-        return obraRepository
-                .findByTituloAndAutor(titulo, autor)
-                .orElseGet(() -> {
-
-                    Obra nova = Obra.builder()
-                            .titulo(titulo)
-                            .autor(autor)
-                            .idioma(idioma)
-                            .imageLinksJson(capa)
-                            .build();
-
-                    return obraRepository.save(nova);
-                });
+        return obraRepository.findByTituloAndAutor(titulo, autor)
+                .orElseGet(() -> obraRepository.save(
+                        Obra.builder()
+                                .titulo(titulo)
+                                .autor(autor)
+                                .idioma(idioma)
+                                .imageLinksJson(capa)
+                                .build()
+                ));
     }
 }

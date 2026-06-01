@@ -348,7 +348,7 @@ public class ClientController {
 
         model.addAttribute(ATTR_CLIENTE, cliente);
         model.addAttribute("historico", historico);
-        return "cliente/carteira";
+        return "cliente/homepage";
     }
 
     @PostMapping("/comprar-tokens")

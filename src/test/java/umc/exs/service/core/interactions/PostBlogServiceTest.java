@@ -17,6 +17,8 @@ import umc.exs.model.enums.StatusPost;
 import umc.exs.repository.negocios.ComentarioBlogRepository;
 import umc.exs.repository.negocios.PostBlogRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.log.AppLogger;
+import umc.exs.service.log.LogAuditoriaService;
 
 @ExtendWith(MockitoExtension.class)
 class PostBlogServiceTest {
@@ -32,6 +34,12 @@ class PostBlogServiceTest {
 
     @InjectMocks
     PostBlogService service;
+
+    @Mock
+    AppLogger appLogger;
+
+    @Mock
+    LogAuditoriaService logAuditoriaService;
 
     @Test
     void listarTodos_deveRetornarPostsOrdenados() {

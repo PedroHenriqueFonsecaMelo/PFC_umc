@@ -17,6 +17,7 @@ import umc.exs.model.entidades.logic.RecuperacaoSenha;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.usuario.RecuperacaoSenhaRepository;
 import umc.exs.service.cliente.senha.SenhaService;
+import umc.exs.service.log.LogAuditoriaService;
 
 @ExtendWith(MockitoExtension.class)
 class ClienteAutenticacaoServiceTest {
@@ -35,6 +36,9 @@ class ClienteAutenticacaoServiceTest {
 
     @InjectMocks
     ClienteAutenticacaoService service;
+
+    @Mock
+    LogAuditoriaService logAuditoria;
 
     @Test
     void autenticar_quandoSenhaCorreta_retornaCliente() {

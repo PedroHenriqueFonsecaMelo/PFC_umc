@@ -120,4 +120,17 @@ public class LogAuditoria {
         }
     }
 
+    public LogAuditoria(String acao2, String detalhes2, LocalDateTime agora) {
+        this.acao = acao2;
+        this.detalhes = detalhes2;
+        this.dataHora = agora;
+    }
+
+    public LogAuditoria(String emailUsuario2, String acao2, String detalhes2, LocalDateTime agora) {
+        this.emailUsuario = emailUsuario2;
+        this.acao = acao2;
+        this.detalhes = detalhes2;
+        this.dataHora = agora;
+    }
+
 }

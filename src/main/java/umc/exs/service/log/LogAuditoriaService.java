@@ -3,6 +3,7 @@ package umc.exs.service.log;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -69,6 +70,53 @@ public class LogAuditoriaService {
         }
     }
 
+    public void registrarLog(String acao, String emailUsuario, String detalhes) {
+
+        try {
+            LocalDateTime agora = LocalDateTime.now();
+
+            LogAuditoria la = new LogAuditoria(
+                    emailUsuario,
+                    acao,
+                    detalhes,
+                    agora);
+
+            String dataFormatada = FORMATTER.format(agora);
+
+            auditLog.info("ACAO={} EMAIL={} DETALHES={} DATA_HORA={}",
+                    acao, emailUsuario, detalhes, dataFormatada);
+
+            repository.save(la);
+
+        } catch (Exception e) {
+            log.warn("Falha ao salvar log de auditoria [acao={}]: {}",
+                    acao, e.getMessage());
+        }
+    }
+
+    public void registrarLog(String acao, String detalhes) {
+
+        try {
+            LocalDateTime agora = LocalDateTime.now();
+
+            LogAuditoria la = new LogAuditoria(
+                    acao,
+                    detalhes,
+                    agora);
+
+            String dataFormatada = FORMATTER.format(agora);
+
+            auditLog.info("ACAO={} DETALHES={} DATA_HORA={}",
+                    acao, detalhes, dataFormatada);
+
+            repository.save(la);
+
+        } catch (Exception e) {
+            log.warn("Falha ao salvar log de auditoria [acao={}]: {}",
+                    acao, e.getMessage());
+        }
+    }
+
     /**
      * Busca logs a partir da criação do usuário.
      */
@@ -100,10 +148,8 @@ public class LogAuditoriaService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
         // Converte strings em LocalDateTime, ou null se não informado
-        LocalDateTime inicioLDT = null;
-        if (dataInicio != null && !dataInicio.isBlank()) {
-            inicioLDT = LocalDateTime.parse(dataInicio + " 00:00", formatter);
-        }
+        LocalDate date = LocalDate.parse(dataInicio);
+        LocalDateTime inicioLDT = date.atStartOfDay();
 
         LocalDateTime fimLDT = null;
         if (dataFim != null && !dataFim.isBlank()) {

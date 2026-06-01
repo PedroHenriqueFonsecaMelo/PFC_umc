@@ -13,12 +13,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import umc.exs.dto.mapper.CancelamentoMapper;
 import umc.exs.dto.request.admin.CancelamentoRequest;
 import umc.exs.dto.response.compras.CancelamentoResponse;
 import umc.exs.model.entidades.foundation.SolicitacaoCancelamento;
+import umc.exs.model.enums.MotivoCategoria;
 import umc.exs.service.cancelamento.CancelamentoService;
 
 @Slf4j
@@ -36,7 +38,7 @@ public class CancelamentoController {
     @PostMapping("/api/pedidos/{pedidoId}/solicitar-cancelamento")
     public ResponseEntity<?> solicitar(
             @PathVariable Long pedidoId,
-            @RequestBody CancelamentoRequest request,
+            @RequestBody @Valid CancelamentoRequest request,
             @AuthenticationPrincipal UserDetails user) {
         try {
             SolicitacaoCancelamento cancelamento = cancelamentoService.solicitarCancelamento(pedidoId,
@@ -135,7 +137,7 @@ public class CancelamentoController {
         }
 
         try {
-            umc.exs.model.enums.MotivoCategoria motivo = umc.exs.model.enums.MotivoCategoria.valueOf(
+            MotivoCategoria motivo = MotivoCategoria.valueOf(
                     motivoCategoriaStr != null ? motivoCategoriaStr : "DECISAO_ADMINISTRATIVA");
 
             var resultado = cancelamentoService.cancelarPeloAdmin(

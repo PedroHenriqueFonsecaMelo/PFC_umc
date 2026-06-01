@@ -4,6 +4,8 @@
 spring:
   application:
     name: PFC_Projeto
+  jmx:
+    enabled: false
 
   jackson:
     serialization:
@@ -26,12 +28,14 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
-        temp:
-          use_jdbc_metadata_defaults: false
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+        "[jakarta.persistence.validation.mode]": none
+        "[hibernate.validator.apply_to_ddl]": false
+        boot:
+          "[allow_jdbc_metadata_access]": false
     open-in-view: false
     show-sql: false
 
@@ -43,20 +47,22 @@ spring:
     port: "${MAIL_PORT}"
     username: "${MAIL_USERNAME}"
     password: "${MAIL_PASSWORD}"
-    from: "${MAIL_FROM}"
+    
     properties:
       mail:
+        from: "${MAIL_FROM}"
         smtp:
           auth: true
           starttls:
             enable: true
+            required: true
           ssl:
             trust: smtp.gmail.com
 
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 50MB
+      max-file-size: 8MB
+      max-request-size: 8MB
 
 
 
@@ -86,8 +92,7 @@ jwt:
 # 🌍 App config
 # ===============================
 app:
-  base-url: "${APP_BASE_URL}"
-  allowed-origin: "${APP_ALLOWED_ORIGIN}"
+  base-url: "${APP_BASE_URL:http://localhost:8080}"
   seed:
     mode: stress
 
@@ -124,3 +129,10 @@ logging:
     root: WARN
     umc:
       exs: INFO
+
+# ===============================
+# 🧾 Admin
+# ===============================
+ADMIN:
+  EMAIL: "${ADMIN_EMAIL}"
+  PASSWORD: "${ADMIN_PASSWORD}"

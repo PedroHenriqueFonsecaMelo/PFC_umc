@@ -22,7 +22,6 @@ import umc.exs.dto.request.compra.CompraTokensRequest;
 import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.service.cliente.ClienteService;
-import umc.exs.service.log.LogAuditoriaService;
 
 @Slf4j
 @RestController
@@ -34,7 +33,6 @@ public class TokenControllerApi {
 
     private final ClienteService clienteService;
     private final PagamentoPixStrategy pixStrategy;
-    private final LogAuditoriaService logAuditoriaService;
 
     @Value("${mercadopago.access-token}")
     private String accessToken;
@@ -56,9 +54,8 @@ public class TokenControllerApi {
             boolean sucesso = pixStrategy.processar(request.getValor(), request);
 
             if (!sucesso) {
-                logAuditoriaService.registrarLog("PIX_FALHA", cliente.getId(),
-                        cliente.getEmail(), "Geração de PIX falhou.");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+                throw new IllegalStateException(
+                        "Falha ao gerar PIX");
             }
 
             double tokens = request.getValor() * TOKENS_POR_REAL;

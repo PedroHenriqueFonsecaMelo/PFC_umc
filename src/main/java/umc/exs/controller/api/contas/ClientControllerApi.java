@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import umc.exs.dto.mapper.ClienteMapper;
 import umc.exs.dto.response.admin.VendaResponse;
@@ -114,7 +115,7 @@ public class ClientControllerApi {
      */
     @PostMapping("/enderecos")
     public ResponseEntity<Void> adicionarEndereco(
-            @RequestBody Endereco endereco,
+            @RequestBody @Valid Endereco endereco,
             @AuthenticationPrincipal UserDetails user) {
 
         if (user == null)

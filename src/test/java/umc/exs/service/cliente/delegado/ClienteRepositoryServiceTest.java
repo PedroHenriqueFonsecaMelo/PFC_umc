@@ -89,7 +89,10 @@ class ClienteRepositoryServiceTest {
 
     @Test
     void excluirTokenRecuperacao_deveRemoverRegistro() {
+         Cliente cliente = new Cliente();
+        cliente.setId(1L);
         RecuperacaoSenha registro = new RecuperacaoSenha();
+        registro.setCliente(cliente);
         service.excluirTokenRecuperacao(registro);
         verify(tokenRepository).delete(registro);
     }

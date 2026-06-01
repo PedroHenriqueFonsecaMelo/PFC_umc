@@ -5,9 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import umc.exs.model.entidades.foundation.ReservaCheckout;
 import umc.exs.repository.negocios.ReservaCheckoutRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.log.AcaoAuditoria;
+import umc.exs.service.log.AppLogger;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +24,7 @@ public class ReservaCheckoutService {
 
     private final ReservaCheckoutRepository reservaRepo;
     private final ClienteRepository clienteRepo;
+    private final AppLogger appLogger;
 
     private static final int DURACAO_RESERVA_MIN = 5;
     private static final int LIMITE_TENTATIVAS = 3;
@@ -29,66 +33,81 @@ public class ReservaCheckoutService {
 
     @Transactional
     public Map<String, Object> reservar(List<Long> livroIds, String emailUsuario) {
-        // Limite de 5 livros por checkout
+
         if (livroIds.size() > LIMITE_LIVROS) {
             return Map.of(
                     "reservado", false,
                     "motivo", "LIMITE_EXCEDIDO",
-                    "mensagem",
-                    "Limite de " + LIMITE_LIVROS + " livros por compra. Remova alguns itens para continuar.");
+                    "mensagem", "Limite de " + LIMITE_LIVROS + " livros");
         }
 
         Long clienteId = resolverClienteId(emailUsuario);
-        if (clienteId == null)
+
+        if (clienteId == null) {
             return Map.of("reservado", false, "motivo", "NAO_AUTENTICADO");
+        }
 
         LocalDateTime agora = LocalDateTime.now();
 
         for (Long livroId : livroIds) {
-            // Verifica bloqueio anti-abuso
-            Optional<ReservaCheckout> reservaExistente = reservaRepo.findByLivroIdAndClienteId(livroId, clienteId);
 
-            if (reservaExistente.isPresent()) {
-                ReservaCheckout r = reservaExistente.get();
-                if (r.getBloqueadoAte() != null && agora.isBefore(r.getBloqueadoAte())) {
-                    long segundosRestantes = java.time.Duration.between(agora, r.getBloqueadoAte()).getSeconds();
-                    long minutos = segundosRestantes / 60;
-                    long segundos = segundosRestantes % 60;
+            Optional<ReservaCheckout> existente =
+                    reservaRepo.findByLivroIdAndClienteId(livroId, clienteId);
+
+            if (existente.isPresent()) {
+
+                ReservaCheckout r = existente.get();
+
+                if (r.getBloqueadoAte() != null &&
+                        agora.isBefore(r.getBloqueadoAte())) {
+
+                    appLogger.error(
+                            AcaoAuditoria.GENERICO,
+                            clienteId,
+                            emailUsuario,
+                            "Tentativa bloqueada livroId=" + livroId);
+
                     return Map.of(
                             "reservado", false,
                             "motivo", "BLOQUEADO",
-                            "mensagem", String.format(
-                                    "Você pode tentar novamente em %d:%02d.", minutos, segundos),
                             "bloqueadoAte", r.getBloqueadoAte().toString());
                 }
             }
 
-            // Verifica se outro usuário tem reserva ativa
-            Optional<ReservaCheckout> reservaOutro = reservaRepo.findReservaAtivaDeOutro(livroId, clienteId, agora);
+            Optional<ReservaCheckout> outro =
+                    reservaRepo.findReservaAtivaDeOutro(livroId, clienteId, agora);
 
-            if (reservaOutro.isPresent()) {
-                long segundosRestantes = java.time.Duration.between(
-                        agora, reservaOutro.get().getExpiraEm()).getSeconds();
+            if (outro.isPresent()) {
+
+                appLogger.info(
+                        AcaoAuditoria.GENERICO,
+                        clienteId,
+                        emailUsuario,
+                        "Livro indisponível livroId=" + livroId);
+
                 return Map.of(
                         "reservado", false,
                         "motivo", "INDISPONIVEL",
-                        "livroId", livroId,
-                        "mensagem", "Um ou mais livros estão temporariamente reservados. Tente novamente em breve.",
-                        "segundosRestantes", segundosRestantes);
+                        "livroId", livroId);
             }
         }
 
-        // Cria ou renova reservas para todos os livros
         LocalDateTime expira = agora.plusMinutes(DURACAO_RESERVA_MIN);
+
         for (Long livroId : livroIds) {
-            Optional<ReservaCheckout> existente = reservaRepo.findByLivroIdAndClienteId(livroId, clienteId);
+
+            Optional<ReservaCheckout> existente =
+                    reservaRepo.findByLivroIdAndClienteId(livroId, clienteId);
 
             if (existente.isPresent()) {
+
                 ReservaCheckout r = existente.get();
                 r.setReservadoEm(agora);
                 r.setExpiraEm(expira);
                 reservaRepo.save(r);
+
             } else {
+
                 reservaRepo.save(ReservaCheckout.builder()
                         .livroId(livroId)
                         .clienteId(clienteId)
@@ -99,6 +118,14 @@ public class ReservaCheckoutService {
             }
         }
 
+        appLogger.success(
+                AcaoAuditoria.PAGAMENTO_INTENCAO_REGISTRADA,
+                clienteId,
+                emailUsuario,
+                "Reserva criada");
+
+        log.info("RESERVA_CRIADA clienteId={} livros={}", clienteId, livroIds.size());
+
         return Map.of(
                 "reservado", true,
                 "expiraEm", expira.toString(),
@@ -107,67 +134,96 @@ public class ReservaCheckoutService {
 
     @Transactional
     public Map<String, Object> liberarReservas(List<Long> livroIds, String emailUsuario) {
+
         Long clienteId = resolverClienteId(emailUsuario);
-        if (clienteId == null)
+
+        if (clienteId == null) {
             return Map.of("liberado", false);
+        }
 
         LocalDateTime agora = LocalDateTime.now();
 
         for (Long livroId : livroIds) {
-            Optional<ReservaCheckout> opt = reservaRepo.findByLivroIdAndClienteId(livroId, clienteId);
+
+            Optional<ReservaCheckout> opt =
+                    reservaRepo.findByLivroIdAndClienteId(livroId, clienteId);
 
             if (opt.isPresent()) {
-                ReservaCheckout r = opt.get();
-                int novasTentativas = r.getTentativas() + 1;
-                r.setTentativas(novasTentativas);
 
-                if (novasTentativas >= LIMITE_TENTATIVAS) {
-                    // Bloqueia por 5 minutos e reseta contador
+                ReservaCheckout r = opt.get();
+
+                int tentativas = r.getTentativas() + 1;
+                r.setTentativas(tentativas);
+
+                if (tentativas >= LIMITE_TENTATIVAS) {
+
                     r.setBloqueadoAte(agora.plusMinutes(BLOQUEIO_MIN));
                     r.setTentativas(0);
-                    r.setExpiraEm(agora.minusSeconds(1)); // expira imediatamente
+                    r.setExpiraEm(agora.minusSeconds(1));
+
                     reservaRepo.save(r);
+
                 } else {
                     reservaRepo.delete(r);
                 }
             }
         }
 
+        appLogger.info(
+                AcaoAuditoria.GENERICO,
+                clienteId,
+                emailUsuario,
+                "Reservas liberadas");
+
+        log.info("RESERVA_LIBERADA clienteId={}", clienteId);
+
         return Map.of("liberado", true);
     }
 
     @Transactional(readOnly = true)
     public Map<String, Object> statusReserva(Long livroId, String emailUsuario) {
+
         Long clienteId = resolverClienteId(emailUsuario);
-        if (clienteId == null)
+
+        if (clienteId == null) {
             return Map.of("ativa", false);
+        }
 
         LocalDateTime agora = LocalDateTime.now();
-        Optional<ReservaCheckout> opt = reservaRepo.findByLivroIdAndClienteId(livroId, clienteId);
 
-        if (opt.isEmpty())
+        Optional<ReservaCheckout> opt =
+                reservaRepo.findByLivroIdAndClienteId(livroId, clienteId);
+
+        if (opt.isEmpty()) {
             return Map.of("ativa", false);
+        }
 
         ReservaCheckout r = opt.get();
-        if (agora.isAfter(r.getExpiraEm()))
-            return Map.of("ativa", false);
 
-        long segundosRestantes = java.time.Duration.between(agora, r.getExpiraEm()).getSeconds();
+        if (agora.isAfter(r.getExpiraEm())) {
+            return Map.of("ativa", false);
+        }
+
+        long segundos =
+                java.time.Duration.between(agora, r.getExpiraEm()).getSeconds();
+
         return Map.of(
                 "ativa", true,
-                "segundosRestantes", segundosRestantes,
+                "segundosRestantes", segundos,
                 "expiraEm", r.getExpiraEm().toString());
     }
 
-    // Cron: limpa reservas expiradas a cada 1 minuto
     @Scheduled(fixedDelay = 60000)
     @Transactional
     public void limparReservasExpiradas() {
+
         reservaRepo.deleteExpiradas(LocalDateTime.now());
-        log.debug("Reservas expiradas limpas.");
+
+        log.debug("RESERVAS_EXPIRADAS_LIMPAS");
     }
 
     private Long resolverClienteId(String email) {
+
         return clienteRepo.findByEmail(email)
                 .map(c -> c.getId())
                 .orElse(null);

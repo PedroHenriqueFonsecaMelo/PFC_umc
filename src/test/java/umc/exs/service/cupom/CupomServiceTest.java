@@ -1,7 +1,7 @@
 package umc.exs.service.cupom;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
@@ -19,6 +19,8 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.negocios.CupomRepository;
 import umc.exs.repository.negocios.CupomUsoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.log.AppLogger;
+import umc.exs.service.log.LogAuditoriaService;
 
 @ExtendWith(MockitoExtension.class)
 class CupomServiceTest {
@@ -34,6 +36,12 @@ class CupomServiceTest {
 
     @InjectMocks
     CupomService service;
+
+    @Mock
+    AppLogger appLogger;
+
+    @Mock
+    LogAuditoriaService logAuditoria;
 
     @Test
     void gerarCupomPorPontuacao_quandoClienteNaoEncontrado_lanca() {

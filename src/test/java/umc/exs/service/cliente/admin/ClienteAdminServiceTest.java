@@ -25,6 +25,8 @@ import umc.exs.repository.negocios.SolicitacaoCancelamentoRepository;
 import umc.exs.repository.negocios.TransacaoRepository;
 import umc.exs.repository.negocios.TopicoForumRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.log.AppLogger;
+import umc.exs.service.log.LogAuditoriaService;
 
 @ExtendWith(MockitoExtension.class)
 class ClienteAdminServiceTest {
@@ -58,6 +60,12 @@ class ClienteAdminServiceTest {
 
     @InjectMocks
     ClienteAdminService service;
+    
+    @Mock
+    AppLogger appLogger;
+
+    @Mock
+    LogAuditoriaService logAuditoriaService;
 
     @Test
     void listarClientes_deveMapearResponses() {

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import umc.exs.dto.request.cliente.ComentarioRequest;
 import umc.exs.dto.request.livro.AvaliacaoLivroRequest;
@@ -130,7 +131,7 @@ public class AvaliacaoLivroController {
 
     @PostMapping("/salvar")
     public ResponseEntity<Map<String, Object>> salvarComentario(
-            @RequestBody ComentarioRequest payload,
+            @RequestBody @Valid ComentarioRequest payload,
             Authentication auth) {
 
         if (auth == null || !auth.isAuthenticated()) {
@@ -203,7 +204,7 @@ public class AvaliacaoLivroController {
     @PostMapping("/legado")
     public ResponseEntity<Map<String, Object>> criarAvaliacao(
             @AuthenticationPrincipal UserDetails user,
-            @RequestBody AvaliacaoLivroRequest dto) {
+            @RequestBody @Valid AvaliacaoLivroRequest dto) {
 
         if (user == null) {
             return ResponseEntity.status(401).body(Map.of(ERRO, "Não autorizado."));

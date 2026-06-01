@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.livro.Obra;
@@ -19,6 +20,7 @@ import umc.exs.service.core.livros.delegado.LivroCompraService;
 import umc.exs.service.cupom.CupomService;
 import umc.exs.service.email.facade.EmailFacade;
 import umc.exs.service.gamificacao.GamificacaoService;
+import umc.exs.service.log.AppLogger;
 import umc.exs.service.log.LogAuditoriaService;
 import umc.exs.service.notificacao.NotificacaoService;
 
@@ -30,10 +32,16 @@ class LivroCompraServiceTest {
         private EmailFacade emailFacade;
         private CupomService cupomService;
         private GamificacaoService gamificacaoService;
-        private LogAuditoriaService logAuditoriaService;
+
         private NotificacaoService notificacaoService;
 
         private LivroCompraService service;
+
+        @Mock
+        AppLogger appLogger;
+
+        @Mock
+        LogAuditoriaService logAuditoriaService;
 
         @BeforeEach
         void setUp() {
@@ -113,7 +121,7 @@ class LivroCompraServiceTest {
                 when(clienteRepository.findByEmail(email))
                                 .thenReturn(Optional.of(buyer));
 
-                when(pedidoService.registrarPedido(any(), any()))
+                when(pedidoService.registrarPedido(any(), any(), any()))
                                 .thenReturn(null);
 
                 service.realizarCompra(livroId, email);
@@ -122,7 +130,7 @@ class LivroCompraServiceTest {
 
                 verify(livroRepository).save(livro);
                 verify(clienteRepository, never()).save(any());
-                verify(pedidoService).registrarPedido(buyer, livro);
+                verify(pedidoService).registrarPedido(eq(buyer), eq(livro), any());
                 verify(emailFacade).sendHtmlSafe(
                                 buyer.getEmail(),
                                 "Compra realizada",

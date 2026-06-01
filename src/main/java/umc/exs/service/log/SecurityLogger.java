@@ -10,14 +10,14 @@ public class SecurityLogger {
     private static final Logger logger = LoggerFactory.getLogger(SecurityLogger.class);
 
     public void loginSuccess(String username) {
-        logger.info("AUDIT: LOGIN SUCESSO - Usuário '{}' logado com sucesso.", username);
+        logger.info("SECURITY LOGIN SUCCESS - user={}", username);
     }
 
     public void loginFailure(String username, String reason) {
-        logger.warn("AUDIT: LOGIN FALHA - Usuário '{}'. Motivo: {}", username, reason);
+        logger.warn("SECURITY LOGIN FAILURE - user={} reason={}", username, reason);
     }
 
     public void accountBlocked(String username) {
-        logger.error("AUDIT: CONTA BLOQUEADA - A conta do usuário '{}' foi bloqueada após falhas.", username);
+        logger.error("SECURITY ACCOUNT BLOCKED - user={}", username);
     }
 }

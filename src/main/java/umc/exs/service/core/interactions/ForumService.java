@@ -19,6 +19,8 @@ import umc.exs.repository.negocios.RespostaForumRepository;
 import umc.exs.repository.negocios.TopicoForumRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.gamificacao.GamificacaoService;
+import umc.exs.service.log.AcaoAuditoria;
+import umc.exs.service.log.AppLogger;
 
 @Service
 @RequiredArgsConstructor
@@ -28,51 +30,57 @@ public class ForumService {
     private final RespostaForumRepository respostaRepo;
     private final ClienteRepository clienteRepo;
     private final GamificacaoService gamificacaoService;
-
-    // ── Listagem ──────────────────────────────────────────────────────────────
+    private final AppLogger appLogger;
 
     @Transactional(readOnly = true)
     public Page<TopicoForum> listarTopicos(String busca, CategoriaForum categoria, Pageable pageable) {
+
         boolean temBusca = busca != null && !busca.isBlank();
         boolean temCategoria = categoria != null;
 
         if (temBusca && temCategoria) {
             return topicoRepo.findByTituloContainingIgnoreCaseAndCategoria(busca, categoria, pageable);
-        } else if (temBusca) {
-            return topicoRepo.findByTituloContainingIgnoreCase(busca, pageable);
-        } else if (temCategoria) {
-            return topicoRepo.findByCategoria(categoria, pageable);
-        } else {
-            return topicoRepo.findAll(pageable);
         }
-    }
+        if (temBusca) {
+            return topicoRepo.findByTituloContainingIgnoreCase(busca, pageable);
+        }
+        if (temCategoria) {
+            return topicoRepo.findByCategoria(categoria, pageable);
+        }
 
-    // ── Detalhe ───────────────────────────────────────────────────────────────
+        return topicoRepo.findAll(pageable);
+    }
 
     @Transactional(readOnly = true)
     public TopicoForum buscarTopicoPorId(Long id) {
         return topicoRepo.findByIdWithRespostas(id)
-                .orElseThrow(() -> new RuntimeException("Tópico não encontrado."));
+                .orElseThrow(() -> new RuntimeException("Tópico não encontrado"));
     }
 
     @Transactional
     public void incrementarVisualizacoes(Long topicoId) {
         topicoRepo.incrementarVisualizacoes(topicoId);
+
+        appLogger.info(
+                AcaoAuditoria.GENERICO,
+                null,
+                null,
+                "VIEW_TOPICO id=" + topicoId);
     }
 
     @Transactional(readOnly = true)
     public Set<Long> getRespostasLikedByUser(Long topicoId, Long clienteId) {
-        if (clienteId == null)
+        if (clienteId == null) {
             return Collections.emptySet();
+        }
         return respostaRepo.findRespostaIdsLikedByClienteInTopico(topicoId, clienteId);
     }
 
-    // ── Criação ───────────────────────────────────────────────────────────────
-
     @Transactional
     public TopicoForum criarTopico(NovoTopicoRequest dto, Long autorId) {
+
         Cliente autor = clienteRepo.findById(autorId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         TopicoForum topico = new TopicoForum();
         topico.setTitulo(dto.getTitulo().trim());
@@ -80,18 +88,28 @@ public class ForumService {
         topico.setCategoria(dto.getCategoria());
         topico.setAutor(autor);
 
-        return topicoRepo.save(topico);
+        TopicoForum salvo = topicoRepo.save(topico);
+
+        appLogger.success(
+                AcaoAuditoria.GENERICO,
+                autorId,
+                autor.getEmail(),
+                "TOPICO_CRIADO id=" + salvo.getId());
+
+        return salvo;
     }
 
     @Transactional
-    public RespostaForum criarResposta(Long topicoId, String dto, Long autorId) {
+    public RespostaForum criarResposta(Long topicoId, String conteudo, Long autorId) {
+
         TopicoForum topico = topicoRepo.findById(topicoId)
-                .orElseThrow(() -> new RuntimeException("Tópico não encontrado."));
+                .orElseThrow(() -> new RuntimeException("Tópico não encontrado"));
+
         Cliente autor = clienteRepo.findById(autorId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         RespostaForum resposta = new RespostaForum();
-        resposta.setConteudo(dto.trim());
+        resposta.setConteudo(conteudo.trim());
         resposta.setAutor(autor);
         resposta.setTopico(topico);
 
@@ -100,18 +118,30 @@ public class ForumService {
         topico.setQtdRespostas(topico.getQtdRespostas() + 1);
         topicoRepo.save(topico);
 
+        appLogger.success(
+                AcaoAuditoria.GENERICO,
+                autorId,
+                autor.getEmail(),
+                "RESPOSTA_CRIADA topicoId=" + topicoId);
+
         return salva;
     }
 
-    // ── Moderação ─────────────────────────────────────────────────────────────
-
     @Transactional
     public void deletarTopico(Long id) {
+
         topicoRepo.deleteById(id);
+
+        appLogger.error(
+                AcaoAuditoria.GENERICO,
+                null,
+                null,
+                "TOPICO_DELETADO id=" + id);
     }
 
     @Transactional(readOnly = true)
     public boolean isAutorResposta(Long respostaId, String emailUsuario) {
+
         return respostaRepo.findById(respostaId)
                 .map(r -> r.getAutor() != null &&
                         r.getAutor().getEmail() != null &&
@@ -121,24 +151,34 @@ public class ForumService {
 
     @Transactional
     public void deletarResposta(Long id) {
+
         RespostaForum resposta = respostaRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Resposta não encontrada."));
+                .orElseThrow(() -> new RuntimeException("Resposta não encontrada"));
+
         TopicoForum topico = resposta.getTopico();
+
         respostaRepo.delete(resposta);
+
         if (topico.getQtdRespostas() > 0) {
             topico.setQtdRespostas(topico.getQtdRespostas() - 1);
             topicoRepo.save(topico);
         }
-    }
 
-    // ── Curtidas ──────────────────────────────────────────────────────────────
+        appLogger.error(
+                AcaoAuditoria.GENERICO,
+                resposta.getAutor() != null ? resposta.getAutor().getId() : null,
+                resposta.getAutor() != null ? resposta.getAutor().getEmail() : null,
+                "RESPOSTA_DELETADA id=" + id);
+    }
 
     @Transactional
     public Map<String, Object> curtirResposta(Long respostaId, Long clienteId) {
+
         RespostaForum resposta = respostaRepo.findById(respostaId)
-                .orElseThrow(() -> new RuntimeException("Resposta não encontrada."));
+                .orElseThrow(() -> new RuntimeException("Resposta não encontrada"));
 
         boolean jaLikeu = resposta.getCurtidoresIds().contains(clienteId);
+
         if (jaLikeu) {
             resposta.getCurtidoresIds().remove(clienteId);
             resposta.setQtdCurtidas(Math.max(0, resposta.getQtdCurtidas() - 1));
@@ -146,26 +186,32 @@ public class ForumService {
             resposta.getCurtidoresIds().add(clienteId);
             resposta.setQtdCurtidas(resposta.getQtdCurtidas() + 1);
         }
+
         respostaRepo.save(resposta);
+
+        appLogger.info(
+                AcaoAuditoria.GENERICO,
+                clienteId,
+                null,
+                "LIKE_RESPOSTA respostaId=" + respostaId + " estado=" + (!jaLikeu));
 
         return Map.of(
                 "curtidas", resposta.getQtdCurtidas(),
                 "liked", !jaLikeu);
     }
 
-    // ── Melhor Resposta ───────────────────────────────────────────────────────
-
     @Transactional
     public void marcarMelhorResposta(Long respostaId, Long clienteId, boolean isAdmin) {
+
         RespostaForum resposta = respostaRepo.findById(respostaId)
-                .orElseThrow(() -> new RuntimeException("Resposta não encontrada."));
+                .orElseThrow(() -> new RuntimeException("Resposta não encontrada"));
+
         TopicoForum topico = resposta.getTopico();
 
         if (!isAdmin && !topico.getAutor().getId().equals(clienteId)) {
-            throw new RuntimeException("Apenas o autor do tópico pode marcar a melhor resposta.");
+            throw new RuntimeException("Sem permissão");
         }
 
-        // Remove marcação anterior (se houver)
         respostaRepo.findByTopicoAndMelhorRespostaTrue(topico).ifPresent(prev -> {
             if (!prev.getId().equals(respostaId)) {
                 prev.setMelhorResposta(false);
@@ -183,5 +229,11 @@ public class ForumService {
 
         topico.setResolvido(novoEstado);
         topicoRepo.save(topico);
+
+        appLogger.success(
+                AcaoAuditoria.GENERICO,
+                clienteId,
+                null,
+                "MELHOR_RESPOSTA respostaId=" + respostaId + " estado=" + novoEstado);
     }
 }

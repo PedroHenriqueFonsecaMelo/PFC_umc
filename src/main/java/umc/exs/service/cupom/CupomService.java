@@ -17,6 +17,7 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.negocios.CupomRepository;
 import umc.exs.repository.negocios.CupomUsoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.log.LogAuditoriaService;
 
 @Slf4j
 @Service
@@ -26,38 +27,54 @@ public class CupomService {
     private static final double DESCONTO_CUPOM_XP = 10.0;
     private static final int DIAS_VALIDADE_PADRAO = 30;
 
+    private static final String LOG_CUPOM_XP_GERADO = "CUPOM_XP_GERADO";
+    private static final String LOG_CUPOM_ADMIN_CRIADO = "CUPOM_ADMIN_CRIADO";
+    private static final String LOG_CUPOM_INVALIDADO = "CUPOM_INVALIDADO";
+    private static final String LOG_CUPOM_VALIDACAO = "CUPOM_VALIDADO";
+    private static final String LOG_CUPOM_APLICADO = "CUPOM_APLICADO";
+    private static final String LOG_CUPOM_LISTAGEM = "CUPOM_LISTAGEM";
+
     private static final String CLIENTE_NAO_ENCONTRADO = "Cliente não encontrado";
     private static final String CUPOM_NAO_ENCONTRADO = "Cupom não encontrado";
 
     private final CupomRepository cupomRepository;
     private final CupomUsoRepository cupomUsoRepository;
     private final ClienteRepository clienteRepository;
+    private final LogAuditoriaService logAuditoria;
 
-    // ───────────────────────── XP (Cupons Gerados por Gamificação)
-    // ─────────────────────────
+    // ───────────────────────── XP ─────────────────────────
 
     @Transactional
     public Cupom gerarCupomPorPontuacao(@NonNull Long clienteId) {
+
         Cliente cliente = clienteRepository.findById(clienteId)
                 .orElseThrow(() -> new RuntimeException(CLIENTE_NAO_ENCONTRADO));
 
-        return cupomRepository.save(Cupom.builder()
+        Cupom cupom = cupomRepository.save(Cupom.builder()
                 .cliente(cliente)
                 .codigo(gerarCodigoUnico("XP"))
                 .percentualDesconto(DESCONTO_CUPOM_XP)
-                .quantidadeMaxima(1) // Cupom de XP é sempre único
+                .quantidadeMaxima(1)
                 .tipo("PONTUACAO")
                 .dataCriacao(LocalDateTime.now())
                 .expiracao(LocalDateTime.now().plusDays(DIAS_VALIDADE_PADRAO))
                 .build());
+
+        logAuditoria.registrarLog(
+                LOG_CUPOM_XP_GERADO,
+                cliente.getId(),
+                cliente.getEmail(),
+                "cupomId=" + cupom.getId() + ", codigo=" + cupom.getCodigo()
+        );
+
+        return cupom;
     }
 
-    // ───────────────────────── ADMIN (Cupons Promocionais Estilo iFood)
-    // ─────────────────────────
+    // ───────────────────────── ADMIN ─────────────────────────
 
     @Transactional
     public Cupom criarCupom(CriarCupomRequest dto, LocalDateTime dataValidade) {
-        // Validações básicas
+
         validarPercentual(dto.getPercentualDesconto());
         validarData(dataValidade);
 
@@ -87,38 +104,57 @@ public class CupomService {
                 .quantidadeUsada(0)
                 .build();
 
-        return cupomRepository.save(cupom);
+        Cupom saved = cupomRepository.save(cupom);
+
+        logAuditoria.registrarLog(
+                LOG_CUPOM_ADMIN_CRIADO,
+                null,
+                null,
+                "cupomId=" + saved.getId() + ", codigo=" + codigoFinal
+        );
+
+        return saved;
     }
 
     @Transactional
     public void invalidarCupom(@NonNull Long id) {
+
         Cupom cupom = cupomRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException(CUPOM_NAO_ENCONTRADO));
 
         cupom.setUsado(true);
         cupomRepository.save(cupom);
 
-        log.info(" Cupom ID {} foi invalidado manualmente.", id);
+        logAuditoria.registrarLog(
+                LOG_CUPOM_INVALIDADO,
+                null,
+                null,
+                "cupomId=" + id
+        );
     }
 
-    // ───────────────────────── VALIDAÇÃO E APLICAÇÃO ─────────────────────────
+    // ───────────────────────── VALIDAÇÃO ─────────────────────────
 
-    /**
-     * Valida o cupom sobre o total do carrinho e retorna preview do desconto.
-     * Não registra uso.
-     */
     @Transactional(readOnly = true)
     public java.util.Map<String, Object> validarCupomParaTotal(String codigo, String emailCliente, double total) {
+
         Cliente cliente = clienteRepository.findByEmail(emailCliente)
                 .orElseThrow(() -> new RuntimeException(CLIENTE_NAO_ENCONTRADO));
 
         Cupom cupom = cupomRepository.findByCodigo(codigo.toUpperCase())
-                .orElseThrow(() -> new RuntimeException("Cupom não encontrado."));
+                .orElseThrow(() -> new RuntimeException(CUPOM_NAO_ENCONTRADO));
 
         verificarElegibilidade(cupom, cliente);
 
         double desconto = total * (cupom.getPercentualDesconto() / 100.0);
         double totalComDesconto = Math.max(0, total - desconto);
+
+        logAuditoria.registrarLog(
+                LOG_CUPOM_VALIDACAO,
+                cliente.getId(),
+                cliente.getEmail(),
+                "cupom=" + cupom.getCodigo() + ", total=" + total
+        );
 
         return java.util.Map.of(
                 "valido", true,
@@ -126,32 +162,29 @@ public class CupomService {
                 "percentual", cupom.getPercentualDesconto(),
                 "totalOriginal", total,
                 "desconto", desconto,
-                "totalComDesconto", totalComDesconto);
+                "totalComDesconto", totalComDesconto
+        );
     }
 
-    /**
-     * Aplica o cupom ao total do carrinho, registrando o uso único.
-     * Retorna o total com desconto aplicado.
-     */
+    // ───────────────────────── APLICAÇÃO ─────────────────────────
 
     @Transactional
     public double aplicarCupomCarrinho(String codigo, Cliente cliente, double totalOriginal) {
+
         Cupom cupom = cupomRepository.findByCodigo(codigo.toUpperCase())
                 .orElseThrow(() -> new RuntimeException(CUPOM_NAO_ENCONTRADO));
 
-        // Re-valida no momento da compra para evitar race conditions
         verificarElegibilidade(cupom, cliente);
 
-        // Registra uso do cupom (livroId null = aplicado sobre o total do carrinho)
         CupomUso uso = CupomUso.builder()
                 .cupom(cupom)
                 .cliente(cliente)
                 .livroId(null)
                 .dataUso(LocalDateTime.now())
                 .build();
+
         cupomUsoRepository.save(uso);
 
-        // Atualiza contadores globais
         cupom.setQuantidadeUsada(cupom.getQuantidadeUsada() + 1);
 
         if (cupom.getQuantidadeMaxima() != null &&
@@ -160,38 +193,43 @@ public class CupomService {
         }
 
         cupomRepository.save(cupom);
-        return calcularPrecoComDesconto(totalOriginal, cupom.getPercentualDesconto());
+
+        double totalFinal = calcularPrecoComDesconto(totalOriginal, cupom.getPercentualDesconto());
+
+        logAuditoria.registrarLog(
+                LOG_CUPOM_APLICADO,
+                cliente.getId(),
+                cliente.getEmail(),
+                "cupom=" + cupom.getCodigo() + ", totalOriginal=" + totalOriginal + ", totalFinal=" + totalFinal
+        );
+
+        return totalFinal;
     }
 
     // ───────────────────────── HELPERS ─────────────────────────
 
-    /**
-     * Centraliza todas as regras de bloqueio (iFood Style)
-     */
     private void verificarElegibilidade(Cupom cupom, Cliente cliente) {
-        // 1. Verificar se está expirado
+
         if (cupom.getExpiracao().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Este cupom expirou.");
+            throw new IllegalArgumentException("Cupom expirado");
         }
 
-        // 2. Verificar se foi desativado manualmente ou esgotou
         if (cupom.isUsado()) {
-            throw new IllegalArgumentException("Cupom não está mais ativo.");
+            throw new IllegalArgumentException("Cupom inativo");
         }
 
-        // 3. Verificar se o cupom é exclusivo para outro cliente
-        if (cupom.getCliente() != null && !cupom.getCliente().getId().equals(cliente.getId())) {
-            throw new IllegalArgumentException("Este cupom é exclusivo para outro usuário.");
+        if (cupom.getCliente() != null &&
+                !cupom.getCliente().getId().equals(cliente.getId())) {
+            throw new IllegalArgumentException("Cupom exclusivo para outro usuário");
         }
 
-        // 4. REGRA DE OURO: Uso único por CPF/Cliente
         if (cupomUsoRepository.existsByCupomIdAndClienteId(cupom.getId(), cliente.getId())) {
-            throw new IllegalArgumentException("Você já utilizou este cupom.");
+            throw new IllegalArgumentException("Cupom já utilizado");
         }
 
-        // 5. Verificar limite global
-        if (cupom.getQuantidadeMaxima() != null && cupom.getQuantidadeUsada() >= cupom.getQuantidadeMaxima()) {
-            throw new IllegalArgumentException("Este cupom atingiu o limite máximo de resgates.");
+        if (cupom.getQuantidadeMaxima() != null &&
+                cupom.getQuantidadeUsada() >= cupom.getQuantidadeMaxima()) {
+            throw new IllegalArgumentException("Limite de uso atingido");
         }
     }
 
@@ -202,27 +240,50 @@ public class CupomService {
 
     private void validarPercentual(Double p) {
         if (p == null || p <= 0 || p > 100)
-            throw new IllegalArgumentException("Percentual de desconto inválido (1-100)");
+            throw new IllegalArgumentException("Percentual inválido");
     }
 
     private void validarData(LocalDateTime d) {
         if (d == null || d.isBefore(LocalDateTime.now()))
-            throw new IllegalArgumentException("A data de expiração deve ser no futuro");
+            throw new IllegalArgumentException("Data inválida");
     }
 
     private String gerarCodigoUnico(String prefixo) {
         return prefixo + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 
-    // Listagens
+    // ───────────────────────── LISTAGENS ─────────────────────────
+
     public List<Cupom> listarTodosCupons() {
-        return cupomRepository.findAllByOrderByDataCriacaoDesc().stream().toList();
+
+        List<Cupom> cupons = cupomRepository.findAllByOrderByDataCriacaoDesc().stream().toList();
+
+        logAuditoria.registrarLog(
+                LOG_CUPOM_LISTAGEM,
+                null,
+                null,
+                "total=" + cupons.size()
+        );
+
+        return cupons;
     }
 
     public List<Cupom> listarCuponsDisponiveis(String emailCliente) {
+
         Cliente cliente = clienteRepository.findByEmail(emailCliente)
                 .orElseThrow(() -> new RuntimeException(CLIENTE_NAO_ENCONTRADO));
-        return cupomRepository.findByClienteIdAndUsadoFalseAndExpiracaoAfter(cliente.getId(), LocalDateTime.now())
+
+        List<Cupom> cupons = cupomRepository
+                .findByClienteIdAndUsadoFalseAndExpiracaoAfter(cliente.getId(), LocalDateTime.now())
                 .stream().toList();
+
+        logAuditoria.registrarLog(
+                LOG_CUPOM_LISTAGEM,
+                cliente.getId(),
+                cliente.getEmail(),
+                "disponiveis=" + cupons.size()
+        );
+
+        return cupons;
     }
 }

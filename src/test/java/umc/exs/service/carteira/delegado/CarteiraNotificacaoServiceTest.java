@@ -10,6 +10,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.service.log.AppLogger;
+import umc.exs.service.log.LogAuditoriaService;
 import umc.exs.service.notificacao.NotificacaoService;
 
 @ExtendWith(MockitoExtension.class)
@@ -20,6 +22,12 @@ class CarteiraNotificacaoServiceTest {
 
     @InjectMocks
     private CarteiraNotificacaoService service;
+
+    @Mock
+    AppLogger appLogger;
+
+    @Mock
+    LogAuditoriaService logAuditoriaService;
 
     @Test
     void notificarRecarga_deveNotificarSaldoEDashboard() {

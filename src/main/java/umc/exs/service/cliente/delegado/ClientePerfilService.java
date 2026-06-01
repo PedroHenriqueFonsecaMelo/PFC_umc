@@ -15,6 +15,7 @@ import umc.exs.dto.request.cliente.SignupRequest;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.service.cliente.EnderecoService;
+import umc.exs.service.log.AcaoAuditoria;
 import umc.exs.service.log.LogAuditoriaService;
 import umc.exs.service.storage.ArquivosService;
 
@@ -29,16 +30,16 @@ public class ClientePerfilService {
         private final LogAuditoriaService auditoria;
 
         @Transactional
-        public Cliente atualizarDados(
-                        Long clienteId,
-                        ClienteUpdateRequest dto) {
+        public Cliente atualizarDados(Long clienteId, ClienteUpdateRequest dto) {
 
                 Cliente cliente = repositoryService.buscarPorId(clienteId);
 
                 if (dto.getDatanasc() != null) {
                         int idade = Period.between(dto.getDatanasc(), LocalDate.now()).getYears();
+
                         if (idade < 18)
                                 throw new IllegalArgumentException("É necessário ser maior de 18 anos.");
+
                         if (idade > 120)
                                 throw new IllegalArgumentException("Digite uma data de nascimento válida.");
                 }
@@ -46,32 +47,25 @@ public class ClientePerfilService {
                 cliente.setNome(dto.getNome());
                 cliente.setDatanasc(dto.getDatanasc());
 
-                if (dto.getSenha() != null &&
-                                !dto.getSenha().isBlank()) {
-
-                        cliente.setSenha(
-                                        passwordEncoder.encode(dto.getSenha()));
+                if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+                        cliente.setSenha(passwordEncoder.encode(dto.getSenha()));
                 }
 
-                enderecoService.sincronizarEnderecos(
-                                cliente,
-                                dto.getEnderecos());
+                enderecoService.sincronizarEnderecos(cliente, dto.getEnderecos());
 
                 Cliente salvo = repositoryService.salvar(cliente);
 
                 auditoria.registrarLog(
-                                "ATUALIZACAO_DADOS",
-                                clienteId,
-                                salvo.getEmail(),
-                                "Dados atualizados.");
+                        AcaoAuditoria.CLIENTE_DADOS_ATUALIZADOS.name(),
+                        clienteId,
+                        salvo.getEmail(),
+                        "Atualização de dados do perfil");
 
                 return salvo;
         }
 
         @Transactional
-        public String atualizarFoto(
-                        Long clienteId,
-                        MultipartFile foto) {
+        public String atualizarFoto(Long clienteId, MultipartFile foto) {
 
                 Cliente cliente = repositoryService.buscarPorId(clienteId);
 
@@ -82,10 +76,10 @@ public class ClientePerfilService {
                 repositoryService.salvar(cliente);
 
                 auditoria.registrarLog(
-                                "UPLOAD_FOTO",
-                                clienteId,
-                                cliente.getEmail(),
-                                "Foto atualizada.");
+                        AcaoAuditoria.CLIENTE_FOTO_ATUALIZADA.name(),
+                        clienteId,
+                        cliente.getEmail(),
+                        "Foto de perfil atualizada");
 
                 return url;
         }
@@ -95,24 +89,26 @@ public class ClientePerfilService {
 
                 Cliente cliente = clienteMapper.paraEntidade(request);
 
-                cliente.setSenha(
-                                passwordEncoder.encode(request.getSenha()));
-
+                cliente.setSenha(passwordEncoder.encode(request.getSenha()));
                 cliente.setSaldoTokens(0.0);
 
-                return repositoryService.salvar(cliente);
+                Cliente salvo = repositoryService.salvar(cliente);
+
+                auditoria.registrarLog(
+                        AcaoAuditoria.CLIENTE_CADASTRADO.name(),
+                        salvo.getId(),
+                        salvo.getEmail(),
+                        "Novo cliente cadastrado");
+
+                return salvo;
         }
 
         @Transactional
-        public Cliente cadastrarCompleto(
-                        SignupRequest request,
-                        Endereco enderecoDTO) {
+        public Cliente cadastrarCompleto(SignupRequest request, Endereco enderecoDTO) {
 
                 Cliente cliente = clienteMapper.paraEntidade(request);
 
-                cliente.setSenha(
-                                passwordEncoder.encode(request.getSenha()));
-
+                cliente.setSenha(passwordEncoder.encode(request.getSenha()));
                 cliente.setSaldoTokens(0.0);
 
                 Endereco endereco = enderecoService.saveOrReuseEndereco(enderecoDTO);
@@ -120,6 +116,14 @@ public class ClientePerfilService {
                 cliente.getEnderecos().add(endereco);
                 endereco.getClientes().add(cliente);
 
-                return repositoryService.salvar(cliente);
+                Cliente salvo = repositoryService.salvar(cliente);
+
+                auditoria.registrarLog(
+                        AcaoAuditoria.CLIENTE_CADASTRO_COMPLETO.name(),
+                        salvo.getId(),
+                        salvo.getEmail(),
+                        "Cadastro completo com endereço");
+
+                return salvo;
         }
 }

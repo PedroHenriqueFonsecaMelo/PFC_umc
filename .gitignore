@@ -34,3 +34,4 @@ TODO.md
 .claudesrc/main/resources/application-local.yml
 
 .claude/
+/bibliotroca.env

@@ -25,171 +25,166 @@ public class ClienteRepositoryService {
     private final RecuperacaoSenhaRepository tokenRepository;
     private final EnderecoService enderecoService;
 
-    // =====================================================
-    // BUSCAS
-    // =====================================================
-
     public Cliente buscarPorId(@NonNull Long id) {
 
+        log.debug("Buscando cliente por ID={}", id);
+
         return clienteRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Cliente não encontrado com ID: " + id));
+                .orElseThrow(() -> {
+                    log.warn("Cliente não encontrado ID={}", id);
+                    return new IllegalArgumentException("Cliente não encontrado com ID: " + id);
+                });
     }
 
     public Cliente buscarPorEmailOuFalhar(String email) {
 
+        log.debug("Buscando cliente por email={}", email);
+
         return clienteRepository.findByEmailAndAtivoTrue(email)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Nenhum cliente vinculado ao e-mail: " + email));
+                .orElseThrow(() -> {
+                    log.warn("Cliente não encontrado email={}", email);
+                    return new IllegalArgumentException("Nenhum cliente vinculado ao e-mail: " + email);
+                });
     }
 
     public Optional<Cliente> encontrarPorEmail(String email) {
+
+        log.debug("Verificando existência de cliente email={}", email);
 
         return clienteRepository.findByEmailAndAtivoTrue(email);
     }
 
     public boolean existeEmailAtivo(String email) {
 
-        return clienteRepository.existsByEmailAndAtivoTrue(email);
+        boolean existe = clienteRepository.existsByEmailAndAtivoTrue(email);
+
+        log.debug("Existe email ativo {} = {}", email, existe);
+
+        return existe;
     }
 
     public boolean existeCpfAtivo(String cpf) {
 
-        return clienteRepository.existsByCpfAndAtivoTrue(cpf);
+        boolean existe = clienteRepository.existsByCpfAndAtivoTrue(cpf);
+
+        log.debug("Existe CPF ativo {} = {}", cpf, existe);
+
+        return existe;
     }
 
     public boolean encontrarPorCPF(String cpf) {
 
-        return clienteRepository.existsByCpf(cpf);
-    }
+        boolean existe = clienteRepository.existsByCpf(cpf);
 
-    // =====================================================
-    // PERSISTÊNCIA
-    // =====================================================
+        log.debug("Existe CPF {} = {}", cpf, existe);
+
+        return existe;
+    }
 
     @Transactional
     public Cliente salvar(Cliente cliente) {
 
-        log.debug("Persistindo cliente: {}", cliente.getEmail());
+        log.info("Salvando cliente email={} id={}", cliente.getEmail(), cliente.getId());
 
-        return clienteRepository.save(cliente);
+        Cliente salvo = clienteRepository.save(cliente);
+
+        log.debug("Cliente salvo com sucesso id={}", salvo.getId());
+
+        return salvo;
     }
 
     @Transactional
     public void deletarPorId(@NonNull Long id) {
 
-        Cliente cliente = clienteRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Tentativa de deletar cliente inexistente."));
+        log.warn("Solicitado soft delete cliente id={}", id);
 
-        // Soft delete
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Tentativa de deletar cliente inexistente id={}", id);
+                    return new IllegalArgumentException("Tentativa de deletar cliente inexistente.");
+                });
+
         cliente.setAtivo(false);
         cliente.setDeletedAt(LocalDateTime.now());
 
         clienteRepository.save(cliente);
 
-        log.info("Soft delete aplicado ao cliente ID {}.", id);
+        log.info("Soft delete aplicado cliente id={} email={}", id, cliente.getEmail());
     }
-
-    // =====================================================
-    // LOGIN
-    // =====================================================
 
     @Transactional
     public void registrarFalhaLogin(Cliente cliente) {
 
         cliente.registrarFalhaLogin();
-
         clienteRepository.save(cliente);
 
-        log.warn("Falha de login registrada para: {}", cliente.getEmail());
+        log.warn("Falha login cliente email={} tentativas={}", cliente.getEmail(), cliente.getTentativas());
     }
 
     @Transactional
     public void resetarTentativasLogin(Cliente cliente) {
 
         cliente.resetarTentativas();
-
         clienteRepository.save(cliente);
+
+        log.info("Tentativas de login resetadas email={}", cliente.getEmail());
     }
 
-    // =====================================================
-    // TOKENS
-    // =====================================================
-
     @Transactional
-    public void excluirTokenRecuperacao(
-            @NonNull RecuperacaoSenha registro) {
+    public void excluirTokenRecuperacao(@NonNull RecuperacaoSenha registro) {
 
         tokenRepository.delete(registro);
 
-        log.info("Token de recuperação removido com sucesso.");
+        log.info("Token recuperação removido clienteId={}", registro.getCliente().getId());
     }
 
     @Transactional
     public void limparTokensAntigos(Cliente cliente) {
 
         tokenRepository.deleteByCliente(cliente);
+
+        log.info("Tokens antigos removidos clienteId={}", cliente.getId());
     }
 
-    // =====================================================
-    // ENDEREÇOS
-    // =====================================================
-
-    /**
-     * Adiciona endereço ao cliente.
-     */
     @Transactional
-    public void adicionarEnderecoParaUsuarioLogado(
-            String email,
-            Endereco dto) {
+    public void adicionarEnderecoParaUsuarioLogado(String email, Endereco dto) {
+
+        log.info("Adicionando endereço para email={}", email);
 
         Cliente cliente = clienteRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> {
+                    log.error("Usuário não encontrado email={}", email);
+                    return new RuntimeException("Usuário não encontrado");
+                });
 
         enderecoService.vincularNovoEndereco(cliente, dto);
 
         Cliente salvo = clienteRepository.save(cliente);
 
-        /**
-         * Auto seleção:
-         * seleciona o primeiro endereço caso
-         * cliente ainda não possua seleção.
-         */
         if (salvo.getEnderecoSelecionadoId() == null) {
 
             salvo.getEnderecos().stream()
                     .map(Endereco::getId)
                     .findFirst()
                     .ifPresent(id -> {
-
                         salvo.setEnderecoSelecionadoId(id);
-
                         clienteRepository.save(salvo);
+                        log.info("Endereço padrão definido clienteId={} enderecoId={}", salvo.getId(), id);
                     });
         }
 
-        log.info("Endereço vinculado ao cliente {}", email);
+        log.info("Endereço vinculado com sucesso email={} id={}", email, cliente.getId());
     }
 
-    /**
-     * Remove vínculo cliente-endereço.
-     */
     @Transactional
-    public void deletarEnderecoDoCliente(
-            @NonNull Long clienteId,
-            @NonNull Long enderecoId) {
+    public void deletarEnderecoDoCliente(@NonNull Long clienteId, @NonNull Long enderecoId) {
+
+        log.warn("Removendo endereço clienteId={} enderecoId={}", clienteId, enderecoId);
 
         Cliente cliente = buscarPorId(clienteId);
 
-        enderecoService.deletarEnderecoDoCliente(
-                cliente,
-                enderecoId);
+        enderecoService.deletarEnderecoDoCliente(cliente, enderecoId);
 
-        /**
-         * Limpa seleção caso endereço removido
-         * fosse o endereço selecionado.
-         */
         if (enderecoId.equals(cliente.getEnderecoSelecionadoId())) {
 
             cliente.setEnderecoSelecionadoId(
@@ -201,44 +196,24 @@ public class ClienteRepositoryService {
 
         clienteRepository.save(cliente);
 
-        log.info(
-                "Endereço ID {} removido do cliente {}",
-                enderecoId,
-                cliente.getEmail());
+        log.info("Endereço removido clienteId={} enderecoId={}", clienteId, enderecoId);
     }
 
     @Transactional
-    public void atualizarEnderecoDoCliente(
-            @NonNull Long clienteId,
-            @NonNull Endereco dto) {
+    public void atualizarEnderecoDoCliente(@NonNull Long clienteId, @NonNull Endereco dto) {
+
+        log.info("Atualizando endereço clienteId={} enderecoId={}", clienteId, dto.getId());
 
         Cliente cliente = buscarPorId(clienteId);
 
         Long idAntigo = dto.getId();
 
-        /**
-         * Remove vínculo antigo.
-         */
-        enderecoService.deletarEnderecoDoCliente(
-                cliente,
-                idAntigo);
+        enderecoService.deletarEnderecoDoCliente(cliente, idAntigo);
 
-        /**
-         * Zera o ID para forçar INSERT e evitar conflito
-         * com o registro recém-deletado na mesma transação.
-         */
         dto.setId(null);
 
-        /**
-         * Cria/reutiliza novo endereço.
-         */
-        enderecoService.vincularNovoEndereco(
-                cliente,
-                dto);
+        enderecoService.vincularNovoEndereco(cliente, dto);
 
-        /**
-         * Atualiza endereço selecionado.
-         */
         if (idAntigo.equals(cliente.getEnderecoSelecionadoId())) {
 
             cliente.getEnderecos().stream()
@@ -249,19 +224,13 @@ public class ClienteRepositoryService {
 
         clienteRepository.save(cliente);
 
-        log.info(
-                "Endereço atualizado para cliente {}",
-                cliente.getEmail());
+        log.info("Endereço atualizado clienteId={}", clienteId);
     }
 
-    // =====================================================
-    // CARTÕES
-    // =====================================================
-
     @Transactional
-    public void deletarCartaoDoCliente(
-            @NonNull Long clienteId,
-            @NonNull Long cartaoId) {
+    public void deletarCartaoDoCliente(@NonNull Long clienteId, @NonNull Long cartaoId) {
+
+        log.warn("Removendo cartão clienteId={} cartaoId={}", clienteId, cartaoId);
 
         Cliente cliente = buscarPorId(clienteId);
 
@@ -269,25 +238,27 @@ public class ClienteRepositoryService {
                 .removeIf(c -> c.getId().equals(cartaoId));
 
         if (!removido) {
-
-            throw new IllegalArgumentException(
-                    "Cartão não encontrado ou não pertence a este cliente.");
+            log.error("Cartão não encontrado clienteId={} cartaoId={}", clienteId, cartaoId);
+            throw new IllegalArgumentException("Cartão não encontrado ou não pertence a este cliente.");
         }
 
         clienteRepository.save(cliente);
 
-        log.info(
-                "Cartão ID {} removido do cliente {}",
-                cartaoId,
-                cliente.getEmail());
+        log.info("Cartão removido clienteId={} cartaoId={}", clienteId, cartaoId);
     }
 
     public Cliente getByEmail(String email) {
+
+        log.debug("getByEmail email={}", email);
+
         return clienteRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
     }
 
     public Cliente getById(Long id) {
+
+        log.debug("getById id={}", id);
+
         return clienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
     }

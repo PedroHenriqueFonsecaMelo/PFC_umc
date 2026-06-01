@@ -62,7 +62,7 @@ class ClientePerfilServiceTest {
         assertEquals("Nome Atualizado", salvo.getNome());
         assertEquals("hashed", salvo.getSenha());
         verify(enderecoService).sincronizarEnderecos(cliente, null);
-        verify(auditoria).registrarLog(eq("ATUALIZACAO_DADOS"), eq(1L), eq("cliente@test.com"), anyString());
+        verify(auditoria).registrarLog(eq("CLIENTE_DADOS_ATUALIZADOS"), eq(1L), eq("cliente@test.com"), anyString());
     }
 
     @Test

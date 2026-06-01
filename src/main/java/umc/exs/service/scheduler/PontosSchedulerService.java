@@ -90,14 +90,15 @@ public class PontosSchedulerService {
     }
 
     private void zerarTudo(PontuacaoUsuario p) {
+
         p.setXpTotal(0);
         p.setXpLivrosAprovados(0);
         p.setXpCompras(0);
         p.setXpAvaliacoes(0);
 
-        logAuditoria.registrarLog("XP_ZERADO", p.getCliente().getId(), p.getCliente().getEmail(),
-                "XP zerado por 45 dias de inatividade.");
-        notificacaoService.criarNotificacaoDashboard(p.getCliente(), "Seu XP foi zerado por inatividade prolongada.",
+        notificacaoService.criarNotificacaoDashboard(
+                p.getCliente(),
+                "Seu XP foi zerado por inatividade prolongada.",
                 "/gamificacao");
     }
 }

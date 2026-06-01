@@ -20,7 +20,6 @@ import umc.exs.service.core.livros.notificacao.LivroNotificacaoService;
 import umc.exs.service.core.livros.recompensa.LivroRecompensaService;
 import umc.exs.service.email.facade.EmailFacade;
 import umc.exs.service.email.html.EmailHtmlBuilder;
-
 import umc.exs.service.log.LogAuditoriaService;
 
 @Slf4j
@@ -40,7 +39,14 @@ public class LivroAprovacaoService {
     private final LivroNotificacaoService livroNotificacaoService;
     private final LivroRecompensaService livroRecompensaService;
 
+    private static final String LOG_LIVRO_APROVADO = "LIVRO_APROVADO";
+    private static final String LOG_LIVRO_REJEITADO = "LIVRO_REJEITADO";
+    private static final String LOG_LOTE_ATUALIZADO = "LOTE_STATUS_ATUALIZADO";
+    private static final String LOG_LIVRO_APROVACAO_PROCESSADA = "LIVRO_APROVACAO_PROCESSADA";
+
     private static final String MENSAGEM_LIVRO_NAO_ENCONTRADO = "Livro não encontrado";
+
+    // ========================= APROVAÇÃO =========================
 
     @Transactional
     public Livro aprovarLivro(Long livroId, Long adminId, AdminAprovacaoRequest dto) {
@@ -56,15 +62,12 @@ public class LivroAprovacaoService {
         anuncio.setAdminAprovadorId(adminId);
         anuncio.setDataAprovacao(LocalDateTime.now());
 
-        // Busca gênero automaticamente via Google Books se não estiver preenchido
         if (anuncio.getGenero() == null || anuncio.getGenero().isBlank()) {
             try {
                 String genero = googleBooksService.buscarGeneroPorIsbn(anuncio.getIsbn());
-                if (genero != null) {
-                    anuncio.setGenero(genero);
-                }
+                anuncio.setGenero(genero);
             } catch (Exception e) {
-                log.warn("Não foi possível buscar gênero para ISBN {}: {}", anuncio.getIsbn(), e.getMessage());
+                log.warn("GENERO_API_FALHA isbn={} erro={}", anuncio.getIsbn(), e.getMessage());
             }
         }
 
@@ -74,7 +77,6 @@ public class LivroAprovacaoService {
 
         Livro saved = livroRepository.save(anuncio);
 
-        // Notificações wishlist
         livroNotificacaoService.notificarWishlistSeDisponivel(anuncio.getIsbn(), anuncio.getTitulo());
 
         Cliente vendedor = anuncio.getVendedor();
@@ -86,19 +88,18 @@ public class LivroAprovacaoService {
 
             double saldoAntes = vendedor.getSaldoTokens() != null ? vendedor.getSaldoTokens() : 0.0;
 
-            // reward (tokens)
             double tokenReward = LivroRecompensaService.TOKEN_REWARD;
             vendedor.setSaldoTokens(saldoAntes + tokenReward);
             clienteRepository.save(vendedor);
 
-            // gamificação (XP)
             livroRecompensaService.recompensarVendedorPorAprovacao(vendedor);
 
             logAuditoria.registrarLog(
-                    "LIVRO_APROVADO",
-                    vendedor.getId(),
+                    LOG_LIVRO_APROVADO,
+                    adminId,
                     vendedor.getEmail(),
-                    "Livro " + livroId);
+                    "livroId=" + livroId + ", vendedorId=" + vendedor.getId()
+            );
 
             try {
                 emailFacade.sendHtmlSafe(
@@ -106,7 +107,7 @@ public class LivroAprovacaoService {
                         "Livro aprovado",
                         EmailHtmlBuilder.livroAprovado(vendedor.getNome(), anuncio.getTitulo(), tokenReward));
             } catch (Exception e) {
-                log.error("Erro ao enviar email de livro aprovado: {}", e.getMessage(), e);
+                log.error("EMAIL_APROVACAO_FALHA livroId={} erro={}", livroId, e.getMessage());
             }
 
             try {
@@ -122,28 +123,42 @@ public class LivroAprovacaoService {
                                 true,
                                 LocalDateTime.now()));
             } catch (Exception e) {
-                log.error("Erro ao enviar email de livro aprovado: {}", e.getMessage(), e);
+                log.error("EMAIL_SALDO_FALHA livroId={} erro={}", livroId, e.getMessage());
             }
 
-            // Notificação dashboard: livro aprovado
             livroNotificacaoService.notificarAprovacaoDashboard(vendedor, anuncio.getTitulo(), tokenReward);
         }
 
-        // Atualiza status do lote
         if (anuncio.getLote() != null) {
-            Long loteId = anuncio.getLote().getId();
 
+            Long loteId = anuncio.getLote().getId();
             long pending = livroRepository.countByLoteIdAndAprovadoFalse(loteId);
 
             if (pending == 0) {
                 Lote lote = loteRepository.findById(loteId).orElseThrow();
                 lote.setStatus(Lote.LoteStatus.TOTAL_APROVADO);
                 loteRepository.save(lote);
+
+                logAuditoria.registrarLog(
+                        LOG_LOTE_ATUALIZADO,
+                        adminId,
+                        null,
+                        "loteId=" + loteId + ", status=TOTAL_APROVADO"
+                );
             }
         }
 
+        logAuditoria.registrarLog(
+                LOG_LIVRO_APROVACAO_PROCESSADA,
+                adminId,
+                null,
+                "livroId=" + livroId + ", status=APROVADO"
+        );
+
         return saved;
     }
+
+    // ========================= REJEIÇÃO =========================
 
     @Transactional
     public void rejeitarLivro(Long livroId, Long adminId, String estado, String comentario) {
@@ -157,6 +172,7 @@ public class LivroAprovacaoService {
         }
 
         if (vendedor != null) {
+
             try {
                 emailFacade.sendHtmlSafe(
                         vendedor.getEmail(),
@@ -166,25 +182,25 @@ public class LivroAprovacaoService {
                                 anuncio.getTitulo(),
                                 comentario));
             } catch (Exception e) {
-                log.error("Erro ao enviar email de livro rejeitado: {}", e.getMessage(), e);
+                log.error("EMAIL_REJEICAO_FALHA livroId={} erro={}", livroId, e.getMessage());
             }
 
             livroNotificacaoService.notificarRejeicaoDashboard(vendedor, anuncio.getTitulo(), comentario);
         }
 
-        Lote lote = anuncio.getLote();
-
         anuncio.setMotivoRejeicao(comentario);
         anuncio.setAdminAprovadorId(adminId);
         livroRepository.save(anuncio);
 
+        Lote lote = anuncio.getLote();
+
         if (lote != null) {
-            // Conta apenas livros ainda sem decisão (exclui rejeitados e aprovados)
+
             long pending = livroRepository
                     .countByLoteIdAndAprovadoFalseAndAdminAprovadorIdIsNull(lote.getId());
 
             if (pending == 0) {
-                // Conta apenas os aprovados para definir o status final do lote
+
                 long aprovados = livroRepository.findByLoteId(lote.getId()).stream()
                         .filter(l -> Boolean.TRUE.equals(l.getAprovado()))
                         .count();
@@ -194,9 +210,21 @@ public class LivroAprovacaoService {
                         : Lote.LoteStatus.PARCIAL_APROVADO);
 
                 loteRepository.save(lote);
-            }
 
-            logAuditoria.registrarLog("LIVRO_REJEITADO", adminId, "admin", "Livro " + livroId);
+                logAuditoria.registrarLog(
+                        LOG_LOTE_ATUALIZADO,
+                        adminId,
+                        null,
+                        "loteId=" + lote.getId() + ", status=" + lote.getStatus()
+                );
+            }
         }
+
+        logAuditoria.registrarLog(
+                LOG_LIVRO_REJEITADO,
+                adminId,
+                null,
+                "livroId=" + livroId + ", motivo=" + comentario
+        );
     }
 }

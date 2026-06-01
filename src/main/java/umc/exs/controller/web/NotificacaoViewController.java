@@ -1,5 +1,6 @@
 package umc.exs.controller.web;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -37,7 +38,7 @@ public class NotificacaoViewController {
 
     @PostMapping("/disparar")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> disparar(@RequestBody EmailDisparoRequest dto) {
+    public ResponseEntity<Map<String, String>> disparar(@RequestBody @Valid EmailDisparoRequest dto) {
         String mensagem = notificacaoEmailService.dispararOuAgendar(dto);
         return ResponseEntity.ok(Map.of("mensagem", mensagem));
     }
