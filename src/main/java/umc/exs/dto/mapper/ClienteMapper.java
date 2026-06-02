@@ -22,6 +22,7 @@ public interface ClienteMapper {
     @Mapping(source = "id", target = "id")
     @Mapping(source = "nome", target = "nome")
     @Mapping(source = "email", target = "email")
+    @Mapping(source = "fotoPerfil", target = "fotoPerfil")
     @Mapping(source = "cpf", target = "cpfMascarado")
     @Mapping(source = "datanasc", target = "dataNascimento")
     @Mapping(source = "dataCriacao", target = "dataCadastro")

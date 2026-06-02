@@ -6,9 +6,7 @@
   Uso: <header th:replace="~{fragments/client-nav :: clientNav}"></header>
 -->
         <header th:fragment="clientNav" class="client-nav">
-            <a th:href="@{/}" class="cn-brand">
-                <img src="/img/logo-bibliotroca.png" alt="Bibliotroca" style="height:65px;width:auto;vertical-align:middle;margin-right:8px;">Bibliotroca
-            </a>
+            <a th:href="@{/}" class="cn-brand" id="cnBrand"></a>
             <nav class="cn-links">
                 <a th:href="@{/livros/vitrine}" class="cn-btn">Vitrine</a>
                 <a
@@ -25,8 +23,6 @@
                 >Lista de Desejos</a>
             </nav>
             <div class="cn-right">
-                <span class="cn-saldo" id="navSaldo">T$ --</span>
-
                 <!-- ── Mini Carrinho (estante) ── -->
                 <div
                     style="position: relative; display: inline-block"
@@ -44,8 +40,8 @@
                             xmlns="http://www.w3.org/2000/svg"
                             preserveAspectRatio="xMidYMid"
                             viewBox="0 0 84 94"
-                            height="48"
-                            width="48"
+                            height="96"
+                            width="96"
                             style="transform: translateY(4px)"
                         >
                             <g
@@ -102,7 +98,7 @@
                     </button>
                     <span
                         id="cnCartBadge"
-                        style="display: none; position: absolute; top: 2px; right: 2px; background: #722f37; color: #fff; border-radius: 50%; min-width: 17px; height: 17px; font-size: 0.6rem; font-weight: 700; align-items: center; justify-content: center; line-height: 1; padding: 0 3px; pointer-events: none; z-index: 1"
+                        style="display: none; position: absolute; top: 13px; right: 13px; background: #722f37; color: #fff; border-radius: 50%; min-width: 17px; height: 17px; font-size: 0.6rem; font-weight: 700; align-items: center; justify-content: center; line-height: 1; padding: 0 3px; pointer-events: none; z-index: 1"
                     >0</span>
 
                     <!-- Dropdown mini carrinho -->
@@ -220,71 +216,6 @@
                     </div>
                 </div>
 
-                <!-- Sininho de Notificações -->
-                <div
-                    class="cn-notif-wrapper"
-                    id="cnNotifWrapper"
-                    style="position: relative; display: inline-block"
-                >
-                    <button
-                        class="cn-btn cn-notif-btn"
-                        id="cnNotifBtn"
-                        onclick="cnToggleNotif(event)"
-                        style="background: none; border: none; cursor: pointer; padding: 0.3rem 0.45rem; position: relative; border-radius: 8px; transition: background 0.18s"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <path
-                                d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
-                            />
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                        </svg>
-                        <span
-                            id="cnNotifBadge"
-                            style="display: none; position: absolute; top: -4px; right: -6px; background: #722f37; color: #fff; border-radius: 50%; width: 17px; height: 17px; font-size: 0.6rem; font-weight: 700; align-items: center; justify-content: center; line-height: 1"
-                        >0</span>
-                    </button>
-                    <div
-                        id="cnNotifDropdown"
-                        style="display: none; position: absolute; right: 0; top: calc(100% + 10px); min-width: 340px; max-width: 400px; background: #fff; border: 1px solid rgba(44, 36, 27, 0.1); border-radius: 14px; box-shadow: 0 8px 32px rgba(44, 36, 27, 0.15); z-index: 999; overflow: hidden"
-                    >
-                        <div
-                            style="padding: 0.75rem 1.1rem; border-bottom: 1px solid rgba(44, 36, 27, 0.08); display: flex; align-items: center; justify-content: space-between; background: #f9f6f0"
-                        >
-                            <span
-                                style="font-size: 0.85rem; font-weight: 700; color: #2c241b; font-family: 'Playfair Display', serif"
-                            >🔔 Notificações</span>
-                            <button
-                                id="cnBtnMarcarTodas"
-                                onclick="cnMarcarTodas(event)"
-                                style="background: rgba(114, 47, 55, 0.08); border: none; cursor: pointer; font-size: 0.7rem; color: #722f37; font-weight: 600; padding: 0.22rem 0.55rem; border-radius: 6px; transition: background 0.15s"
-                            >
-                                Marcar lidas
-                            </button>
-                        </div>
-                        <ul
-                            id="cnNotifLista"
-                            style="list-style: none; margin: 0; padding: 0; max-height: 340px; overflow-y: auto"
-                        >
-                        </ul>
-                        <div
-                            id="cnNotifVazia"
-                            style="padding: 1.5rem; text-align: center; font-size: 0.82rem; color: #7a6e65; font-family: 'IM Fell English', serif; font-style: italic; display: none"
-                        >
-                            Nenhuma notificação.
-                        </div>
-                    </div>
-                </div>
-
                 <!-- ── Menu de conta (ícone + dropdown hover) ── -->
                 <div class="cn-perfil-wrapper" id="cnPerfilWrapper">
                     <button
@@ -355,6 +286,73 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Sininho de Notificações -->
+                <div
+                    class="cn-notif-wrapper"
+                    id="cnNotifWrapper"
+                    style="position: relative; display: inline-block"
+                >
+                    <button
+                        class="cn-btn cn-notif-btn"
+                        id="cnNotifBtn"
+                        onclick="cnToggleNotif(event)"
+                        style="background: none; border: none; cursor: pointer; padding: 0.3rem 0.45rem; position: relative; border-radius: 8px; transition: background 0.18s"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path
+                                d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
+                            />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                        </svg>
+                        <span
+                            id="cnNotifBadge"
+                            style="display: none; position: absolute; top: -4px; right: -6px; background: #722f37; color: #fff; border-radius: 50%; width: 17px; height: 17px; font-size: 0.6rem; font-weight: 700; align-items: center; justify-content: center; line-height: 1"
+                        >0</span>
+                    </button>
+                    <div
+                        id="cnNotifDropdown"
+                        style="display: none; position: absolute; right: 0; top: calc(100% + 10px); min-width: 340px; max-width: 400px; background: #fff; border: 1px solid rgba(44, 36, 27, 0.1); border-radius: 14px; box-shadow: 0 8px 32px rgba(44, 36, 27, 0.15); z-index: 999; overflow: hidden"
+                    >
+                        <div
+                            style="padding: 0.75rem 1.1rem; border-bottom: 1px solid rgba(44, 36, 27, 0.08); display: flex; align-items: center; justify-content: space-between; background: #f9f6f0"
+                        >
+                            <span
+                                style="font-size: 0.85rem; font-weight: 700; color: #2c241b; font-family: 'Playfair Display', serif"
+                            >🔔 Notificações</span>
+                            <button
+                                id="cnBtnMarcarTodas"
+                                onclick="cnMarcarTodas(event)"
+                                style="background: rgba(114, 47, 55, 0.08); border: none; cursor: pointer; font-size: 0.7rem; color: #722f37; font-weight: 600; padding: 0.22rem 0.55rem; border-radius: 6px; transition: background 0.15s"
+                            >
+                                Marcar lidas
+                            </button>
+                        </div>
+                        <ul
+                            id="cnNotifLista"
+                            style="list-style: none; margin: 0; padding: 0; max-height: 340px; overflow-y: auto"
+                        >
+                        </ul>
+                        <div
+                            id="cnNotifVazia"
+                            style="padding: 1.5rem; text-align: center; font-size: 0.82rem; color: #7a6e65; font-family: 'IM Fell English', serif; font-style: italic; display: none"
+                        >
+                            Nenhuma notificação.
+                        </div>
+                    </div>
+                </div>
+
+                <span class="cn-saldo" id="navSaldo">T$ --</span>
             </div>
 
             <!-- Modal de confirmação de saída -->
@@ -709,6 +707,15 @@
                     setInterval(cnAtualizarBadgeEstante, 1500);
 
                     /* ── Saldo na navbar (e detecção de admin) ── */
+                    /* Exibe foto cacheada imediatamente para evitar flash */
+                    (function() {
+                        var cached = sessionStorage.getItem("cnBrandFoto");
+                        if (cached) {
+                            var b = document.getElementById("cnBrand");
+                            if (b) b.innerHTML = cached;
+                        }
+                    })();
+
                     fetch("/clientes/meu-perfil-json", { credentials: "include" })
                         .then(function (r) {
                             if (r.ok) {
@@ -723,6 +730,9 @@
                             if (!result) return;
 
                             if (result.tipo === "visitante") {
+                                sessionStorage.removeItem("cnBrandFoto");
+                                var brand = document.getElementById("cnBrand");
+                                if (brand) brand.innerHTML = 'Biblio<em style="color:#722f37">troca</em>';
                                 // Usuário não logado: troca dropdown por link de login
                                 var perfilWrapper = document.getElementById(
                                     "cnPerfilWrapper",
@@ -758,6 +768,18 @@
                                     el.textContent = "T$ " +
                                         (result.d.saldoTokens || 0).toFixed(2);
                                 }
+                                var brand = document.getElementById("cnBrand");
+                                if (brand) {
+                                    var html;
+                                    if (result.d.fotoPerfil) {
+                                        html = '<img src="' + result.d.fotoPerfil + '" alt="Meu perfil" style="width:112px;height:112px;border-radius:50%;object-fit:cover;border:2px solid rgba(44,36,27,0.25);display:block;flex-shrink:0;">';
+                                    } else {
+                                        var inicial = (result.d.nome || "?").charAt(0).toUpperCase();
+                                        html = '<div style="width:112px;height:112px;border-radius:50%;background:rgba(44,36,27,0.15);display:flex;align-items:center;justify-content:center;font-family:\'Playfair Display\',serif;font-size:3rem;font-weight:700;color:#2c241b;flex-shrink:0;">' + inicial + "</div>";
+                                    }
+                                    brand.innerHTML = html;
+                                    sessionStorage.setItem("cnBrandFoto", html);
+                                }
                             } else if (result.tipo === "verificarAdmin") {
                                 fetch("/api/admin/me", { credentials: "include" })
                                     .then(function (r2) {
@@ -765,6 +787,8 @@
                                     })
                                     .then(function (admin) {
                                         if (!admin) return;
+                                        var brand = document.getElementById("cnBrand");
+                                        if (brand) brand.innerHTML = 'Biblio<em style="color:#722f37">troca</em>';
                                         // Redireciona "Meu Perfil" para o painel do admin
                                         var link = document.getElementById("cnPerfilLink");
                                         if (link) {

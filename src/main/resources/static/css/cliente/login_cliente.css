@@ -78,8 +78,10 @@ body {
     top: 20px;
     left: 20px;
     z-index: 9999;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.88rem;
     font-weight: 600;
+    line-height: 1;
     color: rgba(114, 47, 55, 0.72);
     text-decoration: none;
     display: flex;
@@ -92,6 +94,7 @@ body {
     background: rgba(255, 255, 255, 0.55);
     backdrop-filter: blur(6px);
     transition: color 0.22s, background 0.22s, border-color 0.22s;
+    box-sizing: border-box;
 }
 .back-link:hover {
     color: #722f37;
@@ -612,15 +615,14 @@ body {
     color: var(--ink, #2c241b);
 }
 
-/* ── Layout órbita + login ── */
+/* ── Layout login centralizado ── */
 .page-content {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 3rem !important;
     min-height: 100vh;
-    padding: 2rem 2rem 2rem 4rem;
+    padding: 2rem;
     box-sizing: border-box;
     overflow: visible;
     position: relative !important;
@@ -629,49 +631,7 @@ body {
     margin: 0 !important;
 }
 
-.orbit-side {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 520px;
-    position: relative;
-}
-
-.orbit-wrap {
-    position: relative;
-    width: 500px;
-    height: 500px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: visible;
-}
-
-.orbit-list {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 0;
-    height: 0;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.orbit-list li {
-    position: absolute;
-    top: 0;
-    left: 0;
-    transform-origin: 0 0;
-}
-
-.orbit-list li:hover {
-    z-index: 999;
-}
-
 .login-side {
-    flex: 0 0 420px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -696,22 +656,4 @@ body {
 }
 .footnote {
     display: none !important;
-}
-
-@media (max-width: 900px) {
-    .page-content {
-        flex-direction: column !important;
-        gap: 2rem !important;
-    }
-    .orbit-side {
-        min-height: 360px;
-    }
-    .orbit-wrap {
-        width: 320px;
-        height: 320px;
-    }
-    .login-side {
-        flex: unset;
-        width: 100%;
-    }
 }

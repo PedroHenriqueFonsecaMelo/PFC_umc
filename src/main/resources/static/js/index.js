@@ -7,6 +7,41 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
 
+/* ── Contador animado nas stats ── */
+function animarContadores() {
+  document.querySelectorAll(".stat-number").forEach((el) => {
+    const raw = el.textContent.trim();
+    const match = raw.match(/^[\d.]+/);
+    if (!match) return;
+    const target = parseFloat(match[0].replace(/\./g, "").replace(",", "."));
+    if (isNaN(target) || target < 10) return; // ignora 4.9★
+    const suffix = raw.slice(match[0].length);
+    const isDecimal = match[0].includes(".");
+    let start = null;
+    const duration = 1400;
+    function step(ts) {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const cur = isDecimal
+        ? (ease * target).toFixed(1)
+        : Math.round(ease * target).toLocaleString("pt-BR");
+      el.textContent = cur + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+}
+
+const statsObs = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    animarContadores();
+    statsObs.disconnect();
+  }
+}, { threshold: 0.4 });
+const statsBar = document.querySelector(".stats-bar");
+if (statsBar) statsObs.observe(statsBar);
+
 /* ── Livros em destaque ── */
 async function carregarLivrosDestaque() {
   const track = document.getElementById("carrosselTrack");
@@ -272,12 +307,12 @@ async function carregarBlog() {
       setTimeout(() => section.scrollIntoView({ behavior: "smooth" }), 100);
     }
 
-    grid.innerHTML = posts.slice(0, 3).map((p) => {
+    grid.innerHTML = posts.slice(0, 3).map((p, i) => {
       const imgHTML = p.imagemUrl
         ? `<img src="${p.imagemUrl}" alt="${p.titulo}" loading="lazy" />`
         : `<span style="font-size:2rem;opacity:.4">📝</span>`;
       return `
-      <a href="/blog/${p.id}" class="blog-card-link" style="text-decoration:none;color:inherit;display:block">
+      <a href="/blog/${p.id}" class="blog-card-link reveal" style="text-decoration:none;color:inherit;display:block;--delay:${i * 0.12}s">
         <article class="blog-card" style="cursor:pointer">
           <div class="blog-card-img">${imgHTML}</div>
           <div class="blog-card-body">
@@ -295,6 +330,7 @@ async function carregarBlog() {
       </a>`;
     }).join("");
 
+    grid.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
     const verTodosEl = document.getElementById("blogVerTodos");
     if (verTodosEl) verTodosEl.style.display = "";
   } catch (_) {}

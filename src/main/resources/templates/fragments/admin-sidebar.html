@@ -12,7 +12,6 @@
             id="sidebar"
         >
             <div class="sidebar-logo">
-                <img src="/img/logo-bibliotroca.png" alt="Bibliotroca" style="height:55px;width:auto;margin-bottom:8px;">
                 <a
                     href="/"
                     style="display: flex; align-items: center; gap: 10px; text-decoration: none"
@@ -70,11 +69,14 @@
                     th:classappend="${activeMenu == 'cancelamentos'} ? ' ativo'"
                     style="display: flex; align-items: center; justify-content: space-between"
                 >
-                    <span><i class="fa-solid fa-ban"></i> Cancelamentos</span>
-                    <span
-                        id="badgeCancelamentos"
-                        style="display: none; background: #c0392b; color: #fff; font-size: 0.68rem; font-weight: 700; padding: 1px 7px; border-radius: 20px; min-width: 18px; text-align: center; line-height: 1.6"
-                    >0</span>
+                    <i class="fa-solid fa-ban"></i>
+                    <span style="flex: 1; display: flex; align-items: center; justify-content: space-between">
+                        Cancelamentos
+                        <span
+                            id="badgeCancelamentos"
+                            style="display: none; background: #c0392b; color: #fff; font-size: 0.68rem; font-weight: 700; padding: 1px 7px; border-radius: 20px; min-width: 18px; text-align: center; line-height: 1.6"
+                        >0</span>
+                    </span>
                 </a>
                 <a
                     href="/admin/painel?tab=pedidos"
@@ -95,7 +97,7 @@
                     class="nav-item"
                     th:classappend="${activeMenu == 'estoque'} ? ' ativo'"
                 >
-                    <i class="fa-solid fa-warehouse"></i> Estoque
+                    <i class="fa-solid fa-warehouse"></i> Gestão de Livros
                 </a>
                 <a
                     href="/admin/cupons"

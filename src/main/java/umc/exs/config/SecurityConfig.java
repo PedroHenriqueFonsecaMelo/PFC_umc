@@ -89,7 +89,7 @@ public class SecurityConfig {
                                                                                                 "https://placehold.co "
                                                                                                 +
                                                                                                 "https://images.unsplash.com https:;"))
-                                                .frameOptions(frame -> frame.deny())
+                                                .frameOptions(frame -> frame.sameOrigin())
                                                 .httpStrictTransportSecurity(hsts -> hsts.maxAgeInSeconds(31536000)
                                                                 .includeSubDomains(true))
                                                 .contentTypeOptions(cto -> {

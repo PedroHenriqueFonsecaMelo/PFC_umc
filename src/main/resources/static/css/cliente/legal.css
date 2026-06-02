@@ -79,3 +79,56 @@ ul li {
     color: #3a3028;
     margin-bottom: 0.2rem;
 }
+.legal-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+.legal-table thead {
+    background: #2c241b;
+    color: #f9f6f0;
+}
+.legal-table thead th {
+    padding: 0.6rem 0.9rem;
+    text-align: left;
+    font-family: "Georgia", serif;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+.legal-table tbody tr:nth-child(odd) {
+    background: #f4f0e8;
+}
+.legal-table tbody tr:nth-child(even) {
+    background: #fff;
+}
+.legal-table tbody td {
+    padding: 0.55rem 0.9rem;
+    color: #3a3028;
+    line-height: 1.6;
+    border-bottom: 1px solid rgba(44, 36, 27, 0.08);
+}
+.notice {
+    background: rgba(114, 47, 55, 0.07);
+    border-left: 3px solid #722f37;
+    padding: 0.75rem 1rem;
+    border-radius: 0 4px 4px 0;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #3a3028;
+    line-height: 1.6;
+}
+.notice strong {
+    display: block;
+    color: #722f37;
+    margin-bottom: 0.25rem;
+}
+.legal-footer {
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(44, 36, 27, 0.15);
+    font-size: 0.8rem;
+    color: #7a6e65;
+    line-height: 1.7;
+    font-style: italic;
+}
