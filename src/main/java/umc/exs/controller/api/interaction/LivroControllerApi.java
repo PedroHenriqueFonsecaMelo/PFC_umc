@@ -66,13 +66,14 @@ public class LivroControllerApi {
     public ResponseEntity<Page<LivroExibicaoResponse>> listarVitrine(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) Boolean emPromocao) {
+            @RequestParam(required = false) Boolean emPromocao,
+            @RequestParam(required = false) String busca) {
 
         var pageable = PageRequest.of(page, Math.min(size, 50), Sort.by(Sort.Direction.DESC, "id"));
         if (Boolean.TRUE.equals(emPromocao)) {
-            return ResponseEntity.ok(livroService.listarPromocoesAtivasPaginado(pageable).map(livroMapper::toResponse));
+            return ResponseEntity.ok(livroService.listarPromocoesAtivasPaginado(pageable, busca).map(livroMapper::toResponse));
         }
-        return ResponseEntity.ok(livroService.listarLivrosAprovadosPaginado(pageable).map(livroMapper::toResponse));
+        return ResponseEntity.ok(livroService.listarLivrosAprovadosPaginado(pageable, busca).map(livroMapper::toResponse));
     }
 
     /**

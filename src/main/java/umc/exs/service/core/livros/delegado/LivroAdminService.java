@@ -77,9 +77,11 @@ public class LivroAdminService {
         return livros;
     }
 
-    public Page<Livro> listarLivrosAprovadosPaginado(Pageable pageable) {
+    public Page<Livro> listarLivrosAprovadosPaginado(Pageable pageable, String busca) {
 
-        Page<Livro> page = livroRepository.findByAprovadoTrue(pageable);
+        Page<Livro> page = (busca != null && !busca.isBlank())
+                ? livroRepository.findByAprovadoTrueAndBusca(busca.trim(), pageable)
+                : livroRepository.findByAprovadoTrue(pageable);
 
         logAuditoria.registrarLog(
                 LOG_LIVROS_APROVADOS_LISTADOS,
@@ -91,9 +93,11 @@ public class LivroAdminService {
         return page;
     }
 
-    public Page<Livro> listarPromocoesAtivasPaginado(Pageable pageable) {
+    public Page<Livro> listarPromocoesAtivasPaginado(Pageable pageable, String busca) {
 
-        Page<Livro> page = livroRepository.findPromocoesAtivasPaginado(LocalDateTime.now(), pageable);
+        Page<Livro> page = (busca != null && !busca.isBlank())
+                ? livroRepository.findPromocoesAtivasPaginadoComBusca(LocalDateTime.now(), busca.trim(), pageable)
+                : livroRepository.findPromocoesAtivasPaginado(LocalDateTime.now(), pageable);
 
         logAuditoria.registrarLog(
                 LOG_PROMOCOES_ATIVAS_LISTADAS,

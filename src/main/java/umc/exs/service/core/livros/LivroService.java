@@ -70,12 +70,12 @@ public class LivroService {
         return livroAdminService.listarLivrosAprovados();
     }
 
-    public Page<Livro> listarLivrosAprovadosPaginado(Pageable pageable) {
-        return livroAdminService.listarLivrosAprovadosPaginado(pageable);
+    public Page<Livro> listarLivrosAprovadosPaginado(Pageable pageable, String busca) {
+        return livroAdminService.listarLivrosAprovadosPaginado(pageable, busca);
     }
 
-    public Page<Livro> listarPromocoesAtivasPaginado(Pageable pageable) {
-        return livroAdminService.listarPromocoesAtivasPaginado(pageable);
+    public Page<Livro> listarPromocoesAtivasPaginado(Pageable pageable, String busca) {
+        return livroAdminService.listarPromocoesAtivasPaginado(pageable, busca);
     }
 
     @Transactional

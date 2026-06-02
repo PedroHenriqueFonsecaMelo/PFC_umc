@@ -386,15 +386,6 @@ function renderPaginacao() {
 function aplicarFiltros() {
     let lista = [..._todosLivros];
 
-    if (_filtros.busca) {
-        const termo = norm(_filtros.busca);
-        lista = lista.filter((l) =>
-            norm(l.titulo).includes(termo) ||
-            norm(l.autor).includes(termo) ||
-            norm(l.isbn || "").includes(termo)
-        );
-    }
-
     if (_filtros.estados.length > 0) {
         lista = lista.filter((l) => {
             const est = (l.estadoAprovado || "BOM").toUpperCase();
@@ -568,7 +559,7 @@ window.removerChipOrdem = function () {
     aplicarFiltros();
 };
 
-/* ── Busca em tempo real (debounce 400 ms) ── */
+/* ── Busca em tempo real (debounce 400 ms) — dispara busca server-side ── */
 function onBuscaInput() {
     const val = document.getElementById("vitrineBusca")?.value || "";
     const btnX = document.getElementById("btnLimparBusca");
@@ -577,7 +568,9 @@ function onBuscaInput() {
     clearTimeout(_debounceTimer);
     _debounceTimer = setTimeout(() => {
         _filtros.busca = val;
-        aplicarFiltros();
+        _paginaAtual = 0;
+        sessionStorage.removeItem("vitrine_pagina");
+        carregarLivros();
     }, 400);
 }
 
@@ -666,6 +659,7 @@ async function carregarLivros() {
     try {
         const params = new URLSearchParams({ page: _paginaAtual, size: 20 });
         if (modoPromo) params.set("emPromocao", "true");
+        if (_filtros.busca) params.set("busca", _filtros.busca);
 
         const res = await fetch(`/api/livros/vitrine?${params}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);

@@ -86,6 +86,26 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
 
   Page<Livro> findByAprovadoTrue(Pageable pageable);
 
+  @Query("""
+          SELECT l FROM Livro l
+          WHERE l.aprovado = true
+            AND (LOWER(l.titulo) LIKE LOWER(CONCAT('%', :busca, '%'))
+                 OR LOWER(l.autor) LIKE LOWER(CONCAT('%', :busca, '%'))
+                 OR LOWER(l.isbn) LIKE LOWER(CONCAT('%', :busca, '%')))
+      """)
+  Page<Livro> findByAprovadoTrueAndBusca(@Param("busca") String busca, Pageable pageable);
+
+  @Query("""
+          SELECT l FROM Livro l
+          WHERE l.aprovado = true
+            AND l.emPromocao = true
+            AND (l.promocaoExpira IS NULL OR l.promocaoExpira > :agora)
+            AND (LOWER(l.titulo) LIKE LOWER(CONCAT('%', :busca, '%'))
+                 OR LOWER(l.autor) LIKE LOWER(CONCAT('%', :busca, '%'))
+                 OR LOWER(l.isbn) LIKE LOWER(CONCAT('%', :busca, '%')))
+      """)
+  Page<Livro> findPromocoesAtivasPaginadoComBusca(@Param("agora") LocalDateTime agora, @Param("busca") String busca, Pageable pageable);
+
   List<Livro> findByAprovadoFalse();
 
   long countByAprovadoTrue();
