@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RateLimitFilter extends OncePerRequestFilter {
 
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
-    private static final int CAPACITY = 100;
+    private static final int CAPACITY = 500;
     private static final long REFILL_INTERVAL_MS = 60_000;
 
     private static final String[] SKIP_PATHS = {
