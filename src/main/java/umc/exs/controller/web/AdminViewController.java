@@ -204,6 +204,12 @@ public class AdminViewController {
         return "admin/estoque";
     }
 
+    @GetMapping("/estoque/{id}")
+    public String estoqueDetalhe(@PathVariable Long id, Model model) {
+        model.addAttribute("livroId", id);
+        return "admin/estoque_detalhe";
+    }
+
     @GetMapping("/cupons")
     public String cupons() {
         return "admin/cupons";

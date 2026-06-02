@@ -50,6 +50,16 @@ async function carregarEstoque() {
         todosLivros = await res.json();
         window._todosLivrosEstoque = todosLivros;
         renderGrid(todosLivros);
+        // Verificar se veio da página de detalhes com livro para editar
+        const editId = sessionStorage.getItem('editarLivroId');
+        const editDados = sessionStorage.getItem('editarLivroDados');
+        if (editId && editDados) {
+            sessionStorage.removeItem('editarLivroId');
+            sessionStorage.removeItem('editarLivroDados');
+            try {
+                abrirModalEdit(JSON.parse(editDados));
+            } catch(e) {}
+        }
     } catch (_) {
         document.getElementById("estoqueGrid").innerHTML =
             `<p style="color:#722f37;grid-column:1/-1;padding:2rem;text-align:center">Erro ao carregar estoque.</p>`;
@@ -158,9 +168,10 @@ function renderGrid(livros) {
             ${promoHtml}
           </td>
           <td class="col-acoes">
-            <button class="btn-editar btn-sm"
-                    onclick='abrirModalEdit(${JSON.stringify(l)})'>
-              <i class="fa-solid fa-pen"></i> Editar
+            <button class="btn-sm" onclick="window.location.href='/admin/estoque/${l.id}'"
+                style="background:#f0ece6;color:#2c241b;border:none;border-radius:6px;
+                padding:.35rem .75rem;cursor:pointer;font-size:.8rem;font-weight:600;margin-right:.25rem;">
+                <i class="fa-solid fa-eye"></i> Detalhes
             </button>
             <button class="btn-excluir btn-sm"
                     onclick="confirmarExclusao(${l.id}, '${
