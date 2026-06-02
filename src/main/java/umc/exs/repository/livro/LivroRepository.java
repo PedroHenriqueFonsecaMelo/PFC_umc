@@ -91,9 +91,11 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
           WHERE l.aprovado = true
             AND (LOWER(l.titulo) LIKE LOWER(CONCAT('%', :busca, '%'))
                  OR LOWER(l.autor) LIKE LOWER(CONCAT('%', :busca, '%'))
-                 OR LOWER(l.isbn) LIKE LOWER(CONCAT('%', :busca, '%')))
+                 OR LOWER(l.isbn) LIKE LOWER(CONCAT('%', :busca, '%'))
+                 OR LOWER(l.titulo) LIKE LOWER(CONCAT('%', :buscaNorm, '%'))
+                 OR LOWER(l.autor) LIKE LOWER(CONCAT('%', :buscaNorm, '%')))
       """)
-  Page<Livro> findByAprovadoTrueAndBusca(@Param("busca") String busca, Pageable pageable);
+  Page<Livro> findByAprovadoTrueAndBusca(@Param("busca") String busca, @Param("buscaNorm") String buscaNorm, Pageable pageable);
 
   @Query("""
           SELECT l FROM Livro l
@@ -102,9 +104,11 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
             AND (l.promocaoExpira IS NULL OR l.promocaoExpira > :agora)
             AND (LOWER(l.titulo) LIKE LOWER(CONCAT('%', :busca, '%'))
                  OR LOWER(l.autor) LIKE LOWER(CONCAT('%', :busca, '%'))
-                 OR LOWER(l.isbn) LIKE LOWER(CONCAT('%', :busca, '%')))
+                 OR LOWER(l.isbn) LIKE LOWER(CONCAT('%', :busca, '%'))
+                 OR LOWER(l.titulo) LIKE LOWER(CONCAT('%', :buscaNorm, '%'))
+                 OR LOWER(l.autor) LIKE LOWER(CONCAT('%', :buscaNorm, '%')))
       """)
-  Page<Livro> findPromocoesAtivasPaginadoComBusca(@Param("agora") LocalDateTime agora, @Param("busca") String busca, Pageable pageable);
+  Page<Livro> findPromocoesAtivasPaginadoComBusca(@Param("agora") LocalDateTime agora, @Param("busca") String busca, @Param("buscaNorm") String buscaNorm, Pageable pageable);
 
   List<Livro> findByAprovadoFalse();
 

@@ -79,24 +79,50 @@ public class LivroAdminService {
 
     public Page<Livro> listarLivrosAprovadosPaginado(Pageable pageable, String busca) {
 
-        Page<Livro> page = (busca != null && !busca.isBlank())
-                ? livroRepository.findByAprovadoTrueAndBusca(busca.trim(), pageable)
-                : livroRepository.findByAprovadoTrue(pageable);
+        if (busca == null || busca.isBlank()) {
+            Page<Livro> page = livroRepository.findByAprovadoTrue(pageable);
+            logAuditoria.registrarLog(
+                    LOG_LIVROS_APROVADOS_LISTADOS,
+                    null,
+                    null,
+                    "page=" + pageable.getPageNumber() + ", size=" + pageable.getPageSize()
+            );
+            return page;
+        }
+
+        // Para busca com acentos no SQLite, filtrar em memória
+        String termo = normalize(busca.trim());
+
+        List<Livro> todos = livroRepository.findByAprovadoTrue();
+        List<Livro> filtrados = todos.stream()
+                .filter(l -> {
+                    String titulo = normalize(l.getTitulo());
+                    String autor = normalize(l.getAutor());
+                    String isbn = l.getIsbn() != null ? l.getIsbn().toLowerCase() : "";
+                    return titulo.contains(termo) || autor.contains(termo) || isbn.contains(termo);
+                })
+                .collect(java.util.stream.Collectors.toList());
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), filtrados.size());
+        List<Livro> pagina = start >= filtrados.size()
+                ? java.util.Collections.emptyList()
+                : filtrados.subList(start, end);
 
         logAuditoria.registrarLog(
                 LOG_LIVROS_APROVADOS_LISTADOS,
                 null,
                 null,
-                "page=" + pageable.getPageNumber() + ", size=" + pageable.getPageSize()
+                "busca=" + busca + ", page=" + pageable.getPageNumber() + ", total=" + filtrados.size()
         );
 
-        return page;
+        return new org.springframework.data.domain.PageImpl<>(pagina, pageable, filtrados.size());
     }
 
     public Page<Livro> listarPromocoesAtivasPaginado(Pageable pageable, String busca) {
 
         Page<Livro> page = (busca != null && !busca.isBlank())
-                ? livroRepository.findPromocoesAtivasPaginadoComBusca(LocalDateTime.now(), busca.trim(), pageable)
+                ? livroRepository.findPromocoesAtivasPaginadoComBusca(LocalDateTime.now(), normalizarBusca(busca), normalizarBuscaSemAcento(busca), pageable)
                 : livroRepository.findPromocoesAtivasPaginado(LocalDateTime.now(), pageable);
 
         logAuditoria.registrarLog(
@@ -284,5 +310,28 @@ public class LivroAdminService {
                 null,
                 "livroId=" + id
         );
+    }
+
+    // ========================= UTILITÁRIOS =========================
+
+    private String normalizarBusca(String busca) {
+        if (busca == null) return null;
+        return busca.trim();
+    }
+
+    private String normalizarBuscaSemAcento(String busca) {
+        if (busca == null) return null;
+        return java.text.Normalizer
+                .normalize(busca.trim(), java.text.Normalizer.Form.NFD)
+                .replaceAll("[\\p{InCombiningDiacriticalMarks}]", "")
+                .toLowerCase();
+    }
+
+    private String normalize(String s) {
+        if (s == null) return "";
+        return java.text.Normalizer
+                .normalize(s, java.text.Normalizer.Form.NFD)
+                .replaceAll("[\\p{InCombiningDiacriticalMarks}]", "")
+                .toLowerCase();
     }
 }
