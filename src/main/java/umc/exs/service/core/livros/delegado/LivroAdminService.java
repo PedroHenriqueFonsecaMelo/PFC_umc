@@ -101,7 +101,7 @@ public class LivroAdminService {
                     String isbn = l.getIsbn() != null ? l.getIsbn().toLowerCase() : "";
                     return titulo.contains(termo) || autor.contains(termo) || isbn.contains(termo);
                 })
-                .collect(java.util.stream.Collectors.toList());
+                .toList();
 
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), filtrados.size());

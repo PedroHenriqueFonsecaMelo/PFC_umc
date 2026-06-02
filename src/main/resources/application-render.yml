@@ -28,14 +28,15 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+    defer-datasource-initialization: true
     properties:
       hibernate:
         "[jakarta.persistence.validation.mode]": none
         "[hibernate.validator.apply_to_ddl]": false
         boot:
-          "[allow_jdbc_metadata_access]": false
+          "[allow_jdbc_metadata_access]": true
     open-in-view: false
     show-sql: false
 
@@ -44,33 +45,32 @@ spring:
   # ===============================
   mail:
     host: "${MAIL_HOST}"
-    port: "${MAIL_PORT}"
+    port: 465
     username: "${MAIL_USERNAME}"
     password: "${MAIL_PASSWORD}"
-    
     properties:
       mail:
-        from: "${MAIL_FROM}"
         smtp:
           auth: true
-          starttls:
-            enable: true
-            required: true
           ssl:
             trust: smtp.gmail.com
+            enable: true
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
 
   servlet:
     multipart:
       max-file-size: 8MB
       max-request-size: 8MB
 
-
-
+mail:
+  from: ${MAIL_FROM}
 # ===============================
 # 🌐 Server (Render)
 # ===============================
 server:
-  port: "${PORT}"
+  port: "${PORT:8080}"
 
   error:
     include-stacktrace: never

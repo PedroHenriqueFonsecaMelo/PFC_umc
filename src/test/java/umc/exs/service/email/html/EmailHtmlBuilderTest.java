@@ -10,11 +10,23 @@ import org.junit.jupiter.api.Test;
 class EmailHtmlBuilderTest {
 
     @Test
-    void compraSucesso_deveGerarHtmlComTitulo() {
-        String html = EmailHtmlBuilder.compraSucesso("Maria", "Livro Legal", 39.90);
-        assertTrue(html.contains("Compra confirmada"));
-        assertTrue(html.contains("Livro Legal"));
-        assertTrue(html.contains("Maria"));
+    void compraSucesso_deveGerarHtmlCompleto() {
+
+        String html = EmailHtmlBuilder.compraSucesso(
+                "Maria",
+                "Livro Legal",
+                39.90,
+                150.00,
+                "02/06/2026");
+
+        assertAll(
+                () -> assertTrue(html.contains("Compra realizada com sucesso")),
+                () -> assertTrue(html.contains("Maria")),
+                () -> assertTrue(html.contains("Livro Legal")),
+                () -> assertTrue(html.contains("39.9")),
+                () -> assertTrue(html.contains("<html")),
+                () -> assertTrue(html.contains("</html>")),
+                () -> assertTrue(html.contains("Bibliotroca")));
     }
 
     @Test

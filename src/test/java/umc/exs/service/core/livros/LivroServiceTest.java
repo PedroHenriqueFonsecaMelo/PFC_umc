@@ -1,6 +1,7 @@
 package umc.exs.service.core.livros;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
@@ -108,20 +109,27 @@ class LivroServiceTest {
 
     @Test
     void listarLivrosAprovadosPaginado_deveDelegar() {
+
         Pageable pageable = mock(Pageable.class);
         Page<Livro> page = mock(Page.class);
-        when(livroAdminService.listarLivrosAprovadosPaginado(pageable)).thenReturn(page);
 
-        assertSame(page, service.listarLivrosAprovadosPaginado(pageable));
+        when(livroAdminService
+                .listarLivrosAprovadosPaginado(any(Pageable.class), any(String.class)))
+                .thenReturn(page);
+
+        assertSame(page, service.listarLivrosAprovadosPaginado(pageable, "teste"));
+
+        verify(livroAdminService)
+                .listarLivrosAprovadosPaginado(pageable, "teste");
     }
 
     @Test
     void listarPromocoesAtivasPaginado_deveDelegar() {
         Pageable pageable = mock(Pageable.class);
         Page<Livro> page = mock(Page.class);
-        when(livroAdminService.listarPromocoesAtivasPaginado(pageable)).thenReturn(page);
+        when(livroAdminService.listarPromocoesAtivasPaginado(any(Pageable.class), any(String.class))).thenReturn(page);
 
-        assertSame(page, service.listarPromocoesAtivasPaginado(pageable));
+        assertSame(page, service.listarPromocoesAtivasPaginado(pageable, "teste"));
     }
 
     @Test
