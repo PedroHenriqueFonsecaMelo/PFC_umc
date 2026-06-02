@@ -83,3 +83,7 @@ gamificacao:
     compra: 30
     avaliacao: 10
     cupom-threshold: 500
+
+ADMIN:
+  EMAIL: admin@admin.com
+  PASSWORD: admin123

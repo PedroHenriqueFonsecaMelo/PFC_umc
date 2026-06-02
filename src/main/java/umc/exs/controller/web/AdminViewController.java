@@ -45,7 +45,7 @@ public class AdminViewController {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final LogAuditoriaService logAuditoriaService;
-    private static final String ADMIN_LOGIN = "cliente/login_cliente";
+    private static final String ADMIN_LOGIN = "admin/admin_login";
 
     /**
      * Exibe página login admin.

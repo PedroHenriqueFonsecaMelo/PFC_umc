@@ -48,10 +48,10 @@ public class StressSeedService {
     private final Random random = new Random();
 
     @Value("${ADMIN.EMAIL}")
-    private final String admin_email;
+    private String admin_email;
 
     @Value("${ADMIN.PASSWORD}")
-    private final String admin_password;
+    private String admin_password;
 
     @Async
     public void run() {

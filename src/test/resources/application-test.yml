@@ -25,3 +25,7 @@ mail:
 
 mercadopago:
   access-token: "${MP_ACCESS_TOKEN:1234567890abcdef}"
+
+ADMIN:
+  EMAIL: admin@test.com
+  PASSWORD: admin123
