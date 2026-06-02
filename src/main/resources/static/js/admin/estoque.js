@@ -48,6 +48,7 @@ async function carregarEstoque() {
         const res = await fetch("/api/admin/livros/aprovados");
         if (!res.ok) throw new Error();
         todosLivros = await res.json();
+        window._todosLivrosEstoque = todosLivros;
         renderGrid(todosLivros);
     } catch (_) {
         document.getElementById("estoqueGrid").innerHTML =
@@ -174,20 +175,100 @@ function renderGrid(livros) {
     iniciarContadoresAdmin();
 }
 
-/* ── FILTRO ── */
-function filtrar() {
-    const q = document.getElementById("searchInput").value.toLowerCase();
-    if (!q) {
-        renderGrid(todosLivros);
-        return;
+/* ── FILTROS AVANÇADOS ── */
+function toggleFiltrosEstoque() {
+    const panel = document.getElementById("filtrosEstoquePanel");
+    const btn = document.getElementById("btnFiltrosEstoque");
+    const aberto = panel.style.display !== "none";
+    panel.style.display = aberto ? "none" : "block";
+    btn.style.borderColor = aberto ? "rgba(44,36,27,.2)" : "#722f37";
+    btn.style.color = aberto ? "#2c241b" : "#722f37";
+}
+
+function atualizarPillsEstoque() {
+    const pills = document.getElementById("filtrosEstoquePills");
+    const badge = document.getElementById("filtrosEstoqueBadge");
+    if (!pills) return;
+
+    const ativos = [];
+    const estado = document.getElementById("filtroEstoqueEstado")?.value;
+    const promo = document.getElementById("filtroEstoquePromo")?.value;
+    const precoMin = document.getElementById("filtroEstoquePrecoMin")?.value;
+    const precoMax = document.getElementById("filtroEstoquePrecoMax")?.value;
+
+    const estadoLabel = { NOVO: "Novo", OTIMO: "Ótimo", BOM: "Bom", DESGASTADO: "Desgastado", RUIM: "Ruim" };
+    if (estado) ativos.push({ label: `Estado: ${estadoLabel[estado] || estado}`, id: "filtroEstoqueEstado" });
+    if (promo === "sim") ativos.push({ label: "Em promoção", id: "filtroEstoquePromo" });
+    if (promo === "nao") ativos.push({ label: "Sem promoção", id: "filtroEstoquePromo" });
+    if (precoMin) ativos.push({ label: `Preço ≥ T$${precoMin}`, id: "filtroEstoquePrecoMin" });
+    if (precoMax) ativos.push({ label: `Preço ≤ T$${precoMax}`, id: "filtroEstoquePrecoMax" });
+
+    pills.innerHTML = ativos.map(f => `
+        <span style="display:inline-flex;align-items:center;gap:.3rem;
+            background:#f0e8e8;color:#722f37;border-radius:20px;
+            padding:.25rem .65rem;font-size:.75rem;font-weight:600;">
+            ${f.label}
+            <button onclick="document.getElementById('${f.id}').value='';aplicarFiltrosEstoque()"
+                style="background:none;border:none;cursor:pointer;color:#722f37;
+                font-size:.8rem;padding:0;line-height:1;">✕</button>
+        </span>
+    `).join("");
+
+    if (badge) {
+        badge.textContent = ativos.length;
+        badge.style.display = ativos.length > 0 ? "inline" : "none";
     }
-    renderGrid(
-        todosLivros.filter((l) =>
+}
+
+function aplicarFiltrosEstoque() {
+    const q = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
+    const estado = document.getElementById("filtroEstoqueEstado")?.value;
+    const promo = document.getElementById("filtroEstoquePromo")?.value;
+    const precoMin = parseFloat(document.getElementById("filtroEstoquePrecoMin")?.value);
+    const precoMax = parseFloat(document.getElementById("filtroEstoquePrecoMax")?.value);
+
+    let lista = todosLivros;
+
+    if (q) {
+        lista = lista.filter(l =>
             (l.titulo || "").toLowerCase().includes(q) ||
             (l.autor || "").toLowerCase().includes(q) ||
             (l.isbn || "").toLowerCase().includes(q)
-        ),
-    );
+        );
+    }
+    if (estado) {
+        lista = lista.filter(l => (l.estadoAprovado || "BOM") === estado);
+    }
+    if (promo === "sim") {
+        lista = lista.filter(l => l.emPromocao && promoValida(l.promocaoExpira));
+    }
+    if (promo === "nao") {
+        lista = lista.filter(l => !l.emPromocao || !promoValida(l.promocaoExpira));
+    }
+    if (!isNaN(precoMin)) {
+        lista = lista.filter(l => (l.precoAprovado || 0) >= precoMin);
+    }
+    if (!isNaN(precoMax)) {
+        lista = lista.filter(l => (l.precoAprovado || 0) <= precoMax);
+    }
+
+    atualizarPillsEstoque();
+    renderGrid(lista);
+}
+
+function limparFiltrosEstoque() {
+    ["filtroEstoqueEstado", "filtroEstoquePromo",
+     "filtroEstoquePrecoMin", "filtroEstoquePrecoMax"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+    });
+    aplicarFiltrosEstoque();
+    atualizarPillsEstoque();
+}
+
+/* ── FILTRO (legado — mantido para compatibilidade) ── */
+function filtrar() {
+    aplicarFiltrosEstoque();
 }
 
 /* ── MÁSCARA E VALIDAÇÃO DA DATA DE PROMOÇÃO ── */

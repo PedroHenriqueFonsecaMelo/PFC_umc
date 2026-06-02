@@ -51,13 +51,108 @@
               type="text"
               id="searchInput"
               placeholder="Buscar por título, autor ou ISBN..."
-              oninput="filtrar()"
+              oninput="aplicarFiltrosEstoque()"
             />
           </div>
           <div class="estoque-contador" id="contadorLivros">— livros</div>
           <button class="btn-add" onclick="abrirModalAdd()">
             <i class="fa-solid fa-plus"></i> Adicionar Livro
           </button>
+        </div>
+
+        <!-- BARRA DE FILTROS AVANÇADOS -->
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem 1.25rem;
+            border-top:1px solid rgba(44,36,27,.08);flex-wrap:wrap;">
+
+            <button onclick="toggleFiltrosEstoque()" id="btnFiltrosEstoque"
+                style="display:inline-flex;align-items:center;gap:.5rem;
+                padding:.45rem 1rem;border:1.5px solid rgba(44,36,27,.2);
+                border-radius:8px;background:#fff;font-size:.82rem;
+                color:#2c241b;cursor:pointer;font-family:'DM Sans',sans-serif;
+                font-weight:600;transition:all .2s;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <line x1="4" y1="6" x2="20" y2="6"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
+                    <line x1="10" y1="18" x2="14" y2="18"/>
+                </svg>
+                Filtros
+                <span id="filtrosEstoqueBadge" style="display:none;background:#722f37;
+                    color:#fff;border-radius:20px;padding:.1rem .45rem;
+                    font-size:.7rem;font-weight:700;"></span>
+            </button>
+
+            <!-- Pills dos filtros ativos -->
+            <div id="filtrosEstoquePills" style="display:flex;gap:.4rem;flex-wrap:wrap;"></div>
+        </div>
+
+        <!-- Painel de filtros colapsável -->
+        <div id="filtrosEstoquePanel" style="display:none;padding:1.25rem;
+            border-top:1px solid rgba(44,36,27,.08);background:#faf8f5;">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);
+                gap:1rem;margin-bottom:1rem;">
+
+                <div>
+                    <label style="font-size:.72rem;font-weight:700;text-transform:uppercase;
+                        letter-spacing:.06em;color:#9c968f;display:block;margin-bottom:.4rem;">
+                        Estado
+                    </label>
+                    <select id="filtroEstoqueEstado" onchange="aplicarFiltrosEstoque()"
+                        style="width:100%;padding:.5rem .75rem;border:1.5px solid #e0d9d0;
+                        border-radius:8px;font-size:.85rem;background:#fff;
+                        color:#2c241b;font-family:'DM Sans',sans-serif;">
+                        <option value="">Todos os estados</option>
+                        <option value="NOVO">Novo</option>
+                        <option value="OTIMO">Ótimo</option>
+                        <option value="BOM">Bom</option>
+                        <option value="DESGASTADO">Desgastado</option>
+                        <option value="RUIM">Ruim</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="font-size:.72rem;font-weight:700;text-transform:uppercase;
+                        letter-spacing:.06em;color:#9c968f;display:block;margin-bottom:.4rem;">
+                        Promoção
+                    </label>
+                    <select id="filtroEstoquePromo" onchange="aplicarFiltrosEstoque()"
+                        style="width:100%;padding:.5rem .75rem;border:1.5px solid #e0d9d0;
+                        border-radius:8px;font-size:.85rem;background:#fff;
+                        color:#2c241b;font-family:'DM Sans',sans-serif;">
+                        <option value="">Todos</option>
+                        <option value="sim">Em promoção</option>
+                        <option value="nao">Sem promoção</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="font-size:.72rem;font-weight:700;text-transform:uppercase;
+                        letter-spacing:.06em;color:#9c968f;display:block;margin-bottom:.4rem;">
+                        Preço (T$)
+                    </label>
+                    <div style="display:flex;gap:.5rem;align-items:center;">
+                        <input id="filtroEstoquePrecoMin" type="number" placeholder="Mínimo"
+                            oninput="aplicarFiltrosEstoque()"
+                            style="width:100%;padding:.5rem .75rem;border:1.5px solid #e0d9d0;
+                            border-radius:8px;font-size:.85rem;font-family:'DM Sans',sans-serif;">
+                        <span style="color:#9c968f;font-size:.85rem;">–</span>
+                        <input id="filtroEstoquePrecoMax" type="number" placeholder="Máximo"
+                            oninput="aplicarFiltrosEstoque()"
+                            style="width:100%;padding:.5rem .75rem;border:1.5px solid #e0d9d0;
+                            border-radius:8px;font-size:.85rem;font-family:'DM Sans',sans-serif;">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;">
+                <button onclick="limparFiltrosEstoque()"
+                    style="padding:.45rem 1.25rem;background:transparent;
+                    border:1.5px solid rgba(44,36,27,.2);border-radius:8px;
+                    font-size:.82rem;color:#7a6e65;cursor:pointer;
+                    font-family:'DM Sans',sans-serif;font-weight:600;">
+                    Limpar todos os filtros
+                </button>
+            </div>
         </div>
 
         <!-- TABELA DE LIVROS -->
