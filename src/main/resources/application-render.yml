@@ -28,15 +28,16 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-    defer-datasource-initialization: true
+    defer-datasource-initialization: false
     properties:
       hibernate:
+        default_schema: public
         "[jakarta.persistence.validation.mode]": none
         "[hibernate.validator.apply_to_ddl]": false
         boot:
-          "[allow_jdbc_metadata_access]": true
+          "[allow_jdbc_metadata_access]": false
     open-in-view: false
     show-sql: false
 
@@ -45,19 +46,22 @@ spring:
   # ===============================
   mail:
     host: "${MAIL_HOST}"
-    port: 465
+    port: 587
     username: "${MAIL_USERNAME}"
     password: "${MAIL_PASSWORD}"
     properties:
       mail:
         smtp:
           auth: true
+          starttls:
+            enable: true
+            required: true
           ssl:
             trust: smtp.gmail.com
             enable: true
-          connectiontimeout: 10000
-          timeout: 10000
-          writetimeout: 10000
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
   servlet:
     multipart:
@@ -127,6 +131,7 @@ logging:
     name: "./logs/application.log"
   level:
     root: WARN
+    org.springframework.boot: INFO
     umc:
       exs: INFO
 

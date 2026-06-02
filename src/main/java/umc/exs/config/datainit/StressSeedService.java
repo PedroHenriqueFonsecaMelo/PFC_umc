@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +46,9 @@ public class StressSeedService {
 
     private final Random random = new Random();
 
+    @Value("${spring.jpa.hibernate.ddl-auto:none}")
+    private String ddlAuto;
+
     @Value("${ADMIN.EMAIL}")
     private String admin_email;
 
@@ -67,6 +69,11 @@ public class StressSeedService {
 
     @Transactional
     public void run() {
+
+        if (!"create-drop".equalsIgnoreCase(ddlAuto) && !"create".equalsIgnoreCase(ddlAuto)) {
+            log.info("Seed cancelado: ddl-auto está definido como '{}'. O StressSeed só roda em modo de recriação (create/create-drop).", ddlAuto);
+            return;
+        }
 
         if (clienteRepo.count() > 0) {
             log.info("Seed já executado.");
