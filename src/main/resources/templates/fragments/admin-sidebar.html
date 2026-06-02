@@ -23,6 +23,30 @@
                     </div>
                 </a>
             </div>
+            <script th:src="@{/js/admin/global-search.js}"></script>
+            <div style="padding:0 1rem 1rem;position:relative;">
+                <div style="position:relative;">
+                    <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);
+                        opacity:.5;" width="14" height="14" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input id="globalSearch" type="text" placeholder="Buscar clientes ou livros..."
+                        oninput="globalSearchInput(this.value)"
+                        autocomplete="off"
+                        style="width:100%;padding:.5rem .75rem .5rem 2rem;
+                        background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+                        border-radius:8px;color:#fff;font-size:.8rem;
+                        font-family:'DM Sans',sans-serif;box-sizing:border-box;outline:none;">
+                </div>
+                <!-- Dropdown de resultados -->
+                <div id="globalSearchResults" style="display:none;position:absolute;
+                    left:1rem;right:1rem;top:100%;background:#fff;border-radius:8px;
+                    box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:9999;
+                    max-height:400px;overflow-y:auto;border:1px solid #e0d9d0;">
+                </div>
+            </div>
+
             <nav class="sidebar-nav">
                 <span class="nav-label">Menu</span>
                 <a
