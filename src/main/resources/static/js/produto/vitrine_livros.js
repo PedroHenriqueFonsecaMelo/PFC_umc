@@ -21,6 +21,10 @@ async function carregarSaldo() {
 /* ── Estado global ── */
 let _todosLivros = []; // livros da página atual (até 20 itens)
 let _paginaAtual = 0;
+const _paginaSalva = parseInt(sessionStorage.getItem('vitrine_pagina') || '0');
+if (!isNaN(_paginaSalva) && _paginaSalva > 0) {
+    _paginaAtual = _paginaSalva;
+}
 let _totalPaginas = 0;
 let _totalElements = 0;
 let modoPromo = false;
@@ -77,6 +81,7 @@ function iniciarContadores() {
 function togglePromo() {
     modoPromo = !modoPromo;
     _paginaAtual = 0;
+    sessionStorage.removeItem('vitrine_pagina');
     const btn = document.getElementById("btnPromo");
     const titulo = document.getElementById("vitrineTitulo");
 
@@ -267,6 +272,7 @@ window.removerChipGenero = function (g) {
 function irParaPagina(p) {
     if (p < 0 || p >= _totalPaginas) return;
     _paginaAtual = p;
+    sessionStorage.setItem('vitrine_pagina', p);
     carregarLivros();
     window.scrollTo({ top: 0, behavior: "smooth" });
 }

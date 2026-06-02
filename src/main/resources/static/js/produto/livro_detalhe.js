@@ -119,7 +119,7 @@ function renderBookCover(livro) {
     document.getElementById("placeholderAuthor").textContent = livro.autor;
 
     // Verso: resumo truncado + ISBN
-    const resumo = livro.resumoOficial ||
+    const resumo = (livro.resumoOficial || livro.descricao) ||
         "Sem descrição disponível para este livro.";
     document.getElementById("bookBackText").textContent = resumo.length > 400
         ? resumo.slice(0, 400) + "…"
@@ -526,20 +526,20 @@ function renderLivro(livro) {
         buscarDadosGoogleBooks(livro.isbn).then((gbData) => {
             // Resumo
             const descFinal =
-                (livro.resumoOficial && livro.resumoOficial.trim())
-                    ? livro.resumoOficial.trim()
+                ((livro.resumoOficial || livro.descricao) && (livro.resumoOficial || livro.descricao).trim())
+                    ? (livro.resumoOficial || livro.descricao).trim()
                     : (gbData && gbData.descricao ? gbData.descricao : null);
             if (descFinal) exibirResumo(descFinal);
 
             // Metadados enriquecidos
             if (gbData) exibirMetadados(livro, gbData);
         }).catch(() => {
-            if (livro.resumoOficial && livro.resumoOficial.trim()) {
-                exibirResumo(livro.resumoOficial.trim());
+            if ((livro.resumoOficial || livro.descricao) && (livro.resumoOficial || livro.descricao).trim()) {
+                exibirResumo((livro.resumoOficial || livro.descricao).trim());
             }
         });
-    } else if (livro.resumoOficial && livro.resumoOficial.trim()) {
-        exibirResumo(livro.resumoOficial.trim());
+    } else if ((livro.resumoOficial || livro.descricao) && (livro.resumoOficial || livro.descricao).trim()) {
+        exibirResumo((livro.resumoOficial || livro.descricao).trim());
     }
 
     // Gênero do banco (se já tiver)
