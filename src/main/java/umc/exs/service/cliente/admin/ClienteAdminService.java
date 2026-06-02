@@ -69,6 +69,7 @@ public class ClienteAdminService {
         long[] s = statsMap.getOrDefault(c.getId(), new long[]{0L, Double.doubleToLongBits(0.0)});
         long totalCompras = s[0];
         double totalGasto = Double.longBitsToDouble(s[1]);
+        long totalCupons = cupomUsoRepository.countByClienteId(c.getId());
 
         return new ClienteListaResponse(
                 c.getId(),
@@ -79,6 +80,7 @@ public class ClienteAdminService {
                 calcularNivel(totalGasto),
                 totalCompras,
                 totalGasto,
+                totalCupons,
                 c.isAtivo());
     }
 

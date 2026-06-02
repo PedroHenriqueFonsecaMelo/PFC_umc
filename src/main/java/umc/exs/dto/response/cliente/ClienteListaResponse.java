@@ -18,5 +18,6 @@ public class ClienteListaResponse {
     private String nivel;
     private long totalCompras;
     private double totalGasto;
+    private long totalCupons;
     private boolean ativo;
 }
