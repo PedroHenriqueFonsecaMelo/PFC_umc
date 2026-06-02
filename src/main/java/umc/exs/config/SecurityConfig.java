@@ -199,7 +199,7 @@ public class SecurityConfig {
 
         // Recursos estáticos (CSS, JS, Imagens)
         private static final String[] STATIC_RESOURCES = {
-                        "/css/**", "/js/**", "/images/**", "/imagens/**", "/cliente/**",
+                        "/css/**", "/js/**", "/img/**", "/images/**", "/imagens/**", "/cliente/**",
                         "/produto/**", "/static/**", "/uploads/**", "/*.png", "/*.ico", "/*.svg"
         };
 
