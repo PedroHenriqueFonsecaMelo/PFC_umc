@@ -311,8 +311,8 @@ function buildDesejoCard(d) {
     const capa = capaUrl(d.isbn);
     const imgHtml = capa
         ? `<img class="desejo-capa" src="${capa}" alt="Capa"
-             onerror="this.outerHTML='<div class=desejo-capa-placeholder>📚</div>'">`
-        : `<div class="desejo-capa-placeholder">📚</div>`;
+             onerror="this.src='/img/logo-bibliotroca.png'">`
+        : `<img src="/img/logo-bibliotroca.png" class="desejo-capa-placeholder" style="object-fit:contain;">`;
 
     const tituloHtml = d.titulo
         ? `<div class="desejo-titulo">${escHtml(d.titulo)}</div>`

@@ -78,7 +78,7 @@ function renderEstante() {
             foto = "https://covers.openlibrary.org/b/isbn/" +
                 item.isbn.replace(/-/g, "") + "-L.jpg";
         }
-        if (!foto) foto = "https://via.placeholder.com/54x72?text=📚";
+        if (!foto) foto = "/img/logo-bibliotroca.png";
 
         const estado = item.estadoAprovado || "BOM";
         const preco = (item.precoAprovado || 0).toFixed(2);

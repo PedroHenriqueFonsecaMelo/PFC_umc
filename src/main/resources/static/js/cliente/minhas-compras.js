@@ -307,7 +307,7 @@ function buildTimeline(status) {
 
 function buildCard(p) {
     const foto = primeiraFoto(p.fotosUrls);
-    const imgSrc = foto || "https://via.placeholder.com/72x96?text=📚";
+    const imgSrc = foto || "/img/logo-bibliotroca.png";
 
     const rastreio = (p.codigoRastreio && p.statusEnvio === "EM_TRANSITO")
         ? `<div class="rastreio-info">

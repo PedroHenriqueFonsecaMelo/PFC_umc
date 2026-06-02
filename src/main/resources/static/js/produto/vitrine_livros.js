@@ -100,20 +100,71 @@ function togglePromo() {
 /* ── Fallback de capa: OpenLibrary → foto do vendedor → placeholder ── */
 window.vitrineFallback = function (img) {
     const fallback = img.dataset.fallback;
+
+    // Verificar se a imagem do OpenLibrary é o placeholder cinza (< 1kb)
+    function checkImageSize() {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const pixel = ctx.getImageData(
+            Math.floor(img.naturalWidth/2),
+            Math.floor(img.naturalHeight/2),
+            1, 1
+        ).data;
+        // Placeholder cinza do OpenLibrary tem pixel central cinza (R≈200, G≈200, B≈200)
+        const isCinza = pixel[0] > 180 && pixel[1] > 180 && pixel[2] > 180 &&
+                        Math.abs(pixel[0]-pixel[1]) < 15 && Math.abs(pixel[1]-pixel[2]) < 15;
+        if (isCinza) {
+            usarLogo();
+        }
+    }
+
+    function usarLogo() {
+        if (fallback && !img._triedFallback) {
+            img._triedFallback = true;
+            img.src = fallback;
+            img.onload = checkImageSize;
+            img.onerror = usarLogo;
+        } else {
+            img.src = "/img/logo-bibliotroca.png";
+            img.style.objectFit = "contain";
+            img.style.padding = "10px";
+            img.onerror = null;
+            img.onload = null;
+        }
+    }
+
     if (fallback) {
         delete img.dataset.fallback;
-        img.onerror = function () {
-            img.style.display = "none";
-            const ph = img.nextElementSibling;
-            if (ph) ph.style.display = "flex";
-        };
+        img.onerror = usarLogo;
         img.src = fallback;
     } else {
-        img.style.display = "none";
-        const ph = img.nextElementSibling;
-        if (ph) ph.style.display = "flex";
+        // Verificar se imagem atual é cinza
+        if (img.complete && img.naturalWidth > 0) {
+            checkImageSize();
+        } else {
+            img.onload = checkImageSize;
+            img.onerror = usarLogo;
+        }
     }
 };
+
+// Ao carregar cada imagem da vitrine, verificar se é o placeholder cinza
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        document.querySelectorAll('.book-image img').forEach(function(img) {
+            if (img.complete && img.naturalWidth > 0 && img.src.includes('openlibrary')) {
+                vitrineFallback(img);
+            } else if (!img.complete) {
+                img.addEventListener('load', function() {
+                    if (img.src.includes('openlibrary')) vitrineFallback(img);
+                });
+            }
+        });
+    }, 1000);
+});
 
 /* ── Classe CSS do badge por estado ── */
 function classeBadge(estado) {
@@ -208,8 +259,7 @@ function renderLivros(livros) {
               <div class="book-image">
                 ${imgTag}
                 <div class="placeholder-cover" style="${phStyle}">
-                  <div class="ptitle">${livro.titulo}</div>
-                  <div class="pauthor">${livro.autor}</div>
+                  <img src="/img/logo-bibliotroca.png" alt="${livro.titulo}" style="width:80%;height:auto;object-fit:contain;margin:auto;">
                 </div>
                 <div class="effect"></div>
                 <div class="light"></div>

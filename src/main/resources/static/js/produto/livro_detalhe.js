@@ -135,13 +135,47 @@ function renderBookCover(livro) {
     function usarFotoUsuario() {
         try {
             const fotos = JSON.parse(livro.fotosUrls || "[]");
-            if (fotos.length > 0) {
+            if (fotos.length > 0 && fotos[0]) {
                 img.src = fotos[0];
                 img.style.display = "block";
-                ph.style.display = "none";
+                if (ph) ph.style.display = "none";
+                img.onerror = () => {
+                    img.src = "/img/logo-bibliotroca.png";
+                    img.style.objectFit = "contain";
+                    img.style.padding = "10px";
+                    img.onerror = null;
+                };
+            } else {
+                img.src = "/img/logo-bibliotroca.png";
+                img.style.display = "block";
+                img.style.objectFit = "contain";
+                img.style.padding = "10px";
+                if (ph) ph.style.display = "none";
             }
-        } catch (_) {}
+        } catch (_) {
+            img.src = "/img/logo-bibliotroca.png";
+            img.style.display = "block";
+            img.style.objectFit = "contain";
+            img.style.padding = "10px";
+        }
     }
+
+    // Se já tem foto no banco, usar diretamente
+    try {
+        const fotos = JSON.parse(livro.fotosUrls || "[]");
+        if (fotos.length > 0 && fotos[0] && fotos[0].startsWith("http")) {
+            img.src = fotos[0];
+            img.style.display = "block";
+            if (ph) ph.style.display = "none";
+            img.onerror = () => {
+                img.src = "/img/logo-bibliotroca.png";
+                img.style.objectFit = "contain";
+                img.style.padding = "10px";
+                img.onerror = null;
+            };
+            return; // Não precisa buscar API
+        }
+    } catch (_) {}
 
     if (livro.isbn) {
         // Tenta Google Books primeiro (melhor qualidade), depois OpenLibrary
@@ -190,12 +224,15 @@ function renderGaleria(fotos) {
     const thumbsCont = document.getElementById("galeriaThumbs");
     if (!fotoMain) return;
 
-    const primeira = fotos.length > 0
+    const primeira = fotos.length > 0 && fotos[0]
         ? fotos[0]
-        : "https://via.placeholder.com/400x480?text=📚";
+        : "/img/logo-bibliotroca.png";
     fotoMain.src = primeira;
     fotoMain.onerror = () => {
-        fotoMain.src = "https://via.placeholder.com/400x480?text=📚";
+        fotoMain.src = "/img/logo-bibliotroca.png";
+        fotoMain.style.objectFit = "contain";
+        fotoMain.style.padding = "20px";
+        fotoMain.onerror = null;
     };
 
     if (fotos.length > 1 && thumbsCont) {
