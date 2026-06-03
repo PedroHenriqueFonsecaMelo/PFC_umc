@@ -9,14 +9,14 @@
 }
 
 :root {
-  --ink: #2c241b;
+  --ink: #000000;
   --paper: #f9f6f0;
   --cream: #ede8df;
-  --accent: #722f37;
+  --accent: #7e7e82;
   --forest: #4a5d23;
   --white: #ffffff;
-  --muted: #7a6e65;
-  --border: rgba(44, 36, 27, 0.15);
+  --muted: #000000;
+  --border: rgba(0, 0, 0, 0.15);
 }
 
 body {
@@ -60,21 +60,19 @@ body {
 .btn-voltar {
   display: inline-flex;
   align-items: center;
-  padding: 0.5rem 1rem;
-  border: 1.5px solid var(--border);
+  padding: 0.35rem 0.8rem;
+  border: 1px solid #000;
   border-radius: 8px;
-  color: var(--muted);
+  color: #000;
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   white-space: nowrap;
-  transition: border-color 0.18s, color 0.18s;
+  transition: background 0.18s, color 0.18s;
 }
 .btn-voltar:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: #000;
+  color: #fff;
 }
 
 /* ── Estado vazio ── */
@@ -95,7 +93,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0.7rem 1rem;
-  background: var(--cream);
+  background: rgba(126, 126, 130, 0.1);
   border: 1px solid var(--border);
   border-radius: 10px;
   margin-bottom: 1rem;
@@ -119,9 +117,9 @@ body {
 
 .btn-remover-selecionados {
   background: transparent;
-  border: 1px solid rgba(114, 47, 55, 0.35);
+  border: 1px solid #000;
   border-radius: 8px;
-  color: var(--accent);
+  color: #000;
   padding: 0.35rem 0.8rem;
   font-size: 0.78rem;
   font-weight: 600;
@@ -129,7 +127,7 @@ body {
   transition: background 0.18s, color 0.18s;
 }
 .btn-remover-selecionados:hover:not(:disabled) {
-  background: var(--accent);
+  background: #000;
   color: #fff;
 }
 .btn-remover-selecionados:disabled {
@@ -156,11 +154,11 @@ body {
   transition: border-color 0.18s, box-shadow 0.18s;
 }
 .estante-item:hover {
-  box-shadow: 3px 3px 0 rgba(44, 36, 27, 0.07);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.07);
 }
 .estante-item.selecionado {
   border-color: var(--accent);
-  background: rgba(114, 47, 55, 0.04);
+  background: rgba(126, 126, 130, 0.04);
 }
 
 .estante-item-check {
@@ -233,7 +231,7 @@ body {
   font-family: "Playfair Display", serif;
   font-size: 1.15rem;
   font-weight: 800;
-  color: var(--accent);
+  color: #000;
   flex-shrink: 0;
 }
 .estante-item-remover {
@@ -367,9 +365,9 @@ body {
 .estante-footer {
   position: sticky;
   bottom: 0;
-  background: var(--cream);
+  background: rgba(126, 126, 130, 0.1);
   border: 1.5px solid var(--ink);
-  border-radius: 16px 16px 0 0;
+  border-radius: 16px;
   padding: 1.25rem 1.5rem;
   display: flex;
   align-items: center;
@@ -395,9 +393,9 @@ body {
 
 .btn-prosseguir {
   padding: 0.85rem 1.8rem;
-  background: var(--accent);
-  color: var(--paper);
-  border: 2px solid var(--accent);
+  background: #000;
+  color: #fff;
+  border: 2px solid #000;
   border-radius: 10px;
   font-family: "DM Sans", sans-serif;
   font-size: 0.9rem;
@@ -409,8 +407,8 @@ body {
   white-space: nowrap;
 }
 .btn-prosseguir:hover:not(:disabled) {
-  background: #5a2229;
-  border-color: #5a2229;
+  background: #333;
+  border-color: #333;
 }
 .btn-prosseguir:disabled {
   opacity: 0.45;
@@ -437,7 +435,7 @@ body {
   transition: background 0.18s;
 }
 .btn-primario:hover {
-  background: #5a2229;
+  background: #606064;
 }
 
 @media (max-width: 600px) {

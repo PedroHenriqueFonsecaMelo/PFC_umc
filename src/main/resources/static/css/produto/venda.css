@@ -430,7 +430,7 @@ body {
 
 /* ── FOOTER ── */
 footer {
-  background: var(--ink);
+  background: #000;
   color: rgba(249, 246, 240, 0.35);
   padding: 2rem 5vw;
   text-align: center;
