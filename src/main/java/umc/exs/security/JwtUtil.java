@@ -6,13 +6,18 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 
 @Component
@@ -51,6 +56,21 @@ public class JwtUtil {
                 .subject(subject)
                 .issuedAt(now)
                 .expiration(exp)
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public String generateToken(UserDetails userDetails) {
+
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        return Jwts.builder()
+                .subject(userDetails.getUsername())
+                .claim("roles", roles)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(getSigningKey())
                 .compact();
     }

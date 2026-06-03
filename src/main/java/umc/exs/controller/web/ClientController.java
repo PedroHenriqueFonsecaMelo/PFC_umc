@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -121,33 +122,30 @@ public class ClientController {
         try {
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
             boolean isAdmin = userDetails.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ADMIN"));
-
+                    .anyMatch(a -> a.getAuthority().equals("ADMIN") || a.getAuthority().equals("ROLE_ADMIN"));
             if (isAdmin) {
                 if (!passwordEncoder.matches(senha, userDetails.getPassword())) {
                     model.addAttribute("erro", "E-mail ou senha inválidos.");
                     return VIEW_LOGIN;
                 }
-                String token = jwtUtil.generateToken(email);
-                jwtUtil.addTokenCookie(response, token);
-                Authentication auth = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(auth);
+
+                authHelper.authenticate(userDetails.getUsername(), response);
+
                 return "redirect:/admin/dashboard";
             }
         } catch (UsernameNotFoundException ignored) {
-            // Tenta cliente abaixo
         }
 
         try {
             Cliente cliente = clienteService.autenticarCliente(email, senha);
-            if (cliente.getId() != null) {
-                Objects.requireNonNull(cliente.getId(), "ID do cliente não pode ser nulo após autenticação");
 
+            if (cliente != null && cliente.getId() != null) {
                 authHelper.authenticate(cliente.getEmail(), response);
                 return "redirect:/clientes/homepage";
-            } else
-                return REDIRECT_LOGIN;
+            } else {
+                model.addAttribute("erro", "E-mail ou senha inválidos.");
+                return VIEW_LOGIN;
+            }
 
         } catch (IllegalArgumentException e) {
             model.addAttribute("erro", e.getMessage());

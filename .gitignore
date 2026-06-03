@@ -35,3 +35,5 @@ TODO.md
 
 .claude/
 /bibliotroca.env
+credentials.json
+/render_credentials.json

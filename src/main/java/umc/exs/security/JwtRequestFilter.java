@@ -58,7 +58,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(ud, null,
                         ud.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(auth);
+
+                System.out.println("[JWT] token OK uri=" + requestURI + " username=" + username + " authorities=" + ud.getAuthorities());
             }
+        } else {
+            System.out.println("[JWT] token NULO/INV uri=" + requestURI);
         }
 
         chain.doFilter(request, response);
@@ -68,11 +72,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("token".equalsIgnoreCase(cookie.getName())) {
+                // Compatível com o cookie default usado no JwtUtil (jwt.cookie.name: token)
+                if (cookie.getName() != null && cookie.getName().equalsIgnoreCase("token")) {
                     return cookie.getValue();
                 }
+
             }
         }
+
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);
@@ -80,3 +87,4 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         return null;
     }
 }
+

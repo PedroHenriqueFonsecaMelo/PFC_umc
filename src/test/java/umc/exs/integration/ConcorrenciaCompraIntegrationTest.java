@@ -23,7 +23,8 @@ import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.core.livros.LivroService;
-import umc.exs.service.email.EmailService;
+import umc.exs.service.email.EmailServiceGmailAPI;
+import umc.exs.service.email.EmailServiceSmtp;
 import umc.exs.service.email.facade.EmailFacade;
 
 @SpringBootTest
@@ -49,7 +50,10 @@ class ConcorrenciaCompraIntegrationTest {
     private EmailFacade emailFacade;
 
     @MockitoBean
-    private EmailService emailService;
+    private EmailServiceGmailAPI emailService;
+
+    @MockitoBean
+    private EmailServiceSmtp emailServiceSmtp;
 
     /**
      * Limpa o banco de dados desabilitando temporariamente as FKs.

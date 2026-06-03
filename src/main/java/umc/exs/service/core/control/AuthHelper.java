@@ -1,3 +1,4 @@
+// Código corrigido para: umc.exs.service.core.control.AuthHelper
 package umc.exs.service.core.control;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -7,7 +8,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
@@ -25,11 +25,10 @@ public class AuthHelper {
 
     public void authenticate(String email, HttpServletResponse response) {
 
-        UserDetails userDetails =
-                userDetailsService.loadUserByUsername(email);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-        String token = jwtUtil.generateToken(email);
-
+        String token = jwtUtil.generateToken(userDetails);
+        
         jwtUtil.addTokenCookie(response, token);
 
         Authentication authentication =
@@ -41,23 +40,20 @@ public class AuthHelper {
         SecurityContextHolder.getContext()
                 .setAuthentication(authentication);
 
-        Cliente cliente = clienteRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException("Cliente não encontrado"));
-
-        appLogger.loginSuccess(email);
-
-        appLogger.success(
-                AcaoAuditoria.LOGIN_SUCESSO,
-                cliente.getId(),
-                cliente.getEmail(),
-                "Autenticado via JWT");
+        clienteRepository.findByEmail(email).ifPresentOrElse(
+                cliente -> {
+                    appLogger.loginSuccess(email);
+                    appLogger.success(
+                            AcaoAuditoria.LOGIN_SUCESSO,
+                            cliente.getId(),
+                            cliente.getEmail(),
+                            "Autenticado via JWT");
+                },
+                () -> appLogger.loginSuccess(email)
+        );
     }
 
-    public void addTokenCookie(
-            HttpServletResponse response,
-            String token) {
-
+    public void addTokenCookie(HttpServletResponse response, String token) {
         jwtUtil.addTokenCookie(response, token);
     }
 }

@@ -25,11 +25,15 @@ import umc.exs.service.cancelamento.CancelamentoService;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
 public class CancelamentoController {
 
     private final CancelamentoService cancelamentoService;
     private final CancelamentoMapper mapper;
+
+    public CancelamentoController(CancelamentoService cancelamentoService) {
+        this.cancelamentoService = cancelamentoService;
+        this.mapper = org.mapstruct.factory.Mappers.getMapper(CancelamentoMapper.class);
+    }
 
     // ─────────────────────────────────────────────────────────────────
     // CLIENTE: solicitar cancelamento

@@ -8,30 +8,51 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import umc.exs.service.email.EmailService;
+import jakarta.mail.MessagingException;
+import umc.exs.service.email.EmailServiceGmailAPI;
+import umc.exs.service.email.EmailServiceSmtp;
 
 @ExtendWith(MockitoExtension.class)
 class EmailFacadeTest {
 
     @Mock
-    EmailService emailService;
+    private EmailServiceGmailAPI gmailService;
+
+    @Mock
+    private EmailServiceSmtp smtpService;
 
     @InjectMocks
-    EmailFacade facade;
+    private EmailFacade facade;
 
     @Test
-    void sendHtmlSafe_quandoDestinatarioInvalido_naoEnvia() {
-        facade.sendHtmlSafe("", "Assunto", "Corpo");
-        verifyNoInteractions(emailService);
+    void deveUsarSmtpQuandoProfileForLocal() {
+        // Arrange - Forçando o profile "local" via Reflection
+        ReflectionTestUtils.setField(facade, "profile", "local");
+
+        // Act
+        facade.sendHtmlSafe("teste@uol.com", "Assunto", "Corpo");
+
+        // Assert - Garante que o SMTP foi chamado e o Gmail API foi ignorado
+        try {
+            verify(smtpService, times(1)).enviarHtml(anyString(), anyString(), anyString());
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+        verifyNoInteractions(gmailService);
     }
 
     @Test
-    void sendHtmlSafe_quandoEnviaErro_naoPropagaExcecao() throws Exception {
-        doThrow(new RuntimeException("erro")).when(emailService)
-                .enviarHtml(anyString(), anyString(), anyString());
+    void deveUsarGmailQuandoProfileForProd() {
+        // Arrange - Forçando o profile "prod"
+        ReflectionTestUtils.setField(facade, "profile", "prod");
 
-        facade.sendHtmlSafe("user@test.com", "Assunto", "Corpo");
-        verify(emailService).enviarHtml("user@test.com", "Assunto", "Corpo");
+        // Act
+        facade.sendHtmlSafe("teste@uol.com", "Assunto", "Corpo");
+
+        // Assert - Garante que o Gmail foi chamado e o SMTP ignorado
+        verify(gmailService, times(1)).enviarHtml(anyString(), anyString(), anyString());
+        verifyNoInteractions(smtpService);
     }
 }

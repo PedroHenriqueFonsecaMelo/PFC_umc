@@ -41,35 +41,11 @@ spring:
     open-in-view: false
     show-sql: false
 
-  # ===============================
-  # 📧 Email
-  # ===============================
-  mail:
-    host: "${MAIL_HOST}"
-    port: 587
-    username: "${MAIL_USERNAME}"
-    password: "${MAIL_PASSWORD}"
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          ssl:
-            trust: smtp.gmail.com
-            enable: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
-
   servlet:
     multipart:
       max-file-size: 8MB
       max-request-size: 8MB
 
-mail:
-  from: ${MAIL_FROM}
 # ===============================
 # 🌐 Server (Render)
 # ===============================
@@ -141,3 +117,11 @@ logging:
 ADMIN:
   EMAIL: "${ADMIN_EMAIL}"
   PASSWORD: "${ADMIN_PASSWORD}"
+
+# ===============================
+# 📧 Gmail API Configuration
+# ===============================
+gmail:
+  api:
+    credentials-base64: "${GOOGLE_CREDENTIALS_BASE64}"
+    GMAIL_REFRESH_TOKEN: "${GMAIL_REFRESH_TOKEN}"

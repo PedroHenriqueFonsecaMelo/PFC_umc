@@ -1,20 +1,21 @@
 package umc.exs.service.email.facade;
 
 import org.springframework.stereotype.Service;
-
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import umc.exs.service.email.EmailService;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class EmailFacade {
 
+    // O Spring injetará AUTOMATICAMENTE a única implementação ativa do Profile atual
     private final EmailService emailService;
 
-    public void sendHtmlSafe(String to, String subject, String body) {
+    public EmailFacade(EmailService emailService) {
+        this.emailService = emailService;
+    }
 
+    public void sendHtmlSafe(String to, String subject, String body) {
         try {
             if (to == null || to.isBlank()) {
                 log.warn("Email ignorado: destinatário inválido");
