@@ -6,7 +6,7 @@
    ================================================================ */
 (function () {
     var PERFIL_URL = "/api/clientes/meu-perfil-json";
-    var DESTINO_URL = "/clientes/meu-perfil?tab=enderecos";
+    var DESTINO_URL = "/clientes/meu-perfil?aba=enderecos";
     /* Chave única por página — fechar em vitrine não oculta em vender */
     var SS_KEY = "bib_ae_" +
         window.location.pathname.replace(/[^a-z0-9]/gi, "_");
@@ -20,7 +20,7 @@
             "#ae-toast{",
             "  position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;",
             "  width:300px;max-width:calc(100vw - 2rem);",
-            "  background:#fff;border-left:3px solid #722f37;border-radius:8px;",
+            "  background:#fff;border-left:3px solid #2c241b;border-radius:8px;",
             "  box-shadow:0 4px 20px rgba(44,36,27,.16),0 1px 4px rgba(44,36,27,.08);",
             "  padding:14px 14px 14px 14px;",
             "  display:flex;gap:10px;align-items:flex-start;",
@@ -37,7 +37,7 @@
             "}",
             "#ae-toast .ae-link{",
             '  font-family:"DM Sans",sans-serif;font-size:.82rem;',
-            "  font-weight:600;color:#722f37;text-decoration:none;",
+            "  font-weight:600;color:#2c241b;text-decoration:none;",
             "}",
             "#ae-toast .ae-link:hover{text-decoration:underline}",
             "#ae-toast .ae-fechar{",
