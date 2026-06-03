@@ -127,7 +127,7 @@
 .cn-dot {
   width: 8px;
   height: 8px;
-  background: #722f37;
+  background: #2c241b;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -175,7 +175,7 @@
   transform: translateX(-50%) scaleX(0);
   width: 55%;
   height: 1.5px;
-  background: #a04050;
+  background: #2c241b;
   border-radius: 2px;
   transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -417,12 +417,12 @@
 
 .cn-perfil-item:hover {
   background: rgba(114, 47, 55, 0.07);
-  color: #722f37;
+  color: #2c241b;
 }
 
 .cn-sair-item {
   border-top: 1px solid rgba(44, 36, 27, 0.09);
-  color: #722f37;
+  color: #2c241b;
   font-weight: 600;
 }
 
@@ -516,8 +516,8 @@
 
 .cn-modal-btn-sair {
   padding: 0.52rem 1.1rem;
-  background: #722f37;
-  border: 1.5px solid #722f37;
+  background: #2c241b;
+  border: 1.5px solid #2c241b;
   border-radius: 8px;
   color: #f9f6f0;
   font-family: "DM Sans", sans-serif;

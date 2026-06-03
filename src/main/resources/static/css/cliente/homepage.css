@@ -9,7 +9,7 @@
   --ink: #2c241b;
   --paper: #f9f6f0;
   --cream: #ede8df;
-  --accent: #722f37;
+  --accent: #2c241b;
   --forest: #4a5d23;
   --white: #ffffff;
   --muted: #7a6e65;
@@ -58,7 +58,7 @@ body {
   display: inline-block;
   width: 6px;
   height: 6px;
-  background: #722f37;
+  background: #2c241b;
   border-radius: 50%;
   margin-right: 0.5rem;
 }
@@ -77,8 +77,8 @@ body {
   cursor: pointer;
 }
 .topbar-btn-danger:hover {
-  background: #722f37;
-  border-color: #722f37;
+  background: #2c241b;
+  border-color: #2c241b;
   color: #f9f6f0;
 }
 
@@ -147,7 +147,7 @@ body {
   justify-content: center;
   width: 24px;
   height: 24px;
-  background: #722f37;
+  background: #2c241b;
   border-radius: 50%;
   font-size: 0.75rem;
   cursor: pointer;
@@ -218,10 +218,10 @@ body {
 }
 
 .stat-chip.stat-tokens .stat-icon {
-  color: #722f37;
+  color: #2c241b;
 }
 .stat-chip.stat-tokens .stat-value {
-  color: #722f37;
+  color: #2c241b;
 }
 
 /* ============================================================
@@ -244,7 +244,7 @@ body {
 .alert-danger {
   background: rgba(114, 47, 55, 0.08);
   border-color: rgba(114, 47, 55, 0.3);
-  color: #722f37;
+  color: #2c241b;
 }
 
 /* ============================================================
@@ -283,7 +283,7 @@ body {
 
 .tab-btn.active {
   color: #2c241b;
-  border-bottom-color: #722f37;
+  border-bottom-color: #2c241b;
 }
 
 .tab-btn:hover:not(.active) {
@@ -336,7 +336,7 @@ a.tab-btn:hover {
 }
 
 .panel-title-accent {
-  color: #722f37;
+  color: #2c241b;
   margin-right: 0.5rem;
 }
 
@@ -382,7 +382,7 @@ select {
 
 input:focus,
 select:focus {
-  border-color: #722f37;
+  border-color: #2c241b;
 }
 
 input[readonly] {
@@ -418,6 +418,13 @@ input::placeholder {
 .btn-tech-primary:hover {
   background: transparent;
   color: #2c241b;
+}
+.btn-tech-primary:disabled {
+  background: #2c241b;
+  color: #f9f6f0;
+  border-color: #2c241b;
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .btn-tech-secondary {
@@ -525,8 +532,8 @@ legend {
 .btn-remover-endereco,
 .btn-remover-cartao {
   background: transparent;
-  color: #722f37;
-  border: 1px solid #722f37;
+  color: #2c241b;
+  border: 1px solid #2c241b;
   border-radius: 8px;
   padding: 0.4rem 0.85rem;
   font-size: 0.72rem;
@@ -539,7 +546,7 @@ legend {
 }
 .btn-remover-endereco:hover,
 .btn-remover-cartao:hover {
-  background: #722f37;
+  background: #2c241b;
   color: #f9f6f0;
 }
 
@@ -553,7 +560,7 @@ legend {
   align-items: center;
   gap: 0.4rem;
   padding: 0.48rem 1.1rem;
-  background: #722f37;
+  background: #2c241b;
   color: #f9f6f0;
   border: none;
   border-radius: 8px;
@@ -580,7 +587,7 @@ legend {
   box-shadow: 0 1px 4px rgba(44, 36, 27, 0.06);
 }
 .end-card--ativo {
-  border: 2px solid #722f37;
+  border: 2px solid #2c241b;
   box-shadow: 0 2px 10px rgba(114, 47, 55, 0.12);
 }
 
@@ -588,7 +595,7 @@ legend {
   position: absolute;
   top: 0.7rem;
   right: 0.85rem;
-  background: #722f37;
+  background: #2c241b;
   color: #fff;
   font-size: 0.68rem;
   font-weight: 700;
@@ -644,11 +651,11 @@ legend {
 .end-btn-acao--danger {
   background: transparent;
   border: 1.5px solid rgba(114, 47, 55, 0.35);
-  color: #722f37;
+  color: #2c241b;
 }
 .end-btn-acao--danger:hover {
   background: rgba(114, 47, 55, 0.07);
-  border-color: #722f37;
+  border-color: #2c241b;
 }
 
 /* Formulário de endereço — card com header escuro */
@@ -667,7 +674,7 @@ legend {
   justify-content: space-between;
   padding: 1rem 1.4rem;
   background: #2c241b;
-  border-bottom: 3px solid #722f37;
+  border-bottom: 3px solid #2c241b;
 }
 
 .end-form-header span {
@@ -685,7 +692,7 @@ legend {
   display: inline-block;
   width: 7px;
   height: 7px;
-  background: #722f37;
+  background: #2c241b;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -714,7 +721,7 @@ legend {
 
 /* Labels em vinho dentro dos formulários de endereço */
 .end-form-body label {
-  color: #722f37;
+  color: #2c241b;
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -731,7 +738,7 @@ legend {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .end-form-body input[type="text"]:focus {
-  border-color: #722f37;
+  border-color: #2c241b;
   box-shadow: 0 0 0 3px rgba(114, 47, 55, 0.1);
   background: #fffcf9;
 }
@@ -742,13 +749,13 @@ legend {
 /* Mensagem de erro dentro do form */
 .erro-endereco {
   display: none;
-  color: #722f37;
+  color: #2c241b;
   font-size: 0.82rem;
   font-weight: 500;
   margin-bottom: 0.85rem;
   padding: 0.45rem 0.8rem;
   background: rgba(114, 47, 55, 0.07);
-  border-left: 3px solid #722f37;
+  border-left: 3px solid #2c241b;
   border-radius: 0 6px 6px 0;
 }
 
@@ -785,7 +792,7 @@ legend {
 
 .end-btn-save {
   padding: 0.55rem 1.5rem;
-  background: #722f37;
+  background: #2c241b;
   color: #f9f6f0;
   border: none;
   border-radius: 8px;
@@ -837,7 +844,7 @@ legend {
 }
 .link-arrow {
   margin-left: auto;
-  color: #722f37;
+  color: #2c241b;
 }
 
 /* ============================================================
@@ -851,7 +858,7 @@ legend {
 }
 
 .btn-danger-link {
-  color: #722f37;
+  color: #2c241b;
   font-size: 0.8rem;
   text-decoration: none;
   border-bottom: 1px solid rgba(114, 47, 55, 0.3);
@@ -865,7 +872,7 @@ legend {
   font-family: inherit;
 }
 .btn-danger-link:hover {
-  border-bottom-color: #722f37;
+  border-bottom-color: #2c241b;
 }
 
 /* ============================================================
@@ -898,7 +905,7 @@ legend {
 }
 
 .gami-aviso a {
-  color: #722f37;
+  color: #2c241b;
 }
 
 .gami-ranking-lista {
@@ -931,7 +938,7 @@ legend {
   font-size: 1rem !important;
 }
 .gami-perfil-nivel {
-  color: #722f37 !important;
+  color: #2c241b !important;
 }
 .gami-perfil-xp {
   color: #7a6e65 !important;
@@ -945,14 +952,14 @@ legend {
   background: rgba(44, 36, 27, 0.08) !important;
 }
 .gami-barra-fill {
-  background: linear-gradient(90deg, #722f37, #4a5d23) !important;
+  background: linear-gradient(90deg, #2c241b, #4a5d23) !important;
 }
 
 .gami-detalhe-item {
   color: #7a6e65 !important;
 }
 .gami-detalhe-xp {
-  color: #722f37 !important;
+  color: #2c241b !important;
 }
 
 .gami-rank-item {
@@ -979,7 +986,6 @@ legend {
    ============================================================ */
 .senha-card {
   margin-top: 1.5rem;
-  border-top: 3px solid var(--accent);
 }
 
 .senha-instrucao {

@@ -841,24 +841,24 @@
                         </div>
                         <div class="form-submit-row">
                             <button type="submit" class="btn-tech-primary">
-                                ▶ Salvar Dados
+                                Salvar Dados
                             </button>
                         </div>
                     </form>
 
                     <!-- Alterar Senha -->
+                    <form
+                        th:action="@{/clientes/alterar-senha-perfil}"
+                        method="post"
+                    >
                     <div class="panel-card senha-card">
                         <h2 class="panel-title">
-                            <span class="panel-title-accent">🔑</span> Alterar
+                            <span class="panel-title-accent">◉</span> Alterar
                             Senha
                         </h2>
                         <p class="senha-instrucao">
                             Confirme sua senha atual antes de definir a nova.
                         </p>
-                        <form
-                            th:action="@{/clientes/alterar-senha-perfil}"
-                            method="post"
-                        >
                             <div class="senha-form-grid">
                                 <div class="form-group-2">
                                     <label>① Senha atual</label>
@@ -1034,17 +1034,17 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-submit-row">
-                                <button
-                                    type="submit"
-                                    id="btnAlterarSenha"
-                                    class="btn-tech-primary"
-                                >
-                                    ▶ Alterar Senha
-                                </button>
-                            </div>
-                        </form>
                     </div>
+                    <div class="form-submit-row">
+                        <button
+                            type="submit"
+                            id="btnAlterarSenha"
+                            class="btn-tech-primary"
+                        >
+                            Alterar Senha
+                        </button>
+                    </div>
+                    </form>
                 </div>
 
                 <!-- ------------------------------------------------

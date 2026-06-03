@@ -57,11 +57,10 @@
 
         var div = document.createElement("div");
         div.id = "ae-toast";
-        div.innerHTML = '<span class="ae-icon">📍</span>' +
-            '<div class="ae-corpo">' +
+        div.innerHTML = '<div class="ae-corpo">' +
             '<div class="ae-texto">Cadastre seu endereço de entrega para comprar livros</div>' +
             '<a class="ae-link" href="' + DESTINO_URL +
-            '">Cadastrar agora →</a>' +
+            '">Cadastrar agora</a>' +
             "</div>" +
             '<button class="ae-fechar" aria-label="Fechar" onclick="window.__aeFechar()">✕</button>';
         document.body.appendChild(div);

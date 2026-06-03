@@ -13,7 +13,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 @Service
-@Profile("{local, test}")
+@Profile({"local", "test"})
 public class EmailServiceSmtp implements EmailService {
 
     private final JavaMailSender mailSender;
