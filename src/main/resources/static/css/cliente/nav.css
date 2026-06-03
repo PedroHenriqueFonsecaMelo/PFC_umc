@@ -1,41 +1,125 @@
 /* ============================================================
    nav.css — Barra de navegação unificada · Bibliotroca
-   Usada em todas as páginas autenticadas do cliente.
    ============================================================ */
 
 .client-nav {
   position: sticky;
   top: 0;
   z-index: 100;
-  display: flex;
-  align-items: center;
-  padding: 0 5vw;
-  height: 108px;
-  background: #2c241b;
-  gap: 0.5rem;
+  display: block;
   line-height: 1.2;
   font-size: 16px;
-  border-bottom: 1px solid rgba(249, 246, 240, 0.06);
+  color: rgba(44, 36, 27, 0.85);
 }
 
-/* ── Logo ── */
-.cn-brand {
-  font-family: "Playfair Display", serif;
-  font-style: italic;
-  font-size: 2.2rem;
-  color: #f9f6f0;
-  text-decoration: none;
+/* ── Faixa preta com marquee ── */
+.cn-topbar {
+  background: #0e0e0e;
+  height: 44px;
   display: flex;
   align-items: center;
+  padding-left: calc(5vw + 112px + 1.5rem);
+  padding-right: 5vw;
+  overflow: hidden;
+}
+
+.cn-marquee-outer {
+  overflow: hidden;
+  flex: 1;
+}
+
+.cn-marquee-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: cnMarquee 38s linear infinite;
+}
+
+.cn-marquee-track span {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.74rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.58);
+  letter-spacing: 0.07em;
+}
+
+.cn-pulse-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+  position: relative;
+  animation: cnPulseDot 1.8s ease-in-out infinite;
+}
+
+.cn-pulse-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: cnPulseRing 1.8s ease-in-out infinite;
+}
+
+@keyframes cnPulseDot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+@keyframes cnPulseRing {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  70%  { transform: scale(2.2); opacity: 0; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes cnMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ── Faixa cinza de navegação ── */
+.cn-nav-row {
+  display: flex;
+  align-items: center;
+  height: 68px;
+  padding: 0 5vw 0 calc(5vw + 112px + 1.5rem);
   gap: 0.5rem;
+  background: rgba(126, 126, 130, 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(44, 36, 27, 0.1);
+}
+
+
+/* ── Logo / Foto de perfil ── */
+.cn-brand {
+  position: absolute;
+  left: 5vw;
+  top: 0;
+  width: 112px;
+  height: 112px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  text-decoration: none;
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-size: 1.75rem;
+  color: #2c241b;
   flex-shrink: 0;
-  margin-right: 2rem;
-  padding-right: 2rem;
-  border-right: 1px solid rgba(249, 246, 240, 0.1);
-  line-height: 1;
-  letter-spacing: -0.01em;
+  border: none;
+  outline: none;
+  box-shadow: none;
   transition: opacity 0.2s;
 }
+
 .cn-brand:hover {
   opacity: 0.85;
 }
@@ -66,7 +150,7 @@
   position: relative;
   background: transparent;
   border: none;
-  color: rgba(249, 246, 240, 0.65);
+  color: rgba(44, 36, 27, 0.65);
   padding: 0.75rem 1.4rem;
   border-radius: 0;
   font-family: "DM Sans", sans-serif;
@@ -97,7 +181,7 @@
 }
 
 .cn-btn:hover {
-  color: #f9f6f0;
+  color: #2c241b;
 }
 
 .cn-btn:hover::after {
@@ -113,14 +197,19 @@
   margin-left: 0.5rem;
 }
 
+/* Estante fica sempre por último */
+#cnMiniCartWrapper {
+  order: 99;
+}
+
 /* ── Display de saldo ── */
 .cn-saldo {
   font-family: monospace;
   font-size: 0.88rem;
   line-height: 1.2;
-  color: rgba(249, 246, 240, 0.88);
-  background: rgba(249, 246, 240, 0.07);
-  border: 1px solid rgba(249, 246, 240, 0.15);
+  color: rgba(44, 36, 27, 0.88);
+  background: rgba(44, 36, 27, 0.07);
+  border: 1px solid rgba(44, 36, 27, 0.18);
   padding: 0.32rem 0.9rem;
   white-space: nowrap;
 }
@@ -141,13 +230,18 @@
 
 /* ── Responsivo ── */
 @media (max-width: 860px) {
-  .client-nav {
-    height: 86px;
+  .cn-topbar {
+    height: 32px;
+    padding-left: calc(5vw + 89px + 1.25rem);
+  }
+  .cn-nav-row {
+    height: 57px;
+    padding-left: calc(5vw + 89px + 1.25rem);
   }
   .cn-brand {
-    font-size: 1.7rem;
-    margin-right: 1.25rem;
-    padding-right: 1.25rem;
+    width: 89px;
+    height: 89px;
+    font-size: 1.5rem;
   }
   .cn-btn {
     font-size: 0.78rem;
@@ -164,16 +258,19 @@
 }
 
 @media (max-width: 560px) {
-  .client-nav {
-    height: 70px;
-    padding: 0 4vw;
-    gap: 0.3rem;
+  .cn-topbar {
+    display: none;
   }
   .cn-brand {
-    font-size: 1.4rem;
-    border-right: none;
-    margin-right: 0.5rem;
-    padding-right: 0;
+    width: 47px;
+    height: 47px;
+    font-size: 0.85rem;
+    overflow: hidden;
+  }
+  .cn-nav-row {
+    height: 47px;
+    padding: 0 4vw 0 calc(4vw + 55px);
+    gap: 0.3rem;
   }
   .cn-btn {
     font-size: 0.7rem;
@@ -264,15 +361,15 @@
   border: none;
   border-radius: 8px;
   padding: 0.3rem 0.4rem;
-  color: rgba(249, 246, 240, 0.85);
+  color: rgba(44, 36, 27, 0.85);
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.18s, color 0.18s;
 }
 
 .cn-perfil-btn:hover {
-  background: rgba(249, 246, 240, 0.1);
-  color: #f9f6f0;
+  background: rgba(44, 36, 27, 0.1);
+  color: #2c241b;
 }
 
 .cn-perfil-dropdown {

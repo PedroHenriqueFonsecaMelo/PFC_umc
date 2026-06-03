@@ -41,7 +41,7 @@
     <header class="masthead">
       <div class="masthead-top">
         <span class="masthead-tagline" id="mastheadTagline"></span>
-        <a class="masthead-logo" th:href="@{/}"><img src="/img/logo-bibliotroca.png" alt="Bibliotroca" style="height:120px;width:auto;vertical-align:middle;margin-right:10px;">Biblio<em>troca</em></a>
+        <a class="masthead-logo" th:href="@{/}">Biblio<em>troca</em></a>
         <div class="masthead-actions">
           <div class="nav-guest" id="navGuest">
             <a class="btn-classic" th:href="@{/entrar}">Entrar</a>
@@ -66,15 +66,15 @@
     <!-- HERO -->
     <section class="hero">
       <div class="hero-banner">
-        <p class="hero-kicker">Marketplace de Livros Usados</p>
-        <h1>
+        <p class="hero-kicker hero-anim-1">Marketplace de Livros Usados</p>
+        <h1 class="hero-anim-2">
           Dê uma nova vida<br>aos seus <em>livros</em>
         </h1>
-        <p class="hero-sub">
+        <p class="hero-sub hero-anim-3">
           Cada livro que passa de mão em mão carrega uma história — e começa uma
           nova.
         </p>
-        <div class="hero-cta">
+        <div class="hero-cta hero-anim-4">
           <a class="btn-primary" th:href="@{/livros/vitrine}"
           >Explorar a vitrine</a>
           <a
@@ -226,7 +226,7 @@
           </p>
         </div>
         <div class="how-steps">
-          <div class="how-step reveal">
+          <div class="how-step reveal" style="--delay:0s">
             <div class="how-step-num">01</div>
             <span class="how-step-icon">📖</span>
             <h3>Cadastre-se</h3>
@@ -235,7 +235,7 @@
               apenas do básico.
             </p>
           </div>
-          <div class="how-step reveal">
+          <div class="how-step reveal" style="--delay:0.12s">
             <div class="how-step-num">02</div>
             <span class="how-step-icon">📦</span>
             <h3>Envie seus livros</h3>
@@ -244,7 +244,7 @@
               cada título.
             </p>
           </div>
-          <div class="how-step reveal">
+          <div class="how-step reveal" style="--delay:0.24s">
             <div class="how-step-num">03</div>
             <span class="how-step-icon">🪙</span>
             <h3>Ganhe tokens</h3>
@@ -253,7 +253,7 @@
               outros títulos.
             </p>
           </div>
-          <div class="how-step reveal">
+          <div class="how-step reveal" style="--delay:0.36s">
             <div class="how-step-num">04</div>
             <span class="how-step-icon">🏆</span>
             <h3>Suba no ranking</h3>

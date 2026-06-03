@@ -1007,11 +1007,49 @@ footer::before {
   }
 }
 
-/* ── Fade-in on scroll ── */
+/* ── Animações de entrada ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes logoIn {
+  from { opacity: 0; letter-spacing: 0.06em; }
+  to   { opacity: 1; letter-spacing: -0.02em; }
+}
+@keyframes spineIn {
+  from { opacity: 0; transform: rotate(180deg) translateY(40px); }
+  to   { opacity: 1; transform: rotate(180deg) translateY(0); }
+}
+
+/* Masthead logo */
+.masthead-logo {
+  animation: logoIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+/* Hero stagger */
+.hero-anim-1 { animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both; }
+.hero-anim-2 { animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s  both; }
+.hero-anim-3 { animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both; }
+.hero-anim-4 { animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.5s  both; }
+
+/* Bookshelf spines com rise escalonado */
+.shelf-books .spine { animation: spineIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.spine-1  { animation-delay: 0.5s; }
+.spine-2  { animation-delay: 0.56s; }
+.spine-3  { animation-delay: 0.62s; }
+.spine-4  { animation-delay: 0.68s; }
+.spine-5  { animation-delay: 0.74s; }
+.spine-6  { animation-delay: 0.80s; }
+.spine-7  { animation-delay: 0.86s; }
+.spine-8  { animation-delay: 0.92s; }
+.spine-9  { animation-delay: 0.98s; }
+.spine-10 { animation-delay: 1.04s; }
+
+/* Fade-in on scroll com suporte a stagger via --delay */
 .reveal {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.55s ease, transform 0.55s ease;
+  transform: translateY(22px);
+  transition: opacity 0.6s ease var(--delay, 0s), transform 0.6s ease var(--delay, 0s);
 }
 .reveal.visible {
   opacity: 1;

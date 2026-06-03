@@ -69,18 +69,11 @@
     </div>
 
     <!-- Voltar -->
-    <a th:href="@{/}" href="/" class="back-link">← Voltar para o início</a>
+    <a th:href="@{/}" href="/" class="back-link">Voltar</a>
 
     <!-- Layout novo: órbita + login -->
     <main class="page-content">
-      <!-- Lado esquerdo: órbita de capas -->
-      <div class="orbit-side" aria-hidden="true">
-        <div class="orbit-wrap">
-          <ul class="orbit-list" id="orbitList"></ul>
-        </div>
-      </div>
-
-      <!-- Lado direito: card de login -->
+      <!-- Card de login -->
       <div class="login-side">
         <div class="book-page">
           <div class="page-header">
@@ -162,7 +155,7 @@
                 </button>
               </div>
             </div>
-            <button type="submit" class="btn-entrar">Abrir a biblioteca</button>
+            <button type="submit" class="btn-entrar">Abrir Bibliotroca</button>
           </form>
 
           <hr class="divider" />
@@ -195,6 +188,5 @@
 
     <script th:src="@{/js/cliente/login_cliente.js}"></script>
     <script th:src="@{/js/cliente/bookshelf-login.js}"></script>
-    <script th:src="@{/js/cliente/orbit-login.js}"></script>
   </body>
 </html>

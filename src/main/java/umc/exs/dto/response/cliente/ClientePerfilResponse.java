@@ -20,6 +20,7 @@ public class ClientePerfilResponse {
     private Long id;
     private String nome;
     private String email;
+    private String fotoPerfil;
     private String cpfMascarado;
     private LocalDate dataNascimento;
     private LocalDateTime dataCadastro;
