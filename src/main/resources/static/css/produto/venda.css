@@ -105,15 +105,15 @@ body {
   letter-spacing: 0.09em;
   text-transform: uppercase;
   padding: 0.5rem 1.25rem;
-  border: 1.5px solid var(--forest);
+  border: 1.5px solid var(--ink);
   background: transparent;
-  color: var(--forest);
+  color: var(--ink);
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
   border-radius: 8px;
 }
 .btn-add:hover:not(:disabled) {
-  background: var(--forest);
+  background: var(--ink);
   color: var(--white);
 }
 .btn-add:disabled {
@@ -430,6 +430,7 @@ body {
 
 /* ── FOOTER ── */
 footer {
+  margin-top: auto;
   background: #000;
   color: rgba(249, 246, 240, 0.35);
   padding: 2rem 5vw;
@@ -452,7 +453,7 @@ footer::before {
   margin-bottom: 0.3rem;
 }
 .footer-logo em {
-  color: var(--accent);
+  color: #722f37;
 }
 .footer-copy {
   font-size: 0.68rem;

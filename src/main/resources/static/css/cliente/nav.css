@@ -10,6 +10,7 @@
   line-height: 1.2;
   font-size: 16px;
   color: rgba(44, 36, 27, 0.85);
+  flex-shrink: 0;
 }
 
 /* ── Faixa preta com marquee ── */
@@ -117,11 +118,11 @@
   border: none;
   outline: none;
   box-shadow: none;
-  transition: opacity 0.2s;
+  transition: transform 0.2s ease;
 }
 
 .cn-brand:hover {
-  opacity: 0.85;
+  transform: scale(1.08);
 }
 
 .cn-dot {
@@ -563,4 +564,42 @@
 .book-shelf-nav.shelf-animating .book-shelf__shelf {
   animation: shelf-lift 0.4s ease 1;
   transform-origin: 50% 50%;
+}
+
+/* ── Sticky footer ── */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Footer padrão ── */
+footer {
+  margin-top: auto;
+  background: #000;
+  color: rgba(249, 246, 240, 0.35);
+  padding: 2rem 5vw;
+  text-align: center;
+}
+footer::before {
+  content: "◆  ◆  ◆";
+  display: block;
+  font-size: 0.6rem;
+  letter-spacing: 0.5em;
+  color: rgba(249, 246, 240, 0.15);
+  margin-bottom: 1.25rem;
+}
+.footer-logo {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: rgba(249, 246, 240, 0.5);
+  font-style: italic;
+  margin-bottom: 0.3rem;
+}
+.footer-logo em {
+  color: #722f37;
+}
+.footer-copy {
+  font-size: 0.68rem;
 }
