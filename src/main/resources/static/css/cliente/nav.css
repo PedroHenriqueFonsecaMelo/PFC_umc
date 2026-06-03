@@ -150,7 +150,7 @@
   position: relative;
   background: transparent;
   border: none;
-  color: rgba(44, 36, 27, 0.65);
+  color: #2c241b;
   padding: 0.75rem 1.4rem;
   border-radius: 0;
   font-family: "DM Sans", sans-serif;
@@ -207,7 +207,7 @@
   font-family: monospace;
   font-size: 0.88rem;
   line-height: 1.2;
-  color: rgba(44, 36, 27, 0.88);
+  color: #2c241b;
   background: rgba(44, 36, 27, 0.07);
   border: 1px solid rgba(44, 36, 27, 0.18);
   padding: 0.32rem 0.9rem;
@@ -361,7 +361,7 @@
   border: none;
   border-radius: 0;
   padding: 0.3rem 0.45rem;
-  color: rgba(44, 36, 27, 0.65);
+  color: #2c241b;
   cursor: pointer;
   flex-shrink: 0;
   position: relative;
