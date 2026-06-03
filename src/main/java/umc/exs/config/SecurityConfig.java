@@ -79,9 +79,10 @@ public class SecurityConfig {
                                                                                                 +
                                                                                                 "https://openlibrary.org "
                                                                                                 +
+                                                                                                "https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.js.map "
+                                                                                                +
                                                                                                 "https://viacep.com.br; "
                                                                                                 +
-
                                                                                                 "img-src 'self' data: "
                                                                                                 +
                                                                                                 "https://via.placeholder.com "
