@@ -14,12 +14,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import io.github.manoelcampos.dtogen.DTO;
+
 import umc.exs.model.enums.StatusPost;
 
 @Entity
 @Table(name = "post_blog")
-@DTO
+
 @Data
 @Builder
 @NoArgsConstructor

@@ -12,7 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import io.github.manoelcampos.dtogen.DTO;
+
 
 /**
  * Armazena o total de visitas por dia.
@@ -20,7 +20,7 @@ import io.github.manoelcampos.dtogen.DTO;
  */
 @Entity
 @Table(name = "visita_site")
-@DTO
+
 @Data
 @Builder
 @NoArgsConstructor

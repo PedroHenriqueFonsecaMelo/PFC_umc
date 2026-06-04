@@ -24,12 +24,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import io.github.manoelcampos.dtogen.DTO;
+
 import umc.exs.model.entidades.usuario.Cliente;
 
 @Entity
 @Table(name = "resposta_forum")
-@DTO
+
 @Getter
 @Setter
 @Builder

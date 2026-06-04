@@ -15,7 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import io.github.manoelcampos.dtogen.DTO;
+
 import umc.exs.model.entidades.usuario.Cliente;
 
 /**
@@ -25,7 +25,7 @@ import umc.exs.model.entidades.usuario.Cliente;
  */
 @Entity
 @Table(name = "cupom_uso", uniqueConstraints = @UniqueConstraint(columnNames = { "cupom_id", "cliente_id" }))
-@DTO
+
 @Data
 @Builder
 @NoArgsConstructor

@@ -19,10 +19,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import io.github.manoelcampos.dtogen.DTO;
+
 
 @Entity
-@DTO
+
 @Getter
 @Setter
 @Builder

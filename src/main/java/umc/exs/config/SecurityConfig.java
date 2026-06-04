@@ -62,20 +62,20 @@ public class SecurityConfig {
                                                                                                 +
                                                                                                 "https://cdnjs.cloudflare.com; "
                                                                                                 +
-
                                                                                                 "font-src 'self' " +
                                                                                                 "https://fonts.gstatic.com "
                                                                                                 +
                                                                                                 "https://cdnjs.cloudflare.com; "
                                                                                                 +
-
                                                                                                 "script-src 'self' 'unsafe-inline' "
                                                                                                 +
                                                                                                 "https://cdn.jsdelivr.net; "
                                                                                                 +
-
-                                                                                                "connect-src 'self' " +
+                                                                                                "connect-src 'self' "
+                                                                                                +
                                                                                                 "https://www.googleapis.com "
+                                                                                                +
+                                                                                                "https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.js.map "
                                                                                                 +
                                                                                                 "https://openlibrary.org "
                                                                                                 +

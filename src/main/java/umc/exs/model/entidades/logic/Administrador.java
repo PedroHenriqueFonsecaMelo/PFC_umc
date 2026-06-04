@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import io.github.manoelcampos.dtogen.DTO;
+
 
 @Entity
 @Table(name = "admins")
@@ -17,7 +17,7 @@ import io.github.manoelcampos.dtogen.DTO;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@DTO
+
 public class Administrador {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

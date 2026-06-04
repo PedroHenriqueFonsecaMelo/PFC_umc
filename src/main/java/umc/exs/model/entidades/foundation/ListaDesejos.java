@@ -2,14 +2,14 @@ package umc.exs.model.entidades.foundation;
 
 import jakarta.persistence.*;
 import lombok.*;
-import io.github.manoelcampos.dtogen.DTO;
+
 import umc.exs.model.entidades.usuario.Cliente;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "lista_desejos", uniqueConstraints = @UniqueConstraint(columnNames = { "cliente_id", "isbn" }))
-@DTO
+
 @Data
 @Builder
 @NoArgsConstructor

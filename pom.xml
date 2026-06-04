@@ -93,11 +93,6 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>io.github.manoelcampos</groupId>
-            <artifactId>dtogen</artifactId>
-            <version>2.1.7</version>
-        </dependency>
-        <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>1.5.5.Final</version>
@@ -188,11 +183,6 @@
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                             <version>1.18.38</version>
-                        </path>
-                        <path>
-                            <groupId>io.github.manoelcampos</groupId>
-                            <artifactId>dtogen</artifactId>
-                            <version>2.1.7</version>
                         </path>
                         <path>
                             <groupId>org.projectlombok</groupId>

@@ -18,11 +18,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mercadopago.MercadoPagoConfig;
 
 import umc.exs.dto.request.compra.CarrinhoCompraRequest;
 import umc.exs.dto.response.compras.CarrinhoCompraResponse;
 import umc.exs.service.core.livros.LivroService;
+import umc.exs.service.email.EmailService; // Importa a interface genérica
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -38,11 +38,11 @@ class LivroControllerApiIntegrationTest {
     @MockitoBean
     private JavaMailSender javaMailSender;
 
-    @MockitoBean
-    private MercadoPagoConfig mercadoPagoConfig;
-
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private EmailService emailService;
 
     @Test
     void comprarCarrinho_SemAuth_ReturnsUnauthorized() throws Exception {
@@ -57,7 +57,6 @@ class LivroControllerApiIntegrationTest {
 
     @Test
     void comprarCarrinho_ComAuth_ReturnsOk() throws Exception {
-
         CarrinhoCompraRequest request = new CarrinhoCompraRequest();
         request.setLivroIds(List.of(1L));
 

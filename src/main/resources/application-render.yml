@@ -67,12 +67,15 @@ jwt:
   expiration: "${JWT_EXPIRATION}"
   cookie:
     name: token
+    secure: true
+    samesite: Strict
+
 
 # ===============================
 # 🌍 App config
 # ===============================
 app:
-  base-url: "${APP_BASE_URL:http://localhost:8080}"
+  base-url: "${APP_BASE_URL:${RENDER_EXTERNAL_URL:http://localhost:8080}}"
   seed:
     mode: stress
 

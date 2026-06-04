@@ -137,15 +137,23 @@ public class AdminViewController {
             @RequestParam(required = false) String dataFim,
             Model model) {
 
+        String filtroEmail = (emailUsuario != null && !emailUsuario.trim().isEmpty()) ? emailUsuario : null;
+        String filtroAcao = (acao != null && !acao.trim().isEmpty()) ? acao : null;
+        String filtroDataIni = (dataInicio != null && !dataInicio.trim().isEmpty()) ? dataInicio : null;
+        String filtroDataFimClean = (dataFim != null && !dataFim.trim().isEmpty()) ? dataFim : null;
+
         List<LogAuditoria> logs = logAuditoriaService.buscarComFiltros(emailUsuario, acao, dataInicio, dataFim);
         List<String> acoes = logAuditoriaService.buscarAcoesDistintas();
 
+        if (logs == null) logs = java.util.Collections.emptyList();
+        if (acoes == null) acoes = java.util.Collections.emptyList();
+
         model.addAttribute("logs", logs);
         model.addAttribute("acoes", acoes);
-        model.addAttribute("filtroEmail", emailUsuario != null ? emailUsuario : "");
-        model.addAttribute("filtroAcao", acao != null ? acao : "");
-        model.addAttribute("filtroDataInicio", dataInicio != null ? dataInicio : "");
-        model.addAttribute("filtroDataFim", dataFim != null ? dataFim : "");
+        model.addAttribute("filtroEmail", filtroEmail != null ? filtroEmail : "");
+        model.addAttribute("filtroAcao", filtroAcao != null ? filtroAcao : "");
+        model.addAttribute("filtroDataInicio", filtroDataIni != null ? filtroDataIni : "");
+        model.addAttribute("filtroDataFim", filtroDataFimClean != null ? filtroDataFimClean : "");
         model.addAttribute("totalLogs", logs.size());
 
         return "admin/auditoria";

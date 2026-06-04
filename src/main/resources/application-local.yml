@@ -56,6 +56,8 @@ jwt:
   expiration: 86400000
   cookie:
     name: token
+    secure: false
+    samesite: Lax
 
 app:
   allowed-origin: "https://localhost:8443"

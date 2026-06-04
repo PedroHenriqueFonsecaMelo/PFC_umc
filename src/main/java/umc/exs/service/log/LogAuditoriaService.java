@@ -148,8 +148,11 @@ public class LogAuditoriaService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
         // Converte strings em LocalDateTime, ou null se não informado
-        LocalDate date = LocalDate.parse(dataInicio);
-        LocalDateTime inicioLDT = date.atStartOfDay();
+        LocalDateTime inicioLDT = null;
+        if (dataInicio != null && !dataInicio.isBlank()) {
+            LocalDate date = LocalDate.parse(dataInicio);
+            inicioLDT = date.atStartOfDay();
+        }
 
         LocalDateTime fimLDT = null;
         if (dataFim != null && !dataFim.isBlank()) {

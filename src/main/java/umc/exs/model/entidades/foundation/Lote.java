@@ -5,14 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import io.github.manoelcampos.dtogen.DTO;
+
 import umc.exs.model.entidades.usuario.Cliente;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@DTO
+
 @Data
 @Builder
 @NoArgsConstructor

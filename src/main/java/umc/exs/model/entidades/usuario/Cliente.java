@@ -32,7 +32,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import io.github.manoelcampos.dtogen.DTO;
+
 import umc.exs.converter.LocalDateStringConverter;
 import umc.exs.converter.CpfConverter;
 import umc.exs.model.entidades.livro.AvaliacaoLivro;
@@ -40,7 +40,7 @@ import umc.exs.model.enums.Genero;
 
 @Entity
 @Table(name = "users")
-@DTO
+
 @Getter
 @Setter
 @Builder

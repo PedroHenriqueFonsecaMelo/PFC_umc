@@ -29,3 +29,18 @@ mercadopago:
 ADMIN:
   EMAIL: admin@test.com
   PASSWORD: admin123
+
+jwt:
+  secret: "9a4f2c8d3e1b7f6a5c4d3e2b1a0f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2" # Minimo 64 caracteres
+  expiration: "3600000"
+  cookie:
+    name: token
+
+gmail:
+  api:
+    credentials-base64: "dGVzdGU=" # 'teste' em base64
+    GMAIL_REFRESH_TOKEN: "mock_refresh_token"
+
+google:
+  books:
+    api-key: "mock_google_books_key"

@@ -27,13 +27,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import io.github.manoelcampos.dtogen.DTO;
+
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.CategoriaForum;
 
 @Entity
 @Table(name = "topico_forum")
-@DTO
+
 @Getter
 @Setter
 @Builder
