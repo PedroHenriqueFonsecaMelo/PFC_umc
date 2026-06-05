@@ -235,7 +235,7 @@ async function carregarNavUsuario() {
       const cliente = await res.json();
       const primeiroNome = (cliente.nome || "").split(" ")[0];
       const fotoHtml = cliente.fotoPerfil
-        ? `<img src="${cliente.fotoPerfil}" style="width:84px;height:84px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:.4rem;">`
+        ? `<a href="/clientes/meu-perfil" class="nav-foto-link"><img src="${cliente.fotoPerfil}" alt="Meu perfil"></a>`
         : "";
       document.getElementById("mastheadTagline").innerHTML = fotoHtml +
         "Olá, <strong>" + primeiroNome + "</strong>";

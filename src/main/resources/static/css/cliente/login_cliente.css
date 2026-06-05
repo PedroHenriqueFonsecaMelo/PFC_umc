@@ -82,7 +82,7 @@ body {
     font-size: 0.88rem;
     font-weight: 600;
     line-height: 1;
-    color: rgba(114, 47, 55, 0.72);
+    color: #000;
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -90,16 +90,16 @@ body {
     letter-spacing: 0.03em;
     padding: 6px 12px;
     border-radius: 6px;
-    border: 1.5px solid rgba(114, 47, 55, 0.28);
+    border: 1.5px solid #000;
     background: rgba(255, 255, 255, 0.55);
     backdrop-filter: blur(6px);
     transition: color 0.22s, background 0.22s, border-color 0.22s;
     box-sizing: border-box;
 }
 .back-link:hover {
-    color: #722f37;
+    color: #000;
     background: rgba(255, 255, 255, 0.88);
-    border-color: rgba(114, 47, 55, 0.55);
+    border-color: #000;
 }
 
 .page-content {
@@ -646,6 +646,10 @@ body {
     margin-top: 0;
     position: relative;
     top: 0;
+    border: 1px solid #000;
+}
+.login-side .book-page::after {
+    display: none;
 }
 
 .book {
