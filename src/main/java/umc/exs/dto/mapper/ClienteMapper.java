@@ -4,10 +4,12 @@ import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import umc.exs.dto.request.cliente.EnderecoShared;
 import umc.exs.dto.request.cliente.SignupRequest;
 import umc.exs.dto.response.admin.VendaResponse;
 import umc.exs.dto.response.cliente.ClientePerfilResponse;
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.model.entidades.livro.Livro;
 
 @Mapper(componentModel = "spring")
@@ -27,12 +29,16 @@ public interface ClienteMapper {
     @Mapping(source = "saldoTokens", target = "saldoTokens")
     ClientePerfilResponse toPerfilResponse(Cliente cliente);
 
-    // SIGNUP REQUEST → CLIENTE
     Cliente paraEntidade(SignupRequest request);
 
-    // CONVERSÃO DE LISTA (O MapStruct usará o método individual abaixo para montar esta lista)
     List<VendaResponse.resumo> toVendaResumoList(List<Livro> livros);
 
-    // CONVERSÃO INDIVIDUAL (Essencial para o MapStruct entender como ligar Livro -> resumo)
     VendaResponse.resumo toVendaResumo(Livro livro);
+
+    EnderecoShared toEnderecoDTO(Endereco endereco);
+
+    @Mapping(target = "clientes", ignore = true)
+    Endereco toEntity(EnderecoShared dto);
+
+    List<Endereco> toEntityList(List<EnderecoShared> dtos);
 }

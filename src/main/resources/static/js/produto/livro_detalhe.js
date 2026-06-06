@@ -303,6 +303,16 @@ function renderFotosVendedor(fotos) {
     section.style.display = "block";
 }
 
+function obterFotosUsuario(livro) {
+    try {
+        const fotos = JSON.parse(livro.fotosUrls || "[]");
+        if (Array.isArray(fotos)) {
+            return fotos.filter(f => f && f.trim().length > 0);
+        }
+    } catch (_) {}
+    return [];
+}
+
 /* ── Lightbox ── */
 let _lightboxFotos = [];
 let _lightboxIndice = 0;
@@ -495,14 +505,20 @@ function renderLivro(livro) {
     renderBookCover(livro);
 
     // Fotos do vendedor
-    let fotos = [];
-    try {
-        const arr = JSON.parse(livro.fotosUrls);
-        if (Array.isArray(arr) && arr.length > 0) fotos = arr;
-    } catch (_) {}
-    _lightboxFotos = fotos;
-    renderGaleria(fotos);
-    renderFotosVendedor(fotos);
+    const fotosUsuario = (() => {
+        try {
+            const arr = JSON.parse(livro.fotosUrls);
+            return Array.isArray(arr) ? arr.filter(Boolean) : [];
+        } catch (_) {
+            return [];
+        }
+    })();
+
+    _lightboxFotos = fotosUsuario;
+
+    renderGaleria(fotosUsuario);
+
+    renderFotosVendedor(fotosUsuario);
 
     // Badge de promoção
     if (livro.emPromocao) {

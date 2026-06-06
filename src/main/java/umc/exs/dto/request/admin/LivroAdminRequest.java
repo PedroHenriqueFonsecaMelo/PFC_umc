@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -29,6 +30,7 @@ public class LivroAdminRequest {
     @Size(min = 10, max = 20, message = "O ISBN deve ter entre 10 e 20 caracteres")
     String isbn;
 
+    @Positive(message = "A quantidade deve ser positiva")
     @NotNull(message = "O preço é obrigatório")
     @Min(value = 0, message = "O preço não pode ser negativo")
     Double preco;

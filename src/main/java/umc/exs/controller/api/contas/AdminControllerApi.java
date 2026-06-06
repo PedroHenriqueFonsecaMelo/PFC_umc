@@ -351,4 +351,6 @@ public class AdminControllerApi {
         String url = ArquivosService.salvarFotoLivro(foto, "uploads/livros/");
         return ResponseEntity.ok(Map.of("url", url));
     }
+
+    
 }

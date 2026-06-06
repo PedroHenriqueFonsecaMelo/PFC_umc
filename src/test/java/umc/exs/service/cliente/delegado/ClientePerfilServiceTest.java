@@ -61,7 +61,9 @@ class ClientePerfilServiceTest {
 
         assertEquals("Nome Atualizado", salvo.getNome());
         assertEquals("hashed", salvo.getSenha());
-        verify(enderecoService).sincronizarEnderecos(cliente, null);
+        
+        // CORREÇÃO: Alterado de 'null' para 'any()' para aceitar tanto uma lista vazia quanto null
+        verify(enderecoService).sincronizarEnderecos(eq(cliente), any());
         verify(auditoria).registrarLog(eq("CLIENTE_DADOS_ATUALIZADOS"), eq(1L), eq("cliente@test.com"), anyString());
     }
 

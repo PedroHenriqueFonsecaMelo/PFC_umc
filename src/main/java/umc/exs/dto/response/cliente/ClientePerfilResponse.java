@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import umc.exs.model.entidades.usuario.Endereco;
+import umc.exs.dto.request.cliente.EnderecoShared;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,7 +26,7 @@ public class ClientePerfilResponse {
     private LocalDateTime dataCadastro;
     private boolean ativo;
     private String nivel;
-    private List<Endereco> enderecos;
+    private List<EnderecoShared> enderecos;
 
     // Resumo financeiro
     private Double saldoTokens;

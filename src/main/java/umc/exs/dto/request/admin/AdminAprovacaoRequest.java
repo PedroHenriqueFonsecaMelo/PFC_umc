@@ -1,6 +1,7 @@
 package umc.exs.dto.request.admin;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,7 @@ public class AdminAprovacaoRequest {
 
     private String fotosUrls;
 
+    @Positive(message = "A quantidade deve ser positiva")
     @Min(value = 0, message = "O preço sugerido não pode ser negativo")
     private Double precoSugerido;
 

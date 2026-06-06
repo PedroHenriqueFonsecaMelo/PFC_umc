@@ -2,6 +2,7 @@ package umc.exs.service.cliente.delegado;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -51,7 +52,9 @@ public class ClientePerfilService {
                         cliente.setSenha(passwordEncoder.encode(dto.getSenha()));
                 }
 
-                enderecoService.sincronizarEnderecos(cliente, dto.getEnderecos());
+                List<Endereco> enderecosEntidade = clienteMapper.toEntityList(dto.getEnderecos());
+
+                enderecoService.sincronizarEnderecos(cliente, enderecosEntidade);
 
                 Cliente salvo = repositoryService.salvar(cliente);
 

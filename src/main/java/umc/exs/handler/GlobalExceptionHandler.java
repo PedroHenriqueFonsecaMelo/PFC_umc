@@ -3,6 +3,7 @@ package umc.exs.handler;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -64,6 +65,23 @@ public class GlobalExceptionHandler {
 
         response.setStatus(404);
         return "error/404";
+    }
+
+    @ExceptionHandler(BadCredentialsException.class) 
+    public Object handle401(BadCredentialsException ex,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+
+        log.warn("401 error: {}", ex.getMessage());
+
+        if (isRest(request)) {
+            return ResponseEntity.status(401).body(Map.of(
+                    "status", 401,
+                    "error", "Unauthorized"));
+        }
+
+        response.setStatus(401);
+        return "error/401";
     }
 
     @ExceptionHandler(Exception.class)

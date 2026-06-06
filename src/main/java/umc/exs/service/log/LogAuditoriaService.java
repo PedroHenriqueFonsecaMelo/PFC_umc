@@ -93,7 +93,6 @@ public class LogAuditoriaService {
                     acao, e.getMessage());
         }
     }
-
     public void registrarLog(String acao, String detalhes) {
 
         try {
