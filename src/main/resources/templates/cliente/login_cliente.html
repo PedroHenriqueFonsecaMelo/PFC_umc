@@ -11,7 +11,6 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" th:href="@{/css/breadcrumb.css}" />
-    <link rel="stylesheet" th:href="@{/css/cliente/bookshelf.css}" />
     <link rel="stylesheet" th:href="@{/css/cliente/login_cliente.css}" />
   </head>
   <body>
@@ -175,18 +174,6 @@
       </div>
     </main>
 
-    <!-- Estante interativa rodapé -->
-    <div
-      class="bookshelf-container"
-      id="bookshelfContainer"
-      aria-label="Estante de livros clássicos"
-    >
-      <div class="bookshelf-fade"></div>
-      <div class="books-row" id="booksRow"></div>
-      <div class="bookshelf-floor"></div>
-    </div>
-
     <script th:src="@{/js/cliente/login_cliente.js}"></script>
-    <script th:src="@{/js/cliente/bookshelf-login.js}"></script>
   </body>
 </html>

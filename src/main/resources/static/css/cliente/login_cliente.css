@@ -20,15 +20,9 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* fundo creme + linhas horizontais sutis simulando páginas */
-    background-color: #f4f1ec;
-    background-image: repeating-linear-gradient(
-        180deg,
-        transparent,
-        transparent 27px,
-        rgba(114, 47, 55, 0.06) 27px,
-        rgba(114, 47, 55, 0.06) 28px
-    );
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.38)),
+        url('/imagens/fundo.png') center center / cover no-repeat fixed;
 }
 
 /* elemento estranho abaixo do card — oculto */
@@ -639,17 +633,62 @@ body {
 
 .login-side .book-page {
     width: 380px;
-    background: #fff;
+    background: rgba(10, 10, 18, 0.62);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     border-radius: 16px;
     padding: 2.5rem 2rem;
-    box-shadow: 0 8px 48px rgba(44, 36, 27, 0.13);
+    box-shadow: 0 12px 56px rgba(0, 0, 0, 0.45);
     margin-top: 0;
     position: relative;
     top: 0;
-    border: 1px solid #000;
+    border: 1px solid rgba(255, 255, 255, 0.14);
 }
 .login-side .book-page::after {
     display: none;
+}
+.login-side .book-page::before {
+    display: none;
+}
+
+/* ── Textos dourados no card escuro ── */
+.login-side .page-header h1 {
+    color: #c9a96e;
+}
+.login-side .page-header p {
+    color: rgba(201, 169, 110, 0.7);
+}
+.login-side .field label {
+    color: rgba(201, 169, 110, 0.75);
+}
+.login-side .field input {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(201, 169, 110, 0.3);
+    color: #c9a96e;
+}
+.login-side .field input::placeholder {
+    color: rgba(201, 169, 110, 0.35);
+}
+.login-side .field input:focus {
+    border-color: rgba(201, 169, 110, 0.7);
+    box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.12);
+}
+.login-side .btn-entrar {
+    border-color: rgba(201, 169, 110, 0.6);
+    color: #c9a96e;
+}
+.login-side .btn-entrar:hover {
+    background: rgba(201, 169, 110, 0.1);
+    box-shadow: 4px 4px 0 rgba(201, 169, 110, 0.2);
+}
+.login-side .divider {
+    border-top-color: rgba(201, 169, 110, 0.2);
+}
+.login-side .panel-link {
+    color: rgba(201, 169, 110, 0.55);
+}
+.login-side .panel-link:hover {
+    color: #c9a96e;
 }
 
 .book {

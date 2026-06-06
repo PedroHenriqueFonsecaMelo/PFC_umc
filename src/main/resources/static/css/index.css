@@ -639,14 +639,19 @@ body {
 .how-steps {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  border-left: 1px solid var(--border);
-  border-top: 1px solid var(--border);
+  gap: 1cm;
 }
 .how-step {
-  padding: 2.5rem 2rem;
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
   background: var(--paper);
+  text-align: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.how-step:hover {
+  transform: scale(1.04);
+  box-shadow: 0 8px 28px rgba(44, 36, 27, 0.12);
 }
 .how-step-num {
   font-family: var(--serif);
@@ -656,10 +661,13 @@ body {
   line-height: 1;
   margin-bottom: 1rem;
 }
-.how-step-icon {
-  font-size: 1.4rem;
-  margin-bottom: 0.75rem;
+.how-step-img {
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
   display: block;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
 }
 .how-step h3 {
   font-family: var(--serif);
@@ -1013,7 +1021,7 @@ footer::before {
     gap: 1rem;
   }
   .how-steps {
-    border-left: none;
+    gap: 0.75cm;
   }
   .ranking-header {
     flex-direction: column;
