@@ -114,10 +114,10 @@
                 >Deixe em branco para envio imediato.</span>
 
                 <div class="notif-actions">
-                  <button class="btn-notif-send" onclick="disparar(false)">
+                  <button class="btn-notif-send" onclick="abrirModalEnvio('imediato')">
                     <i class="fa-solid fa-paper-plane"></i> Enviar agora
                   </button>
-                  <button class="btn-notif-schedule" onclick="disparar(true)">
+                  <button class="btn-notif-schedule" onclick="abrirModalEnvio('agendado')">
                     <i class="fa-solid fa-clock"></i> Agendar
                   </button>
                 </div>
@@ -308,8 +308,56 @@
           });
       }
 
+      // ── Modal de confirmação de envio ─────────────────────────────────────────
+      function abrirModalEnvio(tipo) {
+        const assunto = document.getElementById("assunto")?.value?.trim();
+        const corpo = document.getElementById("corpo")?.value?.trim();
+
+        if (!assunto || !corpo) {
+          mostrarToast("Preencha o assunto e a mensagem antes de enviar.", "#b45309");
+          return;
+        }
+
+        const agendamento = document.getElementById("agendamento")?.value?.trim();
+        if (tipo === 'agendado' && !agendamento) {
+          mostrarToast("Informe a data e hora para agendamento.", "#b45309");
+          return;
+        }
+
+        const filtroEl = document.getElementById("filtro");
+        const limiteEl = document.getElementById("limite");
+        const criterio = filtroEl?.options[filtroEl.selectedIndex]?.text || "Todos";
+        const quantidade = limiteEl?.options[limiteEl.selectedIndex]?.text || "Todos";
+
+        const titulo = document.getElementById("modalEnvioTitulo");
+        const resumo = document.getElementById("modalEnvioResumo");
+        const btnConfirmar = document.getElementById("modalEnvioBtnConfirmar");
+        const modal = document.getElementById("modalConfirmarEnvio");
+
+        titulo.textContent = tipo === 'imediato' ? "Confirmar Envio Imediato" : "Confirmar Agendamento";
+        resumo.innerHTML = `
+          <div><strong>Assunto:</strong> ${assunto}</div>
+          <div style="margin-top:0.4rem"><strong>Destinatários:</strong> ${criterio} — ${quantidade}</div>
+          ${tipo === 'agendado'
+            ? `<div style="margin-top:0.4rem"><strong>Agendado para:</strong> ${agendamento}</div>`
+            : '<div style="margin-top:0.4rem;color:#722f37;font-weight:600">Envio imediato</div>'}
+        `;
+        btnConfirmar.textContent = tipo === 'imediato' ? "Sim, enviar agora" : "Sim, agendar";
+        btnConfirmar.onclick = () => {
+          fecharModalEnvio();
+          executarEnvio(tipo === 'agendado');
+        };
+
+        modal.style.display = "flex";
+        modal.onclick = (e) => { if (e.target === modal) fecharModalEnvio(); };
+      }
+
+      function fecharModalEnvio() {
+        document.getElementById("modalConfirmarEnvio").style.display = "none";
+      }
+
       // ── Disparar / agendar ────────────────────────────────────────────────────
-      function disparar(comAgendamento) {
+      function executarEnvio(comAgendamento) {
         const filtro = document.getElementById("filtro").value;
         const limite = parseInt(document.getElementById("limite").value);
         const assunto = document.getElementById("assunto").value.trim();
@@ -364,5 +412,37 @@
       // Carrega histórico ao abrir a página
       document.addEventListener("DOMContentLoaded", carregarHistorico);
     </script>
+
+    <!-- Modal de confirmação de envio/agendamento -->
+    <div id="modalConfirmarEnvio" style="display:none;position:fixed;
+        inset:0;background:rgba(0,0,0,0.5);z-index:9999;
+        align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:12px;padding:2rem;
+          max-width:440px;width:90%;
+          box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+        <h3 style="margin:0 0 0.75rem;
+            font-family:'Playfair Display',serif;font-size:1.2rem;
+            color:#2c241b;" id="modalEnvioTitulo">Confirmar Envio</h3>
+        <div id="modalEnvioResumo" style="margin:0 0 1.5rem;
+            font-size:0.88rem;color:#5a4f47;line-height:1.7;
+            background:#f9f6f2;border-radius:8px;padding:1rem;">
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+          <button onclick="fecharModalEnvio()"
+              style="padding:0.5rem 1.25rem;
+              border:1.5px solid #e0d9d0;border-radius:8px;
+              background:#fff;color:#7a6e65;
+              font-size:0.9rem;cursor:pointer;font-weight:500;">
+            Cancelar
+          </button>
+          <button id="modalEnvioBtnConfirmar"
+              style="padding:0.5rem 1.25rem;border:none;
+              border-radius:8px;background:#722f37;color:#fff;
+              font-size:0.9rem;cursor:pointer;font-weight:600;">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
