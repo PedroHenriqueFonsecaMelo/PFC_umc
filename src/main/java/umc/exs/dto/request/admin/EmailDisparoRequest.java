@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class EmailDisparoRequest {
@@ -12,6 +13,9 @@ public class EmailDisparoRequest {
 
     @Min(value = 1, message = "O limite deve ser maior que 0")
     private Integer limite;
+
+    /** Usado quando filtro = "emails_especificos": lista de e-mails alvo */
+    private List<String> emailsEspecificos;
 
     @NotBlank(message = "O assunto é obrigatório")
     @Size(max = 200, message = "O assunto não pode ter mais de 200 caracteres")

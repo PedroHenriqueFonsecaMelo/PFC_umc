@@ -95,7 +95,27 @@ public class NotificacaoEmailService {
                 log.info("dispararOuAgendar — filtro='{}', limite={}, assunto='{}'",
                                 dto.getFiltro(), dto.getLimite(), dto.getAssunto());
 
-                List<EmailDestinatarioResponse> destinatarios = filtrarDestinatarios(dto.getFiltro(), dto.getLimite());
+                List<EmailDestinatarioResponse> destinatarios;
+                if ("emails_especificos".equals(dto.getFiltro())
+                                && dto.getEmailsEspecificos() != null
+                                && !dto.getEmailsEspecificos().isEmpty()) {
+                        List<String> emailsAlvo = dto.getEmailsEspecificos().stream()
+                                        .map(String::trim)
+                                        .map(String::toLowerCase)
+                                        .filter(e -> !e.isEmpty())
+                                        .collect(Collectors.toList());
+                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        destinatarios = clienteRepository.findAll().stream()
+                                        .filter(c -> emailsAlvo.contains(c.getEmail().toLowerCase()))
+                                        .map(c -> new EmailDestinatarioResponse(
+                                                        c.getId(), c.getNome(), c.getEmail(),
+                                                        c.getSaldoTokens() == null ? 0.0 : c.getSaldoTokens(),
+                                                        0,
+                                                        c.getDataCriacao() != null ? c.getDataCriacao().format(fmt) : "—"))
+                                        .collect(Collectors.toList());
+                } else {
+                        destinatarios = filtrarDestinatarios(dto.getFiltro(), dto.getLimite());
+                }
 
                 if (destinatarios.isEmpty()) {
                         log.warn("Nenhum destinatário encontrado para filtro='{}'", dto.getFiltro());

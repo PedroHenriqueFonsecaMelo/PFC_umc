@@ -51,7 +51,7 @@
                 </div>
 
                 <label class="notif-label">Critério de filtro</label>
-                <select class="notif-select" id="filtro">
+                <select class="notif-select" id="filtro" onchange="onFiltroChange()">
                   <option value="todos">Todos os usuários</option>
                   <option value="ranking_maior">Maior ranking (XP)</option>
                   <option value="ranking_menor">Menor ranking (XP)</option>
@@ -59,7 +59,15 @@
                   <option value="tokens_menor">Menos tokens na carteira</option>
                   <option value="mais_antigos">Usuários mais antigos</option>
                   <option value="mais_novos">Usuários mais recentes</option>
+                  <option value="emails_especificos">E-mails específicos</option>
                 </select>
+
+                <div id="campoEmailsEspecificos" style="display:none;margin-top:0.5rem;">
+                  <label class="notif-label">E-mails dos destinatários</label>
+                  <textarea class="notif-textarea" id="emailsEspecificos"
+                    placeholder="Digite os e-mails separados por vírgula"
+                    style="min-height:80px;"></textarea>
+                </div>
 
                 <label class="notif-label">Quantidade máxima</label>
                 <select class="notif-select" id="limite">
@@ -134,11 +142,12 @@
                       <th>Destinatários</th>
                       <th>Tipo</th>
                       <th>Agendado para</th>
+                      <th>Ações</th>
                     </tr>
                   </thead>
                   <tbody id="historicoBody">
                     <tr>
-                      <td colspan="5" class="preview-empty">
+                      <td colspan="6" class="preview-empty">
                         Carregando histórico...
                       </td>
                     </tr>
@@ -157,6 +166,22 @@
 
     <!-- Toast de feedback -->
     <div class="notif-toast" id="toast"></div>
+
+    <!-- Modal de detalhes do e-mail -->
+    <div id="modalDetalhes" style="display:none;position:fixed;inset:0;
+        background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:12px;padding:2rem;max-width:560px;
+          width:92%;box-shadow:0 8px 32px rgba(0,0,0,0.2);max-height:85vh;overflow-y:auto;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+          <h3 style="margin:0;font-family:'Playfair Display',serif;font-size:1.15rem;color:#2c241b;">
+            Detalhes do E-mail
+          </h3>
+          <button onclick="fecharModalDetalhes()"
+              style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#7a6e65;line-height:1;">✕</button>
+        </div>
+        <div id="modalDetalhesCorpo"></div>
+      </div>
+    </div>
 
     <script>
       // Topbar date
@@ -194,21 +219,54 @@
         el.value = v;
       }
 
+      // ── Mostrar/ocultar campo de e-mails específicos ─────────────────────────
+      function onFiltroChange() {
+        const filtro = document.getElementById("filtro").value;
+        const campo = document.getElementById("campoEmailsEspecificos");
+        if (campo) campo.style.display = filtro === "emails_especificos" ? "block" : "none";
+      }
+
+      // ── Modal de detalhes ─────────────────────────────────────────────────────
+      function abrirDetalhes(e) {
+        const tipo = e.tipo === "AGENDADO"
+          ? '<span style="background:rgba(13,148,136,.12);color:#0f766e;font-size:.75rem;font-weight:700;padding:.2rem .5rem;border-radius:4px;">Agendado</span>'
+          : '<span style="background:rgba(74,93,35,.12);color:#4a5d23;font-size:.75rem;font-weight:700;padding:.2rem .5rem;border-radius:4px;">Imediato</span>';
+        document.getElementById("modalDetalhesCorpo").innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:0.75rem;font-size:.88rem;color:#2c241b;">
+            <div><span style="font-weight:700;color:#7a6e65;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">Data e hora</span><div style="margin-top:.2rem;">${e.dataRegistro}</div></div>
+            <div><span style="font-weight:700;color:#7a6e65;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">Assunto</span><div style="margin-top:.2rem;font-weight:600;">${e.assunto}</div></div>
+            <div><span style="font-weight:700;color:#7a6e65;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">Destinatários</span><div style="margin-top:.2rem;">${e.quantidadeDestinatarios} usuário(s)</div></div>
+            <div><span style="font-weight:700;color:#7a6e65;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">Tipo</span><div style="margin-top:.2rem;">${tipo}${e.agendadoPara ? ' — ' + e.agendadoPara : ''}</div></div>
+            <div><span style="font-weight:700;color:#7a6e65;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">Filtro aplicado</span><div style="margin-top:.2rem;">${e.filtro}</div></div>
+            <div><span style="font-weight:700;color:#7a6e65;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;">Conteúdo</span><div style="margin-top:.2rem;white-space:pre-wrap;background:#f9f6f0;border-radius:8px;padding:.75rem;border:1px solid #e0d9d0;line-height:1.6;">${e.corpo}</div></div>
+          </div>`;
+        document.getElementById("modalDetalhes").style.display = "flex";
+      }
+
+      function fecharModalDetalhes() {
+        document.getElementById("modalDetalhes").style.display = "none";
+      }
+
+      document.addEventListener("click", function(ev) {
+        const modal = document.getElementById("modalDetalhes");
+        if (ev.target === modal) fecharModalDetalhes();
+      });
+
       // ── Histórico de e-mails ──────────────────────────────────────────────────
       function carregarHistorico() {
         const tbody = document.getElementById("historicoBody");
         tbody.innerHTML =
-          '<tr><td colspan="5" class="preview-empty">Carregando...</td></tr>';
+          '<tr><td colspan="6" class="preview-empty">Carregando...</td></tr>';
 
         fetch("/admin/notificacoes/historico")
           .then((r) => r.json())
           .then((data) => {
             if (!data.length) {
               tbody.innerHTML =
-                '<tr><td colspan="5" class="preview-empty">Nenhum e-mail enviado ainda.</td></tr>';
+                '<tr><td colspan="6" class="preview-empty">Nenhum e-mail enviado ainda.</td></tr>';
               return;
             }
-            tbody.innerHTML = data.map((e) => {
+            tbody.innerHTML = data.map((e, idx) => {
               const tipo = e.tipo === "AGENDADO"
                 ? '<span style="background:rgba(13,148,136,.12);color:#0f766e;font-size:.72rem;font-weight:700;padding:.15rem .45rem;border-radius:4px;">Agendado</span>'
                 : '<span style="background:rgba(74,93,35,.12);color:#4a5d23;font-size:.72rem;font-weight:700;padding:.15rem .45rem;border-radius:4px;">Imediato</span>';
@@ -221,6 +279,8 @@
               const corpoPreview = e.corpo.length > 60
                 ? e.corpo.substring(0, 60) + "…"
                 : e.corpo;
+              const key = "_email_" + idx;
+              window[key] = e;
               return `<tr>
                 <td style="white-space:nowrap;font-size:.78rem;">${e.dataRegistro}</td>
                 <td>
@@ -230,12 +290,20 @@
                 <td style="text-align:center;font-weight:700;">${e.quantidadeDestinatarios}</td>
                 <td>${tipo}</td>
                 <td>${agendadoPara}</td>
+                <td style="text-align:center;">
+                  <button onclick="abrirDetalhes(window['${key}'])"
+                      style="background:none;border:1px solid #e0d9d0;border-radius:6px;
+                      padding:.25rem .65rem;font-size:.75rem;cursor:pointer;color:#2c241b;
+                      font-weight:600;transition:background .15s;"
+                      onmouseover="this.style.background='#f3f0eb'"
+                      onmouseout="this.style.background='none'">Detalhes</button>
+                </td>
               </tr>`;
             }).join("");
           })
           .catch(() => {
             tbody.innerHTML =
-              '<tr><td colspan="5" class="preview-empty">Erro ao carregar histórico.</td></tr>';
+              '<tr><td colspan="6" class="preview-empty">Erro ao carregar histórico.</td></tr>';
             mostrarToast("Erro ao buscar histórico.", "#b91c1c");
           });
       }
@@ -261,12 +329,23 @@
           return;
         }
 
+        const emailsRaw = document.getElementById("emailsEspecificos")?.value || "";
+        const emailsEspecificos = filtro === "emails_especificos"
+          ? emailsRaw.split(",").map(e => e.trim()).filter(e => e.length > 0)
+          : [];
+
+        if (filtro === "emails_especificos" && emailsEspecificos.length === 0) {
+          mostrarToast("Informe pelo menos um e-mail.", "#b45309");
+          return;
+        }
+
         const payload = {
           filtro,
           limite,
           assunto,
           corpo,
           agendamento: comAgendamento ? agendamento : "",
+          emailsEspecificos,
         };
 
         fetch("/admin/notificacoes/disparar", {
