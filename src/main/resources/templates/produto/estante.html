@@ -18,18 +18,18 @@
         <!-- NAV -->
         <header th:replace="~{fragments/client-nav :: clientNav}"></header>
 
-        <!-- NAVEGAÇÃO CONTEXTUAL -->
-        <div class="breadcrumb-wrap">
-            <nav class="breadcrumb-nav">
-                <a href="/">Início</a>
-                <span class="breadcrumb-sep">›</span>
-                <span class="breadcrumb-current">Minha Estante</span>
-            </nav>
-            <a href="/livros/vitrine" class="btn-voltar"
-            >Continuar Comprando</a>
-        </div>
-
         <main class="estante-main">
+
+            <!-- NAVEGAÇÃO CONTEXTUAL -->
+            <div class="breadcrumb-wrap">
+                <nav class="breadcrumb-nav">
+                    <a href="/">Início</a>
+                    <span class="breadcrumb-sep">›</span>
+                    <span class="breadcrumb-current">Minha Estante</span>
+                </nav>
+                <a href="/livros/vitrine" class="btn-voltar"
+                >← Voltar à Vitrine</a>
+            </div>
             <!-- Cabeçalho da página -->
             <div class="estante-header">
                 <div>
@@ -62,14 +62,23 @@
             <div id="estanteConteudo" style="display: none">
                 <!-- Barra de ações em lote -->
                 <div class="estante-acoes-lote">
-                    <label class="checkbox-wrapper">
-                        <input
-                            type="checkbox"
-                            id="chkSelecionarTodos"
-                            onchange="toggleSelecionarTodos(this)"
+                    <div class="estante-acoes-selecao">
+                        <button
+                            class="btn-remover-selecionados"
+                            onclick="selecionarTodos()"
+                            id="btnSelecionarTodos"
                         >
-                        <span>Selecionar todos</span>
-                    </label>
+                            Selecionar todos
+                        </button>
+                        <button
+                            class="btn-remover-selecionados"
+                            onclick="desmarcarTodos()"
+                            id="btnDesmarcarTodos"
+                            disabled
+                        >
+                            Desmarcar todos
+                        </button>
+                    </div>
                     <button
                         class="btn-remover-selecionados"
                         onclick="removerSelecionados()"

@@ -172,7 +172,7 @@ function atualizarSubtotal() {
     const qtdEl = document.getElementById("qtdSelecionados");
     const btnPross = document.getElementById("btnProsseguir");
     const btnRemover = document.getElementById("btnRemoverSelecionados");
-    const chkTodos = document.getElementById("chkSelecionarTodos");
+    const btnDesmarcar = document.getElementById("btnDesmarcarTodos");
 
     // Se houver cupom ativo, recalcula com o novo total
     if (_cupomAtivo) {
@@ -201,17 +201,10 @@ function atualizarSubtotal() {
     if (qtdEl) qtdEl.textContent = qtd;
     if (btnPross) btnPross.disabled = qtd === 0 || qtd > LIMITE_SELECAO;
     if (btnRemover) btnRemover.disabled = qtd === 0;
+    if (btnDesmarcar) btnDesmarcar.disabled = qtd === 0;
 
     const contadorSelecao = document.getElementById("contadorSelecao");
     if (contadorSelecao) contadorSelecao.textContent = `${qtd}/${LIMITE_SELECAO} selecionados para compra`;
-
-    // Atualiza estado do "Selecionar todos"
-    if (chkTodos) {
-        const totalItens =
-            document.querySelectorAll(".estante-item-check").length;
-        chkTodos.checked = totalItens > 0 && qtd === totalItens;
-        chkTodos.indeterminate = qtd > 0 && qtd < totalItens;
-    }
 
     // Destaca visualmente os itens selecionados
     document.querySelectorAll(".estante-item-check").forEach((c) => {
@@ -220,29 +213,33 @@ function atualizarSubtotal() {
     });
 }
 
-/* ── Selecionar / desselecionar todos (respeita limite de 5) ── */
-window.toggleSelecionarTodos = function (chk) {
+/* ── Selecionar todos (respeita limite de 5) ── */
+window.selecionarTodos = function () {
     const todos = document.querySelectorAll(".estante-item-check");
-    if (chk.checked) {
-        let count = 0;
-        todos.forEach((c) => {
-            if (count < LIMITE_SELECAO) {
-                c.checked = true;
-                count++;
-            } else {
-                c.checked = false;
-            }
-        });
-        if (todos.length > LIMITE_SELECAO) {
-            mostrarToast(
-                `Você pode levar no máximo ${LIMITE_SELECAO} livros por compra. Os primeiros ${LIMITE_SELECAO} foram selecionados.`,
-                "aviso",
-                5000
-            );
+    let count = 0;
+    todos.forEach((c) => {
+        if (count < LIMITE_SELECAO) {
+            c.checked = true;
+            count++;
+        } else {
+            c.checked = false;
         }
-    } else {
-        todos.forEach((c) => { c.checked = false; });
+    });
+    if (todos.length > LIMITE_SELECAO) {
+        mostrarToast(
+            `Você pode levar no máximo ${LIMITE_SELECAO} livros por compra. Os primeiros ${LIMITE_SELECAO} foram selecionados.`,
+            "aviso",
+            5000
+        );
     }
+    atualizarSubtotal();
+};
+
+/* ── Desmarcar todos ── */
+window.desmarcarTodos = function () {
+    document.querySelectorAll(".estante-item-check").forEach((c) => {
+        c.checked = false;
+    });
     atualizarSubtotal();
 };
 

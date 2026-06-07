@@ -135,6 +135,11 @@ body {
   cursor: not-allowed;
 }
 
+.estante-acoes-selecao {
+  display: flex;
+  gap: 0.5rem;
+}
+
 /* ── Lista de livros ── */
 .estante-lista {
   display: flex;
