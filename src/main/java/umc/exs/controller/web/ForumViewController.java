@@ -74,7 +74,7 @@ public class ForumViewController {
         Long clienteId = resolverClienteId(user);
         Set<Long> respostasLiked = forumService.getRespostasLikedByUser(id, clienteId);
         boolean isAdmin = user != null && user.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ADMIN"));
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
         model.addAttribute("topico", topico);
         model.addAttribute("respostasLiked", respostasLiked);
@@ -149,7 +149,7 @@ public class ForumViewController {
                     .map(c -> c.getNome())
                     .orElse(user.getUsername());
             boolean isAdmin = user.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ADMIN"));
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
             model.addAttribute("clienteLogado", true);
             model.addAttribute("clienteId", clienteId);
