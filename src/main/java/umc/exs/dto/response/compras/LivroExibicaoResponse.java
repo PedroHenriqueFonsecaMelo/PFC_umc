@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import umc.exs.model.enums.EstadoLivro;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -20,4 +21,7 @@ public class LivroExibicaoResponse {
     private String descricao;
     private EstadoLivro estadoAprovado;
     private Double precoAprovado;
+    private Boolean emPromocao;
+    private Double precoOriginal;
+    private LocalDateTime promocaoExpira;
 }

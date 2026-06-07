@@ -732,13 +732,13 @@ function confirmarExclusao(id, titulo) {
         `Tem certeza que deseja remover "${titulo}" do estoque? Esta ação não pode ser desfeita.`;
     document.getElementById("btnConfirmDelete").onclick = () =>
         excluirLivro(id);
-    document.getElementById("confirmModal").classList.add("open");
-    document.getElementById("confirmOverlay").classList.add("open");
+    const modal = document.getElementById("confirmModal");
+    modal.style.display = "flex";
+    modal.onclick = (e) => { if (e.target === modal) fecharConfirm(); };
 }
 
 function fecharConfirm() {
-    document.getElementById("confirmModal").classList.remove("open");
-    document.getElementById("confirmOverlay").classList.remove("open");
+    document.getElementById("confirmModal").style.display = "none";
 }
 
 async function excluirLivro(id) {

@@ -432,21 +432,43 @@
         }
     }
 
+    function mostrarModalExcluir(onConfirmar) {
+        const modal = document.getElementById("modalExcluirLivro");
+        modal.style.display = "flex";
+        const btnConfirmar = document.getElementById("modalExcluirConfirmar");
+        const btnCancelar = document.getElementById("modalExcluirCancelar");
+        const confirmar = () => {
+            modal.style.display = "none";
+            btnConfirmar.removeEventListener("click", confirmar);
+            btnCancelar.removeEventListener("click", cancelar);
+            onConfirmar();
+        };
+        const cancelar = () => {
+            modal.style.display = "none";
+            btnConfirmar.removeEventListener("click", confirmar);
+            btnCancelar.removeEventListener("click", cancelar);
+        };
+        btnConfirmar.addEventListener("click", confirmar);
+        btnCancelar.addEventListener("click", cancelar);
+        modal.onclick = (e) => { if (e.target === modal) cancelar(); };
+    }
+
     async function excluirLivro() {
         if (!_livroAtual) return;
-        if (!confirm(`Deseja excluir "${_livroAtual.titulo}"? Esta ação não pode ser desfeita.`)) return;
-        try {
-            const res = await fetch(`/api/admin/livros/${LIVRO_ID}`, {
-                method: "DELETE", credentials: "include"
-            });
-            if (res.ok) {
-                window.location.href = "/admin/estoque";
-            } else {
-                alert("Erro ao excluir livro.");
+        mostrarModalExcluir(async () => {
+            try {
+                const res = await fetch(`/api/admin/livros/${LIVRO_ID}`, {
+                    method: "DELETE", credentials: "include"
+                });
+                if (res.ok) {
+                    window.location.href = "/admin/estoque";
+                } else {
+                    alert("Erro ao excluir livro.");
+                }
+            } catch(e) {
+                alert("Erro de conexão.");
             }
-        } catch(e) {
-            alert("Erro de conexão.");
-        }
+        });
     }
 
     function abrirMenu() {
@@ -460,5 +482,37 @@
 
     document.addEventListener("DOMContentLoaded", carregarDetalhe);
 </script>
+
+<div id="modalExcluirLivro" style="display:none;position:fixed;
+    inset:0;background:rgba(0,0,0,0.5);z-index:9999;
+    align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;padding:2rem;
+        max-width:400px;width:90%;
+        box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+        <h3 style="margin:0 0 0.75rem;
+            font-family:'Playfair Display',serif;font-size:1.2rem;
+            color:#2c241b;">Excluir livro</h3>
+        <p style="margin:0 0 1.5rem;font-size:0.9rem;
+            color:#5a4f47;line-height:1.6;">
+            Tem certeza que deseja excluir este livro?
+            Esta ação não pode ser desfeita.
+        </p>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+            <button id="modalExcluirCancelar"
+                style="padding:0.5rem 1.25rem;
+                border:1.5px solid #e0d9d0;border-radius:8px;
+                background:#fff;color:#7a6e65;
+                font-size:0.9rem;cursor:pointer;font-weight:500;">
+                Cancelar
+            </button>
+            <button id="modalExcluirConfirmar"
+                style="padding:0.5rem 1.25rem;border:none;
+                border-radius:8px;background:#722f37;color:#fff;
+                font-size:0.9rem;cursor:pointer;font-weight:600;">
+                Sim, excluir
+            </button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
