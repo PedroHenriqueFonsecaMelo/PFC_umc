@@ -870,7 +870,7 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.title = "Clique para remover da estante";
         } else {
             btn.classList.remove("na-estante");
-            if (text) text.textContent = "Add Estante";
+            if (text) text.textContent = "Adicionar à Estante";
             check.style.opacity = "0";
             cart.style.display = "inline-block";
             gsap.set(cart, { x: 0, rotate: 0, opacity: 1 });

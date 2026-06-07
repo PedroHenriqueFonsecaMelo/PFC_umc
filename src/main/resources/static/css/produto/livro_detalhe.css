@@ -57,6 +57,13 @@ body {
   border: 1px solid #fef08a;
 }
 
+/* ── Breadcrumb (override breadcrumb.css para alinhar à esquerda) ── */
+body .breadcrumb-wrap {
+  max-width: 960px;
+  padding-left: 5vw;
+  padding-right: 5vw;
+}
+
 /* ── Breadcrumb ── */
 .detalhe-breadcrumb {
   max-width: 1100px;
@@ -340,9 +347,9 @@ body {
   justify-content: center;
   width: 100%;
   padding: 0.85rem 1rem;
-  background: var(--accent);
-  color: var(--paper);
-  border: 2px solid var(--accent);
+  background: #2c241b;
+  color: #fff;
+  border: 2px solid #2c241b;
   border-radius: 0.6rem;
   font-family: "DM Sans", sans-serif;
   font-size: 0.88rem;
@@ -354,8 +361,8 @@ body {
   transition: background 0.18s;
 }
 .btn-primario:hover {
-  background: #5a2229;
-  border-color: #5a2229;
+  background: #1a1a1a;
+  border-color: #1a1a1a;
 }
 
 .aviso-estante {
