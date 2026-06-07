@@ -77,6 +77,24 @@ function iniciarContadores() {
     contadorInterval = setInterval(atualizar, 1000);
 }
 
+/* ── Botão "Promoções" no painel de filtros ── */
+function toggleFiltroPromo() {
+    modoPromo = !modoPromo;
+    _paginaAtual = 0;
+    sessionStorage.removeItem("vitrine_pagina");
+    const btn = document.getElementById("btnFiltroPromo");
+    if (btn) {
+        if (modoPromo) {
+            btn.style.background = "#722f37";
+            btn.style.color = "#fff";
+        } else {
+            btn.style.background = "#fff";
+            btn.style.color = "#722f37";
+        }
+    }
+    carregarLivros();
+}
+
 /* ── Toggle: somente promoções ── */
 function togglePromo() {
     modoPromo = !modoPromo;
@@ -464,7 +482,7 @@ function lerEAplicarFiltros() {
         "relevancia";
 
     _paginaAtual = 0;
-    aplicarFiltros();
+    carregarLivros();
     fecharPainelFiltros();
 }
 
@@ -616,6 +634,13 @@ function limparFiltros() {
     if (max) max.value = "";
     const sel = document.getElementById("filtroOrdem");
     if (sel) sel.value = "relevancia";
+
+    modoPromo = false;
+    const btnPromoFiltro = document.getElementById("btnFiltroPromo");
+    if (btnPromoFiltro) {
+        btnPromoFiltro.style.background = "#fff";
+        btnPromoFiltro.style.color = "#722f37";
+    }
 
     carregarLivros();
 }

@@ -194,16 +194,22 @@
                     <!-- /filtro-colunas -->
 
                     <!-- Ações -->
-                    <div class="filtro-acoes">
-                        <button class="btn-limpar" onclick="limparFiltros()">
-                            Limpar
+                    <div class="filtro-acoes" style="justify-content:space-between;">
+                        <button id="btnFiltroPromo" onclick="toggleFiltroPromo()"
+                            style="display:inline-flex;align-items:center;gap:0.4rem;
+                            padding:0.5rem 1.1rem;border-radius:8px;font-size:0.85rem;
+                            font-weight:600;cursor:pointer;transition:all 0.2s;
+                            background:#fff;color:#722f37;border:2px solid #722f37;">
+                            🏷 Promoções
                         </button>
-                        <button
-                            class="btn-aplicar"
-                            onclick="lerEAplicarFiltros()"
-                        >
-                            Aplicar filtros
-                        </button>
+                        <div style="display:flex;gap:0.5rem;">
+                            <button class="btn-limpar" onclick="limparFiltros()">
+                                Limpar
+                            </button>
+                            <button class="btn-aplicar" onclick="lerEAplicarFiltros()">
+                                Aplicar filtros
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
