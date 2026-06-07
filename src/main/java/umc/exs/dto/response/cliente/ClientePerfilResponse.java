@@ -9,6 +9,7 @@ import umc.exs.dto.request.cliente.EnderecoShared;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import umc.exs.model.enums.StatusConta;
 
 @Data
 @Builder
@@ -25,6 +26,9 @@ public class ClientePerfilResponse {
     private LocalDate dataNascimento;
     private LocalDateTime dataCadastro;
     private boolean ativo;
+    private StatusConta statusConta;
+    private LocalDateTime suspensaoAte;
+    private String motivoSuspensao;
     private String nivel;
     private List<EnderecoShared> enderecos;
 

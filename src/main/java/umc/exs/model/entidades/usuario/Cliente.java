@@ -37,6 +37,7 @@ import umc.exs.converter.LocalDateStringConverter;
 import umc.exs.converter.CpfConverter;
 import umc.exs.model.entidades.livro.AvaliacaoLivro;
 import umc.exs.model.enums.Genero;
+import umc.exs.model.enums.StatusConta;
 
 @Entity
 @Table(name = "users")
@@ -100,6 +101,17 @@ public class Cliente {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private StatusConta statusConta = StatusConta.ATIVO;
+
+    @Column(name = "suspensao_ate")
+    private LocalDateTime suspensaoAte;
+
+    @Column(name = "motivo_suspensao", length = 500)
+    private String motivoSuspensao;
 
     /**
      * Verificação de e-mail — false até o usuário clicar no link de confirmação.

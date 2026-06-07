@@ -242,4 +242,48 @@ public class EmailHtmlBuilder {
 
         return EmailLayout.wrap("Comunicado", html.toString());
     }
+
+    public static String contaSuspensa(String nome, String motivo, LocalDateTime suspensaoAte) {
+        nome = EmailSanitizer.esc(nome);
+        motivo = EmailSanitizer.esc(motivo != null ? motivo : "Violação dos termos de uso.");
+
+        String retorno = suspensaoAte != null
+                ? "Sua conta ficará suspensa até <strong>"
+                    + suspensaoAte.format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm"))
+                    + "</strong>."
+                : "Sua conta foi suspensa por tempo <strong>indefinido</strong>.";
+
+        String conteudo = EmailComponents.h2("Olá, " + nome + ".")
+                + EmailComponents.p("Sua conta na <strong>Bibliotroca</strong> foi <strong style='color:#b45309'>suspensa</strong>.")
+                + EmailComponents.caixa(
+                        EmailComponents.p("<strong>Motivo:</strong> " + motivo)
+                        + EmailComponents.p(retorno))
+                + EmailComponents.aviso("Durante a suspensão você não poderá acessar sua conta.")
+                + EmailComponents.p("Se acredita que houve um engano, entre em contato com o suporte.")
+                + EmailComponents.p("Equipe Bibliotroca.");
+
+        return EmailLayout.wrap("Sua conta foi suspensa — Bibliotroca", conteudo);
+    }
+
+    public static String contaRemovida(String nome, String motivo, Double saldoTokens) {
+        nome = EmailSanitizer.esc(nome);
+        motivo = EmailSanitizer.esc(motivo != null ? motivo : "Violação dos termos de uso.");
+
+        String saldoInfo = (saldoTokens != null && saldoTokens > 0)
+                ? EmailComponents.aviso("Você possuía um saldo de <strong>T$ "
+                    + String.format("%.2f", saldoTokens)
+                    + "</strong> que não poderá ser resgatado após a remoção.")
+                : "";
+
+        String conteudo = EmailComponents.h2("Olá, " + nome + ".")
+                + EmailComponents.p("Sua conta na <strong>Bibliotroca</strong> foi <strong style='color:#722f37'>removida</strong> permanentemente.")
+                + EmailComponents.caixa(
+                        EmailComponents.p("<strong>Motivo:</strong> " + motivo))
+                + saldoInfo
+                + EmailComponents.p("Esta ação é irreversível. Todos os seus dados foram removidos da plataforma.")
+                + EmailComponents.p("Se acredita que houve um engano, entre em contato com o suporte.")
+                + EmailComponents.p("Equipe Bibliotroca.");
+
+        return EmailLayout.wrap("Sua conta foi removida — Bibliotroca", conteudo);
+    }
 }

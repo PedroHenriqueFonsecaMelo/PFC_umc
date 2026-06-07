@@ -105,9 +105,33 @@ function renderPerfil(p) {
         Platina: "nivel-Platina",
     };
     const nivel = p.nivel || "Bronze";
-    const statusBadge = p.ativo
+    const statusConta = p.statusConta || (p.ativo ? "ATIVO" : "REMOVIDO");
+    const statusBadge = statusConta === "ATIVO"
         ? `<span class="badge-status status-ativo"><i class="fa-solid fa-circle" style="font-size:7px"></i> Ativo</span>`
-        : `<span class="badge-status status-inativo"><i class="fa-solid fa-circle" style="font-size:7px"></i> Inativo</span>`;
+        : statusConta === "SUSPENSO"
+            ? `<span class="badge-status" style="background:#fef9c3;color:#854d0e;border:1px solid #fde68a"><i class="fa-solid fa-circle" style="font-size:7px"></i> Suspenso</span>`
+            : `<span class="badge-status status-inativo"><i class="fa-solid fa-circle" style="font-size:7px"></i> Removido</span>`;
+
+    // Seção Gestão de Conta
+    const statusContaBadge = statusConta === "ATIVO"
+        ? `<span style="padding:4px 12px;border-radius:20px;background:#dcfce7;color:#166534;font-size:13px;font-weight:600"><i class="fa-solid fa-circle" style="font-size:7px;margin-right:5px"></i>ATIVO</span>`
+        : statusConta === "SUSPENSO"
+            ? `<span style="padding:4px 12px;border-radius:20px;background:#fef9c3;color:#854d0e;font-size:13px;font-weight:600"><i class="fa-solid fa-circle" style="font-size:7px;margin-right:5px"></i>SUSPENSO</span>`
+            : `<span style="padding:4px 12px;border-radius:20px;background:#fee2e2;color:#991b1b;font-size:13px;font-weight:600"><i class="fa-solid fa-circle" style="font-size:7px;margin-right:5px"></i>REMOVIDO</span>`;
+    const suspensaoExtra = statusConta === "SUSPENSO"
+        ? `<div style="font-size:12px;color:#7a6e65;margin-top:8px">
+                ${p.suspensaoAte ? `<span>Válida até: <strong>${fmtDataHora(p.suspensaoAte)}</strong></span>` : `<span>Suspensão <strong>indefinida</strong></span>`}
+                ${p.motivoSuspensao ? `<span style="margin-left:12px">Motivo: <em>${esc(p.motivoSuspensao)}</em></span>` : ""}
+           </div>` : "";
+    const btnSuspender = statusConta === "ATIVO"
+        ? `<button onclick="abrirModalSuspender()" style="padding:0.45rem 1.1rem;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;background:#fff;color:#b45309;border:1.5px solid #b45309;transition:all 0.2s"><i class="fa-solid fa-ban"></i> Suspender Conta</button>`
+        : "";
+    const btnRemover = statusConta !== "REMOVIDO"
+        ? `<button onclick="abrirModalRemover()" style="padding:0.45rem 1.1rem;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;background:#fff;color:#722f37;border:1.5px solid #722f37;transition:all 0.2s"><i class="fa-solid fa-trash"></i> Remover Conta</button>`
+        : "";
+    const btnReativar = statusConta !== "ATIVO"
+        ? `<button onclick="reativarConta()" style="padding:0.45rem 1.1rem;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;background:#2e7d32;color:#fff;border:none;transition:all 0.2s"><i class="fa-solid fa-rotate-left"></i> Reativar Conta</button>`
+        : "";
 
     // Atualiza breadcrumb padronizado com o nome do cliente
     const bcrNome = document.getElementById("bcrNomeCliente");
@@ -304,6 +328,70 @@ function renderPerfil(p) {
             </div>
 
         </div><!-- /tabs-area -->
+
+        <!-- GESTÃO DE CONTA -->
+        <div class="panel-card" style="margin-top:24px">
+            <div class="panel-header">
+                <div class="panel-title"><i class="fa-solid fa-shield-halved"></i> Gestão de Conta</div>
+                ${statusContaBadge}
+            </div>
+            ${suspensaoExtra}
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:16px">
+                ${btnSuspender}
+                ${btnRemover}
+                ${btnReativar}
+            </div>
+        </div>
+
+        <!-- MODAL SUSPENDER -->
+        <div id="modalSuspender" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+            <div style="background:#fff;border-radius:12px;padding:2rem;max-width:480px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+                <h3 style="margin:0 0 1rem;font-family:'Playfair Display',serif;font-size:1.2rem;color:#2c241b">Suspender Conta</h3>
+                <div style="margin-bottom:1rem">
+                    <label style="display:block;font-size:0.85rem;font-weight:600;color:#2c241b;margin-bottom:0.4rem">Motivo *</label>
+                    <textarea id="motivoSuspensao" rows="3" placeholder="Descreva o motivo da suspensão..." style="width:100%;padding:0.6rem;border:1.5px solid #e0d9d0;border-radius:8px;font-size:0.9rem;resize:vertical;box-sizing:border-box"></textarea>
+                </div>
+                <div style="margin-bottom:1rem">
+                    <label style="display:block;font-size:0.85rem;font-weight:600;color:#2c241b;margin-bottom:0.6rem">Duração</label>
+                    <div style="display:flex;flex-wrap:wrap;gap:0.5rem">
+                        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;cursor:pointer"><input type="radio" name="diasSuspensao" value="7"> 7 dias</label>
+                        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;cursor:pointer"><input type="radio" name="diasSuspensao" value="15"> 15 dias</label>
+                        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;cursor:pointer"><input type="radio" name="diasSuspensao" value="30"> 30 dias</label>
+                        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;cursor:pointer"><input type="radio" name="diasSuspensao" value="0" checked> Indefinido</label>
+                    </div>
+                </div>
+                <div style="margin-bottom:1.5rem">
+                    <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;cursor:pointer">
+                        <input type="checkbox" id="notificarSuspensao" checked> Notificar cliente por e-mail
+                    </label>
+                </div>
+                <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+                    <button onclick="fecharModalSuspender()" style="padding:0.5rem 1.25rem;border:1.5px solid #e0d9d0;border-radius:8px;background:#fff;color:#7a6e65;font-size:0.9rem;cursor:pointer;font-weight:500">Cancelar</button>
+                    <button onclick="confirmarSuspensao()" style="padding:0.5rem 1.25rem;border:none;border-radius:8px;background:#b45309;color:#fff;font-size:0.9rem;cursor:pointer;font-weight:600">Confirmar Suspensão</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL REMOVER -->
+        <div id="modalRemover" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+            <div style="background:#fff;border-radius:12px;padding:2rem;max-width:480px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+                <h3 style="margin:0 0 1rem;font-family:'Playfair Display',serif;font-size:1.2rem;color:#2c241b">Remover Conta</h3>
+                <p style="margin:0 0 1rem;font-size:0.9rem;color:#5a4f47;line-height:1.6">Esta ação marcará a conta como <strong>removida</strong>. O cliente não poderá mais fazer login.</p>
+                <div style="margin-bottom:1rem">
+                    <label style="display:block;font-size:0.85rem;font-weight:600;color:#2c241b;margin-bottom:0.4rem">Motivo *</label>
+                    <textarea id="motivoRemocao" rows="3" placeholder="Descreva o motivo da remoção..." style="width:100%;padding:0.6rem;border:1.5px solid #e0d9d0;border-radius:8px;font-size:0.9rem;resize:vertical;box-sizing:border-box"></textarea>
+                </div>
+                <div style="margin-bottom:1.5rem">
+                    <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;cursor:pointer">
+                        <input type="checkbox" id="notificarRemocao" checked> Notificar cliente por e-mail
+                    </label>
+                </div>
+                <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+                    <button onclick="fecharModalRemover()" style="padding:0.5rem 1.25rem;border:1.5px solid #e0d9d0;border-radius:8px;background:#fff;color:#7a6e65;font-size:0.9rem;cursor:pointer;font-weight:500">Cancelar</button>
+                    <button onclick="confirmarRemocao()" style="padding:0.5rem 1.25rem;border:none;border-radius:8px;background:#722f37;color:#fff;font-size:0.9rem;cursor:pointer;font-weight:600">Confirmar Remoção</button>
+                </div>
+            </div>
+        </div>
     `;
 
     document.getElementById("perfilContent").innerHTML = html;
@@ -408,6 +496,90 @@ function ativarAba(nome) {
     const panel = document.getElementById("panel-" + nome);
     if (btn) btn.classList.add("ativo");
     if (panel) panel.classList.add("ativo");
+}
+
+/* ── GESTÃO DE CONTA ─────────────────────────────────────────── */
+function abrirModalSuspender() {
+    const m = document.getElementById("modalSuspender");
+    if (!m) return;
+    m.style.display = "flex";
+    m.onclick = (e) => { if (e.target === m) fecharModalSuspender(); };
+}
+function fecharModalSuspender() {
+    const m = document.getElementById("modalSuspender");
+    if (m) m.style.display = "none";
+}
+
+function abrirModalRemover() {
+    const m = document.getElementById("modalRemover");
+    if (!m) return;
+    m.style.display = "flex";
+    m.onclick = (e) => { if (e.target === m) fecharModalRemover(); };
+}
+function fecharModalRemover() {
+    const m = document.getElementById("modalRemover");
+    if (m) m.style.display = "none";
+}
+
+async function confirmarSuspensao() {
+    const motivo = document.getElementById("motivoSuspensao")?.value?.trim();
+    if (!motivo) { alert("Informe o motivo da suspensão."); return; }
+    const dias = parseInt(document.querySelector('input[name="diasSuspensao"]:checked')?.value || "0");
+    const notificar = document.getElementById("notificarSuspensao")?.checked ?? true;
+    const id = window._CLIENTE_ID;
+    try {
+        const res = await fetch(`/api/admin/clientes/${id}/suspender`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ motivo, diasSuspensao: dias, notificarEmail: notificar })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { mostrarToast("toast-err", data.erro || "Erro ao suspender conta."); return; }
+        fecharModalSuspender();
+        mostrarToast("toast-ok", "Conta suspensa com sucesso.");
+        await carregarPerfil();
+    } catch (_) {
+        mostrarToast("toast-err", "Erro de conexão.");
+    }
+}
+
+async function confirmarRemocao() {
+    const motivo = document.getElementById("motivoRemocao")?.value?.trim();
+    if (!motivo) { alert("Informe o motivo da remoção."); return; }
+    const notificar = document.getElementById("notificarRemocao")?.checked ?? true;
+    const id = window._CLIENTE_ID;
+    try {
+        const res = await fetch(`/api/admin/clientes/${id}/remover`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ motivo, notificarEmail: notificar })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { mostrarToast("toast-err", data.erro || "Erro ao remover conta."); return; }
+        fecharModalRemover();
+        mostrarToast("toast-ok", "Conta removida com sucesso.");
+        await carregarPerfil();
+    } catch (_) {
+        mostrarToast("toast-err", "Erro de conexão.");
+    }
+}
+
+async function reativarConta() {
+    const id = window._CLIENTE_ID;
+    try {
+        const res = await fetch(`/api/admin/clientes/${id}/reativar`, {
+            method: "POST",
+            credentials: "include"
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { mostrarToast("toast-err", data.erro || "Erro ao reativar conta."); return; }
+        mostrarToast("toast-ok", "Conta reativada com sucesso.");
+        await carregarPerfil();
+    } catch (_) {
+        mostrarToast("toast-err", "Erro de conexão.");
+    }
 }
 
 /* ── INIT ───────────────────────────────────────────────────── */

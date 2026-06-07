@@ -28,6 +28,8 @@ import umc.exs.dto.request.admin.AdminAprovacaoRequest;
 import umc.exs.dto.request.admin.AtualizarEnvioRequest;
 import umc.exs.dto.request.admin.CriarCupomRequest;
 import umc.exs.dto.request.admin.LivroAdminRequest;
+import umc.exs.dto.request.admin.RemoverClienteRequest;
+import umc.exs.dto.request.admin.SuspenderClienteRequest;
 import umc.exs.dto.request.livro.RejeicaoLivroRequest;
 import umc.exs.dto.response.admin.ExternApiResponse;
 import umc.exs.dto.response.admin.DashboardResponse;
@@ -316,6 +318,40 @@ public class AdminControllerApi {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ExternApiResponse.fail(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/clientes/{id}/suspender")
+    public ResponseEntity<?> suspenderCliente(
+            @PathVariable Long id,
+            @RequestBody SuspenderClienteRequest req) {
+        try {
+            clienteAdminService.suspenderCliente(id, req.getMotivo(), req.getDiasSuspensao(), req.isNotificarEmail());
+            return ResponseEntity.ok(Map.of("ok", true));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("erro", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/clientes/{id}/remover")
+    public ResponseEntity<?> removerCliente(
+            @PathVariable Long id,
+            @RequestBody RemoverClienteRequest req) {
+        try {
+            clienteAdminService.removerCliente(id, req.getMotivo(), req.isNotificarEmail());
+            return ResponseEntity.ok(Map.of("ok", true));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("erro", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/clientes/{id}/reativar")
+    public ResponseEntity<?> reativarCliente(@PathVariable Long id) {
+        try {
+            clienteAdminService.reativarCliente(id);
+            return ResponseEntity.ok(Map.of("ok", true));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("erro", e.getMessage()));
         }
     }
 

@@ -136,10 +136,52 @@
                 </a>
             </nav>
             <div class="sidebar-footer">
-                <a href="/admin/sair" class="nav-item nav-sair">
+                <a href="#" onclick="confirmarSairAdmin(); return false;" class="nav-item nav-sair">
                     <i class="fa-solid fa-right-from-bracket"></i> Sair
                 </a>
             </div>
+
+            <!-- Modal de confirmação de logout admin — dentro do fragment para ser incluído via th:replace -->
+            <div id="modalSairAdmin" style="display:none;position:fixed;
+                inset:0;background:rgba(0,0,0,0.5);z-index:9999;
+                align-items:center;justify-content:center;">
+                <div style="background:#fff;border-radius:12px;padding:2rem;
+                    max-width:400px;width:90%;
+                    box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+                    <h3 style="margin:0 0 0.75rem;
+                        font-family:'Playfair Display',serif;font-size:1.2rem;
+                        color:#2c241b;">Sair do painel</h3>
+                    <p style="margin:0 0 1.5rem;font-size:0.9rem;
+                        color:#5a4f47;line-height:1.6;">
+                        Tem certeza que deseja sair do painel administrativo?
+                    </p>
+                    <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+                        <button onclick="document.getElementById('modalSairAdmin').style.display='none'"
+                            style="padding:0.5rem 1.25rem;
+                            border:1.5px solid #e0d9d0;border-radius:8px;
+                            background:#fff;color:#7a6e65;
+                            font-size:0.9rem;cursor:pointer;font-weight:500;">
+                            Cancelar
+                        </button>
+                        <button onclick="window.location.href='/admin/sair'"
+                            style="padding:0.5rem 1.25rem;border:none;
+                            border-radius:8px;background:#722f37;color:#fff;
+                            font-size:0.9rem;cursor:pointer;font-weight:600;">
+                            Sim, sair
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function confirmarSairAdmin() {
+                    var modal = document.getElementById('modalSairAdmin');
+                    modal.style.display = 'flex';
+                    modal.onclick = function(e) {
+                        if (e.target === modal) modal.style.display = 'none';
+                    };
+                }
+            </script>
         </aside>
 
         <script>

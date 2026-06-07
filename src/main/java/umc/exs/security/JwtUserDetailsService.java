@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import umc.exs.model.entidades.logic.Administrador;
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.enums.StatusConta;
 import umc.exs.repository.logic.AdminRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 
@@ -36,6 +37,11 @@ public class JwtUserDetailsService implements UserDetailsService {
         // Then try to find a regular client
         Optional<Cliente> opt = clienteRepository.findByEmail(username);
         Cliente c = opt.orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        StatusConta status = c.getStatusConta() != null ? c.getStatusConta() : StatusConta.ATIVO;
+        if (status == StatusConta.SUSPENSO || status == StatusConta.REMOVIDO) {
+            throw new UsernameNotFoundException("Conta " + status.name().toLowerCase() + ": " + username);
+        }
 
         return User.withUsername(c.getEmail())
                 .password(c.getSenha())

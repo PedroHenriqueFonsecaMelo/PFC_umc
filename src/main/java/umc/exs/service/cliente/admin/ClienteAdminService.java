@@ -8,12 +8,16 @@ import umc.exs.dto.response.cliente.ClientePerfilResponse;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.foundation.Pedido;
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.enums.StatusConta;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.negocios.*;
 import umc.exs.repository.usuario.ClienteRepository;
+import umc.exs.service.email.facade.EmailFacade;
+import umc.exs.service.email.html.EmailHtmlBuilder;
 import umc.exs.service.log.AcaoAuditoria;
 import umc.exs.service.log.LogAuditoriaService;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +36,7 @@ public class ClienteAdminService {
     private final LivroRepository livroRepository;
     private final SolicitacaoCancelamentoRepository cancelamentoRepository;
     private final LogAuditoriaService logAuditoria;
+    private final EmailFacade emailFacade;
 
     @Transactional(readOnly = true)
     public List<ClienteListaResponse> listarClientes() {
@@ -125,6 +130,9 @@ public class ClienteAdminService {
                 .dataNascimento(cliente.getDatanasc())
                 .dataCadastro(cliente.getDataCriacao())
                 .ativo(cliente.isAtivo())
+                .statusConta(cliente.getStatusConta() != null ? cliente.getStatusConta() : StatusConta.ATIVO)
+                .suspensaoAte(cliente.getSuspensaoAte())
+                .motivoSuspensao(cliente.getMotivoSuspensao())
                 .nivel(calcularNivel(totalGasto))
                 .saldoTokens(cliente.getSaldoTokens() != null ? cliente.getSaldoTokens() : 0.0)
                 .totalGasto(totalGasto)
@@ -139,6 +147,75 @@ public class ClienteAdminService {
                 .totalTopicosForum(topicosForum)
                 .totalListaDesejos(listaDesejos)
                 .build();
+    }
+
+    @Transactional
+    public void suspenderCliente(Long id, String motivo, int dias, boolean notificar) {
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado: " + id));
+
+        cliente.setStatusConta(StatusConta.SUSPENSO);
+        cliente.setAtivo(false);
+        cliente.setMotivoSuspensao(motivo);
+        cliente.setSuspensaoAte(dias > 0 ? LocalDateTime.now().plusDays(dias) : null);
+        clienteRepository.save(cliente);
+
+        logAuditoria.registrarLog(
+                AcaoAuditoria.CLIENTE_PERFIL_VISUALIZADO.name(),
+                id,
+                cliente.getEmail(),
+                "Conta suspensa. Motivo: " + motivo + ". Dias: " + (dias > 0 ? dias : "indefinido"));
+
+        if (notificar) {
+            String html = EmailHtmlBuilder.contaSuspensa(cliente.getNome(), motivo, cliente.getSuspensaoAte());
+            emailFacade.sendHtmlSafe(cliente.getEmail(), "Sua conta foi suspensa — Bibliotroca", html);
+        }
+    }
+
+    @Transactional
+    public void removerCliente(Long id, String motivo, boolean notificar) {
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado: " + id));
+
+        Double saldo = cliente.getSaldoTokens();
+        String emailDestino = cliente.getEmail();
+        String nomeCliente = cliente.getNome();
+
+        cliente.setStatusConta(StatusConta.REMOVIDO);
+        cliente.setAtivo(false);
+        cliente.setMotivoSuspensao(motivo);
+        cliente.setDeletedAt(LocalDateTime.now());
+        clienteRepository.save(cliente);
+
+        logAuditoria.registrarLog(
+                AcaoAuditoria.CLIENTE_PERFIL_VISUALIZADO.name(),
+                id,
+                emailDestino,
+                "Conta removida pelo admin. Motivo: " + motivo);
+
+        if (notificar) {
+            String html = EmailHtmlBuilder.contaRemovida(nomeCliente, motivo, saldo);
+            emailFacade.sendHtmlSafe(emailDestino, "Sua conta foi removida — Bibliotroca", html);
+        }
+    }
+
+    @Transactional
+    public void reativarCliente(Long id) {
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado: " + id));
+
+        cliente.setStatusConta(StatusConta.ATIVO);
+        cliente.setAtivo(true);
+        cliente.setMotivoSuspensao(null);
+        cliente.setSuspensaoAte(null);
+        cliente.setDeletedAt(null);
+        clienteRepository.save(cliente);
+
+        logAuditoria.registrarLog(
+                AcaoAuditoria.CLIENTE_PERFIL_VISUALIZADO.name(),
+                id,
+                cliente.getEmail(),
+                "Conta reativada pelo admin.");
     }
 
     private ClientePerfilResponse.PedidoResumoDTO mapToPedidoResumoDTO(Pedido p) {
