@@ -578,10 +578,34 @@ function ativarAba(nome) {
     if (panel) panel.classList.add("ativo");
 }
 
+/* ── AVISO ───────────────────────────────────────────────────── */
+function mostrarAviso(msg) {
+    const id = "modalAviso";
+    let m = document.getElementById(id);
+    if (!m) {
+        m = document.createElement("div");
+        m.id = id;
+        m.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;";
+        m.innerHTML = `
+            <div style="background:#fff;border-radius:12px;padding:2rem;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+                <h3 style="margin:0 0 0.75rem;font-family:'Playfair Display',serif;font-size:1.1rem;color:#2c241b;">Atenção</h3>
+                <p id="modalAvisoMsg" style="margin:0 0 1.5rem;font-size:0.9rem;color:#5a4f47;line-height:1.6;"></p>
+                <div style="display:flex;justify-content:flex-end;">
+                    <button onclick="document.getElementById('modalAviso').style.display='none'"
+                        style="padding:0.5rem 1.25rem;border:none;border-radius:8px;background:#722f37;color:#fff;font-size:0.9rem;cursor:pointer;font-weight:600;">OK</button>
+                </div>
+            </div>`;
+        document.body.appendChild(m);
+    }
+    document.getElementById("modalAvisoMsg").textContent = msg;
+    m.style.display = "flex";
+}
+
 /* ── GESTÃO DE CONTA ─────────────────────────────────────────── */
 function abrirModalSuspender() {
     const m = document.getElementById("modalSuspender");
     if (!m) return;
+    document.getElementById("motivoSuspensao").value = "Sua conta foi suspensa temporariamente devido a uma violação dos nossos termos de uso. Entre em contato com nosso suporte caso acredite que isso foi um engano.";
     m.style.display = "flex";
     m.onclick = (e) => { if (e.target === m) fecharModalSuspender(); };
 }
@@ -593,6 +617,7 @@ function fecharModalSuspender() {
 function abrirModalRemover() {
     const m = document.getElementById("modalRemover");
     if (!m) return;
+    document.getElementById("motivoRemocao").value = "Sua conta foi removida permanentemente devido a uma violação grave dos nossos termos de uso. Entre em contato com nosso suporte para mais informações.";
     m.style.display = "flex";
     m.onclick = (e) => { if (e.target === m) fecharModalRemover(); };
 }
@@ -603,7 +628,7 @@ function fecharModalRemover() {
 
 async function confirmarSuspensao() {
     const motivo = document.getElementById("motivoSuspensao")?.value?.trim();
-    if (!motivo) { alert("Informe o motivo da suspensão."); return; }
+    if (!motivo) { mostrarAviso("Por favor, informe o motivo da suspensão."); return; }
     const dias = parseInt(document.querySelector('input[name="diasSuspensao"]:checked')?.value || "0");
     const notificar = document.getElementById("notificarSuspensao")?.checked ?? true;
     const id = window._CLIENTE_ID;
@@ -626,7 +651,7 @@ async function confirmarSuspensao() {
 
 async function confirmarRemocao() {
     const motivo = document.getElementById("motivoRemocao")?.value?.trim();
-    if (!motivo) { alert("Informe o motivo da remoção."); return; }
+    if (!motivo) { mostrarAviso("Por favor, informe o motivo da remoção."); return; }
     const notificar = document.getElementById("notificarRemocao")?.checked ?? true;
     const id = window._CLIENTE_ID;
     try {
