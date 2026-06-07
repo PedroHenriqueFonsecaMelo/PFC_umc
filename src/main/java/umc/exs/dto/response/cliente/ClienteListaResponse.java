@@ -3,6 +3,7 @@ package umc.exs.dto.response.cliente;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import umc.exs.model.enums.StatusConta;
 
 import java.time.LocalDateTime;
 
@@ -20,4 +21,5 @@ public class ClienteListaResponse {
     private double totalGasto;
     private long totalCupons;
     private boolean ativo;
+    private StatusConta statusConta;
 }

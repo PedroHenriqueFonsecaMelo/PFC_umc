@@ -143,8 +143,9 @@ function aplicarFiltros() {
         .trim();
 
     let lista = _todos;
-    if (_filtroAtivo === "ativos") lista = lista.filter((c) => c.ativo);
-    if (_filtroAtivo === "inativos") lista = lista.filter((c) => !c.ativo);
+    if (_filtroAtivo === "ativos") lista = lista.filter((c) => c.ativo && (c.statusConta || "ATIVO") === "ATIVO");
+    if (_filtroAtivo === "inativos") lista = lista.filter((c) => !c.ativo && (c.statusConta || "REMOVIDO") === "REMOVIDO");
+    if (_filtroAtivo === "suspensos") lista = lista.filter((c) => (c.statusConta || "") === "SUSPENSO");
     if (busca) {
         lista = lista.filter((c) =>
             (c.nome || "").toLowerCase().includes(busca) ||
@@ -209,10 +210,15 @@ function badgeNivel(nivel) {
     }</span>`;
 }
 
-function badgeStatus(ativo) {
-    return ativo
-        ? `<span class="badge-status status-ativo"><i class="fa-solid fa-circle" style="font-size:7px"></i> Ativo</span>`
-        : `<span class="badge-status status-inativo"><i class="fa-solid fa-circle" style="font-size:7px"></i> Inativo</span>`;
+function badgeStatus(ativo, statusConta) {
+    const status = statusConta || (ativo ? "ATIVO" : "REMOVIDO");
+    if (status === "SUSPENSO") {
+        return `<span class="badge-status" style="background:#fef9c3;color:#854d0e;border:1px solid #fde68a"><i class="fa-solid fa-circle" style="font-size:7px"></i> Suspenso</span>`;
+    }
+    if (status === "ATIVO") {
+        return `<span class="badge-status status-ativo"><i class="fa-solid fa-circle" style="font-size:7px"></i> Ativo</span>`;
+    }
+    return `<span class="badge-status status-inativo"><i class="fa-solid fa-circle" style="font-size:7px"></i> Inativo</span>`;
 }
 
 function renderTabela(lista) {
@@ -241,7 +247,7 @@ function renderTabela(lista) {
             <td>${fmtTokens(c.saldoTokens)} tk</td>
             <td>${badgeNivel(c.nivel)}</td>
             <td>${c.totalCompras}</td>
-            <td>${badgeStatus(c.ativo)}</td>
+            <td>${badgeStatus(c.ativo, c.statusConta)}</td>
             <td>
                 <a href="/admin/clientes/${c.id}" class="btn-detalhes">
                     <i class="fa-solid fa-eye"></i> Ver Detalhes

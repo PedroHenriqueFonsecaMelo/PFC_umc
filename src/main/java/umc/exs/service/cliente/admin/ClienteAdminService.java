@@ -86,7 +86,8 @@ public class ClienteAdminService {
                 totalCompras,
                 totalGasto,
                 totalCupons,
-                c.isAtivo());
+                c.isAtivo(),
+                c.getStatusConta() != null ? c.getStatusConta() : StatusConta.ATIVO);
     }
 
     @Transactional(readOnly = true)
