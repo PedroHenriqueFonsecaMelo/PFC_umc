@@ -163,7 +163,7 @@
                 <div class="blog-section-title">Novo Post</div>
                 <form
                   id="formBlog"
-                  onsubmit="publicarPost(event)"
+                  onsubmit="abrirModalPublicacao(event)"
                   enctype="multipart/form-data"
                 >
                   <div style="margin-bottom: 0.75rem">
@@ -226,5 +226,37 @@
     <!-- /layout -->
 
     <script th:src="@{/js/admin/painel.js}"></script>
+
+    <!-- Modal de confirmação de publicação de post -->
+    <div id="modalConfirmarPublicacao" style="display:none;position:fixed;
+        inset:0;background:rgba(0,0,0,0.5);z-index:9999;
+        align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:12px;padding:2rem;
+          max-width:440px;width:90%;
+          box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+        <h3 style="margin:0 0 0.75rem;
+            font-family:'Playfair Display',serif;font-size:1.2rem;
+            color:#2c241b;">Confirmar Publicação</h3>
+        <div id="modalPublicacaoResumo" style="margin:0 0 1.5rem;
+            font-size:0.88rem;color:#5a4f47;line-height:1.7;
+            background:#f9f6f2;border-radius:8px;padding:1rem;">
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+          <button onclick="fecharModalPublicacao()"
+              style="padding:0.5rem 1.25rem;
+              border:1.5px solid #e0d9d0;border-radius:8px;
+              background:#fff;color:#7a6e65;
+              font-size:0.9rem;cursor:pointer;font-weight:500;">
+            Cancelar
+          </button>
+          <button id="modalPublicacaoBtnConfirmar"
+              style="padding:0.5rem 1.25rem;border:none;
+              border-radius:8px;background:#722f37;color:#fff;
+              font-size:0.9rem;cursor:pointer;font-weight:600;">
+            Sim, publicar
+          </button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

@@ -1659,8 +1659,38 @@ async function salvarEdicaoBlog(e) {
   }
 }
 
-async function publicarPost(e) {
+function abrirModalPublicacao(e) {
   e.preventDefault();
+  const titulo = document.getElementById("blogTitulo")?.value?.trim() || "";
+
+  if (!titulo) {
+    mostrarToast("Preencha o título do post antes de publicar.", "aviso");
+    return;
+  }
+
+  const resumo = document.getElementById("modalPublicacaoResumo");
+  resumo.innerHTML = `
+    <div><strong>Título:</strong> ${titulo}</div>
+    <div style="margin-top:0.4rem;color:#722f37;font-weight:600">Publicação imediata</div>
+  `;
+
+  const btnConfirmar = document.getElementById("modalPublicacaoBtnConfirmar");
+  btnConfirmar.textContent = "Sim, publicar";
+  btnConfirmar.onclick = () => {
+    fecharModalPublicacao();
+    executarPublicacao();
+  };
+
+  const modal = document.getElementById("modalConfirmarPublicacao");
+  modal.style.display = "flex";
+  modal.onclick = (ev) => { if (ev.target === modal) fecharModalPublicacao(); };
+}
+
+function fecharModalPublicacao() {
+  document.getElementById("modalConfirmarPublicacao").style.display = "none";
+}
+
+async function executarPublicacao() {
   const form = document.getElementById("formBlog");
   const msg = document.getElementById("blogMsg");
   const data = new FormData(form);
