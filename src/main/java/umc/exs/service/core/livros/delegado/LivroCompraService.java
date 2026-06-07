@@ -120,6 +120,8 @@ public class LivroCompraService {
         List<Long> ids = Objects.requireNonNull(request.getLivroIds(), "Lista de IDs não pode ser nula");
         if (ids.isEmpty())
             throw new IllegalArgumentException("O carrinho está vazio.");
+        if (ids.size() > 20)
+            throw new IllegalArgumentException("Limite de 20 livros por compra excedido.");
 
         List<Livro> livrosParaComprar = livroRepository.findAllDisponiveisWithLock(ids).stream()
                 .filter(l -> Boolean.TRUE.equals(l.getAprovado()))

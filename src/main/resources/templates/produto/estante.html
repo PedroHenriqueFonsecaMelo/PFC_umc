@@ -35,6 +35,10 @@
                 <div>
                     <h1>Minha Estante</h1>
                     <p>Selecione os livros que deseja comprar agora.</p>
+                    <div class="estante-contadores" id="estanteContadores" style="display:none">
+                        <span class="contador-badge" id="contadorTotal">0/20 na estante</span>
+                        <span class="contador-badge" id="contadorSelecao">0/5 selecionados para compra</span>
+                    </div>
                 </div>
             </div>
 
@@ -116,8 +120,7 @@
                 <div class="estante-footer">
                     <div class="estante-subtotal">
                         <span class="subtotal-label"
-                        >Subtotal (<span id="qtdSelecionados">0</span> livro(s)
-                            selecionado(s))</span>
+                        >Subtotal (<span id="qtdSelecionados">0</span>/5 selecionado(s))</span>
                         <span class="subtotal-valor" id="subtotalValor"
                         >T$ 0,00</span>
                     </div>
@@ -134,5 +137,6 @@
         </main>
 
         <script th:src="@{/js/produto/estante.js}"></script>
+        <div class="toast" id="toastEstante"></div>
     </body>
 </html>

@@ -691,6 +691,16 @@ function _executarAdicionarEstante() {
             4000
         );
     } else {
+        // Verifica limite da estante (20 livros)
+        if (getCarrinho().length >= 20) {
+            mostrarToast(
+                "Sua estante está cheia. O limite é de 20 livros. " +
+                "Finalize ou remova livros antes de adicionar novos.",
+                "aviso",
+                5000
+            );
+            return;
+        }
         // Adiciona ao carrinho
         adicionarAoCarrinho(_livroAtual);
         atualizarBotaoEstante(_livroAtual.id);

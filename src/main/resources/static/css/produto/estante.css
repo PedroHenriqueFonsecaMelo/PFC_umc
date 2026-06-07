@@ -365,7 +365,8 @@ body {
 .estante-footer {
   position: sticky;
   bottom: 0;
-  background: rgba(126, 126, 130, 0.1);
+  background: var(--paper);
+  box-shadow: 0 -4px 12px rgba(44, 36, 27, 0.1);
   border: 1.5px solid var(--ink);
   border-radius: 16px;
   padding: 1.25rem 1.5rem;
@@ -446,4 +447,41 @@ body {
   .btn-prosseguir {
     width: 100%;
   }
+}
+
+/* ── Toast ── */
+.toast {
+  display: none;
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  z-index: 99;
+  text-align: center;
+  max-width: 90vw;
+  box-shadow: 4px 4px 0 rgba(44, 36, 27, 0.15);
+}
+.toast-sucesso { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.toast-info    { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.toast-aviso   { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+
+/* ── Contadores da estante ── */
+.estante-contadores {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 0.4rem;
+}
+.contador-badge {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 0.2rem 0.55rem;
+  font-weight: 600;
+  font-size: 0.78rem;
 }

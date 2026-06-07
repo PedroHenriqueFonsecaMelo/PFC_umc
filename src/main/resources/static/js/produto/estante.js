@@ -7,6 +7,22 @@
 const CART_KEY = "bibliotroca_carrinho";
 const CHECKOUT_KEY = "bibliotroca_checkout_ids";
 const CUPOM_KEY = "bibliotroca_checkout_cupom";
+const LIMITE_ESTANTE = 20;
+const LIMITE_SELECAO = 5;
+
+/* ── Toast ── */
+function mostrarToast(msg, tipo, duracao) {
+    const t = document.getElementById("toastEstante");
+    if (!t) return;
+    t.className = "toast toast-" + (tipo || "info");
+    t.innerHTML = msg;
+    t.style.display = "block";
+    clearTimeout(t._timer);
+    const ms = duracao !== undefined ? duracao : 3000;
+    if (ms > 0) {
+        t._timer = setTimeout(() => { t.style.display = "none"; }, ms);
+    }
+}
 
 /* ── Estado do cupom ── */
 let _cupomAtivo = null; // { codigo, percentual, desconto, totalComDesconto, totalOriginal }
@@ -55,17 +71,22 @@ function renderEstante() {
     const vazia = document.getElementById("estanteVazia");
     const conteudo = document.getElementById("estanteConteudo");
     const lista = document.getElementById("listaEstante");
+    const contadores = document.getElementById("estanteContadores");
+    const contadorTotal = document.getElementById("contadorTotal");
 
     if (!lista) return;
 
     if (itens.length === 0) {
         if (vazia) vazia.style.display = "block";
         if (conteudo) conteudo.style.display = "none";
+        if (contadores) contadores.style.display = "none";
         return;
     }
 
     if (vazia) vazia.style.display = "none";
     if (conteudo) conteudo.style.display = "block";
+    if (contadores) contadores.style.display = "flex";
+    if (contadorTotal) contadorTotal.textContent = `${itens.length}/${LIMITE_ESTANTE} na estante`;
 
     lista.innerHTML = itens.map((item) => {
         let foto = null;
@@ -88,7 +109,7 @@ function renderEstante() {
         <div class="estante-item" id="item-${item.id}">
             <input type="checkbox" class="estante-item-check" id="chk-${item.id}"
                    data-id="${item.id}" data-preco="${item.precoAprovado || 0}"
-                   onchange="atualizarSubtotal()">
+                   onchange="aoSelecionarItem(this)">
             <img class="estante-item-img" src="${foto}" alt="${
             escHtml(item.titulo)
         }"
@@ -117,6 +138,26 @@ function escHtml(str) {
         .replace(/&/g, "&amp;").replace(/</g, "&lt;")
         .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
+
+/* ── Intercepta seleção de checkbox com limite de 5 ── */
+window.aoSelecionarItem = function (check) {
+    if (check.checked) {
+        // Conta os já marcados ANTES deste (exclui o checkbox atual do count)
+        const jaChecados = Array.from(
+            document.querySelectorAll(".estante-item-check:checked")
+        ).filter(c => c !== check).length;
+        if (jaChecados >= LIMITE_SELECAO) {
+            check.checked = false;
+            mostrarToast(
+                `Você pode selecionar no máximo ${LIMITE_SELECAO} livros por compra.`,
+                "aviso",
+                4000
+            );
+            return;
+        }
+    }
+    atualizarSubtotal();
+};
 
 /* ── Atualiza subtotal e estado dos botões ── */
 function atualizarSubtotal() {
@@ -158,8 +199,11 @@ function atualizarSubtotal() {
     }
 
     if (qtdEl) qtdEl.textContent = qtd;
-    if (btnPross) btnPross.disabled = qtd === 0;
+    if (btnPross) btnPross.disabled = qtd === 0 || qtd > LIMITE_SELECAO;
     if (btnRemover) btnRemover.disabled = qtd === 0;
+
+    const contadorSelecao = document.getElementById("contadorSelecao");
+    if (contadorSelecao) contadorSelecao.textContent = `${qtd}/${LIMITE_SELECAO} selecionados para compra`;
 
     // Atualiza estado do "Selecionar todos"
     if (chkTodos) {
@@ -176,11 +220,29 @@ function atualizarSubtotal() {
     });
 }
 
-/* ── Selecionar / desselecionar todos ── */
+/* ── Selecionar / desselecionar todos (respeita limite de 5) ── */
 window.toggleSelecionarTodos = function (chk) {
-    document.querySelectorAll(".estante-item-check").forEach((c) => {
-        c.checked = chk.checked;
-    });
+    const todos = document.querySelectorAll(".estante-item-check");
+    if (chk.checked) {
+        let count = 0;
+        todos.forEach((c) => {
+            if (count < LIMITE_SELECAO) {
+                c.checked = true;
+                count++;
+            } else {
+                c.checked = false;
+            }
+        });
+        if (todos.length > LIMITE_SELECAO) {
+            mostrarToast(
+                `Você pode levar no máximo ${LIMITE_SELECAO} livros por compra. Os primeiros ${LIMITE_SELECAO} foram selecionados.`,
+                "aviso",
+                5000
+            );
+        }
+    } else {
+        todos.forEach((c) => { c.checked = false; });
+    }
     atualizarSubtotal();
 };
 
@@ -308,6 +370,15 @@ window.prosseguirCheckout = function () {
         .map((c) => parseInt(c.dataset.id, 10));
 
     if (ids.length === 0) return;
+
+    if (ids.length > LIMITE_SELECAO) {
+        mostrarToast(
+            `Você pode levar no máximo ${LIMITE_SELECAO} livros por compra.`,
+            "aviso",
+            4000
+        );
+        return;
+    }
 
     // Persiste os IDs selecionados e o cupom para a página de checkout
     sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify(ids));
