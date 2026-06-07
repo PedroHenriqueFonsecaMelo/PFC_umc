@@ -29,6 +29,9 @@ public class ClientePerfilResponse {
     private StatusConta statusConta;
     private LocalDateTime suspensaoAte;
     private String motivoSuspensao;
+    private LocalDateTime dataAcao;
+    private String adminAcao;
+    private LocalDateTime emailNotificadoEm;
     private String nivel;
     private List<EnderecoShared> enderecos;
 

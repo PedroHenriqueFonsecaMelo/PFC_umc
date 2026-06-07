@@ -133,6 +133,9 @@ public class ClienteAdminService {
                 .statusConta(cliente.getStatusConta() != null ? cliente.getStatusConta() : StatusConta.ATIVO)
                 .suspensaoAte(cliente.getSuspensaoAte())
                 .motivoSuspensao(cliente.getMotivoSuspensao())
+                .dataAcao(cliente.getDataAcao())
+                .adminAcao(cliente.getAdminAcao())
+                .emailNotificadoEm(cliente.getEmailNotificadoEm())
                 .nivel(calcularNivel(totalGasto))
                 .saldoTokens(cliente.getSaldoTokens() != null ? cliente.getSaldoTokens() : 0.0)
                 .totalGasto(totalGasto)
@@ -149,66 +152,97 @@ public class ClienteAdminService {
                 .build();
     }
 
+    private static final String MOTIVO_PADRAO_SUSPENSAO =
+            "Sua conta na Bibliotroca foi suspensa temporariamente devido a uma violação dos nossos termos de uso. " +
+            "Entre em contato com nosso suporte caso acredite que isso foi um engano.";
+
+    private static final String MOTIVO_PADRAO_REMOCAO =
+            "Sua conta na Bibliotroca foi removida permanentemente devido a uma violação grave dos nossos termos de uso. " +
+            "Lamentamos informar que não será possível reativar o acesso. Entre em contato com nosso suporte para mais informações.";
+
+    private static final String MENSAGEM_PADRAO_REATIVACAO =
+            "Sua conta na Bibliotroca foi reativada. Você já pode fazer login normalmente. " +
+            "Agradecemos sua compreensão e esperamos que tenha uma boa experiência em nossa plataforma.";
+
+    private String motivoEfetivo(String motivo, String padrao) {
+        return (motivo != null && !motivo.isBlank()) ? motivo : padrao;
+    }
+
     @Transactional
-    public void suspenderCliente(Long id, String motivo, int dias, boolean notificar) {
+    public void suspenderCliente(Long id, String motivo, int dias, boolean notificar, String adminEmail) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado: " + id));
 
+        String motivoFinal = motivoEfetivo(motivo, MOTIVO_PADRAO_SUSPENSAO);
+        LocalDateTime agora = LocalDateTime.now();
         cliente.setStatusConta(StatusConta.SUSPENSO);
         cliente.setAtivo(false);
-        cliente.setMotivoSuspensao(motivo);
-        cliente.setSuspensaoAte(dias > 0 ? LocalDateTime.now().plusDays(dias) : null);
+        cliente.setMotivoSuspensao(motivoFinal);
+        cliente.setSuspensaoAte(dias > 0 ? agora.plusDays(dias) : null);
+        cliente.setDataAcao(agora);
+        cliente.setAdminAcao(adminEmail);
+        cliente.setEmailNotificadoEm(notificar ? agora : null);
         clienteRepository.save(cliente);
 
         logAuditoria.registrarLog(
                 AcaoAuditoria.CLIENTE_PERFIL_VISUALIZADO.name(),
                 id,
                 cliente.getEmail(),
-                "Conta suspensa. Motivo: " + motivo + ". Dias: " + (dias > 0 ? dias : "indefinido"));
+                "Conta suspensa por " + adminEmail + ". Motivo: " + motivoFinal + ". Dias: " + (dias > 0 ? dias : "indefinido"));
 
         if (notificar) {
-            String html = EmailHtmlBuilder.contaSuspensa(cliente.getNome(), motivo, cliente.getSuspensaoAte());
+            String html = EmailHtmlBuilder.contaSuspensa(cliente.getNome(), motivoFinal, cliente.getSuspensaoAte());
             emailFacade.sendHtmlSafe(cliente.getEmail(), "Sua conta foi suspensa — Bibliotroca", html);
         }
     }
 
     @Transactional
-    public void removerCliente(Long id, String motivo, boolean notificar) {
+    public void removerCliente(Long id, String motivo, boolean notificar, String adminEmail) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado: " + id));
 
+        String motivoFinal = motivoEfetivo(motivo, MOTIVO_PADRAO_REMOCAO);
         Double saldo = cliente.getSaldoTokens();
         String emailDestino = cliente.getEmail();
         String nomeCliente = cliente.getNome();
+        LocalDateTime agora = LocalDateTime.now();
 
         cliente.setStatusConta(StatusConta.REMOVIDO);
         cliente.setAtivo(false);
-        cliente.setMotivoSuspensao(motivo);
-        cliente.setDeletedAt(LocalDateTime.now());
+        cliente.setMotivoSuspensao(motivoFinal);
+        cliente.setDeletedAt(agora);
+        cliente.setDataAcao(agora);
+        cliente.setAdminAcao(adminEmail);
+        cliente.setEmailNotificadoEm(notificar ? agora : null);
         clienteRepository.save(cliente);
 
         logAuditoria.registrarLog(
                 AcaoAuditoria.CLIENTE_PERFIL_VISUALIZADO.name(),
                 id,
                 emailDestino,
-                "Conta removida pelo admin. Motivo: " + motivo);
+                "Conta removida por " + adminEmail + ". Motivo: " + motivoFinal);
 
         if (notificar) {
-            String html = EmailHtmlBuilder.contaRemovida(nomeCliente, motivo, saldo);
+            String html = EmailHtmlBuilder.contaRemovida(nomeCliente, motivoFinal, saldo);
             emailFacade.sendHtmlSafe(emailDestino, "Sua conta foi removida — Bibliotroca", html);
         }
     }
 
     @Transactional
-    public void reativarCliente(Long id) {
+    public void reativarCliente(Long id, String mensagem, boolean notificar) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado: " + id));
+
+        String mensagemFinal = motivoEfetivo(mensagem, MENSAGEM_PADRAO_REATIVACAO);
 
         cliente.setStatusConta(StatusConta.ATIVO);
         cliente.setAtivo(true);
         cliente.setMotivoSuspensao(null);
         cliente.setSuspensaoAte(null);
         cliente.setDeletedAt(null);
+        cliente.setDataAcao(null);
+        cliente.setAdminAcao(null);
+        cliente.setEmailNotificadoEm(notificar ? LocalDateTime.now() : null);
         clienteRepository.save(cliente);
 
         logAuditoria.registrarLog(
@@ -216,6 +250,11 @@ public class ClienteAdminService {
                 id,
                 cliente.getEmail(),
                 "Conta reativada pelo admin.");
+
+        if (notificar) {
+            String html = EmailHtmlBuilder.contaReativada(cliente.getNome(), mensagemFinal);
+            emailFacade.sendHtmlSafe(cliente.getEmail(), "Sua conta foi reativada — Bibliotroca", html);
+        }
     }
 
     private ClientePerfilResponse.PedidoResumoDTO mapToPedidoResumoDTO(Pedido p) {

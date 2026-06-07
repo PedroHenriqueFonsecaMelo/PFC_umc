@@ -418,6 +418,24 @@ table.inner-table {
     color: #fff;
 }
 
+/* ── DETALHE DE AÇÃO (suspensão / remoção) ──────────────────── */
+.acao-detalhe-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.acao-detalhe-label {
+    min-width: 120px;
+    font-weight: 600;
+    color: #7a6e65;
+    flex-shrink: 0;
+}
+.acao-detalhe-value {
+    color: #2c241b;
+}
+
 /* ── RESPONSIVO ─────────────────────────────────────────────── */
 @media (max-width: 900px) {
     .breadcrumb, .perfil-header, .summary-grid, .tabs-area {

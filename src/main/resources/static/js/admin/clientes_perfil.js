@@ -118,11 +118,70 @@ function renderPerfil(p) {
         : statusConta === "SUSPENSO"
             ? `<span style="padding:4px 12px;border-radius:20px;background:#fef9c3;color:#854d0e;font-size:13px;font-weight:600"><i class="fa-solid fa-circle" style="font-size:7px;margin-right:5px"></i>SUSPENSO</span>`
             : `<span style="padding:4px 12px;border-radius:20px;background:#fee2e2;color:#991b1b;font-size:13px;font-weight:600"><i class="fa-solid fa-circle" style="font-size:7px;margin-right:5px"></i>REMOVIDO</span>`;
-    const suspensaoExtra = statusConta === "SUSPENSO"
-        ? `<div style="font-size:12px;color:#7a6e65;margin-top:8px">
-                ${p.suspensaoAte ? `<span>Válida até: <strong>${fmtDataHora(p.suspensaoAte)}</strong></span>` : `<span>Suspensão <strong>indefinida</strong></span>`}
-                ${p.motivoSuspensao ? `<span style="margin-left:12px">Motivo: <em>${esc(p.motivoSuspensao)}</em></span>` : ""}
-           </div>` : "";
+    // Card de detalhes da ação (suspensão ou remoção)
+    let acaoDetalhe = "";
+    if (statusConta === "SUSPENSO" || statusConta === "REMOVIDO") {
+        const corBorda = statusConta === "SUSPENSO" ? "#fde68a" : "#fca5a5";
+        const corFundo = statusConta === "SUSPENSO" ? "#fffbeb" : "#fff5f5";
+
+        // Contagem regressiva para suspensão temporária
+        let contagemRegressiva = "";
+        if (statusConta === "SUSPENSO" && p.suspensaoAte) {
+            const ate = new Date(p.suspensaoAte);
+            const agora = new Date();
+            const diffMs = ate - agora;
+            if (diffMs > 0) {
+                const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                const horas = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                contagemRegressiva = `<span style="display:inline-block;margin-top:4px;padding:2px 10px;border-radius:12px;background:#fef9c3;color:#854d0e;font-size:11px;font-weight:600">
+                    <i class="fa-solid fa-hourglass-half" style="margin-right:4px"></i>Expira em ${dias}d ${horas}h
+                </span>`;
+            } else {
+                contagemRegressiva = `<span style="display:inline-block;margin-top:4px;padding:2px 10px;border-radius:12px;background:#fee2e2;color:#991b1b;font-size:11px;font-weight:600">Prazo expirado</span>`;
+            }
+        }
+
+        const linhaValidade = statusConta === "SUSPENSO"
+            ? `<div class="acao-detalhe-row">
+                <span class="acao-detalhe-label">Válida até</span>
+                <span class="acao-detalhe-value">${p.suspensaoAte ? fmtDataHora(p.suspensaoAte) : "Indefinida"} ${contagemRegressiva}</span>
+               </div>`
+            : "";
+
+        const linhaEmail = p.emailNotificadoEm
+            ? `<div class="acao-detalhe-row">
+                <span class="acao-detalhe-label"><i class="fa-solid fa-envelope" style="margin-right:4px"></i>E-mail enviado</span>
+                <span class="acao-detalhe-value" style="color:#166534">${fmtDataHora(p.emailNotificadoEm)}</span>
+               </div>`
+            : `<div class="acao-detalhe-row">
+                <span class="acao-detalhe-label"><i class="fa-solid fa-envelope-slash" style="margin-right:4px"></i>E-mail</span>
+                <span class="acao-detalhe-value" style="color:#7a6e65">Não notificado</span>
+               </div>`;
+
+        acaoDetalhe = `
+            <div style="margin-top:14px;border:1.5px solid ${corBorda};border-radius:10px;background:${corFundo};padding:14px 18px">
+                <div style="font-size:12px;font-weight:700;color:#5a4f47;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.04em">
+                    <i class="fa-solid fa-clock-rotate-left" style="margin-right:6px"></i>Detalhes da Ação
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                    <div class="acao-detalhe-row">
+                        <span class="acao-detalhe-label">Data da ação</span>
+                        <span class="acao-detalhe-value">${p.dataAcao ? fmtDataHora(p.dataAcao) : "—"}</span>
+                    </div>
+                    <div class="acao-detalhe-row">
+                        <span class="acao-detalhe-label">Responsável</span>
+                        <span class="acao-detalhe-value">${p.adminAcao ? esc(p.adminAcao) : "—"}</span>
+                    </div>
+                    <div class="acao-detalhe-row">
+                        <span class="acao-detalhe-label">Motivo</span>
+                        <span class="acao-detalhe-value"><em>${p.motivoSuspensao ? esc(p.motivoSuspensao) : "—"}</em></span>
+                    </div>
+                    ${linhaValidade}
+                    ${linhaEmail}
+                </div>
+            </div>`;
+    }
+    const suspensaoExtra = acaoDetalhe;
     const btnSuspender = statusConta === "ATIVO"
         ? `<button onclick="abrirModalSuspender()" style="padding:0.45rem 1.1rem;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;background:#fff;color:#b45309;border:1.5px solid #b45309;transition:all 0.2s"><i class="fa-solid fa-ban"></i> Suspender Conta</button>`
         : "";
@@ -130,7 +189,7 @@ function renderPerfil(p) {
         ? `<button onclick="abrirModalRemover()" style="padding:0.45rem 1.1rem;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;background:#fff;color:#722f37;border:1.5px solid #722f37;transition:all 0.2s"><i class="fa-solid fa-trash"></i> Remover Conta</button>`
         : "";
     const btnReativar = statusConta !== "ATIVO"
-        ? `<button onclick="reativarConta()" style="padding:0.45rem 1.1rem;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;background:#2e7d32;color:#fff;border:none;transition:all 0.2s"><i class="fa-solid fa-rotate-left"></i> Reativar Conta</button>`
+        ? `<button onclick="abrirModalReativar()" style="padding:0.45rem 1.1rem;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;background:#2e7d32;color:#fff;border:none;transition:all 0.2s"><i class="fa-solid fa-rotate-left"></i> Reativar Conta</button>`
         : "";
 
     // Atualiza breadcrumb padronizado com o nome do cliente
@@ -392,6 +451,27 @@ function renderPerfil(p) {
                 </div>
             </div>
         </div>
+
+        <!-- MODAL REATIVAR -->
+        <div id="modalReativar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+            <div style="background:#fff;border-radius:12px;padding:2rem;max-width:480px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+                <h3 style="margin:0 0 1rem;font-family:'Playfair Display',serif;font-size:1.2rem;color:#2c241b">Reativar Conta</h3>
+                <p style="margin:0 0 1rem;font-size:0.9rem;color:#5a4f47;line-height:1.6">A conta será reativada e o cliente poderá fazer login novamente.</p>
+                <div style="margin-bottom:1rem">
+                    <label style="display:block;font-size:0.85rem;font-weight:600;color:#2c241b;margin-bottom:0.4rem">Mensagem para o cliente (opcional)</label>
+                    <textarea id="mensagemReativacao" rows="3" placeholder="Sua conta na Bibliotroca foi reativada. Você já pode fazer login normalmente. Agradecemos sua compreensão e esperamos que tenha uma boa experiência em nossa plataforma." style="width:100%;padding:0.6rem;border:1.5px solid #e0d9d0;border-radius:8px;font-size:0.9rem;resize:vertical;box-sizing:border-box"></textarea>
+                </div>
+                <div style="margin-bottom:1.5rem">
+                    <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;cursor:pointer">
+                        <input type="checkbox" id="notificarReativacao" checked> Notificar cliente por e-mail
+                    </label>
+                </div>
+                <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+                    <button onclick="fecharModalReativar()" style="padding:0.5rem 1.25rem;border:1.5px solid #e0d9d0;border-radius:8px;background:#fff;color:#7a6e65;font-size:0.9rem;cursor:pointer;font-weight:500">Cancelar</button>
+                    <button onclick="confirmarReativacao()" style="padding:0.5rem 1.25rem;border:none;border-radius:8px;background:#2e7d32;color:#fff;font-size:0.9rem;cursor:pointer;font-weight:600"><i class="fa-solid fa-rotate-left"></i> Reativar Conta</button>
+                </div>
+            </div>
+        </div>
     `;
 
     document.getElementById("perfilContent").innerHTML = html;
@@ -566,15 +646,31 @@ async function confirmarRemocao() {
     }
 }
 
-async function reativarConta() {
+function abrirModalReativar() {
+    const m = document.getElementById("modalReativar");
+    if (!m) return;
+    m.style.display = "flex";
+    m.onclick = (e) => { if (e.target === m) fecharModalReativar(); };
+}
+function fecharModalReativar() {
+    const m = document.getElementById("modalReativar");
+    if (m) m.style.display = "none";
+}
+
+async function confirmarReativacao() {
+    const mensagem = document.getElementById("mensagemReativacao")?.value?.trim() || null;
+    const notificar = document.getElementById("notificarReativacao")?.checked ?? true;
     const id = window._CLIENTE_ID;
     try {
         const res = await fetch(`/api/admin/clientes/${id}/reativar`, {
             method: "POST",
-            credentials: "include"
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ mensagem, notificarEmail: notificar })
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) { mostrarToast("toast-err", data.erro || "Erro ao reativar conta."); return; }
+        fecharModalReativar();
         mostrarToast("toast-ok", "Conta reativada com sucesso.");
         await carregarPerfil();
     } catch (_) {

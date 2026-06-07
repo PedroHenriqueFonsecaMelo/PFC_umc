@@ -324,9 +324,11 @@ public class AdminControllerApi {
     @PostMapping("/clientes/{id}/suspender")
     public ResponseEntity<?> suspenderCliente(
             @PathVariable Long id,
-            @RequestBody SuspenderClienteRequest req) {
+            @RequestBody SuspenderClienteRequest req,
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            clienteAdminService.suspenderCliente(id, req.getMotivo(), req.getDiasSuspensao(), req.isNotificarEmail());
+            String adminEmail = userDetails != null ? userDetails.getUsername() : "admin";
+            clienteAdminService.suspenderCliente(id, req.getMotivo(), req.getDiasSuspensao(), req.isNotificarEmail(), adminEmail);
             return ResponseEntity.ok(Map.of("ok", true));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("erro", e.getMessage()));
@@ -336,9 +338,11 @@ public class AdminControllerApi {
     @PostMapping("/clientes/{id}/remover")
     public ResponseEntity<?> removerCliente(
             @PathVariable Long id,
-            @RequestBody RemoverClienteRequest req) {
+            @RequestBody RemoverClienteRequest req,
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            clienteAdminService.removerCliente(id, req.getMotivo(), req.isNotificarEmail());
+            String adminEmail = userDetails != null ? userDetails.getUsername() : "admin";
+            clienteAdminService.removerCliente(id, req.getMotivo(), req.isNotificarEmail(), adminEmail);
             return ResponseEntity.ok(Map.of("ok", true));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("erro", e.getMessage()));
@@ -346,9 +350,13 @@ public class AdminControllerApi {
     }
 
     @PostMapping("/clientes/{id}/reativar")
-    public ResponseEntity<?> reativarCliente(@PathVariable Long id) {
+    public ResponseEntity<?> reativarCliente(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, Object> body) {
         try {
-            clienteAdminService.reativarCliente(id);
+            String mensagem = body != null ? (String) body.get("mensagem") : null;
+            boolean notificar = body != null && Boolean.TRUE.equals(body.get("notificarEmail"));
+            clienteAdminService.reativarCliente(id, mensagem, notificar);
             return ResponseEntity.ok(Map.of("ok", true));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("erro", e.getMessage()));

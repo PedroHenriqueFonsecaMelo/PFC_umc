@@ -265,6 +265,19 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Sua conta foi suspensa — Bibliotroca", conteudo);
     }
 
+    public static String contaReativada(String nome, String mensagem) {
+        nome = EmailSanitizer.esc(nome);
+        mensagem = EmailSanitizer.esc(mensagem != null ? mensagem : "");
+
+        String conteudo = EmailComponents.h2("Olá, " + nome + ".")
+                + EmailComponents.p("Sua conta na <strong>Bibliotroca</strong> foi <strong style='color:#2e7d32'>reativada</strong> com sucesso.")
+                + EmailComponents.caixa(EmailComponents.p(mensagem))
+                + EmailComponents.p("Você já pode acessar sua conta normalmente.")
+                + EmailComponents.p("Equipe Bibliotroca.");
+
+        return EmailLayout.wrap("Sua conta foi reativada — Bibliotroca", conteudo);
+    }
+
     public static String contaRemovida(String nome, String motivo, Double saldoTokens) {
         nome = EmailSanitizer.esc(nome);
         motivo = EmailSanitizer.esc(motivo != null ? motivo : "Violação dos termos de uso.");

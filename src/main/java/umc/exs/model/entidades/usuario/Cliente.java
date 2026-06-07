@@ -103,7 +103,7 @@ public class Cliente {
     private LocalDateTime deletedAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'ATIVO'")
     @Builder.Default
     private StatusConta statusConta = StatusConta.ATIVO;
 
@@ -112,6 +112,15 @@ public class Cliente {
 
     @Column(name = "motivo_suspensao", length = 500)
     private String motivoSuspensao;
+
+    @Column(name = "data_acao")
+    private LocalDateTime dataAcao;
+
+    @Column(name = "admin_acao", length = 255)
+    private String adminAcao;
+
+    @Column(name = "email_notificado_em")
+    private LocalDateTime emailNotificadoEm;
 
     /**
      * Verificação de e-mail — false até o usuário clicar no link de confirmação.
