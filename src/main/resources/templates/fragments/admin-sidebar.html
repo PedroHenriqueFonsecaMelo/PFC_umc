@@ -63,6 +63,13 @@
                     <i class="fa-solid fa-box-open"></i> Lotes Pendentes
                 </a>
                 <a
+                    href="/admin/painel?tab=pedidos"
+                    class="nav-item"
+                    th:classappend="${activeMenu == 'pedidos'} ? ' ativo'"
+                >
+                    <i class="fa-solid fa-truck"></i> Pedidos / Envio
+                </a>
+                <a
                     href="/admin/cancelamentos"
                     class="nav-item"
                     id="navCancelamentos"
@@ -78,13 +85,7 @@
                         >0</span>
                     </span>
                 </a>
-                <a
-                    href="/admin/painel?tab=pedidos"
-                    class="nav-item"
-                    th:classappend="${activeMenu == 'pedidos'} ? ' ativo'"
-                >
-                    <i class="fa-solid fa-truck"></i> Pedidos / Envio
-                </a>
+                <div style="height:1px;background:rgba(255,255,255,0.08);margin:0.4rem 1rem;"></div>
                 <a
                     href="/admin/clientes"
                     class="nav-item"
@@ -106,6 +107,7 @@
                 >
                     <i class="fa-solid fa-ticket"></i> Cupons
                 </a>
+                <div style="height:1px;background:rgba(255,255,255,0.08);margin:0.4rem 1rem;"></div>
                 <a
                     href="/admin/painel?tab=blog"
                     class="nav-item"
@@ -120,19 +122,20 @@
                 >
                     <i class="fa-solid fa-comments"></i> Fórum
                 </a>
-                <a
-                    href="/admin/audit"
-                    class="nav-item"
-                    th:classappend="${activeMenu == 'auditoria'} ? ' ativo'"
-                >
-                    <i class="fa-solid fa-shield-halved"></i> Auditoria
-                </a>
+                <div style="height:1px;background:rgba(255,255,255,0.08);margin:0.4rem 1rem;"></div>
                 <a
                     href="/admin/notificacoes"
                     class="nav-item"
                     th:classappend="${activeMenu == 'notificacoes'} ? ' ativo'"
                 >
                     <i class="fa-solid fa-envelope-open-text"></i> Notificações
+                </a>
+                <a
+                    href="/admin/audit"
+                    class="nav-item"
+                    th:classappend="${activeMenu == 'auditoria'} ? ' ativo'"
+                >
+                    <i class="fa-solid fa-shield-halved"></i> Auditoria
                 </a>
             </nav>
             <div class="sidebar-footer">
