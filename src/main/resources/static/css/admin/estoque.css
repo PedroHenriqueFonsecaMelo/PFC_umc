@@ -774,3 +774,25 @@
   color: #722f37;
   background: rgba(114, 47, 55, 0.04);
 }
+
+/* ── TOAST ─────────────────────────────────────────────────── */
+.toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    z-index: 2000;
+    max-width: 360px;
+}
+.toast-ok {
+    background: #2e7d32;
+    color: #fff;
+}
+.toast-err {
+    background: #722f37;
+    color: #fff;
+}

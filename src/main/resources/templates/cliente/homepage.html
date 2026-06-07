@@ -3308,5 +3308,13 @@
             © 2025 Bibliotroca — Todos os direitos reservados
         </p>
     </footer>
+
+    <!-- Garante visibilidade do botão de logout flutuante — página sempre autenticada -->
+    <script>
+        (function () {
+            var btn = document.getElementById("btnSairFlutuante");
+            if (btn) btn.style.display = "flex";
+        })();
+    </script>
     </body>
 </html>

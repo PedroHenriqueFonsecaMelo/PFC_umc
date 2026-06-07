@@ -40,7 +40,7 @@
                 <div class="overlay" id="overlay" onclick="fecharMenu()"></div>
                 <div
                     class="content"
-                    style="overflow-y: auto; flex: 1; min-width: 0"
+                    style="overflow-y: auto; flex: 1; min-width: 0; min-height: 0"
                 >
                     <header class="topbar">
                         <div style="display:flex;align-items:center;gap:14px">
@@ -246,8 +246,16 @@
                                                 th:if="${clienteLogado and (clienteId == topico.autor.id or isAdmin)}"
                                                 class="btn-melhor marcado"
                                                 th:data-resposta-id="${resposta.id}"
+                                                style="display:inline-flex;align-items:center;gap:0.4rem;
+                                                    padding:0.4rem 0.9rem;border-radius:8px;font-size:0.82rem;
+                                                    font-weight:600;cursor:pointer;transition:all 0.2s;
+                                                    background:#16a34a;color:#fff;border:1.5px solid #16a34a;"
                                             >
-                                                ✓ Desmarcar
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                                                    <polyline points="20 6 9 17 4 12"/>
+                                                </svg>
+                                                Melhor Resposta
                                             </button>
 
                                             <button
@@ -331,8 +339,16 @@
                                                 th:if="${clienteLogado and (clienteId == topico.autor.id or isAdmin)}"
                                                 class="btn-melhor"
                                                 th:data-resposta-id="${resposta.id}"
+                                                style="display:inline-flex;align-items:center;gap:0.4rem;
+                                                    padding:0.4rem 0.9rem;border-radius:8px;font-size:0.82rem;
+                                                    font-weight:600;cursor:pointer;transition:all 0.2s;
+                                                    background:#fff;color:#722f37;border:1.5px solid #722f37;"
                                             >
-                                                ✓ Melhor Resposta
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                                                    <polyline points="20 6 9 17 4 12"/>
+                                                </svg>
+                                                Melhor Resposta
                                             </button>
 
                                             <button
@@ -572,8 +588,16 @@
                                         th:if="${clienteLogado and clienteId == topico.autor.id}"
                                         class="btn-melhor marcado"
                                         th:data-resposta-id="${resposta.id}"
+                                        style="display:inline-flex;align-items:center;gap:0.4rem;
+                                            padding:0.4rem 0.9rem;border-radius:8px;font-size:0.82rem;
+                                            font-weight:600;cursor:pointer;transition:all 0.2s;
+                                            background:#16a34a;color:#fff;border:1.5px solid #16a34a;"
                                     >
-                                        ✓ Desmarcar
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                                            <polyline points="20 6 9 17 4 12"/>
+                                        </svg>
+                                        Melhor Resposta
                                     </button>
                                 </div>
                             </article>
@@ -644,13 +668,21 @@
                                         >0</span>
                                     </span>
 
-                                    <!-- Marcar melhor resposta: autor do tópico -->
+                                    <!-- Marcar melhor resposta: autor do tópico, exceto a própria resposta -->
                                     <button
-                                        th:if="${clienteLogado and clienteId == topico.autor.id}"
+                                        th:if="${clienteLogado and clienteId == topico.autor.id and !clienteId.equals(resposta.autor.id)}"
                                         class="btn-melhor"
                                         th:data-resposta-id="${resposta.id}"
+                                        style="display:inline-flex;align-items:center;gap:0.4rem;
+                                            padding:0.4rem 0.9rem;border-radius:8px;font-size:0.82rem;
+                                            font-weight:600;cursor:pointer;transition:all 0.2s;
+                                            background:#fff;color:#722f37;border:1.5px solid #722f37;"
                                     >
-                                        ✓ Melhor Resposta
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                                            <polyline points="20 6 9 17 4 12"/>
+                                        </svg>
+                                        Melhor Resposta
                                     </button>
 
                                     <!-- Excluir própria resposta -->

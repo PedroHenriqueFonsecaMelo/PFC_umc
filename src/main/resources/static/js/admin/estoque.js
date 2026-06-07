@@ -604,6 +604,16 @@ function mostrarErro(msg) {
     el.style.display = "block";
 }
 
+let _toastTimer;
+function mostrarToast(cls, msg) {
+    const t = document.getElementById("toast");
+    t.className = "toast " + cls;
+    t.textContent = msg;
+    t.style.display = "block";
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => { t.style.display = "none"; }, 3000);
+}
+
 function esconderErro() {
     document.getElementById("modalErro").style.display = "none";
 }
@@ -711,10 +721,15 @@ async function salvarLivro(e) {
             return;
         }
 
+        const titulo = payload.titulo || "Livro";
+        const msgSucesso = modoEdicao
+            ? `Livro '${titulo}' atualizado com sucesso!`
+            : `Livro '${titulo}' adicionado com sucesso!`;
         btn.disabled = false;
         btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
         fecharModal();
         await carregarEstoque();
+        mostrarToast("toast-ok", msgSucesso);
     } catch (_) {
         mostrarErro("Erro de conexão. Tente novamente.");
         btn.disabled = false;
