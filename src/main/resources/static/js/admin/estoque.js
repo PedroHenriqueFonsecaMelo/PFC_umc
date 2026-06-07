@@ -168,7 +168,7 @@ function renderGrid(livros) {
             ${promoHtml}
           </td>
           <td class="col-acoes">
-            <button class="btn-sm" onclick="window.location.href='/admin/estoque/${l.id}'"
+            <button class="btn-sm" onclick="window.location.href='/admin/livros/${l.id}'"
                 style="background:#f0ece6;color:#2c241b;border:none;border-radius:6px;
                 padding:.35rem .75rem;cursor:pointer;font-size:.8rem;font-weight:600;margin-right:.25rem;">
                 <i class="fa-solid fa-eye"></i> Detalhes

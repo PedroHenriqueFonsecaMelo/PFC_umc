@@ -109,7 +109,7 @@ async function executarBuscaGlobal(termo) {
                     if (Array.isArray(fotos) && fotos[0]) capa = fotos[0];
                 } catch(e) {}
                 html += `
-                <a href="/admin/estoque/${l.id}" style="display:flex;align-items:center;
+                <a href="/admin/livros/${l.id}" style="display:flex;align-items:center;
                     gap:.75rem;padding:.65rem .75rem;text-decoration:none;color:#2c241b;
                     border-bottom:1px solid #f9f6f0;transition:background .15s;"
                     onmouseover="this.style.background='#faf8f5'"

@@ -207,12 +207,12 @@ public class AdminViewController {
                 .body(pdfBytes);
     }
 
-    @GetMapping("/estoque")
+    @GetMapping("/livros")
     public String estoque() {
         return "admin/estoque";
     }
 
-    @GetMapping("/estoque/{id}")
+    @GetMapping("/livros/{id}")
     public String estoqueDetalhe(@PathVariable Long id, Model model) {
         model.addAttribute("livroId", id);
         return "admin/estoque_detalhe";

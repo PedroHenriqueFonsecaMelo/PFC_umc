@@ -90,7 +90,7 @@
 
         <div class="detalhe-wrap">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
-                <a href="/admin/estoque" class="btn-voltar">
+                <a href="/admin/livros" class="btn-voltar">
                     <i class="fa-solid fa-arrow-left"></i> Voltar ao Estoque
                 </a>
                 <div class="acoes-bar">
@@ -461,7 +461,7 @@
                     method: "DELETE", credentials: "include"
                 });
                 if (res.ok) {
-                    window.location.href = "/admin/estoque";
+                    window.location.href = "/admin/livros";
                 } else {
                     alert("Erro ao excluir livro.");
                 }
