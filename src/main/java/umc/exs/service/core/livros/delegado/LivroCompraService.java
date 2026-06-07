@@ -138,6 +138,13 @@ public class LivroCompraService {
                 .mapToDouble(l -> l.getPrecoAprovado() != null ? l.getPrecoAprovado() : 0.0)
                 .sum();
 
+        // Base do cupom: apenas livros sem promoção
+        double totalParaCupom = livrosParaComprar.stream()
+                .filter(l -> !Boolean.TRUE.equals(l.getEmPromocao()))
+                .mapToDouble(l -> l.getPrecoAprovado() != null ? l.getPrecoAprovado() : 0.0)
+                .sum();
+        double totalPromocional = totalOriginal - totalParaCupom;
+
         // Aplica cupom no total, se informado
         String codigoCupom = request.getCodigoCupom();
         double totalComDesconto = totalOriginal;
@@ -145,7 +152,8 @@ public class LivroCompraService {
         String cupomAplicado = null;
 
         if (codigoCupom != null && !codigoCupom.isBlank()) {
-            totalComDesconto = cupomService.aplicarCupomCarrinho(codigoCupom, comprador, totalOriginal);
+            double totalNormalComDesconto = cupomService.aplicarCupomCarrinho(codigoCupom, comprador, totalParaCupom);
+            totalComDesconto = totalNormalComDesconto + totalPromocional;
             descontoAplicado = totalOriginal - totalComDesconto;
             cupomAplicado = codigoCupom.toUpperCase().trim();
         }

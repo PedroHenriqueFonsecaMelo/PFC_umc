@@ -28,6 +28,7 @@ let _itensSelecionados = [];
 let _saldoAtual = null;
 let _totalOriginal = 0; // total sem desconto; usado para recalcular ao aplicar/remover cupom
 let _cupomCheckout = null; // { codigo, percentual, desconto, totalComDesconto }
+let _baseDesconto = 0; // total de livros sem promoção — base de cálculo do cupom
 // true  → veio da estante (localStorage); false → compra direta (sessionStorage)
 let _compraViaEstante = true;
 // true enquanto o usuário não tiver endereço cadastrado — impede renderFinanceiro de habilitar o botão
@@ -212,10 +213,13 @@ window.aplicarCupomCheckout = async function () {
     }
 
     try {
+        const totalParaCupom = _itensSelecionados
+            .filter(item => !item.emPromocao)
+            .reduce((acc, item) => acc + (item.precoAprovado || 0), 0);
         const res = await fetch(
             `/api/cupons/validar?codigo=${
                 encodeURIComponent(codigo)
-            }&total=${_totalOriginal}`,
+            }&total=${totalParaCupom}`,
             { credentials: "include" },
         );
         const data = await res.json();
@@ -234,6 +238,17 @@ window.aplicarCupomCheckout = async function () {
                 desconto: data.desconto,
                 totalComDesconto: data.totalComDesconto,
             };
+            const itensEmPromocao = _itensSelecionados.filter(i => i.emPromocao).length;
+            const promoAviso = document.getElementById("checkoutPromoAviso");
+            if (promoAviso) {
+                if (itensEmPromocao > 0) {
+                    const itensNormal = _itensSelecionados.length - itensEmPromocao;
+                    promoAviso.textContent = `Cupom aplicado a ${itensNormal} ${itensNormal === 1 ? "item" : "itens"}. Livros em promoção não participam.`;
+                    promoAviso.style.display = "block";
+                } else {
+                    promoAviso.style.display = "none";
+                }
+            }
             renderCupomCheckout();
             renderFinanceiro(_saldoAtual, _totalOriginal);
         }
@@ -257,6 +272,8 @@ window.removerCupomCheckout = function () {
     sessionStorage.removeItem(CUPOM_KEY);
     const input = document.getElementById("checkoutCupomCodigo");
     if (input) input.value = "";
+    const promoAviso = document.getElementById("checkoutPromoAviso");
+    if (promoAviso) promoAviso.style.display = "none";
     renderCupomCheckout();
     renderFinanceiro(_saldoAtual, _totalOriginal);
 };
@@ -267,10 +284,15 @@ function renderFinanceiro(saldo, totalOriginal) {
     _totalOriginal = totalOriginal;
 
     // Recalcula desconto com o total atualizado quando há cupom ativo
+    // Base do cupom: apenas livros sem promoção
     if (_cupomCheckout) {
-        const desconto = totalOriginal * (_cupomCheckout.percentual / 100);
+        const baseDesc = _itensSelecionados
+            .filter(i => !i.emPromocao)
+            .reduce((s, i) => s + (i.precoAprovado || 0), 0);
+        const totalPromo = totalOriginal - baseDesc;
+        const desconto = baseDesc * (_cupomCheckout.percentual / 100);
         _cupomCheckout.desconto = desconto;
-        _cupomCheckout.totalComDesconto = Math.max(0, totalOriginal - desconto);
+        _cupomCheckout.totalComDesconto = Math.max(0, baseDesc - desconto) + totalPromo;
     }
 
     const total = _cupomCheckout

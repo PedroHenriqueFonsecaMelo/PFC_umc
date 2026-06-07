@@ -19,7 +19,6 @@ html, body {
 .layout {
   display: flex;
   height: 100vh;
-  overflow: hidden;
 }
 
 /* ── Sidebar ── */
@@ -120,6 +119,7 @@ html, body {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
   overflow-y: auto;
 }
 

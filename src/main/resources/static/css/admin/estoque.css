@@ -571,7 +571,7 @@
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 1px 4px rgba(44, 36, 27, 0.08);
-  overflow: hidden;
+  overflow: visible;
   margin: 0 1.5rem 2rem;
 }
 
