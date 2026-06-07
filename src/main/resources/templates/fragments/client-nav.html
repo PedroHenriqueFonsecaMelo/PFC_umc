@@ -475,11 +475,35 @@
                         if (cart) cart.style.display = "none";
                     };
 
-                    /* ── Mini Carrinho: limpar estante ── */
+                    /* ── Mini Carrinho: limpar estante (com confirmação) ── */
                     window.cnLimparEstante = function () {
-                        localStorage.removeItem(CART_KEY);
-                        cnAtualizarBadgeEstante();
-                        cnPopularMiniCart();
+                        var modal = document.getElementById("modalLimparNav");
+                        if (!modal) return;
+                        document.getElementById("modalLimparNavConfirmar").textContent = "Sim, limpar tudo";
+                        modal.style.display = "flex";
+
+                        var btnConfirmar = document.getElementById("modalLimparNavConfirmar");
+                        var btnCancelar = document.getElementById("modalLimparNavCancelar");
+
+                        function fechar() {
+                            modal.style.display = "none";
+                            btnConfirmar.removeEventListener("click", confirmar);
+                            btnCancelar.removeEventListener("click", fechar);
+                            modal.removeEventListener("click", fora);
+                        }
+                        function confirmar() {
+                            fechar();
+                            localStorage.removeItem(CART_KEY);
+                            cnAtualizarBadgeEstante();
+                            cnPopularMiniCart();
+                        }
+                        function fora(e) {
+                            if (e.target === modal) fechar();
+                        }
+
+                        btnConfirmar.addEventListener("click", confirmar);
+                        btnCancelar.addEventListener("click", fechar);
+                        modal.addEventListener("click", fora);
                     };
 
                     /* ── Mini Carrinho: popular com itens do localStorage ── */
@@ -539,6 +563,13 @@
                                 "</div>" +
                                 '<div style="font-size:.82rem;font-weight:700;color:#000;flex-shrink:0;">' +
                                 "T$ " + preco.toFixed(2) + "</div>" +
+                                '<button onclick="removerItemNav(' + item.id + ')" ' +
+                                'style="background:none;border:none;cursor:pointer;color:#9c968f;' +
+                                'font-size:1rem;padding:0 0 0 0.5rem;flex-shrink:0;line-height:1;' +
+                                'transition:color 0.15s;" ' +
+                                'onmouseover="this.style.color=\'#722f37\'" ' +
+                                'onmouseout="this.style.color=\'#9c968f\'" ' +
+                                'title="Remover da estante">\u2715</button>' +
                                 "</div>";
                         }).join("");
 
@@ -553,6 +584,42 @@
                             .replace(/>/g, "&gt;")
                             .replace(/"/g, "&quot;");
                     }
+
+                    /* ── Remover item individual do mini-carrinho (com confirmação) ── */
+                    window.removerItemNav = function (id) {
+                        var modal = document.getElementById("modalLimparNav");
+                        if (!modal) return;
+                        var titulo = modal.querySelector("h3");
+                        var mensagem = modal.querySelector("p");
+                        titulo.textContent = "Remover livro da estante";
+                        mensagem.textContent = "Tem certeza que deseja remover este livro da sua estante?";
+                        document.getElementById("modalLimparNavConfirmar").textContent = "Sim, remover";
+                        modal.style.display = "flex";
+
+                        var btnConfirmar = document.getElementById("modalLimparNavConfirmar");
+                        var btnCancelar = document.getElementById("modalLimparNavCancelar");
+
+                        function fechar() {
+                            modal.style.display = "none";
+                            btnConfirmar.removeEventListener("click", onConfirmar);
+                            btnCancelar.removeEventListener("click", fechar);
+                            modal.removeEventListener("click", fora);
+                        }
+                        function onConfirmar() {
+                            var carrinho;
+                            try { carrinho = JSON.parse(localStorage.getItem(CART_KEY)) || []; }
+                            catch (_) { carrinho = []; }
+                            localStorage.setItem(CART_KEY, JSON.stringify(carrinho.filter(function(i) { return i.id !== id; })));
+                            fechar();
+                            cnAtualizarBadgeEstante();
+                            cnPopularMiniCart();
+                        }
+                        function fora(e) { if (e.target === modal) fechar(); }
+
+                        btnConfirmar.addEventListener("click", onConfirmar);
+                        btnCancelar.addEventListener("click", fechar);
+                        modal.addEventListener("click", fora);
+                    };
 
                     /* ── Expõe badge globalmente para páginas de produto atualizarem ── */
                     window.cnAtualizarBadgeEstante = cnAtualizarBadgeEstante;
@@ -1300,6 +1367,36 @@
 
             <!-- Page Loader global — disponível em todas as páginas que incluem este nav -->
             <th:block th:replace="~{fragments/loader :: loader}"></th:block>
+
+            <!-- Modal de confirmação — Limpar estante -->
+            <div id="modalLimparNav" style="display:none;position:fixed;
+                inset:0;background:rgba(0,0,0,0.5);z-index:9999;
+                align-items:center;justify-content:center;">
+                <div style="background:#fff;border-radius:12px;padding:2rem;
+                    max-width:400px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+                    <h3 style="margin:0 0 0.75rem;
+                        font-family:'Playfair Display',serif;font-size:1.2rem;
+                        color:#2c241b;">Limpar estante</h3>
+                    <p style="margin:0 0 1.5rem;font-size:0.9rem;
+                        color:#5a4f47;line-height:1.6;">
+                        Tem certeza que deseja remover todos os livros da sua estante?
+                    </p>
+                    <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+                        <button id="modalLimparNavCancelar"
+                            style="padding:0.5rem 1.25rem;border:1.5px solid #e0d9d0;
+                            border-radius:8px;background:#fff;color:#7a6e65;
+                            font-size:0.9rem;cursor:pointer;font-weight:500;">
+                            Cancelar
+                        </button>
+                        <button id="modalLimparNavConfirmar"
+                            style="padding:0.5rem 1.25rem;border:none;
+                            border-radius:8px;background:#722f37;color:#fff;
+                            font-size:0.9rem;cursor:pointer;font-weight:600;">
+                            Sim, limpar tudo
+                        </button>
+                    </div>
+                </div>
+            </div>
         </header>
     </body>
 </html>

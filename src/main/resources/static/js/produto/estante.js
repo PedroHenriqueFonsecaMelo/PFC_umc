@@ -243,20 +243,61 @@ window.desmarcarTodos = function () {
     atualizarSubtotal();
 };
 
+/* ── Modal de confirmação genérico ── */
+function mostrarModalConfirmacao(titulo, mensagem, onConfirmar) {
+    const modal = document.getElementById("modalConfirmacao");
+    document.getElementById("modalConfirmacaoTitulo").textContent = titulo;
+    document.getElementById("modalConfirmacaoMensagem").textContent = mensagem;
+    modal.style.display = "flex";
+
+    const btnConfirmar = document.getElementById("modalConfirmacaoConfirmar");
+    const btnCancelar = document.getElementById("modalConfirmacaoCancelar");
+
+    const confirmar = () => {
+        modal.style.display = "none";
+        btnConfirmar.removeEventListener("click", confirmar);
+        btnCancelar.removeEventListener("click", cancelar);
+        onConfirmar();
+    };
+    const cancelar = () => {
+        modal.style.display = "none";
+        btnConfirmar.removeEventListener("click", confirmar);
+        btnCancelar.removeEventListener("click", cancelar);
+    };
+
+    btnConfirmar.addEventListener("click", confirmar);
+    btnCancelar.addEventListener("click", cancelar);
+
+    modal.onclick = (e) => { if (e.target === modal) cancelar(); };
+}
+
 /* ── Remover item individual ── */
 window.removerItem = function (id) {
-    saveCarrinho(getCarrinho().filter((i) => i.id !== id));
-    renderEstante();
+    mostrarModalConfirmacao(
+        "Remover livro da estante",
+        "Tem certeza que deseja remover este livro da sua estante?",
+        () => {
+            saveCarrinho(getCarrinho().filter((i) => i.id !== id));
+            renderEstante();
+        }
+    );
 };
 
 /* ── Remover itens selecionados ── */
 window.removerSelecionados = function () {
-    const selecionados = new Set(
-        Array.from(document.querySelectorAll(".estante-item-check:checked"))
-            .map((c) => parseInt(c.dataset.id, 10)),
+    const qtd = document.querySelectorAll(".estante-item-check:checked").length;
+    mostrarModalConfirmacao(
+        "Remover livros selecionados",
+        `Tem certeza que deseja remover ${qtd} livro(s) selecionado(s) da sua estante?`,
+        () => {
+            const selecionados = new Set(
+                Array.from(document.querySelectorAll(".estante-item-check:checked"))
+                    .map((c) => parseInt(c.dataset.id, 10)),
+            );
+            saveCarrinho(getCarrinho().filter((i) => !selecionados.has(i.id)));
+            renderEstante();
+        }
     );
-    saveCarrinho(getCarrinho().filter((i) => !selecionados.has(i.id)));
-    renderEstante();
 };
 
 /* ── Aplicar cupom ── */
