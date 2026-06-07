@@ -7,6 +7,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import lombok.RequiredArgsConstructor;
+import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.service.cliente.ClienteService;
 
 /**
  * Controller Thymeleaf para o módulo de livros.
@@ -20,7 +25,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Controller
 @RequestMapping("/livros")
+@RequiredArgsConstructor
 public class LivroViewController {
+
+    private final ClienteService clienteService;
 
     /** Formulário de cadastro para venda de livro. */
     @GetMapping("/vender")
@@ -56,9 +64,20 @@ public class LivroViewController {
     /**
      * Página de checkout: revisão e confirmação da compra selecionada.
      * Exige autenticação — bloqueada no SecurityConfig antes da regra /livros/**.
+     * Usuários sem endereço cadastrado são redirecionados para o perfil.
      */
     @GetMapping("/checkout")
-    public String paginaCheckout() {
+    public String paginaCheckout(@AuthenticationPrincipal UserDetails user,
+            RedirectAttributes ra) {
+        Cliente cliente = clienteService.buscarClientePorEmail(user.getUsername())
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
+
+        if (cliente.getEnderecos() == null || cliente.getEnderecos().isEmpty()) {
+            ra.addFlashAttribute("aviso",
+                    "Cadastre um endereço de entrega antes de realizar sua compra.");
+            return "redirect:/clientes/meu-perfil";
+        }
+
         return "produto/checkout";
     }
 

@@ -65,15 +65,17 @@ function carregarSaldo() {
 }
 
 /* ── Toast ── */
-function mostrarToast(msg, tipo) {
+function mostrarToast(msg, tipo, duracao) {
     const t = document.getElementById("toastDetalhe");
     if (!t) return;
     t.className = "toast toast-" + (tipo || "info");
     t.innerHTML = msg;
     t.style.display = "block";
-    setTimeout(() => {
-        t.style.display = "none";
-    }, 3000);
+    clearTimeout(t._timer);
+    const ms = duracao !== undefined ? duracao : 3000;
+    if (ms > 0) {
+        t._timer = setTimeout(() => { t.style.display = "none"; }, ms);
+    }
 }
 
 /* ── Contador regressivo de promoção ── */
@@ -625,7 +627,7 @@ function atualizarBotaoEstante(livroId) {
     } else {
         btn.classList.remove("na-estante");
         btn.classList.remove("remover");
-        if (textEl) textEl.textContent = "Add Estante";
+        if (textEl) textEl.textContent = "Adicionar à Estante";
         btn.title = "";
         if (aviso) aviso.style.display = "none";
     }
@@ -686,6 +688,7 @@ function _executarAdicionarEstante() {
         mostrarToast(
             `<strong>${_livroAtual.titulo}</strong> removido da estante.`,
             "aviso",
+            4000
         );
     } else {
         // Adiciona ao carrinho
@@ -693,8 +696,10 @@ function _executarAdicionarEstante() {
         atualizarBotaoEstante(_livroAtual.id);
         atualizarBadgeNav(true);
         mostrarToast(
-            `<strong>${_livroAtual.titulo}</strong> adicionado à estante!`,
-            "info",
+            `Livro adicionado à sua estante com sucesso! ` +
+            `<a href="/livros/estante" style="font-weight:bold;color:inherit;text-decoration:underline;">Ver minha estante →</a>`,
+            "sucesso",
+            4000
         );
     }
 }
@@ -703,14 +708,42 @@ function _executarAdicionarEstante() {
 window.handleComprarAgora = function () {
     if (!_livroAtual) return;
 
-    // Compra direta: NÃO adiciona ao localStorage (estante/mini carrinho).
-    // O objeto completo vai no sessionStorage para o checkout usar sem depender do localStorage.
-    sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify([_livroAtual.id]));
-    sessionStorage.setItem(
-        CHECKOUT_KEY + "_direto",
-        JSON.stringify([_livroAtual]),
-    );
-    window.location.href = "/livros/checkout";
+    fetch("/clientes/meu-perfil-json", {
+        credentials: "include",
+        redirect: "manual",
+    })
+        .then(function (r) {
+            if (r.type === "opaqueredirect" || r.status === 0 ||
+                r.status === 302 || !r.ok) {
+                window.location.href = "/clientes/login";
+                return null;
+            }
+            return r.json();
+        })
+        .then(function (data) {
+            if (!data) return;
+            if (!data.enderecos || data.enderecos.length === 0) {
+                mostrarToast(
+                    'Você ainda não tem um endereço de entrega cadastrado. ' +
+                    '<a href="/clientes/meu-perfil" style="font-weight:bold;color:inherit;text-decoration:underline;">' +
+                    'Cadastre um endereço no seu perfil</a> para realizar compras.',
+                    "aviso",
+                    8000
+                );
+                return;
+            }
+            // Compra direta: NÃO adiciona ao localStorage (estante/mini carrinho).
+            // O objeto completo vai no sessionStorage para o checkout usar sem depender do localStorage.
+            sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify([_livroAtual.id]));
+            sessionStorage.setItem(
+                CHECKOUT_KEY + "_direto",
+                JSON.stringify([_livroAtual]),
+            );
+            window.location.href = "/livros/checkout";
+        })
+        .catch(function () {
+            window.location.href = "/clientes/login";
+        });
 };
 
 /* ── Carrega o livro da API ── */
