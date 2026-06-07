@@ -130,15 +130,11 @@ function renderGrid(livros) {
         }
 
         // Capa miniatura
-        const capaHtml = foto
-            ? `<img src="${foto}" alt="${l.titulo}"
+        const capaHtml = `<img src="${foto || '/img/logo-bibliotroca.png'}" alt="${l.titulo}"
                     style="width:56px;height:76px;object-fit:cover;border-radius:5px;
                            box-shadow:0 2px 8px rgba(0,0,0,0.18);flex-shrink:0;
                            border:1px solid rgba(0,0,0,0.08);"
-                    onerror="this.outerHTML='<div style=&quot;width:56px;height:76px;background:#f0ebe4;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;&quot;>📚</div>'">`
-            : `<div style="width:56px;height:76px;background:#f0ebe4;border-radius:5px;
-                           display:flex;align-items:center;justify-content:center;
-                           font-size:1.5rem;flex-shrink:0;">📚</div>`;
+                    onerror="this.onerror=null;this.src='/img/logo-bibliotroca.png';">`;
 
         return `
         <tr class="estoque-row" id="adm-card-${l.id}">
