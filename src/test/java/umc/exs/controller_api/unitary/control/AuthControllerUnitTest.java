@@ -60,12 +60,13 @@ class AuthControllerUnitTest {
         when(request.getRemoteAddr()).thenReturn("127.0.0.1");
         when(request.getHeader("User-Agent")).thenReturn("JUnit");
 
-        ResponseEntity<Map<String, Object>> resp = controller.login(req, response, request);
+        ResponseEntity<?> resp = controller.login(req, response, request);
+        Map<String, Object> body = (Map<String, Object>) resp.getBody();
 
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         assertNotNull(resp.getBody());
-        assertEquals("Login bem-sucedido", resp.getBody().get("message"));
-        assertEquals("token-abc", resp.getBody().get("token"));
+        assertEquals("Login bem-sucedido", body.get("message"));
+        assertEquals("token-abc", body.get("token"));
         verify(authHelper).addTokenCookie(response, "token-abc");
     }
 
@@ -81,11 +82,12 @@ class AuthControllerUnitTest {
         HttpServletResponse response = mock(HttpServletResponse.class);
         HttpServletRequest request = mock(HttpServletRequest.class);
 
-        ResponseEntity<Map<String, Object>> resp = controller.login(req, response, request);
+        ResponseEntity<?> resp = controller.login(req, response, request);
+        Map<String, Object> body = (Map<String, Object>) resp.getBody();
 
         assertEquals(HttpStatus.UNAUTHORIZED, resp.getStatusCode());
         assertNotNull(resp.getBody());
-        assertEquals("E-mail ou senha inválidos.", resp.getBody().get("error"));
+        assertEquals("E-mail ou senha inválidos.", body.get("error"));
         verifyNoInteractions(authHelper);
     }
 }

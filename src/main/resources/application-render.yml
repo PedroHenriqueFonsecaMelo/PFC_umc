@@ -4,6 +4,8 @@
 spring:
   application:
     name: PFC_Projeto
+  config:
+    import: "optional:file:bibliotroca.properties"
   jmx:
     enabled: false
 

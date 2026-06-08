@@ -35,3 +35,6 @@ TODO.md
 /bibliotroca.env
 credentials.json
 /render_credentials.json
+/local.env
+/bibliotroca.properties
+/local.properties

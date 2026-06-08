@@ -28,6 +28,7 @@ import umc.exs.service.cliente.ClienteService;
 @RequiredArgsConstructor
 public class LivroViewController {
 
+
     private final ClienteService clienteService;
 
     /** Formulário de cadastro para venda de livro. */
@@ -69,6 +70,7 @@ public class LivroViewController {
     @GetMapping("/checkout")
     public String paginaCheckout(@AuthenticationPrincipal UserDetails user,
             RedirectAttributes ra) {
+        
         Cliente cliente = clienteService.buscarClientePorEmail(user.getUsername())
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
 

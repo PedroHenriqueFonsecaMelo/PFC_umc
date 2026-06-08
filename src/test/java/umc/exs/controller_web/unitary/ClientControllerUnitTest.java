@@ -12,7 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import umc.exs.controller.web.ClientController;
 import umc.exs.model.entidades.usuario.Cliente;
-
+import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.security.JwtUtil;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.service.cliente.ClienteService;
@@ -33,6 +33,7 @@ class ClientControllerUnitTest {
         private PasswordEncoder passwordEncoder;
         private GamificacaoService gamificacaoService;
         private ClienteMapper clienteMapper;
+        private ClienteRepository clienteRepository;
 
         private ClientController controller;
 
@@ -45,17 +46,17 @@ class ClientControllerUnitTest {
                 passwordEncoder = mock(PasswordEncoder.class);
                 gamificacaoService = mock(GamificacaoService.class);
                 clienteMapper = mock(ClienteMapper.class);
+                clienteRepository = mock(ClienteRepository.class);
 
                 controller = new ClientController(
-
                                 clienteService,
                                 authHelper,
                                 jwtUtil,
                                 userDetailsService,
                                 passwordEncoder,
                                 gamificacaoService,
+                                clienteRepository,
                                 clienteMapper);
-
         }
 
         @Test

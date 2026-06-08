@@ -198,7 +198,10 @@ public class CarteiraService {
 
         @Transactional(readOnly = true)
         public List<Transacao> listarHistoricoPorCliente(Long clienteId) {
-                return transacaoRepository.findByClienteIdOrderByDataHoraDesc(clienteId);
+                return transacaoRepository
+                                .findByClienteIdAndStatusOrderByDataHoraDesc(
+                                                clienteId,
+                                                STATUS_CONCLUIDO);
         }
 
         @Transactional(readOnly = true)

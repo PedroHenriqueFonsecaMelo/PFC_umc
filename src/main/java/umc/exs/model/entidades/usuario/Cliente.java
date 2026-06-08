@@ -34,6 +34,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 import umc.exs.converter.LocalDateStringConverter;
+import umc.exs.converter.LocalDateTimeConverter;
+
 import umc.exs.converter.CpfConverter;
 import umc.exs.model.entidades.livro.AvaliacaoLivro;
 import umc.exs.model.enums.Genero;
@@ -56,25 +58,35 @@ public class Cliente {
     private Long id;
 
     @Column(nullable = false)
-    private String senha;
-
-    @Column(nullable = false)
     private String nome;
 
-    @Convert(converter = LocalDateStringConverter.class)
     @Column(nullable = false)
-    private LocalDate datanasc;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
-    private Genero gen;
-
-    @Column(nullable = true)
-    @Convert(converter = CpfConverter.class)
-    private String cpf;
+    private String senha;
 
     @Column(nullable = false, unique = true)
     private String email;
+
+    @Convert(converter = LocalDateStringConverter.class)
+    @Column
+    private LocalDate datanasc;
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    private Genero gen;
+
+    @Column
+    @Convert(converter = CpfConverter.class)
+    private String cpf;
+
+    @Column
+    private String fotoPerfil;
+
+    @Column
+    private Long enderecoSelecionadoId;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Double saldoTokens = 0.0;
 
     @Column(nullable = false)
     @Builder.Default
@@ -84,56 +96,40 @@ public class Cliente {
     @Builder.Default
     private boolean bloqueada = false;
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime dataCriacao;
-
-    @Column(nullable = false)
-    @Builder.Default
-    private Double saldoTokens = 0.0;
-
-    @Column
-    private String fotoPerfil;
-
     @Column(nullable = false)
     @Builder.Default
     private boolean ativo = true;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'ATIVO'")
-    @Builder.Default
-    private StatusConta statusConta = StatusConta.ATIVO;
-
-    @Column(name = "suspensao_ate", columnDefinition = "TEXT")
-    private LocalDateTime suspensaoAte;
-
-    @Column(name = "motivo_suspensao", length = 500)
-    private String motivoSuspensao;
-
-    @Column(name = "data_acao", columnDefinition = "TEXT")
-    private LocalDateTime dataAcao;
-
-    @Column(name = "admin_acao", length = 255)
-    private String adminAcao;
-
-    @Column(name = "email_notificado_em", columnDefinition = "TEXT")
-    private LocalDateTime emailNotificadoEm;
-
-    /**
-     * Verificação de e-mail — false até o usuário clicar no link de confirmação.
-     */
     @Column(nullable = false)
     @Builder.Default
     private boolean emailVerificado = false;
 
-    /**
-     * ID do endereço padrão selecionado para entrega. Null se nenhum selecionado.
-     */
-    @Column
-    private Long enderecoSelecionadoId;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private StatusConta statusConta = StatusConta.ATIVO;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    @Convert(converter = LocalDateTimeConverter.class)
+    private LocalDateTime dataCriacao;
+
+    @Convert(converter = LocalDateTimeConverter.class)
+    private LocalDateTime deletedAt;
+
+    @Convert(converter = LocalDateTimeConverter.class)
+    private LocalDateTime suspensaoAte;
+
+    @Column(length = 500)
+    private String motivoSuspensao;
+
+    @Convert(converter = LocalDateTimeConverter.class)
+    private LocalDateTime dataAcao;
+
+    private String adminAcao;
+
+    @Convert(converter = LocalDateTimeConverter.class)
+    private LocalDateTime emailNotificadoEm;
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, cascade = {
