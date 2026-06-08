@@ -107,19 +107,19 @@ public class Cliente {
     @Builder.Default
     private StatusConta statusConta = StatusConta.ATIVO;
 
-    @Column(name = "suspensao_ate")
+    @Column(name = "suspensao_ate", columnDefinition = "TEXT")
     private LocalDateTime suspensaoAte;
 
     @Column(name = "motivo_suspensao", length = 500)
     private String motivoSuspensao;
 
-    @Column(name = "data_acao")
+    @Column(name = "data_acao", columnDefinition = "TEXT")
     private LocalDateTime dataAcao;
 
     @Column(name = "admin_acao", length = 255)
     private String adminAcao;
 
-    @Column(name = "email_notificado_em")
+    @Column(name = "email_notificado_em", columnDefinition = "TEXT")
     private LocalDateTime emailNotificadoEm;
 
     /**

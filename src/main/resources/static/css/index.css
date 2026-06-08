@@ -1571,3 +1571,58 @@ footer::before {
   width: 28px;
   background: #2c241b;
 }
+
+/* ── HEX VITRINE ────────────────────────────────────────────── */
+.hex-vitrine {
+  background: #f9f6f0;
+  padding: 40px 20px 60px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+#hexLivros {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-width: 900px;
+}
+
+#hexLivros li {
+  width: 160px;
+  height: 185px;
+  position: relative;
+  cursor: pointer;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  background: #722f37;
+  transition: transform 0.2s;
+  overflow: hidden;
+}
+
+#hexLivros li:nth-child(2n) {
+  background: #2c241b;
+}
+
+#hexLivros li:nth-child(3n) {
+  background: #4a1e24;
+}
+
+#hexLivros li:hover {
+  transform: scale(1.05);
+}
+
+#hexLivros li img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+
+#hexLivros li:hover img {
+  opacity: 1;
+}

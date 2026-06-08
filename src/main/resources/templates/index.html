@@ -88,34 +88,11 @@
         </div>
       </div>
 
-      <div class="hero-shelf-wrap">
-        <div class="hero-shelf">
-          <div class="shelf-books">
-            <div class="spine spine-1"><span>Dom Casmurro</span></div>
-            <div class="spine spine-2"><span>O Alquimista</span></div>
-            <div class="spine spine-3"><span>Sapiens</span></div>
-            <div class="spine spine-4"><span>Grande Sertão: Veredas</span></div>
-            <div class="spine spine-5"><span>Vidas Secas</span></div>
-            <div class="spine spine-6"><span>Cem Anos de Solidão</span></div>
-            <div class="spine spine-7"><span>O Senhor dos Anéis</span></div>
-            <div class="spine spine-8"><span>Crime e Castigo</span></div>
-            <div class="spine spine-9"><span>1984</span></div>
-            <div class="spine spine-10"><span>A Metamorfose</span></div>
-          </div>
-          <div class="shelf-plank"></div>
-        </div>
-      </div>
     </section>
 
-    <!-- BOOK WALL -->
-    <section class="book-wall-section">
-      <div class="book-wall-heading">
-        <h2>Livros esperando por você</h2>
-        <p>
-          Uma curadoria de títulos que encontraram novos lares pela Bibliotroca.
-        </p>
-      </div>
-      <div class="book-wall" id="bookWall"></div>
+    <!-- HEX VITRINE -->
+    <section class="hex-vitrine" id="hexVitrine">
+      <ul id="hexLivros"></ul>
     </section>
 
     <!-- STATS -->
@@ -394,6 +371,42 @@
 
     <script th:src="@{/js/book-wall.js}"></script>
     <script th:src="@{/js/index.js}"></script>
+    <script>
+    (async function() {
+      try {
+        const res = await fetch('/api/livros/vitrine?page=0&size=20');
+        const data = await res.json();
+        const livrosEmbaralhados = (data.content || data || [])
+          .sort(function() { return Math.random() - 0.5; })
+          .slice(0, 8);
+        const ul = document.getElementById('hexLivros');
+        if (!ul) return;
+        livrosEmbaralhados.forEach(function(livro) {
+          const li = document.createElement('li');
+          li.onclick = function() { window.location.href = '/livros/' + livro.id; };
+          const img = document.createElement('img');
+          // fotoUrl e fotosUrls são JSON array serializado ex: ["/uploads/livro/abc.jpg"]
+          var src = '/img/logo-bibliotroca.png';
+          try {
+            var arr = JSON.parse(livro.fotoUrl || livro.fotosUrls || '[]');
+            if (Array.isArray(arr) && arr.length > 0) src = arr[0];
+          } catch(_) {
+            if (livro.fotoUrl && livro.fotoUrl.charAt(0) !== '[') src = livro.fotoUrl;
+          }
+          img.src = src;
+          img.alt = livro.titulo || 'Livro';
+          img.onerror = function() {
+            this.onerror = null;
+            this.src = '/img/logo-bibliotroca.png';
+          };
+          li.appendChild(img);
+          ul.appendChild(li);
+        });
+      } catch(e) {
+        console.error('Erro ao carregar livros hex:', e);
+      }
+    })();
+    </script>
 
     <!-- Page Loader -->
     <th:block th:replace="~{fragments/loader :: loader}"></th:block>

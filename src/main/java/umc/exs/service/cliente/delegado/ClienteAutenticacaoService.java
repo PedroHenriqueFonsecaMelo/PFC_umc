@@ -1,17 +1,22 @@
 package umc.exs.service.cliente.delegado;
 
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import umc.exs.model.entidades.logic.RecuperacaoSenha;
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.model.enums.StatusConta;
 import umc.exs.repository.usuario.RecuperacaoSenhaRepository;
 import umc.exs.service.cliente.senha.SenhaService;
 import umc.exs.service.log.AcaoAuditoria;
 import umc.exs.service.log.LogAuditoriaService;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClienteAutenticacaoService {
@@ -27,6 +32,25 @@ public class ClienteAutenticacaoService {
 
                 Cliente cliente = repositoryService.encontrarPorEmail(email)
                                 .orElseThrow(() -> new IllegalArgumentException("E-mail ou senha inválidos."));
+
+                StatusConta status = cliente.getStatusConta() != null ? cliente.getStatusConta() : StatusConta.ATIVO;
+
+                log.info("DEBUG statusConta={} suspensaoAte={}",
+                        cliente.getStatusConta(),
+                        cliente.getSuspensaoAte());
+
+                if (status == StatusConta.SUSPENSO) {
+                        String prazo = cliente.getSuspensaoAte() != null
+                                ? "até " + cliente.getSuspensaoAte().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                                : "por tempo indefinido";
+                        log.info("DEBUG lançando CONTA_SUSPENSA para {}", email);
+                        throw new IllegalArgumentException("CONTA_SUSPENSA|Sua conta está suspensa " + prazo + ". Em caso de dúvidas, entre em contato com a plataforma.");
+                }
+
+                if (status == StatusConta.REMOVIDO) {
+                        log.info("DEBUG lançando CONTA_REMOVIDA para {}", email);
+                        throw new IllegalArgumentException("CONTA_REMOVIDA|Sua conta foi removida da plataforma. Em caso de dúvidas, entre em contato com a plataforma.");
+                }
 
                 if (!cliente.isEmailVerificado()) {
                         logAuditoria.registrarLog(

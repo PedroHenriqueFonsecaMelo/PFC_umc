@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +45,7 @@ public class AuthController {
     // ───────────────────────── LOGIN ─────────────────────────
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(
+    public ResponseEntity<?> login(
             @Valid @RequestBody LoginRequest LoginRequest,
             HttpServletResponse response,
             HttpServletRequest request) {
@@ -68,8 +69,17 @@ public class AuthController {
                     COOKIE_TOKEN, token));
 
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(401)
-                    .body(Map.of("error", "E-mail ou senha inválidos."));
+            String msg = e.getMessage();
+            if (msg != null && msg.contains("|")) {
+                String[] parts = msg.split("\\|", 2);
+                String texto = parts[1];
+                return ResponseEntity.status(HttpStatus.FOUND)
+                        .header("Location", "/clientes/login?erro=" + java.net.URLEncoder.encode(texto, java.nio.charset.StandardCharsets.UTF_8))
+                        .build();
+            }
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", "/clientes/login?erro=" + java.net.URLEncoder.encode("E-mail ou senha inválidos.", java.nio.charset.StandardCharsets.UTF_8))
+                    .build();
         }
     }
 

@@ -2,6 +2,7 @@ package umc.exs.controller.web;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,6 +31,8 @@ import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.social.PontuacaoUsuario;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.entidades.usuario.Endereco;
+import umc.exs.model.enums.StatusConta;
+import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.security.JwtUtil;
 import umc.exs.service.cliente.ClienteService;
@@ -47,6 +50,7 @@ public class ClientController {
     private final JwtUserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final GamificacaoService gamificacaoService;
+    private final ClienteRepository clienteRepository;
 
     private final ClienteMapper clienteMapper;
 
@@ -132,6 +136,26 @@ public class ClientController {
         } catch (UsernameNotFoundException ignored) {
         }
 
+        // Verificar status da conta ANTES de autenticar
+        Optional<Cliente> clienteOpt = clienteRepository.findByEmail(email);
+        if (clienteOpt.isPresent()) {
+            Cliente c = clienteOpt.get();
+            StatusConta status = c.getStatusConta() != null ? c.getStatusConta() : StatusConta.ATIVO;
+
+            if (status == StatusConta.SUSPENSO) {
+                String prazo = c.getSuspensaoAte() != null
+                    ? "até " + c.getSuspensaoAte().toString().substring(0, 10)
+                    : "por tempo indefinido";
+                model.addAttribute("erro", "Sua conta está suspensa " + prazo + ". Em caso de dúvidas, entre em contato com a plataforma.");
+                return VIEW_LOGIN;
+            }
+
+            if (status == StatusConta.REMOVIDO) {
+                model.addAttribute("erro", "Sua conta foi removida da plataforma. Em caso de dúvidas, entre em contato com a plataforma.");
+                return VIEW_LOGIN;
+            }
+        }
+
         try {
             Cliente cliente = clienteService.autenticarCliente(email, senha);
 
@@ -144,7 +168,11 @@ public class ClientController {
             }
 
         } catch (IllegalArgumentException e) {
-            model.addAttribute("erro", e.getMessage());
+            String msg = e.getMessage();
+            if (msg != null && msg.contains("|")) {
+                msg = msg.split("\\|", 2)[1];
+            }
+            model.addAttribute("erro", msg);
             return VIEW_LOGIN;
         }
     }

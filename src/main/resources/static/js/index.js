@@ -61,19 +61,14 @@ async function carregarLivrosDestaque() {
 
     // Monta slides
     destaque.forEach((livro, i) => {
-      let foto = null;
+      var src = '/img/logo-bibliotroca.png';
       try {
-        const arr = JSON.parse(livro.fotosUrls);
-        if (Array.isArray(arr) && arr.length > 0) foto = arr[0];
-      } catch (_) {}
-
-      // Tenta capa via OpenLibrary se não tiver foto
-      const capaUrl = foto ||
-        (livro.isbn
-          ? `https://covers.openlibrary.org/b/isbn/${
-            livro.isbn.replace(/-/g, "")
-          }-M.jpg`
-          : null);
+        var arr = JSON.parse(livro.fotoUrl || '[]');
+        if (Array.isArray(arr) && arr.length > 0) src = arr[0];
+      } catch(_) {
+        if (livro.fotoUrl && !livro.fotoUrl.startsWith('[')) src = livro.fotoUrl;
+      }
+      const capaUrl = src;
 
       const slide = document.createElement("div");
       slide.className = "carousel-slide";

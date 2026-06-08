@@ -90,6 +90,15 @@
             class="alert alert-erro"
           >
           </div>
+          <div
+            th:if="${param.erro}"
+            th:text="${param.erro}"
+            class="alert alert-erro"
+            style="background:#fef2f2;color:#991b1b;border:1px solid #fecaca;
+                   border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;
+                   font-size:0.9rem;line-height:1.5;"
+          >
+          </div>
           <div th:if="${param.logout}" class="alert alert-sucesso">
             Você saiu com sucesso.
           </div>
