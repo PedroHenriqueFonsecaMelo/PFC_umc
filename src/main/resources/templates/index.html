@@ -41,7 +41,10 @@
     <header class="masthead">
       <div class="masthead-top">
         <span class="masthead-tagline" id="mastheadTagline"></span>
-        <a class="masthead-logo" th:href="@{/}">Biblio<em>troca</em></a>
+        <a class="masthead-logo" th:href="@{/}">
+          <img src="/img/logo-bibliotroca.png" alt="" class="masthead-logo-img">
+          Biblio<em>troca</em>
+        </a>
         <div class="masthead-actions">
           <div class="nav-guest" id="navGuest">
             <a class="btn-classic" th:href="@{/entrar}">Entrar</a>
@@ -66,9 +69,6 @@
     <!-- HERO -->
     <section class="hero">
       <div class="hero-banner">
-        <img src="/img/logo-bibliotroca.png"
-             alt="Bibliotroca"
-             style="width:260px;display:block;margin:0 auto 1.5rem auto;">
         <p class="hero-kicker hero-anim-1">Marketplace de Livros Usados</p>
         <h1 class="hero-anim-2">
           Dê uma nova vida<br>aos seus <em>livros</em>

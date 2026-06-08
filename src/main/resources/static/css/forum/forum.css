@@ -879,3 +879,34 @@ body {
   color: #722f37;
   background: rgba(114, 47, 55, 0.08);
 }
+
+/* ── FOOTER ── */
+footer {
+  margin-top: auto;
+  background: #000;
+  color: rgba(249, 246, 240, 0.35);
+  padding: 2rem 5vw;
+  text-align: center;
+}
+footer::before {
+  content: "◆  ◆  ◆";
+  display: block;
+  font-size: 0.6rem;
+  letter-spacing: 0.5em;
+  color: rgba(249, 246, 240, 0.15);
+  margin-bottom: 1.25rem;
+}
+.footer-logo {
+  font-family: var(--serif);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: rgba(249, 246, 240, 0.5);
+  font-style: italic;
+  margin-bottom: 0.3rem;
+}
+.footer-logo em {
+  color: #722f37;
+}
+.footer-copy {
+  font-size: 0.68rem;
+}

@@ -78,13 +78,21 @@ body {
 }
 .masthead-logo {
   font-family: var(--serif);
-  font-size: 4.8rem;
+  font-size: clamp(1.6rem, 6vw, 4.8rem);
   font-weight: 700;
   color: var(--ink);
   text-decoration: none;
   letter-spacing: -0.02em;
-  text-align: center;
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+.masthead-logo-img {
+  height: clamp(56px, 13vw, 168px);
+  width: auto;
+  flex-shrink: 0;
 }
 .masthead-logo em {
   font-style: italic;
@@ -190,12 +198,12 @@ body {
 
 /* ── HERO ── */
 .hero {
-  padding-top: 3rem;
+  padding-top: 1rem;
   background: var(--paper);
 }
 .hero-banner {
   text-align: center;
-  padding: 4rem 5vw 3rem;
+  padding: 1.3rem 5vw 3rem;
   max-width: 820px;
   margin: 0 auto;
 }
