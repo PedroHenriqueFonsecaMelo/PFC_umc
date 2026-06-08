@@ -33,9 +33,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import umc.exs.config.LocalDateTimeConverter;
 import umc.exs.converter.LocalDateStringConverter;
-import umc.exs.converter.LocalDateTimeConverter;
-
 import umc.exs.converter.CpfConverter;
 import umc.exs.model.entidades.livro.AvaliacaoLivro;
 import umc.exs.model.enums.Genero;
@@ -100,12 +99,15 @@ public class Cliente {
     @Builder.Default
     private boolean ativo = true;
 
+    /**
+     * Verificação de e-mail — false até o usuário clicar no link de confirmação.
+     */
     @Column(nullable = false)
     @Builder.Default
     private boolean emailVerificado = false;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'ATIVO'")
     @Builder.Default
     private StatusConta statusConta = StatusConta.ATIVO;
 
@@ -115,20 +117,25 @@ public class Cliente {
     private LocalDateTime dataCriacao;
 
     @Convert(converter = LocalDateTimeConverter.class)
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
     @Convert(converter = LocalDateTimeConverter.class)
+    @Column(name = "suspensao_ate", columnDefinition = "TEXT")
     private LocalDateTime suspensaoAte;
 
-    @Column(length = 500)
+    @Column(name = "motivo_suspensao", length = 500)
     private String motivoSuspensao;
 
     @Convert(converter = LocalDateTimeConverter.class)
+    @Column(name = "data_acao", columnDefinition = "TEXT")
     private LocalDateTime dataAcao;
 
+    @Column(name = "admin_acao", length = 255)
     private String adminAcao;
 
     @Convert(converter = LocalDateTimeConverter.class)
+    @Column(name = "email_notificado_em", columnDefinition = "TEXT")
     private LocalDateTime emailNotificadoEm;
 
     @JsonIgnore

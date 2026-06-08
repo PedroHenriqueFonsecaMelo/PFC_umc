@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reportes de Problema — Bibliotroca Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" th:href="@{/css/admin/layout.css}" />
+    <link rel="stylesheet" th:href="@{/css/admin/clientes.css}" />
+  </head>
+  <body>
+    <div class="layout">
+      <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('reportes')}"></th:block>
+
+      <div class="content">
+        <header class="topbar">
+          <div>
+            <div class="topbar-title">Reportes de Problema</div>
+            <div class="topbar-date" id="dataHoje"></div>
+          </div>
+        </header>
+
+        <div class="main">
+          <!-- Filtros -->
+          <div style="display:flex;gap:0.5rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+            <button id="btnTodos"
+              onclick="setFiltro('todos')"
+              style="padding:0.4rem 1rem;border-radius:20px;border:1.5px solid #722f37;
+                     background:#722f37;color:#fff;font-size:0.82rem;cursor:pointer;font-weight:600;">
+              Todos
+            </button>
+            <button id="btnNaoLidos"
+              onclick="setFiltro('nao-lidos')"
+              style="padding:0.4rem 1rem;border-radius:20px;border:1.5px solid #e0d9d0;
+                     background:#fff;color:#7a6e65;font-size:0.82rem;cursor:pointer;font-weight:500;">
+              Não lidos <span id="badgeNaoLidos" style="display:none;margin-left:4px;
+                background:#722f37;color:#fff;border-radius:10px;padding:1px 7px;font-size:0.75rem;"></span>
+            </button>
+          </div>
+
+          <!-- Tabela -->
+          <div class="table-card" style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:0.875rem;">
+              <thead>
+                <tr style="border-bottom:2px solid #f0ebe4;text-align:left;">
+                  <th style="padding:0.75rem 1rem;color:#7a6e65;font-weight:600;white-space:nowrap;">Data</th>
+                  <th style="padding:0.75rem 1rem;color:#7a6e65;font-weight:600;">E-mail</th>
+                  <th style="padding:0.75rem 1rem;color:#7a6e65;font-weight:600;">Motivo</th>
+                  <th style="padding:0.75rem 1rem;color:#7a6e65;font-weight:600;">Usuário</th>
+                  <th style="padding:0.75rem 1rem;color:#7a6e65;font-weight:600;white-space:nowrap;">Status da Conta</th>
+                  <th style="padding:0.75rem 1rem;color:#7a6e65;font-weight:600;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyReportes">
+                <tr>
+                  <td colspan="6" style="padding:2rem;text-align:center;color:#aaa;">
+                    Carregando...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Detalhes do Reporte -->
+    <div id="modalDetalhesReporte" style="display:none;position:fixed;inset:0;
+        background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:12px;padding:2rem;max-width:600px;
+          width:94%;box-shadow:0 8px 32px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+          <h3 style="margin:0;font-family:'Playfair Display',serif;font-size:1.2rem;color:#2c241b;">
+            Detalhes do Reporte
+          </h3>
+          <button onclick="fecharDetalhes()"
+            style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:#7a6e65;padding:0.2rem 0.5rem;">
+            &times;
+          </button>
+        </div>
+
+        <!-- Info do reporte -->
+        <div style="background:#f9f6f0;border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.25rem;
+            display:grid;grid-template-columns:1fr 1fr;gap:0.5rem 1.5rem;">
+          <div>
+            <div style="font-size:0.75rem;color:#7a6e65;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">E-mail</div>
+            <div id="detEmail" style="font-size:0.875rem;color:#2c241b;margin-top:2px;word-break:break-all;"></div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;color:#7a6e65;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Usuário</div>
+            <div id="detUsuario" style="font-size:0.875rem;color:#2c241b;margin-top:2px;"></div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;color:#7a6e65;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Data</div>
+            <div id="detData" style="font-size:0.875rem;color:#2c241b;margin-top:2px;"></div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;color:#7a6e65;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Membro desde</div>
+            <div id="detMembro" style="font-size:0.875rem;color:#2c241b;margin-top:2px;"></div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;color:#7a6e65;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Motivo</div>
+            <div id="detMotivo" style="font-size:0.875rem;color:#2c241b;margin-top:2px;font-weight:600;"></div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;color:#7a6e65;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Status da conta</div>
+            <div id="detStatus" style="margin-top:4px;"></div>
+          </div>
+        </div>
+
+        <!-- Mensagem do usuário -->
+        <div style="margin-bottom:1.25rem;">
+          <div style="font-size:0.78rem;font-weight:600;color:#5a4f47;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:.5px;">
+            Mensagem do usuário
+          </div>
+          <div id="detDetalhes"
+            style="background:#fff8f0;border-left:4px solid #c9a96e;padding:0.75rem 1rem;
+                   border-radius:0 6px 6px 0;font-size:0.875rem;color:#2c241b;
+                   white-space:pre-wrap;line-height:1.6;"></div>
+        </div>
+
+        <!-- Histórico de respostas -->
+        <div style="margin-bottom:1.25rem;">
+          <div style="font-size:0.78rem;font-weight:600;color:#5a4f47;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:.5px;">
+            Histórico de respostas
+          </div>
+          <div id="detHistorico"></div>
+        </div>
+
+        <!-- Nova resposta -->
+        <div style="border-top:1px solid #f0ebe4;padding-top:1.25rem;margin-bottom:1rem;">
+          <label style="display:block;font-size:0.82rem;font-weight:600;color:#5a4f47;
+              margin-bottom:0.4rem;">Nova resposta (será enviada por e-mail)</label>
+          <textarea id="detRespMensagem" rows="4"
+            style="width:100%;padding:0.6rem;border:1.5px solid #e0d9d0;border-radius:8px;
+                   font-size:0.9rem;resize:vertical;box-sizing:border-box;color:#2c241b;
+                   font-family:'DM Sans',sans-serif;"></textarea>
+        </div>
+
+        <!-- Ações -->
+        <div style="display:flex;gap:0.75rem;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+          <button onclick="confirmarExclusao()"
+            style="padding:0.5rem 1.1rem;border:1.5px solid #c62828;border-radius:8px;
+                   background:#fff;color:#c62828;font-size:0.85rem;cursor:pointer;font-weight:500;">
+            <i class="fa-solid fa-trash-can"></i> Excluir reporte
+          </button>
+          <div style="display:flex;gap:0.75rem;">
+            <button onclick="fecharDetalhes()"
+              style="padding:0.5rem 1.25rem;border:1.5px solid #e0d9d0;border-radius:8px;
+                     background:#fff;color:#7a6e65;font-size:0.9rem;cursor:pointer;font-weight:500;">
+              Fechar
+            </button>
+            <button onclick="confirmarEnvioResposta()"
+              style="padding:0.5rem 1.25rem;border:none;border-radius:8px;background:#722f37;
+                     color:#fff;font-size:0.9rem;cursor:pointer;font-weight:600;">
+              <i class="fa-solid fa-paper-plane"></i> Responder
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de confirmação padrão -->
+    <div id="modalConfirmReporte" style="display:none;position:fixed;inset:0;
+        background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:12px;padding:2rem;max-width:400px;
+          width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+        <h3 id="confirmTitulo" style="margin:0 0 0.75rem;font-family:'Playfair Display',serif;
+            font-size:1.1rem;color:#2c241b;"></h3>
+        <p id="confirmTexto" style="margin:0 0 1.5rem;font-size:0.9rem;color:#5a4f47;line-height:1.6;"></p>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+          <button id="confirmCancelarBtn"
+            style="padding:0.5rem 1.25rem;border:1.5px solid #e0d9d0;border-radius:8px;
+                   background:#fff;color:#7a6e65;font-size:0.9rem;cursor:pointer;font-weight:500;">
+            Voltar
+          </button>
+          <button id="confirmOkBtn"
+            style="padding:0.5rem 1.25rem;border:none;border-radius:8px;background:#722f37;
+                   color:#fff;font-size:0.9rem;cursor:pointer;font-weight:600;">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script th:src="@{/js/admin/reportes.js}"></script>
+    <script>
+      document.getElementById('dataHoje').textContent =
+        new Date().toLocaleDateString('pt-BR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    </script>
+  </body>
+</html>

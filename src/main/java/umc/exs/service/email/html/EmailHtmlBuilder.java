@@ -278,6 +278,16 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Sua conta foi reativada — Bibliotroca", conteudo);
     }
 
+    public static String respostaReporte(String mensagem) {
+        String conteudo = EmailComponents.h2("Retorno da equipe Bibliotroca")
+                + EmailComponents.p("Recebemos seu reporte e gostaríamos de retornar:")
+                + EmailComponents.caixa(
+                        EmailComponents.p(EmailSanitizer.esc(mensagem).replace("\n", "<br>")))
+                + EmailComponents.p("Se precisar de mais ajuda, entre em contato conosco novamente pela plataforma.")
+                + EmailComponents.aviso("Este é um retorno da equipe Bibliotroca referente ao seu reporte de problema.");
+        return EmailLayout.wrap("Retorno sobre seu reporte", conteudo);
+    }
+
     public static String contaRemovida(String nome, String motivo, Double saldoTokens) {
         nome = EmailSanitizer.esc(nome);
         motivo = EmailSanitizer.esc(motivo != null ? motivo : "Violação dos termos de uso.");

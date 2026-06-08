@@ -23,6 +23,12 @@ import java.util.Objects;
 
 import umc.exs.dto.mapper.CupomMapper;
 import umc.exs.dto.mapper.LivroMapper;
+import umc.exs.model.entidades.logic.Reporte;
+import umc.exs.model.entidades.logic.ReporteResposta;
+import umc.exs.repository.logic.ReporteRepository;
+import umc.exs.repository.logic.ReporteRespostaRepository;
+import umc.exs.service.email.facade.EmailFacade;
+import umc.exs.service.email.html.EmailHtmlBuilder;
 import umc.exs.dto.mapper.PedidoMapper;
 import umc.exs.dto.request.admin.AdminAprovacaoRequest;
 import umc.exs.dto.request.admin.AtualizarEnvioRequest;
@@ -75,6 +81,9 @@ public class AdminControllerApi {
     private final LivroMapper livroMapper;
     private final PedidoMapper pedidoMapper;
     private final CupomMapper cupomMapper;
+    private final ReporteRepository reporteRepository;
+    private final ReporteRespostaRepository reporteRespostaRepository;
+    private final EmailFacade emailFacade;
 
     // ==========================================================
     // LOTES
@@ -384,6 +393,83 @@ public class AdminControllerApi {
                     return (Map<String, Object>) m;
                 }).toList();
         return ResponseEntity.ok(posts);
+    }
+
+    // ==========================================================
+    // REPORTES
+    // ==========================================================
+
+    @GetMapping("/reportes")
+    public ResponseEntity<List<Map<String, Object>>> listarReportes() {
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        List<Map<String, Object>> lista = reporteRepository.findAllByOrderByDataCriacaoDesc()
+                .stream().map(r -> {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("id", r.getId());
+                    m.put("emailContato", r.getEmailContato());
+                    m.put("motivo", r.getMotivo());
+                    m.put("detalhes", r.getDetalhes() != null ? r.getDetalhes() : "");
+                    m.put("dataCriacao", r.getDataCriacao() != null ? r.getDataCriacao().format(fmt) : "");
+                    m.put("lido", r.isLido());
+                    m.put("nomeUsuario", r.getNomeUsuario() != null ? r.getNomeUsuario() : "—");
+                    m.put("statusConta", r.getStatusConta() != null ? r.getStatusConta() : "—");
+                    m.put("dataCadastro", r.getDataCadastro() != null ? r.getDataCadastro().format(fmt) : "—");
+                    List<Map<String, Object>> respostas = reporteRespostaRepository
+                            .findByReporteIdOrderByDataEnvioAsc(r.getId())
+                            .stream().map(resp -> {
+                                Map<String, Object> rm = new LinkedHashMap<>();
+                                rm.put("mensagem", resp.getMensagem());
+                                rm.put("dataEnvio", resp.getDataEnvio() != null
+                                        ? resp.getDataEnvio().format(fmt) : "");
+                                return rm;
+                            }).toList();
+                    m.put("respostas", respostas);
+                    return m;
+                }).toList();
+        return ResponseEntity.ok(lista);
+    }
+
+    @GetMapping("/reportes/nao-lidos/count")
+    public ResponseEntity<Map<String, Object>> contarReportesNaoLidos() {
+        return ResponseEntity.ok(Map.of("count", reporteRepository.countByLidoFalse()));
+    }
+
+    @PostMapping("/reportes/{id}/marcar-lido")
+    public ResponseEntity<?> marcarReporteLido(@PathVariable Long id) {
+        return reporteRepository.findById(id).map(r -> {
+            r.setLido(true);
+            reporteRepository.save(r);
+            return ResponseEntity.ok(Map.of("ok", true));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/reportes/{id}/responder")
+    public ResponseEntity<?> responderReporte(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        return reporteRepository.findById(id).map(r -> {
+            String mensagem = body.getOrDefault("mensagem", "");
+            String html = EmailHtmlBuilder.respostaReporte(mensagem);
+            emailFacade.sendHtmlSafe(r.getEmailContato(),
+                    "Retorno sobre seu reporte — Bibliotroca", html);
+            reporteRespostaRepository.save(ReporteResposta.builder()
+                    .reporte(r)
+                    .mensagem(mensagem)
+                    .dataEnvio(LocalDateTime.now())
+                    .build());
+            r.setLido(true);
+            reporteRepository.save(r);
+            return ResponseEntity.ok(Map.of("ok", true));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/reportes/{id}")
+    public ResponseEntity<?> excluirReporte(@PathVariable Long id) {
+        if (!reporteRepository.existsById(id)) return ResponseEntity.notFound().build();
+        reporteRespostaRepository.findByReporteIdOrderByDataEnvioAsc(id)
+                .forEach(reporteRespostaRepository::delete);
+        reporteRepository.deleteById(id);
+        return ResponseEntity.ok(Map.of("ok", true));
     }
 
     @PostMapping(value = "/livros/upload-foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

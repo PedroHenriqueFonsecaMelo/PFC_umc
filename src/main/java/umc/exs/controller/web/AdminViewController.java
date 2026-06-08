@@ -239,6 +239,11 @@ public class AdminViewController {
         return "admin/clientes";
     }
 
+    @GetMapping("/reportes")
+    public String reportes() {
+        return "admin/reportes";
+    }
+
     @GetMapping("/clientes/{id}")
     public String clientePerfil(@PathVariable Long id, Model model) {
         model.addAttribute("clienteId", id);

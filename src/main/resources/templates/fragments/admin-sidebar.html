@@ -4,7 +4,7 @@
         <!--
   Fragment: adminSidebar(activeMenu)
   Uso: <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('dashboard')}"></th:block>
-  Valores de activeMenu: dashboard | lotes | cancelamentos | pedidos | clientes | estoque | cupons | blog | forum | auditoria | notificacoes
+  Valores de activeMenu: dashboard | lotes | cancelamentos | pedidos | clientes | estoque | cupons | blog | forum | auditoria | notificacoes | reportes
 -->
         <aside
             th:fragment="adminSidebar(activeMenu)"
@@ -131,6 +131,13 @@
                     <i class="fa-solid fa-envelope-open-text"></i> Notificações
                 </a>
                 <a
+                    href="/admin/reportes"
+                    class="nav-item"
+                    th:classappend="${activeMenu == 'reportes'} ? ' ativo'"
+                >
+                    <i class="fa-solid fa-envelope"></i> Reportes
+                </a>
+                <a
                     href="/admin/audit"
                     class="nav-item"
                     th:classappend="${activeMenu == 'auditoria'} ? ' ativo'"
@@ -186,7 +193,21 @@
                 }
             </script>
 
-            <!-- Botão flutuante de logout admin -->
+            <!-- Ícone de Reportes com badge — fixo no canto superior direito -->
+            <a href="/admin/reportes" id="btnReportesBadge"
+                title="Reportes de problema"
+                style="position:fixed;top:1rem;right:4.5rem;
+                width:36px;height:36px;border-radius:50%;
+                background:#f9f6f0;border:1.5px solid #e0d9d0;
+                display:flex;align-items:center;justify-content:center;
+                box-shadow:0 2px 8px rgba(0,0,0,0.10);
+                cursor:pointer;z-index:997;text-decoration:none;color:#722f37;"
+                onmouseover="this.style.background='#722f37';this.style.color='#fff'"
+                onmouseout="this.style.background='#f9f6f0';this.style.color='#722f37'">
+                <i class="fa-solid fa-envelope" style="font-size:15px;"></i>
+            </a>
+
+        <!-- Botão flutuante de logout admin -->
             <a href="#" onclick="confirmarSairAdmin(); return false;"
                 id="btnSairFlutuanteAdmin"
                 title="Sair do painel"
@@ -236,6 +257,7 @@
                 }
             })();
         </script>
+
 
         <!-- Page Loader global — disponível em todas as páginas admin -->
         <th:block th:replace="~{fragments/loader :: loader}"></th:block>
