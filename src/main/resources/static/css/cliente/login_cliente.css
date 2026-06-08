@@ -340,7 +340,8 @@ body {
 
 .book-page {
     flex: 1;
-    background: #ffffff;
+    background: #2c241b;
+    color: #f5f0e8;
     border-radius: 0 10px 10px 0;
     padding: 40px 38px 34px;
     position: relative;
@@ -348,33 +349,26 @@ body {
     border: 1px solid rgba(74, 93, 35, 0.15);
     border-left: none;
 }
-.book-page::before {
-    content: "";
+.book-page::before,
+.book-page::after {
+    content: '';
     position: absolute;
-    inset: 0;
-    background-image: repeating-linear-gradient(
-        180deg,
-        transparent,
-        transparent 28px,
-        rgba(74, 93, 35, 0.04) 28px,
-        rgba(74, 93, 35, 0.04) 29px
-    );
+    width: 40px;
+    height: 40px;
+    border-color: #c8a96e;
+    border-style: solid;
+    opacity: 0.5;
     pointer-events: none;
 }
+.book-page::before {
+    top: 12px;
+    left: 12px;
+    border-width: 1.5px 0 0 1.5px;
+}
 .book-page::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        #4a5d23 30%,
-        #722f37 55%,
-        transparent 100%
-    );
+    bottom: 12px;
+    right: 12px;
+    border-width: 0 1.5px 1.5px 0;
 }
 
 .page-header {
@@ -386,13 +380,13 @@ body {
     font-family: "Playfair Display", Georgia, serif;
     font-size: 1.55rem;
     font-weight: 700;
-    color: #2c241b;
+    color: #f5f0e8;
     letter-spacing: -0.02em;
     margin-bottom: 5px;
 }
 .page-header p {
     font-size: 0.81rem;
-    color: rgba(44, 36, 27, 0.55);
+    color: rgba(245, 240, 232, 0.6);
     font-weight: 300;
 }
 
@@ -439,7 +433,7 @@ body {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(74, 93, 35, 0.65);
+    color: #c8a96e;
     margin-bottom: 6px;
 }
 .field input {
@@ -467,9 +461,9 @@ body {
     padding: 13px;
     margin-top: 6px;
     background: transparent;
-    border: 1px solid #4a5d23;
+    border: 1px solid #c8a96e;
     border-radius: 4px;
-    color: #4a5d23;
+    color: #c8a96e;
     font-size: 0.86rem;
     font-weight: 700;
     font-family: "DM Sans", sans-serif;
@@ -495,7 +489,7 @@ body {
     transition: transform 0.5s ease;
 }
 .btn-entrar:hover {
-    background: rgba(74, 93, 35, 0.08);
+    background: rgba(200, 169, 110, 0.1);
     box-shadow: 4px 4px 0 rgba(114, 47, 55, 0.25);
 }
 .btn-entrar:hover::before {
@@ -507,7 +501,7 @@ body {
 
 .divider {
     border: none;
-    border-top: 1px solid rgba(74, 93, 35, 0.15);
+    border-top: 1px solid rgba(200, 169, 110, 0.2);
     margin: 22px 0 16px;
     position: relative;
     z-index: 1;
@@ -522,13 +516,13 @@ body {
 }
 .panel-link {
     font-size: 0.77rem;
-    color: rgba(74, 93, 35, 0.55);
+    color: rgba(200, 169, 110, 0.7);
     text-decoration: none;
     transition: color 0.2s;
     letter-spacing: 0.02em;
 }
 .panel-link:hover {
-    color: #4a5d23;
+    color: #c8a96e;
 }
 
 .footnote {
@@ -633,9 +627,7 @@ body {
 
 .login-side .book-page {
     width: 380px;
-    background: rgba(10, 10, 18, 0.62);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    background: #2c241b;
     border-radius: 16px;
     padding: 2.5rem 2rem;
     box-shadow: 0 12px 56px rgba(0, 0, 0, 0.45);
@@ -643,12 +635,6 @@ body {
     position: relative;
     top: 0;
     border: 1px solid rgba(255, 255, 255, 0.14);
-}
-.login-side .book-page::after {
-    display: none;
-}
-.login-side .book-page::before {
-    display: none;
 }
 
 /* ── Textos dourados no card escuro ── */

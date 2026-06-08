@@ -195,7 +195,9 @@ public class SecurityConfig {
                         // Ranking público
                         "/ranking", "/api/ranking/top",
                         // Proxy Google Books (sem chave exposta no frontend)
-                        "/api/books/**"
+                        "/api/books/**",
+                        // Reportes de problema enviados da tela de login (sem autenticação)
+                        "/api/reportes"
         };
 
         // Recursos estáticos (CSS, JS, Imagens)

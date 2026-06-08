@@ -167,22 +167,156 @@
           </form>
 
           <hr class="divider" />
-          <div class="panel-links">
-            <a
-              th:href="@{/clientes/novo-cadastro}"
-              href="/clientes/novo-cadastro"
-              class="panel-link"
-            >Criar conta</a>
-            <a
-              th:href="@{/clientes/recuperar-senha}"
-              href="/clientes/recuperar-senha"
-              class="panel-link"
-            >Esqueceu a senha?</a>
+          <div class="panel-links" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;flex-wrap:wrap;">
+            <a th:href="@{/clientes/novo-cadastro}" href="/clientes/novo-cadastro" class="panel-link">Criar conta</a>
+            <span style="color:rgba(200,169,110,0.4);font-size:0.75rem;">·</span>
+            <a th:href="@{/clientes/recuperar-senha}" href="/clientes/recuperar-senha" class="panel-link">Esqueceu a senha?</a>
+            <span style="color:rgba(200,169,110,0.4);font-size:0.75rem;">·</span>
+            <a href="#" onclick="abrirModalReporte(); return false;" class="panel-link">Reportar problema</a>
           </div>
         </div>
       </div>
     </main>
 
     <script th:src="@{/js/cliente/login_cliente.js}"></script>
+
+    <!-- Modal: Reportar Problema -->
+    <div id="modalReporte" style="display:none;position:fixed;inset:0;
+        background:rgba(0,0,0,0.6);z-index:9999;
+        align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:12px;padding:2rem;
+          max-width:480px;width:90%;
+          box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+        <h3 style="margin:0 0 1rem;font-family:'Playfair Display',serif;
+            font-size:1.2rem;color:#2c241b;">Reportar Problema</h3>
+        <div style="margin-bottom:1rem">
+          <label style="display:block;font-size:0.85rem;font-weight:600;
+              color:#2c241b;margin-bottom:0.4rem">Motivo *</label>
+          <select id="reporteMotivo" style="width:100%;padding:0.6rem;
+              border:1.5px solid #e0d9d0;border-radius:8px;
+              font-size:0.9rem;background:#fff">
+            <option value="">Selecione o motivo...</option>
+            <option value="Conta suspensa indevidamente">Conta suspensa indevidamente</option>
+            <option value="Conta removida indevidamente">Conta removida indevidamente</option>
+            <option value="Não consigo acessar minha conta">Não consigo acessar minha conta</option>
+            <option value="Erro no sistema">Erro no sistema</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+        <div style="margin-bottom:0.75rem">
+          <label style="display:block;font-size:0.85rem;font-weight:600;
+              color:#2c241b;margin-bottom:0.4rem">E-mail para contato *</label>
+          <input type="email" id="reporteEmail" placeholder="seu@email.com"
+              style="width:100%;padding:0.6rem;border:1.5px solid #e0d9d0;
+              border-radius:8px;font-size:0.9rem;box-sizing:border-box">
+        </div>
+        <div style="margin-bottom:1.5rem">
+          <label style="display:block;font-size:0.85rem;font-weight:600;
+              color:#2c241b;margin-bottom:0.4rem">Detalhes da situação</label>
+          <textarea id="reporteDetalhes" rows="4"
+              placeholder="Descreva o que está acontecendo..."
+              style="width:100%;padding:0.6rem;border:1.5px solid #e0d9d0;
+              border-radius:8px;font-size:0.9rem;resize:vertical;
+              box-sizing:border-box"></textarea>
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+          <button onclick="confirmarCancelarReporte()"
+              style="padding:0.5rem 1.25rem;border:1.5px solid #e0d9d0;
+              border-radius:8px;background:#fff;color:#7a6e65;
+              font-size:0.9rem;cursor:pointer;font-weight:500">
+            Cancelar
+          </button>
+          <button onclick="confirmarEnviarReporte()"
+              style="padding:0.5rem 1.25rem;border:none;border-radius:8px;
+              background:#722f37;color:#fff;font-size:0.9rem;
+              cursor:pointer;font-weight:600">
+            Enviar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Confirmação de ação -->
+    <div id="modalReporteConfirm" style="display:none;position:fixed;inset:0;
+        background:rgba(0,0,0,0.6);z-index:10000;
+        align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:12px;padding:2rem;
+          max-width:400px;width:90%;
+          box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+        <h3 id="reporteConfirmTitulo" style="margin:0 0 0.75rem;
+            font-family:'Playfair Display',serif;font-size:1.1rem;
+            color:#2c241b;"></h3>
+        <p id="reporteConfirmTexto" style="margin:0 0 1.5rem;
+            font-size:0.9rem;color:#5a4f47;line-height:1.6;"></p>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+          <button id="reporteConfirmCancelar"
+              style="padding:0.5rem 1.25rem;border:1.5px solid #e0d9d0;
+              border-radius:8px;background:#fff;color:#7a6e65;
+              font-size:0.9rem;cursor:pointer;font-weight:500">
+            Voltar
+          </button>
+          <button id="reporteConfirmOk"
+              style="padding:0.5rem 1.25rem;border:none;border-radius:8px;
+              background:#722f37;color:#fff;font-size:0.9rem;
+              cursor:pointer;font-weight:600">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function abrirModalReporte() {
+        document.getElementById('modalReporte').style.display = 'flex';
+      }
+
+      function confirmarCancelarReporte() {
+        mostrarConfirmReporte(
+          'Cancelar reporte',
+          'Tem certeza que deseja cancelar? As informações não serão enviadas.',
+          function() {
+            document.getElementById('modalReporte').style.display = 'none';
+            document.getElementById('modalReporteConfirm').style.display = 'none';
+          }
+        );
+      }
+
+      function confirmarEnviarReporte() {
+        var motivo = document.getElementById('reporteMotivo').value;
+        var email = document.getElementById('reporteEmail').value.trim();
+        var detalhes = document.getElementById('reporteDetalhes').value.trim();
+        if (!motivo) { alert('Selecione o motivo do reporte.'); return; }
+        if (!email) { alert('Informe seu e-mail para contato.'); return; }
+        mostrarConfirmReporte(
+          'Confirmar envio',
+          'Tem certeza que deseja enviar este reporte? Nossa equipe entrará em contato.',
+          async function() {
+            try {
+              await fetch('/api/reportes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ motivo: motivo, email: email, detalhes: detalhes })
+              });
+              document.getElementById('modalReporte').style.display = 'none';
+              document.getElementById('modalReporteConfirm').style.display = 'none';
+              alert('Reporte enviado com sucesso! Nossa equipe analisará sua solicitação.');
+            } catch(e) {
+              alert('Erro ao enviar reporte. Tente novamente.');
+            }
+          }
+        );
+      }
+
+      function mostrarConfirmReporte(titulo, texto, onConfirmar) {
+        document.getElementById('reporteConfirmTitulo').textContent = titulo;
+        document.getElementById('reporteConfirmTexto').textContent = texto;
+        var modal = document.getElementById('modalReporteConfirm');
+        modal.style.display = 'flex';
+        document.getElementById('reporteConfirmOk').onclick = onConfirmar;
+        document.getElementById('reporteConfirmCancelar').onclick = function() {
+          modal.style.display = 'none';
+        };
+      }
+    </script>
   </body>
 </html>
