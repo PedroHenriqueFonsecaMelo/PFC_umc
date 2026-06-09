@@ -40,5 +40,40 @@ class LivroPromocaoServiceUnitTest {
         assertEquals(120.0, livro.getPrecoAprovado());
         assertNull(livro.getPromocaoExpira());
     }
+
+    @Test
+    void aplicarPromocao_quandoPromoAtiva_comDescontoZero_deveManterPrecoAprovado() {
+        Livro livro = new Livro();
+
+        LocalDateTime expira = LocalDateTime.now().plusHours(10);
+
+        service.aplicarPromocao(livro, true, 200.0, 0.0, expira);
+
+        assertEquals(200.0, livro.getPrecoOriginal());
+        assertEquals(200.0, livro.getPrecoAprovado());
+        assertEquals(expira, livro.getPromocaoExpira());
+    }
+
+    @Test
+    void aplicarPromocao_quandoPromoAtiva_comPercentualMaiorQue100_deveAplicarFormulaDireto() {
+        Livro livro = new Livro();
+
+        // Ex: 150% => 1 - 1.5 = -0.5 => preço negativo (apenas verifica fórmula)
+        LocalDateTime expira = LocalDateTime.now().plusDays(2);
+        service.aplicarPromocao(livro, true, 100.0, 150.0, expira);
+
+        assertEquals(100.0, livro.getPrecoOriginal());
+        assertEquals(-50.0, livro.getPrecoAprovado());
+        assertEquals(expira, livro.getPromocaoExpira());
+    }
+
+    @Test
+    void aplicarPromocao_quandoPromoAtiva_comDescontoNulo_deveCalcularComDoubleNullUnboxing() {
+        Livro livro = new Livro();
+        LocalDateTime expira = LocalDateTime.now().plusDays(1);
+
+        // Sem validação no service: percentualDesconto null deve causar NullPointerException
+        assertThrows(NullPointerException.class, () -> service.aplicarPromocao(livro, true, 100.0, null, expira));
+    }
 }
 

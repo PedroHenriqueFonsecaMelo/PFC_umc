@@ -1,7 +1,7 @@
 package umc.exs.service.notificacao;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Map;
@@ -66,5 +66,46 @@ class NotificacaoServiceTest {
         NotificacaoDashboard result = service.criarNotificacaoDashboard(cliente, null, "/link");
         assertNull(result);
         verifyNoInteractions(notificacaoDashboardRepository);
+    }
+
+    @Test
+    void notificarSaldo_quandoClienteIdNull_naoEnvia() {
+        service.notificarSaldo(null, 10.0, "Saldo");
+
+        verifyNoInteractions(messagingTemplate);
+    }
+
+    @Test
+    void notificarSaldo_quandoDescricaoNull_enviaComDescricaoVazia() {
+        service.notificarSaldo(1L, 10.0, null);
+
+        verify(messagingTemplate).convertAndSend(
+                eq("/topic/saldo/1"),
+                argThat((Object payload) -> {
+                    Map<?, ?> map = (Map<?, ?>) payload;
+                    return map.get("descricao").equals("");
+                })
+        );
+    }
+
+    @Test
+    void criarNotificacaoDashboard_quandoClienteNull_retornaNull() {
+        NotificacaoDashboard result = service.criarNotificacaoDashboard(null, "Mensagem", "/link");
+
+        assertNull(result);
+        verifyNoInteractions(notificacaoDashboardRepository);
+    }
+
+    @Test
+    void criarNotificacaoDashboard_quandoErroNoSave_retornaNull() {
+        Cliente cliente = new Cliente();
+        cliente.setId(1L);
+
+        when(notificacaoDashboardRepository.save(any()))
+                .thenThrow(new RuntimeException());
+
+        NotificacaoDashboard result = service.criarNotificacaoDashboard(cliente, "Mensagem", "/link");
+
+        assertNull(result);
     }
 }

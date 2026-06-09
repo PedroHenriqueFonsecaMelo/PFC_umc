@@ -4,9 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
@@ -23,69 +26,55 @@ import umc.exs.dto.response.admin.DashboardResponse;
 import umc.exs.model.entidades.logic.Administrador;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.logic.AdminRepository;
+import umc.exs.repository.logic.ReporteRepository;
+import umc.exs.repository.logic.ReporteRespostaRepository;
 import umc.exs.service.cliente.admin.ClienteAdminService;
 import umc.exs.service.cupom.CupomService;
+import umc.exs.service.email.facade.EmailFacade;
 import umc.exs.service.core.dashboard.DashboardService;
 import umc.exs.service.core.dashboard.LoteService;
 import umc.exs.service.core.dashboard.PedidoService;
 import umc.exs.service.core.interactions.PostBlogService;
 import umc.exs.service.core.livros.LivroService;
 
+@ExtendWith(MockitoExtension.class)
 class AdminControllerApiUnitTest {
 
+    @Mock
     private LivroService livroService;
+    @Mock
     private LivroRepository livroRepository;
+    @Mock
     private AdminRepository adminRepository;
+    @Mock
     private LoteService loteService;
+    @Mock
     private PedidoService pedidoService;
+    @Mock
     private DashboardService dashboardService;
+    @Mock
     private CupomService cupomService;
+    @Mock
     private PostBlogService postBlogService;
+    @Mock
     private ClienteAdminService clienteAdminService;
-
+    @Mock
     private LivroMapper livroMapper;
+    @Mock
     private PedidoMapper pedidoMapper;
+    @Mock
     private CupomMapper cupomMapper;
+    @Mock
+    private ReporteRepository reporteRepository;
+    @Mock
+    private ReporteRespostaRepository reporteRespostaRepository;
+    @Mock
+    private EmailFacade emailFacade;
 
+    @InjectMocks
     private AdminControllerApi controller;
-
-    private UserDetails adminUser;
-
-    @BeforeEach
-    void setUp() {
-        livroService = mock(LivroService.class);
-        livroRepository = mock(LivroRepository.class);
-        adminRepository = mock(AdminRepository.class);
-        loteService = mock(LoteService.class);
-        pedidoService = mock(PedidoService.class);
-        dashboardService = mock(DashboardService.class);
-        cupomService = mock(CupomService.class);
-        postBlogService = mock(PostBlogService.class);
-        clienteAdminService = mock(ClienteAdminService.class);
-
-        livroMapper = mock(LivroMapper.class);
-        pedidoMapper = mock(PedidoMapper.class);
-        cupomMapper = mock(CupomMapper.class);
-
-        controller = new AdminControllerApi(
-                livroService,
-                livroRepository,
-                adminRepository,
-                loteService,
-                pedidoService,
-                dashboardService,
-                cupomService,
-                postBlogService,
-                clienteAdminService,
-                livroMapper,
-                pedidoMapper,
-                cupomMapper);
-
-        adminUser = User.withUsername("admin@email.com")
-                .password("pass")
-                .authorities("ADMIN")
-                .build();
-    }
+    
+    private UserDetails adminUser = User.withUsername("admin@email.com") .password("pass") .authorities("ADMIN") .build();
 
     @Test
     void aprovarLivro_SemAuth_Retorna401() {
@@ -143,7 +132,8 @@ class AdminControllerApiUnitTest {
         when(dto.getPercentualDesconto()).thenReturn(10.0);
         when(dto.getQuantidadeMaxima()).thenReturn(10);
 
-        // CupomService.criarCupom(...) devolve Cupom; no controller o retorno vira body de ResponseEntity.
+        // CupomService.criarCupom(...) devolve Cupom; no controller o retorno vira body
+        // de ResponseEntity.
         var cupom = mock(umc.exs.model.entidades.foundation.Cupom.class);
         when(cupomService.criarCupom(eq(dto), any(java.time.LocalDateTime.class)))
                 .thenReturn(cupom);
@@ -157,9 +147,9 @@ class AdminControllerApiUnitTest {
 
     @Test
     void invalidaAuthAdmin_QuandoBuscarPerfilCliente() {
-        // Método getMe exige user não-null mas não valida explicitamente; fica fora do escopo.
+        // Método getMe exige user não-null mas não valida explicitamente; fica fora do
+        // escopo.
         // Mantemos testes apenas nos endpoints com checagem explícita.
         assertTrue(true);
     }
 }
-

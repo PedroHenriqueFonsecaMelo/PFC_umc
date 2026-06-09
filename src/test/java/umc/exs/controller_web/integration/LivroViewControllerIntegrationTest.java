@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import umc.exs.controller.web.LivroViewController;
 import umc.exs.security.JwtUtil;
 import umc.exs.security.JwtUserDetailsService;
+import umc.exs.service.cliente.ClienteService;
 import umc.exs.service.core.interactions.VisitaSiteService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -25,6 +26,9 @@ class LivroViewControllerIntegrationTest {
 
     @MockitoBean
     private VisitaSiteService visitaSiteService;
+
+    @MockitoBean
+    private ClienteService clienteService;
 
     @MockitoBean
     private JwtUtil jwtUtil;

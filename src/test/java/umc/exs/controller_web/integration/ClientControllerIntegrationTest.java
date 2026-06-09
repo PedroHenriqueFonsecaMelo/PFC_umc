@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import umc.exs.controller.web.ClientController;
 import umc.exs.dto.mapper.ClienteMapper;
 import umc.exs.model.entidades.usuario.Cliente;
-
+import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.security.JwtUtil;
 import umc.exs.security.JwtUserDetailsService;
 import umc.exs.service.cliente.ClienteService;
@@ -38,6 +38,9 @@ class ClientControllerIntegrationTest {
 
         @Autowired
         private MockMvc mockMvc;
+
+        @MockitoBean
+        private ClienteRepository clienteRepository;
 
         @MockitoBean
         private ClienteService clienteService;

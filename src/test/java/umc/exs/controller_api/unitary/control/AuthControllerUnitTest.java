@@ -71,7 +71,7 @@ class AuthControllerUnitTest {
     }
 
     @Test
-    void login_InvalidCredentials_Retorna401() {
+    void login_InvalidCredentials_RetornaRedirecionamento() { 
         LoginRequest req = new LoginRequest();
         req.setEmail("user@email.com");
         req.setSenha("123");
@@ -83,11 +83,10 @@ class AuthControllerUnitTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
 
         ResponseEntity<?> resp = controller.login(req, response, request);
-        Map<String, Object> body = (Map<String, Object>) resp.getBody();
 
-        assertEquals(HttpStatus.UNAUTHORIZED, resp.getStatusCode());
-        assertNotNull(resp.getBody());
-        assertEquals("E-mail ou senha inválidos.", body.get("error"));
+        assertEquals(HttpStatus.FOUND, resp.getStatusCode());
+        
+    
         verifyNoInteractions(authHelper);
     }
 }

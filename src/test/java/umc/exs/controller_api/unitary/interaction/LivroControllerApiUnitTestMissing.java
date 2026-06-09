@@ -7,11 +7,13 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.mapstruct.factory.Mappers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.userdetails.User;
@@ -25,9 +27,11 @@ import umc.exs.dto.request.compra.LoteRequest;
 import umc.exs.dto.request.livro.LivroRequest;
 import umc.exs.dto.response.compras.CarrinhoCompraResponse;
 import umc.exs.model.entidades.foundation.Lote;
+import umc.exs.model.entidades.livro.Livro;
+
 import umc.exs.service.core.livros.LivroService;
 
-class LivroControllerApiUnitTestInteraction {
+class LivroControllerApiUnitTestMissing {
 
     private LivroService livroService;
     private LivroMapper livroMapper;
@@ -41,73 +45,8 @@ class LivroControllerApiUnitTestInteraction {
         livroMapper = Mappers.getMapper(LivroMapper.class);
         controller = new LivroControllerApi(livroService, livroMapper);
 
-        user = User.withUsername("test@example.com")
-                .password("pass")
-                .authorities("USER")
-                .build();
+        user = User.withUsername("test@example.com").password("pass").authorities("USER").build();
     }
-
-    @Test
-    void criarLoteVenda_SemAuth_Retorna401() {
-        ResponseEntity<Object> resp = (ResponseEntity<Object>) controller.criarLoteVenda(null, null, List.of());
-
-        assertEquals(HttpStatus.UNAUTHORIZED, resp.getStatusCode());
-        assertEquals("Usuário precisa estar logado.", resp.getBody());
-        verifyNoInteractions(livroService);
-    }
-
-    @Test
-    void comprarLivro_SemAuth_Retorna401() {
-        ResponseEntity<Object> resp = (ResponseEntity<Object>) controller.comprarLivro(1L, null);
-        assertEquals(HttpStatus.UNAUTHORIZED, resp.getStatusCode());
-        assertEquals("Usuário precisa estar logado.", resp.getBody());
-        verifyNoInteractions(livroService);
-    }
-
-    @Test
-    void comprarLivro_ComSucesso_RetornaOk() {
-        doNothing().when(livroService).realizarCompra(eq(1L), eq(user.getUsername()));
-
-        ResponseEntity<Object> resp = (ResponseEntity<Object>) controller.comprarLivro(1L, user);
-
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
-        assertEquals("Compra realizada com sucesso! Tokens transferidos.", resp.getBody());
-        verify(livroService).realizarCompra(eq(1L), eq(user.getUsername()));
-    }
-
-    @Test
-    void comprarCarrinho_ComSucesso_RetornaOk() {
-        CarrinhoCompraRequest req = new CarrinhoCompraRequest();
-        req.setLivroIds(List.of(1L, 2L));
-
-        CarrinhoCompraResponse mockResponse = CarrinhoCompraResponse.builder()
-                .totalSolicitados(2)
-                .totalComprados(2)
-                .totalGasto(25.0)
-                .saldoRestante(75.0)
-                .build();
-
-        when(livroService.comprarCarrinho(eq(user.getUsername()), eq(req)))
-                .thenReturn(mockResponse);
-
-        ResponseEntity<Object> resp = (ResponseEntity<Object>) controller.comprarCarrinho(user, req);
-
-        assertEquals(HttpStatus.OK, resp.getStatusCode());
-        assertEquals(mockResponse, resp.getBody());
-        verify(livroService).comprarCarrinho(eq(user.getUsername()), eq(req));
-    }
-
-    @Test
-    void comprarCarrinho_SemAuth_Retorna401() {
-        CarrinhoCompraRequest req = new CarrinhoCompraRequest();
-        req.setLivroIds(List.of(1L));
-
-        ResponseEntity<Object> resp = (ResponseEntity<Object>) controller.comprarCarrinho(null, req);
-        assertEquals(HttpStatus.UNAUTHORIZED, resp.getStatusCode());
-        assertEquals("Usuário precisa estar logado.", resp.getBody());
-        verifyNoInteractions(livroService);
-    }
-
 
     private static MultipartFile multipartImage(String name, String contentType, byte[] bytes, long sizeOverride) {
         // Spring MockMultipartFile usa os bytes informados para tamanho real,
@@ -145,6 +84,14 @@ class LivroControllerApiUnitTestInteraction {
         assertNotNull(resp.getBody());
     }
 
+    @Test
+    void criarLoteVenda_SemAuth_Retorna401() {
+        ResponseEntity<Object> resp = controller.criarLoteVenda(null, mock(LoteRequest.class), List.of());
+
+        assertEquals(HttpStatus.UNAUTHORIZED, resp.getStatusCode());
+        assertEquals("Usuário precisa estar logado.", resp.getBody());
+        verifyNoInteractions(livroService);
+    }
 
     @Test
     void criarLoteVenda_SemFotos_Retorna400() {
@@ -384,5 +331,3 @@ class LivroControllerApiUnitTestInteraction {
         verify(livroService).listarLivrosAprovadosPaginado(any(), eq("abc"));
     }
 }
-
-

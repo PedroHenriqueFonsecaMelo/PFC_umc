@@ -157,12 +157,12 @@ public class AvaliacaoLivroController {
                 .avaliador(leitor)
                 .build();
 
-        avaliacaoRepo.save(nova);
+        AvaliacaoLivro salva = avaliacaoRepo.save(nova);
 
         return ResponseEntity.ok(Map.of(
                 MESSAGE, "Salvo com sucesso!",
-                "id", nova.getId()));
-    }
+                "id", salva.getId()));
+            }
 
     @GetMapping("/livro/{isbn}/media")
     public ResponseEntity<Map<String, Object>> buscarMedia(@PathVariable("isbn") String isbn) {

@@ -152,7 +152,9 @@ class CarteiraServiceTest {
     @Test
     void listarHistoricoPorCliente_deveDelegar() {
         List<Transacao> lista = List.of(mock(Transacao.class));
-        when(transacaoRepository.findByClienteIdOrderByDataHoraDesc(1L)).thenReturn(lista);
+              
+        when(transacaoRepository.findByClienteIdAndStatusOrderByDataHoraDesc(any(), any()))
+                .thenReturn(lista);
         assertEquals(lista, service.listarHistoricoPorCliente(1L));
     }
 

@@ -79,7 +79,7 @@ class ForumViewControllerUnitTest {
 
         UserDetails user = User.withUsername("admin@example.com")
                 .password("password")
-                .authorities("ADMIN")
+                .roles("ADMIN") 
                 .build();
 
         when(forumService.buscarTopicoPorId(1L)).thenReturn(topico);

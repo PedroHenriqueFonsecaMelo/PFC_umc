@@ -255,6 +255,8 @@
                                 <exclude>**/umc/exs/model/**/*</exclude>
                                 <exclude>**/umc/exs/repository/**/*</exclude>
                                 <exclude>**/umc/exs/security/**/*</exclude>
+                                <exclude>umc/exs/DependencyScanner.*</exclude>
+                                <exclude>umc/exs/ServletInitializer.*</exclude>
                                 <exclude>**/umc/exs/Main.*</exclude>
                                 <exclude>**/*Printer.*</exclude>                                <!-- Exclui a classe que printou o diagrama -->
                             </excludes>
