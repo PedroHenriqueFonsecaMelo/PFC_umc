@@ -21,8 +21,8 @@ body {
     align-items: center;
     justify-content: center;
     background:
-        linear-gradient(rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.38)),
-        url('/imagens/fundo.png') center center / cover no-repeat fixed;
+        linear-gradient(rgba(249, 246, 240, 0.82), rgba(249, 246, 240, 0.82)),
+        url('/imagens/prateleira.png') center center / cover no-repeat fixed;
 }
 
 /* elemento estranho abaixo do card — oculto */
@@ -375,6 +375,7 @@ body {
     margin-bottom: 26px;
     position: relative;
     z-index: 1;
+    text-align: center;
 }
 .page-header h1 {
     font-family: "Playfair Display", Georgia, serif;
@@ -621,6 +622,7 @@ body {
 
 .login-side {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 }
