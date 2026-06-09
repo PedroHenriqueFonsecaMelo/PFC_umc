@@ -15,6 +15,11 @@
         <style>
             .back-link { color: #000; border-color: #000; }
             .back-link:hover { color: #000; border-color: #000; }
+            body {
+                background:
+                    linear-gradient(rgba(255,255,255,0.38), rgba(255,255,255,0.38)),
+                    url('/imagens/fundo.png') center center / cover no-repeat fixed;
+            }
         </style>
     </head>
 
@@ -52,17 +57,5 @@
             </form>
         </div>
 
-        <!-- Estante decorativa rodapé -->
-        <div
-            class="bookshelf-container"
-            id="bookshelfContainer"
-            aria-hidden="true"
-        >
-            <div class="bookshelf-fade"></div>
-            <div class="books-row" id="booksRow"></div>
-            <div class="bookshelf-floor"></div>
-        </div>
-
-        <script th:src="@{/js/cliente/bookshelf-deco.js}"></script>
     </body>
 </html>
