@@ -15,8 +15,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
     <link rel="stylesheet" th:href="@{/css/index.css}" />
-    <link rel="stylesheet" th:href="@{/css/book-wall.css}" />
-    <link rel="stylesheet" th:href="@{/css/social-icons.css}" />
+<link rel="stylesheet" th:href="@{/css/social-icons.css}" />
   </head>
   <body>
     <!-- FLASH: lote enviado -->
@@ -40,10 +39,9 @@
     <!-- MASTHEAD -->
     <header class="masthead">
       <div class="masthead-top">
-        <span class="masthead-tagline" id="mastheadTagline"></span>
+        <img src="/img/logo-bibliotroca.png" alt="Bibliotroca" class="masthead-logo-img">
         <a class="masthead-logo" th:href="@{/}">
-          <img src="/img/logo-bibliotroca.png" alt="" class="masthead-logo-img">
-          Biblio<em>troca</em>
+          <span>Biblio<em>troca</em></span>
         </a>
         <div class="masthead-actions">
           <div class="nav-guest" id="navGuest">
@@ -88,11 +86,6 @@
         </div>
       </div>
 
-    </section>
-
-    <!-- HEX VITRINE -->
-    <section class="hex-vitrine" id="hexVitrine">
-      <ul id="hexLivros"></ul>
     </section>
 
     <!-- STATS -->
@@ -328,7 +321,7 @@
     <footer>
       <div class="footer-logo">Biblio<em>troca</em></div>
       <p class="footer-copyright">
-        © 2025 Bibliotroca — Todos os direitos reservados
+        © 2026 Bibliotroca — Todos os direitos reservados
       </p>
       <div class="footer-links">
         <a th:href="@{/livros/vitrine}">Vitrine</a>
@@ -369,44 +362,7 @@
       </div>
     </footer>
 
-    <script th:src="@{/js/book-wall.js}"></script>
     <script th:src="@{/js/index.js}"></script>
-    <script>
-    (async function() {
-      try {
-        const res = await fetch('/api/livros/vitrine?page=0&size=20');
-        const data = await res.json();
-        const livrosEmbaralhados = (data.content || data || [])
-          .sort(function() { return Math.random() - 0.5; })
-          .slice(0, 8);
-        const ul = document.getElementById('hexLivros');
-        if (!ul) return;
-        livrosEmbaralhados.forEach(function(livro) {
-          const li = document.createElement('li');
-          li.onclick = function() { window.location.href = '/livros/' + livro.id; };
-          const img = document.createElement('img');
-          // fotoUrl e fotosUrls são JSON array serializado ex: ["/uploads/livro/abc.jpg"]
-          var src = '/img/logo-bibliotroca.png';
-          try {
-            var arr = JSON.parse(livro.fotoUrl || livro.fotosUrls || '[]');
-            if (Array.isArray(arr) && arr.length > 0) src = arr[0];
-          } catch(_) {
-            if (livro.fotoUrl && livro.fotoUrl.charAt(0) !== '[') src = livro.fotoUrl;
-          }
-          img.src = src;
-          img.alt = livro.titulo || 'Livro';
-          img.onerror = function() {
-            this.onerror = null;
-            this.src = '/img/logo-bibliotroca.png';
-          };
-          li.appendChild(img);
-          ul.appendChild(li);
-        });
-      } catch(e) {
-        console.error('Erro ao carregar livros hex:', e);
-      }
-    })();
-    </script>
 
     <!-- Page Loader -->
     <th:block th:replace="~{fragments/loader :: loader}"></th:block>

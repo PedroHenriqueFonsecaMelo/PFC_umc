@@ -13,10 +13,12 @@ function animarContadores() {
     const raw = el.textContent.trim();
     const match = raw.match(/^[\d.]+/);
     if (!match) return;
-    const target = parseFloat(match[0].replace(/\./g, "").replace(",", "."));
-    if (isNaN(target) || target < 10) return; // ignora 4.9★
-    const suffix = raw.slice(match[0].length);
     const isDecimal = match[0].includes(".");
+    const target = isDecimal
+      ? parseFloat(match[0])
+      : parseFloat(match[0].replace(/\./g, "").replace(",", "."));
+    if (isNaN(target) || target < 10) return; // ignora decimais pequenos como 4.9★
+    const suffix = raw.slice(match[0].length);
     let start = null;
     const duration = 1400;
     function step(ts) {
@@ -61,13 +63,20 @@ async function carregarLivrosDestaque() {
 
     // Monta slides
     destaque.forEach((livro, i) => {
-      var src = '/img/logo-bibliotroca.png';
+      var src = null;
       try {
-        var arr = JSON.parse(livro.fotoUrl || '[]');
+        var raw = livro.fotosUrls || livro.fotoUrl || '[]';
+        var arr = JSON.parse(raw);
         if (Array.isArray(arr) && arr.length > 0) src = arr[0];
+        else if (typeof raw === 'string' && !raw.startsWith('[')) src = raw;
       } catch(_) {
-        if (livro.fotoUrl && !livro.fotoUrl.startsWith('[')) src = livro.fotoUrl;
+        var raw2 = livro.fotosUrls || livro.fotoUrl;
+        if (raw2 && !raw2.startsWith('[')) src = raw2;
       }
+      if (!src && livro.isbn) {
+        src = 'https://covers.openlibrary.org/b/isbn/' + livro.isbn.replace(/-/g, '') + '-L.jpg';
+      }
+      if (!src) src = '/img/logo-bibliotroca.png';
       const capaUrl = src;
 
       const slide = document.createElement("div");
@@ -232,8 +241,8 @@ async function carregarNavUsuario() {
       const fotoHtml = cliente.fotoPerfil
         ? `<a href="/clientes/meu-perfil" class="nav-foto-link"><img src="${cliente.fotoPerfil}" alt="Meu perfil"></a>`
         : "";
-      document.getElementById("mastheadTagline").innerHTML = fotoHtml +
-        "Olá, <strong>" + primeiroNome + "</strong>";
+      const tagline = document.getElementById("mastheadTagline");
+      if (tagline) tagline.innerHTML = fotoHtml + "Olá, <strong>" + primeiroNome + "</strong>";
       document.getElementById("navGuest").style.display = "none";
       document.getElementById("navUser").style.display = "flex";
       document.getElementById("navMinhaConta").href = "/clientes/meu-perfil";
@@ -251,11 +260,14 @@ async function carregarNavUsuario() {
     // 404 → pode ser admin (não está na tabela de clientes)
     if (res.status === 404) {
       const adminRes = await fetch("/api/admin/me", { credentials: "include" });
-      if (!adminRes.ok) return;
+      if (!adminRes.ok) {
+        document.getElementById("navGuest").style.display = "flex";
+        return;
+      }
       const admin = await adminRes.json();
       const primeiroNome = (admin.nome || "Administrador").split(" ")[0];
-      document.getElementById("mastheadTagline").innerHTML = "Olá, <strong>" +
-        primeiroNome + "</strong> · Admin";
+      const taglineAdmin = document.getElementById("mastheadTagline");
+      if (taglineAdmin) taglineAdmin.innerHTML = "Olá, <strong>" + primeiroNome + "</strong> · Admin";
       document.getElementById("navGuest").style.display = "none";
       document.getElementById("navUser").style.display = "flex";
       // Redireciona links do nav para o painel
@@ -282,8 +294,14 @@ async function carregarNavUsuario() {
           );
         },
       );
+      return;
     }
-  } catch (_) {}
+
+    // Não é cliente nem admin → visitante
+    document.getElementById("navGuest").style.display = "flex";
+  } catch (_) {
+    document.getElementById("navGuest").style.display = "flex";
+  }
 }
 
 /* ── Blog ── */

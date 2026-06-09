@@ -38,9 +38,9 @@ body {
   border-bottom: 1px solid var(--border);
 }
 .masthead-top {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   padding: 0.6rem 5vw;
   border-bottom: 1px solid var(--border);
 }
@@ -78,16 +78,12 @@ body {
 }
 .masthead-logo {
   font-family: var(--serif);
-  font-size: clamp(1.6rem, 6vw, 4.8rem);
+  font-size: clamp(2.13rem, 8vw, 6.4rem);
   font-weight: 700;
   color: var(--ink);
   text-decoration: none;
   letter-spacing: -0.02em;
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
+  text-align: center;
 }
 .masthead-logo-img {
   height: clamp(56px, 13vw, 168px);
@@ -103,7 +99,6 @@ body {
   align-items: center;
   gap: 0.75rem;
   justify-content: flex-end;
-  flex: 1;
 }
 .masthead-nav {
   display: flex;
@@ -144,7 +139,7 @@ body {
   font-style: italic;
 }
 .nav-guest {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 0.75rem;
 }
@@ -199,7 +194,19 @@ body {
 /* ── HERO ── */
 .hero {
   padding-top: 1rem;
-  background: var(--paper);
+  background-color: var(--paper);
+  background-image: url('/imagens/prateleira.png');
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(249, 246, 240, 0.82);
+  pointer-events: none;
 }
 .hero-banner {
   text-align: center;
@@ -635,10 +642,26 @@ body {
 
 /* ── COMO FUNCIONA ── */
 .how-section {
-  padding: 5rem 5vw;
-  background: var(--cream);
+  padding: 1.67rem 5vw 5rem;
+  background-color: var(--cream);
+  background-image: url('/imagens/prateleira.png');
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.how-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(237, 232, 223, 0.82);
+  pointer-events: none;
+}
+.how-section > * {
+  position: relative;
+  z-index: 1;
 }
 .how-inner {
   max-width: 1100px;
@@ -957,7 +980,7 @@ body {
 
 /* ── FOOTER ── */
 footer {
-  background: var(--ink);
+  background: #000;
   color: rgba(249, 246, 240, 0.35);
   padding: 2.5rem 5vw;
   text-align: center;
