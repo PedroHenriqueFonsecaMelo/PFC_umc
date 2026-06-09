@@ -666,38 +666,43 @@ body {
   z-index: 1;
 }
 .how-inner {
-  max-width: 1100px;
+  max-width: 1210px;
   margin: 0 auto;
 }
 .how-steps {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1cm;
+  overflow: visible;
 }
 .how-step {
-  padding: 1.25rem 1.25rem;
+  padding: 1.57rem 1.57rem;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: var(--paper);
+  background: rgba(0, 0, 0, 0.8);
   text-align: center;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+  position: relative;
 }
 .how-step:hover {
-  transform: scale(1.04);
-  box-shadow: 0 8px 28px rgba(44, 36, 27, 0.12);
+  transform: scale(1.2);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55), 0 0 0 2px rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  z-index: 2;
 }
 .how-step-num {
   font-family: var(--serif);
   font-size: 3.5rem;
   font-weight: 700;
-  color: rgba(44, 36, 27, 0.08);
+  color: rgba(255, 255, 255, 0.2);
   line-height: 1;
   margin-bottom: 1rem;
 }
 .how-step-img {
   width: 100%;
-  max-height: 160px;
+  height: 200px;
   object-fit: cover;
+  object-position: center;
   display: block;
   border-radius: 8px;
   margin-bottom: 1.25rem;
@@ -707,12 +712,13 @@ body {
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
   font-weight: 700;
+  color: #fff;
 }
 .how-step p {
   font-family: var(--fell);
   font-style: italic;
   font-size: 0.9rem;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.8);
   line-height: 1.7;
 }
 
