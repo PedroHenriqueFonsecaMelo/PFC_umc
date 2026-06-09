@@ -1,4 +1,4 @@
-package umc.exs.controller_api.unitary.interaction;
+package umc.exs.controller_api.integration;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;

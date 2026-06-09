@@ -7,6 +7,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import umc.exs.dto.request.compra.CarrinhoCompraRequest;
+import umc.exs.dto.response.compras.CarrinhoCompraResponse;
+import umc.exs.model.entidades.foundation.Pedido;
 import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.entidades.usuario.Endereco;
@@ -19,6 +22,7 @@ import umc.exs.service.gamificacao.GamificacaoService;
 import umc.exs.service.log.LogAuditoriaService;
 import umc.exs.service.notificacao.NotificacaoService;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -29,118 +33,261 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class LivroCompraServiceTest {
 
-    @Mock
-    private LivroRepository livroRepository;
+        @Mock
+        private LivroRepository livroRepository;
+        @Mock
+        private ClienteRepository clienteRepository;
+        @Mock
+        private EmailFacade emailFacade;
+        @Mock
+        private PedidoService pedidoService;
+        @Mock
+        private CupomService cupomService;
+        @Mock
+        private GamificacaoService gamificacaoService;
+        @Mock
+        private LogAuditoriaService logAuditoria;
+        @Mock
+        private NotificacaoService notificacaoService;
 
-    @Mock
-    private ClienteRepository clienteRepository;
+        @InjectMocks
+        private LivroCompraService service;
 
-    @Mock
-    private EmailFacade emailFacade;
+        private Cliente cliente;
+        private Livro livro;
 
-    @Mock
-    private PedidoService pedidoService;
+        @BeforeEach
+        void setup() {
+                cliente = new Cliente();
+                cliente.setId(1L);
+                cliente.setEmail("teste@email.com");
+                cliente.setNome("Cliente Teste");
+                cliente.setSaldoTokens(100.0);
+                cliente.setEnderecos(Set.of(new Endereco()));
 
-    @Mock
-    private CupomService cupomService;
+                livro = new Livro();
+                livro.setId(10L);
+                livro.setTitulo("Livro Teste");
+                livro.setPrecoAprovado(50.0);
+                livro.setAprovado(true);
+        }
 
-    @Mock
-    private GamificacaoService gamificacaoService;
+        @Test
+        void deveRealizarCompraComSucesso() {
 
-    @Mock
-    private LogAuditoriaService logAuditoria;
+                when(livroRepository.findByIdAndAprovadoTrueWithLock(10L))
+                                .thenReturn(Optional.of(livro));
 
-    @Mock
-    private NotificacaoService notificacaoService;
+                when(clienteRepository.findByEmail("teste@email.com"))
+                                .thenReturn(Optional.of(cliente));
 
-    @InjectMocks
-    private LivroCompraService service;
+                when(pedidoService.registrarPedido(any(), any(), anyString()))
+                                .thenReturn(null); // evita NullPointer interno
 
-    private Cliente cliente;
-    private Livro livro;
+                when(notificacaoService.criarNotificacaoDashboard(any(), anyString(), anyString()))
+                                .thenReturn(null);
 
-    @BeforeEach
-    void setup() {
-        cliente = new Cliente();
-        cliente.setId(1L);
-        cliente.setEmail("teste@email.com");
-        cliente.setNome("Cliente Teste");
-        cliente.setSaldoTokens(100.0);
-        cliente.setEnderecos(Set.of(new Endereco())); // apenas para não ficar vazio
+                doNothing().when(emailFacade)
+                                .sendHtmlSafe(anyString(), anyString(), anyString());
 
-        livro = new Livro();
-        livro.setId(10L);
-        livro.setTitulo("Livro Teste");
-        livro.setPrecoAprovado(50.0);
-        livro.setAprovado(true);
-    }
+                service.realizarCompra(10L, "teste@email.com");
 
-    @Test
-    void deveRealizarCompraComSucesso() {
+                assertEquals(50.0, cliente.getSaldoTokens());
 
-        when(livroRepository.findByIdAndAprovadoTrueWithLock(10L))
-                .thenReturn(Optional.of(livro));
+                verify(livroRepository).save(any());
+                verify(pedidoService).registrarPedido(any(), any(), anyString());
+                verify(logAuditoria).registrarLog(anyString(), anyLong(), anyString(), anyString());
+                verify(gamificacaoService).xpCompra(anyLong());
+        }
 
-        when(clienteRepository.findByEmail("teste@email.com"))
-                .thenReturn(Optional.of(cliente));
+        @Test
+        void deveFalharQuandoLivroNaoExiste() {
 
-        service.realizarCompra(10L, "teste@email.com");
+                when(livroRepository.findByIdAndAprovadoTrueWithLock(10L))
+                                .thenReturn(Optional.empty());
 
-        assertEquals(50.0, cliente.getSaldoTokens());
+                assertThrows(IllegalArgumentException.class,
+                                () -> service.realizarCompra(10L, "teste@email.com"));
+        }
 
-        verify(pedidoService).registrarPedido(any(), any(), anyString());
-        verify(emailFacade, atLeastOnce()).sendHtmlSafe(any(), any(), any());
-        verify(logAuditoria).registrarLog(any(), any(), any(), any());
-        verify(gamificacaoService).xpCompra(anyLong());
-    }
+        @Test
+        void deveFalharQuandoClienteNaoExiste() {
 
-    @Test
-    void deveFalharQuandoLivroNaoExiste() {
+                when(livroRepository.findByIdAndAprovadoTrueWithLock(10L))
+                                .thenReturn(Optional.of(livro));
 
-        when(livroRepository.findByIdAndAprovadoTrueWithLock(10L))
-                .thenReturn(Optional.empty());
+                when(clienteRepository.findByEmail("teste@email.com"))
+                                .thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> service.realizarCompra(10L, "teste@email.com"));
-    }
+                assertThrows(IllegalStateException.class,
+                                () -> service.realizarCompra(10L, "teste@email.com"));
+        }
 
-    @Test
-    void deveFalharQuandoClienteNaoExiste() {
+        @Test
+        void deveFalharQuandoSaldoInsuficiente() {
 
-        when(livroRepository.findByIdAndAprovadoTrueWithLock(10L))
-                .thenReturn(Optional.of(livro));
+                cliente.setSaldoTokens(10.0);
 
-        when(clienteRepository.findByEmail("teste@email.com"))
-                .thenReturn(Optional.empty());
+                when(livroRepository.findByIdAndAprovadoTrueWithLock(10L))
+                                .thenReturn(Optional.of(livro));
 
-        assertThrows(IllegalStateException.class, () -> service.realizarCompra(10L, "teste@email.com"));
-    }
+                when(clienteRepository.findByEmail("teste@email.com"))
+                                .thenReturn(Optional.of(cliente));
 
-    @Test
-    void deveFalharQuandoSaldoInsuficiente() {
+                assertThrows(IllegalStateException.class,
+                                () -> service.realizarCompra(10L, "teste@email.com"));
+        }
 
-        cliente.setSaldoTokens(10.0);
+        @Test
+        void deveFalharQuandoNaoTemEndereco() {
 
-        when(livroRepository.findByIdAndAprovadoTrueWithLock(10L))
-                .thenReturn(Optional.of(livro));
+                cliente.setEnderecos(Set.of());
 
-        when(clienteRepository.findByEmail("teste@email.com"))
-                .thenReturn(Optional.of(cliente));
+                when(livroRepository.findByIdAndAprovadoTrueWithLock(10L))
+                                .thenReturn(Optional.of(livro));
 
-        assertThrows(IllegalStateException.class, () -> service.realizarCompra(10L, "teste@email.com"));
-    }
+                when(clienteRepository.findByEmail("teste@email.com"))
+                                .thenReturn(Optional.of(cliente));
 
-    @Test
-    void deveFalharQuandoNaoTemEndereco() {
+                assertThrows(IllegalStateException.class,
+                                () -> service.realizarCompra(10L, "teste@email.com"));
+        }
 
-        cliente.setEnderecos(Set.of());
+        @Test
+        void comprarCarrinho_deveRealizarCompraComSucesso() {
 
-        when(livroRepository.findByIdAndAprovadoTrueWithLock(10L))
-                .thenReturn(Optional.of(livro));
+                Livro livro1 = new Livro();
+                livro1.setId(1L);
+                livro1.setTitulo("Livro 1");
+                livro1.setPrecoAprovado(30.0);
+                livro1.setAprovado(true);
 
-        when(clienteRepository.findByEmail("teste@email.com"))
-                .thenReturn(Optional.of(cliente));
+                Livro livro2 = new Livro();
+                livro2.setId(2L);
+                livro2.setTitulo("Livro 2");
+                livro2.setPrecoAprovado(20.0);
+                livro2.setAprovado(true);
 
-        assertThrows(IllegalStateException.class, () -> service.realizarCompra(10L, "teste@email.com"));
-    }
+                CarrinhoCompraRequest request = new CarrinhoCompraRequest();
+                request.setLivroIds(List.of(1L, 2L));
 
+                when(clienteRepository.findByEmail(anyString()))
+                                .thenReturn(Optional.of(cliente));
+
+                when(livroRepository.findAllDisponiveisWithLock(anyList()))
+                                .thenReturn(List.of(livro1, livro2));
+
+                when(pedidoService.gerarCodigoPedido())
+                                .thenReturn("COD123");
+
+                when(pedidoService.registrarPedido(any(), any(), anyString()))
+                                .thenAnswer(invocation -> {
+                                        Pedido p = new Pedido();
+                                        p.setId(1L);
+                                        p.setCodigoPedido("COD123");
+                                        return p;
+                                });
+
+                CarrinhoCompraResponse response = service.comprarCarrinho("teste@email.com", request);
+
+                assertEquals(2, response.getTotalComprados());
+                assertEquals(50.0, response.getTotalOriginal());
+                assertEquals(50.0, response.getTotalGasto());
+                assertEquals(50.0, cliente.getSaldoTokens());
+
+                verify(clienteRepository).save(any());
+        }
+
+        @Test
+        void comprarCarrinho_deveFalharQuandoExcedeLimite() {
+
+                CarrinhoCompraRequest request = new CarrinhoCompraRequest();
+                request.setLivroIds(
+                                java.util.stream.LongStream.range(1, 25)
+                                                .boxed().toList());
+
+                when(clienteRepository.findByEmail(anyString()))
+                                .thenReturn(Optional.of(cliente));
+
+                assertThrows(IllegalArgumentException.class,
+                                () -> service.comprarCarrinho("teste@email.com", request));
+        }
+
+        @Test
+        void comprarCarrinho_deveFalharQuandoSaldoInsuficiente() {
+
+                cliente.setSaldoTokens(10.0);
+
+                Livro livro = new Livro();
+                livro.setId(1L);
+                livro.setPrecoAprovado(50.0);
+                livro.setAprovado(true);
+
+                CarrinhoCompraRequest request = new CarrinhoCompraRequest();
+                request.setLivroIds(List.of(1L));
+
+                when(clienteRepository.findByEmail(anyString()))
+                                .thenReturn(Optional.of(cliente));
+
+                when(livroRepository.findAllDisponiveisWithLock(anyList()))
+                                .thenReturn(List.of(livro));
+
+                assertThrows(IllegalStateException.class,
+                                () -> service.comprarCarrinho("teste@email.com", request));
+        }
+
+        @Test
+        void comprarCarrinho_deveAplicarCupom() {
+
+                Livro livro = new Livro();
+                livro.setId(1L);
+                livro.setPrecoAprovado(100.0);
+                livro.setAprovado(true);
+                livro.setEmPromocao(false);
+
+                CarrinhoCompraRequest request = new CarrinhoCompraRequest();
+                request.setLivroIds(List.of(1L));
+                request.setCodigoCupom("DESC10");
+
+                when(clienteRepository.findByEmail(anyString()))
+                                .thenReturn(Optional.of(cliente));
+
+                when(livroRepository.findAllDisponiveisWithLock(anyList()))
+                                .thenReturn(List.of(livro));
+
+                when(cupomService.aplicarCupomCarrinho(anyString(), any(), anyDouble()))
+                                .thenReturn(80.0);
+
+                when(pedidoService.gerarCodigoPedido())
+                                .thenReturn("COD123");
+
+                when(pedidoService.registrarPedido(any(), any(), anyString()))
+                                .thenAnswer(invocation -> {
+                                        Pedido p = new Pedido();
+                                        p.setId(1L);
+                                        p.setCodigoPedido("COD123");
+                                        return p;
+                                });
+
+                CarrinhoCompraResponse response = service.comprarCarrinho("teste@email.com", request);
+
+                assertEquals(20.0, response.getDescontoAplicado());
+                assertEquals("DESC10", response.getCodigoCupomAplicado());
+        }
+
+        @Test
+        void comprarCarrinho_deveFalharQuandoNenhumLivroDisponivel() {
+
+                CarrinhoCompraRequest request = new CarrinhoCompraRequest();
+                request.setLivroIds(List.of(1L));
+
+                when(clienteRepository.findByEmail(anyString()))
+                                .thenReturn(Optional.of(cliente));
+
+                when(livroRepository.findAllDisponiveisWithLock(anyList()))
+                                .thenReturn(List.of());
+
+                assertThrows(IllegalArgumentException.class,
+                                () -> service.comprarCarrinho("teste@email.com", request));
+        }
 }

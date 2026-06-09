@@ -36,7 +36,7 @@ public class VendaResponse {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class resumo {
+    public static class Resumo {
 
         private Long id;
         private String titulo;

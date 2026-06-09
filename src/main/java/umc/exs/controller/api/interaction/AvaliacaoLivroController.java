@@ -135,7 +135,8 @@ public class AvaliacaoLivroController {
             Authentication auth) {
 
         if (auth == null || !auth.isAuthenticated()) {
-            return ResponseEntity.status(401).body(Map.of(ERRO, "Você precisa estar logado."));
+            return ResponseEntity.status(401).body(
+                    Map.of("erro", "Você precisa estar logado."));
         }
 
         Cliente leitor = clienteRepo.findByEmail(auth.getName())
@@ -159,10 +160,12 @@ public class AvaliacaoLivroController {
 
         AvaliacaoLivro salva = avaliacaoRepo.save(nova);
 
-        return ResponseEntity.ok(Map.of(
-                MESSAGE, "Salvo com sucesso!",
-                "id", salva.getId()));
-            }
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Salvo com sucesso!");
+        response.put("id", salva.getId());
+
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/livro/{isbn}/media")
     public ResponseEntity<Map<String, Object>> buscarMedia(@PathVariable("isbn") String isbn) {

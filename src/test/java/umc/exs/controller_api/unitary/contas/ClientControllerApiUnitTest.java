@@ -99,7 +99,7 @@ class ClientControllerApiUnitTest {
 
     @Test
     void listarMinhasVendas_SemAuthRetorna401() {
-        ResponseEntity<List<VendaResponse.resumo>> resp = controller.listarMinhasVendas(null);
+        ResponseEntity<List<VendaResponse.Resumo>> resp = controller.listarMinhasVendas(null);
         assertEquals(HttpStatus.UNAUTHORIZED, resp.getStatusCode());
     }
 

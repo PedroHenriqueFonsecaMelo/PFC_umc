@@ -45,7 +45,7 @@ class MinhasVendasServiceTest {
 
         when(livroRepository.findAllByVendedorEmail("user@test.com")).thenReturn(List.of(livro));
 
-        List<VendaResponse.resumo> vendas = service.listarMinhasVendas("user@test.com");
+        List<VendaResponse.Resumo> vendas = service.listarMinhasVendas("user@test.com");
 
         assertEquals(1, vendas.size());
         assertEquals("Livro", vendas.get(0).getTitulo());

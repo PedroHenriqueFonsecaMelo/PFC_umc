@@ -192,11 +192,11 @@ public class ClientControllerApi {
      * anúncios.
      */
     @GetMapping("/minhas-vendas")
-    public ResponseEntity<List<VendaResponse.resumo>> listarMinhasVendas(
+    public ResponseEntity<List<VendaResponse.Resumo>> listarMinhasVendas(
             @AuthenticationPrincipal UserDetails user) {
         if (user == null)
             return ResponseEntity.status(401).build();
-        List<VendaResponse.resumo> vendas = minhasVendasService.listarMinhasVendas(user.getUsername());
+        List<VendaResponse.Resumo> vendas = minhasVendasService.listarMinhasVendas(user.getUsername());
         return ResponseEntity.ok(vendas);
     }
 

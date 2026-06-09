@@ -23,7 +23,6 @@ import java.util.Objects;
 
 import umc.exs.dto.mapper.CupomMapper;
 import umc.exs.dto.mapper.LivroMapper;
-import umc.exs.model.entidades.logic.Reporte;
 import umc.exs.model.entidades.logic.ReporteResposta;
 import umc.exs.repository.logic.ReporteRepository;
 import umc.exs.repository.logic.ReporteRespostaRepository;

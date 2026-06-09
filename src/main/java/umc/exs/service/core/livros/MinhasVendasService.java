@@ -29,7 +29,7 @@ public class MinhasVendasService {
     private final ObjectMapper objectMapper;
 
     /** Lista todos os livros anunciados pelo cliente autenticado. */
-    public List<VendaResponse.resumo> listarMinhasVendas(String email) {
+    public List<VendaResponse.Resumo> listarMinhasVendas(String email) {
         List<Livro> livros = livroRepository.findAllByVendedorEmail(email);
         log.info("[MinhasVendas] email={} → {} livro(s) encontrado(s)", email, livros.size());
         return livros.stream()
@@ -75,10 +75,10 @@ public class MinhasVendasService {
 
     // ── helpers ──────────────────────────────────────────────────
 
-    private VendaResponse.resumo toMinhaVendaDTO(Livro livro) {
+    private VendaResponse.Resumo toMinhaVendaDTO(Livro livro) {
         List<String> fotos = parseFotos(livro.getFotosUrls());
         String primeiraFoto = fotos.isEmpty() ? null : fotos.get(0);
-        return new VendaResponse.resumo(
+        return new VendaResponse.Resumo(
                 livro.getId(),
                 livro.getTitulo(),
                 livro.getAutor(),
