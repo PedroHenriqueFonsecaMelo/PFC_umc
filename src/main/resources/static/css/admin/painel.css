@@ -1076,7 +1076,7 @@ input[type="text"].search-input.pedidos-search {
   letter-spacing: 0.07em;
   text-transform: uppercase;
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: 8px;
   transition: border-color 0.18s, color 0.18s;
 }
 

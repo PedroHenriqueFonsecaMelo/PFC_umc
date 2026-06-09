@@ -240,9 +240,7 @@ function renderLivros() {
 
   let html = `
     <div class="audit-topbar">
-      <button class="btn-voltar-lotes" onclick="loadLotes()">
-        <i class="fa-solid fa-arrow-left"></i> Voltar aos Lotes
-      </button>
+      <button class="btn-voltar-lotes" onclick="loadLotes()">Voltar</button>
       <h3 class="audit-title">
         Auditoria do Lote
         <span class="audit-count">${restantes} livro(s) pendente(s)</span>

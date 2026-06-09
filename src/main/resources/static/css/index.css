@@ -105,6 +105,8 @@ body {
   align-items: center;
   justify-content: center;
   padding: 0.45rem 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.35);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
 }
 .masthead-nav a {
   font-size: 0.7rem;
@@ -415,7 +417,7 @@ body {
 
 /* ── STATS ── */
 .stats-bar {
-  background: var(--ink);
+  background: #000;
   color: var(--paper);
   display: flex;
   justify-content: center;
@@ -799,7 +801,7 @@ body {
 /* ── RANKING ── */
 .ranking-section {
   padding: 5rem 5vw;
-  background: var(--ink);
+  background: #000;
   color: var(--paper);
 }
 .ranking-inner {

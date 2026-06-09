@@ -33,19 +33,6 @@
           </div>
         </header>
 
-        <!-- BREADCRUMB DE LOTE (visível quando auditoria de lote está aberta) -->
-        <div id="breadcrumb-lote" class="breadcrumb-wrap" style="display: none">
-          <nav class="breadcrumb-nav">
-            <a href="/admin/painel">Painel Admin</a>
-            <span class="breadcrumb-sep">›</span>
-            <a href="#" onclick="loadLotes(); return false;">Lotes Pendentes</a>
-            <span class="breadcrumb-sep">›</span>
-            <span class="breadcrumb-current" id="bcrLoteNumero">Lote</span>
-          </nav>
-          <button onclick="loadLotes()" class="btn-voltar">
-            ← Voltar para Lotes
-          </button>
-        </div>
 
         <div class="main">
           <div>
@@ -182,13 +169,19 @@
                     ></textarea>
                   </div>
                   <div style="margin-bottom: 1.25rem">
-                    <label>Imagem (opcional)</label>
+                    <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.4rem">
+                      <label for="blogImagem" class="btn-publicar" style="cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem">
+                        <i class="fa-solid fa-image"></i> Escolher arquivo
+                      </label>
+                      <span id="blogImagemNome" style="font-size:0.8rem;color:#7a6e65;font-style:italic">Nenhum arquivo selecionado</span>
+                    </div>
                     <input
                       type="file"
                       id="blogImagem"
                       name="imagem"
                       accept="image/*"
-                      style="font-size: 0.875rem; color: #7a6e65"
+                      style="display:none"
+                      onchange="document.getElementById('blogImagemNome').textContent = this.files[0]?.name || 'Nenhum arquivo selecionado'"
                     />
                     <div id="blogImgPreview" style="margin-top: 0.5rem"></div>
                   </div>
