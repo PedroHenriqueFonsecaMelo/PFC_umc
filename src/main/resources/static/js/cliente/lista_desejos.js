@@ -1,14 +1,16 @@
 /* ================================================================
-   lista_desejos.js — Lista de Desejos · Bibliotroca
+   lista_desejos.js — Lista de Desejos Híbrida · Bibliotroca
    ================================================================ */
 
 const authHeaders = { "Content-Type": "application/json" };
 
-let isbnsSalvos = new Set();
+// Guarda IDs salvos (pode ser Google ID ou OpenLibrary Work ID)
+let idsSalvos = new Set();
 const metaCache = {};
 
 function mostrarToast(msg, tipo) {
     const t = document.getElementById("toast");
+    if (!t) return;
     t.textContent = msg;
     t.className = "show " + tipo;
     setTimeout(() => {
@@ -42,7 +44,7 @@ function fmtData(iso) {
     });
 }
 
-function capaUrl(isbn) {
+function capaUrlOpenLibrary(isbn) {
     if (!isbn) return null;
     const isbn13 = isbn.replace(/[^0-9X]/g, "");
     if (isbn13.length === 10 || isbn13.length === 13) {
@@ -51,43 +53,8 @@ function capaUrl(isbn) {
     return null;
 }
 
-async function buscarLivros() {
-    const input = document.getElementById("inputBusca");
-    const query = input.value.trim();
-    if (!query) {
-        input.focus();
-        return;
-    }
-
-    const btn = document.getElementById("btnBuscar");
-    const container = document.getElementById("resultadosBusca");
-
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Buscando...';
-    container.innerHTML = "";
-
-    try {
-        const items = await buscarOpenLibrary(query);
-
-        if (!items || items.length === 0) {
-            container.innerHTML =
-                '<p class="search-hint">Nenhum resultado encontrado para "' +
-                escHtml(query) + '".</p>';
-            return;
-        }
-
-        container.innerHTML = items.map(buildResultadoItem).join("");
-    } catch (e) {
-        container.innerHTML =
-            '<p class="search-error"><i class="fa-solid fa-triangle-exclamation"></i> Erro ao buscar. Verifique a conexão e tente novamente.</p>';
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-search"></i> Buscar';
-    }
-}
-
-// Prefere ISBN de edição BR (97885) ou PT (978972), senão qualquer ISBN-13 ou ISBN-10
 function escolherMelhorIsbn(isbns) {
+    if (!isbns || isbns.length === 0) return null;
     const norm = isbns.map((i) => i.replace(/[^0-9X]/gi, ""));
     return norm.find((i) => i.startsWith("97885")) ||
         norm.find((i) => i.startsWith("978972")) ||
@@ -96,7 +63,6 @@ function escolherMelhorIsbn(isbns) {
         norm[0];
 }
 
-// Busca título/autor da edição exata via Books API — igual ao venda_livro.js
 async function buscarTituloPorIsbn(isbn) {
     try {
         const res = await fetch(
@@ -116,32 +82,32 @@ async function buscarTituloPorIsbn(isbn) {
     }
 }
 
+/* ================================================================
+   MOTORES DE BUSCA (OpenLibrary & Google Books)
+   ================================================================ */
+
 async function buscarOpenLibrary(query) {
     try {
         const url = "https://openlibrary.org/search.json?title=" +
             encodeURIComponent(query) +
-            "&limit=10&fields=title,author_name,isbn,cover_i";
+            "&limit=10&fields=title,author_name,isbn,cover_i,key";
         const res = await fetch(url);
         if (!res.ok) return null;
         const data = await res.json();
 
-        const docs = (data.docs || [])
-            .filter((d) => d.isbn && d.isbn.length > 0)
-            .slice(0, 8);
+        const docs = (data.docs || []).slice(0, 8);
 
-        // Busca título da edição correta em paralelo para todos os resultados
-        const items = await Promise.all(docs.map(async (doc) => {
+        return await Promise.all(docs.map(async (doc) => {
             const isbn = escolherMelhorIsbn(doc.isbn || []);
-            if (!isbn) return null;
-
-            const edicao = await buscarTituloPorIsbn(isbn);
-
+            const edicao = isbn ? await buscarTituloPorIsbn(isbn) : null;
             const capa = doc.cover_i
                 ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`
-                : capaUrl(isbn);
+                : capaUrlOpenLibrary(isbn);
 
             return {
-                isbn,
+                googleBookId: "",
+                openLibraryWorkId: doc.key, // Ex: /works/OL12345W
+                isbn: isbn || "",
                 titulo: (edicao && edicao.titulo) || doc.title || "Sem título",
                 autores: (edicao && edicao.autores) ||
                     (doc.author_name
@@ -150,15 +116,97 @@ async function buscarOpenLibrary(query) {
                 capa,
             };
         }));
-
-        return items.filter(Boolean);
     } catch (_) {
         return null;
     }
 }
 
+async function buscarGoogleBooks(query) {
+    try {
+        const url = `https://www.googleapis.com/books/v1/volumes?q=${
+            encodeURIComponent(query)
+        }&maxResults=8`;
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const data = await res.json();
+
+        if (!data.items) return [];
+
+        return data.items.map((item) => {
+            const info = item.volumeInfo;
+            const iden = info.industryIdentifiers || [];
+            const isbn13 = iden.find((id) => id.type === "ISBN_13")?.identifier;
+            const isbn10 = iden.find((id) => id.type === "ISBN_10")?.identifier;
+
+            return {
+                googleBookId: item.id,
+                openLibraryWorkId: "",
+                isbn: isbn13 || isbn10 || "",
+                titulo: info.title || "Sem título",
+                autores: info.authors
+                    ? info.authors.slice(0, 2).join(", ")
+                    : "Autor desconhecido",
+                capa: info.imageLinks?.thumbnail ||
+                    info.imageLinks?.smallThumbnail || null,
+            };
+        });
+    } catch (_) {
+        return null;
+    }
+}
+
+// Orquestrador do Input de Busca
+async function buscarLivros() {
+    const input = document.getElementById("inputBusca");
+    const query = input.value.trim();
+    if (!query) {
+        input.focus();
+        return;
+    }
+
+    const btn = document.getElementById("btnBuscar");
+    const container = document.getElementById("resultadosBusca");
+
+    // Tenta ler um select no HTML (se houver), senão padroniza para o googlebooks
+    const selectProvedor = document.getElementById("selectProvedor");
+    const provedor = selectProvedor ? selectProvedor.value : "google";
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Buscando...';
+    container.innerHTML = "";
+
+    try {
+        const items = (provedor === "openlibrary")
+            ? await buscarOpenLibrary(query)
+            : await buscarGoogleBooks(query);
+
+        if (!items || items.length === 0) {
+            container.innerHTML =
+                `<p class="search-hint">Nenhum resultado encontrado para "${
+                    escHtml(query)
+                }" no provedor selecionado.</p>`;
+            return;
+        }
+
+        container.innerHTML = items.filter(Boolean).map(buildResultadoItem)
+            .join("");
+    } catch (e) {
+        container.innerHTML =
+            '<p class="search-error"><i class="fa-solid fa-triangle-exclamation"></i> Erro ao buscar. Verifique a conexão.</p>';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-search"></i> Buscar';
+    }
+}
+
+/* ================================================================
+   RENDERIZAÇÃO E ACTIONS
+   ================================================================ */
+
 function buildResultadoItem(item) {
-    const { isbn: isbnEscolhido, titulo, autores, capa } = item;
+    const { googleBookId, openLibraryWorkId, isbn, titulo, autores, capa } =
+        item;
+    const idUnicoFront = googleBookId || openLibraryWorkId;
 
     const imgHtml = capa
         ? `<img class="resultado-capa" src="${capa}" alt="Capa" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
@@ -167,41 +215,70 @@ function buildResultadoItem(item) {
         capa ? "display:none" : ""
     }">📚</div>`;
 
-    const jaAdicionado = isbnsSalvos.has(isbnEscolhido);
+    // 1. Gera as chaves textuais idênticas às que colocamos na leitura da lista salva
+    const isbnChave = isbn ? "ISBN:" + String(isbn).trim() : null;
+    const textoChave = "TEXTO:" + String(titulo).toLowerCase().trim() +
+        (autores ? "_" + String(autores).toLowerCase().trim() : "");
+
+    // 2. Procura por QUALQUER um dos critérios dentro do Set de idsSalvos
+    const jaAdicionado = idsSalvos.has(idUnicoFront) ||
+        (isbnChave && idsSalvos.has(isbnChave)) ||
+        idsSalvos.has(textoChave);
+
+    // 3. Monta o botão baseado no estado real de duplicidade
     const btnHtml = jaAdicionado
         ? `<span class="btn-ja-adicionado"><i class="fa-solid fa-check"></i> Salvo</span>`
         : `<button class="btn-adicionar"
-               data-isbn="${escHtml(isbnEscolhido)}"
+               data-googleid="${escHtml(googleBookId)}"
+               data-workid="${escHtml(openLibraryWorkId)}"
+               data-isbn="${escHtml(isbn)}"
                data-titulo="${escHtml(titulo)}"
                data-autores="${escHtml(autores)}"
-               onclick="adicionarDesejo(this.dataset.isbn, this.dataset.titulo, this.dataset.autores, this)">
+               onclick="adicionarDesejo(this.dataset.googleid, this.dataset.workid, this.dataset.isbn, this.dataset.titulo, this.dataset.autores, this)">
              <i class="fa-solid fa-heart"></i> Salvar
            </button>`;
 
     return `
-        <div class="resultado-item" id="res-${escHtml(isbnEscolhido)}">
+        <div class="resultado-item" id="res-${
+        escHtml(idUnicoFront).replace(/\//g, "-")
+    }">
             ${imgHtml}${placeholderHtml}
             <div class="resultado-info">
                 <div class="resultado-titulo">${escHtml(titulo)}</div>
                 <div class="resultado-autor">${escHtml(autores)}</div>
                 <div class="resultado-isbn">ISBN: <span>${
-        escHtml(isbnEscolhido)
+        isbn ? escHtml(isbn) : "Não disponível"
     }</span></div>
             </div>
             ${btnHtml}
         </div>`;
 }
 
-async function adicionarDesejo(isbn, titulo, autor, btn) {
+async function adicionarDesejo(
+    googleBookId,
+    openLibraryWorkId,
+    isbn,
+    titulo,
+    autor,
+    btn,
+) {
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+    const idUnico = googleBookId || openLibraryWorkId;
 
     try {
         const res = await fetch("/api/lista-desejos", {
             method: "POST",
             headers: authHeaders,
             credentials: "include",
-            body: JSON.stringify({ isbn }),
+            body: JSON.stringify({
+                googleBookId: googleBookId || null,
+                openLibraryWorkId: openLibraryWorkId || null,
+                isbn: isbn || null,
+                titulo,
+                autor,
+            }),
         });
 
         if (res.status === 401) {
@@ -214,8 +291,15 @@ async function adicionarDesejo(isbn, titulo, autor, btn) {
             throw new Error(txt || "Erro ao adicionar");
         }
 
-        metaCache[isbn] = { titulo, autor };
-        isbnsSalvos.add(isbn);
+        metaCache[idUnico] = {
+            titulo,
+            autor,
+            isbn,
+            googleBookId,
+            openLibraryWorkId,
+        };
+        idsSalvos.add(idUnico);
+
         btn.outerHTML =
             `<span class="btn-ja-adicionado"><i class="fa-solid fa-check"></i> Salvo</span>`;
         mostrarToast("Livro adicionado à lista de desejos!", "sucesso");
@@ -227,7 +311,7 @@ async function adicionarDesejo(isbn, titulo, autor, btn) {
     }
 }
 
-async function removerDesejo(id, card) {
+async function removerDesejo(id, card, idUnicoFront) {
     card.style.opacity = "0.5";
     try {
         const res = await fetch("/api/lista-desejos/" + id, {
@@ -243,9 +327,10 @@ async function removerDesejo(id, card) {
 
         card.remove();
         mostrarToast("Livro removido da lista de desejos.", "sucesso");
+
+        if (idUnicoFront) idsSalvos.delete(idUnicoFront);
+
         atualizarBadge();
-        const isbnEl = card.querySelector(".desejo-isbn");
-        if (isbnEl) isbnsSalvos.delete(isbnEl.textContent.trim());
         atualizarBotoesResultados();
     } catch (e) {
         mostrarToast("Erro ao remover. Tente novamente.", "erro");
@@ -255,6 +340,8 @@ async function removerDesejo(id, card) {
 
 async function carregarListaSalva() {
     const container = document.getElementById("wishlistContainer");
+    if (!container) return;
+
     try {
         const res = await fetch("/api/lista-desejos", {
             headers: authHeaders,
@@ -267,9 +354,19 @@ async function carregarListaSalva() {
         if (!res.ok) throw new Error("Falha na API");
 
         const lista = await res.json();
+        idsSalvos.clear();
 
-        isbnsSalvos.clear();
-        lista.forEach((d) => isbnsSalvos.add(d.isbn));
+        lista.forEach((d) => {
+            const id = d.googleBookId || d.openLibraryWorkId;
+            if (id) idsSalvos.add(id);
+
+            if (d.isbn) idsSalvos.add("ISBN:" + d.isbn.trim());
+            if (d.titulo) {
+                const chaveTexto = "TEXTO:" + d.titulo.toLowerCase().trim() +
+                    (d.autor ? "_" + d.autor.toLowerCase().trim() : "");
+                idsSalvos.add(chaveTexto);
+            }
+        });
 
         if (lista.length === 0) {
             container.innerHTML = `
@@ -283,10 +380,9 @@ async function carregarListaSalva() {
 
         container.innerHTML =
             `<div class="skeleton"></div><div class="skeleton"></div>`;
-        const itensComMeta = await Promise.all(
-            lista.map((d) => enriquecerDesejo(d)),
-        );
-        container.innerHTML = itensComMeta.map(buildDesejoCard).join("");
+
+        // Mapeia os itens vindo do seu próprio banco de dados
+        container.innerHTML = lista.map(buildDesejoCard).join("");
         atualizarBadge(lista.length);
     } catch (e) {
         container.innerHTML =
@@ -294,31 +390,25 @@ async function carregarListaSalva() {
     }
 }
 
-async function enriquecerDesejo(desejo) {
-    if (metaCache[desejo.isbn]) {
-        return { ...desejo, ...metaCache[desejo.isbn] };
-    }
-    const edicao = await buscarTituloPorIsbn(desejo.isbn);
-    if (edicao && (edicao.titulo || edicao.autores)) {
-        const meta = { titulo: edicao.titulo, autor: edicao.autores };
-        metaCache[desejo.isbn] = meta;
-        return { ...desejo, ...meta };
-    }
-    return desejo;
-}
-
 function buildDesejoCard(d) {
-    const capa = capaUrl(d.isbn);
+    const idUnicoFront = d.googleBookId || d.openLibraryWorkId;
+
+    // Fallback de capas inteligente baseado na origem
+    let capa = null;
+    if (d.isbn) {
+        capa = capaUrlOpenLibrary(d.isbn);
+    }
+
     const imgHtml = capa
-        ? `<img class="desejo-capa" src="${capa}" alt="Capa"
-             onerror="this.src='/img/logo-bibliotroca.png'">`
+        ? `<img class="desejo-capa" src="${capa}" alt="Capa" onerror="this.src='/img/logo-bibliotroca.png'">`
         : `<img src="/img/logo-bibliotroca.png" class="desejo-capa-placeholder" style="object-fit:contain;">`;
 
+    // CORRIGIDO: Removida a duplicidade de declaração const
     const tituloHtml = d.titulo
         ? `<div class="desejo-titulo">${escHtml(d.titulo)}</div>`
-        : `<div class="desejo-titulo" style="color:var(--muted);font-style:italic">Livro ISBN ${
-            escHtml(d.isbn)
-        }</div>`;
+        : `<div class="desejo-titulo" style="color:var(--muted);font-style:italic">Livro Sem Título</div>`;
+
+    // CORRIGIDO: Removida a duplicidade de declaração const
     const autorHtml = d.autor
         ? `<div class="desejo-autor">${escHtml(d.autor)}</div>`
         : "";
@@ -330,13 +420,17 @@ function buildDesejoCard(d) {
                 ${tituloHtml}
                 ${autorHtml}
                 <div class="desejo-meta">
-                    <span class="desejo-isbn">${escHtml(d.isbn)}</span>
+                    <span class="desejo-isbn">${
+        d.isbn ? escHtml(d.isbn) : "Sem ISBN"
+    }</span>
                     <span class="desejo-data"><i class="fa-regular fa-calendar"></i> ${
         fmtData(d.dataAdicao)
     }</span>
                 </div>
             </div>
-            <button class="btn-remover" onclick="removerDesejo(${d.id}, document.getElementById('desejo-${d.id}'))">
+            <button class="btn-remover" onclick="removerDesejo(${d.id}, document.getElementById('desejo-${d.id}'), '${
+        escHtml(idUnicoFront)
+    }')">
                 <i class="fa-solid fa-trash-can"></i> Remover
             </button>
         </div>`;
@@ -344,6 +438,7 @@ function buildDesejoCard(d) {
 
 function atualizarBadge(n) {
     const badge = document.getElementById("badgeTotal");
+    if (!badge) return;
     const total = n !== undefined
         ? n
         : document.querySelectorAll(".desejo-card").length;
@@ -357,34 +452,19 @@ function atualizarBadge(n) {
 
 function atualizarBotoesResultados() {
     document.querySelectorAll(".resultado-item").forEach((item) => {
-        const isbnEl = item.querySelector(".resultado-isbn span");
-        if (!isbnEl) return;
-        const isbn = isbnEl.textContent.trim();
+        const idUnicoFront = item.id.replace("res-", "");
         const btnWrap = item.querySelector(
             ".btn-adicionar, .btn-ja-adicionado",
         );
         if (!btnWrap) return;
 
-        if (isbnsSalvos.has(isbn)) {
-            // Marca como salvo
+        if (
+            idsSalvos.has(idUnicoFront) ||
+            idsSalvos.has("/" + idUnicoFront.replace(/-/g, "/"))
+        ) {
             if (!btnWrap.classList.contains("btn-ja-adicionado")) {
                 btnWrap.outerHTML =
                     `<span class="btn-ja-adicionado"><i class="fa-solid fa-check"></i> Salvo</span>`;
-            }
-        } else {
-            // Volta para botão de salvar
-            if (!btnWrap.classList.contains("btn-adicionar")) {
-                const tituloEl = item.querySelector(".resultado-titulo");
-                const autorEl = item.querySelector(".resultado-autor");
-                const titulo = tituloEl ? tituloEl.textContent.trim() : "";
-                const autores = autorEl ? autorEl.textContent.trim() : "";
-                btnWrap.outerHTML = `<button class="btn-adicionar"
-                    data-isbn="${escHtml(isbn)}"
-                    data-titulo="${escHtml(titulo)}"
-                    data-autores="${escHtml(autores)}"
-                    onclick="adicionarDesejo(this.dataset.isbn, this.dataset.titulo, this.dataset.autores, this)">
-                    <i class="fa-solid fa-heart"></i> Salvar
-                </button>`;
             }
         }
     });
@@ -400,9 +480,13 @@ function escHtml(str) {
         .replace(/'/g, "&#39;");
 }
 
-document.getElementById("inputBusca").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") buscarLivros();
-});
+// Inicializadores
+const inputBusca = document.getElementById("inputBusca");
+if (inputBusca) {
+    inputBusca.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") buscarLivros();
+    });
+}
 
 carregarPerfil();
 carregarListaSalva();

@@ -179,6 +179,14 @@ public class LivroCompraService {
 
         // Debita o total (com desconto) de uma vez
         comprador.setSaldoTokens(saldoAnterior - totalComDesconto);
+        double proporcao = totalComDesconto / totalOriginal;
+
+        comprados = comprados.stream()
+                .map(i -> {
+                    i.setPreco(i.getPreco() * proporcao);
+                    return i;
+                })
+        .toList();
         clienteRepository.save(comprador);
 
         registrarLogECoordenarEmails(comprador, comprados, falhas, saldoAnterior);

@@ -21,7 +21,7 @@ async function carregarSaldo() {
 /* ── Estado global ── */
 let _todosLivros = []; // livros da página atual (até 20 itens)
 let _paginaAtual = 0;
-const _paginaSalva = parseInt(sessionStorage.getItem('vitrine_pagina') || '0');
+const _paginaSalva = parseInt(sessionStorage.getItem("vitrine_pagina") || "0");
 if (!isNaN(_paginaSalva) && _paginaSalva > 0) {
     _paginaAtual = _paginaSalva;
 }
@@ -99,7 +99,7 @@ function toggleFiltroPromo() {
 function togglePromo() {
     modoPromo = !modoPromo;
     _paginaAtual = 0;
-    sessionStorage.removeItem('vitrine_pagina');
+    sessionStorage.removeItem("vitrine_pagina");
     const btn = document.getElementById("btnPromo");
     const titulo = document.getElementById("vitrineTitulo");
 
@@ -116,36 +116,52 @@ function togglePromo() {
 }
 
 /* ── Fallback de capa: OpenLibrary → foto do vendedor → placeholder ── */
+/* ── Fallback de capa: OpenLibrary → foto do vendedor → placeholder ── */
 window.vitrineFallback = function (img) {
     const fallback = img.dataset.fallback;
 
     // Verificar se a imagem do OpenLibrary é o placeholder cinza (< 1kb)
     function checkImageSize() {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        const pixel = ctx.getImageData(
-            Math.floor(img.naturalWidth/2),
-            Math.floor(img.naturalHeight/2),
-            1, 1
-        ).data;
-        // Placeholder cinza do OpenLibrary tem pixel central cinza (R≈200, G≈200, B≈200)
-        const isCinza = pixel[0] > 180 && pixel[1] > 180 && pixel[2] > 180 &&
-                        Math.abs(pixel[0]-pixel[1]) < 15 && Math.abs(pixel[1]-pixel[2]) < 15;
-        if (isCinza) {
-            usarLogo();
+        try {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            const pixel = ctx.getImageData(
+                Math.floor(img.naturalWidth / 2),
+                Math.floor(img.naturalHeight / 2),
+                1,
+                1,
+            ).data;
+
+            // Placeholder cinza do OpenLibrary tem pixel central cinza (R≈200, G≈200, B≈200)
+            const isCinza = pixel[0] > 180 && pixel[1] > 180 &&
+                pixel[2] > 180 &&
+                Math.abs(pixel[0] - pixel[1]) < 15 &&
+                Math.abs(pixel[1] - pixel[2]) < 15;
+            if (isCinza) {
+                usarLogo();
+            }
+        } catch (e) {
+            // Se ainda assim falhar por segurança (CORS), faz o log e não quebra o script
+            console.warn(
+                "Falha ao checar tamanho da imagem por CORS, mantendo original.",
+                e,
+            );
         }
     }
 
     function usarLogo() {
         if (fallback && !img._triedFallback) {
             img._triedFallback = true;
+            // Imagens do próprio servidor não precisam de crossOrigin se estiverem no mesmo domínio
+            img.removeAttribute("crossOrigin");
             img.src = fallback;
             img.onload = checkImageSize;
             img.onerror = usarLogo;
         } else {
+            img.removeAttribute("crossOrigin");
             img.src = "/img/logo-bibliotroca.png";
             img.style.objectFit = "contain";
             img.style.padding = "10px";
@@ -157,6 +173,12 @@ window.vitrineFallback = function (img) {
     if (fallback) {
         delete img.dataset.fallback;
         img.onerror = usarLogo;
+        // Configura CORS antes de alterar o SRC se for da OpenLibrary
+        if (fallback.includes("openlibrary")) {
+            img.crossOrigin = "anonymous";
+        } else {
+            img.removeAttribute("crossOrigin");
+        }
         img.src = fallback;
     } else {
         // Verificar se imagem atual é cinza
@@ -170,14 +192,37 @@ window.vitrineFallback = function (img) {
 };
 
 // Ao carregar cada imagem da vitrine, verificar se é o placeholder cinza
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-        document.querySelectorAll('.book-image img').forEach(function(img) {
-            if (img.complete && img.naturalWidth > 0 && img.src.includes('openlibrary')) {
+document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(function () {
+        document.querySelectorAll(".book-image img").forEach(function (img) {
+            if (img.src.includes("openlibrary")) {
+                // Adiciona a permissão de CORS de forma preventiva
+                img.crossOrigin = "anonymous";
+
+                if (img.complete && img.naturalWidth > 0) {
+                    vitrineFallback(img);
+                } else {
+                    img.addEventListener("load", function () {
+                        vitrineFallback(img);
+                    });
+                }
+            }
+        });
+    }, 1000);
+});
+
+// Ao carregar cada imagem da vitrine, verificar se é o placeholder cinza
+document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(function () {
+        document.querySelectorAll(".book-image img").forEach(function (img) {
+            if (
+                img.complete && img.naturalWidth > 0 &&
+                img.src.includes("openlibrary")
+            ) {
                 vitrineFallback(img);
             } else if (!img.complete) {
-                img.addEventListener('load', function() {
-                    if (img.src.includes('openlibrary')) vitrineFallback(img);
+                img.addEventListener("load", function () {
+                    if (img.src.includes("openlibrary")) vitrineFallback(img);
                 });
             }
         });
@@ -252,11 +297,12 @@ function renderLivros(livros) {
 
         // Lógica de imagem: OpenLibrary → foto do vendedor → placeholder
         let imgTag, phStyle;
+        // Procure por esta linha dentro da função renderLivros(livros):
         if (isbn) {
             const fbAttr = vendorFoto ? `data-fallback="${vendorFoto}"` : "";
             imgTag =
                 `<img src="https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg"
-                            ${fbAttr} onerror="vitrineFallback(this)"
+                            ${fbAttr} crossorigin="anonymous" onerror="vitrineFallback(this)"
                             alt="${livro.titulo}" />`;
             phStyle = "display:none";
         } else if (vendorFoto) {
@@ -297,30 +343,36 @@ function renderLivros(livros) {
     iniciarContadores();
 }
 
-function popularFiltroGeneros(livros) {
-    const generos = [
-        ...new Set(
-            livros
-                .map((l) => l.genero)
-                .filter((g) => g && g.trim()),
-        ),
-    ].sort((a, b) => a.localeCompare(b, "pt-BR"));
+async function carregarTodosGeneros() {
+    try {
+        const res = await fetch("/api/livros/generos");
+        if (!res.ok) throw new Error("Erro na rota de generos");
 
-    const container = document.getElementById("filtroGeneros");
-    if (!container) return;
+        const generos = await res.json();
 
-    if (generos.length === 0) {
-        container.innerHTML =
-            '<span style="font-size:.8rem;color:#9a8a80;font-style:italic;">Nenhum gênero disponível</span>';
-        return;
+        // Se a API respondeu mas retornou um array vazio, aciona o fallback com os livros da tela
+        if (!generos || generos.length === 0) {
+            console.log("API de gêneros vazia, usando fallback local...");
+            popularFiltroGeneros(_todosLivros);
+            return;
+        }
+
+        const container = document.getElementById("filtroGeneros");
+        if (!container) return;
+
+        // CORRIGIDO: Vinculada a função correta onchange="atualizarFiltroGeneros()" para reagir ao clique
+        container.innerHTML = generos.map((g) =>
+            `<label class="filtro-check-item">
+                <input type="checkbox" value="${g}" class="cb-genero" onchange="atualizarFiltroGeneros()"> ${g}
+             </label>`
+        ).join("");
+    } catch (err) {
+        console.warn(
+            "Falha ao carregar gêneros via API, usando fallback local:",
+            err,
+        );
+        popularFiltroGeneros(_todosLivros);
     }
-
-    container.innerHTML = generos.map((g) =>
-        `<label class="filtro-check-item">
-            <input type="checkbox" value="${g}"
-                   onchange="atualizarFiltroGeneros()"> ${g}
-         </label>`
-    ).join("");
 }
 
 function atualizarFiltroGeneros() {
@@ -340,7 +392,7 @@ window.removerChipGenero = function (g) {
 function irParaPagina(p) {
     if (p < 0 || p >= _totalPaginas) return;
     _paginaAtual = p;
-    sessionStorage.setItem('vitrine_pagina', p);
+    sessionStorage.setItem("vitrine_pagina", p);
     carregarLivros();
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -461,14 +513,19 @@ function aplicarFiltros() {
 
 /* ── Lê valores do painel de filtros e aplica ── */
 function lerEAplicarFiltros() {
-    const checks = document.querySelectorAll(
+    // 1. Captura estados físicos
+    const checksEstados = document.querySelectorAll(
         "#filtroEstados input[type=checkbox]:checked",
     );
-    _filtros.estados = Array.from(checks).map((c) => c.value);
+    _filtros.estados = Array.from(checksEstados).map((c) => c.value);
 
-    const genChecks = document.querySelectorAll("#filtroGeneros input:checked");
-    _filtros.generos = Array.from(genChecks).map((c) => c.value);
+    // 2. Captura gêneros (Atualizado para ler do painel)
+    const checksGeneros = document.querySelectorAll(
+        "#filtroGeneros input[type=checkbox]:checked",
+    );
+    _filtros.generos = Array.from(checksGeneros).map((c) => c.value);
 
+    // 3. Preços
     const minVal = document.getElementById("filtroPrecoMin")?.value;
     const maxVal = document.getElementById("filtroPrecoMax")?.value;
     _filtros.precoMin = minVal !== "" && minVal !== null
@@ -478,13 +535,26 @@ function lerEAplicarFiltros() {
         ? parseFloat(maxVal)
         : null;
 
+    // 4. Ordenação
     _filtros.ordem = document.getElementById("filtroOrdem")?.value ||
         "relevancia";
 
+    // Reseta para a primeira página e busca no banco
+    _paginaAtual = 0;
+    sessionStorage.removeItem("vitrine_pagina");
+    carregarLivros();
+    fecharPainelFiltros(); // Função que recolhe o painel de filtros
+}
+
+/* Modificado para atualizar a listagem ao remover o chip de gênero na tela */
+window.removerChipGenero = function (g) {
+    _filtros.generos = _filtros.generos.filter((x) => x !== g);
+    const cb = document.querySelector(`#filtroGeneros input[value="${g}"]`);
+    if (cb) cb.checked = false;
+
     _paginaAtual = 0;
     carregarLivros();
-    fecharPainelFiltros();
-}
+};
 
 /* ── Contador ── */
 function atualizarContador(n) {
@@ -670,43 +740,126 @@ function fecharPainelFiltros() {
 
 /* ── Carrega página de livros do servidor ── */
 async function carregarLivros() {
-    const grid = document.getElementById("gridLivros");
-    if (!grid) return;
-
-    grid.innerHTML =
-        `<p style="grid-column:1/-1;text-align:center;color:#7A6E65;
-        padding:3rem 0;font-family:'IM Fell English',serif;font-style:italic;">Carregando…</p>`;
-    const contadorEl = document.getElementById("vitrineContador");
-    if (contadorEl) contadorEl.textContent = "";
-    const paginacaoEl = document.getElementById("vitrinePaginacao");
-    if (paginacaoEl) paginacaoEl.innerHTML = "";
-
     try {
-        const params = new URLSearchParams({ page: _paginaAtual, size: 20 });
-        if (modoPromo) params.set("emPromocao", "true");
-        if (_filtros.busca) params.set("busca", _filtros.busca);
+        const grid = document.getElementById("gridLivros");
+        if (grid && _todosLivros.length === 0) {
+            grid.innerHTML =
+                `<div class="vitrine-loading" style="grid-column:1/-1; text-align:center; padding:3rem;">Carregando vitrine...</div>`;
+        }
 
-        const res = await fetch(`/api/livros/vitrine?${params}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        // Criando os parâmetros de busca estruturados
+        const params = new URLSearchParams();
+        params.append("page", _paginaAtual);
+        params.append("size", 20);
+        params.append("ordem", _filtros.ordem);
 
-        _todosLivros = data.content || [];
-        _totalPaginas = data.totalPages || 0;
-        _totalElements = data.totalElements || 0;
+        if (_filtros.busca) params.append("busca", _filtros.busca);
+        if (_filtros.precoMin !== null) {
+            params.append("precoMin", _filtros.precoMin);
+        }
+        if (_filtros.precoMax !== null) {
+            params.append("precoMax", _filtros.precoMax);
+        }
+        if (modoPromo) params.append("promocao", true);
 
-        popularFiltroGeneros(_todosLivros);
-        aplicarFiltros();
+        // Envia cada estado selecionado como parâmetro idêntico (Spring Pageable lê como List)
+        _filtros.estados.forEach((est) => params.append("estados", est));
+
+        // ── NOVO: Adiciona os Gêneros selecionados à requisição Server-Side ──
+        _filtros.generos.forEach((gen) => params.append("generos", gen));
+
+        const res = await fetch(
+            `/api/livros/vitrine-json?${params.toString()}`,
+            {
+                credentials: "include",
+            },
+        );
+
+        if (!res.ok) throw new Error("Erro ao buscar livros");
+
+        const dados = await res.json();
+
+        // Atualiza os estados globais vindos do Page do Spring
+        _todosLivros = dados.content || [];
+        _totalPaginas = dados.totalPages || 0;
+        _totalElements = dados.totalElements || 0;
+
+        // Renderiza os livros na tela com a resposta do servidor
+        renderLivros(_todosLivros);
+        renderChips();
+        renderPaginacao();
+
+        if (_filtros.generos.length === 0) {
+            const checks = document.querySelectorAll(
+                "#filtroGeneros input:checked",
+            );
+            if (checks.length === 0) {
+                popularFiltroGeneros(_todosLivros);
+            }
+        }
     } catch (err) {
-        console.error("Erro ao carregar vitrine:", err);
-        grid.innerHTML =
-            `<p style="grid-column:1/-1;text-align:center;color:#722F37;
-            padding:2.5rem 0;font-family:'IM Fell English',serif;font-style:italic">
-            Erro ao carregar vitrine.</p>`;
+        console.error("Erro no carregamento:", err);
     }
+}
+async function carregarTodosGeneros() {
+    try {
+        const res = await fetch("/api/livros/generos"); // Rota no seu backend que devolve um array de strings
+        if (!res.ok) return;
+        const generos = await res.json();
+
+        const container = document.getElementById("filtroGeneros");
+        if (!container) return;
+
+        if (generos.length === 0) {
+            container.innerHTML =
+                '<span style="font-size:.8rem;color:#9a8a80;font-style:italic;">Nenhum gênero disponível</span>';
+            return;
+        }
+
+        container.innerHTML = generos.map((g) =>
+            `<label class="filtro-check-item">
+                <input type="checkbox" value="${g}" class="cb-genero"> ${g}
+             </label>`
+        ).join("");
+    } catch (_) {
+        // Fallback dinâmico temporário caso a rota ainda não exista no Java:
+        popularFiltroGeneros(_todosLivros);
+    }
+}
+
+function popularFiltroGeneros(livros) {
+    if (!livros || livros.length === 0) return;
+
+    const generos = [
+        ...new Set(
+            livros
+                .map((l) => l.genero)
+                .filter((g) => g && g.trim()),
+        ),
+    ].sort((a, b) => a.localeCompare(b, "pt-BR"));
+
+    const container = document.getElementById("filtroGeneros");
+    if (!container) return;
+
+    if (generos.length === 0) {
+        // Só exibe a mensagem de vazio se o container já estiver desabastecido
+        if (!container.innerHTML || container.innerHTML.includes("cb-genero")) {
+            container.innerHTML =
+                '<span style="font-size:.8rem;color:#9a8a80;font-style:italic;">Nenhum gênero disponível</span>';
+        }
+        return;
+    }
+
+    container.innerHTML = generos.map((g) =>
+        `<label class="filtro-check-item">
+            <input type="checkbox" value="${g}" class="cb-genero" onchange="atualizarFiltroGeneros()"> ${g}
+         </label>`
+    ).join("");
 }
 
 /* ── Init ── */
 document.addEventListener("DOMContentLoaded", () => {
     carregarSaldo();
+    carregarTodosGeneros();
     carregarLivros();
 });

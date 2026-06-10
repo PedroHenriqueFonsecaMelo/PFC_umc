@@ -141,8 +141,6 @@ public class LivroAprovacaoService {
 
                 logAuditoria.registrarLog(
                         LOG_LOTE_ATUALIZADO,
-                        adminId,
-                        null,
                         "loteId=" + loteId + ", status=TOTAL_APROVADO"
                 );
             }
@@ -150,8 +148,6 @@ public class LivroAprovacaoService {
 
         logAuditoria.registrarLog(
                 LOG_LIVRO_APROVACAO_PROCESSADA,
-                adminId,
-                null,
                 "livroId=" + livroId + ", status=APROVADO"
         );
 

@@ -111,11 +111,11 @@ public class Cliente {
     @Builder.Default
     private StatusConta statusConta = StatusConta.ATIVO;
 
-    @CreationTimestamp
     @Column(nullable = false, updatable = false)
     @Convert(converter = LocalDateTimeConverter.class)
     private LocalDateTime dataCriacao;
 
+    @CreationTimestamp
     @Convert(converter = LocalDateTimeConverter.class)
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
@@ -172,5 +172,12 @@ public class Cliente {
     public void resetarTentativas() {
         this.tentativas = 0;
         this.bloqueada = false;
+    }
+
+    @jakarta.persistence.PrePersist
+    protected void onCreate() {
+        if (this.dataCriacao == null) {
+            this.dataCriacao = LocalDateTime.now();
+        }
     }
 }

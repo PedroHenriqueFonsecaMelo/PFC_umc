@@ -24,11 +24,23 @@ public class ListaDesejos {
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
-    @Column(nullable = false)
+    @Column
     private String isbn;
 
     @Column(nullable = false)
     private LocalDateTime dataAdicao;
+
+    @Column
+    private String titulo;
+
+    @Column
+    private String googleBookId;
+
+    @Column
+    private String openLibraryWorkId;
+
+    @Column
+    private String autor;
 
     /**
      * Quando ativo, compra o livro automaticamente se o cliente tiver saldo ao

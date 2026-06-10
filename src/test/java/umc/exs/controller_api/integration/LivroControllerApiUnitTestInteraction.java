@@ -363,25 +363,29 @@ class LivroControllerApiUnitTestInteraction {
     @Test
     void listarVitrine_EmPromocaoTrue_ChamaMetodoPromocao() {
         var page = mock(org.springframework.data.domain.Page.class);
-        when(livroService.listarPromocoesAtivasPaginado(any(), anyString()))
+        
+        when(livroService.listarPromocoesAtivasPaginado(any(), anyString(), any(), any()))
                 .thenReturn(page);
 
-        ResponseEntity<?> resp = controller.listarVitrine(0, 20, true, "abc");
+        ResponseEntity<?> resp = controller.listarVitrine(0, 20, true, "abc", null, null, "recente");
 
         assertEquals(HttpStatus.OK, resp.getStatusCode());
-        verify(livroService).listarPromocoesAtivasPaginado(any(), eq("abc"));
+        
+        verify(livroService).listarPromocoesAtivasPaginado(any(), eq("abc"), any(), any());
     }
 
     @Test
     void listarVitrine_EmPromocaoFalse_ChamaMetodoAprovados() {
         var page = mock(org.springframework.data.domain.Page.class);
-        when(livroService.listarLivrosAprovadosPaginado(any(), anyString()))
+        
+        when(livroService.listarLivrosAprovadosPaginado(any(), anyString(), any(), any()))
                 .thenReturn(page);
 
-        ResponseEntity<?> resp = controller.listarVitrine(0, 20, false, "abc");
+        ResponseEntity<?> resp = controller.listarVitrine(0, 20, false, "abc", null, null, "recente");
 
         assertEquals(HttpStatus.OK, resp.getStatusCode());
-        verify(livroService).listarLivrosAprovadosPaginado(any(), eq("abc"));
+        
+        verify(livroService).listarLivrosAprovadosPaginado(any(), eq("abc"), any(), any());
     }
 }
 

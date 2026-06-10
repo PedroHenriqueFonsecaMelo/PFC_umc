@@ -14,7 +14,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ListaDesejosResponse {
     private Long id;
+    private String googleBookId;
+    private String openLibraryWorkId;
     private String isbn;
+    private String titulo;
+    private String autor;
     private LocalDateTime dataAdicao;
     private boolean preReservaAtiva;
 }

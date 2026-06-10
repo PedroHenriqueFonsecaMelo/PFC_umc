@@ -8,10 +8,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
@@ -20,184 +22,203 @@ import umc.exs.model.entidades.livro.Livro;
 @Repository
 public interface LivroRepository extends JpaRepository<Livro, Long> {
 
-  // =========================================================
-  // ISBN
-  // =========================================================
+    // =========================================================
+    // ISBN
+    // =========================================================
 
-  Optional<Livro> findByIsbn(String isbn);
+    Optional<Livro> findByIsbn(String isbn);
 
-  Optional<Livro> findFirstByIsbnOrderByDataAprovacaoDesc(String isbn);
+    Optional<Livro> findFirstByIsbnOrderByDataAprovacaoDesc(String isbn);
 
-  Optional<Livro> findFirstByIsbnAndAprovadoTrueOrderByDataAprovacaoDesc(String isbn);
+    Optional<Livro> findFirstByIsbnAndAprovadoTrueOrderByDataAprovacaoDesc(String isbn);
 
-  // =========================================================
-  // ID + APROVAÇÃO
-  // =========================================================
+    // =========================================================
+    // ID + APROVAÇÃO
+    // =========================================================
 
-  Optional<Livro> findByIdAndAprovadoTrue(Long id);
+    Optional<Livro> findByIdAndAprovadoTrue(Long id);
 
-  @Lock(LockModeType.PESSIMISTIC_WRITE)
-  @QueryHints({
-      @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")
-  })
-  @Query("SELECT l FROM Livro l WHERE l.id = :id AND l.aprovado = true")
-  Optional<Livro> findByIdAndAprovadoTrueWithLock(@Param("id") Long id);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints({
+            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")
+    })
+    @Query("SELECT l FROM Livro l WHERE l.id = :id AND l.aprovado = true")
+    Optional<Livro> findByIdAndAprovadoTrueWithLock(@Param("id") Long id);
 
-  @Lock(LockModeType.PESSIMISTIC_WRITE)
-  @Query("""
-          SELECT l
-          FROM Livro l
-          WHERE l.id IN :ids
-            AND l.aprovado = true
-      """)
-  List<Livro> findAllDisponiveisWithLock(@Param("ids") List<Long> ids);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+                SELECT l
+                FROM Livro l
+                WHERE l.id IN :ids
+                  AND l.aprovado = true
+            """)
+    List<Livro> findAllDisponiveisWithLock(@Param("ids") List<Long> ids);
 
-  // =========================================================
-  // LOTE
-  // =========================================================
+    // =========================================================
+    // LOTE
+    // =========================================================
 
-  List<Livro> findByLoteId(Long loteId);
+    List<Livro> findByLoteId(Long loteId);
 
-  List<Livro> findByLoteIdAndAprovadoFalse(Long loteId);
+    List<Livro> findByLoteIdAndAprovadoFalse(Long loteId);
 
-  /**
-   * Livros do lote ainda sem decisão do admin — exibidos na fila de auditoria.
-   */
-  List<Livro> findByLoteIdAndAprovadoFalseAndAdminAprovadorIdIsNull(Long loteId);
+    /**
+     * Livros do lote ainda sem decisão do admin — exibidos na fila de auditoria.
+     */
+    List<Livro> findByLoteIdAndAprovadoFalseAndAdminAprovadorIdIsNull(Long loteId);
 
-  long countByLoteId(Long loteId);
+    long countByLoteId(Long loteId);
 
-  long countByLoteIdAndAprovadoFalse(Long loteId);
+    long countByLoteIdAndAprovadoFalse(Long loteId);
 
-  /** Conta livros do lote ainda aguardando decisão do admin. */
-  long countByLoteIdAndAprovadoFalseAndAdminAprovadorIdIsNull(Long loteId);
+    /** Conta livros do lote ainda aguardando decisão do admin. */
+    long countByLoteIdAndAprovadoFalseAndAdminAprovadorIdIsNull(Long loteId);
 
-  // =========================================================
-  // OBRA
-  // =========================================================
+    // =========================================================
+    // OBRA
+    // =========================================================
 
-  List<Livro> findByObraId(Long obraId);
+    List<Livro> findByObraId(Long obraId);
 
-  // =========================================================
-  // APROVAÇÃO (STATUS GERAL)
-  // =========================================================
+    // =========================================================
+    // APROVAÇÃO (STATUS GERAL)
+    // =========================================================
 
-  List<Livro> findByAprovadoTrue();
+    List<Livro> findByAprovadoTrue();
 
-  Page<Livro> findByAprovadoTrue(Pageable pageable);
+    Page<Livro> findByAprovadoTrue(Pageable pageable);
 
-  @Query("""
-          SELECT l FROM Livro l
-          WHERE l.aprovado = true
-            AND (LOWER(l.titulo) LIKE LOWER(CONCAT('%', :busca, '%'))
-                 OR LOWER(l.autor) LIKE LOWER(CONCAT('%', :busca, '%'))
-                 OR LOWER(l.isbn) LIKE LOWER(CONCAT('%', :busca, '%'))
-                 OR LOWER(l.titulo) LIKE LOWER(CONCAT('%', :buscaNorm, '%'))
-                 OR LOWER(l.autor) LIKE LOWER(CONCAT('%', :buscaNorm, '%')))
-      """)
-  Page<Livro> findByAprovadoTrueAndBusca(@Param("busca") String busca, @Param("buscaNorm") String buscaNorm, Pageable pageable);
+    @Query("""
+                SELECT l FROM Livro l
+                WHERE l.aprovado = true
+                  AND (LOWER(l.titulo) LIKE LOWER(CONCAT('%', :busca, '%'))
+                       OR LOWER(l.autor) LIKE LOWER(CONCAT('%', :busca, '%'))
+                       OR LOWER(l.isbn) LIKE LOWER(CONCAT('%', :busca, '%'))
+                       OR LOWER(l.titulo) LIKE LOWER(CONCAT('%', :buscaNorm, '%'))
+                       OR LOWER(l.autor) LIKE LOWER(CONCAT('%', :buscaNorm, '%')))
+            """)
+    Page<Livro> findByAprovadoTrueAndBusca(@Param("busca") String busca, @Param("buscaNorm") String buscaNorm,
+            Pageable pageable);
 
-  @Query("""
-          SELECT l FROM Livro l
-          WHERE l.aprovado = true
-            AND l.emPromocao = true
-            AND (l.promocaoExpira IS NULL OR l.promocaoExpira > :agora)
-            AND (LOWER(l.titulo) LIKE LOWER(CONCAT('%', :busca, '%'))
-                 OR LOWER(l.autor) LIKE LOWER(CONCAT('%', :busca, '%'))
-                 OR LOWER(l.isbn) LIKE LOWER(CONCAT('%', :busca, '%'))
-                 OR LOWER(l.titulo) LIKE LOWER(CONCAT('%', :buscaNorm, '%'))
-                 OR LOWER(l.autor) LIKE LOWER(CONCAT('%', :buscaNorm, '%')))
-      """)
-  Page<Livro> findPromocoesAtivasPaginadoComBusca(@Param("agora") LocalDateTime agora, @Param("busca") String busca, @Param("buscaNorm") String buscaNorm, Pageable pageable);
+    @Query("""
+                SELECT l FROM Livro l
+                WHERE l.aprovado = true
+                  AND l.emPromocao = true
+                  AND (l.promocaoExpira IS NULL OR l.promocaoExpira > :agora)
+                  AND (LOWER(l.titulo) LIKE LOWER(CONCAT('%', :busca, '%'))
+                       OR LOWER(l.autor) LIKE LOWER(CONCAT('%', :busca, '%'))
+                       OR LOWER(l.isbn) LIKE LOWER(CONCAT('%', :busca, '%'))
+                       OR LOWER(l.titulo) LIKE LOWER(CONCAT('%', :buscaNorm, '%'))
+                       OR LOWER(l.autor) LIKE LOWER(CONCAT('%', :buscaNorm, '%')))
+            """)
+    Page<Livro> findPromocoesAtivasPaginadoComBusca(@Param("agora") LocalDateTime agora,
+            @Param("busca") String busca,
+            @Param("buscaNorm") String buscaNorm, Pageable pageable);
 
-  List<Livro> findByAprovadoFalse();
+    List<Livro> findByAprovadoFalse();
 
-  long countByAprovadoTrue();
+    Page<Livro> findByAprovadoFalse(Pageable pageable);
 
-  // =========================================================
-  // ANÚNCIO / DATA
-  // =========================================================
+    long countByAprovadoTrue();
 
-  List<Livro> findByDataAnuncioAfter(LocalDateTime data);
+    // =========================================================
+    // ANÚNCIO / DATA
+    // =========================================================
 
-  /**
-   * Projeção usada pelo dashboard: retorna apenas as datas de anúncio,
-   * sem carregar as entidades relacionadas (vendedor, lote, etc.).
-   * Evita EntityNotFoundException quando o Cliente/vendedor foi deletado do
-   * banco.
-   */
-  @Query("SELECT l.dataAnuncio FROM Livro l WHERE l.dataAnuncio > :data AND l.dataAnuncio IS NOT NULL")
-  List<LocalDateTime> findDataAnuncioAfterProjection(@Param("data") LocalDateTime data);
+    List<Livro> findByDataAnuncioAfter(LocalDateTime data);
 
-  // =========================================================
-  // PROMOÇÕES
-  // =========================================================
+    /**
+     * Projeção usada pelo dashboard: retorna apenas as datas de anúncio,
+     * sem carregar as entidades relacionadas (vendedor, lote, etc.).
+     * Evita EntityNotFoundException quando o Cliente/vendedor foi deletado do
+     * banco.
+     */
+    @Query("SELECT l.dataAnuncio FROM Livro l WHERE l.dataAnuncio > :data AND l.dataAnuncio IS NOT NULL")
+    List<LocalDateTime> findDataAnuncioAfterProjection(@Param("data") LocalDateTime data);
 
-  List<Livro> findByAprovadoTrueAndEmPromocaoTrue();
+    // =========================================================
+    // PROMOÇÕES
+    // =========================================================
 
-  /** Promoções ativas (sem expiração ou ainda válidas) */
-  @Query("""
-          SELECT l
-          FROM Livro l
-          WHERE l.aprovado = true
-            AND l.emPromocao = true
-            AND (l.promocaoExpira IS NULL OR l.promocaoExpira > :agora)
-      """)
-  List<Livro> findPromocoesAtivas(@Param("agora") LocalDateTime agora);
+    List<Livro> findByAprovadoTrueAndEmPromocaoTrue();
 
-  /** Promoções ativas paginadas */
-  @Query("""
-          SELECT l
-          FROM Livro l
-          WHERE l.aprovado = true
-            AND l.emPromocao = true
-            AND (l.promocaoExpira IS NULL OR l.promocaoExpira > :agora)
-      """)
-  Page<Livro> findPromocoesAtivasPaginado(@Param("agora") LocalDateTime agora, Pageable pageable);
+    /** Promoções ativas (sem expiração ou ainda válidas) */
+    @Query("""
+                SELECT l
+                FROM Livro l
+                WHERE l.aprovado = true
+                  AND l.emPromocao = true
+                  AND (l.promocaoExpira IS NULL OR l.promocaoExpira > :agora)
+            """)
+    List<Livro> findPromocoesAtivas(@Param("agora") LocalDateTime agora);
 
-  /** Promoções expiradas */
-  @Query("""
-          SELECT l
-          FROM Livro l
-          WHERE l.emPromocao = true
-            AND l.promocaoExpira IS NOT NULL
-            AND l.promocaoExpira < :agora
-      """)
-  List<Livro> findPromocoesExpiradas(@Param("agora") LocalDateTime agora);
+    /** Promoções ativas paginadas */
+    @Query("""
+                SELECT l
+                FROM Livro l
+                WHERE l.aprovado = true
+                  AND l.emPromocao = true
+                  AND (l.promocaoExpira IS NULL OR l.promocaoExpira > :agora)
+            """)
+    Page<Livro> findPromocoesAtivasPaginado(@Param("agora") LocalDateTime agora, Pageable pageable);
 
-  /** Total de livros aprovados enviados por um vendedor (cliente). */
-  long countByVendedorIdAndAprovadoTrue(Long vendedorId);
+    /** Promoções expiradas */
+    @Query("""
+                SELECT l
+                FROM Livro l
+                WHERE l.emPromocao = true
+                  AND l.promocaoExpira IS NOT NULL
+                  AND l.promocaoExpira < :agora
+            """)
+    List<Livro> findPromocoesExpiradas(@Param("agora") LocalDateTime agora);
 
-  /** Total de livros rejeitados (não aprovados e já avaliados) de um vendedor. */
-  @Query("SELECT COUNT(l) FROM Livro l WHERE l.vendedor.id = :vendedorId AND l.aprovado = false AND l.adminAprovadorId IS NOT NULL")
-  long countRejeitadosByVendedorId(@Param("vendedorId") Long vendedorId);
+    /** Total de livros aprovados enviados por um vendedor (cliente). */
+    long countByVendedorIdAndAprovadoTrue(Long vendedorId);
 
-  /**
-   * Todos os livros anunciados por um cliente — vendas diretas (vendedor_id) e
-   * livros enviados em lote (lote.cliente_id). Usa LEFT JOIN explícito para
-   * garantir que o Hibernate não descarte registros com FK nula.
-   */
-  @Query("""
-          SELECT l FROM Livro l
-          LEFT JOIN l.vendedor v
-          LEFT JOIN l.lote lo
-          LEFT JOIN lo.cliente lc
-          WHERE v.email = :email OR lc.email = :email
-          ORDER BY l.dataAnuncio DESC
-      """)
-  List<Livro> findAllByVendedorEmail(@Param("email") String email);
+    /** Total de livros rejeitados (não aprovados e já avaliados) de um vendedor. */
+    @Query("SELECT COUNT(l) FROM Livro l WHERE l.vendedor.id = :vendedorId AND l.aprovado = false AND l.adminAprovadorId IS NOT NULL")
+    long countRejeitadosByVendedorId(@Param("vendedorId") Long vendedorId);
 
-  /**
-   * Detalhe de um livro validando propriedade do cliente (segurança / LGPD).
-   * Cobre vendas diretas e livros de lote via LEFT JOIN explícito.
-   */
-  @Query("""
-          SELECT l FROM Livro l
-          LEFT JOIN l.vendedor v
-          LEFT JOIN l.lote lo
-          LEFT JOIN lo.cliente lc
-          WHERE l.id = :id
-            AND (v.email = :email OR lc.email = :email)
-      """)
-  Optional<Livro> findByIdAndVendedorEmail(@Param("id") Long id, @Param("email") String email);
+    /**
+     * Todos os livros anunciados por um cliente — vendas diretas (vendedor_id) e
+     * livros enviados em lote (lote.cliente_id). Usa LEFT JOIN explícito para
+     * garantir que o Hibernate não descarte registros com FK nula.
+     */
+    @Query("""
+                SELECT l FROM Livro l
+                LEFT JOIN l.vendedor v
+                LEFT JOIN l.lote lo
+                LEFT JOIN lo.cliente lc
+                WHERE v.email = :email OR lc.email = :email
+                ORDER BY l.dataAnuncio DESC
+            """)
+    List<Livro> findAllByVendedorEmail(@Param("email") String email);
+
+    /**
+     * Detalhe de um livro validando propriedade do cliente (segurança / LGPD).
+     * Cobre vendas diretas e livros de lote via LEFT JOIN explícito.
+     */
+    @Query("""
+                SELECT l FROM Livro l
+                LEFT JOIN l.vendedor v
+                LEFT JOIN l.lote lo
+                LEFT JOIN lo.cliente lc
+                WHERE l.id = :id
+                  AND (v.email = :email OR lc.email = :email)
+            """)
+    Optional<Livro> findByIdAndVendedorEmail(@Param("id") Long id, @Param("email") String email);
+
+    @Modifying
+    @Transactional
+    @Query("""
+                UPDATE Livro l
+                SET l.precoAprovado = l.precoAprovado * (1 + (:taxa / 100.0))
+                WHERE l.aprovado = true
+                  AND l.precoAprovado IS NOT NULL
+            """)
+    int aplicarInflacaoEmTodosAprovados(@Param("taxa") Double taxa);
+
+    boolean existsByIsbnAndAprovadoTrue(String isbn);
+
+    boolean existsByTituloIgnoreCaseAndAprovadoTrue(String titulo);
 }

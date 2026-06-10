@@ -50,8 +50,6 @@ public class CarteiraEmailService {
 
             auditoria.registrarLog(
                     AcaoAuditoria.CARTEIRA_TOKEN_ADICIONADO.name(),
-                    cliente.getId(),
-                    cliente.getEmail(),
                     String.format("E-mail de crédito enviado | Valor: %.2f | Método: %s",
                             valor, metodo));
 
@@ -65,8 +63,6 @@ public class CarteiraEmailService {
 
             auditoria.registrarLog(
                     AcaoAuditoria.GENERICO.name(),
-                    cliente.getId(),
-                    cliente.getEmail(),
                     "Falha ao enviar e-mail de crédito: " + e.getMessage());
         }
     }
@@ -93,8 +89,6 @@ public class CarteiraEmailService {
 
             auditoria.registrarLog(
                     AcaoAuditoria.CARTEIRA_TOKEN_DEBITADO.name(),
-                    cliente.getId(),
-                    cliente.getEmail(),
                     String.format("E-mail de débito enviado | Valor: %.2f | Descrição: %s",
                             valor, descricao));
 
@@ -108,8 +102,6 @@ public class CarteiraEmailService {
 
             auditoria.registrarLog(
                     AcaoAuditoria.GENERICO.name(),
-                    cliente.getId(),
-                    cliente.getEmail(),
                     "Falha ao enviar e-mail de débito: " + e.getMessage());
         }
     }
@@ -135,8 +127,6 @@ public class CarteiraEmailService {
 
             auditoria.registrarLog(
                     AcaoAuditoria.PAGAMENTO_PIX_CONFIRMADO.name(),
-                    cliente.getId(),
-                    cliente.getEmail(),
                     String.format("E-mail PIX enviado | Valor: %.2f", valorPix));
 
             log.info("Email PIX enviado clienteId={} valor={}",
@@ -149,8 +139,6 @@ public class CarteiraEmailService {
 
             auditoria.registrarLog(
                     AcaoAuditoria.GENERICO.name(),
-                    cliente.getId(),
-                    cliente.getEmail(),
                     "Falha ao enviar e-mail PIX: " + e.getMessage());
         }
     }

@@ -1,5 +1,7 @@
 package umc.exs.repository.negocios;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +18,13 @@ public interface LoteRepository extends JpaRepository<Lote, Long> {
     /** Lista lotes por status com cliente carregado (evita N+1 queries). */
     @Query("SELECT l FROM Lote l JOIN FETCH l.cliente WHERE l.status = :status ORDER BY l.dataCriacao ASC")
     List<Lote> findByStatusWithCliente(@Param("status") Lote.LoteStatus status);
+
+    /**
+     * Lista lotes por status com cliente carregado de forma paginada (evita N+1
+     * queries).
+     */
+    @Query(value = "SELECT l FROM Lote l LEFT JOIN FETCH l.cliente WHERE l.status = :status", countQuery = "SELECT COUNT(l) FROM Lote l WHERE l.status = :status")
+    Page<Lote> findByStatusWithCliente(@Param("status") Lote.LoteStatus status, Pageable pageable);
 
     /** Busca lote por ID com cliente carregado. */
     @Query("SELECT l FROM Lote l JOIN FETCH l.cliente WHERE l.id = :id")

@@ -1,349 +1,596 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalhe do Livro — Bibliotroca Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/admin/layout.css}">
     <style>
-        .detalhe-wrap { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem; }
-        .detalhe-card { background: #fff; border-radius: 12px; padding: 2rem;
-            box-shadow: 0 1px 4px rgba(0,0,0,.08); margin-bottom: 1.5rem; }
-        .detalhe-header { display: flex; gap: 2rem; align-items: flex-start; margin-bottom: 2rem; }
-        .detalhe-capa { width: 160px; min-width: 160px; height: 220px; object-fit: cover;
-            border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.15); }
-        .detalhe-info { flex: 1; }
-        .detalhe-titulo { font-size: 1.5rem; font-weight: 700; color: #2c241b; margin-bottom: .25rem; }
-        .detalhe-autor { font-size: 1rem; color: #9c968f; margin-bottom: 1rem; }
-        .detalhe-badges { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; }
-        .badge { padding: .25rem .75rem; border-radius: 20px; font-size: .75rem; font-weight: 700; }
-        .badge-promo { background: #fce8e8; color: #e11d48; }
-        .badge-genero { background: #e8f0fe; color: #1a56db; }
-        .detalhe-preco { font-size: 1.8rem; font-weight: 700; color: #722f37; margin-bottom: 1rem; }
-        .detalhe-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
-        .detalhe-item label { font-size: .72rem; font-weight: 700; text-transform: uppercase;
-            letter-spacing: .06em; color: #9c968f; display: block; margin-bottom: .25rem; }
-        .detalhe-item span { font-size: .9rem; color: #2c241b; font-weight: 500; }
-        .detalhe-resumo { line-height: 1.7; color: #5a4f47; font-size: .9rem; }
-        .detalhe-fotos { display: flex; gap: 1rem; flex-wrap: wrap; }
-        .detalhe-foto { width: 100px; height: 130px; object-fit: cover; border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.1); cursor: pointer; }
-        .acoes-bar { display: flex; gap: 1rem; }
-        .btn-editar-detalhe { padding: .6rem 1.5rem; background: #722f37; color: #fff;
-            border: none; border-radius: 8px; font-size: .9rem; font-weight: 600;
-            cursor: pointer; display: inline-flex; align-items: center; gap: .5rem; }
-        .btn-excluir-detalhe { padding: .6rem 1.5rem; background: transparent; color: #e11d48;
-            border: 1.5px solid #e11d48; border-radius: 8px; font-size: .9rem; font-weight: 600;
-            cursor: pointer; display: inline-flex; align-items: center; gap: .5rem; }
-        .btn-voltar { padding: .5rem 1rem; background: transparent; color: #7a6e65;
-            border: 1.5px solid #e0d9d0; border-radius: 8px; font-size: .85rem;
-            cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: .4rem; }
-        .section-title { font-size: .8rem; font-weight: 700; text-transform: uppercase;
-            letter-spacing: .08em; color: #9c968f; margin-bottom: 1rem; padding-bottom: .5rem;
-            border-bottom: 1px solid #f0ece6; }
-        #loadingDetalhe { text-align: center; padding: 3rem; color: #9c968f; font-style: italic; }
-        .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none; }
-        .modal { position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-            background:#fff;border-radius:12px;padding:2rem;z-index:1001;
-            width:90%;max-width:600px;max-height:90vh;overflow-y:auto;display:none; }
-        .modal-header { display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem; }
-        .modal-close { background:none;border:none;font-size:1.2rem;cursor:pointer;color:#9c968f; }
-        .form-group { margin-bottom:1rem; }
-        .form-group label { display:block;font-size:.8rem;font-weight:600;color:#7a6e65;margin-bottom:.4rem; }
-        .form-group input, .form-group select, .form-group textarea {
-            width:100%;padding:.6rem .75rem;border:1.5px solid #e0d9d0;border-radius:8px;
-            font-size:.9rem;font-family:'DM Sans',sans-serif;box-sizing:border-box; }
-        .form-group textarea { min-height:100px;resize:vertical; }
-        .modal-actions { display:flex;gap:1rem;justify-content:flex-end;margin-top:1.5rem; }
-        .btn-save { padding:.6rem 1.5rem;background:#722f37;color:#fff;border:none;
-            border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer; }
-        .btn-cancel-modal { padding:.6rem 1.5rem;background:transparent;color:#7a6e65;
-            border:1.5px solid #e0d9d0;border-radius:8px;font-size:.9rem;cursor:pointer; }
+        .detalhe-wrap {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .detalhe-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+            margin-bottom: 1.5rem;
+        }
+
+        .detalhe-header {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+        }
+
+        .detalhe-capa {
+            width: 160px;
+            min-width: 160px;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .15);
+        }
+
+        .detalhe-info {
+            flex: 1;
+        }
+
+        .detalhe-titulo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c241b;
+            margin-bottom: .25rem;
+        }
+
+        .detalhe-autor {
+            font-size: 1rem;
+            color: #9c968f;
+            margin-bottom: 1rem;
+        }
+
+        .detalhe-badges {
+            display: flex;
+            gap: .5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .badge {
+            padding: .25rem .75rem;
+            border-radius: 20px;
+            font-size: .75rem;
+            font-weight: 700;
+        }
+
+        .badge-promo {
+            background: #fce8e8;
+            color: #e11d48;
+        }
+
+        .badge-genero {
+            background: #e8f0fe;
+            color: #1a56db;
+        }
+
+        .detalhe-preco {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #722f37;
+            margin-bottom: 1rem;
+        }
+
+        .detalhe-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .detalhe-item label {
+            font-size: .72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: #9c968f;
+            display: block;
+            margin-bottom: .25rem;
+        }
+
+        .detalhe-item span {
+            font-size: .9rem;
+            color: #2c241b;
+            font-weight: 500;
+        }
+
+        .detalhe-resumo {
+            line-height: 1.7;
+            color: #5a4f47;
+            font-size: .9rem;
+        }
+
+        .detalhe-fotos {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .detalhe-foto {
+            width: 100px;
+            height: 130px;
+            object-fit: cover;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+            cursor: pointer;
+        }
+
+        .acoes-bar {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-editar-detalhe {
+            padding: .6rem 1.5rem;
+            background: #722f37;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .btn-excluir-detalhe {
+            padding: .6rem 1.5rem;
+            background: transparent;
+            color: #e11d48;
+            border: 1.5px solid #e11d48;
+            border-radius: 8px;
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .btn-voltar {
+            padding: .5rem 1rem;
+            background: transparent;
+            color: #7a6e65;
+            border: 1.5px solid #e0d9d0;
+            border-radius: 8px;
+            font-size: .85rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+        }
+
+        .section-title {
+            font-size: .8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: #9c968f;
+            margin-bottom: 1rem;
+            padding-bottom: .5rem;
+            border-bottom: 1px solid #f0ece6;
+        }
+
+        #loadingDetalhe {
+            text-align: center;
+            padding: 3rem;
+            color: #9c968f;
+            font-style: italic;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            z-index: 1001;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #9c968f;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: .8rem;
+            font-weight: 600;
+            color: #7a6e65;
+            margin-bottom: .4rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: .6rem .75rem;
+            border: 1.5px solid #e0d9d0;
+            border-radius: 8px;
+            font-size: .9rem;
+            font-family: 'DM Sans', sans-serif;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .btn-save {
+            padding: .6rem 1.5rem;
+            background: #722f37;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-cancel-modal {
+            padding: .6rem 1.5rem;
+            background: transparent;
+            color: #7a6e65;
+            border: 1.5px solid #e0d9d0;
+            border-radius: 8px;
+            font-size: .9rem;
+            cursor: pointer;
+        }
     </style>
 </head>
+
 <body>
-<div class="layout">
-    <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('estoque')}"></th:block>
+    <div class="layout">
+        <th:block th:replace="~{fragments/admin-sidebar :: adminSidebar('estoque')}"></th:block>
 
-    <div class="overlay" id="overlay" onclick="fecharMenu()"></div>
+        <div class="overlay" id="overlay" onclick="fecharMenu()"></div>
 
-    <div class="content">
-        <header class="topbar">
-            <div style="display:flex;align-items:center;gap:14px;">
-                <button class="menu-btn" onclick="abrirMenu()">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-                <div>
-                    <div class="topbar-title">Detalhe do Livro</div>
-                    <div class="topbar-date" id="dataHoje"></div>
-                </div>
-            </div>
-        </header>
-
-        <div class="detalhe-wrap">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
-                <a href="/admin/livros" class="btn-voltar">
-                    <i class="fa-solid fa-arrow-left"></i> Voltar ao Estoque
-                </a>
-                <div class="acoes-bar">
-                    <button class="btn-excluir-detalhe" onclick="excluirLivro()">
-                        <i class="fa-solid fa-trash"></i> Excluir livro
+        <div class="content">
+            <header class="topbar">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <button class="menu-btn" onclick="abrirMenu()">
+                        <i class="fa-solid fa-bars"></i>
                     </button>
-                    <button class="btn-editar-detalhe" onclick="editarLivro()">
-                        <i class="fa-solid fa-pen"></i> Editar livro
-                    </button>
+                    <div>
+                        <div class="topbar-title">Detalhe do Livro</div>
+                        <div class="topbar-date" id="dataHoje"></div>
+                    </div>
                 </div>
-            </div>
+            </header>
 
-            <div id="loadingDetalhe">Carregando...</div>
-            <div id="conteudoDetalhe" style="display:none;">
-
-                <!-- Card principal -->
-                <div class="detalhe-card">
-                    <div class="detalhe-header">
-                        <img id="detCapaImg" class="detalhe-capa" src="/img/logo-bibliotroca.png"
-                            style="object-fit:contain;padding:10px;"
-                            onerror="this.src='/img/logo-bibliotroca.png';this.style.objectFit='contain';this.style.padding='10px'">
-                        <div class="detalhe-info">
-                            <div class="detalhe-titulo" id="detTitulo"></div>
-                            <div class="detalhe-autor" id="detAutor"></div>
-                            <div class="detalhe-badges" id="detBadges"></div>
-                            <div class="detalhe-preco" id="detPreco"></div>
-                            <div class="detalhe-grid" id="detGrid"></div>
-                        </div>
+            <div class="detalhe-wrap">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+                    <a href="/admin/livros" class="btn-voltar">
+                        <i class="fa-solid fa-arrow-left"></i> Voltar ao Estoque
+                    </a>
+                    <div class="acoes-bar">
+                        <button class="btn-excluir-detalhe" onclick="excluirLivro()">
+                            <i class="fa-solid fa-trash"></i> Excluir livro
+                        </button>
+                        <button class="btn-editar-detalhe" onclick="editarLivro()">
+                            <i class="fa-solid fa-pen"></i> Editar livro
+                        </button>
                     </div>
                 </div>
 
-                <!-- Resumo -->
-                <div class="detalhe-card" id="cardResumo" style="display:none;">
-                    <div class="section-title">Sobre o livro</div>
-                    <div class="detalhe-resumo" id="detResumo"></div>
-                </div>
+                <div id="loadingDetalhe">Carregando...</div>
+                <div id="conteudoDetalhe" style="display:none;">
 
-                <!-- Fotos -->
-                <div class="detalhe-card" id="cardFotos" style="display:none;">
-                    <div class="section-title">Fotos do exemplar</div>
-                    <div class="detalhe-fotos" id="detFotos"></div>
-                </div>
+                    <!-- Card principal -->
+                    <div class="detalhe-card">
+                        <div class="detalhe-header">
+                            <img id="detCapaImg" class="detalhe-capa" src="/img/logo-bibliotroca.png"
+                                style="object-fit:contain;padding:10px;"
+                                onerror="this.src='/img/logo-bibliotroca.png';this.style.objectFit='contain';this.style.padding='10px'">
+                            <div class="detalhe-info">
+                                <div class="detalhe-titulo" id="detTitulo"></div>
+                                <div class="detalhe-autor" id="detAutor"></div>
+                                <div class="detalhe-badges" id="detBadges"></div>
+                                <div class="detalhe-preco" id="detPreco"></div>
+                                <div class="detalhe-grid" id="detGrid"></div>
+                            </div>
+                        </div>
+                    </div>
 
-                <!-- Promoção -->
-                <div class="detalhe-card" id="cardPromo" style="display:none;">
-                    <div class="section-title">Informações de Promoção</div>
-                    <div class="detalhe-grid" id="detPromoGrid"></div>
-                </div>
+                    <!-- Resumo -->
+                    <div class="detalhe-card" id="cardResumo" style="display:none;">
+                        <div class="section-title">Sobre o livro</div>
+                        <div class="detalhe-resumo" id="detResumo"></div>
+                    </div>
 
+                    <!-- Fotos -->
+                    <div class="detalhe-card" id="cardFotos" style="display:none;">
+                        <div class="section-title">Fotos do exemplar</div>
+                        <div class="detalhe-fotos" id="detFotos"></div>
+                    </div>
+
+                    <!-- Promoção -->
+                    <div class="detalhe-card" id="cardPromo" style="display:none;">
+                        <div class="section-title">Informações de Promoção</div>
+                        <div class="detalhe-grid" id="detPromoGrid"></div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="modal-overlay" id="modalOverlay" onclick="fecharModalEdit()"></div>
-<div class="modal" id="modalEdit">
-    <div class="modal-header">
-        <h2>Editar Livro</h2>
-        <button class="modal-close" onclick="fecharModalEdit()">✕</button>
+    <div class="modal-overlay" id="modalOverlay" onclick="fecharModalEdit()"></div>
+    <div class="modal" id="modalEdit">
+        <div class="modal-header">
+            <h2>Editar Livro</h2>
+            <button class="modal-close" onclick="fecharModalEdit()">✕</button>
+        </div>
+        <form onsubmit="salvarEdicao(event)">
+            <div class="form-group">
+                <label>ISBN</label>
+                <input type="text" id="editIsbn" readonly style="background:#f9f6f0;">
+            </div>
+            <div class="form-group">
+                <label>Título *</label>
+                <input type="text" id="editTitulo" required>
+            </div>
+            <div class="form-group">
+                <label>Autor *</label>
+                <input type="text" id="editAutor" required>
+            </div>
+            <div class="form-group">
+                <label>Preço (T$) *</label>
+                <input type="number" id="editPreco" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label>Estado *</label>
+                <select id="editEstado" required>
+                    <option value="NOVO">Novo</option>
+                    <option value="OTIMO">Ótimo</option>
+                    <option value="BOM">Bom</option>
+                    <option value="DESGASTADO">Desgastado</option>
+                    <option value="RUIM">Ruim</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Resumo / Descrição</label>
+                <textarea id="editResumo"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Gênero</label>
+                <select id="editGenero">
+                    <option value="">— Selecionar —</option>
+                    <option>Ficção</option>
+                    <option>Ficção Científica</option>
+                    <option>Fantasia</option>
+                    <option>Infantojuvenil</option>
+                    <option>Jovem Adulto</option>
+                    <option>Mistério</option>
+                    <option>Suspense</option>
+                    <option>Terror</option>
+                    <option>Romance</option>
+                    <option>Ficção Histórica</option>
+                    <option>Aventura</option>
+                    <option>Biografia</option>
+                    <option>História</option>
+                    <option>Filosofia</option>
+                    <option>Psicologia</option>
+                    <option>Autoajuda</option>
+                    <option>Negócios</option>
+                    <option>Ciências</option>
+                    <option>Tecnologia</option>
+                    <option>Computação</option>
+                    <option>Arte</option>
+                    <option>Poesia</option>
+                    <option>Drama</option>
+                    <option>Quadrinhos</option>
+                    <option>Literatura</option>
+                    <option>Não-ficção</option>
+                    <option>Culinária</option>
+                    <option>Esportes</option>
+                    <option>Humor</option>
+                    <option>Religião</option>
+                    <option>Política</option>
+                    <option>Direito</option>
+                    <option>Medicina</option>
+                    <option>Educação</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:.5rem;">
+                    <input type="checkbox" id="editEmPromocao" onchange="togglePromoEdit()">
+                    Em promoção
+                </label>
+            </div>
+            <div id="camposPromo" style="display:none;">
+                <div class="form-group">
+                    <label>Desconto (%)</label>
+                    <input type="number" id="editDesconto" min="1" max="99" oninput="calcPrecoPromo()">
+                </div>
+                <div class="form-group">
+                    <label>Preço promocional (T$)</label>
+                    <input type="number" id="editPrecoPromo" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Validade da promoção</label>
+                    <input type="datetime-local" id="editValidadePromo">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel-modal" onclick="fecharModalEdit()">Cancelar</button>
+                <button type="submit" class="btn-save">Salvar alterações</button>
+            </div>
+        </form>
     </div>
-    <form onsubmit="salvarEdicao(event)">
-        <div class="form-group">
-            <label>ISBN</label>
-            <input type="text" id="editIsbn" readonly style="background:#f9f6f0;">
-        </div>
-        <div class="form-group">
-            <label>Título *</label>
-            <input type="text" id="editTitulo" required>
-        </div>
-        <div class="form-group">
-            <label>Autor *</label>
-            <input type="text" id="editAutor" required>
-        </div>
-        <div class="form-group">
-            <label>Preço (T$) *</label>
-            <input type="number" id="editPreco" step="0.01" required>
-        </div>
-        <div class="form-group">
-            <label>Estado *</label>
-            <select id="editEstado" required>
-                <option value="NOVO">Novo</option>
-                <option value="OTIMO">Ótimo</option>
-                <option value="BOM">Bom</option>
-                <option value="DESGASTADO">Desgastado</option>
-                <option value="RUIM">Ruim</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Resumo / Descrição</label>
-            <textarea id="editResumo"></textarea>
-        </div>
-        <div class="form-group">
-            <label>Gênero</label>
-            <select id="editGenero">
-                <option value="">— Selecionar —</option>
-                <option>Ficção</option><option>Ficção Científica</option>
-                <option>Fantasia</option><option>Infantojuvenil</option>
-                <option>Jovem Adulto</option><option>Mistério</option>
-                <option>Suspense</option><option>Terror</option>
-                <option>Romance</option><option>Ficção Histórica</option>
-                <option>Aventura</option><option>Biografia</option>
-                <option>História</option><option>Filosofia</option>
-                <option>Psicologia</option><option>Autoajuda</option>
-                <option>Negócios</option><option>Ciências</option>
-                <option>Tecnologia</option><option>Computação</option>
-                <option>Arte</option><option>Poesia</option>
-                <option>Drama</option><option>Quadrinhos</option>
-                <option>Literatura</option><option>Não-ficção</option>
-                <option>Culinária</option><option>Esportes</option>
-                <option>Humor</option><option>Religião</option>
-                <option>Política</option><option>Direito</option>
-                <option>Medicina</option><option>Educação</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label style="display:flex;align-items:center;gap:.5rem;">
-                <input type="checkbox" id="editEmPromocao" onchange="togglePromoEdit()">
-                Em promoção
-            </label>
-        </div>
-        <div id="camposPromo" style="display:none;">
-            <div class="form-group">
-                <label>Desconto (%)</label>
-                <input type="number" id="editDesconto" min="1" max="99"
-                    oninput="calcPrecoPromo()">
-            </div>
-            <div class="form-group">
-                <label>Preço promocional (T$)</label>
-                <input type="number" id="editPrecoPromo" step="0.01">
-            </div>
-            <div class="form-group">
-                <label>Validade da promoção</label>
-                <input type="datetime-local" id="editValidadePromo">
-            </div>
-        </div>
-        <div class="modal-actions">
-            <button type="button" class="btn-cancel-modal" onclick="fecharModalEdit()">Cancelar</button>
-            <button type="submit" class="btn-save">Salvar alterações</button>
-        </div>
-    </form>
-</div>
 
-<script th:inline="javascript">
-    const LIVRO_ID = /*[[${livroId}]]*/ 0;
-    let _livroAtual = null;
+    <script th:inline="javascript">
+        const LIVRO_ID = /*[[${livroId}]]*/ 0;
+        let _livroAtual = null;
 
-    document.getElementById("dataHoje").textContent = new Date().toLocaleDateString("pt-BR", {
-        weekday: "long", day: "2-digit", month: "long", year: "numeric"
-    });
+        document.getElementById("dataHoje").textContent = new Date().toLocaleDateString("pt-BR", {
+            weekday: "long", day: "2-digit", month: "long", year: "numeric"
+        });
 
-    async function carregarDetalhe() {
-        try {
-            const res = await fetch(`/api/livros/${LIVRO_ID}`, {credentials:"include"});
-            if (!res.ok) throw new Error();
-            const l = await res.json();
-            _livroAtual = l;
-            renderDetalhe(l);
-        } catch(e) {
-            document.getElementById("loadingDetalhe").textContent = "Erro ao carregar livro.";
-        }
-    }
-
-    function renderDetalhe(l) {
-        document.getElementById("loadingDetalhe").style.display = "none";
-        document.getElementById("conteudoDetalhe").style.display = "block";
-
-        // Capa
-        let capa = null;
-        try {
-            const fotos = JSON.parse(l.fotosUrls || "[]");
-            if (fotos.length > 0 && fotos[0]) capa = fotos[0];
-        } catch(e) {}
-        const capaEl = document.getElementById("detCapaImg");
-        if (capa) {
-            capaEl.src = capa;
-            capaEl.style.objectFit = "cover";
-            capaEl.style.padding = "0";
+        async function carregarDetalhe() {
+            try {
+                const res = await fetch(`/api/livros/${LIVRO_ID}`, { credentials: "include" });
+                if (!res.ok) throw new Error();
+                const l = await res.json();
+                _livroAtual = l;
+                renderDetalhe(l);
+            } catch (e) {
+                document.getElementById("loadingDetalhe").textContent = "Erro ao carregar livro.";
+            }
         }
 
-        // Titulo e autor
-        document.getElementById("detTitulo").textContent = l.titulo || "Sem título";
-        document.getElementById("detAutor").textContent = l.autor || "Autor desconhecido";
+        function renderDetalhe(l) {
+            document.getElementById("loadingDetalhe").style.display = "none";
+            document.getElementById("conteudoDetalhe").style.display = "block";
 
-        // Badges
-        const estadoCores = {
-            NOVO:"#22c55e", OTIMO:"#3b82f6", BOM:"#f59e0b",
-            DESGASTADO:"#f97316", RUIM:"#ef4444"
-        };
-        const estadoLabel = {
-            NOVO:"Novo", OTIMO:"Ótimo", BOM:"Bom",
-            DESGASTADO:"Desgastado", RUIM:"Ruim"
-        };
-        const estado = l.estadoAprovado || "BOM";
-        const cor = estadoCores[estado] || "#888";
-        let badges = `<span class="badge" style="background:${cor}22;color:${cor};">
+            // Capa
+            let capa = null;
+            try {
+                const fotos = JSON.parse(l.fotosUrls || "[]");
+                if (fotos.length > 0 && fotos[0]) capa = fotos[0];
+            } catch (e) { }
+            const capaEl = document.getElementById("detCapaImg");
+            if (capa) {
+                capaEl.src = capa;
+                capaEl.style.objectFit = "cover";
+                capaEl.style.padding = "0";
+            }
+
+            // Titulo e autor
+            document.getElementById("detTitulo").textContent = l.titulo || "Sem título";
+            document.getElementById("detAutor").textContent = l.autor || "Autor desconhecido";
+
+            // Badges
+            const estadoCores = {
+                NOVO: "#22c55e", OTIMO: "#3b82f6", BOM: "#f59e0b",
+                DESGASTADO: "#f97316", RUIM: "#ef4444"
+            };
+            const estadoLabel = {
+                NOVO: "Novo", OTIMO: "Ótimo", BOM: "Bom",
+                DESGASTADO: "Desgastado", RUIM: "Ruim"
+            };
+            const estado = l.estadoAprovado || "BOM";
+            const cor = estadoCores[estado] || "#888";
+            let badges = `<span class="badge" style="background:${cor}22;color:${cor};">
             ${estadoLabel[estado] || estado}</span>`;
-        if (l.genero) badges += `<span class="badge badge-genero">${l.genero}</span>`;
-        if (l.emPromocao) badges += `<span class="badge badge-promo"><i class="fa-solid fa-tag"></i> Em promoção</span>`;
-        document.getElementById("detBadges").innerHTML = badges;
+            if (l.genero) badges += `<span class="badge badge-genero">${l.genero}</span>`;
+            if (l.emPromocao) badges += `<span class="badge badge-promo"><i class="fa-solid fa-tag"></i> Em promoção</span>`;
+            document.getElementById("detBadges").innerHTML = badges;
 
-        // Preço
-        if (l.emPromocao && l.precoOriginal) {
-            const desc = Math.round((1 - l.precoAprovado / l.precoOriginal) * 100);
-            document.getElementById("detPreco").innerHTML =
-                `<span style="text-decoration:line-through;font-size:1rem;color:#9c968f;">
+            // Preço
+            if (l.emPromocao && l.precoOriginal) {
+                const desc = Math.round((1 - l.precoAprovado / l.precoOriginal) * 100);
+                document.getElementById("detPreco").innerHTML =
+                    `<span style="text-decoration:line-through;font-size:1rem;color:#9c968f;">
                     T$ ${Number(l.precoOriginal).toFixed(2)}</span>
                  <span style="color:#e11d48;"> T$ ${Number(l.precoAprovado).toFixed(2)}</span>
                  <span style="font-size:.8rem;background:#fce8e8;color:#e11d48;
                     padding:.2rem .5rem;border-radius:20px;margin-left:.5rem;">-${desc}%</span>`;
-        } else {
-            document.getElementById("detPreco").textContent =
-                `T$ ${Number(l.precoAprovado || 0).toFixed(2)}`;
-        }
+            } else {
+                document.getElementById("detPreco").textContent =
+                    `T$ ${Number(l.precoAprovado || 0).toFixed(2)}`;
+            }
 
-        // Grid de info
-        document.getElementById("detGrid").innerHTML = `
+            // Grid de info
+            document.getElementById("detGrid").innerHTML = `
             <div class="detalhe-item"><label>ISBN</label><span>${l.isbn || "—"}</span></div>
             <div class="detalhe-item"><label>Idioma</label><span>${l.idioma || "—"}</span></div>
             <div class="detalhe-item"><label>Gênero</label><span>${l.genero || "—"}</span></div>
             <div class="detalhe-item"><label>ID do livro</label><span>#${l.id}</span></div>
             <div class="detalhe-item"><label>ID do vendedor</label><span>${l.vendedorId || "—"}</span></div>
-            <div class="detalhe-item"><label>Admin aprovador</label><span>${l.adminAprovadorId || "—"}</span></div>
         `;
 
-        // Resumo
-        if (l.resumoOficial || l.descricao) {
-            document.getElementById("cardResumo").style.display = "block";
-            document.getElementById("detResumo").textContent = l.resumoOficial || l.descricao;
-        }
+            // Resumo
+            if (l.resumoOficial || l.descricao) {
+                document.getElementById("cardResumo").style.display = "block";
+                document.getElementById("detResumo").textContent = l.resumoOficial || l.descricao;
+            }
 
-        // Fotos
-        try {
-            const fotos = JSON.parse(l.fotosUrls || "[]");
-            if (fotos.length > 0) {
-                document.getElementById("cardFotos").style.display = "block";
-                document.getElementById("detFotos").innerHTML = fotos.map(f =>
-                    `<img class="detalhe-foto" src="${f}"
+            // Fotos
+            try {
+                const fotos = JSON.parse(l.fotosUrls || "[]");
+                if (fotos.length > 0) {
+                    document.getElementById("cardFotos").style.display = "block";
+                    document.getElementById("detFotos").innerHTML = fotos.map(f =>
+                        `<img class="detalhe-foto" src="${f}"
                         onerror="this.src='/img/logo-bibliotroca.png'"
                         onclick="window.open('${f}','_blank')">`
-                ).join("");
-            }
-        } catch(e) {}
+                    ).join("");
+                }
+            } catch (e) { }
 
-        // Promoção
-        if (l.emPromocao) {
-            document.getElementById("cardPromo").style.display = "block";
-            let expiraStr = "—";
-            if (l.promocaoExpira) {
-                try {
-                    expiraStr = Array.isArray(l.promocaoExpira)
-                        ? new Date(l.promocaoExpira[0], l.promocaoExpira[1]-1, l.promocaoExpira[2],
-                            l.promocaoExpira[3]||0, l.promocaoExpira[4]||0)
-                            .toLocaleString("pt-BR")
-                        : new Date(l.promocaoExpira).toLocaleString("pt-BR");
-                } catch(e) {}
-            }
-            document.getElementById("detPromoGrid").innerHTML = `
+            // Promoção
+            if (l.emPromocao) {
+                document.getElementById("cardPromo").style.display = "block";
+                let expiraStr = "—";
+                if (l.promocaoExpira) {
+                    try {
+                        expiraStr = Array.isArray(l.promocaoExpira)
+                            ? new Date(l.promocaoExpira[0], l.promocaoExpira[1] - 1, l.promocaoExpira[2],
+                                l.promocaoExpira[3] || 0, l.promocaoExpira[4] || 0)
+                                .toLocaleString("pt-BR")
+                            : new Date(l.promocaoExpira).toLocaleString("pt-BR");
+                    } catch (e) { }
+                }
+                document.getElementById("detPromoGrid").innerHTML = `
                 <div class="detalhe-item"><label>Preço original</label>
                     <span>T$ ${Number(l.precoOriginal || 0).toFixed(2)}</span></div>
                 <div class="detalhe-item"><label>Preço promocional</label>
@@ -351,164 +598,195 @@
                 <div class="detalhe-item"><label>Validade</label>
                     <span>${expiraStr}</span></div>
             `;
-        }
-    }
-
-    function editarLivro() {
-        if (!_livroAtual) return;
-        const l = _livroAtual;
-        document.getElementById("editIsbn").value = l.isbn || "";
-        document.getElementById("editTitulo").value = l.titulo || "";
-        document.getElementById("editAutor").value = l.autor || "";
-        document.getElementById("editPreco").value = l.precoAprovado || "";
-        document.getElementById("editEstado").value = l.estadoAprovado || "BOM";
-        document.getElementById("editResumo").value = l.resumoOficial || l.descricao || "";
-        document.getElementById("editGenero").value = l.genero || "";
-        document.getElementById("editEmPromocao").checked = l.emPromocao || false;
-        togglePromoEdit();
-        if (l.emPromocao) {
-            document.getElementById("editPrecoPromo").value = l.precoAprovado || "";
-            if (l.precoOriginal) {
-                const desc = Math.round((1 - l.precoAprovado/l.precoOriginal)*100);
-                document.getElementById("editDesconto").value = desc;
             }
         }
-        document.getElementById("modalOverlay").style.display = "block";
-        document.getElementById("modalEdit").style.display = "block";
-    }
 
-    function fecharModalEdit() {
-        document.getElementById("modalOverlay").style.display = "none";
-        document.getElementById("modalEdit").style.display = "none";
-    }
-
-    function togglePromoEdit() {
-        const checked = document.getElementById("editEmPromocao").checked;
-        document.getElementById("camposPromo").style.display = checked ? "block" : "none";
-    }
-
-    function calcPrecoPromo() {
-        const preco = parseFloat(document.getElementById("editPreco").value) || 0;
-        const desc = parseFloat(document.getElementById("editDesconto").value) || 0;
-        if (preco && desc) {
-            document.getElementById("editPrecoPromo").value = (preco * (1 - desc/100)).toFixed(2);
-        }
-    }
-
-    async function salvarEdicao(event) {
-        event.preventDefault();
-        const emPromocao = document.getElementById("editEmPromocao").checked;
-        const payload = {
-            titulo: document.getElementById("editTitulo").value,
-            autor: document.getElementById("editAutor").value,
-            precoAprovado: parseFloat(document.getElementById("editPreco").value),
-            estadoAprovado: document.getElementById("editEstado").value,
-            resumoOficial: document.getElementById("editResumo").value,
-            genero: document.getElementById("editGenero").value,
-            emPromocao: emPromocao,
-            precoOriginal: emPromocao ? parseFloat(document.getElementById("editPreco").value) : null,
-            promocaoExpira: emPromocao ? document.getElementById("editValidadePromo").value : null,
-        };
-        try {
-            const res = await fetch(`/api/admin/livros/${LIVRO_ID}`, {
-                method: "PUT",
-                credentials: "include",
-                headers: {"Content-Type":"application/json"},
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                fecharModalEdit();
-                await carregarDetalhe();
-                alert("Livro atualizado com sucesso!");
-            } else {
-                alert("Erro ao salvar alterações.");
+        function editarLivro() {
+            if (!_livroAtual) return;
+            const l = _livroAtual;
+            document.getElementById("editIsbn").value = l.isbn || "";
+            document.getElementById("editTitulo").value = l.titulo || "";
+            document.getElementById("editAutor").value = l.autor || "";
+            document.getElementById("editPreco").value = l.precoAprovado || "";
+            document.getElementById("editEstado").value = l.estadoAprovado || "BOM";
+            document.getElementById("editResumo").value = l.resumoOficial || l.descricao || "";
+            document.getElementById("editGenero").value = l.genero || "";
+            document.getElementById("editEmPromocao").checked = l.emPromocao || false;
+            togglePromoEdit();
+            if (l.emPromocao) {
+                document.getElementById("editPrecoPromo").value = l.precoAprovado || "";
+                if (l.precoOriginal) {
+                    const desc = Math.round((1 - l.precoAprovado / l.precoOriginal) * 100);
+                    document.getElementById("editDesconto").value = desc;
+                }
             }
-        } catch(e) {
-            alert("Erro ao salvar alterações.");
+            document.getElementById("modalOverlay").style.display = "block";
+            document.getElementById("modalEdit").style.display = "block";
         }
-    }
 
-    function mostrarModalExcluir(onConfirmar) {
-        const modal = document.getElementById("modalExcluirLivro");
-        modal.style.display = "flex";
-        const btnConfirmar = document.getElementById("modalExcluirConfirmar");
-        const btnCancelar = document.getElementById("modalExcluirCancelar");
-        const confirmar = () => {
-            modal.style.display = "none";
-            btnConfirmar.removeEventListener("click", confirmar);
-            btnCancelar.removeEventListener("click", cancelar);
-            onConfirmar();
-        };
-        const cancelar = () => {
-            modal.style.display = "none";
-            btnConfirmar.removeEventListener("click", confirmar);
-            btnCancelar.removeEventListener("click", cancelar);
-        };
-        btnConfirmar.addEventListener("click", confirmar);
-        btnCancelar.addEventListener("click", cancelar);
-        modal.onclick = (e) => { if (e.target === modal) cancelar(); };
-    }
+        function fecharModalEdit() {
+            document.getElementById("modalOverlay").style.display = "none";
+            document.getElementById("modalEdit").style.display = "none";
+        }
 
-    async function excluirLivro() {
-        if (!_livroAtual) return;
-        mostrarModalExcluir(async () => {
+        function togglePromoEdit() {
+            const checked = document.getElementById("editEmPromocao").checked;
+            document.getElementById("camposPromo").style.display = checked ? "block" : "none";
+        }
+
+        function calcPrecoPromo() {
+            const preco = parseFloat(document.getElementById("editPreco").value) || 0;
+            const desc = parseFloat(document.getElementById("editDesconto").value) || 0;
+            if (preco && desc) {
+                document.getElementById("editPrecoPromo").value = (preco * (1 - desc / 100)).toFixed(2);
+            }
+        }
+
+        async function salvarEdicao(event) {
+            event.preventDefault();
+
+            const emPromocao = document.getElementById("editEmPromocao").checked;
+
+            // Captura os valores dos inputs do formulário de edição
+            const isbnVal = document.getElementById("editIsbn")?.value?.trim() || "";
+            const precoVal = parseFloat(document.getElementById("editPreco").value);
+            const estadoVal = document.getElementById("editEstado").value;
+
+            // Validação básica no front-end para evitar requisições inválidas ao Spring
+            if (!isbnVal) {
+                alert("O campo ISBN é obrigatório.");
+                return;
+            }
+            if (isNaN(precoVal) || precoVal < 0) {
+                alert("Informe um preço válido.");
+                return;
+            }
+
+            // MONTAGEM DO PAYLOAD CORRETO (Alinhado com o DTO do Spring Boot)
+            const payload = {
+                titulo: document.getElementById("editTitulo").value.trim(),
+                autor: document.getElementById("editAutor").value.trim(),
+                isbn: isbnVal,                 // <-- Adicionado (Obrigatório!)
+                preco: precoVal,               // <-- Corrigido (Era precoAprovado)
+                estado: estadoVal,             // <-- Corrigido (Era estadoAprovado)
+                resumo: document.getElementById("editResumo").value.trim(), // <-- Ajustado para bater com 'resumo'
+                genero: document.getElementById("editGenero").value,
+                emPromocao: emPromocao,
+                percentualDesconto: emPromocao ? parseFloat(document.getElementById("editDesconto")?.value || 0) : null,
+                promocaoExpira: emPromocao ? document.getElementById("editValidadePromo").value : null
+            };
+
+            // Obs: Se o seu backend receber a data de expiração como string formatada em BR (DD/MM/AAAA HH:MM),
+            // certifique-se de convertê-la para ISO (YYYY-MM-DDTHH:mm:ss) usando sua função 'maskedParaIso' 
+            // antes de enviar, caso o Spring use LocalDateTime.
+            if (emPromocao && payload.promocaoExpira) {
+                if (typeof maskedParaIso === "function") {
+                    payload.promocaoExpira = maskedParaIso(payload.promocaoExpira);
+                }
+            }
+
             try {
                 const res = await fetch(`/api/admin/livros/${LIVRO_ID}`, {
-                    method: "DELETE", credentials: "include"
+                    method: "PUT",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
                 });
+
                 if (res.ok) {
-                    window.location.href = "/admin/livros";
+                    fecharModalEdit();
+                    await carregarDetalhe();
+                    alert("Livro atualizado com sucesso!");
                 } else {
-                    alert("Erro ao excluir livro.");
+                    // Tenta capturar a mensagem de erro vinda do validador do Java
+                    const errData = await res.json().catch(() => ({}));
+                    alert(errData.message || "Erro ao salvar alterações no servidor.");
                 }
-            } catch(e) {
-                alert("Erro de conexão.");
+            } catch (e) {
+                alert("Erro de conexão ao salvar alterações.");
             }
-        });
-    }
+        }
 
-    function abrirMenu() {
-        document.getElementById("sidebar")?.classList.add("open");
-        document.getElementById("overlay")?.classList.add("show");
-    }
-    function fecharMenu() {
-        document.getElementById("sidebar")?.classList.remove("open");
-        document.getElementById("overlay")?.classList.remove("show");
-    }
+        function mostrarModalExcluir(onConfirmar) {
+            const modal = document.getElementById("modalExcluirLivro");
+            modal.style.display = "flex";
+            const btnConfirmar = document.getElementById("modalExcluirConfirmar");
+            const btnCancelar = document.getElementById("modalExcluirCancelar");
+            const confirmar = () => {
+                modal.style.display = "none";
+                btnConfirmar.removeEventListener("click", confirmar);
+                btnCancelar.removeEventListener("click", cancelar);
+                onConfirmar();
+            };
+            const cancelar = () => {
+                modal.style.display = "none";
+                btnConfirmar.removeEventListener("click", confirmar);
+                btnCancelar.removeEventListener("click", cancelar);
+            };
+            btnConfirmar.addEventListener("click", confirmar);
+            btnCancelar.addEventListener("click", cancelar);
+            modal.onclick = (e) => { if (e.target === modal) cancelar(); };
+        }
 
-    document.addEventListener("DOMContentLoaded", carregarDetalhe);
-</script>
+        async function excluirLivro() {
+            if (!_livroAtual) return;
+            mostrarModalExcluir(async () => {
+                try {
+                    const res = await fetch(`/api/admin/livros/${LIVRO_ID}`, {
+                        method: "DELETE", credentials: "include"
+                    });
+                    if (res.ok) {
+                        window.location.href = "/admin/livros";
+                    } else {
+                        alert("Erro ao excluir livro.");
+                    }
+                } catch (e) {
+                    alert("Erro de conexão.");
+                }
+            });
+        }
 
-<div id="modalExcluirLivro" style="display:none;position:fixed;
+        function abrirMenu() {
+            document.getElementById("sidebar")?.classList.add("open");
+            document.getElementById("overlay")?.classList.add("show");
+        }
+        function fecharMenu() {
+            document.getElementById("sidebar")?.classList.remove("open");
+            document.getElementById("overlay")?.classList.remove("show");
+        }
+
+        document.addEventListener("DOMContentLoaded", carregarDetalhe);
+    </script>
+
+    <div id="modalExcluirLivro" style="display:none;position:fixed;
     inset:0;background:rgba(0,0,0,0.5);z-index:9999;
     align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:12px;padding:2rem;
+        <div style="background:#fff;border-radius:12px;padding:2rem;
         max-width:400px;width:90%;
         box-shadow:0 8px 32px rgba(0,0,0,0.2);">
-        <h3 style="margin:0 0 0.75rem;
+            <h3 style="margin:0 0 0.75rem;
             font-family:'Playfair Display',serif;font-size:1.2rem;
             color:#2c241b;">Excluir livro</h3>
-        <p style="margin:0 0 1.5rem;font-size:0.9rem;
+            <p style="margin:0 0 1.5rem;font-size:0.9rem;
             color:#5a4f47;line-height:1.6;">
-            Tem certeza que deseja excluir este livro?
-            Esta ação não pode ser desfeita.
-        </p>
-        <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
-            <button id="modalExcluirCancelar"
-                style="padding:0.5rem 1.25rem;
+                Tem certeza que deseja excluir este livro?
+                Esta ação não pode ser desfeita.
+            </p>
+            <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+                <button id="modalExcluirCancelar" style="padding:0.5rem 1.25rem;
                 border:1.5px solid #e0d9d0;border-radius:8px;
                 background:#fff;color:#7a6e65;
                 font-size:0.9rem;cursor:pointer;font-weight:500;">
-                Cancelar
-            </button>
-            <button id="modalExcluirConfirmar"
-                style="padding:0.5rem 1.25rem;border:none;
+                    Cancelar
+                </button>
+                <button id="modalExcluirConfirmar" style="padding:0.5rem 1.25rem;border:none;
                 border-radius:8px;background:#722f37;color:#fff;
                 font-size:0.9rem;cursor:pointer;font-weight:600;">
-                Sim, excluir
-            </button>
+                    Sim, excluir
+                </button>
+            </div>
         </div>
     </div>
-</div>
 </body>
+
 </html>

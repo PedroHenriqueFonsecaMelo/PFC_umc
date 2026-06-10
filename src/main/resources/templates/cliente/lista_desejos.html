@@ -21,7 +21,6 @@
     <header th:replace="~{fragments/client-nav :: clientNav}"></header>
 
     <main>
-      <!-- HEADER -->
       <div class="page-header">
         <h1><i class="fa-solid fa-heart"></i> Minha Lista de Desejos</h1>
         <p>
@@ -30,7 +29,6 @@
         </p>
       </div>
 
-      <!-- Visitante: aviso de login -->
       <th:block th:unless="${clienteLogado}">
         <div
           style="text-align: center; padding: 3rem 1rem; max-width: 480px; margin: 0 auto"
@@ -65,14 +63,23 @@
         </div>
       </th:block>
 
-      <!-- Usuário logado: conteúdo da lista de desejos -->
       <th:block th:if="${clienteLogado}">
-        <!-- SEÇÃO: BUSCA -->
         <div class="section-title">
           <i class="fa-solid fa-magnifying-glass"></i> Buscar Livro
         </div>
         <div class="search-card">
-          <div class="search-row">
+          <div
+            class="search-row"
+            style="display: flex; gap: 0.5rem; align-items: center"
+          >
+            <select
+              id="selectProvedor"
+              style="padding: 0.75rem; border: 1px solid #b0a49a; border-radius: 6px; font-family: 'DM Sans', sans-serif; background-color: #f9f6f0; color: #2c241b; font-size: 0.9rem; cursor: pointer; outline: none"
+            >
+              <option value="google">Google Books</option>
+              <option value="openlibrary">Open Library</option>
+            </select>
+
             <input
               id="inputBusca"
               class="search-input"
@@ -80,6 +87,7 @@
               placeholder="Ex: Dom Casmurro, Harry Potter, O Hobbit..."
               maxlength="120"
               autocomplete="off"
+              style="flex: 1"
             />
             <button id="btnBuscar" class="btn-buscar" onclick="buscarLivros()">
               <i class="fa-solid fa-search"></i> Buscar
@@ -87,12 +95,11 @@
           </div>
           <div id="resultadosBusca">
             <p class="search-hint">
-              Digite o título do livro e clique em Buscar.
+              Selecione o provedor, digite o título do livro e clique em Buscar.
             </p>
           </div>
         </div>
 
-        <!-- SEÇÃO: LISTA SALVA -->
         <div class="section-title">
           <i class="fa-solid fa-bookmark"></i> Livros Salvos
           <span
@@ -108,16 +115,17 @@
       </th:block>
     </main>
 
-    <!-- TOAST -->
     <div id="toast"></div>
 
     <th:block th:if="${clienteLogado}">
       <script th:src="@{/js/cliente/lista_desejos.js}"></script>
     </th:block>
 
-  <footer>
-    <div class="footer-logo">Biblio<em>troca</em></div>
-    <p class="footer-copy">© 2026 Bibliotroca — Todos os direitos reservados</p>
-  </footer>
+    <footer>
+      <div class="footer-logo">Biblio<em>troca</em></div>
+      <p class="footer-copy">
+        © 2026 Bibliotroca — Todos os direitos reservados
+      </p>
+    </footer>
   </body>
 </html>

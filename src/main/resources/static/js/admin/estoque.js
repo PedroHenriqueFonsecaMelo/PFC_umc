@@ -10,6 +10,10 @@ document.getElementById("dataHoje").textContent = new Date().toLocaleDateString(
     "pt-BR",
     { weekday: "long", day: "2-digit", month: "long", year: "numeric" },
 );
+document.getElementById("modalFotoInput")
+    .addEventListener("change", (e) => {
+        handleModalFotos(e.target.files);
+    });
 
 /* ── UTILS ── */
 function promoValida(promocaoExpira) {
@@ -43,27 +47,94 @@ const ESTADO_LABEL = {
 };
 
 /* ── CARREGAR LIVROS ── */
-async function carregarEstoque() {
+// Variáveis de controle de página no estoque.js
+let paginaAtual = 0;
+const tamanhoPagina = 10; 
+let totalPaginas = 0;
+
+// Atualize a sua função de carregar para atualizar a interface do HTML novo:
+async function carregarEstoque(pagina = 0) {
+    paginaAtual = pagina;
     try {
-        const res = await fetch("/api/admin/livros/aprovados");
+        const res = await fetch(`/api/admin/livros/aprovados?page=${pagina}&size=${tamanhoPagina}`);
         if (!res.ok) throw new Error();
-        todosLivros = await res.json();
-        window._todosLivrosEstoque = todosLivros;
+        
+        const resultadoPaginado = await res.json();
+        todosLivros = resultadoPaginado.content;
+        totalPaginas = resultadoPaginado.totalPages;
+        
         renderGrid(todosLivros);
-        // Verificar se veio da página de detalhes com livro para editar
-        const editId = sessionStorage.getItem('editarLivroId');
-        const editDados = sessionStorage.getItem('editarLivroDados');
-        if (editId && editDados) {
-            sessionStorage.removeItem('editarLivroId');
-            sessionStorage.removeItem('editarLivroDados');
-            try {
-                abrirModalEdit(JSON.parse(editDados));
-            } catch(e) {}
-        }
+        
+        // Atualiza o contador do topo da página original
+        document.getElementById("contadorLivros").innerText = `${resultadoPaginado.totalElements} livros`;
+        
+        // Renderiza a paginação nova do HTML
+        renderizarControlesPaginacao(resultadoPaginado);
+        
     } catch (_) {
-        document.getElementById("estoqueGrid").innerHTML =
-            `<p style="color:#722f37;grid-column:1/-1;padding:2rem;text-align:center">Erro ao carregar estoque.</p>`;
+        // Trata erro...
     }
+}
+
+function renderizarControlesPaginacao(pageData) {
+    const container = document.getElementById("paginacaoContainer");
+    if (pageData.totalElements === 0) {
+        container.style.display = "none";
+        return;
+    }
+    container.style.display = "flex";
+
+    // 1. Atualiza texto de informações ("Exibindo X-Y de Z")
+    const deItem = pageData.number * pageData.size + 1;
+    const ateItem = Math.min(deItem + pageData.numberOfElements - 1, pageData.totalElements);
+    document.getElementById("paginacaoMostrando").innerText = `${deItem}-${ateItem}`;
+    document.getElementById("paginacaoTotal").innerText = pageData.totalElements;
+
+    // 2. Controla estado dos botões Anterior e Próximo
+    const btnPrev = document.getElementById("btnPagePrev");
+    const btnNext = document.getElementById("btnPageNext");
+    
+    btnPrev.disabled = pageData.first;
+    btnPrev.style.opacity = pageData.first ? "0.5" : "1";
+    btnPrev.style.cursor = pageData.first ? "not-allowed" : "pointer";
+
+    btnNext.disabled = pageData.last;
+    btnNext.style.opacity = pageData.last ? "0.5" : "1";
+    btnNext.style.cursor = pageData.last ? "not-allowed" : "pointer";
+
+    // 3. Desenha os números das páginas centrais
+    const numerosContainer = document.getElementById("paginacaoNumeros");
+    numerosContainer.innerHTML = "";
+
+    for (let i = 0; i < pageData.totalPages; i++) {
+        const ativo = i === pageData.number;
+        const btnNumero = document.createElement("button");
+        btnNumero.innerText = i + 1;
+        btnNumero.onclick = () => carregarEstoque(i);
+        
+        // Estilos básicos para o botão numérico (Destaca o ativo com a cor do seu tema #722f37)
+        Object.assign(btnNumero.style, {
+            padding: "0.4rem 0.75rem",
+            border: "1.5px solid " + (ativo ? "#722f37" : "#e0d9d0"),
+            borderRadius: "6px",
+            background: ativo ? "#722f37" : "#fff",
+            color: ativo ? "#fff" : "#2c241b",
+            cursor: "pointer",
+            fontSize: "0.85rem",
+            fontWeight: "600"
+        });
+        
+        numerosContainer.appendChild(btnNumero);
+    }
+}
+
+// Funções chamadas pelos botões de Avançar e Voltar
+function mudarPaginaAnterior() {
+    if (paginaAtual > 0) carregarEstoque(paginaAtual - 1);
+}
+
+function mudarPaginaProxima() {
+    if (paginaAtual < totalPaginas - 1) carregarEstoque(paginaAtual + 1);
 }
 
 function renderGrid(livros) {
@@ -130,7 +201,9 @@ function renderGrid(livros) {
         }
 
         // Capa miniatura
-        const capaHtml = `<img src="${foto || '/img/logo-bibliotroca.png'}" alt="${l.titulo}"
+        const capaHtml = `<img src="${
+            foto || "/img/logo-bibliotroca.png"
+        }" alt="${l.titulo}"
                     style="width:56px;height:76px;object-fit:cover;border-radius:5px;
                            box-shadow:0 2px 8px rgba(0,0,0,0.18);flex-shrink:0;
                            border:1px solid rgba(0,0,0,0.08);"
@@ -203,14 +276,39 @@ function atualizarPillsEstoque() {
     const precoMin = document.getElementById("filtroEstoquePrecoMin")?.value;
     const precoMax = document.getElementById("filtroEstoquePrecoMax")?.value;
 
-    const estadoLabel = { NOVO: "Novo", OTIMO: "Ótimo", BOM: "Bom", DESGASTADO: "Desgastado", RUIM: "Ruim" };
-    if (estado) ativos.push({ label: `Estado: ${estadoLabel[estado] || estado}`, id: "filtroEstoqueEstado" });
-    if (promo === "sim") ativos.push({ label: "Em promoção", id: "filtroEstoquePromo" });
-    if (promo === "nao") ativos.push({ label: "Sem promoção", id: "filtroEstoquePromo" });
-    if (precoMin) ativos.push({ label: `Preço ≥ T$${precoMin}`, id: "filtroEstoquePrecoMin" });
-    if (precoMax) ativos.push({ label: `Preço ≤ T$${precoMax}`, id: "filtroEstoquePrecoMax" });
+    const estadoLabel = {
+        NOVO: "Novo",
+        OTIMO: "Ótimo",
+        BOM: "Bom",
+        DESGASTADO: "Desgastado",
+        RUIM: "Ruim",
+    };
+    if (estado) {
+        ativos.push({
+            label: `Estado: ${estadoLabel[estado] || estado}`,
+            id: "filtroEstoqueEstado",
+        });
+    }
+    if (promo === "sim") {
+        ativos.push({ label: "Em promoção", id: "filtroEstoquePromo" });
+    }
+    if (promo === "nao") {
+        ativos.push({ label: "Sem promoção", id: "filtroEstoquePromo" });
+    }
+    if (precoMin) {
+        ativos.push({
+            label: `Preço ≥ T$${precoMin}`,
+            id: "filtroEstoquePrecoMin",
+        });
+    }
+    if (precoMax) {
+        ativos.push({
+            label: `Preço ≤ T$${precoMax}`,
+            id: "filtroEstoquePrecoMax",
+        });
+    }
 
-    pills.innerHTML = ativos.map(f => `
+    pills.innerHTML = ativos.map((f) => `
         <span style="display:inline-flex;align-items:center;gap:.3rem;
             background:#f0e8e8;color:#722f37;border-radius:20px;
             padding:.25rem .65rem;font-size:.75rem;font-weight:600;">
@@ -228,35 +326,44 @@ function atualizarPillsEstoque() {
 }
 
 function aplicarFiltrosEstoque() {
-    const q = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
+    const q = (document.getElementById("searchInput")?.value || "")
+        .toLowerCase().trim();
     const estado = document.getElementById("filtroEstoqueEstado")?.value;
     const promo = document.getElementById("filtroEstoquePromo")?.value;
-    const precoMin = parseFloat(document.getElementById("filtroEstoquePrecoMin")?.value);
-    const precoMax = parseFloat(document.getElementById("filtroEstoquePrecoMax")?.value);
+    const precoMin = parseFloat(
+        document.getElementById("filtroEstoquePrecoMin")?.value,
+    );
+    const precoMax = parseFloat(
+        document.getElementById("filtroEstoquePrecoMax")?.value,
+    );
 
     let lista = todosLivros;
 
     if (q) {
-        lista = lista.filter(l =>
+        lista = lista.filter((l) =>
             (l.titulo || "").toLowerCase().includes(q) ||
             (l.autor || "").toLowerCase().includes(q) ||
             (l.isbn || "").toLowerCase().includes(q)
         );
     }
     if (estado) {
-        lista = lista.filter(l => (l.estadoAprovado || "BOM") === estado);
+        lista = lista.filter((l) => (l.estadoAprovado || "BOM") === estado);
     }
     if (promo === "sim") {
-        lista = lista.filter(l => l.emPromocao && promoValida(l.promocaoExpira));
+        lista = lista.filter((l) =>
+            l.emPromocao && promoValida(l.promocaoExpira)
+        );
     }
     if (promo === "nao") {
-        lista = lista.filter(l => !l.emPromocao || !promoValida(l.promocaoExpira));
+        lista = lista.filter((l) =>
+            !l.emPromocao || !promoValida(l.promocaoExpira)
+        );
     }
     if (!isNaN(precoMin)) {
-        lista = lista.filter(l => (l.precoAprovado || 0) >= precoMin);
+        lista = lista.filter((l) => (l.precoAprovado || 0) >= precoMin);
     }
     if (!isNaN(precoMax)) {
-        lista = lista.filter(l => (l.precoAprovado || 0) <= precoMax);
+        lista = lista.filter((l) => (l.precoAprovado || 0) <= precoMax);
     }
 
     atualizarPillsEstoque();
@@ -264,8 +371,12 @@ function aplicarFiltrosEstoque() {
 }
 
 function limparFiltrosEstoque() {
-    ["filtroEstoqueEstado", "filtroEstoquePromo",
-     "filtroEstoquePrecoMin", "filtroEstoquePrecoMax"].forEach(id => {
+    [
+        "filtroEstoqueEstado",
+        "filtroEstoquePromo",
+        "filtroEstoquePrecoMin",
+        "filtroEstoquePrecoMax",
+    ].forEach((id) => {
         const el = document.getElementById(id);
         if (el) el.value = "";
     });
@@ -407,15 +518,18 @@ function renderModalFotos() {
 }
 
 async function handleModalFotos(files) {
+    const lista = Array.from(files); // PEGA PRIMEIRO
+
     const input = document.getElementById("modalFotoInput");
-    if (input) input.value = "";
+    if (input) input.value = ""; // só depois limpa
 
     const vagas = MODAL_MAX_FOTOS -
         modalFotos.filter((f) => !f.uploading).length;
     if (vagas <= 0) return;
 
-    const lista = Array.from(files).slice(0, vagas);
-    for (const file of lista) {
+    const selecionadas = lista.slice(0, vagas);
+
+    for (const file of selecionadas) {
         const placeholder = { url: "", uploading: true };
         modalFotos.push(placeholder);
         renderModalFotos();
@@ -423,19 +537,22 @@ async function handleModalFotos(files) {
         try {
             const fd = new FormData();
             fd.append("foto", file);
+
             const res = await fetch("/api/admin/livros/upload-foto", {
                 method: "POST",
                 credentials: "include",
                 body: fd,
             });
-            if (!res.ok) throw new Error();
+
             const data = await res.json();
+
             placeholder.url = data.url;
             placeholder.uploading = false;
-        } catch (_) {
+        } catch (e) {
             modalFotos.splice(modalFotos.indexOf(placeholder), 1);
-            mostrarErro("Erro ao enviar foto. Tente novamente.");
+            mostrarErro("Erro ao enviar foto");
         }
+
         renderModalFotos();
     }
 }
@@ -535,33 +652,54 @@ function abrirModalEdit(livro) {
     modoEdicao = true;
     document.getElementById("modalTitulo").textContent = "Editar Livro";
     document.getElementById("livroId").value = livro.id;
+
+    // 1. GARANTIA DO TÍTULO E AUTOR
     document.getElementById("fTitulo").value = livro.titulo || "";
     document.getElementById("fAutor").value = livro.autor || "";
-    document.getElementById("fIsbn").value = livro.isbn || "";
-    document.getElementById("fEstado").value = livro.estadoAprovado || "BOM";
-    document.getElementById("fResumo").value = livro.resumoOficial || "";
+
+    // 2. CORREÇÃO DO ISBN: Se a propriedade vier vazia/nula, tenta alternativas comuns (como maiúsculo)
+    document.getElementById("fIsbn").value = livro.isbn || livro.ISBN || "";
+
+    // 3. CORREÇÃO DO ESTADO: O Java espera [NOVO, OTIMO, BOM, DESGASTADO, RUIM].
+    // Mapeia tanto 'estadoAprovado' quanto 'estado' (caso mude o DTO) e define 'BOM' como fallback.
+    document.getElementById("fEstado").value = livro.estadoAprovado ||
+        livro.estado || "BOM";
+
+    document.getElementById("fResumo").value = livro.resumoOficial ||
+        livro.resumo || "";
     document.getElementById("fGenero").value = livro.genero || "";
 
-    // Preço: se em promoção, mostra o preço original no campo
-    const precoBase = livro.emPromocao && livro.precoOriginal != null
+    // 4. CORREÇÃO DO PREÇO BASE: Tratamento para nunca enviar string vazia ou NaN
+    // Pega o primeiro valor numérico válido disponível nas propriedades retornadas
+    const precoDoObjeto = livro.precoAprovado ?? livro.preco ?? 0;
+    const precoBase = (livro.emPromocao && livro.precoOriginal != null)
         ? livro.precoOriginal
-        : (livro.precoAprovado != null ? livro.precoAprovado : "");
-    document.getElementById("fPreco").value = precoBase;
+        : precoDoObjeto;
 
-    // Promo fields — só preenche se a promoção ainda estiver válida
+    document.getElementById("fPreco").value = precoBase
+        ? parseFloat(precoBase)
+        : "";
+
+    // 5. PROMO FIELDS: Só preenche se a promoção ainda estiver válida
     if (
         livro.emPromocao && livro.precoOriginal != null &&
         promoValida(livro.promocaoExpira)
     ) {
-        const desconto = Math.round(
-            (1 - livro.precoAprovado / livro.precoOriginal) * 100,
+        // Garante que o cálculo do desconto não quebre por divisão por zero
+        const precoOrigNum = parseFloat(livro.precoOriginal);
+        const precoAprovNum = parseFloat(
+            livro.precoAprovado ?? livro.preco ?? 0,
         );
+
+        const desconto = precoOrigNum > 0
+            ? Math.round((1 - precoAprovNum / precoOrigNum) * 100)
+            : 0;
+
         document.getElementById("fEmPromocao").checked = true;
         document.getElementById("promoSection").style.display = "block";
         document.getElementById("fDesconto").value = desconto;
-        document.getElementById("fPrecoPromo").value = Number(
-            livro.precoAprovado,
-        ).toFixed(2);
+        document.getElementById("fPrecoPromo").value = Number(precoAprovNum)
+            .toFixed(2);
         document.getElementById("fPromoExpira").value = isoParaMasked(
             livro.promocaoExpira,
         );
@@ -569,7 +707,7 @@ function abrirModalEdit(livro) {
         limparCamposPromo();
     }
 
-    // Popula fotos existentes do livro
+    // 6. POPULA FOTOS EXISTENTES
     modalFotos = [];
     try {
         const arr = JSON.parse(livro.fotosUrls || "[]");
@@ -611,7 +749,9 @@ function mostrarToast(cls, msg) {
     t.textContent = msg;
     t.style.display = "block";
     clearTimeout(_toastTimer);
-    _toastTimer = setTimeout(() => { t.style.display = "none"; }, 3000);
+    _toastTimer = setTimeout(() => {
+        t.style.display = "none";
+    }, 3000);
 }
 
 function esconderErro() {
@@ -627,6 +767,27 @@ async function salvarLivro(e) {
     btn.disabled = true;
     btn.textContent = "Salvando...";
 
+    // --- VALIDAÇÕES DOS CAMPOS EXIGIDOS PELO BACKEND ---
+    const isbnVal = document.getElementById("fIsbn").value.trim();
+    const precoRaw = document.getElementById("fPreco").value;
+    const estadoVal = document.getElementById("fEstado").value;
+
+    if (!isbnVal) {
+        mostrarErro("O campo ISBN é obrigatório.");
+        return restaurarBotao(btn);
+    }
+
+    if (!precoRaw || isNaN(parseFloat(precoRaw))) {
+        mostrarErro("O campo Preço é obrigatório e deve ser um número válido.");
+        return restaurarBotao(btn);
+    }
+
+    if (!estadoVal) {
+        mostrarErro("O campo Estado do livro é obrigatório.");
+        return restaurarBotao(btn);
+    }
+    // --------------------------------------------------
+
     const emPromocao = document.getElementById("fEmPromocao").checked;
     const desconto = parseFloat(document.getElementById("fDesconto").value) ||
         0;
@@ -636,18 +797,14 @@ async function salvarLivro(e) {
         mostrarErro(
             "Informe o percentual de desconto (deve ser maior que 0%).",
         );
-        btn.disabled = false;
-        btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
-        return;
+        return restaurarBotao(btn);
     }
 
     if (emPromocao && !promoExpiraRaw) {
         mostrarErro(
             "Informe a data de validade da promoção (DD/MM/AAAA HH:MM).",
         );
-        btn.disabled = false;
-        btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
-        return;
+        return restaurarBotao(btn);
     }
 
     let promocaoExpira = null;
@@ -656,22 +813,16 @@ async function salvarLivro(e) {
             mostrarErro(
                 "Preencha a data de validade completa (DD/MM/AAAA HH:MM).",
             );
-            btn.disabled = false;
-            btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
-            return;
+            return restaurarBotao(btn);
         }
         const isoConvertido = maskedParaIso(promoExpiraRaw);
         if (!isoConvertido) {
             mostrarErro("Data de validade inválida.");
-            btn.disabled = false;
-            btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
-            return;
+            return restaurarBotao(btn);
         }
         if (new Date(isoConvertido) <= new Date()) {
             mostrarErro("A data de validade da promoção deve ser futura.");
-            btn.disabled = false;
-            btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
-            return;
+            return restaurarBotao(btn);
         }
         promocaoExpira = isoConvertido;
     }
@@ -684,9 +835,9 @@ async function salvarLivro(e) {
     const payload = {
         titulo: document.getElementById("fTitulo").value.trim(),
         autor: document.getElementById("fAutor").value.trim(),
-        isbn: document.getElementById("fIsbn").value.trim(),
-        preco: parseFloat(document.getElementById("fPreco").value),
-        estado: document.getElementById("fEstado").value,
+        isbn: isbnVal,
+        preco: parseFloat(precoRaw),
+        estado: estadoVal,
         resumo: document.getElementById("fResumo").value.trim(),
         genero: document.getElementById("fGenero").value.trim() || null,
         capa: capa,
@@ -716,25 +867,28 @@ async function salvarLivro(e) {
                     ? data
                     : (data.message || "Erro ao salvar."),
             );
-            btn.disabled = false;
-            btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
-            return;
+            return restaurarBotao(btn);
         }
 
         const titulo = payload.titulo || "Livro";
         const msgSucesso = modoEdicao
             ? `Livro '${titulo}' atualizado com sucesso!`
             : `Livro '${titulo}' adicionado com sucesso!`;
-        btn.disabled = false;
-        btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
+
+        restaurarBotao(btn);
         fecharModal();
         await carregarEstoque();
         mostrarToast("toast-ok", msgSucesso);
     } catch (_) {
         mostrarErro("Erro de conexão. Tente novamente.");
-        btn.disabled = false;
-        btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
+        restaurarBotao(btn);
     }
+}
+
+// Função auxiliar para evitar repetição de código ao resetar o botão
+function restaurarBotao(btn) {
+    btn.disabled = false;
+    btn.textContent = modoEdicao ? "Salvar alterações" : "Adicionar";
 }
 
 /* ── EXCLUIR ── */
@@ -745,7 +899,9 @@ function confirmarExclusao(id, titulo) {
         excluirLivro(id);
     const modal = document.getElementById("confirmModal");
     modal.style.display = "flex";
-    modal.onclick = (e) => { if (e.target === modal) fecharConfirm(); };
+    modal.onclick = (e) => {
+        if (e.target === modal) fecharConfirm();
+    };
 }
 
 function fecharConfirm() {

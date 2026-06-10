@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class LivroExibicaoResponse {
     private Long id;
+    private long vendedor;
     private String titulo;
     private String autor;
     private String isbn;
@@ -24,4 +25,5 @@ public class LivroExibicaoResponse {
     private Boolean emPromocao;
     private Double precoOriginal;
     private LocalDateTime promocaoExpira;
+    private String genero;
 }

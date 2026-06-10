@@ -41,3 +41,7 @@ credentials.json
 /randoop-4.3.4.zip
 /randoop-4.3.4/*
 /classes-do-projeto.txt
+/user.db-shm
+/user.db-wal
+/src/main/resources/static/atualizar_templates.js
+/src/main/resources/static/organizar.js

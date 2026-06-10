@@ -3,8 +3,6 @@ package umc.exs.model.entidades.foundation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.CreationTimestamp;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -70,7 +68,6 @@ public class Pedido {
     @Builder.Default
     private StatusEnvio statusEnvio = StatusEnvio.AGUARDANDO_ENVIO;
 
-    @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime dataCompra;
 
@@ -88,4 +85,16 @@ public class Pedido {
     // LGPD Art. 16 — retenção obrigatória por 5 anos
     @Column(name = "data_retencao_expira")
     private LocalDate dataRetencaoExpira;
+
+    @jakarta.persistence.PrePersist
+    protected void onCreate() {
+        if (this.dataCompra == null) {
+            this.dataCompra = LocalDateTime.now();
+        }
+        
+        // Aproveitando para definir a data de retenção de 5 anos (LGPD) dinamicamente caso esteja nula
+        if (this.dataRetencaoExpira == null && this.dataCompra != null) {
+            this.dataRetencaoExpira = this.dataCompra.toLocalDate().plusYears(5);
+        }
+    }
 }

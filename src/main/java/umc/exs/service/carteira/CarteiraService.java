@@ -40,34 +40,20 @@ public class CarteiraService {
 
                 double saldoAnterior = saldo(cliente);
 
-                cliente.setSaldoTokens(saldoAnterior + valor);
-
                 transacaoRepository.save(
-                                Transacao.criarTransacao(
-                                                cliente,
-                                                valor,
-                                                metodo,
-                                                STATUS_CONCLUIDO,
-                                                infoAdicional));
+                                Transacao.criarTransacao(cliente, valor, metodo, STATUS_CONCLUIDO, infoAdicional));
 
+                carteiraEmailService.enviarCredito(cliente, saldoAnterior, valor, metodo);
+
+                cliente.setSaldoTokens(saldoAnterior + valor);
                 clienteRepositoryService.salvar(cliente);
 
-                carteiraNotificacaoService.notificarRecarga(
-                                cliente,
-                                valor,
-                                metodo);
+                carteiraNotificacaoService.notificarRecarga(cliente, valor, metodo);
 
-                auditoria.registrarLog(
-                                AcaoAuditoria.CARTEIRA_TOKEN_ADICIONADO.name(),
-                                cliente.getId(),
-                                cliente.getEmail(),
-                                String.format("Método: %s | Valor: T$%.2f", metodo, valor));
+                carteiraEmailService.enviarCredito(cliente, saldoAnterior, valor, metodo);
 
-                carteiraEmailService.enviarCredito(
-                                cliente,
-                                saldoAnterior,
-                                valor,
-                                metodo);
+                cliente.setSaldoTokens(saldoAnterior + valor);
+                clienteRepositoryService.salvar(cliente);
 
                 log.info("Tokens adicionados clienteId={} valor={} metodo={}",
                                 cliente.getId(), valor, metodo);
@@ -107,8 +93,6 @@ public class CarteiraService {
 
                 auditoria.registrarLog(
                                 AcaoAuditoria.CARTEIRA_TOKEN_DEBITADO.name(),
-                                cliente.getId(),
-                                cliente.getEmail(),
                                 String.format("Valor: T$%.2f | Descrição: %s", valor, descricao));
 
                 carteiraEmailService.enviarDebito(
@@ -140,8 +124,6 @@ public class CarteiraService {
 
                 auditoria.registrarLog(
                                 AcaoAuditoria.PAGAMENTO_INTENCAO_REGISTRADA.name(),
-                                cliente.getId(),
-                                cliente.getEmail(),
                                 String.format("PIX criado | Valor: %.2f | PagamentoId: %s",
                                                 valor, pagamentoId));
 
@@ -169,26 +151,16 @@ public class CarteiraService {
                 double saldoAnterior = saldo(cliente);
 
                 transacao.setStatus(STATUS_CONCLUIDO);
-
-                cliente.setSaldoTokens(
-                                saldoAnterior + transacao.getValor());
-
                 transacaoRepository.save(transacao);
+
+                carteiraEmailService.enviarConfirmacaoPix(cliente, saldoAnterior, transacao.getValor());
+
+                cliente.setSaldoTokens(saldoAnterior + transacao.getValor());
                 clienteRepositoryService.salvar(cliente);
 
-                carteiraEmailService.enviarConfirmacaoPix(
-                                cliente,
-                                saldoAnterior,
-                                transacao.getValor());
-
-                carteiraNotificacaoService.notificarPixConfirmado(
-                                cliente,
-                                transacao.getValor());
-
+                carteiraNotificacaoService.notificarPixConfirmado(cliente, transacao.getValor());
                 auditoria.registrarLog(
                                 AcaoAuditoria.PAGAMENTO_PIX_CONFIRMADO.name(),
-                                cliente.getId(),
-                                cliente.getEmail(),
                                 String.format("PIX confirmado | Valor: %.2f | PagamentoId: %s",
                                                 transacao.getValor(), pagamentoId));
 

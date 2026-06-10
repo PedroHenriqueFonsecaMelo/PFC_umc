@@ -42,7 +42,7 @@ public class EmailServiceGmailAPI implements EmailService {
     /**
      * Inicializa o cliente da API do Gmail usando o ClientSecrets + Refresh Token
      */
-    private Gmail getGmailService() throws Exception {
+    protected Gmail getGmailService() throws Exception {
         if (base64Credentials == null || base64Credentials.isEmpty()) {
             throw new IllegalStateException("A variável GMAIL_API_CREDENTIALS_BASE64 não foi configurada.");
         }
@@ -82,7 +82,7 @@ public class EmailServiceGmailAPI implements EmailService {
     }
 
     /** Converte a estrutura do e-mail para o formato bruto (Raw) que a API exige */
-    private Message createMessageWithEmail(MimeMessage mimeMessage) throws Exception {
+    protected Message createMessageWithEmail(MimeMessage mimeMessage) throws Exception {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         mimeMessage.writeTo(buffer);
         byte[] bytes = buffer.toByteArray();
@@ -108,7 +108,7 @@ public class EmailServiceGmailAPI implements EmailService {
     }
 
     /** Centraliza a lógica de envio da API */
-    private void dispararViaApi(String destino, String assunto, String conteudo, boolean isHtml) {
+    protected void dispararViaApi(String destino, String assunto, String conteudo, boolean isHtml) {
         try {
             Gmail service = getGmailService();
 

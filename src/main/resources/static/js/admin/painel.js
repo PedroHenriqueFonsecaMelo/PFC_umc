@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════
-   LOTES
+   LOTES (PAGINADO)
    ════════════════════════════════════════ */
 const priceMap = {
   "NOVO": 50,
@@ -9,11 +9,20 @@ const priceMap = {
   "RUIM": 0,
 };
 let livrosCache = [];
-let loteAtualMeta = null; // { id, codigoProtocolo, nomeVendedor, emailVendedor, quantidadeLivros }
+let loteAtualMeta = null;
 let todosLotes = [];
 let loteSearchTimer = null;
 
-async function loadLotes() {
+// Controle local da paginação
+let paginationMeta = {
+  currentPage: 0,
+  totalPages: 0,
+  totalElements: 0,
+  pageSize: 10,
+  filtroAtual: "",
+};
+
+async function loadLotes(page = 0) {
   // Oculta breadcrumb de lote ao voltar para a lista
   const bcLote = document.getElementById("breadcrumb-lote");
   if (bcLote) bcLote.style.display = "none";
@@ -21,9 +30,23 @@ async function loadLotes() {
   const container = document.getElementById("contentArea");
   container.innerHTML =
     '<div class="loading">Carregando lotes pendentes...</div>';
+
   try {
-    const res = await fetch("/api/admin/lotes/pendentes");
-    todosLotes = await res.json();
+    const size = paginationMeta.pageSize;
+    const busca = paginationMeta.filtroAtual;
+    const url = `/api/admin/lotes/pendentes?page=${page}&size=${size}&search=${
+      encodeURIComponent(busca)
+    }`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    // Mapeamento baseado no padrão Pageable do Spring
+    todosLotes = data.content || [];
+    paginationMeta.currentPage = data.number || 0;
+    paginationMeta.totalPages = data.totalPages || 0;
+    paginationMeta.totalElements = data.totalElements || 0;
+
     renderLotesTabela();
   } catch (e) {
     container.innerHTML =
@@ -31,25 +54,19 @@ async function loadLotes() {
   }
 }
 
-function renderLotesTabela(filtro) {
+function onLoteSearch(value) {
+  clearTimeout(loteSearchTimer);
+  loteSearchTimer = setTimeout(() => {
+    paginationMeta.filtroAtual = value;
+    loadLotes(0);
+  }, 400);
+}
+
+function renderLotesTabela() {
   const container = document.getElementById("contentArea");
+  const totalPendentesGeral = paginationMeta.totalElements;
 
-  let lotes = todosLotes;
-
-  // Filtro de texto
-  if (filtro && filtro.trim()) {
-    const q = filtro.trim().toLowerCase();
-    lotes = lotes.filter((l) =>
-      (l.codigoProtocolo || "").toLowerCase().includes(q) ||
-      (l.nomeVendedor || "").toLowerCase().includes(q) ||
-      (l.emailVendedor || "").toLowerCase().includes(q) ||
-      String(l.id).includes(q)
-    );
-  }
-
-  const totalPendentes = todosLotes.length;
-
-  if (totalPendentes === 0) {
+  if (totalPendentesGeral === 0 && !paginationMeta.filtroAtual) {
     container.innerHTML = `
       <div class="lotes-empty">
         <i class="fa-solid fa-box-open" style="font-size:2.5rem;color:#c5bfb7;margin-bottom:.75rem"></i>
@@ -63,21 +80,25 @@ function renderLotesTabela(filtro) {
     <div class="lotes-header-bar">
       <div>
         <span class="lotes-header-title">Lotes Pendentes</span>
-        <span class="lotes-header-badge">${totalPendentes}</span>
+        <span class="lotes-header-badge">${totalPendentesGeral}</span>
       </div>
       <div class="lotes-search-wrap">
         <i class="fa-solid fa-magnifying-glass lotes-search-icon"></i>
         <input class="lotes-search-input" id="lotesSearchInput" type="text"
                placeholder="Buscar por protocolo, vendedor ou e-mail…"
-               value="${esc(filtro || "")}"
+               value="${esc(paginationMeta.filtroAtual)}"
                oninput="onLoteSearch(this.value)" />
       </div>
     </div>`;
 
-  if (lotes.length === 0) {
+  // Se a busca atual não retornou nada
+  if (todosLotes.length === 0) {
     html +=
       `<div style="padding:2rem;text-align:center;color:#7a6e65;font-size:.88rem">Nenhum lote corresponde à busca.</div>`;
     container.innerHTML = html;
+
+    // Foca o input novamente para o usuário continuar digitando caso queira
+    setTimeout(() => document.getElementById("lotesSearchInput")?.focus(), 50);
     return;
   }
 
@@ -96,7 +117,7 @@ function renderLotesTabela(filtro) {
       </thead>
       <tbody>`;
 
-  lotes.forEach((lote) => {
+  todosLotes.forEach((lote) => {
     const data = lote.dataCriacao
       ? new Date(lote.dataCriacao).toLocaleDateString("pt-BR", {
         day: "2-digit",
@@ -132,7 +153,53 @@ function renderLotesTabela(filtro) {
   });
 
   html += `</tbody></table>`;
+
+  html += renderPaginationControls();
+
   container.innerHTML = html;
+
+  if (
+    document.activeElement?.id !== "lotesSearchInput" &&
+    paginationMeta.filtroAtual
+  ) {
+    const input = document.getElementById("lotesSearchInput");
+    if (input) {
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  }
+}
+
+function renderPaginationControls() {
+  const { currentPage, totalPages } = paginationMeta;
+  if (totalPages <= 1) return ""; // Não exibe se tiver apenas 1 página
+
+  let paginationHtml =
+    `<div class="pagination-container" style="display:flex; justify-content:center; align-items:center; margin-top:1rem; gap:0.5rem;">`;
+
+  const disabledPrev = currentPage === 0
+    ? "disabled style='opacity:0.5; cursor:not-allowed;'"
+    : "";
+  paginationHtml +=
+    `<button class="btn-pagination" ${disabledPrev} onclick="loadLotes(${
+      currentPage - 1
+    })"><i class="fa-solid fa-chevron-left"></i> Anterior</button>`;
+
+  paginationHtml +=
+    `<span class="pagination-info" style="font-size:0.88rem; color:#7a6e65;">Página <strong>${
+      currentPage + 1
+    }</strong> de ${totalPages}</span>`;
+
+  const disabledNext = currentPage === totalPages - 1
+    ? "disabled style='opacity:0.5; cursor:not-allowed;'"
+    : "";
+  paginationHtml +=
+    `<button class="btn-pagination" ${disabledNext} onclick="loadLotes(${
+      currentPage + 1
+    })">Próximo <i class="fa-solid fa-chevron-right"></i></button>`;
+
+  paginationHtml += `</div>`;
+  return paginationHtml;
 }
 
 function onLoteSearch(val) {
@@ -656,13 +723,12 @@ function buildGrupoRow(itens) {
     : "—";
   const totalPreco = itens.reduce((sum, i) => sum + (i.precoLivro || 0), 0);
   const statusGeral = statusAgregado(itens);
-  const pillClass =
-    {
-      "AGUARDANDO_ENVIO": "pill-aguardando",
-      "EM_TRANSITO": "pill-transito",
-      "ENTREGUE": "pill-entregue",
-      "CANCELADO": "pill-cancelado",
-    }[statusGeral] || "";
+  const pillClass = {
+    "AGUARDANDO_ENVIO": "pill-aguardando",
+    "EM_TRANSITO": "pill-transito",
+    "ENTREGUE": "pill-entregue",
+    "CANCELADO": "pill-cancelado",
+  }[statusGeral] || "";
   const temAcao = itens.some((i) =>
     (PROXIMOS_STATUS[i.statusEnvio] || []).length > 0
   );
@@ -712,13 +778,12 @@ function buildGrupoRow(itens) {
 
   // Sub-linhas informativas (sem botão Gerir individual)
   itens.forEach((p) => {
-    const pPill =
-      {
-        "AGUARDANDO_ENVIO": "pill-aguardando",
-        "EM_TRANSITO": "pill-transito",
-        "ENTREGUE": "pill-entregue",
-        "CANCELADO": "pill-cancelado",
-      }[p.statusEnvio] || "";
+    const pPill = {
+      "AGUARDANDO_ENVIO": "pill-aguardando",
+      "EM_TRANSITO": "pill-transito",
+      "ENTREGUE": "pill-entregue",
+      "CANCELADO": "pill-cancelado",
+    }[p.statusEnvio] || "";
     html += `
     <tr class="pedido-tr" id="sub-${safeId}-${p.id}" style="display:none;background:rgba(249,246,240,.6)">
       <td class="pedido-td pedido-td-id" style="padding-left:2.25rem">
@@ -813,13 +878,12 @@ function abrirModalGrupo(codigoPedido) {
   const primeiro = itens[0];
   const total = itens.reduce((sum, i) => sum + (i.precoLivro || 0), 0);
   const statusGeral = statusAgregado(itens);
-  const pillClass =
-    {
-      "AGUARDANDO_ENVIO": "pill-aguardando",
-      "EM_TRANSITO": "pill-transito",
-      "ENTREGUE": "pill-entregue",
-      "CANCELADO": "pill-cancelado",
-    }[statusGeral] || "";
+  const pillClass = {
+    "AGUARDANDO_ENVIO": "pill-aguardando",
+    "EM_TRANSITO": "pill-transito",
+    "ENTREGUE": "pill-entregue",
+    "CANCELADO": "pill-cancelado",
+  }[statusGeral] || "";
 
   document.getElementById("mpGCodigo").textContent = codigoPedido;
   document.getElementById("mpGComprador").textContent =
@@ -842,13 +906,12 @@ function abrirModalGrupo(codigoPedido) {
   statusEl.textContent = LABEL_STATUS[statusGeral] || statusGeral;
 
   document.getElementById("mpGLivros").innerHTML = itens.map((i) => {
-    const iPill =
-      {
-        "AGUARDANDO_ENVIO": "pill-aguardando",
-        "EM_TRANSITO": "pill-transito",
-        "ENTREGUE": "pill-entregue",
-        "CANCELADO": "pill-cancelado",
-      }[i.statusEnvio] || "";
+    const iPill = {
+      "AGUARDANDO_ENVIO": "pill-aguardando",
+      "EM_TRANSITO": "pill-transito",
+      "ENTREGUE": "pill-entregue",
+      "CANCELADO": "pill-cancelado",
+    }[i.statusEnvio] || "";
     return `<div class="mp-row" style="padding:.35rem 0;border-bottom:1px solid rgba(44,36,27,.06)">
       <span class="mp-label" style="flex:1;font-weight:500">${
       esc(i.tituloLivro)
@@ -1101,7 +1164,7 @@ function garantirModalPedido() {
           <button id="mpBtnSalvar" class="mp-btn-salvar" onclick="salvarEnvioModal()">
             <i class="fa-solid fa-floppy-disk"></i> Salvar alteração
           </button>
-          <a id="mpBtnEtiqueta" href="#" target="_blank" class="btn-etiqueta" style="display:none">
+          <a id="mpBtnEtiqueta" href="#" download class="btn-etiqueta" style="display: inline-flex;">
             📦 Etiqueta
           </a>
         </div>
@@ -1153,13 +1216,12 @@ function abrirModalPedido(pedidoId) {
     })
     : "—";
 
-  const pillClass =
-    {
-      "AGUARDANDO_ENVIO": "pill-aguardando",
-      "EM_TRANSITO": "pill-transito",
-      "ENTREGUE": "pill-entregue",
-      "CANCELADO": "pill-cancelado",
-    }[p.statusEnvio] || "";
+  const pillClass = {
+    "AGUARDANDO_ENVIO": "pill-aguardando",
+    "EM_TRANSITO": "pill-transito",
+    "ENTREGUE": "pill-entregue",
+    "CANCELADO": "pill-cancelado",
+  }[p.statusEnvio] || "";
   const statusEl = document.getElementById("mpStatus");
   statusEl.className = "status-pill " + pillClass;
   statusEl.textContent = p.statusEnvioDescricao || p.statusEnvio;
@@ -1681,7 +1743,9 @@ function abrirModalPublicacao(e) {
 
   const modal = document.getElementById("modalConfirmarPublicacao");
   modal.style.display = "flex";
-  modal.onclick = (ev) => { if (ev.target === modal) fecharModalPublicacao(); };
+  modal.onclick = (ev) => {
+    if (ev.target === modal) fecharModalPublicacao();
+  };
 }
 
 function fecharModalPublicacao() {

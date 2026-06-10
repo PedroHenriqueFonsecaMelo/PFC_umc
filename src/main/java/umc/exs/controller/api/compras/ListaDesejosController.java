@@ -7,7 +7,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import umc.exs.dto.mapper.ListaDesejosMapper;
+import umc.exs.dto.request.livro.ListaDesejosRequest;
 import umc.exs.dto.response.cliente.ListaDesejosResponse;
+import umc.exs.model.entidades.foundation.ListaDesejos;
 import umc.exs.service.core.dashboard.ListaDesejosService;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,34 @@ public class ListaDesejosController {
     }
 
     @PostMapping
+    public ResponseEntity<?> adicionar(
+            @AuthenticationPrincipal UserDetails user,
+            @RequestBody ListaDesejosRequest dto) {
+
+        // 1. Defesa rápida de autenticação
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        try {
+            // 2. Invoca o service passando o payload híbrido completo
+            ListaDesejos entidadeSalva = listaDesejosService.adicionarDesejo(
+                    user.getUsername(),
+                    dto.getGoogleBookId(),
+                    dto.getOpenLibraryWorkId(),
+                    dto.getIsbn(),
+                    dto.getTitulo(),
+                    dto.getAutor());
+
+            return ResponseEntity.status(201).body(mapper.toDTO(entidadeSalva));
+
+        } catch (RuntimeException e) {
+
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/simplificado")
     public ResponseEntity<ListaDesejosResponse> adicionar(
             @AuthenticationPrincipal UserDetails user,
             @RequestBody Map<String, String> dto) {
@@ -41,8 +71,9 @@ public class ListaDesejosController {
             return ResponseEntity.status(401).build();
 
         String isbn = dto != null ? dto.get("isbn") : null;
+        String titulo = dto != null ? dto.get("titulo") : null;
         return ResponseEntity.status(201)
-                .body(mapper.toDTO(listaDesejosService.adicionarDesejo(user.getUsername(), isbn)));
+                .body(mapper.toDTO(listaDesejosService.adicionarDesejo(user.getUsername(), isbn, titulo)));
     }
 
     @DeleteMapping("/{id}")

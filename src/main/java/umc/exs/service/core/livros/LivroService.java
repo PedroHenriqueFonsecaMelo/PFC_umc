@@ -66,16 +66,36 @@ public class LivroService {
     }
 
     @Transactional
+    public Page<Livro> listarLivrosPendentes(Pageable page) {
+        return livroAdminService.listarLivrosPendentes(page);
+    }
+
+    @Transactional
     public List<Livro> listarLivrosAprovados() {
         return livroAdminService.listarLivrosAprovados();
     }
 
-    public Page<Livro> listarLivrosAprovadosPaginado(Pageable pageable, String busca) {
-        return livroAdminService.listarLivrosAprovadosPaginado(pageable, busca);
+    @Transactional
+    public Page<Livro> listarLivrosAprovados(Pageable pageable) {
+        return livroAdminService.listarLivrosAprovados(pageable);
     }
 
-    public Page<Livro> listarPromocoesAtivasPaginado(Pageable pageable, String busca) {
-        return livroAdminService.listarPromocoesAtivasPaginado(pageable, busca);
+    // ATUALIZADO: repassa a lista de estados e gêneros para o service responsável
+    @Transactional(readOnly = true)
+    public Page<Livro> listarLivrosAprovadosPaginado(Pageable pageable, String busca, List<String> estados, List<String> generos) {
+        return livroAdminService.listarLivrosAprovadosPaginado(pageable, busca, estados, generos);
+    }
+
+    // ATUALIZADO: repassa a lista de estados e gêneros para o service responsável
+    @Transactional(readOnly = true)
+    public Page<Livro> listarPromocoesAtivasPaginado(Pageable pageable, String busca, List<String> estados, List<String> generos) {
+        return livroAdminService.listarPromocoesAtivasPaginado(pageable, busca, estados, generos);
+    }
+
+    // NOVO ENDPOINT: Busca a lista de strings distintas para popular a barra lateral do front-end
+    @Transactional(readOnly = true)
+    public List<String> listarGenerosUnicosCadastrados() {
+        return livroAdminService.listarGenerosUnicosCadastrados();
     }
 
     @Transactional
@@ -100,13 +120,11 @@ public class LivroService {
 
     @Transactional
     public Livro adicionarLivroAdmin(LivroAdminRequest req) {
-
         return livroAdminService.adicionarLivroAdmin(req);
     }
 
     @Transactional
     public Livro editarLivroAdmin(@NonNull Long id, LivroAdminRequest req) {
-
         return livroAdminService.editarLivroAdmin(id, req);
     }
 
@@ -118,5 +136,12 @@ public class LivroService {
     @Transactional
     public Livro cadastrarPorIsbn(String isbn) {
         return livroAnuncioService.cadastrarPorIsbn(isbn);
+    }
+
+    // ========================= ADMIN / ATUALIZAÇÕES =========================
+
+    @Transactional
+    public Livro aplicarInflacaoIpcaNoPrecoAprovado(@NonNull Long livroId, Double taxaIpcaAcumulado) {
+        return livroAdminService.aplicarInflacaoIpcaNoPrecoAprovado(livroId, taxaIpcaAcumulado);
     }
 }

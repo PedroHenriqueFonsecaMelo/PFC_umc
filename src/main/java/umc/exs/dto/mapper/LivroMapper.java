@@ -19,6 +19,8 @@ public interface LivroMapper {
     @Mapping(source = "emPromocao", target = "emPromocao")
     @Mapping(source = "precoOriginal", target = "precoOriginal")
     @Mapping(source = "promocaoExpira", target = "promocaoExpira")
+    @Mapping(source = "genero", target = "genero")
+    @Mapping(source = "vendedor.id", target = "vendedor")
     LivroExibicaoResponse toResponse(Livro livro);
 
     List<LivroExibicaoResponse> toResponseList(List<Livro> livros);

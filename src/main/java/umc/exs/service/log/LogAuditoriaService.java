@@ -6,11 +6,14 @@ import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.Element;
@@ -27,8 +30,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import umc.exs.model.entidades.logic.LogAuditoria;
 import umc.exs.model.entidades.usuario.Cliente;
+import umc.exs.repository.logic.AdminRepository;
 import umc.exs.repository.logic.LogAuditoriaRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Slf4j
 @Service
@@ -37,6 +44,7 @@ public class LogAuditoriaService {
 
     private final LogAuditoriaRepository repository;
     private final ClienteRepository clienteRepository;
+    private final AdminRepository adminRepo;
 
     private static final Logger auditLog = LoggerFactory.getLogger("AUDIT");
 
@@ -45,6 +53,9 @@ public class LogAuditoriaService {
     /**
      * Registra log ação usuário no banco.
      */
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+
     public void registrarLog(String acao, Long idUsuario, String emailUsuario, String detalhes) {
 
         try {
@@ -63,12 +74,16 @@ public class LogAuditoriaService {
                     acao, idUsuario, emailUsuario, detalhes, dataFormatada);
 
             repository.save(la);
+            repository.flush();
 
         } catch (Exception e) {
             log.warn("Falha ao salvar log de auditoria [acao={}, usuarioId={}]: {}",
                     acao, idUsuario, e.getMessage());
         }
     }
+
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
 
     public void registrarLog(String acao, String emailUsuario, String detalhes) {
 
@@ -87,32 +102,70 @@ public class LogAuditoriaService {
                     acao, emailUsuario, detalhes, dataFormatada);
 
             repository.save(la);
+            repository.flush();
 
         } catch (Exception e) {
             log.warn("Falha ao salvar log de auditoria [acao={}]: {}",
                     acao, e.getMessage());
         }
     }
-    public void registrarLog(String acao, String detalhes) {
 
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void registrarLog(String acao, String detalhes) {
         try {
             LocalDateTime agora = LocalDateTime.now();
 
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String usuarioEmail = "SISTEMA";
+            Long usuarioId = null;
+
+            if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
+                Object principal = auth.getPrincipal();
+
+                if (principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
+                    usuarioEmail = userDetails.getUsername();
+                } else {
+                    usuarioEmail = principal.toString();
+                }
+
+                // Busca o ID no banco com base no e-mail recuperado do contexto
+                if (!"SISTEMA".equals(usuarioEmail)) {
+                    // Primeiro tenta buscar no repositório de clientes
+                    var optCliente = clienteRepository.findByEmail(usuarioEmail);
+                    if (optCliente.isPresent()) {
+                        usuarioId = optCliente.get().getId();
+                    } else {
+                        // Se não for cliente, tenta buscar no de administradores
+                        var optAdmin = adminRepo.findByEmail(usuarioEmail);
+                        if (optAdmin.isPresent()) {
+                            usuarioId = optAdmin.get().getId();
+                        }
+                    }
+                }
+            }
+
+            // Ordem exata do seu construtor:
+            // (Long idUsuario, String emailUsuario, String acao, String detalhes,
+            // LocalDateTime dataHora)
             LogAuditoria la = new LogAuditoria(
+                    usuarioId,
+                    usuarioEmail,
                     acao,
                     detalhes,
                     agora);
 
             String dataFormatada = FORMATTER.format(agora);
 
-            auditLog.info("ACAO={} DETALHES={} DATA_HORA={}",
-                    acao, detalhes, dataFormatada);
+            auditLog.info("USUARIO_ID={} EMAIL={} ACAO={} DETALHES={} DATA_HORA={}",
+                    usuarioId != null ? usuarioId : "—", usuarioEmail, acao, detalhes, dataFormatada);
 
             repository.save(la);
+            repository.flush();
 
         } catch (Exception e) {
             log.warn("Falha ao salvar log de auditoria [acao={}]: {}",
-                    acao, e.getMessage());
+                    acao, e.getMessage(), e);
         }
     }
 
@@ -139,31 +192,30 @@ public class LogAuditoriaService {
             String dataInicio,
             String dataFim) {
 
-        // Ajusta filtros de string
-        String email = (emailUsuario == null || emailUsuario.isBlank()) ? null : emailUsuario.trim();
-        String acaoFiltro = (acao == null || acao.isBlank()) ? null : acao.trim();
-
         // Formato esperado para LocalDateTime
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-        // Converte strings em LocalDateTime, ou null se não informado
-        LocalDateTime inicioLDT = null;
-        if (dataInicio != null && !dataInicio.isBlank()) {
-            LocalDate date = LocalDate.parse(dataInicio);
-            inicioLDT = date.atStartOfDay();
-        }
+        String email = (emailUsuario == null || emailUsuario.isBlank()) ? null : emailUsuario.trim();
+        String acaoFiltro = (acao == null || acao.isBlank()) ? null : acao.trim();
 
-        LocalDateTime fimLDT = null;
-        if (dataFim != null && !dataFim.isBlank()) {
-            fimLDT = LocalDateTime.parse(dataFim + " 23:59", formatter);
-        }
+        LocalDateTime inicio = null;
+        LocalDateTime fim = null;
 
-        // Chama o repositório com LocalDateTime
-        return repository.buscarComFiltros(email, acaoFiltro, inicioLDT, fimLDT);
+        try {
+            if (dataInicio != null && !dataInicio.isBlank()) {
+                inicio = LocalDate.parse(dataInicio.trim()).atStartOfDay();
+            }
+            if (dataFim != null && !dataFim.isBlank()) {
+                fim = LocalDate.parse(dataFim.trim()).atTime(23, 59, 59);
+            }
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Formato de data inválido. Use yyyy-MM-dd", e);
+        }
+        return repository.buscarComFiltros(email, acaoFiltro, inicio, fim);
     }
 
     public List<String> buscarAcoesDistintas() {
-        return repository.findAcoesDistintas();
+        return repository.buscarAcoesDistintas();
     }
 
     /**

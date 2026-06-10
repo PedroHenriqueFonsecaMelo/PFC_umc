@@ -20,155 +20,128 @@ import umc.exs.repository.logic.VisitaSiteRepository;
 import umc.exs.repository.negocios.PedidoRepository;
 import umc.exs.repository.negocios.TransacaoRepository;
 import umc.exs.repository.usuario.ClienteRepository;
-import umc.exs.service.log.AcaoAuditoria;
-import umc.exs.service.log.AppLogger;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DashboardService {
 
-    private final ClienteRepository clienteRepository;
-    private final LivroRepository livroRepository;
-    private final PedidoRepository pedidoRepository;
-    private final TransacaoRepository transacaoRepository;
-    private final VisitaSiteRepository visitaSiteRepository;
-    private final AppLogger appLogger;
+        private final ClienteRepository clienteRepository;
+        private final LivroRepository livroRepository;
+        private final PedidoRepository pedidoRepository;
+        private final TransacaoRepository transacaoRepository;
+        private final VisitaSiteRepository visitaSiteRepository;
 
-    @SuppressWarnings("deprecation")
-    private static final Locale PT_BR = new Locale("pt", "BR");
+        @SuppressWarnings("deprecation")
+        private static final Locale PT_BR = new Locale("pt", "BR");
 
-    @Transactional(readOnly = true)
-    public DashboardResponse getMetricas() {
+        @Transactional(readOnly = true)
+        public DashboardResponse getMetricas() {
 
-        long inicioExecucao = System.currentTimeMillis();
+                long inicioExecucao = System.currentTimeMillis();
 
-        try {
+                try {
 
-            long totalClientes = clienteRepository.count();
-            long totalLivros = livroRepository.count();
+                        long totalClientes = clienteRepository.count();
+                        long totalLivros = livroRepository.count();
 
-            Long visitasRaw = visitaSiteRepository.sumTotalVisitas();
-            long totalVisitas = visitasRaw != null ? visitasRaw : 0L;
+                        Long visitasRaw = visitaSiteRepository.sumTotalVisitas();
+                        long totalVisitas = visitasRaw != null ? visitasRaw : 0L;
 
-            long totalAdquiridos = pedidoRepository.count();
+                        long totalAdquiridos = pedidoRepository.count();
 
-            Double tokensDisp = clienteRepository.sumSaldoTokensAtivos();
-            Double tokensUtil = pedidoRepository.sumTokensUtilizados();
+                        Double tokensDisp = clienteRepository.sumSaldoTokensAtivos();
+                        Double tokensUtil = pedidoRepository.sumTokensUtilizados();
 
-            double tokensDisponibilizados =
-                    tokensDisp != null ? tokensDisp : 0.0;
+                        double tokensDisponibilizados = tokensDisp != null ? tokensDisp : 0.0;
+                        double tokensUtilizados = tokensUtil != null ? tokensUtil : 0.0;
 
-            double tokensUtilizados =
-                    tokensUtil != null ? tokensUtil : 0.0;
+                        long pixGerados = transacaoRepository.count();
+                        long pixConvertidos = transacaoRepository.countByStatus("CONFIRMADO");
 
-            long pixGerados = transacaoRepository.count();
+                        YearMonth base = YearMonth.now();
 
-            long pixConvertidos =
-                    transacaoRepository.countByStatus("CONFIRMADO");
+                        LocalDateTime inicio = base.minusMonths(11)
+                                        .atDay(1)
+                                        .atStartOfDay();
 
-            LocalDateTime inicio =
-                    YearMonth.now()
-                            .minusMonths(11)
-                            .atDay(1)
-                            .atStartOfDay();
+                        var clientes = clienteRepository.findByDataCriacaoAfter(inicio);
+                        var datasCompra = pedidoRepository.findDataCompraAfterProjection(inicio);
+                        var datasAnuncio = livroRepository.findDataAnuncioAfterProjection(inicio);
 
-            var clientes =
-                    clienteRepository.findByDataCriacaoAfter(inicio);
+                        // =========================
+                        // MAPEAMENTOS SEGUROS
+                        // =========================
 
-            var datasCompra =
-                    pedidoRepository.findDataCompraAfterProjection(inicio);
+                        Map<YearMonth, Long> clientesMap = clientes.stream()
+                                        .collect(Collectors.groupingBy(
+                                                        c -> YearMonth.from(c.getDataCriacao()),
+                                                        Collectors.counting()));
 
-            var datasAnuncio =
-                    livroRepository.findDataAnuncioAfterProjection(inicio);
+                        Map<YearMonth, Long> vendasMap = datasCompra.stream()
+                                        .filter(d -> d != null)
+                                        .collect(Collectors.groupingBy(
+                                                        d -> YearMonth.from(d),
+                                                        Collectors.counting()));
 
-            Map<YearMonth, Long> clientesMap =
-                    clientes.stream()
-                            .collect(Collectors.groupingBy(
-                                    c -> YearMonth.from(c.getDataCriacao()),
-                                    Collectors.counting()));
+                        Map<YearMonth, Long> postagensMap = datasAnuncio.stream()
+                                        .filter(d -> d != null)
+                                        .collect(Collectors.groupingBy(
+                                                        d -> YearMonth.from(d),
+                                                        Collectors.counting()));
 
-            Map<YearMonth, Long> vendasMap =
-                    datasCompra.stream()
-                            .collect(Collectors.groupingBy(
-                                    YearMonth::from,
-                                    Collectors.counting()));
+                        List<String> rotulos = new ArrayList<>();
+                        List<Long> clientesMensais = new ArrayList<>();
+                        List<Long> vendasMensais = new ArrayList<>();
+                        List<Long> postagensMensais = new ArrayList<>();
 
-            Map<YearMonth, Long> postagensMap =
-                    datasAnuncio.stream()
-                            .collect(Collectors.groupingBy(
-                                    YearMonth::from,
-                                    Collectors.counting()));
+                        for (int i = 11; i >= 0; i--) {
 
-            List<String> rotulos = new ArrayList<>();
-            List<Long> clientesMensais = new ArrayList<>();
-            List<Long> vendasMensais = new ArrayList<>();
-            List<Long> postagensMensais = new ArrayList<>();
+                                YearMonth ym = base.minusMonths(i);
 
-            for (int i = 11; i >= 0; i--) {
+                                rotulos.add(
+                                                ym.getMonth().getDisplayName(TextStyle.SHORT, PT_BR));
 
-                YearMonth ym = YearMonth.now().minusMonths(i);
+                                clientesMensais.add(clientesMap.getOrDefault(ym, 0L));
+                                vendasMensais.add(vendasMap.getOrDefault(ym, 0L));
+                                postagensMensais.add(postagensMap.getOrDefault(ym, 0L));
+                        }
 
-                rotulos.add(
-                        ym.getMonth()
-                                .getDisplayName(TextStyle.SHORT, PT_BR));
+                        DashboardResponse response = DashboardResponse.builder()
+                                        .totalClientes(totalClientes)
+                                        .totalLivros(totalLivros)
+                                        .totalVisitas(totalVisitas)
+                                        .totalAdquiridos(totalAdquiridos)
+                                        .tokensDisponibilizados(tokensDisponibilizados)
+                                        .tokensUtilizados(tokensUtilizados)
+                                        .pixGerados(pixGerados)
+                                        .pixConvertidos(pixConvertidos)
+                                        .rotulos(rotulos)
+                                        .clientesPorMes(clientesMensais)
+                                        .vendasPorMes(vendasMensais)
+                                        .postagensPorMes(postagensMensais)
+                                        .build();
 
-                clientesMensais.add(
-                        clientesMap.getOrDefault(ym, 0L));
+                        
 
-                vendasMensais.add(
-                        vendasMap.getOrDefault(ym, 0L));
+                        log.info(
+                                        "DASHBOARD_METRICAS_CONSULTADAS clientes={} livros={} visitas={} pedidos={} pixGerados={} pixConvertidos={} tempoMs={}",
+                                        totalClientes,
+                                        totalLivros,
+                                        totalVisitas,
+                                        totalAdquiridos,
+                                        pixGerados,
+                                        pixConvertidos,
+                                        System.currentTimeMillis() - inicioExecucao);
 
-                postagensMensais.add(
-                        postagensMap.getOrDefault(ym, 0L));
-            }
+                        return response;
 
-            DashboardResponse response = DashboardResponse.builder()
-                    .totalClientes(totalClientes)
-                    .totalLivros(totalLivros)
-                    .totalVisitas(totalVisitas)
-                    .totalAdquiridos(totalAdquiridos)
-                    .tokensDisponibilizados(tokensDisponibilizados)
-                    .tokensUtilizados(tokensUtilizados)
-                    .pixGerados(pixGerados)
-                    .pixConvertidos(pixConvertidos)
-                    .rotulos(rotulos)
-                    .clientesPorMes(clientesMensais)
-                    .vendasPorMes(vendasMensais)
-                    .postagensPorMes(postagensMensais)
-                    .build();
+                } catch (Exception e) {
 
-            appLogger.info(
-                    AcaoAuditoria.CLIENTE_PERFIL_VISUALIZADO,
-                    null,
-                    "ADMIN",
-                    "Dashboard administrativo consultado");
 
-            log.info(
-                    "DASHBOARD_METRICAS_CONSULTADAS clientes={} livros={} visitas={} pedidos={} pixGerados={} pixConvertidos={} tempoMs={}",
-                    totalClientes,
-                    totalLivros,
-                    totalVisitas,
-                    totalAdquiridos,
-                    pixGerados,
-                    pixConvertidos,
-                    System.currentTimeMillis() - inicioExecucao);
+                        log.error("DASHBOARD_METRICAS_ERRO", e);
 
-            return response;
-
-        } catch (Exception e) {
-
-            appLogger.error(
-                    AcaoAuditoria.GENERICO,
-                    null,
-                    "ADMIN",
-                    "Falha ao carregar dashboard: " + e.getMessage());
-
-            log.error(
-                    "DASHBOARD_METRICAS_ERRO",
-                    e);
-
-            throw e;
+                        throw e;
+                }
         }
-    }
 }

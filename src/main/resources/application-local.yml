@@ -15,8 +15,12 @@ spring:
     cache: false
 
   datasource:
-    url: jdbc:sqlite:user.db
+    url: jdbc:sqlite:user.db?journal_mode=WAL&synchronous=NORMAL&busy_timeout=10000
     driver-class-name: org.sqlite.JDBC
+    hikari:
+      maximum-pool-size: 1
+      connection-timeout: 15000
+      idle-timeout: 30000
 
   jpa:
     hibernate:

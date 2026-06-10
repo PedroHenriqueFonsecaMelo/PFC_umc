@@ -64,14 +64,14 @@ class ListaDesejosControllerUnitTest {
         when(entity.getCliente()).thenReturn(cliente);
         when(cliente.getNome()).thenReturn("Cliente");
 
-        when(service.adicionarDesejo(eq(user.getUsername()), eq("123")))
+        when(service.adicionarDesejo(eq(user.getUsername()), eq("123"), ""))
                 .thenReturn(entity);
 
         ResponseEntity<ListaDesejosResponse> resp = controller.adicionar(user, dto);
 
         assertEquals(HttpStatus.CREATED, resp.getStatusCode());
         assertNotNull(resp.getBody());
-        verify(service).adicionarDesejo(user.getUsername(), "123");
+        verify(service).adicionarDesejo(user.getUsername(), "123", "");
     }
 }
 

@@ -1,19 +1,25 @@
 package umc.exs.controller_api.unitary.interaction;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-import org.mapstruct.factory.Mappers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.userdetails.User;
@@ -25,10 +31,7 @@ import umc.exs.dto.mapper.LivroMapper;
 import umc.exs.dto.request.compra.CarrinhoCompraRequest;
 import umc.exs.dto.request.compra.LoteRequest;
 import umc.exs.dto.request.livro.LivroRequest;
-import umc.exs.dto.response.compras.CarrinhoCompraResponse;
 import umc.exs.model.entidades.foundation.Lote;
-import umc.exs.model.entidades.livro.Livro;
-
 import umc.exs.service.core.livros.LivroService;
 
 class LivroControllerApiUnitTestMissing {
@@ -310,24 +313,30 @@ class LivroControllerApiUnitTestMissing {
     @Test
     void listarVitrine_EmPromocaoTrue_ChamaMetodoPromocao() {
         var page = mock(org.springframework.data.domain.Page.class);
-        when(livroService.listarPromocoesAtivasPaginado(any(), anyString()))
+        // Atualizado: Stubbing com suporte a 4 argumentos
+        when(livroService.listarPromocoesAtivasPaginado(any(), anyString(), any(), any()))
                 .thenReturn(page);
 
-        ResponseEntity<?> resp = controller.listarVitrine(0, 20, true, "abc");
+        // Act
+        ResponseEntity<?> resp = controller.listarVitrine(0, 20, true, "abc", null, null, "recente");
 
+        // Assert
         assertEquals(HttpStatus.OK, resp.getStatusCode());
-        verify(livroService).listarPromocoesAtivasPaginado(any(), eq("abc"));
+        verify(livroService).listarPromocoesAtivasPaginado(any(), eq("abc"), any(), any());
     }
 
     @Test
     void listarVitrine_EmPromocaoFalse_ChamaMetodoAprovados() {
         var page = mock(org.springframework.data.domain.Page.class);
-        when(livroService.listarLivrosAprovadosPaginado(any(), anyString()))
+        // Atualizado: Stubbing com suporte a 4 argumentos
+        when(livroService.listarLivrosAprovadosPaginado(any(), anyString(), any(), any()))
                 .thenReturn(page);
 
-        ResponseEntity<?> resp = controller.listarVitrine(0, 20, false, "abc");
+        // Act
+        ResponseEntity<?> resp = controller.listarVitrine(0, 20, false, "abc", null, null, "recente");
 
+        // Assert
         assertEquals(HttpStatus.OK, resp.getStatusCode());
-        verify(livroService).listarLivrosAprovadosPaginado(any(), eq("abc"));
+        verify(livroService).listarLivrosAprovadosPaginado(any(), eq("abc"), any(), any());
     }
 }

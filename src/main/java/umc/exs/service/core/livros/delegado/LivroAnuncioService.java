@@ -206,8 +206,6 @@ public class LivroAnuncioService {
 
             logAuditoria.registrarLog(
                     LOG_LIVRO_ISBN_CRIADO,
-                    null,
-                    null,
                     "isbn=" + isbn + ", origem=GOOGLE_BOOKS"
             );
 
@@ -242,14 +240,6 @@ public class LivroAnuncioService {
             dto.setPrecoAprovado(livro.getPrecoAprovado());
             response.add(dto);
         }
-
-        logAuditoria.registrarLog(
-                LOG_PROMO_LISTAGEM,
-                null,
-                null,
-                "total=" + response.size()
-        );
-
         return response;
     }
 
@@ -257,13 +247,6 @@ public class LivroAnuncioService {
 
         Livro livro = livroRepository.findByIdAndAprovadoTrue(id)
                 .orElseThrow(() -> new EntityNotFoundException("Livro não encontrado"));
-
-        logAuditoria.registrarLog(
-                LOG_LIVRO_BUSCA_ATIVA,
-                null,
-                null,
-                "livroId=" + id
-        );
 
         return livro;
     }

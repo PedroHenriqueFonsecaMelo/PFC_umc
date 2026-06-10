@@ -17,6 +17,28 @@
     <link rel="stylesheet" th:href="@{/css/admin/layout.css}" />
     <link rel="stylesheet" th:href="@{/css/admin/painel.css}" />
     <link rel="stylesheet" th:href="@{/css/breadcrumb.css}" />
+
+    <style>
+      .btn-pagination {
+        padding: 0.4rem 0.85rem;
+        border: 1px solid #e0d9d0;
+        background: #fff;
+        color: #7a6e65;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-weight: 500;
+      }
+      .btn-pagination:hover:not([disabled]) {
+        background: #f9f6f2;
+        color: #2c241b;
+        border-color: #c5bfb7;
+      }
+    </style>
   </head>
   <body>
     <div class="layout">
@@ -24,7 +46,6 @@
         th:replace="~{fragments/admin-sidebar :: adminSidebar('lotes')}"
       ></th:block>
 
-      <!-- CONTEÚDO -->
       <div class="content">
         <header class="topbar">
           <div>
@@ -33,19 +54,15 @@
           </div>
         </header>
 
-
         <div class="main">
           <div>
-            <!-- ════ PAINEL LOTES ════ -->
             <div class="tab-panel active" id="panel-lotes">
               <div id="contentArea">
                 <div class="loading">Carregando lotes pendentes...</div>
               </div>
             </div>
 
-            <!-- ════ PAINEL PEDIDOS ════ -->
             <div class="tab-panel" id="panel-pedidos">
-              <!-- Toolbar de pedidos -->
               <div class="pedidos-toolbar">
                 <div class="pedidos-toolbar-top">
                   <span class="pedidos-heading">Pedidos — Gestão de Envio</span>
@@ -132,7 +149,6 @@
               </div>
             </div>
 
-            <!-- ════ PAINEL BLOG ════ -->
             <div class="tab-panel" id="panel-blog">
               <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem"
@@ -140,7 +156,6 @@
                 <span class="pedidos-heading">Gerenciar Blog</span>
               </div>
 
-              <!-- Formulário novo post -->
               <div class="blog-form-card">
                 <div class="blog-section-title">Novo Post</div>
                 <form
@@ -169,18 +184,27 @@
                     ></textarea>
                   </div>
                   <div style="margin-bottom: 1.25rem">
-                    <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.4rem">
-                      <label for="blogImagem" class="btn-publicar" style="cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem">
+                    <div
+                      style="display: flex; align-items: center; gap: 0.75rem; margin-top: 0.4rem"
+                    >
+                      <label
+                        for="blogImagem"
+                        class="btn-publicar"
+                        style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem"
+                      >
                         <i class="fa-solid fa-image"></i> Escolher arquivo
                       </label>
-                      <span id="blogImagemNome" style="font-size:0.8rem;color:#7a6e65;font-style:italic">Nenhum arquivo selecionado</span>
+                      <span
+                        id="blogImagemNome"
+                        style="font-size: 0.8rem; color: #7a6e65; font-style: italic"
+                      >Nenhum arquivo selecionado</span>
                     </div>
                     <input
                       type="file"
                       id="blogImagem"
                       name="imagem"
                       accept="image/*"
-                      style="display:none"
+                      style="display: none"
                       onchange="document.getElementById('blogImagemNome').textContent = this.files[0]?.name || 'Nenhum arquivo selecionado'"
                     />
                     <div id="blogImgPreview" style="margin-top: 0.5rem"></div>
@@ -196,7 +220,6 @@
                 </form>
               </div>
 
-              <!-- Lista de posts existentes -->
               <div class="blog-section-title" style="margin-bottom: 0.75rem">
                 Posts publicados
               </div>
@@ -205,42 +228,39 @@
               </div>
             </div>
           </div>
-          <!-- /page-wrapper -->
         </div>
-        <!-- /main-s -->
       </div>
-      <!-- /content-wrap -->
     </div>
-    <!-- /layout -->
-
     <script th:src="@{/js/admin/painel.js}"></script>
 
-    <!-- Modal de confirmação de publicação de post -->
-    <div id="modalConfirmarPublicacao" style="display:none;position:fixed;
-        inset:0;background:rgba(0,0,0,0.5);z-index:9999;
-        align-items:center;justify-content:center;">
-      <div style="background:#fff;border-radius:12px;padding:2rem;
-          max-width:440px;width:90%;
-          box-shadow:0 8px 32px rgba(0,0,0,0.2);">
-        <h3 style="margin:0 0 0.75rem;
-            font-family:'Playfair Display',serif;font-size:1.2rem;
-            color:#2c241b;">Confirmar Publicação</h3>
-        <div id="modalPublicacaoResumo" style="margin:0 0 1.5rem;
-            font-size:0.88rem;color:#5a4f47;line-height:1.7;
-            background:#f9f6f2;border-radius:8px;padding:1rem;">
+    <div
+      id="modalConfirmarPublicacao"
+      style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center"
+    >
+      <div
+        style="background: #fff; border-radius: 12px; padding: 2rem; max-width: 440px; width: 90%; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2)"
+      >
+        <h3
+          style="margin: 0 0 0.75rem; font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #2c241b"
+        >
+          Confirmar Publicação
+        </h3>
+        <div
+          id="modalPublicacaoResumo"
+          style="margin: 0 0 1.5rem; font-size: 0.88rem; color: #5a4f47; line-height: 1.7; background: #f9f6f2; border-radius: 8px; padding: 1rem"
+        >
         </div>
-        <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
-          <button onclick="fecharModalPublicacao()"
-              style="padding:0.5rem 1.25rem;
-              border:1.5px solid #e0d9d0;border-radius:8px;
-              background:#fff;color:#7a6e65;
-              font-size:0.9rem;cursor:pointer;font-weight:500;">
+        <div style="display: flex; gap: 0.75rem; justify-content: flex-end">
+          <button
+            onclick="fecharModalPublicacao()"
+            style="padding: 0.5rem 1.25rem; border: 1.5px solid #e0d9d0; border-radius: 8px; background: #fff; color: #7a6e65; font-size: 0.9rem; cursor: pointer; font-weight: 500"
+          >
             Cancelar
           </button>
-          <button id="modalPublicacaoBtnConfirmar"
-              style="padding:0.5rem 1.25rem;border:none;
-              border-radius:8px;background:#722f37;color:#fff;
-              font-size:0.9rem;cursor:pointer;font-weight:600;">
+          <button
+            id="modalPublicacaoBtnConfirmar"
+            style="padding: 0.5rem 1.25rem; border: none; border-radius: 8px; background: #722f37; color: #fff; font-size: 0.9rem; cursor: pointer; font-weight: 600"
+          >
             Sim, publicar
           </button>
         </div>

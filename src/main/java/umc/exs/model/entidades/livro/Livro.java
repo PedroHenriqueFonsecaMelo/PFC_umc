@@ -99,4 +99,11 @@ public class Livro {
     @JoinColumn(name = "obra_id")
     @JsonIgnore
     private Obra obra;
+
+    @jakarta.persistence.PrePersist
+    protected void onCreate() {
+        if (this.dataAnuncio == null) {
+            this.dataAnuncio = LocalDateTime.now();
+        }
+    }
 }

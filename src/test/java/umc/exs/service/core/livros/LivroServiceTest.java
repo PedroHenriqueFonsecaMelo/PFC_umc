@@ -42,6 +42,8 @@ class LivroServiceTest {
     @InjectMocks
     LivroService service;
 
+    // ========================= COMPRA =========================
+
     @Test
     void realizarCompra_deveDelegar() {
         service.realizarCompra(1L, "email@test.com");
@@ -57,6 +59,8 @@ class LivroServiceTest {
         assertSame(resp, service.comprarCarrinho("email@test.com", req));
         verify(livroCompraService).comprarCarrinho("email@test.com", req);
     }
+
+    // ========================= ANÚNCIO =========================
 
     @Test
     void cadastrarVenda_deveDelegar() {
@@ -89,6 +93,8 @@ class LivroServiceTest {
         verify(livroAnuncioService).listarPromocoesAtivas();
     }
 
+    // ========================= ADMIN =========================
+
     @Test
     void listarLivrosPendentes_deveDelegar() {
         List<Livro> livros = List.of(new Livro());
@@ -107,29 +113,58 @@ class LivroServiceTest {
         verify(livroAdminService).listarLivrosAprovados();
     }
 
+    /**
+     * ATUALIZADO: Ajustado stubbing e verificação para contemplar os novos
+     * parâmetros de filtros (List).
+     */
     @Test
     void listarLivrosAprovadosPaginado_deveDelegar() {
-
         Pageable pageable = mock(Pageable.class);
         Page<Livro> page = mock(Page.class);
+        List<String> estados = List.of("NOVO");
+        List<String> generos = List.of("Ficção");
 
-        when(livroAdminService
-                .listarLivrosAprovadosPaginado(any(Pageable.class), any(String.class)))
+        // Configura o mock do service especialista para receber os 4 parâmetros da
+        // assinatura atualizada
+        when(livroAdminService.listarLivrosAprovadosPaginado(any(Pageable.class), anyString(), any(), any()))
                 .thenReturn(page);
 
-        assertSame(page, service.listarLivrosAprovadosPaginado(pageable, "teste"));
+        assertSame(page, service.listarLivrosAprovadosPaginado(pageable, "teste", estados, generos));
 
-        verify(livroAdminService)
-                .listarLivrosAprovadosPaginado(pageable, "teste");
+        verify(livroAdminService).listarLivrosAprovadosPaginado(pageable, "teste", estados, generos);
     }
 
+    /**
+     * ATUALIZADO: Ajustado stubbing e verificação para contemplar os novos
+     * parâmetros de filtros (List).
+     */
     @Test
     void listarPromocoesAtivasPaginado_deveDelegar() {
         Pageable pageable = mock(Pageable.class);
         Page<Livro> page = mock(Page.class);
-        when(livroAdminService.listarPromocoesAtivasPaginado(any(Pageable.class), any(String.class))).thenReturn(page);
+        List<String> estados = List.of("BOM");
+        List<String> generos = List.of("Terror");
 
-        assertSame(page, service.listarPromocoesAtivasPaginado(pageable, "teste"));
+        when(livroAdminService.listarPromocoesAtivasPaginado(any(Pageable.class), anyString(), any(), any()))
+                .thenReturn(page);
+
+        assertSame(page, service.listarPromocoesAtivasPaginado(pageable, "teste", estados, generos));
+        verify(livroAdminService).listarPromocoesAtivasPaginado(pageable, "teste", estados, generos);
+    }
+
+    /**
+     * NOVO TESTE: Valida o comportamento de delegação da busca de gêneros únicos da
+     * vitrine.
+     */
+    @Test
+    void listarGenerosUnicosCadastrados_deveDelegar() {
+        List<String> generosEsperados = List.of("Drama", "Suspense");
+        when(livroAdminService.listarGenerosUnicosCadastrados()).thenReturn(generosEsperados);
+
+        List<String> resultado = service.listarGenerosUnicosCadastrados();
+
+        assertEquals(generosEsperados, resultado);
+        verify(livroAdminService).listarGenerosUnicosCadastrados();
     }
 
     @Test
@@ -141,7 +176,6 @@ class LivroServiceTest {
 
     @Test
     void aprovarLivro_deveDelegar() {
-        LivroAdminRequest req = new LivroAdminRequest();
         AdminAprovacaoRequest dto = new AdminAprovacaoRequest();
         Livro livro = new Livro();
         when(livroAdminService.aprovarLivro(1L, 2L, dto)).thenReturn(livro);

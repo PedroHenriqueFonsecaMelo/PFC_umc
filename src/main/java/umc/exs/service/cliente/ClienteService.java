@@ -60,8 +60,6 @@ public class ClienteService {
 
                 auditoria.registrarLog(
                                 "CADASTRO_USUARIO",
-                                cliente.getId(),
-                                cliente.getEmail(),
                                 "Cadastro inicial realizado.");
 
                 enviarEmailVerificacao(
@@ -85,8 +83,6 @@ public class ClienteService {
 
                 auditoria.registrarLog(
                                 "CADASTRO_COMPLETO",
-                                cliente.getId(),
-                                cliente.getEmail(),
                                 "Cadastro completo realizado.");
 
                 return cliente;
@@ -343,8 +339,6 @@ public class ClienteService {
 
                 auditoria.registrarLog(
                                 "LOGIN_SUCESSO",
-                                cliente.getId(),
-                                cliente.getEmail(),
                                 "Sessão iniciada.");
 
                 return cliente;
@@ -389,8 +383,6 @@ public class ClienteService {
 
                 auditoria.registrarLog(
                                 "ALTERACAO_SENHA",
-                                null,
-                                email,
                                 "Senha alterada.");
         }
 

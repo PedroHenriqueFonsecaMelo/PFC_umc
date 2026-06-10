@@ -108,8 +108,6 @@ public class CupomService {
 
         logAuditoria.registrarLog(
                 LOG_CUPOM_ADMIN_CRIADO,
-                null,
-                null,
                 "cupomId=" + saved.getId() + ", codigo=" + codigoFinal
         );
 
@@ -127,8 +125,6 @@ public class CupomService {
 
         logAuditoria.registrarLog(
                 LOG_CUPOM_INVALIDADO,
-                null,
-                null,
                 "cupomId=" + id
         );
     }
@@ -260,8 +256,6 @@ public class CupomService {
 
         logAuditoria.registrarLog(
                 LOG_CUPOM_LISTAGEM,
-                null,
-                null,
                 "total=" + cupons.size()
         );
 

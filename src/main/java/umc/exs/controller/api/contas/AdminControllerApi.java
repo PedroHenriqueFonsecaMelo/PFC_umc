@@ -6,6 +6,11 @@ import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -15,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.data.domain.Sort;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +52,7 @@ import umc.exs.dto.response.compras.LoteResponse;
 import umc.exs.dto.response.compras.PedidoResponse;
 import umc.exs.model.entidades.foundation.Cupom;
 import umc.exs.model.entidades.foundation.Lote;
+import umc.exs.model.entidades.livro.Livro;
 import umc.exs.model.entidades.logic.Administrador;
 import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.logic.AdminRepository;
@@ -86,9 +93,9 @@ public class AdminControllerApi {
 
     // ==========================================================
     // LOTES
-    // ==========================================================
+    // =========================================================
 
-    @GetMapping("/lotes/pendentes")
+    @GetMapping("/lotes/pendentes/lista")
     public ResponseEntity<List<LoteResponse>> listarLotesPendentes() {
         List<LoteResponse> dtos = loteService.listarPendentesComCliente().stream()
                 .map(lote -> {
@@ -100,6 +107,34 @@ public class AdminControllerApi {
                 })
                 .toList();
         return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/lotes/pendentes")
+    public ResponseEntity<Page<LoteResponse>> listarLotesPendentes(
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        // 1. Busque os dados paginados do banco através do Service
+
+        Page<Lote> paginaLotes = loteService.listarPendentesComClientePaginado(pageable);
+
+        // 2. Mapeie a página de Entidades (Lote) para a página de DTOs (LoteResponse)
+        Page<LoteResponse> resultadoPaginado = paginaLotes.map(lote -> {
+            long qtd = livroRepository.countByLoteId(lote.getId());
+            String nome = lote.getCliente() != null ? lote.getCliente().getNome() : "—";
+            String email = lote.getCliente() != null ? lote.getCliente().getEmail() : "—";
+
+            return new LoteResponse(
+                    lote.getId(),
+                    lote.getCodigoProtocolo(),
+                    lote.getStatus().toString(),
+                    lote.getDataCriacao(),
+                    nome,
+                    email,
+                    qtd);
+        });
+
+        // 3. Retorne a página envolvida no ResponseEntity
+        return ResponseEntity.ok(resultadoPaginado);
     }
 
     @GetMapping("/lotes/{id}/detalhes")
@@ -147,9 +182,20 @@ public class AdminControllerApi {
     // LIVROS (Aprovação e Gestão)
     // ==========================================================
 
-    @GetMapping("/livros/pendentes")
+    @GetMapping("/livros/pendentes/lista")
     public ResponseEntity<List<LivroExibicaoResponse>> listarLivrosPendentes() {
         return ResponseEntity.ok(livroMapper.toResponseList(livroService.listarLivrosPendentes()));
+    }
+
+    @GetMapping("/livros/pendentes")
+    public ResponseEntity<Page<LivroExibicaoResponse>> listarLivrosPendentes(
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+
+        Page<Livro> livrosPage = livroService.listarLivrosPendentes(pageable);
+
+        Page<LivroExibicaoResponse> responsePage = livrosPage.map(livroMapper::toResponse);
+
+        return ResponseEntity.ok(responsePage);
     }
 
     @PostMapping("/livros/{id}/aprovar")
@@ -184,9 +230,20 @@ public class AdminControllerApi {
         return ResponseEntity.ok(ExternApiResponse.ok("Livro rejeitado com sucesso"));
     }
 
-    @GetMapping("/livros/aprovados")
+    @GetMapping("/livros/aprovados/lista")
     public ResponseEntity<List<LivroExibicaoResponse>> listarLivrosAprovados() {
         return ResponseEntity.ok(livroMapper.toResponseList(livroService.listarLivrosAprovados()));
+    }
+
+    @GetMapping("/livros/aprovados")
+    public ResponseEntity<Page<LivroExibicaoResponse>> listarLivrosAprovados(
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+
+        Page<Livro> livrosPage = livroService.listarLivrosAprovados(pageable);
+
+        Page<LivroExibicaoResponse> responsePage = livrosPage.map(livroMapper::toResponse);
+
+        return ResponseEntity.ok(responsePage);
     }
 
     @PostMapping("/livros/novo")
@@ -314,7 +371,14 @@ public class AdminControllerApi {
     // ==========================================================
 
     @GetMapping("/clientes")
-    public ResponseEntity<List<ClienteListaResponse>> listarClientes() {
+    public ResponseEntity<Page<ClienteListaResponse>> listarClientes(
+            @PageableDefault(size = 20, sort = "nome") Pageable pageable) {
+
+        return ResponseEntity.ok(clienteAdminService.listarClientes(pageable));
+    }
+
+    @GetMapping("/clientes/tudo/lista")
+    public ResponseEntity<List<ClienteListaResponse>> listarClientesList() {
         return ResponseEntity.ok(clienteAdminService.listarClientes());
     }
 
@@ -336,7 +400,8 @@ public class AdminControllerApi {
             @AuthenticationPrincipal UserDetails userDetails) {
         try {
             String adminEmail = userDetails != null ? userDetails.getUsername() : "admin";
-            clienteAdminService.suspenderCliente(id, req.getMotivo(), req.getDiasSuspensao(), req.isNotificarEmail(), adminEmail);
+            clienteAdminService.suspenderCliente(id, req.getMotivo(), req.getDiasSuspensao(), req.isNotificarEmail(),
+                    adminEmail);
             return ResponseEntity.ok(Map.of("ok", true));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("erro", e.getMessage()));
@@ -419,13 +484,15 @@ public class AdminControllerApi {
                                 Map<String, Object> rm = new LinkedHashMap<>();
                                 rm.put("mensagem", resp.getMensagem());
                                 rm.put("dataEnvio", resp.getDataEnvio() != null
-                                        ? resp.getDataEnvio().format(fmt) : "");
+                                        ? resp.getDataEnvio().format(fmt)
+                                        : "");
                                 return rm;
                             }).toList();
                     m.put("respostas", respostas);
                     return m;
                 }).toList();
         return ResponseEntity.ok(lista);
+
     }
 
     @GetMapping("/reportes/nao-lidos/count")
@@ -464,7 +531,8 @@ public class AdminControllerApi {
 
     @DeleteMapping("/reportes/{id}")
     public ResponseEntity<?> excluirReporte(@PathVariable Long id) {
-        if (!reporteRepository.existsById(id)) return ResponseEntity.notFound().build();
+        if (!reporteRepository.existsById(id))
+            return ResponseEntity.notFound().build();
         reporteRespostaRepository.findByReporteIdOrderByDataEnvioAsc(id)
                 .forEach(reporteRespostaRepository::delete);
         reporteRepository.deleteById(id);
@@ -481,5 +549,4 @@ public class AdminControllerApi {
         return ResponseEntity.ok(Map.of("url", url));
     }
 
-    
 }

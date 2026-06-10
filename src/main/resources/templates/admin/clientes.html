@@ -238,6 +238,16 @@
               <i class="fa-solid fa-spinner fa-spin"></i> Carregando clientes...
             </div>
           </div>
+          <div id="paginacaoContainer" style="display: none; text-align: center; padding: 1.5rem; background: #fff; border-top: 1px solid rgba(44,36,27,.08);">
+            <button id="btnCarregarMais" onclick="carregarProximaPagina()"
+                    style="padding: .6rem 2rem; background: #fff; border: 1.5px solid #722f37; 
+                           color: #722f37; border-radius: 8px; font-family: 'DM Sans', sans-serif; 
+                           font-weight: 600; font-size: .85rem; cursor: pointer; transition: all .2s;
+                           display: inline-flex; align-items: center; gap: .5rem;">
+                <i class="fa-solid fa-plus"></i> Carregar mais clientes
+            </button>
+            <div id="statusPaginacao" style="font-size: .8rem; color: #9c968f; margin-top: .5rem; font-family: 'DM Sans', sans-serif;"></div>
+          </div>
         </div>
       </div>
     </div>

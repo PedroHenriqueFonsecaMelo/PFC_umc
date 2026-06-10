@@ -36,38 +36,39 @@ public class ClienteAutenticacaoService {
                 StatusConta status = cliente.getStatusConta() != null ? cliente.getStatusConta() : StatusConta.ATIVO;
 
                 log.info("DEBUG statusConta={} suspensaoAte={}",
-                        cliente.getStatusConta(),
-                        cliente.getSuspensaoAte());
+                                cliente.getStatusConta(),
+                                cliente.getSuspensaoAte());
 
                 if (status == StatusConta.SUSPENSO) {
                         String prazo = cliente.getSuspensaoAte() != null
-                                ? "até " + cliente.getSuspensaoAte().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                                : "por tempo indefinido";
+                                        ? "até " + cliente.getSuspensaoAte()
+                                                        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                                        : "por tempo indefinido";
                         log.info("DEBUG lançando CONTA_SUSPENSA para {}", email);
-                        throw new IllegalArgumentException("CONTA_SUSPENSA|Sua conta está suspensa " + prazo + ". Em caso de dúvidas, entre em contato com a plataforma.");
+                        throw new IllegalArgumentException("CONTA_SUSPENSA|Sua conta está suspensa " + prazo
+                                        + ". Em caso de dúvidas, entre em contato com a plataforma.");
                 }
 
                 if (status == StatusConta.REMOVIDO) {
                         log.info("DEBUG lançando CONTA_REMOVIDA para {}", email);
-                        throw new IllegalArgumentException("CONTA_REMOVIDA|Sua conta foi removida da plataforma. Em caso de dúvidas, entre em contato com a plataforma.");
+                        throw new IllegalArgumentException(
+                                        "CONTA_REMOVIDA|Sua conta foi removida da plataforma. Em caso de dúvidas, entre em contato com a plataforma.");
                 }
 
                 if (!cliente.isEmailVerificado()) {
                         logAuditoria.registrarLog(
-                                AcaoAuditoria.LOGIN_FALHA.name(),
-                                null,
-                                email,
-                                "Login falhou: e-mail não verificado");
+                                        AcaoAuditoria.LOGIN_FALHA.name(),
+                                        "Login falhou: e-mail não verificado");
 
                         throw new IllegalArgumentException("E-mail não verificado.");
                 }
 
                 if (cliente.isBloqueada()) {
                         logAuditoria.registrarLog(
-                                AcaoAuditoria.LOGIN_BLOQUEADO.name(),
-                                cliente.getId(),
-                                email,
-                                "Tentativa de login em conta bloqueada");
+                                        AcaoAuditoria.LOGIN_BLOQUEADO.name(),
+                                        cliente.getId(),
+                                        email,
+                                        "Tentativa de login em conta bloqueada");
 
                         throw new IllegalArgumentException("Conta bloqueada.");
                 }
@@ -79,22 +80,22 @@ public class ClienteAutenticacaoService {
                         int restantes = Math.max(0, 5 - cliente.getTentativas());
 
                         logAuditoria.registrarLog(
-                                AcaoAuditoria.LOGIN_FALHA.name(),
-                                cliente.getId(),
-                                email,
-                                "Senha incorreta. Tentativas restantes: " + restantes);
+                                        AcaoAuditoria.LOGIN_FALHA.name(),
+                                        cliente.getId(),
+                                        email,
+                                        "Senha incorreta. Tentativas restantes: " + restantes);
 
                         throw new IllegalArgumentException(
-                                "Senha incorreta. Restam " + restantes + " tentativa(s).");
+                                        "Senha incorreta. Restam " + restantes + " tentativa(s).");
                 }
 
                 repositoryService.resetarTentativasLogin(cliente);
 
                 logAuditoria.registrarLog(
-                        AcaoAuditoria.LOGIN_SUCESSO.name(),
-                        cliente.getId(),
-                        email,
-                        "Login realizado com sucesso");
+                                AcaoAuditoria.LOGIN_SUCESSO.name(),
+                                cliente.getId(),
+                                email,
+                                "Login realizado com sucesso");
 
                 return cliente;
         }
@@ -103,10 +104,10 @@ public class ClienteAutenticacaoService {
                 senhaService.iniciarRecuperacao(cliente);
 
                 logAuditoria.registrarLog(
-                        AcaoAuditoria.RECUPERACAO_SENHA_SOLICITADA.name(),
-                        cliente.getId(),
-                        cliente.getEmail(),
-                        "Token de recuperação de senha gerado");
+                                AcaoAuditoria.RECUPERACAO_SENHA_SOLICITADA.name(),
+                                cliente.getId(),
+                                cliente.getEmail(),
+                                "Token de recuperação de senha gerado");
         }
 
         @Transactional
@@ -119,10 +120,10 @@ public class ClienteAutenticacaoService {
                         tokenRepository.delete(registro);
 
                         logAuditoria.registrarLog(
-                                AcaoAuditoria.RECUPERACAO_SENHA_EXPIRADA.name(),
-                                registro.getCliente().getId(),
-                                registro.getCliente().getEmail(),
-                                "Tentativa de uso de token expirado");
+                                        AcaoAuditoria.RECUPERACAO_SENHA_EXPIRADA.name(),
+                                        registro.getCliente().getId(),
+                                        registro.getCliente().getEmail(),
+                                        "Tentativa de uso de token expirado");
 
                         throw new IllegalArgumentException("Token expirado.");
                 }
@@ -137,10 +138,10 @@ public class ClienteAutenticacaoService {
                 tokenRepository.delete(registro);
 
                 logAuditoria.registrarLog(
-                        AcaoAuditoria.RECUPERACAO_SENHA_CONCLUIDA.name(),
-                        cliente.getId(),
-                        cliente.getEmail(),
-                        "Senha redefinida com sucesso");
+                                AcaoAuditoria.RECUPERACAO_SENHA_CONCLUIDA.name(),
+                                cliente.getId(),
+                                cliente.getEmail(),
+                                "Senha redefinida com sucesso");
 
                 return cliente;
         }
@@ -153,10 +154,10 @@ public class ClienteAutenticacaoService {
                 if (!passwordEncoder.matches(senhaAtual, cliente.getSenha())) {
 
                         logAuditoria.registrarLog(
-                                AcaoAuditoria.ALTERACAO_SENHA_FALHA.name(),
-                                cliente.getId(),
-                                email,
-                                "Tentativa de alteração com senha atual incorreta");
+                                        AcaoAuditoria.ALTERACAO_SENHA_FALHA.name(),
+                                        cliente.getId(),
+                                        email,
+                                        "Tentativa de alteração com senha atual incorreta");
 
                         throw new IllegalArgumentException("Senha atual incorreta.");
                 }
@@ -165,10 +166,10 @@ public class ClienteAutenticacaoService {
                 repositoryService.salvar(cliente);
 
                 logAuditoria.registrarLog(
-                        AcaoAuditoria.ALTERACAO_SENHA.name(),
-                        cliente.getId(),
-                        email,
-                        "Senha alterada com sucesso");
+                                AcaoAuditoria.ALTERACAO_SENHA.name(),
+                                cliente.getId(),
+                                email,
+                                "Senha alterada com sucesso");
         }
 
         public boolean validarToken(String token) {

@@ -365,7 +365,7 @@ class AdminControllerApiTest {
     void listarClientes() {
         when(clienteAdminService.listarClientes()).thenReturn(java.util.List.of());
 
-        ResponseEntity<?> resp = controller.listarClientes();
+        ResponseEntity<?> resp = controller.listarClientesList();
 
         assertEquals(HttpStatus.OK, resp.getStatusCode());
     }
@@ -440,4 +440,62 @@ class AdminControllerApiTest {
 
         assertEquals(HttpStatus.NOT_FOUND, resp.getStatusCode());
     }
+
+    // =============================
+    // BLOG (faltava)
+    // =============================
+
+    @Test
+    void listarPostsBlog() {
+        when(postBlogService.listarTodos()).thenReturn(java.util.List.of());
+
+        ResponseEntity<?> resp = controller.listarPostsBlog();
+
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+    }
+
+    // =============================
+    // REPORTES (faltava sucesso)
+    // =============================
+
+    @Test
+    void responderReporte_sucesso() {
+        var reporte = mock(umc.exs.model.entidades.logic.Reporte.class);
+
+        when(reporteRepository.findById(1L))
+                .thenReturn(Optional.of(reporte));
+
+        ResponseEntity<?> resp = controller.responderReporte(1L, java.util.Map.of("mensagem", "ok"));
+
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+
+        verify(reporteRespostaRepository).save(any());
+    }
+
+    @Test
+    void excluirReporte_sucesso() {
+        when(reporteRepository.existsById(1L)).thenReturn(true);
+        when(reporteRespostaRepository.findByReporteIdOrderByDataEnvioAsc(1L))
+                .thenReturn(java.util.List.of());
+
+        ResponseEntity<?> resp = controller.excluirReporte(1L);
+
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+
+        verify(reporteRepository).deleteById(1L);
+    }
+
+    // =============================
+    // UPLOAD FOTO (faltava)
+    // =============================
+
+    @Test
+    void uploadFotoLivro_semAuth() {
+        var file = mock(org.springframework.web.multipart.MultipartFile.class);
+
+        ResponseEntity<?> resp = controller.uploadFotoLivro(file, null);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, resp.getStatusCode());
+    }
+
 }

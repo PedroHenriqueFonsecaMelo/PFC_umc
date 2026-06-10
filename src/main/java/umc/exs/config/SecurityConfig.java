@@ -1,6 +1,8 @@
 package umc.exs.config;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -8,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -84,6 +87,8 @@ public class SecurityConfig {
                                                                                                 "https://viacep.com.br; "
                                                                                                 +
                                                                                                 "img-src 'self' data: "
+                                                                                                +
+                                                                                                "blob: "
                                                                                                 +
                                                                                                 "https://via.placeholder.com "
                                                                                                 +
@@ -178,6 +183,11 @@ public class SecurityConfig {
         @Bean
         public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
                 return cfg.getAuthenticationManager();
+        }
+
+        @Bean
+        public ExecutorService delegatingSecurityContextExecutorService() {
+                return new DelegatingSecurityContextExecutorService(Executors.newCachedThreadPool());
         }
 
         // Rotas que qualquer um pode acessar

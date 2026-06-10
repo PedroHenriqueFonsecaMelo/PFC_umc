@@ -29,8 +29,6 @@ public class CarteiraNotificacaoService {
 
         auditoria.registrarLog(
                 AcaoAuditoria.CARTEIRA_TOKEN_ADICIONADO.name(),
-                cliente.getId(),
-                cliente.getEmail(),
                 String.format("Notificação de recarga enviada | Valor: %.2f | Método: %s",
                         valor, metodo));
 
@@ -51,8 +49,6 @@ public class CarteiraNotificacaoService {
 
             auditoria.registrarLog(
                     AcaoAuditoria.GENERICO.name(),
-                    cliente.getId(),
-                    cliente.getEmail(),
                     "Falha ao criar notificação de recarga: " + e.getMessage());
         }
     }
@@ -69,8 +65,6 @@ public class CarteiraNotificacaoService {
 
         auditoria.registrarLog(
                 AcaoAuditoria.CARTEIRA_TOKEN_DEBITADO.name(),
-                cliente.getId(),
-                cliente.getEmail(),
                 String.format("Notificação de débito enviada | Valor: %.2f | Descrição: %s",
                         valor, descricao));
 
@@ -89,8 +83,6 @@ public class CarteiraNotificacaoService {
 
         auditoria.registrarLog(
                 AcaoAuditoria.PAGAMENTO_PIX_CONFIRMADO.name(),
-                cliente.getId(),
-                cliente.getEmail(),
                 String.format("Notificação PIX enviada | Valor: %.2f", valorPix));
 
         try {
@@ -110,8 +102,6 @@ public class CarteiraNotificacaoService {
 
             auditoria.registrarLog(
                     AcaoAuditoria.GENERICO.name(),
-                    cliente.getId(),
-                    cliente.getEmail(),
                     "Falha ao criar notificação PIX: " + e.getMessage());
         }
     }

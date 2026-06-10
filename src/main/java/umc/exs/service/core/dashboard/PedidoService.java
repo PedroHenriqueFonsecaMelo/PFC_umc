@@ -42,35 +42,23 @@ public class PedidoService {
         private static final SecureRandom RNG = new SecureRandom();
 
         public String gerarCodigoPedido() {
-
-                String data = LocalDateTime.now()
-                                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-
+                String data = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
                 for (int i = 0; i < 100; i++) {
-
                         StringBuilder sufixo = new StringBuilder(4);
-
                         for (int j = 0; j < 4; j++) {
-                                sufixo.append(
-                                                CHARSET_CODIGO.charAt(
-                                                                RNG.nextInt(CHARSET_CODIGO.length())));
+                                sufixo.append(CHARSET_CODIGO.charAt(RNG.nextInt(CHARSET_CODIGO.length())));
                         }
-
                         String codigo = "BIB-" + data + "-" + sufixo;
-
                         if (!pedidoRepository.existsByCodigoPedido(codigo)) {
                                 return codigo;
                         }
                 }
-
                 throw new IllegalStateException("Falha ao gerar código de pedido");
         }
 
         @Transactional
         public Pedido registrarPedido(Cliente comprador, Livro livro, String codigoPedido) {
-
                 LocalDateTime agora = LocalDateTime.now();
-
                 Pedido pedido = Pedido.builder()
                                 .comprador(comprador)
                                 .livroId(livro.getId())
@@ -78,7 +66,7 @@ public class PedidoService {
                                 .autorLivro(livro.getAutor())
                                 .isbnLivro(livro.getIsbn())
                                 .fotosUrls(livro.getFotosUrls())
-                                .precoLivro(livro.getPrecoAprovado())
+                                .precoLivro(livro.getPrecoAprovado()) // Certifique-se de aplicar o desconto aqui se houver cupom!
                                 .statusEnvio(StatusEnvio.AGUARDANDO_ENVIO)
                                 .codigoPedido(codigoPedido)
                                 .dataCompra(agora)
@@ -86,64 +74,53 @@ public class PedidoService {
                                 .build();
 
                 Pedido salvo = pedidoRepository.save(pedido);
-
-                appLogger.success(
-                                AcaoAuditoria.PAGAMENTO_INTENCAO_REGISTRADA,
-                                comprador.getId(),
-                                comprador.getEmail(),
-                                "Pedido criado ID=" + salvo.getId());
-
+                appLogger.success(AcaoAuditoria.PAGAMENTO_INTENCAO_REGISTRADA, comprador.getId(), comprador.getEmail(), "Pedido criado ID=" + salvo.getId());
                 return salvo;
         }
 
         @Transactional(readOnly = true)
-        public List<Pedido> listarTodos() {
-                return pedidoRepository.findAllByOrderByDataCompraDesc();
-        }
+        public List<Pedido> listarTodos() { return pedidoRepository.findAllByOrderByDataCompraDesc(); }
 
         @Transactional(readOnly = true)
-        public List<Pedido> listarPorCliente(Long compradorId) {
-                return pedidoRepository.findByCompradorIdOrderByDataCompraDesc(compradorId);
-        }
+        public List<Pedido> listarPorCliente(Long compradorId) { return pedidoRepository.findByCompradorIdOrderByDataCompraDesc(compradorId); }
 
         @Transactional(readOnly = true)
         public List<Pedido> listarPendentes(Long compradorId) {
                 return pedidoRepository.findByCompradorIdAndStatusEnvioNotInOrderByDataCompraDesc(
-                                compradorId,
-                                List.of(StatusEnvio.ENTREGUE, StatusEnvio.CANCELADO));
+                                compradorId, List.of(StatusEnvio.ENTREGUE, StatusEnvio.CANCELADO));
         }
 
         @Transactional(readOnly = true)
         public Optional<Pedido> buscarPorIdEComprador(Long pedidoId, Long compradorId) {
                 return pedidoRepository.findById(pedidoId)
-                                .filter(p -> p.getComprador() != null
-                                                && compradorId.equals(p.getComprador().getId()));
+                                .filter(p -> p.getComprador() != null && compradorId.equals(p.getComprador().getId()));
         }
 
         @Transactional(readOnly = true)
         public List<Pedido> listarConcluidos(Long compradorId) {
-                return pedidoRepository.findByCompradorIdAndStatusEnvioOrderByDataCompraDesc(
-                                compradorId,
-                                StatusEnvio.ENTREGUE);
+                return pedidoRepository.findByCompradorIdAndStatusEnvioOrderByDataCompraDesc(compradorId, StatusEnvio.ENTREGUE);
         }
 
         @Transactional
         public Pedido atualizarStatus(Long pedidoId, StatusEnvio novoStatus, String codigoRastreio) {
-
-                Pedido pedido = pedidoRepository.findById(pedidoId)
+                Pedido pedido = pedidoRepository.findComCompradorEEnderecos(pedidoId)
                                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
 
                 validarStatusAtual(pedido, novoStatus);
 
-                if (novoStatus == StatusEnvio.CANCELADO) {
-                        processarCancelamento(pedido);
-                }
-
+                // 1. Atualiza as propriedades no objeto primeiro para que as notificações leiam o dado correto
                 pedido.setStatusEnvio(novoStatus);
                 pedido.setDataAtualizacaoStatus(LocalDateTime.now());
-
                 if (codigoRastreio != null && !codigoRastreio.isBlank()) {
                         pedido.setCodigoRastreio(codigoRastreio);
+                }
+
+                // 2. Trata fluxos específicos de e-mail/estorno com base no status novo
+                if (novoStatus == StatusEnvio.CANCELADO) {
+                        processarCancelamento(pedido); 
+                } else {
+                        // Só envia e-mail de atualização comum se NÃO for cancelamento (evita spam de e-mails duplicados)
+                        enviarNotificacoesStatus(pedido, novoStatus);
                 }
 
                 Pedido salvo = pedidoRepository.save(pedido);
@@ -154,39 +131,32 @@ public class PedidoService {
                                 pedido.getComprador().getEmail(),
                                 "Status atualizado pedido=" + pedidoId + " status=" + novoStatus);
 
-                log.info(
-                                "PEDIDO_STATUS_ATUALIZADO id={} status={}",
-                                pedidoId,
-                                novoStatus);
-
-                enviarNotificacoesStatus(pedido, novoStatus);
-
+                log.info("PEDIDO_STATUS_ATUALIZADO id={} status={}", pedidoId, novoStatus);
                 return salvo;
         }
 
         private void validarStatusAtual(Pedido pedido, StatusEnvio novoStatus) {
-
                 if (pedido.getStatusEnvio() == StatusEnvio.ENTREGUE) {
                         throw new RuntimeException("Pedido já entregue");
                 }
-
                 if (pedido.getStatusEnvio() == StatusEnvio.CANCELADO) {
                         throw new RuntimeException("Pedido já cancelado");
                 }
         }
 
         private void processarCancelamento(Pedido pedido) {
-
                 Cliente cliente = pedido.getComprador();
+                double saldoAnterior = cliente.getSaldoTokens() != null ? cliente.getSaldoTokens() : 0.0;
+                
+                // Correção do Valor: Garante o valor que de fato saiu da carteira do cliente
+                double valorEstorno = pedido.getPrecoLivro(); 
 
-                double saldoAnterior = cliente.getSaldoTokens() != null
-                                ? cliente.getSaldoTokens()
-                                : 0.0;
+                // Executa as notificações de estorno ANTES de mutar o saldo para não corromper o e-mail
+                enviarEmailEstorno(cliente, pedido.getId(), saldoAnterior, valorEstorno);
+                criarNotificacaoEstorno(cliente, pedido.getId(), valorEstorno);
 
-                double valor = pedido.getPrecoLivro();
-
-                cliente.setSaldoTokens(saldoAnterior + valor);
-
+                // Modifica e salva o saldo atualizado no banco
+                cliente.setSaldoTokens(saldoAnterior + valorEstorno);
                 clienteRepository.save(cliente);
 
                 appLogger.success(
@@ -195,27 +165,23 @@ public class PedidoService {
                                 cliente.getEmail(),
                                 "Estorno pedido=" + pedido.getId());
 
-                log.info(
-                                "PEDIDO_CANCELADO id={} clienteId={} estorno={}",
-                                pedido.getId(),
-                                cliente.getId(),
-                                valor);
-
-                enviarEmailEstorno(cliente, pedido.getId(), valor);
-                criarNotificacaoEstorno(cliente, pedido.getId(), valor);
+                log.info("PEDIDO_CANCELADO id={} clienteId={} estorno={}", pedido.getId(), cliente.getId(), valorEstorno);
         }
 
-        private void enviarEmailEstorno(Cliente cliente, Long pedidoId, double valor) {
+        private void enviarEmailEstorno(Cliente cliente, Long pedidoId, double saldoAnterior, double valor) {
                 try {
+                        // Correção: Passando o saldoAnterior real capturado antes da mutação do banco
+                        double saldoAtualizado = saldoAnterior + valor; 
+
                         emailFacade.sendHtmlSafe(
                                         cliente.getEmail(),
-                                        "Estorno confirmado",
+                                        "Estorno confirmado — Pedido #" + pedidoId,
                                         EmailHtmlBuilder.atualizacaoSaldo(
                                                         cliente.getNome(),
-                                                        0,
+                                                        saldoAnterior,
                                                         valor,
-                                                        cliente.getSaldoTokens(),
-                                                        "Estorno pedido " + pedidoId,
+                                                        saldoAtualizado, 
+                                                        "Estorno do pedido #" + pedidoId + " (Tokens devolvidos à sua carteira)",
                                                         true,
                                                         LocalDateTime.now()));
                 } catch (Exception e) {
@@ -235,20 +201,23 @@ public class PedidoService {
         }
 
         private void enviarNotificacoesStatus(Pedido pedido, StatusEnvio status) {
-
-                if (pedido.getComprador() == null)
-                        return;
+                if (pedido.getComprador() == null) return;
 
                 try {
+                        // Validação do código de rastreio para exibição limpa no e-mail
+                        String rastreio = (pedido.getCodigoRastreio() != null && !pedido.getCodigoRastreio().isBlank()) 
+                                        ? pedido.getCodigoRastreio() 
+                                        : "Não aplicável / Em processamento";
+
                         emailFacade.sendHtmlSafe(
                                         pedido.getComprador().getEmail(),
-                                        "Pedido atualizado",
+                                        "Atualização do seu Pedido #" + pedido.getId(),
                                         EmailHtmlBuilder.atualizacaoPedido(
                                                         pedido.getComprador().getNome(),
                                                         pedido.getId(),
                                                         status.getDescricao(),
                                                         pedido.getTituloLivro(),
-                                                        pedido.getCodigoRastreio(),
+                                                        rastreio, // Código de rastreio higienizado enviado aqui
                                                         status == StatusEnvio.CANCELADO,
                                                         pedido.getPrecoLivro(),
                                                         baseUrl));

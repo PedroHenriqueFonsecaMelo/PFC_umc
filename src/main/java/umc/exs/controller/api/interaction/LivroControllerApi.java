@@ -1,5 +1,6 @@
 package umc.exs.controller.api.interaction;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,18 +63,63 @@ public class LivroControllerApi {
      * Vitrine paginada — 20 livros por página.
      * Parâmetros: page (default 0), size (default 20), emPromocao (opcional).
      */
-    @GetMapping("/vitrine")
+    @GetMapping("/vitrine-json")
     public ResponseEntity<Page<LivroExibicaoResponse>> listarVitrine(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) Boolean emPromocao,
-            @RequestParam(required = false) String busca) {
+            @RequestParam(required = false) String busca,
+            @RequestParam(required = false) List<String> estados,
+            @RequestParam(required = false) List<String> generos,
+            @RequestParam(defaultValue = "relevancia") String ordem) {
 
-        var pageable = PageRequest.of(page, Math.min(size, 50), Sort.by(Sort.Direction.DESC, "id"));
-        if (Boolean.TRUE.equals(emPromocao)) {
-            return ResponseEntity.ok(livroService.listarPromocoesAtivasPaginado(pageable, busca).map(livroMapper::toResponse));
+        // 1. Traduz o critério de texto do front-end para propriedades reais da
+        // Entidade do Banco
+        Sort sort;
+        switch (ordem) {
+            case "menor_preco":
+                sort = Sort.by(Sort.Direction.ASC, "precoAprovado");
+                break;
+            case "maior_preco":
+                sort = Sort.by(Sort.Direction.DESC, "precoAprovado");
+                break;
+            case "recente":
+                sort = Sort.by(Sort.Direction.DESC, "id");
+                break;
+            case "az":
+                sort = Sort.by(Sort.Direction.ASC, "titulo");
+                break;
+            case "za":
+                sort = Sort.by(Sort.Direction.DESC, "titulo");
+                break;
+            case "relevancia":
+            default:
+                // Se for relevância ou padrão, pode ordenar por IDs recentes ou destaque
+                sort = Sort.by(Sort.Direction.DESC, "id");
+                break;
         }
-        return ResponseEntity.ok(livroService.listarLivrosAprovadosPaginado(pageable, busca).map(livroMapper::toResponse));
+
+        // 2. Monta o objeto de paginação com o limite de segurança de 50 registros por
+        // página
+        var pageable = PageRequest.of(page, Math.min(size, 50), sort);
+
+        // 3. Encaminha os filtros estruturados ao Service
+        // Nota: Garanta que as assinaturas correspondentes no seu livroService aceitem
+        // (pageable, busca, estados, generos)
+        if (Boolean.TRUE.equals(emPromocao)) {
+            return ResponseEntity.ok(livroService
+                    .listarPromocoesAtivasPaginado(pageable, busca, estados, generos)
+                    .map(livroMapper::toResponse));
+        }
+
+        return ResponseEntity.ok(livroService
+                .listarLivrosAprovadosPaginado(pageable, busca, estados, generos)
+                .map(livroMapper::toResponse));
+    }
+
+    @GetMapping("/generos")
+    public ResponseEntity<List<String>> listarTodosGenerosDisponiveis() {
+        return ResponseEntity.ok(livroService.listarGenerosUnicosCadastrados());
     }
 
     /**
@@ -124,7 +170,7 @@ public class LivroControllerApi {
                             Map.of("erro", "Arquivo '" + arquivo.getOriginalFilename() +
                                     "' não é uma imagem válida."));
                 }
-            } catch (java.io.IOException e) {
+            } catch (IOException | RuntimeException e) {
                 return ResponseEntity.badRequest().body(
                         Map.of("erro", "Não foi possível verificar o arquivo: " +
                                 arquivo.getOriginalFilename()));

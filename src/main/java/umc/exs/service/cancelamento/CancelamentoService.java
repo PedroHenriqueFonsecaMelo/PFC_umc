@@ -79,8 +79,6 @@ public class CancelamentoService {
 
         logAuditoria.registrarLog(
                 AcaoAuditoria.CANCELAMENTO_SOLICITADO.name(),
-                cliente.getId(),
-                cliente.getEmail(),
                 "Pedido #" + pedidoId + " — " + request.getMotivoCategoria().getDescricao());
 
         try {
@@ -141,8 +139,6 @@ public class CancelamentoService {
 
         logAuditoria.registrarLog(
                 AcaoAuditoria.CANCELAMENTO_APROVADO.name(),
-                cliente.getId(),
-                cliente.getEmail(),
                 String.format("Pedido #%d cancelado — T$ %.2f estornados.", pedido.getId(), valorEstorno));
 
         try {
@@ -188,8 +184,6 @@ public class CancelamentoService {
 
         logAuditoria.registrarLog(
                 AcaoAuditoria.CANCELAMENTO_RECUSADO.name(),
-                cliente.getId(),
-                cliente.getEmail(),
                 "Pedido #" + pedido.getId() + " — cancelamento recusado.");
 
         try {
@@ -273,8 +267,6 @@ public class CancelamentoService {
 
         logAuditoria.registrarLog(
                 AcaoAuditoria.CANCELAMENTO_ADMIN.name(),
-                comprador.getId(),
-                comprador.getEmail(),
                 String.format("Pedido #%d cancelado pelo admin — T$ %.2f estornados. Motivo: %s",
                         pedidoId, preco, motivo.getDescricao()));
 
