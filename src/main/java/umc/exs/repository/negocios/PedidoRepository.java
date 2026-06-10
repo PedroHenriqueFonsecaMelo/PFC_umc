@@ -1,8 +1,10 @@
 package umc.exs.repository.negocios;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,12 +17,24 @@ import umc.exs.model.enums.StatusEnvio;
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
         /** Todos os pedidos de um cliente, mais recente primeiro. */
+        @EntityGraph(attributePaths = {
+                        "comprador",
+                        "comprador.enderecos"
+        })
         List<Pedido> findByCompradorIdOrderByDataCompraDesc(Long compradorId);
 
         /** Pedidos de um cliente filtrando por status. */
+        @EntityGraph(attributePaths = {
+                        "comprador",
+                        "comprador.enderecos"
+        })
         List<Pedido> findByCompradorIdAndStatusEnvioOrderByDataCompraDesc(Long compradorId, StatusEnvio status);
 
         /** Pedidos pendentes (não entregues e não cancelados). */
+        @EntityGraph(attributePaths = {
+                        "comprador",
+                        "comprador.enderecos"
+        })
         List<Pedido> findByCompradorIdAndStatusEnvioNotInOrderByDataCompraDesc(
                         Long compradorId, List<StatusEnvio> statusExcluidos);
 
@@ -57,6 +71,10 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
         Double sumGastoByClienteId(@Param("clienteId") Long clienteId);
 
         /** Pedidos de um cliente com filtro de data. */
+        @EntityGraph(attributePaths = {
+                        "comprador",
+                        "comprador.enderecos"
+        })
         List<Pedido> findByCompradorIdAndDataCompraAfterOrderByDataCompraDesc(
                         Long compradorId, LocalDateTime dataInicio);
 
@@ -69,5 +87,24 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
         /** Retorna o pedido de compra de um livro, se existir. */
         java.util.Optional<Pedido> findByLivroId(Long livroId);
 
+        @EntityGraph(attributePaths = {
+                        "comprador",
+                        "comprador.enderecos"
+        })
         List<Pedido> findAllByOrderByDataCompraDesc();
+
+        @EntityGraph(attributePaths = {
+                        "comprador",
+                        "comprador.enderecos"
+        })
+        @Query("select p from Pedido p where p.id = :id")
+        Optional<Pedido> findComCompradorEEnderecos(@Param("id") Long id);
+
+        @Query("""
+                            SELECT p.comprador.id, COUNT(p), COALESCE(SUM(p.precoLivro), 0.0)
+                            FROM Pedido p
+                            WHERE p.comprador.id IN :compradorIds
+                            GROUP BY p.comprador.id
+                        """)
+        List<Object[]> statsGroupedByCompradorIds(@Param("compradorIds") List<Long> compradorIds);
 }

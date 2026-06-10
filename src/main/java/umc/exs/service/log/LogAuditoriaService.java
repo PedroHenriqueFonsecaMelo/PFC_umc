@@ -6,11 +6,14 @@ import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.Element;
@@ -29,6 +32,8 @@ import umc.exs.model.entidades.logic.LogAuditoria;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.logic.LogAuditoriaRepository;
 import umc.exs.repository.usuario.ClienteRepository;
+import org.springframework.scheduling.annotation.Async;
+
 
 @Slf4j
 @Service
@@ -45,6 +50,9 @@ public class LogAuditoriaService {
     /**
      * Registra log ação usuário no banco.
      */
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+
     public void registrarLog(String acao, Long idUsuario, String emailUsuario, String detalhes) {
 
         try {
@@ -63,12 +71,16 @@ public class LogAuditoriaService {
                     acao, idUsuario, emailUsuario, detalhes, dataFormatada);
 
             repository.save(la);
+            repository.flush();
 
         } catch (Exception e) {
             log.warn("Falha ao salvar log de auditoria [acao={}, usuarioId={}]: {}",
                     acao, idUsuario, e.getMessage());
         }
     }
+
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
 
     public void registrarLog(String acao, String emailUsuario, String detalhes) {
 
@@ -87,12 +99,17 @@ public class LogAuditoriaService {
                     acao, emailUsuario, detalhes, dataFormatada);
 
             repository.save(la);
+            repository.flush();
 
         } catch (Exception e) {
             log.warn("Falha ao salvar log de auditoria [acao={}]: {}",
                     acao, e.getMessage());
         }
     }
+
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+
     public void registrarLog(String acao, String detalhes) {
 
         try {
@@ -109,6 +126,7 @@ public class LogAuditoriaService {
                     acao, detalhes, dataFormatada);
 
             repository.save(la);
+            repository.flush();
 
         } catch (Exception e) {
             log.warn("Falha ao salvar log de auditoria [acao={}]: {}",
@@ -139,31 +157,31 @@ public class LogAuditoriaService {
             String dataInicio,
             String dataFim) {
 
-        // Ajusta filtros de string
-        String email = (emailUsuario == null || emailUsuario.isBlank()) ? null : emailUsuario.trim();
-        String acaoFiltro = (acao == null || acao.isBlank()) ? null : acao.trim();
 
         // Formato esperado para LocalDateTime
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-        // Converte strings em LocalDateTime, ou null se não informado
-        LocalDateTime inicioLDT = null;
-        if (dataInicio != null && !dataInicio.isBlank()) {
-            LocalDate date = LocalDate.parse(dataInicio);
-            inicioLDT = date.atStartOfDay();
-        }
+        String email = (emailUsuario == null || emailUsuario.isBlank()) ? null : emailUsuario.trim();
+        String acaoFiltro = (acao == null || acao.isBlank()) ? null : acao.trim();
 
-        LocalDateTime fimLDT = null;
-        if (dataFim != null && !dataFim.isBlank()) {
-            fimLDT = LocalDateTime.parse(dataFim + " 23:59", formatter);
-        }
+        LocalDateTime inicio = null;
+        LocalDateTime fim = null;
 
-        // Chama o repositório com LocalDateTime
-        return repository.buscarComFiltros(email, acaoFiltro, inicioLDT, fimLDT);
+        try {
+            if (dataInicio != null && !dataInicio.isBlank()) {
+                inicio = LocalDate.parse(dataInicio.trim()).atStartOfDay();
+            }
+            if (dataFim != null && !dataFim.isBlank()) {
+                fim = LocalDate.parse(dataFim.trim()).atTime(23, 59, 59);
+            }
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Formato de data inválido. Use yyyy-MM-dd", e);
+        }
+        return repository.buscarComFiltros(email, acaoFiltro, inicio, fim);
     }
 
     public List<String> buscarAcoesDistintas() {
-        return repository.findAcoesDistintas();
+        return repository.buscarAcoesDistintas();
     }
 
     /**

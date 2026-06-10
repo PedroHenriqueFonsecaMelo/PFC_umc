@@ -312,6 +312,32 @@ public class LivroAdminService {
         );
     }
 
+    @Transactional
+    public Livro aplicarInflacaoIpcaNoPrecoAprovado(Long livroId, Double taxaIpcaAcumulado) {
+        // 1. Busca o livro usando o repositório injetado na classe especialista
+        Livro livro = livroRepository.findById(livroId)
+                .orElseThrow(() -> new RuntimeException("Livro com ID " + livroId + " não encontrado."));
+
+        if (livro.getPrecoAprovado() == null) {
+            throw new IllegalStateException("O livro informado não possui um preço aprovado cadastrado.");
+        }
+
+        // 2. Transfere o preço antigo para precoOriginal (mantendo o histórico)
+        livro.setPrecoOriginal(livro.getPrecoAprovado());
+
+        // 3. Calcula o novo preço com base na taxa percentual (ex: 4.5 para 4.5%)
+        Double novoPreco = livro.getPrecoAprovado() * (1 + (taxaIpcaAcumulado / 100));
+
+        // 4. Arredonda matematicamente para 2 casas decimais
+        novoPreco = Math.round(novoPreco * 100.0) / 100.0;
+
+        // 5. Atualiza o valor final
+        livro.setPrecoAprovado(novoPreco);
+
+        // 6. Retorna a entidade modificada (o Spring cuidará do commit devido ao @Transactional)
+        return livroRepository.save(livro);
+    }
+
     // ========================= UTILITÁRIOS =========================
 
     private String normalizarBusca(String busca) {

@@ -137,24 +137,32 @@ public class AdminViewController {
             @RequestParam(required = false) String dataFim,
             Model model) {
 
-        String filtroEmail = (emailUsuario != null && !emailUsuario.trim().isEmpty()) ? emailUsuario : null;
-        String filtroAcao = (acao != null && !acao.trim().isEmpty()) ? acao : null;
-        String filtroDataIni = (dataInicio != null && !dataInicio.trim().isEmpty()) ? dataInicio : null;
-        String filtroDataFimClean = (dataFim != null && !dataFim.trim().isEmpty()) ? dataFim : null;
+        // Sanitiza as strings: se estiver vazia ou com espaços, vira null
+        String filtroEmail = (emailUsuario != null && !emailUsuario.isBlank()) ? emailUsuario.trim() : null;
+        String filtroAcao = (acao != null && !acao.isBlank()) ? acao.trim() : null;
+        String filtroDataIni = (dataInicio != null && !dataInicio.isBlank()) ? dataInicio.trim() : null;
+        String filtroDataFim = (dataFim != null && !dataFim.isBlank()) ? dataFim.trim() : null;
 
-        List<LogAuditoria> logs = logAuditoriaService.buscarComFiltros(emailUsuario, acao, dataInicio, dataFim);
+        // AGORA SIM: Passando as variáveis tratadas para o Service
+        List<LogAuditoria> logs = logAuditoriaService.buscarComFiltros(filtroEmail, filtroAcao, filtroDataIni,
+                filtroDataFim);
         List<String> acoes = logAuditoriaService.buscarAcoesDistintas();
 
-        if (logs == null) logs = java.util.Collections.emptyList();
-        if (acoes == null) acoes = java.util.Collections.emptyList();
+        // Garante que as listas nunca fiquem nulas para a View
+        logs = (logs != null) ? logs : java.util.Collections.emptyList();
+        acoes = (acoes != null) ? acoes : java.util.Collections.emptyList();
 
+        // Alimenta o Model para renderizar no Thymeleaf/HTML
         model.addAttribute("logs", logs);
         model.addAttribute("acoes", acoes);
+        model.addAttribute("totalLogs", logs.size());
+
+        // Mantém os campos preenchidos na tela após o filtro rodar (se null, manda
+        // vazio para o input)
         model.addAttribute("filtroEmail", filtroEmail != null ? filtroEmail : "");
         model.addAttribute("filtroAcao", filtroAcao != null ? filtroAcao : "");
         model.addAttribute("filtroDataInicio", filtroDataIni != null ? filtroDataIni : "");
-        model.addAttribute("filtroDataFim", filtroDataFimClean != null ? filtroDataFimClean : "");
-        model.addAttribute("totalLogs", logs.size());
+        model.addAttribute("filtroDataFim", filtroDataFim != null ? filtroDataFim : "");
 
         return "admin/auditoria";
     }

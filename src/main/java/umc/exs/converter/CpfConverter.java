@@ -15,7 +15,6 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 @Converter
-@Component
 public class CpfConverter implements AttributeConverter<String, String> {
 
     private static final String ALGORITMO = "AES/GCM/NoPadding";
@@ -24,8 +23,8 @@ public class CpfConverter implements AttributeConverter<String, String> {
 
     private final SecureRandom random = new SecureRandom();
 
-    @Value("${jwt.secret:changeitchangeitchangeitchangeit}")
-    private String secretKey;
+    
+    private String secretKey = "1bab54b78d14792a3426e3543f27a96a";
 
     private SecretKeySpec getKey() {
         byte[] keyBytes = new byte[32];

@@ -130,7 +130,7 @@ public class PedidoService {
         @Transactional
         public Pedido atualizarStatus(Long pedidoId, StatusEnvio novoStatus, String codigoRastreio) {
 
-                Pedido pedido = pedidoRepository.findById(pedidoId)
+                Pedido pedido = pedidoRepository.findComCompradorEEnderecos(pedidoId)
                                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
 
                 validarStatusAtual(pedido, novoStatus);

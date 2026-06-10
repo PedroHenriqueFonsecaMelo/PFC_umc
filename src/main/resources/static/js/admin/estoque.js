@@ -10,6 +10,10 @@ document.getElementById("dataHoje").textContent = new Date().toLocaleDateString(
     "pt-BR",
     { weekday: "long", day: "2-digit", month: "long", year: "numeric" },
 );
+document.getElementById("modalFotoInput")
+    .addEventListener("change", (e) => {
+        handleModalFotos(e.target.files);
+    });
 
 /* ── UTILS ── */
 function promoValida(promocaoExpira) {
@@ -407,15 +411,17 @@ function renderModalFotos() {
 }
 
 async function handleModalFotos(files) {
-    const input = document.getElementById("modalFotoInput");
-    if (input) input.value = "";
+    const lista = Array.from(files); // PEGA PRIMEIRO
 
-    const vagas = MODAL_MAX_FOTOS -
-        modalFotos.filter((f) => !f.uploading).length;
+    const input = document.getElementById("modalFotoInput");
+    if (input) input.value = ""; // só depois limpa
+
+    const vagas = MODAL_MAX_FOTOS - modalFotos.filter(f => !f.uploading).length;
     if (vagas <= 0) return;
 
-    const lista = Array.from(files).slice(0, vagas);
-    for (const file of lista) {
+    const selecionadas = lista.slice(0, vagas);
+
+    for (const file of selecionadas) {
         const placeholder = { url: "", uploading: true };
         modalFotos.push(placeholder);
         renderModalFotos();
@@ -423,19 +429,22 @@ async function handleModalFotos(files) {
         try {
             const fd = new FormData();
             fd.append("foto", file);
+
             const res = await fetch("/api/admin/livros/upload-foto", {
                 method: "POST",
                 credentials: "include",
                 body: fd,
             });
-            if (!res.ok) throw new Error();
+
             const data = await res.json();
+
             placeholder.url = data.url;
             placeholder.uploading = false;
-        } catch (_) {
+        } catch (e) {
             modalFotos.splice(modalFotos.indexOf(placeholder), 1);
-            mostrarErro("Erro ao enviar foto. Tente novamente.");
+            mostrarErro("Erro ao enviar foto");
         }
+
         renderModalFotos();
     }
 }

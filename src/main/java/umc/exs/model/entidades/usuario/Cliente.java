@@ -74,7 +74,6 @@ public class Cliente {
     private Genero gen;
 
     @Column
-    @Convert(converter = CpfConverter.class)
     private String cpf;
 
     @Column

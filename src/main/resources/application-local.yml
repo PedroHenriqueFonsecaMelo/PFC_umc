@@ -15,8 +15,11 @@ spring:
     cache: false
 
   datasource:
-    url: jdbc:sqlite:user.db
+    url: jdbc:sqlite:user.db?journal_mode=WAL
     driver-class-name: org.sqlite.JDBC
+    hikari:
+      data-source-properties:
+        busy_timeout: 10000
 
   jpa:
     hibernate:

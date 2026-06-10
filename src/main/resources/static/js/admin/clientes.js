@@ -4,6 +4,8 @@
 
 let _todos = [];
 let _filtroAtivo = "todos";
+let _paginaAtual = 0;
+let _ultimaPagina = false;
 
 /* ── UTILS ──────────────────────────────────────────────────── */
 function fmtData(iso) {
@@ -31,6 +33,7 @@ function inicial(nome) {
 
 function mostrarToast(cls, msg) {
     const t = document.getElementById("toast");
+    if (!t) return;
     t.className = "toast " + cls;
     t.textContent = msg;
     t.style.display = "block";
@@ -48,36 +51,102 @@ function fecharMenu() {
     document.getElementById("overlay")?.classList.remove("show");
 }
 
-/* ── FETCH ──────────────────────────────────────────────────── */
+/* ── FETCH & PAGINAÇÃO ──────────────────────────────────────── */
+
+// 💡 Função chamada ao iniciar a tela ou clicar em "Atualizar"
 function carregarDados() {
+    _paginaAtual = 0;
+    _ultimaPagina = false;
+    _todos = []; // Reseta o acumulador
+
     const card = document.getElementById("tableCard");
     card.innerHTML =
         '<div class="loading-placeholder"><i class="fa-solid fa-spinner fa-spin"></i> Carregando clientes...</div>';
 
-    fetch("/api/admin/clientes", { credentials: "include" })
+    buscarPaginaDoServidor();
+}
+
+// 💡 Função executada ao clicar no botão "Carregar mais" do HTML
+function carregarProximaPagina() {
+    if (_ultimaPagina) return;
+    _paginaAtual++;
+    
+    // Altera o estado visual do botão para indicar carregamento
+    const btn = document.getElementById("btnCarregarMais");
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Carregando...';
+    }
+    
+    buscarPaginaDoServidor();
+}
+
+function buscarPaginaDoServidor() {
+    // 💡 Passa a página atual e o tamanho do bloco (20 registros)
+    fetch(`/api/admin/clientes?page=${_paginaAtual}&size=20`, { credentials: "include" })
         .then((r) => {
             if (!r.ok) throw new Error("Falha ao carregar clientes");
             return r.json();
         })
-        .then((data) => {
-            _todos = data;
-            renderTabela(_todos);
+        .then((pageData) => {
+            // pageData agora é o objeto do Spring Page (contém content, last, totalElements, etc.)
+            const novosClientes = pageData.content || [];
+            _ultimaPagina = pageData.last; 
+
+            // Junta os novos registros aos que já haviam sido carregados antes
+            _todos = _todos.concat(novosClientes);
+
+            // Executa os filtros em cima da base atualizada e renderiza
+            aplicarFiltros();
+            
+            // Atualiza os contadores na tela baseado no total do banco de dados
             const total = document.getElementById("totalLabel");
             if (total) {
-                total.textContent = `${data.length} cliente${
-                    data.length !== 1 ? "s" : ""
-                } cadastrado${data.length !== 1 ? "s" : ""}`;
+                const totalBanco = pageData.totalElements || _todos.length;
+                total.textContent = `${totalBanco} cliente${totalBanco !== 1 ? "s" : ""} cadastrado${totalBanco !== 1 ? "s" : ""}`;
             }
+
+            // Gerencia a exibição do container e botão de paginação adicionado no HTML
+            atualizarPainelPaginacao(_todos.length, pageData.totalElements);
         })
         .catch((err) => {
-            card.innerHTML =
-                '<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><p>Erro ao carregar dados. Tente novamente.</p></div>';
+            const card = document.getElementById("tableCard");
+            if (_paginaAtual === 0) {
+                card.innerHTML =
+                    '<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><p>Erro ao carregar dados. Tente novamente.</p></div>';
+            }
             mostrarToast("toast-err", "Erro ao carregar clientes.");
             console.error(err);
         });
 }
 
-/* ── FILTROS ────────────────────────────────────────────────── */
+function atualizarPainelPaginacao(carregados, totalGeral) {
+    const container = document.getElementById("paginacaoContainer");
+    const btn = document.getElementById("btnCarregarMais");
+    const status = document.getElementById("statusPaginacao");
+
+    if (!container) return;
+
+    // Se não há registros ou já chegou na última página, gerencia a visibilidade
+    if (totalGeral === 0) {
+        container.style.display = "none";
+        return;
+    }
+
+    container.style.display = "block";
+
+    if (btn) {
+        btn.disabled = _ultimaPagina;
+        btn.style.display = _ultimaPagina ? "none" : "inline-flex";
+        btn.innerHTML = '<i class="fa-solid fa-plus"></i> Carregar mais clientes';
+    }
+
+    if (status) {
+        status.textContent = `Exibindo ${carregados} de ${totalGeral} clientes`;
+    }
+}
+
+/* ── FILTROS (Mantidos idênticos, mas operando no lote acumulado) ── */
 function setFiltro(filtro) {
     _filtroAtivo = filtro;
     document.querySelectorAll(".filter-tab").forEach((el) => {
@@ -139,8 +208,7 @@ function atualizarPills() {
 }
 
 function aplicarFiltros() {
-    const busca = (document.getElementById("busca")?.value || "").toLowerCase()
-        .trim();
+    const busca = (document.getElementById("busca")?.value || "").toLowerCase().trim();
 
     let lista = _todos;
     if (_filtroAtivo === "ativos") lista = lista.filter((c) => c.ativo && (c.statusConta || "ATIVO") === "ATIVO");
@@ -178,7 +246,7 @@ function aplicarFiltros() {
     // Filtro cadastro
     const cadInicio = document.getElementById("filtroCadastroInicio")?.value;
     const cadFim = document.getElementById("filtroCadastroFim")?.value;
-    if (cadInicio) lista = lista.filter(c => c.dataCadastro && c.dataCadastro >= cadInicio);
+    if (cadInicio) list = lista.filter(c => c.dataCadastro && c.dataCadastro >= cadInicio);
     if (cadFim) lista = lista.filter(c => c.dataCadastro && c.dataCadastro <= cadFim + "T23:59:59");
 
     atualizarPills();

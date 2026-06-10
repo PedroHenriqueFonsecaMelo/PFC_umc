@@ -6,6 +6,11 @@ import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -86,7 +91,7 @@ public class AdminControllerApi {
 
     // ==========================================================
     // LOTES
-    // ==========================================================
+    // =========================================================
 
     @GetMapping("/lotes/pendentes")
     public ResponseEntity<List<LoteResponse>> listarLotesPendentes() {
@@ -314,9 +319,16 @@ public class AdminControllerApi {
     // ==========================================================
 
     @GetMapping("/clientes")
-    public ResponseEntity<List<ClienteListaResponse>> listarClientes() {
-        return ResponseEntity.ok(clienteAdminService.listarClientes());
+    public ResponseEntity<Page<ClienteListaResponse>> listarClientes(
+            @PageableDefault(size = 20, sort = "nome") Pageable pageable) {
+
+        return ResponseEntity.ok(clienteAdminService.listarClientes(pageable));
     }
+
+    @GetMapping("/clientes/tudo/lista")
+    public ResponseEntity<List<ClienteListaResponse>> listarClientesList() {
+         return ResponseEntity.ok(clienteAdminService.listarClientes());
+    }
 
     @GetMapping("/clientes/{id}")
     public ResponseEntity<?> getPerfilCliente(@PathVariable Long id) {
@@ -336,7 +348,8 @@ public class AdminControllerApi {
             @AuthenticationPrincipal UserDetails userDetails) {
         try {
             String adminEmail = userDetails != null ? userDetails.getUsername() : "admin";
-            clienteAdminService.suspenderCliente(id, req.getMotivo(), req.getDiasSuspensao(), req.isNotificarEmail(), adminEmail);
+            clienteAdminService.suspenderCliente(id, req.getMotivo(), req.getDiasSuspensao(), req.isNotificarEmail(),
+                    adminEmail);
             return ResponseEntity.ok(Map.of("ok", true));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("erro", e.getMessage()));
@@ -419,13 +432,15 @@ public class AdminControllerApi {
                                 Map<String, Object> rm = new LinkedHashMap<>();
                                 rm.put("mensagem", resp.getMensagem());
                                 rm.put("dataEnvio", resp.getDataEnvio() != null
-                                        ? resp.getDataEnvio().format(fmt) : "");
+                                        ? resp.getDataEnvio().format(fmt)
+                                        : "");
                                 return rm;
                             }).toList();
                     m.put("respostas", respostas);
                     return m;
                 }).toList();
         return ResponseEntity.ok(lista);
+
     }
 
     @GetMapping("/reportes/nao-lidos/count")
@@ -464,7 +479,8 @@ public class AdminControllerApi {
 
     @DeleteMapping("/reportes/{id}")
     public ResponseEntity<?> excluirReporte(@PathVariable Long id) {
-        if (!reporteRepository.existsById(id)) return ResponseEntity.notFound().build();
+        if (!reporteRepository.existsById(id))
+            return ResponseEntity.notFound().build();
         reporteRespostaRepository.findByReporteIdOrderByDataEnvioAsc(id)
                 .forEach(reporteRespostaRepository::delete);
         reporteRepository.deleteById(id);
@@ -481,5 +497,4 @@ public class AdminControllerApi {
         return ResponseEntity.ok(Map.of("url", url));
     }
 
-    
 }

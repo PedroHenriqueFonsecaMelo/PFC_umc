@@ -119,4 +119,13 @@ public class LivroService {
     public Livro cadastrarPorIsbn(String isbn) {
         return livroAnuncioService.cadastrarPorIsbn(isbn);
     }
+
+    // ========================= ADMIN / ATUALIZAÇÕES =========================
+
+    @Transactional
+    public Livro aplicarInflacaoIpcaNoPrecoAprovado(@NonNull Long livroId, Double taxaIpcaAcumulado) {
+        return livroAdminService.aplicarInflacaoIpcaNoPrecoAprovado(livroId, taxaIpcaAcumulado);
+    }
+
+    
 }

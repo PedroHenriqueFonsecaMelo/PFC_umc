@@ -1,5 +1,6 @@
 package umc.exs.controller.api.interaction;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -124,7 +125,7 @@ public class LivroControllerApi {
                             Map.of("erro", "Arquivo '" + arquivo.getOriginalFilename() +
                                     "' não é uma imagem válida."));
                 }
-            } catch (java.io.IOException e) {
+            } catch (IOException | RuntimeException e) {
                 return ResponseEntity.badRequest().body(
                         Map.of("erro", "Não foi possível verificar o arquivo: " +
                                 arquivo.getOriginalFilename()));
