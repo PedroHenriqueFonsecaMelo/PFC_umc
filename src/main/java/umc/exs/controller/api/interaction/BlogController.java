@@ -25,6 +25,10 @@ import umc.exs.repository.logic.AdminRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.core.interactions.PostBlogService;
 
+/**
+ * Controller REST para gerenciamento do blog da plataforma (posts, comentários, curtidas e agendamento).
+ * Admins criam e publicam posts; clientes comentam e curtem o conteúdo.
+ */
 @RestController
 @RequestMapping("/api/blog")
 @RequiredArgsConstructor
@@ -44,6 +48,10 @@ public class BlogController {
     private static final String DATA_AGENDADA = "dataPublicacaoAgendada";
     private static final String ERRO = "erro";
 
+    /**
+     * Lista todos os posts do blog; sem filtro retorna apenas os publicados.
+     * Com parâmetro de status, filtra por PUBLICADO, RASCUNHO ou AGENDADO.
+     */
     @GetMapping
     public ResponseEntity<List<Map<String, Object>>> listarPosts(
             @RequestParam(required = false) StatusPost status) {
@@ -55,6 +63,7 @@ public class BlogController {
         return ResponseEntity.ok(lista.stream().map(this::toMap).toList());
     }
 
+    /** Busca um post específico do blog pelo ID; retorna 404 se não encontrado. */
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> buscarPost(@PathVariable Long id) {
         return postBlogService.buscarPorId(id)
@@ -62,6 +71,7 @@ public class BlogController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /** Retorna todos os comentários de um post do blog com autor e data formatada. */
     @GetMapping("/{postId}/comentarios")
     public ResponseEntity<List<Map<String, Object>>> listarComentarios(@PathVariable Long postId) {
         List<Map<String, Object>> comentarios = postBlogService.listarComentarios(postId).stream()
@@ -77,6 +87,7 @@ public class BlogController {
         return ResponseEntity.ok(comentarios);
     }
 
+    /** Registra ou desfaz a curtida de um cliente em um post do blog. */
     @PostMapping("/{postId}/curtir")
     public ResponseEntity<Map<String, Object>> curtirPost(
             @PathVariable Long postId,
@@ -89,6 +100,10 @@ public class BlogController {
         return ResponseEntity.ok(resultado);
     }
 
+    /**
+     * Remove um comentário do blog; somente o autor ou admin pode deletar.
+     * Retorna 403 se o usuário não tiver permissão.
+     */
     @DeleteMapping("/{postId}/comentarios/{comentarioId}")
     public ResponseEntity<Map<String, String>> deletarComentario(
             @PathVariable Long postId,
@@ -104,6 +119,7 @@ public class BlogController {
         }
     }
 
+    /** Adiciona um comentário ao post do blog com o nome do cliente autenticado como autor. */
     @PostMapping("/{postId}/comentarios")
     public ResponseEntity<Map<String, Object>> comentar(
             @PathVariable Long postId,
@@ -129,6 +145,7 @@ public class BlogController {
                 "dataCriacao", comentario.getDataCriacao().format(FMT)));
     }
 
+    /** Cria um novo post no blog com título, conteúdo e imagem opcional, atribuindo ao admin logado. */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, Object>> criarPost(
             @RequestParam("titulo") String titulo,
@@ -151,6 +168,7 @@ public class BlogController {
         }
     }
 
+    /** Atualiza título, conteúdo e imagem de um post existente no blog. */
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, Object>> editarPost(
             @PathVariable @NonNull Long id,
@@ -168,12 +186,14 @@ public class BlogController {
         }
     }
 
+    /** Remove permanentemente um post do blog pelo ID. */
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deletarPost(@PathVariable Long id) {
         postBlogService.deletarPost(id);
         return ResponseEntity.ok(Map.of(MENSAGEM, "Post removido."));
     }
 
+    /** Submete um post para revisão antes da publicação; não é possível se o post já estiver publicado. */
     @PatchMapping("/{id}/submeter")
     public ResponseEntity<Map<String, Object>> submeterParaRevisao(@PathVariable @NonNull Long id) {
         try {
@@ -186,6 +206,7 @@ public class BlogController {
         }
     }
 
+    /** Publica imediatamente um post, tornando-o visível para todos os usuários da plataforma. */
     @PatchMapping("/{id}/publicar")
     public ResponseEntity<Map<String, Object>> publicar(@PathVariable @NonNull Long id) {
         PostBlog post = postBlogService.publicar(id);
@@ -194,6 +215,10 @@ public class BlogController {
                 STATUS, Objects.requireNonNull(post.getStatus())));
     }
 
+    /**
+     * Agenda a publicação de um post para uma data e hora futuras no formato ISO-8601.
+     * O post ficará com status AGENDADO até o job de publicação automática executar.
+     */
     @PatchMapping("/{id}/agendar")
     public ResponseEntity<Map<String, Object>> agendar(
             @PathVariable @NonNull Long id,
@@ -214,6 +239,7 @@ public class BlogController {
         }
     }
 
+    /** Converte uma entidade PostBlog para mapa de dados serializável em JSON. */
     private Map<String, Object> toMap(PostBlog p) {
         java.util.LinkedHashMap<String, Object> map = new java.util.LinkedHashMap<>();
         map.put("id", p.getId());

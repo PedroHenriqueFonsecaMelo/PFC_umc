@@ -23,6 +23,10 @@ import umc.exs.model.entidades.foundation.Transacao;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.service.cliente.ClienteService;
 
+/**
+ * Controller REST responsável pela compra de tokens via PIX (Mercado Pago) e pelo histórico de transações.
+ * Integra com webhook do Mercado Pago para confirmar pagamentos e creditar tokens automaticamente.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/tokens")
@@ -37,6 +41,10 @@ public class TokenControllerApi {
     @Value("${mercadopago.access-token}")
     private String accessToken;
 
+    /**
+     * Gera um PIX via Mercado Pago e registra a transação como pendente na carteira do cliente.
+     * A proporção é de 2 tokens por real (ex.: R$ 10 → T$ 20).
+     */
     @PostMapping("/comprar")
     public ResponseEntity<CompraTokensRequest> comprar(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -74,6 +82,7 @@ public class TokenControllerApi {
         }
     }
 
+    /** Retorna o histórico completo de transações da carteira do cliente logado. */
     @GetMapping("/historico")
     public ResponseEntity<List<Transacao>> buscarHistorico(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -87,6 +96,10 @@ public class TokenControllerApi {
         return ResponseEntity.ok(historico);
     }
 
+    /**
+     * Verifica se um pagamento PIX foi aprovado consultando primeiro o banco e depois a API do Mercado Pago.
+     * Se aprovado via polling, credita os tokens imediatamente na carteira do cliente.
+     */
     @GetMapping("/verificar-pagamento/{pagamentoId}")
     public ResponseEntity<Map<String, String>> verificarPagamento(
             @PathVariable String pagamentoId) {
@@ -113,6 +126,10 @@ public class TokenControllerApi {
                 Map.of("status", pago ? "APROVADO" : "PENDENTE"));
     }
 
+    /**
+     * Recebe notificações automáticas do Mercado Pago sobre pagamentos aprovados.
+     * Credita tokens na carteira do cliente ao confirmar status "approved".
+     */
     @PostMapping("/webhook")
     public ResponseEntity<Void> webhookMercadoPago(
             @RequestBody Map<String, Object> body) {
@@ -147,6 +164,7 @@ public class TokenControllerApi {
         }
     }
 
+    /** Simula a aprovação de um pagamento PIX para testes em ambiente de desenvolvimento. */
     @GetMapping("/simular-webhook/{pagamentoId}")
     public ResponseEntity<Map<String, String>> simularWebhook(
             @PathVariable String pagamentoId) {

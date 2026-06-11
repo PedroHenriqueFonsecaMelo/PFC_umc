@@ -16,6 +16,10 @@ import umc.exs.dto.mapper.CupomMapper;
 import umc.exs.dto.response.compras.CupomResponse;
 import umc.exs.service.cupom.CupomService;
 
+/**
+ * Controller REST para consulta e validação de cupons de desconto do cliente logado.
+ * Não registra uso do cupom — apenas calcula o desconto para exibição no carrinho.
+ */
 @RestController
 @RequestMapping("/api/cupons")
 @RequiredArgsConstructor

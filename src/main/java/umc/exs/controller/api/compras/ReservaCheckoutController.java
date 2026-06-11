@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controller REST para gerenciamento de reservas temporárias de livros no checkout.
+ * Permite reservar, liberar e consultar o status de reservas ativas por até 5 minutos.
+ */
 @RestController
 @RequestMapping("/api/checkout")
 @RequiredArgsConstructor
@@ -18,6 +22,10 @@ public class ReservaCheckoutController {
 
     private final ReservaCheckoutService reservaService;
 
+    /**
+     * Reserva uma lista de livros para o cliente logado pelo prazo de 5 minutos.
+     * Retorna motivo de falha caso algum livro já esteja reservado ou o limite seja excedido.
+     */
     @PostMapping("/reservar")
     public ResponseEntity<Map<String, Object>> reservar(
             @RequestBody Map<String, Object> body,
@@ -40,6 +48,10 @@ public class ReservaCheckoutController {
         return ResponseEntity.ok(resultado);
     }
 
+    /**
+     * Libera as reservas dos livros informados quando o cliente abandona o checkout.
+     * Após 3 desistências, o cliente é bloqueado por 5 minutos para evitar abusos.
+     */
     @DeleteMapping("/reservar")
     public ResponseEntity<Map<String, Object>> liberar(
             @RequestBody Map<String, Object> body,
@@ -61,6 +73,7 @@ public class ReservaCheckoutController {
         return ResponseEntity.ok(resultado);
     }
 
+    /** Consulta se o cliente possui reserva ativa para o livro e retorna o tempo restante em segundos. */
     @GetMapping("/reserva/status/{livroId}")
     public ResponseEntity<Map<String, Object>> status(
             @PathVariable Long livroId,

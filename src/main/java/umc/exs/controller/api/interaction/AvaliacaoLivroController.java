@@ -31,6 +31,10 @@ import umc.exs.repository.livro.LivroRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.core.livros.avaliacao.LivroAvaliacaoService;
 
+/**
+ * Controller REST para avaliações e comentários de livros pela comunidade.
+ * Centraliza opiniões por ISBN, agrupa avaliações do mesmo título e calcula média de notas.
+ */
 @RestController
 @RequestMapping("/api/avaliacoes")
 @RequiredArgsConstructor
@@ -50,6 +54,10 @@ public class AvaliacaoLivroController {
     private final LivroRepository livroRepo;
     private final ClienteRepository clienteRepo;
 
+    /**
+     * Busca avaliações de um livro pelo ISBN e retorna título, autor, resumo oficial e lista de comentários.
+     * Usa dados do histórico da comunidade quando o livro ainda não tem registro oficial no banco.
+     */
     @GetMapping("/livro/{isbn}")
     public ResponseEntity<Map<String, Object>> buscarDadosCentralOpiniao(@PathVariable("isbn") String isbn) {
         try {
@@ -79,6 +87,10 @@ public class AvaliacaoLivroController {
         }
     }
 
+    /**
+     * Busca e agrupa todas as avaliações do mesmo livro (por título e autor) independente do ISBN da edição.
+     * Útil para consolidar avaliações de diferentes edições do mesmo título.
+     */
     @GetMapping("/livro/unificado/{isbn}")
     public ResponseEntity<Map<String, Object>> buscarDadosCentralOpiniaoUnificado(@PathVariable("isbn") String isbn) {
         try {
@@ -129,6 +141,10 @@ public class AvaliacaoLivroController {
         }
     }
 
+    /**
+     * Salva a avaliação e comentário do cliente logado para um livro identificado pelo ISBN.
+     * Cria um livro de referência no banco caso ele ainda não exista.
+     */
     @PostMapping("/salvar")
     public ResponseEntity<Map<String, Object>> salvarComentario(
             @RequestBody @Valid ComentarioRequest payload,
@@ -167,6 +183,7 @@ public class AvaliacaoLivroController {
         return ResponseEntity.ok(response);
     }
 
+    /** Calcula e retorna a média de notas das avaliações do livro identificado pelo ISBN. */
     @GetMapping("/livro/{isbn}/media")
     public ResponseEntity<Map<String, Object>> buscarMedia(@PathVariable("isbn") String isbn) {
         try {
@@ -182,6 +199,7 @@ public class AvaliacaoLivroController {
         }
     }
 
+    /** Permite ao admin atualizar o resumo oficial de um livro identificado pelo ISBN. */
     @PutMapping("/admin/resumo/{isbn}")
     public ResponseEntity<Map<String, Object>> atualizarResumoAdmin(
             @PathVariable("isbn") String isbn,
@@ -204,6 +222,7 @@ public class AvaliacaoLivroController {
         return ResponseEntity.status(404).body(Map.of(ERRO, "Livro não encontrado."));
     }
 
+    /** Cria uma avaliação pelo fluxo legado usando o DTO completo de avaliação de livro. */
     @PostMapping("/legado")
     public ResponseEntity<Map<String, Object>> criarAvaliacao(
             @AuthenticationPrincipal UserDetails user,

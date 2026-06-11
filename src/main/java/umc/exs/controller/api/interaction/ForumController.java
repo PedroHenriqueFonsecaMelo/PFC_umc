@@ -25,6 +25,10 @@ import umc.exs.model.enums.CategoriaForum;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.core.interactions.ForumService;
 
+/**
+ * Controller REST do fórum de discussão da plataforma.
+ * Permite listar tópicos paginados, curtir respostas, marcar melhor resposta e remover conteúdo (admin ou autor).
+ */
 @RestController
 @RequestMapping("/api/forum")
 @RequiredArgsConstructor
@@ -37,6 +41,10 @@ public class ForumController {
 
         // ── GET /api/forum/topicos — Lista paginada (busca opcional) ──────────────
 
+        /**
+         * Lista os tópicos do fórum de forma paginada, com filtros opcionais de busca e categoria.
+         * Retorna metadados de paginação (totalPaginas, totalElementos, paginaAtual).
+         */
         @GetMapping("/topicos")
         public ResponseEntity<Map<String, Object>> listarTopicos(
                         @RequestParam(required = false) String busca,
@@ -69,6 +77,7 @@ public class ForumController {
 
         // ── POST /api/forum/respostas/{id}/curtir ─────────────────────────────────
 
+        /** Registra ou remove a curtida do cliente autenticado em uma resposta do fórum. */
         @PostMapping("/respostas/{id}/curtir")
         public ResponseEntity<?> curtirResposta(
                         @PathVariable Long id,
@@ -84,6 +93,10 @@ public class ForumController {
 
         // ── POST /api/forum/respostas/{id}/melhor ─────────────────────────────────
 
+        /**
+         * Marca uma resposta como a melhor do tópico; somente o autor do tópico ou um admin pode fazer isso.
+         * Retorna 403 se o cliente não tiver permissão.
+         */
         @PostMapping("/respostas/{id}/melhor")
         public ResponseEntity<?> marcarMelhorResposta(
                         @PathVariable Long id,
@@ -106,6 +119,7 @@ public class ForumController {
 
         // ── DELETE /api/forum/topicos/{id} — Admin ────────────────────────────────
 
+        /** Remove um tópico do fórum; operação exclusiva para administradores. */
         @DeleteMapping("/topicos/{id}")
         public ResponseEntity<?> deletarTopico(@PathVariable Long id) {
                 forumService.deletarTopico(id);
@@ -113,6 +127,10 @@ public class ForumController {
         }
 
         // ── DELETE /api/forum/respostas/{id} — Admin ou próprio autor ─────────────
+        /**
+         * Remove uma resposta do fórum; admins podem remover qualquer resposta, clientes apenas as próprias.
+         * Retorna 403 se o cliente tentar remover resposta de outro usuário.
+         */
         @DeleteMapping("/respostas/{id}")
         public ResponseEntity<?> deletarResposta(
                         @PathVariable Long id,

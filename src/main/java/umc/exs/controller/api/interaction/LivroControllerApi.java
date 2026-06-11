@@ -29,6 +29,10 @@ import umc.exs.dto.response.compras.LivroExibicaoResponse;
 import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.service.core.livros.LivroService;
 
+/**
+ * Controller REST para operações de livros: vitrine, cadastro de anúncios, compra e busca por ISBN.
+ * Valida tipo e tamanho de imagens (máx 10 MB, formatos JPEG/PNG/WebP) antes de salvar.
+ */
 @RestController
 @RequestMapping("/api/livros")
 @RequiredArgsConstructor
@@ -70,6 +74,7 @@ public class LivroControllerApi {
             @RequestParam(required = false) Boolean emPromocao,
             @RequestParam(required = false) String busca) {
 
+        // LIMITE DE PÁGINA — size é limitado a 50 para evitar consultas excessivas ao banco
         var pageable = PageRequest.of(page, Math.min(size, 50), Sort.by(Sort.Direction.DESC, "id"));
         if (Boolean.TRUE.equals(emPromocao)) {
             return ResponseEntity.ok(livroService.listarPromocoesAtivasPaginado(pageable, busca).map(livroMapper::toResponse));
@@ -101,16 +106,19 @@ public class LivroControllerApi {
             return ResponseEntity.badRequest().body("É necessário adicionar pelo menos uma foto do livro.");
         }
 
+        // VALIDAÇÃO — cada foto é verificada individualmente antes de criar o lote
         for (MultipartFile arquivo : fotos) {
             if (arquivo == null || arquivo.isEmpty())
                 continue;
 
+            // LIMITE DE TAMANHO — arquivos acima de 10 MB são rejeitados imediatamente
             if (arquivo.getSize() > MAX_FILE_SIZE) {
                 return ResponseEntity.badRequest().body(
                         Map.of("erro", "Arquivo '" + arquivo.getOriginalFilename() +
                                 "' excede o limite de 10 MB."));
             }
 
+            // TIPO DE ARQUIVO — apenas JPEG, PNG e WebP são aceitos para evitar uploads maliciosos
             String contentType = arquivo.getContentType();
             if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase())) {
                 return ResponseEntity.badRequest().body(
@@ -119,6 +127,7 @@ public class LivroControllerApi {
             }
 
             try {
+                // MAGIC BYTES — verifica os bytes iniciais do arquivo para confirmar que é uma imagem real
                 byte[] header = arquivo.getBytes();
                 if (!isImagemValida(header)) {
                     return ResponseEntity.badRequest().body(
@@ -156,12 +165,14 @@ public class LivroControllerApi {
             return ResponseEntity.badRequest().body(Map.of("erro", "É necessário enviar uma foto do livro."));
         }
 
+        // LIMITE DE TAMANHO — foto do anúncio individual também limitada a 10 MB
         if (foto.getSize() > MAX_FILE_SIZE) {
             return ResponseEntity.badRequest().body(
                     Map.of("erro", "Arquivo '" + foto.getOriginalFilename() +
                             "' excede o limite de 10 MB."));
         }
 
+        // TIPO DE ARQUIVO — valida o MIME type antes de verificar os magic bytes
         String contentType = foto.getContentType();
         if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase())) {
             return ResponseEntity.badRequest().body(
@@ -170,6 +181,7 @@ public class LivroControllerApi {
         }
 
         try {
+            // MAGIC BYTES — confirma que o arquivo é uma imagem válida antes de aceitar o upload
             byte[] header = foto.getBytes();
             if (!isImagemValida(header)) {
                 return ResponseEntity.badRequest().body(

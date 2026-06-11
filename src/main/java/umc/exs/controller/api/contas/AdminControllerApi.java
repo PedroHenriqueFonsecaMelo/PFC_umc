@@ -63,6 +63,10 @@ import umc.exs.service.core.livros.LivroService;
 import umc.exs.service.cupom.CupomService;
 import umc.exs.service.storage.ArquivosService;
 
+/**
+ * Controller REST principal do painel administrativo da plataforma.
+ * Gerencia livros, lotes, pedidos, cupons, clientes, blog, reportes e dashboard de métricas.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/admin")
@@ -93,6 +97,7 @@ public class AdminControllerApi {
     // LOTES
     // =========================================================
 
+    /** Lista todos os lotes de livros com status pendente de análise pelo administrador. */
     @GetMapping("/lotes/pendentes")
     public ResponseEntity<List<LoteResponse>> listarLotesPendentes() {
         List<LoteResponse> dtos = loteService.listarPendentesComCliente().stream()
@@ -107,6 +112,7 @@ public class AdminControllerApi {
         return ResponseEntity.ok(dtos);
     }
 
+    /** Retorna os detalhes completos de um lote específico incluindo a lista de livros vinculados. */
     @GetMapping("/lotes/{id}/detalhes")
     public ResponseEntity<Map<String, Object>> detalharLote(@PathVariable Long id) {
         Lote lote = loteService.findByIdComCliente(id);
@@ -134,6 +140,7 @@ public class AdminControllerApi {
         return ResponseEntity.ok(resp);
     }
 
+    /** Lista todos os livros pertencentes a um lote específico pelo ID do lote. */
     @GetMapping("/lotes/{id}")
     public ResponseEntity<List<Map<String, Object>>> listarLivrosLote(@PathVariable Long id) {
         List<Map<String, Object>> resposta = livroService.listarLivrosPorLote(id).stream().map(b -> {
@@ -152,11 +159,16 @@ public class AdminControllerApi {
     // LIVROS (Aprovação e Gestão)
     // ==========================================================
 
+    /** Lista todos os livros aguardando aprovação do administrador. */
     @GetMapping("/livros/pendentes")
     public ResponseEntity<List<LivroExibicaoResponse>> listarLivrosPendentes() {
         return ResponseEntity.ok(livroMapper.toResponseList(livroService.listarLivrosPendentes()));
     }
 
+    /**
+     * Aprova um livro pendente, definindo estado de conservação e calculando o preço automaticamente.
+     * Notifica o vendedor por e-mail e credita tokens de recompensa na carteira dele.
+     */
     @PostMapping("/livros/{id}/aprovar")
     public ResponseEntity<ExternApiResponse<Void>> aprovarLivro(
             @PathVariable Long id,
@@ -173,6 +185,10 @@ public class AdminControllerApi {
         return ResponseEntity.ok(ExternApiResponse.ok("Livro aprovado com sucesso"));
     }
 
+    /**
+     * Rejeita um livro informando o motivo ao vendedor por e-mail.
+     * Atualiza o status do lote para REJEITADO ou PARCIAL_APROVADO conforme os demais livros.
+     */
     @PostMapping("/livros/{id}/rejeitar")
     public ResponseEntity<ExternApiResponse<Void>> rejeitarLivro(
             @PathVariable Long id,
@@ -189,11 +205,16 @@ public class AdminControllerApi {
         return ResponseEntity.ok(ExternApiResponse.ok("Livro rejeitado com sucesso"));
     }
 
+    /** Lista todos os livros já aprovados e disponíveis no estoque da plataforma. */
     @GetMapping("/livros/aprovados")
     public ResponseEntity<List<LivroExibicaoResponse>> listarLivrosAprovados() {
         return ResponseEntity.ok(livroMapper.toResponseList(livroService.listarLivrosAprovados()));
     }
 
+    /**
+     * Adiciona um livro diretamente ao estoque pelo administrador, sem passar pelo fluxo de aprovação.
+     * Registra o ID do admin que realizou a inserção para fins de rastreabilidade.
+     */
     @PostMapping("/livros/novo")
     public ResponseEntity<ExternApiResponse<Void>> adicionarLivro(
             @RequestBody LivroAdminRequest request, // Use o Request aqui
@@ -212,6 +233,7 @@ public class AdminControllerApi {
         return ResponseEntity.status(HttpStatus.CREATED).body(ExternApiResponse.ok("Livro adicionado ao estoque"));
     }
 
+    /** Atualiza os dados cadastrais de um livro existente no estoque pelo ID. */
     @PutMapping("/livros/{id}")
     public ResponseEntity<ExternApiResponse<Void>> editarLivro(
             @PathVariable @NonNull Long id,
@@ -226,6 +248,7 @@ public class AdminControllerApi {
         return ResponseEntity.ok(ExternApiResponse.ok("Livro atualizado"));
     }
 
+    /** Remove permanentemente um livro do estoque pelo ID. */
     @DeleteMapping("/livros/{id}")
     public ResponseEntity<ExternApiResponse<Void>> deletarLivro(
             @PathVariable @NonNull Long id,
@@ -242,11 +265,16 @@ public class AdminControllerApi {
     // PEDIDOS
     // ==========================================================
 
+    /** Lista todos os pedidos realizados na plataforma para gestão pelo administrador. */
     @GetMapping("/pedidos")
     public ResponseEntity<List<PedidoResponse>> listarPedidos() {
         return ResponseEntity.ok(pedidoMapper.toResponseList(pedidoService.listarTodos()));
     }
 
+    /**
+     * Atualiza o status de envio de um pedido e registra o código de rastreio da transportadora.
+     * Usado pelo admin para informar que o pedido foi despachado.
+     */
     @PostMapping("/pedidos/{id}/envio")
     public ResponseEntity<PedidoResponse> atualizarEnvio(
             @PathVariable Long id,
@@ -264,17 +292,23 @@ public class AdminControllerApi {
     // CUPONS
     // ==========================================================
 
+    /** Lista todos os cupons cadastrados na plataforma, incluindo os já expirados ou invalidados. */
     @GetMapping("/cupons")
     public ResponseEntity<List<CupomResponse>> listarCupons() {
         return ResponseEntity.ok(cupomMapper.toResponseList(cupomService.listarTodosCupons()));
     }
 
+    /** Invalida um cupom pelo ID, impedindo qualquer uso futuro sem removê-lo do banco. */
     @DeleteMapping("/cupons/{id}")
     public ResponseEntity<ExternApiResponse<Void>> invalidarCupom(@PathVariable @NonNull Long id) {
         cupomService.invalidarCupom(Objects.requireNonNull(id, "ID não pode ser nulo"));
         return ResponseEntity.ok(ExternApiResponse.ok("Cupom invalidado"));
     }
 
+    /**
+     * Cria um novo cupom de desconto com código único, percentual e data de validade.
+     * A data deve estar no formato ISO-8601 (ex: 2025-12-31T23:59:59).
+     */
     @PostMapping("/cupons")
     public ResponseEntity<?> criarCupom(@RequestBody @Valid CriarCupomRequest dto) {
         try {
@@ -297,6 +331,7 @@ public class AdminControllerApi {
     // DASHBOARD
     // ==========================================================
 
+    /** Retorna as métricas consolidadas do dashboard (vendas, livros, clientes, pedidos). */
     @GetMapping("/dashboard/metricas")
     public ResponseEntity<DashboardResponse> getMetricas() {
         return ResponseEntity.ok(dashboardService.getMetricas());
@@ -306,6 +341,7 @@ public class AdminControllerApi {
     // SESSÃO
     // ==========================================================
 
+    /** Retorna o nome e role do administrador logado para exibição no painel. */
     @GetMapping("/me")
     public ResponseEntity<Map<String, String>> getMe(@AuthenticationPrincipal UserDetails user) {
         String nome = adminRepository.findByEmail(user.getUsername())
@@ -318,6 +354,7 @@ public class AdminControllerApi {
     // CLIENTES
     // ==========================================================
 
+    /** Lista todos os clientes de forma paginada (20 por página), ordenados por nome. */
     @GetMapping("/clientes")
     public ResponseEntity<Page<ClienteListaResponse>> listarClientes(
             @PageableDefault(size = 20, sort = "nome") Pageable pageable) {
@@ -325,11 +362,13 @@ public class AdminControllerApi {
         return ResponseEntity.ok(clienteAdminService.listarClientes(pageable));
     }
 
+    /** Lista todos os clientes sem paginação para uso em relatórios e exportações. */
     @GetMapping("/clientes/tudo/lista")
     public ResponseEntity<List<ClienteListaResponse>> listarClientesList() {
          return ResponseEntity.ok(clienteAdminService.listarClientes());
     }
 
+    /** Retorna o perfil completo de um cliente específico para análise administrativa. */
     @GetMapping("/clientes/{id}")
     public ResponseEntity<?> getPerfilCliente(@PathVariable Long id) {
         try {
@@ -341,6 +380,10 @@ public class AdminControllerApi {
         }
     }
 
+    /**
+     * Suspende temporariamente a conta de um cliente pelo número de dias informado.
+     * Pode notificar o cliente por e-mail e registra o e-mail do admin responsável.
+     */
     @PostMapping("/clientes/{id}/suspender")
     public ResponseEntity<?> suspenderCliente(
             @PathVariable Long id,
@@ -356,6 +399,10 @@ public class AdminControllerApi {
         }
     }
 
+    /**
+     * Remove permanentemente a conta de um cliente informando o motivo.
+     * Pode notificar o cliente por e-mail antes da remoção.
+     */
     @PostMapping("/clientes/{id}/remover")
     public ResponseEntity<?> removerCliente(
             @PathVariable Long id,
@@ -370,6 +417,10 @@ public class AdminControllerApi {
         }
     }
 
+    /**
+     * Reativa uma conta suspensa ou removida, restaurando o acesso do cliente à plataforma.
+     * Pode enviar mensagem de reativação por e-mail se o campo notificarEmail for verdadeiro.
+     */
     @PostMapping("/clientes/{id}/reativar")
     public ResponseEntity<?> reativarCliente(
             @PathVariable Long id,
@@ -388,6 +439,7 @@ public class AdminControllerApi {
     // BLOG
     // ==========================================================
 
+    /** Lista todos os posts do blog independentemente do status para gestão pelo administrador. */
     @GetMapping("/blog")
     public ResponseEntity<List<Map<String, Object>>> listarPostsBlog() {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -411,6 +463,10 @@ public class AdminControllerApi {
     // REPORTES
     // ==========================================================
 
+    /**
+     * Lista todos os reportes e denúncias enviados pelos usuários, ordenados do mais recente ao mais antigo.
+     * Inclui as respostas do admin vinculadas a cada reporte.
+     */
     @GetMapping("/reportes")
     public ResponseEntity<List<Map<String, Object>>> listarReportes() {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -443,11 +499,13 @@ public class AdminControllerApi {
 
     }
 
+    /** Retorna a contagem de reportes ainda não lidos para exibição como badge no painel. */
     @GetMapping("/reportes/nao-lidos/count")
     public ResponseEntity<Map<String, Object>> contarReportesNaoLidos() {
         return ResponseEntity.ok(Map.of("count", reporteRepository.countByLidoFalse()));
     }
 
+    /** Marca um reporte como lido pelo administrador, removendo-o da fila de pendências. */
     @PostMapping("/reportes/{id}/marcar-lido")
     public ResponseEntity<?> marcarReporteLido(@PathVariable Long id) {
         return reporteRepository.findById(id).map(r -> {
@@ -457,6 +515,10 @@ public class AdminControllerApi {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Envia uma resposta por e-mail ao usuário que abriu o reporte e registra o histórico no banco.
+     * Marca o reporte como lido automaticamente após o envio da resposta.
+     */
     @PostMapping("/reportes/{id}/responder")
     public ResponseEntity<?> responderReporte(
             @PathVariable Long id,
@@ -477,6 +539,10 @@ public class AdminControllerApi {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Exclui um reporte e todas as respostas vinculadas a ele permanentemente do banco.
+     * Retorna 404 se o reporte não for encontrado.
+     */
     @DeleteMapping("/reportes/{id}")
     public ResponseEntity<?> excluirReporte(@PathVariable Long id) {
         if (!reporteRepository.existsById(id))
@@ -487,6 +553,7 @@ public class AdminControllerApi {
         return ResponseEntity.ok(Map.of("ok", true));
     }
 
+    /** Faz upload de uma foto para um livro do estoque e retorna a URL do arquivo salvo. */
     @PostMapping(value = "/livros/upload-foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, String>> uploadFotoLivro(
             @RequestParam("foto") MultipartFile foto,
