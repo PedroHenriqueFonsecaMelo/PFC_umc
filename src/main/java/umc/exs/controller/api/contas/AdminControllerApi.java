@@ -328,7 +328,7 @@ public class AdminControllerApi {
     @GetMapping("/clientes/tudo/lista")
     public ResponseEntity<List<ClienteListaResponse>> listarClientesList() {
          return ResponseEntity.ok(clienteAdminService.listarClientes());
-    }
+    }
 
     @GetMapping("/clientes/{id}")
     public ResponseEntity<?> getPerfilCliente(@PathVariable Long id) {
