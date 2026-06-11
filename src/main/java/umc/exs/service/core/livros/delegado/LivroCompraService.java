@@ -29,6 +29,10 @@ import umc.exs.service.gamificacao.GamificacaoService;
 import umc.exs.service.log.LogAuditoriaService;
 import umc.exs.service.notificacao.NotificacaoService;
 
+/**
+ * Orquestra o fluxo completo de compra de livros: valida saldo, aplica cupom,
+ * debita tokens em bloco, registra pedido, concede XP e dispara e-mails transacionais.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -49,8 +53,13 @@ public class LivroCompraService {
 
     private static final String ASSUNTO_SALDO = "Atualização de saldo — Bibliotroca";
 
+    /**
+     * Realiza a compra de um único livro: aplica lock pessimista, valida saldo e endereço,
+     * debita tokens, registra pedido, concede XP e envia e-mails ao comprador e ao vendedor.
+     */
     @Transactional
     public void realizarCompra(@NonNull Long livroId, String emailComprador) {
+        // LOCK PESSIMISTA — garante que apenas um usuário compra este livro simultaneamente
         Livro livro = livroRepository.findByIdAndAprovadoTrueWithLock(livroId)
                 .orElseThrow(() -> new IllegalArgumentException("Livro indisponível ou não encontrado."));
 
@@ -82,6 +91,7 @@ public class LivroCompraService {
         logAuditoria.registrarLog("COMPRA_LIVRO_SUCESSO", comprador.getId(), comprador.getEmail(),
                 "Livro " + livroId + " T$" + precoLivro);
 
+        // GAMIFICAÇÃO — concede +30 XP ao comprador por cada livro adquirido
         gamificacaoService.xpCompra(comprador.getId());
 
         // Notificação dashboard: compra realizada (comprador)
@@ -113,6 +123,10 @@ public class LivroCompraService {
                 "Seu livro foi comprado com sucesso");
     }
 
+    /**
+     * Processa compra de múltiplos livros (carrinho): aplica LOCK PESSIMISTA em lote,
+     * aplica CUPOM de desconto apenas sobre itens sem promoção e debita o total de uma vez.
+     */
     @Transactional
     public CarrinhoCompraResponse comprarCarrinho(String emailComprador, CarrinhoCompraRequest request) {
         Cliente comprador = validarCompradorCarrinho(emailComprador);
@@ -138,7 +152,7 @@ public class LivroCompraService {
                 .mapToDouble(l -> l.getPrecoAprovado() != null ? l.getPrecoAprovado() : 0.0)
                 .sum();
 
-        // Base do cupom: apenas livros sem promoção
+        // CUPOM — desconto é aplicado somente sobre livros sem promoção ativa
         double totalParaCupom = livrosParaComprar.stream()
                 .filter(l -> !Boolean.TRUE.equals(l.getEmPromocao()))
                 .mapToDouble(l -> l.getPrecoAprovado() != null ? l.getPrecoAprovado() : 0.0)
@@ -209,6 +223,9 @@ public class LivroCompraService {
                 .build();
     }
 
+    /**
+     * Valida pré-condições do comprador: conta desbloqueada e endereço de entrega cadastrado.
+     */
     private Cliente validarCompradorCarrinho(String email) {
         Cliente c = clienteRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("Comprador não encontrado."));
@@ -221,6 +238,10 @@ public class LivroCompraService {
         return c;
     }
 
+    /**
+     * Compara os IDs solicitados com os livros disponíveis e gera a lista de falhas
+     * para os IDs que não foram encontrados ou já estavam indisponíveis.
+     */
     private List<ItemResultadoDTO> identificarFalhas(List<Long> idsSolicitados, List<Livro> encontrados) {
         Set<Long> encontradosIds = encontrados.stream().map(Livro::getId).collect(Collectors.toSet());
         return idsSolicitados.stream()
@@ -279,6 +300,9 @@ public class LivroCompraService {
         return sucesso;
     }
 
+    /**
+     * Registra o pedido, debita o valor do livro do saldo e marca o exemplar como indisponível.
+     */
     private void processarBaixaLivro(Cliente comprador, Livro livro) {
         pedidoService.registrarPedido(comprador, livro, "");
         comprador.setSaldoTokens(comprador.getSaldoTokens() - livro.getPrecoAprovado());
@@ -286,6 +310,9 @@ public class LivroCompraService {
         livroRepository.save(livro);
     }
 
+    /**
+     * Salva o log de auditoria da compra e coordena o envio dos E-MAILs de confirmação.
+     */
     private void registrarLogECoordenarEmails(Cliente comprador, List<ItemResultadoDTO> comprados,
             List<ItemResultadoDTO> falhas, double saldoAnterior) {
         double totalGasto = saldoAnterior - comprador.getSaldoTokens();
@@ -297,6 +324,9 @@ public class LivroCompraService {
         }
     }
 
+    /**
+     * E-MAIL — envia confirmação de compra individual e extrato de atualização de saldo ao comprador.
+     */
     private void enviarEmailsCompraUnica(Cliente comprador, Livro livro, double saldoAntes) {
         try {
             String email = Objects.requireNonNull(comprador.getEmail());
@@ -314,6 +344,9 @@ public class LivroCompraService {
         }
     }
 
+    /**
+     * E-MAIL — envia resumo do carrinho confirmado (lista de itens + total) e extrato de saldo.
+     */
     private void enviarEmailsSucessoCarrinho(Cliente comprador, List<ItemResultadoDTO> comprados, double totalGasto,
             double saldoAnterior) {
         try {

@@ -4,8 +4,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * Fábrica de templates HTML para todos os e-mails transacionais da Bibliotroca.
+ * Usa componentes reutilizáveis (EmailComponents) e layout centralizado (EmailLayout) para manter
+ * consistência visual. Todos os dados externos passam por EmailSanitizer antes de ser injetados no HTML.
+ */
 public class EmailHtmlBuilder {
 
+    /** Construtor privado — classe utilitária, não deve ser instanciada. */
     private EmailHtmlBuilder() {
     }
 
@@ -16,6 +22,9 @@ public class EmailHtmlBuilder {
     private static final String PEDIDO = "Pedido #";
     private static final String MOTIVO = "Motivo: ";
 
+    /**
+     * E-MAIL — confirmação de compra individual exibindo título do livro, valor debitado e saldo restante.
+     */
     public static String compraSucesso(String nome, String livro, Double preco, Double saldo, String data) {
 
         nome = EmailSanitizer.esc(nome);
@@ -37,6 +46,9 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Compra realizada com sucesso", conteudo);
     }
 
+    /**
+     * E-MAIL — resumo do carrinho confirmado, listando todos os itens, total debitado e saldo restante.
+     */
     public static String carrinhoConfirmado(String nome, List<String[]> itens, double total, Double saldo,
                                             String data) {
 
@@ -61,6 +73,9 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Carrinho confirmado", conteudo);
     }
 
+    /**
+     * E-MAIL — extrato de movimentação financeira: crédito ou débito de tokens com saldo anterior e atual.
+     */
     public static String atualizacaoSaldo(String nome, double valor, Double saldoAnterior, Double saldoAtual,
                                           String operacao, boolean credito, LocalDateTime data) {
 
@@ -79,6 +94,9 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Movimentação financeira", conteudo);
     }
 
+    /**
+     * E-MAIL — notifica o comprador sobre mudança de status do pedido (ex: enviado, entregue, cancelado).
+     */
     public static String atualizacaoPedido(String nome, Long id, String status, String livro,
                                           String mensagem, boolean pago, double valor, String data) {
 
@@ -97,6 +115,9 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Atualização de pedido", conteudo);
     }
 
+    /**
+     * E-MAIL — informa ao comprador que o cancelamento foi aprovado e o estorno creditado no saldo.
+     */
     public static String cancelamentoAprovado(String nome, Long id, String livro,
                                               double valor, Double saldo, String motivo) {
 
@@ -111,6 +132,9 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Cancelamento aprovado", conteudo);
     }
 
+    /**
+     * E-MAIL — informa ao comprador que o cancelamento foi recusado e o pedido permanece ativo.
+     */
     public static String cancelamentoRecusado(String nome, Long id, String livro, String motivo) {
 
         String conteudo =
@@ -122,6 +146,9 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Cancelamento recusado", conteudo);
     }
 
+    /**
+     * E-MAIL — notificação interna ao admin com os dados do cancelamento solicitado pelo comprador.
+     */
     public static String cancelamentoAdmin(String nome, Long id, String livro,
                                            double valor, String cliente, String email,
                                            String motivo, String data) {
@@ -139,6 +166,9 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Cancelamento (admin)", conteudo);
     }
 
+    /**
+     * E-MAIL — avisa o vendedor que seu livro foi aprovado pelo admin e está disponível na vitrine.
+     */
     public static String livroAprovado(String nome, String livro, double valor) {
 
         EmailSanitizer.esc(nome);
@@ -154,6 +184,9 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Livro aprovado", conteudo);
     }
 
+    /**
+     * E-MAIL — informa o vendedor que o livro não foi aprovado, com o motivo da rejeição.
+     */
     public static String livroRejeitado(String nome, String livro, String motivo) {
 
         livro = EmailSanitizer.esc(livro);
@@ -169,6 +202,9 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Livro rejeitado", conteudo);
     }
 
+    /**
+     * E-MAIL — alerta o cliente de que um livro da sua lista de desejos ficou disponível na vitrine.
+     */
     public static String listaDesejosDisponivel(String nome, String livro, String autor,
                                                 boolean disponivel, String link) {
 
@@ -181,6 +217,9 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Lista de desejos", conteudo);
     }
 
+    /**
+     * CUPOM — avisa o cliente que um cupom de desconto está prestes a expirar.
+     */
     public static String cupomExpirando(String nome, String codigo, Double valor, String data) {
 
         String conteudo =
@@ -192,6 +231,9 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Cupom", conteudo);
     }
 
+    /**
+     * E-MAIL — link de redefinição de senha com expiração de 30 minutos.
+     */
     public static String recuperacaoSenha(String nome, String link) {
 
         nome = EmailSanitizer.esc(nome);
@@ -206,6 +248,9 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Recuperação de senha", conteudo);
     }
 
+    /**
+     * E-MAIL — confirmação de e-mail enviada após o cadastro; link expira em 24 horas.
+     */
     public static String verificacaoEmail(String nome, String link) {
 
         nome = EmailSanitizer.esc(nome);
@@ -220,6 +265,10 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Confirmação de e-mail", conteudo);
     }
 
+    /**
+     * E-MAIL — comunicado em massa disparado pelo admin para um ou mais clientes.
+     * Cada linha do campo mensagem é convertida em um parágrafo HTML separado.
+     */
     public static String comunicadoAdmin(String nome, String mensagem) {
 
         nome = EmailSanitizer.esc(nome);
@@ -243,6 +292,9 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Comunicado", html.toString());
     }
 
+    /**
+     * E-MAIL — notifica o cliente que sua conta foi suspensa, informando motivo e prazo.
+     */
     public static String contaSuspensa(String nome, String motivo, LocalDateTime suspensaoAte) {
         nome = EmailSanitizer.esc(nome);
         motivo = EmailSanitizer.esc(motivo != null ? motivo : "Violação dos termos de uso.");
@@ -265,6 +317,9 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Sua conta foi suspensa — Bibliotroca", conteudo);
     }
 
+    /**
+     * E-MAIL — confirma ao cliente que a suspensão foi encerrada e o acesso foi restabelecido.
+     */
     public static String contaReativada(String nome, String mensagem) {
         nome = EmailSanitizer.esc(nome);
         mensagem = EmailSanitizer.esc(mensagem != null ? mensagem : "");
@@ -278,6 +333,9 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Sua conta foi reativada — Bibliotroca", conteudo);
     }
 
+    /**
+     * E-MAIL — retorno da equipe ao cliente sobre um reporte de problema registrado na plataforma.
+     */
     public static String respostaReporte(String mensagem) {
         String conteudo = EmailComponents.h2("Retorno da equipe Bibliotroca")
                 + EmailComponents.p("Recebemos seu reporte e gostaríamos de retornar:")
@@ -288,6 +346,10 @@ public class EmailHtmlBuilder {
         return EmailLayout.wrap("Retorno sobre seu reporte", conteudo);
     }
 
+    /**
+     * E-MAIL — informa o cliente que sua conta foi removida permanentemente pelo admin,
+     * incluindo aviso sobre saldo de tokens não resgatado, se houver.
+     */
     public static String contaRemovida(String nome, String motivo, Double saldoTokens) {
         nome = EmailSanitizer.esc(nome);
         motivo = EmailSanitizer.esc(motivo != null ? motivo : "Violação dos termos de uso.");
