@@ -28,6 +28,10 @@ import umc.exs.security.JwtUtil;
 import umc.exs.service.cliente.ClienteService;
 import umc.exs.service.core.control.AuthHelper;
 
+/**
+ * Controller REST responsável pela autenticação via API (login, logout, registro e verificação de e-mail).
+ * Gera e invalida tokens JWT armazenados em cookie HTTP-only.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/auth")
@@ -44,6 +48,10 @@ public class AuthController {
 
     // ───────────────────────── LOGIN ─────────────────────────
 
+    /**
+     * Realiza o login via API REST, autentica o cliente e retorna o token JWT em cookie.
+     * Registra IP e User-Agent para fins de auditoria.
+     */
     @PostMapping("/login")
     public ResponseEntity<?> login(
             @Valid @RequestBody LoginRequest LoginRequest,
@@ -85,6 +93,7 @@ public class AuthController {
 
     // ───────────────────────── LOGOUT ─────────────────────────
 
+    /** Realiza o logout invalidando o cookie JWT e limpando a sessão do cliente. */
     @PostMapping("/logout")
     public ResponseEntity<Map<String, Object>> logout(
             HttpServletRequest request,
@@ -110,8 +119,13 @@ public class AuthController {
 
     // ───────────────────────── HELPERS ─────────────────────────
 
+    /**
+     * Extrai o token JWT da requisição verificando primeiro o cookie e depois o header Authorization.
+     * Retorna null se nenhum token for encontrado.
+     */
     private String resolveToken(HttpServletRequest request) {
 
+        // Tenta extrair o token do cookie HTTP-only definido no login
         Cookie[] cookies = request.getCookies();
 
         if (cookies != null) {
@@ -122,6 +136,7 @@ public class AuthController {
             }
         }
 
+        // Fallback — aceita token no header Authorization (Bearer) para clientes de API
         String header = request.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {
@@ -133,6 +148,10 @@ public class AuthController {
 
     // ───────────────────────── VERIFICAR EMAIL ─────────────────────────
 
+    /**
+     * Confirma o e-mail do cliente a partir do token enviado por e-mail no cadastro.
+     * Marca o token como usado e redireciona para o login após verificação bem-sucedida.
+     */
     @GetMapping("/verificar-email")
     public ResponseEntity<Map<String, Object>> verificarEmail(@RequestParam String token) {
 
@@ -164,6 +183,7 @@ public class AuthController {
 
     // ───────────────────────── DEV ONLY ─────────────────────────
 
+    /** Endpoint exclusivo para ambiente local que verifica o e-mail sem precisar do link. */
     @Profile("local")
     @GetMapping("/dev/verificar-email/{clienteId}")
     public ResponseEntity<Map<String, Object>> devVerificarEmail(@PathVariable @NonNull Long clienteId) {
@@ -187,6 +207,7 @@ public class AuthController {
 
     // ───────────────────────── REGISTER ─────────────────────────
 
+    /** Registra um novo cliente via API, gera token JWT e define o cookie de sessão automaticamente. */
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(
             @Valid @RequestBody SignupRequest SignupRequest,

@@ -22,6 +22,10 @@ import umc.exs.service.email.facade.EmailFacade;
 import umc.exs.service.email.html.EmailHtmlBuilder;
 import umc.exs.service.log.LogAuditoriaService;
 
+/**
+ * Serviço responsável pela aprovação e rejeição de livros enviados pelos vendedores.
+ * Ao aprovar, calcula preço por estado de conservação, credita tokens e notifica o vendedor.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -48,6 +52,10 @@ public class LivroAprovacaoService {
 
     // ========================= APROVAÇÃO =========================
 
+    /**
+     * Aprova um livro enviado pelo vendedor, define estado, calcula preço e credita tokens de recompensa.
+     * Notifica vendedor por e-mail e atualiza o status do lote se todos os livros forem processados.
+     */
     @Transactional
     public Livro aprovarLivro(Long livroId, Long adminId, AdminAprovacaoRequest dto) {
 
@@ -58,6 +66,7 @@ public class LivroAprovacaoService {
 
         anuncio.setAprovado(true);
         anuncio.setEstadoAprovado(estado);
+        // PREÇO AUTOMÁTICO — definido pelo estado de conservação informado pelo admin
         anuncio.setPrecoAprovado((double) estado.getPreco());
         anuncio.setAdminAprovadorId(adminId);
         anuncio.setDataAprovacao(LocalDateTime.now());
@@ -88,6 +97,7 @@ public class LivroAprovacaoService {
 
             double saldoAntes = vendedor.getSaldoTokens() != null ? vendedor.getSaldoTokens() : 0.0;
 
+            // RECOMPENSA — tokens creditados ao vendedor por cada livro aprovado
             double tokenReward = LivroRecompensaService.TOKEN_REWARD;
             vendedor.setSaldoTokens(saldoAntes + tokenReward);
             clienteRepository.save(vendedor);
@@ -129,6 +139,7 @@ public class LivroAprovacaoService {
             livroNotificacaoService.notificarAprovacaoDashboard(vendedor, anuncio.getTitulo(), tokenReward);
         }
 
+        // APROVAÇÃO — se todos os livros do lote foram processados, atualiza o status do lote
         if (anuncio.getLote() != null) {
 
             Long loteId = anuncio.getLote().getId();
@@ -160,6 +171,10 @@ public class LivroAprovacaoService {
 
     // ========================= REJEIÇÃO =========================
 
+    /**
+     * Rejeita um livro enviado pelo vendedor, armazena o motivo e notifica por e-mail.
+     * Atualiza o status do lote para REJEITADO ou PARCIAL_APROVADO conforme os demais livros.
+     */
     @Transactional
     public void rejeitarLivro(Long livroId, Long adminId, String estado, String comentario) {
 

@@ -16,6 +16,10 @@ import umc.exs.service.cliente.senha.SenhaService;
 import umc.exs.service.log.AcaoAuditoria;
 import umc.exs.service.log.LogAuditoriaService;
 
+/**
+ * Serviço delegado responsável pela autenticação, bloqueio de conta e recuperação de senha.
+ * Controla tentativas incorretas de login e garante a segurança do acesso.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,10 @@ public class ClienteAutenticacaoService {
         private final SenhaService senhaService;
         private final LogAuditoriaService logAuditoria;
 
+        /**
+         * Autentica o cliente verificando status da conta, e-mail verificado e senha.
+         * Incrementa tentativas falhas e bloqueia a conta após o limite ser atingido.
+         */
         @Transactional
         public Cliente autenticar(String email, String senha) {
 
@@ -39,6 +47,7 @@ public class ClienteAutenticacaoService {
                         cliente.getStatusConta(),
                         cliente.getSuspensaoAte());
 
+                // BLOQUEIO — conta suspensa impede o login com prazo de expiração
                 if (status == StatusConta.SUSPENSO) {
                         String prazo = cliente.getSuspensaoAte() != null
                                 ? "até " + cliente.getSuspensaoAte().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
@@ -72,10 +81,12 @@ public class ClienteAutenticacaoService {
                         throw new IllegalArgumentException("Conta bloqueada.");
                 }
 
+                // BLOQUEIO — senha errada incrementa contador; conta bloqueada após 5 tentativas falhas
                 if (!passwordEncoder.matches(senha, cliente.getSenha())) {
 
                         repositoryService.registrarFalhaLogin(cliente);
 
+                        // Calcula quantas tentativas o usuário ainda tem antes do bloqueio total
                         int restantes = Math.max(0, 5 - cliente.getTentativas());
 
                         logAuditoria.registrarLog(
@@ -88,6 +99,7 @@ public class ClienteAutenticacaoService {
                                 "Senha incorreta. Restam " + restantes + " tentativa(s).");
                 }
 
+                // LOGIN OK — zera o contador de tentativas falhas ao autenticar com sucesso
                 repositoryService.resetarTentativasLogin(cliente);
 
                 logAuditoria.registrarLog(
@@ -99,6 +111,7 @@ public class ClienteAutenticacaoService {
                 return cliente;
         }
 
+        /** Gera um token de recuperação de senha e registra o evento na auditoria. */
         public void gerarTokenRecuperacao(Cliente cliente) {
                 senhaService.iniciarRecuperacao(cliente);
 
@@ -109,6 +122,10 @@ public class ClienteAutenticacaoService {
                         "Token de recuperação de senha gerado");
         }
 
+        /**
+         * Redefine a senha do cliente usando o token de recuperação, desbloqueia a conta e zera tentativas.
+         * Deleta o token após uso para evitar reutilização.
+         */
         @Transactional
         public Cliente redefinirSenha(String token, String novaSenha) {
 
@@ -145,6 +162,10 @@ public class ClienteAutenticacaoService {
                 return cliente;
         }
 
+        /**
+         * Altera a senha do cliente logado após confirmar que a senha atual está correta.
+         * Registra falha na auditoria caso a senha informada não confira.
+         */
         @Transactional
         public void alterarSenha(String email, String senhaAtual, String novaSenha) {
 
@@ -171,6 +192,7 @@ public class ClienteAutenticacaoService {
                         "Senha alterada com sucesso");
         }
 
+        /** Verifica se o token de recuperação de senha existe e ainda não expirou. */
         public boolean validarToken(String token) {
                 return tokenRepository.findByToken(token)
                                 .map(t -> !t.isExpirado())

@@ -215,43 +215,51 @@ public class AdminViewController {
                 .body(pdfBytes);
     }
 
+    /** Exibe a página de gerenciamento do estoque de livros para o administrador. */
     @GetMapping("/livros")
     public String estoque() {
         return "admin/estoque";
     }
 
+    /** Exibe os detalhes de um livro específico no estoque administrativo. */
     @GetMapping("/livros/{id}")
     public String estoqueDetalhe(@PathVariable Long id, Model model) {
         model.addAttribute("livroId", id);
         return "admin/estoque_detalhe";
     }
 
+    /** Exibe a página de gerenciamento de cupons de desconto. */
     @GetMapping("/cupons")
     public String cupons() {
         return "admin/cupons";
     }
 
+    /** Exibe a lista de solicitações de cancelamento aguardando análise do administrador. */
     @GetMapping("/cancelamentos")
     public String cancelamentos() {
         return "admin/cancelamentos";
     }
 
+    /** Exibe os detalhes de uma solicitação de cancelamento específica. */
     @GetMapping("/cancelamentos/{id}")
     public String cancelamentoDetalhe(@PathVariable Long id, Model model) {
         model.addAttribute("solicitacaoId", id);
         return "admin/cancelamento_detalhe";
     }
 
+    /** Exibe a lista de todos os clientes cadastrados na plataforma. */
     @GetMapping("/clientes")
     public String clientes() {
         return "admin/clientes";
     }
 
+    /** Exibe a lista de reportes e denúncias enviadas pelos usuários. */
     @GetMapping("/reportes")
     public String reportes() {
         return "admin/reportes";
     }
 
+    /** Exibe o perfil detalhado de um cliente específico para análise pelo administrador. */
     @GetMapping("/clientes/{id}")
     public String clientePerfil(@PathVariable Long id, Model model) {
         model.addAttribute("clienteId", id);

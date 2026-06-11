@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Serviço responsável pela reserva temporária de livros durante o checkout.
+ * Bloqueia livros por 5 minutos para o comprador e libera automaticamente se expirar.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,6 +35,10 @@ public class ReservaCheckoutService {
     private static final int BLOQUEIO_MIN = 5;
     private static final int LIMITE_LIVROS = 5;
 
+    /**
+     * Reserva um conjunto de livros para o cliente durante o checkout por 5 minutos.
+     * Bloqueia o livro para outros compradores e impede reservas duplicadas ativas.
+     */
     @Transactional
     public Map<String, Object> reservar(List<Long> livroIds, String emailUsuario) {
 
@@ -92,6 +100,7 @@ public class ReservaCheckoutService {
             }
         }
 
+        // RESERVA — livro bloqueado por 5 minutos para o comprador enquanto ele finaliza o pedido
         LocalDateTime expira = agora.plusMinutes(DURACAO_RESERVA_MIN);
 
         for (Long livroId : livroIds) {
@@ -132,6 +141,10 @@ public class ReservaCheckoutService {
                 "duracaoSegundos", DURACAO_RESERVA_MIN * 60);
     }
 
+    /**
+     * Libera as reservas dos livros quando o cliente abandona o checkout.
+     * Após 3 desistências, bloqueia o cliente por 5 minutos para evitar abuso.
+     */
     @Transactional
     public Map<String, Object> liberarReservas(List<Long> livroIds, String emailUsuario) {
 
@@ -155,6 +168,7 @@ public class ReservaCheckoutService {
                 int tentativas = r.getTentativas() + 1;
                 r.setTentativas(tentativas);
 
+                // BLOQUEIO — após 3 desistências consecutivas, cliente fica bloqueado por 5 minutos
                 if (tentativas >= LIMITE_TENTATIVAS) {
 
                     r.setBloqueadoAte(agora.plusMinutes(BLOQUEIO_MIN));
@@ -180,6 +194,7 @@ public class ReservaCheckoutService {
         return Map.of("liberado", true);
     }
 
+    /** Consulta se o cliente possui uma reserva ativa para o livro e retorna o tempo restante em segundos. */
     @Transactional(readOnly = true)
     public Map<String, Object> statusReserva(Long livroId, String emailUsuario) {
 
@@ -213,6 +228,7 @@ public class ReservaCheckoutService {
                 "expiraEm", r.getExpiraEm().toString());
     }
 
+    /** Job agendado que roda a cada 60 segundos e remove reservas com prazo expirado do banco. */
     @Scheduled(fixedDelay = 60000)
     @Transactional
     public void limparReservasExpiradas() {
@@ -222,6 +238,7 @@ public class ReservaCheckoutService {
         log.debug("RESERVAS_EXPIRADAS_LIMPAS");
     }
 
+    /** Busca o ID do cliente pelo e-mail; retorna null se não encontrado (sessão inválida). */
     private Long resolverClienteId(String email) {
 
         return clienteRepo.findByEmail(email)

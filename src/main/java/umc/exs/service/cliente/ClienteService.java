@@ -32,6 +32,10 @@ import umc.exs.service.email.facade.EmailFacade;
 import umc.exs.service.email.html.EmailHtmlBuilder;
 import umc.exs.service.log.LogAuditoriaService;
 
+/**
+ * Serviço principal de cliente — orquestra cadastro, autenticação, perfil, carteira e endereços.
+ * Delega responsabilidades específicas para serviços auxiliares (delegados).
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -52,6 +56,10 @@ public class ClienteService {
         @Value("${app.base-url:http://localhost:8443}")
         private String baseUrl;
 
+        /**
+         * Cadastra um novo cliente, registra log de auditoria e envia e-mail de verificação.
+         * Lança exceção se o e-mail já estiver em uso ou os termos não forem aceitos.
+         */
         @Transactional
         public Cliente salvarCliente(SignupRequest signupRequest) {
                 validarNovoCliente(signupRequest);
@@ -72,6 +80,10 @@ public class ClienteService {
                 return cliente;
         }
 
+        /**
+         * Cadastra cliente com endereço completo em um único passo transacional.
+         * Registra log de auditoria com ação CADASTRO_COMPLETO.
+         */
         @Transactional
         public Cliente salvarClienteCompleto(
                         SignupRequest signupRequest,
@@ -92,6 +104,10 @@ public class ClienteService {
                 return cliente;
         }
 
+        /**
+         * Gera e envia um link de verificação de e-mail com validade de 24 horas.
+         * Remove token anterior antes de criar um novo para evitar duplicidade.
+         */
         private void enviarEmailVerificacao(
                         @NonNull Long clienteId,
                         String nome,
@@ -129,6 +145,7 @@ public class ClienteService {
                 }
         }
 
+        /** Faz upload e atualiza a foto de perfil do cliente identificado pelo ID. */
         @Transactional
         public String uploadFotoPerfil(
                         @NonNull Long clienteId,
@@ -139,6 +156,7 @@ public class ClienteService {
                                 foto);
         }
 
+        /** Faz upload da foto de perfil para o cliente identificado pelo e-mail da sessão. */
         @Transactional
         public void uploadFotoPerfilParaUsuarioLogado(
                         String email,
@@ -151,6 +169,7 @@ public class ClienteService {
                                 foto);
         }
 
+        /** Atualiza os dados cadastrais do cliente identificado pelo e-mail da sessão. */
         @Transactional
         public void atualizarDadosLogados(
                         String email,
@@ -163,6 +182,7 @@ public class ClienteService {
                                 dto);
         }
 
+        /** Adiciona tokens à carteira do cliente logado via recarga manual (PIX). */
         @Transactional
         public void adicionarTokensParaUsuarioLogado(
                         String email,
@@ -177,6 +197,7 @@ public class ClienteService {
                                 "Recarga manual");
         }
 
+        /** Adiciona tokens à carteira do cliente identificado pelo ID via recarga PIX. */
         @Transactional
         public Cliente adicionarTokens(
                         Long clienteId,
@@ -193,10 +214,15 @@ public class ClienteService {
                 return cliente;
         }
 
+        /** Busca o cliente pelo e-mail ou lança exceção se não encontrado. */
         public Cliente buscarEntidadePorEmail(String email) {
                 return repositoryService.buscarPorEmailOuFalhar(email);
         }
 
+        /**
+         * Anonimiza os dados pessoais do cliente, bloqueia a conta e marca como removida.
+         * O e-mail é substituído por hash e a senha por valor aleatório irrecuperável.
+         */
         @Transactional
         public void deletarContaPropria(String email) {
 
@@ -204,6 +230,7 @@ public class ClienteService {
 
                 Long id = cliente.getId();
 
+                // ANONIMIZAÇÃO — dados pessoais substituídos para garantir privacidade após exclusão
                 String charPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%*.";
 
                 String senhaAleatoria = secureRandom
@@ -222,6 +249,7 @@ public class ClienteService {
                 cliente.setSenha(
                                 passwordEncoder.encode(senhaAleatoria));
 
+                // BLOQUEIO PERMANENTE — conta desativada e bloqueada para impedir reuso após exclusão
                 cliente.setTentativas(10);
                 cliente.setBloqueada(true);
                 cliente.setAtivo(false);
@@ -240,18 +268,24 @@ public class ClienteService {
                 log.info("Conta {} anonimizada.", id);
         }
 
+        /** Busca o cliente pelo e-mail retornando Optional; sem lançar exceção se não encontrado. */
         public Optional<Cliente> buscarClientePorEmail(
                         String email) {
 
                 return repositoryService.encontrarPorEmail(email);
         }
 
+        /** Busca o cliente pelo ID ou lança exceção se não existir. */
         public Cliente buscarPorId(
                         @NonNull Long id) {
 
                 return repositoryService.buscarPorId(id);
         }
 
+        /**
+         * Valida os dados do novo cliente: aceite de termos, e-mail único e formatação válida.
+         * Lança IllegalArgumentException com mensagem específica para cada violação.
+         */
         public void validarNovoCliente(SignupRequest dto) {
 
                 if (!Boolean.TRUE.equals(dto.getTermsAccepted())) {
@@ -287,6 +321,7 @@ public class ClienteService {
                 }
         }
 
+        /** Registra uma intenção de pagamento pendente (ex.: PIX gerado mas ainda não confirmado). */
         @Transactional
         public void registrarTransacaoPendente(
                         @NonNull Long clienteId,
@@ -301,6 +336,7 @@ public class ClienteService {
                                 pagamentoId);
         }
 
+        /** Lista o histórico de transações da carteira do cliente identificado pelo e-mail. */
         @Transactional(readOnly = true)
         public List<Transacao> listarHistoricoTransacoes(
                         String email) {
@@ -318,6 +354,7 @@ public class ClienteService {
                 return carteiraService.listarHistoricoPorCliente(id);
         }
 
+        /** Verifica se um pagamento PIX já foi confirmado consultando o status pelo ID. */
         public boolean verificarSeFoiPago(
                         String pagamentoId) {
 
@@ -325,6 +362,7 @@ public class ClienteService {
                                 pagamentoId);
         }
 
+        /** Confirma o pagamento PIX e credita o valor na carteira do cliente. */
         public void aprovarPagamento(
                         String pagamentoId) {
 
@@ -332,6 +370,10 @@ public class ClienteService {
                                 pagamentoId);
         }
 
+        /**
+         * Autentica o cliente delegando ao serviço de autenticação e registra log de sucesso.
+         * Lança exceção em caso de credenciais inválidas, conta bloqueada ou suspensa.
+         */
         @Transactional
         public Cliente autenticarCliente(
                         String email,
@@ -350,6 +392,7 @@ public class ClienteService {
                 return cliente;
         }
 
+        /** Inicia o processo de recuperação de senha gerando e enviando token por e-mail. */
         @Transactional
         public void iniciarRecuperacaoSenha(
                         String email) {
@@ -359,12 +402,17 @@ public class ClienteService {
                 autenticacaoService.gerarTokenRecuperacao(cliente);
         }
 
+        /** Verifica se o token de recuperação de senha é válido e ainda não expirou. */
         public boolean validarTokenRecuperacao(
                         String token) {
 
                 return autenticacaoService.validarToken(token);
         }
 
+        /**
+         * Altera a senha do cliente logado após confirmar que nova senha e confirmação coincidem.
+         * Valida a força da nova senha antes de prosseguir.
+         */
         @Transactional
         public void alterarSenhaLogado(
                         String email,
@@ -394,6 +442,7 @@ public class ClienteService {
                                 "Senha alterada.");
         }
 
+        /** Redefine a senha usando o token de recuperação recebido por e-mail após validar a força. */
         @Transactional
         public void alterarSenhaComToken(
                         String token,
@@ -409,6 +458,7 @@ public class ClienteService {
                                 novaSenha);
         }
 
+        /** Adiciona um novo endereço à lista de endereços do cliente logado. */
         @Transactional
         public void adicionarEnderecoParaUsuarioLogado(
                         String email,
@@ -419,6 +469,10 @@ public class ClienteService {
                                 endereco);
         }
 
+        /**
+         * Define o endereço de entrega principal do cliente após verificar que o endereço pertence a ele.
+         * Lança exceção se o endereço informado não for do cliente logado.
+         */
         @Transactional
         public void selecionarEnderecoParaUsuarioLogado(
                         String email,
@@ -440,6 +494,7 @@ public class ClienteService {
                 repositoryService.salvar(cliente);
         }
 
+        /** Atualiza os dados de um endereço existente do cliente pelo ID. */
         @Transactional
         public void atualizarEnderecoDoCliente(
                         @NonNull Long clienteId,
@@ -450,6 +505,7 @@ public class ClienteService {
                                 dto);
         }
 
+        /** Remove o endereço informado da lista de endereços do cliente. */
         @Transactional
         public void deletarEnderecoDoCliente(
                         @NonNull Long clienteId,
@@ -460,6 +516,7 @@ public class ClienteService {
                                 enderecoId);
         }
 
+        /** Remove o cartão de pagamento informado da lista de cartões do cliente. */
         @Transactional
         public void deletarCartaoDoCliente(
                         @NonNull Long clienteId,

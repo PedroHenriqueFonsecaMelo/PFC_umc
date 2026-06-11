@@ -39,6 +39,10 @@ import umc.exs.service.cliente.ClienteService;
 import umc.exs.service.core.control.AuthHelper;
 import umc.exs.service.gamificacao.GamificacaoService;
 
+/**
+ * Controller web responsável por todas as ações do cliente na plataforma.
+ * Gerencia cadastro, login, perfil, carteira, endereços e recuperação de senha.
+ */
 @Controller
 @RequestMapping("/clientes")
 @RequiredArgsConstructor
@@ -67,6 +71,7 @@ public class ClientController {
     // AUTENTICAÇÃO (CADASTRO / LOGIN / SAIR)
     // ============================================================
 
+    /** Exibe o formulário de novo cadastro e limpa qualquer cookie JWT existente. */
     @GetMapping("/novo-cadastro")
     public String exibirFormularioCadastro(HttpServletResponse response, Model model) {
         if (!model.containsAttribute(ATTR_CLIENTE)) {
@@ -76,6 +81,7 @@ public class ClientController {
         return VIEW_CADASTRO;
     }
 
+    /** Processa o cadastro, valida campos e senhas; redireciona para login em caso de sucesso. */
     @PostMapping("/novo-cadastro")
     public String registrarCliente(
             @Valid @ModelAttribute(ATTR_CLIENTE) SignupRequest SignupRequest,
@@ -104,6 +110,7 @@ public class ClientController {
         }
     }
 
+    /** Exibe a página de login do cliente. */
     @GetMapping("/login")
     public String exibirLogin(Model model) {
         if (!model.containsAttribute("loginData")) {
@@ -112,6 +119,10 @@ public class ClientController {
         return VIEW_LOGIN;
     }
 
+    /**
+     * Autentica o cliente verificando status da conta antes de iniciar sessão.
+     * Admins são redirecionados ao painel; clientes suspensos ou removidos recebem mensagem de erro.
+     */
     @PostMapping("/login")
     public String realizarLogin(
             @RequestParam String email,
@@ -142,6 +153,7 @@ public class ClientController {
             Cliente c = clienteOpt.get();
             StatusConta status = c.getStatusConta() != null ? c.getStatusConta() : StatusConta.ATIVO;
 
+            // BLOQUEIO — conta suspensa bloqueia o login com mensagem e prazo visíveis
             if (status == StatusConta.SUSPENSO) {
                 String prazo = c.getSuspensaoAte() != null
                     ? "até " + c.getSuspensaoAte().toString().substring(0, 10)
@@ -177,6 +189,7 @@ public class ClientController {
         }
     }
 
+    /** Exibe a homepage do cliente logado com seus dados de perfil. */
     @GetMapping("/homepage")
     public String exibirHomepage(@AuthenticationPrincipal UserDetails user, Model model) {
         if (user == null)
@@ -188,6 +201,7 @@ public class ClientController {
         return "cliente/homepage";
     }
 
+    /** Desloga o cliente invalidando o cookie JWT e limpando o contexto de segurança. */
     @GetMapping("/sair")
     public String deslogar(HttpServletResponse response, @AuthenticationPrincipal UserDetails user) {
         jwtUtil.clearJwtCookie(response);
@@ -199,6 +213,10 @@ public class ClientController {
     // PERFIL E CONTA
     // ============================================================
 
+    /**
+     * Exibe o perfil completo do cliente com dados de gamificação e avisos de inatividade de XP.
+     * Admins são redirecionados ao painel administrativo.
+     */
     @GetMapping("/meu-perfil")
     public String exibirPerfil(@AuthenticationPrincipal UserDetails user, Model model) {
         if (user == null)
@@ -223,6 +241,7 @@ public class ClientController {
                 long diasSemXp = java.time.temporal.ChronoUnit.DAYS.between(
                         pontuacao.getUltimaAtualizacao(), LocalDateTime.now());
 
+                // AVISO XP — usuário sem atividade há mais de 30 dias recebe alerta de perda de pontos
                 if (diasSemXp > 30) {
                     String msg = diasSemXp >= 45 ? "Seu XP foi zerado por inatividade prolongada."
                             : "Você está perdendo XP por inatividade.";
@@ -236,6 +255,7 @@ public class ClientController {
         return "cliente/homepage";
     }
 
+    /** Retorna os dados do perfil do cliente logado em formato JSON para consumo via AJAX. */
     @GetMapping("/meu-perfil-json")
     @ResponseBody
     public ResponseEntity<ClientePerfilResponse> perfilJson(@AuthenticationPrincipal UserDetails user) {
@@ -265,6 +285,7 @@ public class ClientController {
         return "cliente/minhas-vendas-detalhe";
     }
 
+    /** Recebe o arquivo de foto enviado pelo cliente e atualiza o perfil com a nova imagem. */
     @PostMapping("/foto-perfil")
     public String uploadFotoPerfil(@RequestParam("foto") MultipartFile foto,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
@@ -273,6 +294,7 @@ public class ClientController {
         return REDIRECT_PERFIL;
     }
 
+    /** Processa a atualização dos dados pessoais do cliente logado e redireciona com mensagem de sucesso. */
     @PostMapping("/atualizar")
     public String atualizarCliente(@ModelAttribute(ATTR_CLIENTE) ClienteUpdateRequest dto,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
@@ -285,6 +307,7 @@ public class ClientController {
         return REDIRECT_PERFIL;
     }
 
+    /** Remove permanentemente a conta do cliente, anonimiza os dados e invalida a sessão. */
     @PostMapping("/deletar")
     public String deletarConta(@AuthenticationPrincipal UserDetails user, HttpServletResponse response,
             RedirectAttributes ra) {
@@ -295,6 +318,7 @@ public class ClientController {
         return "redirect:/";
     }
 
+    /** Cadastra um novo endereço para o cliente logado e redireciona para a aba de endereços. */
     @PostMapping("/enderecos/novo")
     public String cadastrarEndereco(@ModelAttribute("endereco") Endereco enderecoDTO,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
@@ -307,6 +331,7 @@ public class ClientController {
         return REDIRECT_ENDERECOS;
     }
 
+    /** Atualiza os dados de um endereço existente do cliente logado. */
     @PostMapping("/enderecos/editar")
     public String editarEndereco(@ModelAttribute Endereco enderecoDTO,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
@@ -320,6 +345,7 @@ public class ClientController {
         return REDIRECT_ENDERECOS;
     }
 
+    /** Remove um endereço específico do cliente logado pelo ID informado. */
     @PostMapping("/enderecos/remover")
     public String removerEndereco(@RequestParam Long enderecoId,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
@@ -333,6 +359,7 @@ public class ClientController {
         return REDIRECT_ENDERECOS;
     }
 
+    /** Define o endereço principal de entrega do cliente logado. */
     @PostMapping("/enderecos/selecionar")
     public String selecionarEndereco(@RequestParam Long enderecoId,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
@@ -363,6 +390,7 @@ public class ClientController {
         return "cliente/lista_desejos";
     }
 
+    /** Exibe a carteira do cliente com saldo atual e histórico completo de transações. */
     @GetMapping("/carteira")
     public String exibirCarteira(@AuthenticationPrincipal UserDetails user, Model model) {
         Cliente cliente = clienteService.buscarClientePorEmail(user.getUsername()).orElseThrow();
@@ -373,6 +401,7 @@ public class ClientController {
         return "cliente/homepage";
     }
 
+    /** Processa a compra de tokens e adiciona o valor à carteira do cliente. */
     @PostMapping("/comprar-tokens")
     public String comprarTokens(@RequestParam Double valor,
             @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
@@ -390,6 +419,10 @@ public class ClientController {
         return "cliente/recuperar_senha";
     }
 
+    /**
+     * Dispara o fluxo de recuperação de senha para o e-mail informado.
+     * Erros são silenciados para não revelar se o e-mail existe na base.
+     */
     @PostMapping("/recuperar-senha")
     public String iniciarRecuperacaoSenha(@RequestParam String email, RedirectAttributes ra) {
         try {
@@ -401,6 +434,7 @@ public class ClientController {
         return REDIRECT_LOGIN;
     }
 
+    /** Valida o token de recuperação e exibe o formulário de nova senha; redireciona se o token for inválido. */
     @GetMapping("/reset-senha")
     public String mostrarFormularioResetSenha(@RequestParam String token, Model model, RedirectAttributes ra) {
         if (!clienteService.validarTokenRecuperacao(token)) {
@@ -411,6 +445,7 @@ public class ClientController {
         return "cliente/reset_senha";
     }
 
+    /** Altera a senha do cliente logado após confirmar a senha atual; exige nova senha válida. */
     @PostMapping("/alterar-senha-perfil")
     public String alterarSenhaPerfil(@RequestParam String senhaAtual, @RequestParam String novaSenha,
             @RequestParam String confirmarSenha, @AuthenticationPrincipal UserDetails user, RedirectAttributes ra) {
@@ -423,6 +458,7 @@ public class ClientController {
         return REDIRECT_PERFIL;
     }
 
+    /** Redefine a senha via token de recuperação após confirmar que as senhas coincidem. */
     @PostMapping("/alterar-senha")
     public String alterarSenha(@ModelAttribute("resetData") SenhaResetRequest resetDTO, RedirectAttributes ra) {
         if (!resetDTO.getNovaSenha().equals(resetDTO.getConfirmarSenha())) {
@@ -438,16 +474,19 @@ public class ClientController {
     // PÁGINAS INFORMATIVAS
     // ============================================================
 
+    /** Exibe a página de Termos de Uso da plataforma. */
     @GetMapping("/termo")
     public String mostrarTermo() {
         return "cliente/Termo";
     }
 
+    /** Exibe a página de Política de Privacidade da plataforma. */
     @GetMapping("/politica")
     public String mostrarPolitica() {
         return "cliente/Politica";
     }
 
+    /** Exibe a página institucional com informações sobre a plataforma. */
     @GetMapping("/sobre")
     public String mostrarSobre() {
         return "cliente/Sobre";
