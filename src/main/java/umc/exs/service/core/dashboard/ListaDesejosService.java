@@ -20,6 +20,10 @@ import umc.exs.service.notificacao.NotificacaoService;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Serviço responsável pela lista de desejos dos clientes.
+ * Permite adicionar, remover e consultar livros desejados, além de notificar quando ficam disponíveis ou em promoção.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -34,12 +38,17 @@ public class ListaDesejosService {
         private final NotificacaoService notificacaoService;
         private final AppLogger appLogger;
 
+        /**
+         * Adiciona um livro (por ISBN) à lista de desejos do cliente.
+         * Valida se o ISBN já está na lista para evitar duplicatas.
+         */
         @Transactional
         public ListaDesejos adicionarDesejo(String emailCliente, String isbn) {
 
                 Cliente cliente = clienteRepository.findByEmail(emailCliente)
                                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
+                // Impede que o mesmo ISBN seja adicionado duas vezes pelo mesmo cliente
                 if (listaDesejosRepository.existsByClienteIdAndIsbn(cliente.getId(), isbn)) {
                         throw new RuntimeException("ISBN já está na sua lista de desejos");
                 }
@@ -67,6 +76,9 @@ public class ListaDesejosService {
                 return saved;
         }
 
+        /**
+         * Remove um item da lista de desejos, garantindo que pertence ao cliente autenticado.
+         */
         @Transactional
         public void removerDesejo(String emailCliente, @NonNull Long desejoId) {
 
@@ -76,6 +88,7 @@ public class ListaDesejosService {
                 ListaDesejos desejo = listaDesejosRepository.findById(desejoId)
                                 .orElseThrow(() -> new RuntimeException("Item não encontrado na lista de desejos"));
 
+                // Valida posse do item antes de permitir remoção
                 if (!desejo.getCliente().getId().equals(cliente.getId())) {
                         throw new RuntimeException("Acesso negado: este item não pertence ao seu perfil");
                 }
@@ -95,6 +108,9 @@ public class ListaDesejosService {
                                 desejo.getIsbn());
         }
 
+        /**
+         * Retorna todos os itens da lista de desejos de um cliente.
+         */
         @Transactional(readOnly = true)
         public List<ListaDesejos> listarDesejos(String emailCliente) {
 
@@ -111,6 +127,10 @@ public class ListaDesejosService {
                 return desejos;
         }
 
+        /**
+         * Notifica por e-mail e dashboard todos os clientes que têm um ISBN em sua lista de desejos
+         * quando esse livro se torna disponível na vitrine.
+         */
         @Transactional
         public void notificarClientesSeDisponivel(String isbn, String titulo) {
 
@@ -127,6 +147,7 @@ public class ListaDesejosService {
                                 isbn,
                                 interessados.size());
 
+                // Notifica cada interessado individualmente; erros não interrompem os demais
                 for (ListaDesejos desejo : interessados) {
 
                         try {
@@ -170,6 +191,9 @@ public class ListaDesejosService {
                 }
         }
 
+        /**
+         * Notifica no dashboard todos os clientes interessados em um ISBN quando o livro entra em promoção.
+         */
         @Transactional
         public void notificarClientesSeEmPromocao(String isbn, String titulo, double precoPromo) {
 
@@ -186,6 +210,7 @@ public class ListaDesejosService {
                                 isbn,
                                 interessados.size());
 
+                // Notifica cada interessado; falhas individuais são logadas sem interromper o loop
                 for (ListaDesejos desejo : interessados) {
 
                         try {
@@ -212,6 +237,10 @@ public class ListaDesejosService {
                 }
         }
 
+        /**
+         * Alterna o status de pré-reserva de um item da lista de desejos do cliente.
+         * Quando ativa, o cliente será priorizado na notificação de disponibilidade.
+         */
         @Transactional
         public ListaDesejos togglePreReserva(String emailCliente, @NonNull Long desejoId) {
 
@@ -221,10 +250,12 @@ public class ListaDesejosService {
                 ListaDesejos desejo = listaDesejosRepository.findById(desejoId)
                                 .orElseThrow(() -> new RuntimeException("Item não encontrado na lista de desejos"));
 
+                // Verifica que o item pertence ao cliente antes de alterar
                 if (!desejo.getCliente().getId().equals(cliente.getId())) {
                         throw new RuntimeException("Acesso negado: este item não pertence ao seu perfil");
                 }
 
+                // Inverte o estado atual da pré-reserva
                 desejo.setPreReservaAtiva(!desejo.isPreReservaAtiva());
 
                 ListaDesejos updated = listaDesejosRepository.save(desejo);

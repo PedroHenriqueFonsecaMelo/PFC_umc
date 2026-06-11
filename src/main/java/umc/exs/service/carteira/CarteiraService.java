@@ -17,6 +17,10 @@ import umc.exs.service.cliente.delegado.ClienteRepositoryService;
 import umc.exs.service.log.AcaoAuditoria;
 import umc.exs.service.log.LogAuditoriaService;
 
+/**
+ * Serviço responsável pelas operações da carteira de tokens dos clientes.
+ * Gerencia adição, débito, registro de intenções de pagamento PIX e consulta de histórico.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -31,6 +35,9 @@ public class CarteiraService {
         private static final String STATUS_CONCLUIDO = "CONCLUIDO";
         private static final String STATUS_PENDENTE = "PENDENTE";
 
+        /**
+         * Adiciona tokens ao saldo do cliente, registra a transação e envia notificação e e-mail de crédito.
+         */
         @Transactional
         public void adicionarTokens(
                         Cliente cliente,
@@ -40,6 +47,7 @@ public class CarteiraService {
 
                 double saldoAnterior = saldo(cliente);
 
+                // Incrementa o saldo com o valor recebido
                 cliente.setSaldoTokens(saldoAnterior + valor);
 
                 transacaoRepository.save(
@@ -73,6 +81,10 @@ public class CarteiraService {
                                 cliente.getId(), valor, metodo);
         }
 
+        /**
+         * Debita tokens do saldo do cliente após validar que há saldo suficiente.
+         * Registra a transação e envia notificação e e-mail de débito.
+         */
         @Transactional
         public void debitarTokens(
                         Cliente cliente,
@@ -81,6 +93,7 @@ public class CarteiraService {
 
                 double saldoAtual = saldo(cliente);
 
+                // Bloqueia a operação se o saldo for insuficiente para o débito
                 if (saldoAtual < valor) {
                         log.warn("Tentativa de débito sem saldo clienteId={} saldo={} valor={}",
                                         cliente.getId(), saldoAtual, valor);
@@ -90,6 +103,7 @@ public class CarteiraService {
 
                 cliente.setSaldoTokens(saldoAtual - valor);
 
+                // Registra como valor negativo para representar saída no extrato
                 transacaoRepository.save(
                                 Transacao.criarTransacao(
                                                 cliente,
@@ -121,12 +135,16 @@ public class CarteiraService {
                                 cliente.getId(), valor, descricao);
         }
 
+        /**
+         * Registra uma intenção de pagamento via PIX com status PENDENTE, aguardando confirmação do gateway.
+         */
         @Transactional
         public void registrarIntencaoPagamento(
                         Cliente cliente,
                         Double valor,
                         String pagamentoId) {
 
+                // Transação criada como pendente; só é concluída após confirmação do PIX
                 Transacao transacao = Transacao.builder()
                                 .cliente(cliente)
                                 .valor(valor)
@@ -149,6 +167,10 @@ public class CarteiraService {
                                 cliente.getId(), pagamentoId);
         }
 
+        /**
+         * Confirma o pagamento PIX, atualiza o saldo do cliente e envia notificação de confirmação.
+         * Ignora silenciosamente se o pagamento já foi processado anteriormente.
+         */
         @Transactional
         public void confirmarPagamentoPix(String pagamentoId) {
 
@@ -159,6 +181,7 @@ public class CarteiraService {
                         throw new IllegalStateException("Transação não localizada: " + pagamentoId);
                 }
 
+                // Evita processar o mesmo PIX mais de uma vez (idempotência)
                 if (!STATUS_PENDENTE.equals(transacao.getStatus())) {
                         log.warn("Pagamento já processado pagamentoId={} status={}",
                                         pagamentoId, transacao.getStatus());
@@ -170,6 +193,7 @@ public class CarteiraService {
 
                 transacao.setStatus(STATUS_CONCLUIDO);
 
+                // Credita o valor confirmado no saldo do cliente
                 cliente.setSaldoTokens(
                                 saldoAnterior + transacao.getValor());
 
@@ -196,6 +220,9 @@ public class CarteiraService {
                                 cliente.getId(), transacao.getValor(), pagamentoId);
         }
 
+        /**
+         * Retorna o histórico de transações concluídas de um cliente, ordenado do mais recente.
+         */
         @Transactional(readOnly = true)
         public List<Transacao> listarHistoricoPorCliente(Long clienteId) {
                 return transacaoRepository
@@ -204,6 +231,9 @@ public class CarteiraService {
                                                 STATUS_CONCLUIDO);
         }
 
+        /**
+         * Verifica se um pagamento PIX foi confirmado com sucesso.
+         */
         @Transactional(readOnly = true)
         public boolean verificarStatusPagamento(String pagamentoId) {
 
@@ -213,6 +243,9 @@ public class CarteiraService {
                                 && STATUS_CONCLUIDO.equals(transacao.getStatus());
         }
 
+        /**
+         * Retorna o saldo atual do cliente, tratando nulo como zero.
+         */
         private double saldo(Cliente cliente) {
                 return cliente.getSaldoTokens() == null ? 0.0 : cliente.getSaldoTokens();
         }

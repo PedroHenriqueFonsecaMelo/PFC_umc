@@ -35,6 +35,10 @@ import umc.exs.service.api.ExternApi;
 import umc.exs.service.core.dashboard.LoteService;
 import umc.exs.service.log.LogAuditoriaService;
 
+/**
+ * Serviço responsável pelo cadastro de anúncios de livros, criação de lotes e busca por ISBN.
+ * Integra com a API do Google Books para enriquecer os dados dos livros anunciados.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -61,6 +65,10 @@ public class LivroAnuncioService {
 
     // ========================= VENDA INDIVIDUAL =========================
 
+    /**
+     * Cadastra um livro para venda individual, salvando a foto e buscando metadados pelo ISBN.
+     * O livro é criado com status não aprovado, aguardando revisão do administrador.
+     */
     @Transactional
     public Livro cadastrarVenda(String email, LivroRequest dto, MultipartFile foto) {
 
@@ -74,6 +82,7 @@ public class LivroAnuncioService {
         String urlFoto = salvarFoto(foto);
         String jsonFotos = converterParaJson(List.of(urlFoto));
 
+        // Consulta a API do Google Books de forma assíncrona para obter metadados do livro
         GoogleBookData response = googleBooksService.buscarPorIsbnAsync(dto.getIsbn()).join();
 
         if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
@@ -82,6 +91,7 @@ public class LivroAnuncioService {
 
         var info = response.getItems().get(0).getVolumeInfo();
 
+        // Usa "Autor Desconhecido" como fallback caso a API não retorne autores
         String autor = (info.getAuthors() != null && !info.getAuthors().isEmpty())
                 ? info.getAuthors().get(0)
                 : "Autor Desconhecido";
@@ -92,6 +102,7 @@ public class LivroAnuncioService {
 
         Obra obra = obterOuCriarObra(info.getTitle(), autor, info.getLanguage(), capaUrl);
 
+        // Livro inicia como não aprovado; somente após análise do admin fica disponível
         Livro anuncio = Livro.builder()
                 .titulo(dto.getTitulo())
                 .autor(dto.getAutor())
@@ -117,12 +128,17 @@ public class LivroAnuncioService {
 
     // ========================= LOTE =========================
 
+    /**
+     * Cria um lote de livros para venda, associando as fotos a cada item enviado pelo cliente.
+     * Limita a 5 lotes pendentes simultâneos por cliente para evitar abuso.
+     */
     @Transactional
     public Lote criarLote(String email, LoteRequest dto, List<MultipartFile> fotos) {
 
         Cliente cliente = clienteRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("Cliente não encontrado"));
 
+        // Impede que um cliente acumule mais de 5 lotes pendentes ao mesmo tempo
         if (loteService.countPendingByCliente(cliente.getId()) >= 5) {
             throw new IllegalStateException("Limite de lotes pendentes atingido");
         }
@@ -136,6 +152,7 @@ public class LivroAnuncioService {
 
         loteRepository.save(lote);
 
+        // Índice global de fotos compartilhado entre todos os livros do lote
         int fotoIndex = 0;
 
         for (LivroItemRequest item : dto.getLivros()) {
@@ -181,6 +198,10 @@ public class LivroAnuncioService {
 
     // ========================= ISBN AUTO =========================
 
+    /**
+     * Cadastra um livro automaticamente a partir do ISBN, consultando Google Books e, em fallback, OpenLibrary.
+     * Lança exceção se o livro não for localizado em nenhuma das fontes.
+     */
     @Transactional
     public Livro cadastrarPorIsbn(String isbn) {
 
@@ -214,6 +235,7 @@ public class LivroAnuncioService {
             return livro;
         }
 
+        // Google Books não retornou resultado; tenta OpenLibrary como segunda fonte
         log.info("Google Books falhou para ISBN {}. Tentando fallback OpenLibrary...", isbn);
 
         var fallback = googleBooksService.buscarPorIsbnOpenLibrary(isbn);
@@ -227,12 +249,16 @@ public class LivroAnuncioService {
 
     // ========================= PROMO LISTAGEM =========================
 
+    /**
+     * Retorna os livros com promoção válida no momento, com dados resumidos para exibição na vitrine.
+     */
     public List<Livro> listarPromocoesAtivas() {
 
         List<Livro> livros = livroRepository.findPromocoesAtivas(LocalDateTime.now());
 
         List<Livro> response = new ArrayList<>();
 
+        // Projeta apenas os campos necessários para evitar exposição de dados sensíveis
         for (Livro livro : livros) {
             Livro dto = new Livro();
             dto.setId(livro.getId());
@@ -253,6 +279,9 @@ public class LivroAnuncioService {
         return response;
     }
 
+    /**
+     * Busca um livro aprovado pelo ID para exibição pública.
+     */
     public Livro buscarPorIdAtivo(Long id) {
 
         Livro livro = livroRepository.findByIdAndAprovadoTrue(id)
@@ -270,6 +299,9 @@ public class LivroAnuncioService {
 
     // ========================= HELPERS =========================
 
+    /**
+     * Salva o arquivo de foto no diretório de uploads e retorna a URL de acesso.
+     */
     private String salvarFoto(MultipartFile foto) {
         String nomeOriginal = foto.getOriginalFilename();
         String nomeSanitizado = sanitizarNomeArquivo(nomeOriginal);
@@ -287,15 +319,22 @@ public class LivroAnuncioService {
         }
     }
 
+    /**
+     * Remove caracteres especiais do nome do arquivo para evitar problemas no sistema de arquivos.
+     */
     private String sanitizarNomeArquivo(String nomeOriginal) {
         if (nomeOriginal == null || nomeOriginal.isBlank()) return "imagem.jpg";
 
         String base = Paths.get(nomeOriginal).getFileName().toString();
+        // Substitui qualquer caractere não alfanumérico (exceto ponto, hífen e sublinhado) por underscore
         String safe = base.replaceAll("[^a-zA-Z0-9.\\-_]", "_");
 
         return safe.isBlank() ? "imagem.jpg" : safe;
     }
 
+    /**
+     * Serializa a lista de URLs de fotos para formato JSON armazenado no banco.
+     */
     private String converterParaJson(List<String> lista) {
         try {
             return objectMapper.writeValueAsString(lista);
@@ -304,10 +343,14 @@ public class LivroAnuncioService {
         }
     }
 
+    /**
+     * Calcula quantas fotos pertencem a cada livro do lote, distribuindo igualmente se não informado.
+     */
     private int calcularFotosPorLivro(LivroItemRequest item, LoteRequest dto, List<MultipartFile> fotos) {
 
         int quantidade = item.getQuantidadedeFotos();
 
+        // Se não foi especificado, divide igualmente entre os livros do lote
         if (quantidade == 0 && !dto.getLivros().isEmpty()) {
             quantidade = fotos.size() / dto.getLivros().size();
         }
@@ -315,6 +358,9 @@ public class LivroAnuncioService {
         return quantidade;
     }
 
+    /**
+     * Busca a obra pelo título e autor ou cria uma nova entrada no repositório de obras.
+     */
     private Obra obterOuCriarObra(String titulo, String autor, String idioma, String capa) {
 
         return obraRepository.findByTituloAndAutor(titulo, autor)

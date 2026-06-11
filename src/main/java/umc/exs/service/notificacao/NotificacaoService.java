@@ -16,7 +16,7 @@ import java.util.Map;
 
 /**
  * Serviço central de notificações em tempo real (WebSocket/STOMP)
- * e notificações de dashboard persistidas no banco.
+ * e notificações de dashboard persistidas no banco de dados.
  */
 @Slf4j
 @Service
@@ -27,9 +27,8 @@ public class NotificacaoService {
     private final NotificacaoDashboardRepository notificacaoDashboardRepository;
 
     /**
-     * Notifica o cliente sobre mudança de saldo via WebSocket
-     * (/topic/saldo/{clienteId}).
-     * Também cria registro de notificação no dashboard.
+     * Envia uma notificação de atualização de saldo ao cliente em tempo real via WebSocket.
+     * Publica no tópico /topic/saldo/{clienteId} para atualização instantânea na interface.
      */
     public void notificarSaldo(Long clienteId, Double novoSaldo, String descricao) {
         try {
@@ -39,6 +38,7 @@ public class NotificacaoService {
                     "descricao", descricao != null ? descricao : "",
                     "timestamp", LocalDateTime.now().toString());
 
+            // Valida os campos obrigatórios antes de publicar no WebSocket
             if (payload.get("clienteId") == null || payload.get("novoSaldo") == null) {
                 log.error("Dados insuficientes para notificação de saldo: clienteId ou novoSaldo nulos.");
                 return;
@@ -51,7 +51,8 @@ public class NotificacaoService {
     }
 
     /**
-     * Cria uma notificação persistida no dashboard do cliente.
+     * Cria e persiste uma notificação no dashboard do cliente com mensagem e link de redirecionamento.
+     * Retorna null silenciosamente em caso de falha para não interromper o fluxo principal.
      */
     @Transactional
     public NotificacaoDashboard criarNotificacaoDashboard(Cliente cliente, String mensagem, String link) {
@@ -62,6 +63,7 @@ public class NotificacaoService {
                 .link(link)
                 .build();
 
+        // Garante que os campos mínimos estão preenchidos antes de persistir
         if (notificacao.getCliente() == null || notificacao.getMensagem() == null) {
             log.error("Dados insuficientes para criar notificação de dashboard: cliente ou mensagem nulos.");
             return null;

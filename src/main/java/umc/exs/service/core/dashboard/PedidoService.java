@@ -24,6 +24,10 @@ import umc.exs.service.log.AcaoAuditoria;
 import umc.exs.service.log.AppLogger;
 import umc.exs.service.notificacao.NotificacaoService;
 
+/**
+ * Serviço responsável pelo ciclo de vida dos pedidos de compra.
+ * Cobre registro, listagem, atualização de status, cancelamento e notificações ao comprador.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,9 +42,14 @@ public class PedidoService {
         private final EmailFacade emailFacade;
         private final NotificacaoService notificacaoService;
 
+        // Charset sem caracteres ambíguos (0, O, 1, I) para facilitar leitura do código de pedido
         private static final String CHARSET_CODIGO = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         private static final SecureRandom RNG = new SecureRandom();
 
+        /**
+         * Gera um código único de pedido no formato BIB-YYYYMMDD-XXXX.
+         * Tenta até 100 vezes para garantir unicidade antes de lançar exceção.
+         */
         public String gerarCodigoPedido() {
 
                 String data = LocalDateTime.now()
@@ -50,6 +59,7 @@ public class PedidoService {
 
                         StringBuilder sufixo = new StringBuilder(4);
 
+                        // Gera sufixo aleatório de 4 caracteres a partir do charset seguro
                         for (int j = 0; j < 4; j++) {
                                 sufixo.append(
                                                 CHARSET_CODIGO.charAt(
@@ -66,11 +76,16 @@ public class PedidoService {
                 throw new IllegalStateException("Falha ao gerar código de pedido");
         }
 
+        /**
+         * Registra um novo pedido no banco com os dados do comprador e do livro adquirido.
+         * Define retenção de dados por 5 anos conforme política da plataforma.
+         */
         @Transactional
         public Pedido registrarPedido(Cliente comprador, Livro livro, String codigoPedido) {
 
                 LocalDateTime agora = LocalDateTime.now();
 
+                // Copia os dados do livro para o pedido para preservar histórico mesmo se o livro for removido
                 Pedido pedido = Pedido.builder()
                                 .comprador(comprador)
                                 .livroId(livro.getId())
@@ -96,16 +111,25 @@ public class PedidoService {
                 return salvo;
         }
 
+        /**
+         * Retorna todos os pedidos da plataforma, ordenados do mais recente para o mais antigo.
+         */
         @Transactional(readOnly = true)
         public List<Pedido> listarTodos() {
                 return pedidoRepository.findAllByOrderByDataCompraDesc();
         }
 
+        /**
+         * Lista todos os pedidos de um comprador específico.
+         */
         @Transactional(readOnly = true)
         public List<Pedido> listarPorCliente(Long compradorId) {
                 return pedidoRepository.findByCompradorIdOrderByDataCompraDesc(compradorId);
         }
 
+        /**
+         * Lista os pedidos em andamento do cliente, excluindo os já entregues e cancelados.
+         */
         @Transactional(readOnly = true)
         public List<Pedido> listarPendentes(Long compradorId) {
                 return pedidoRepository.findByCompradorIdAndStatusEnvioNotInOrderByDataCompraDesc(
@@ -113,6 +137,9 @@ public class PedidoService {
                                 List.of(StatusEnvio.ENTREGUE, StatusEnvio.CANCELADO));
         }
 
+        /**
+         * Busca um pedido pelo ID validando que pertence ao comprador informado.
+         */
         @Transactional(readOnly = true)
         public Optional<Pedido> buscarPorIdEComprador(Long pedidoId, Long compradorId) {
                 return pedidoRepository.findById(pedidoId)
@@ -120,6 +147,9 @@ public class PedidoService {
                                                 && compradorId.equals(p.getComprador().getId()));
         }
 
+        /**
+         * Lista os pedidos já concluídos (entregues) de um cliente.
+         */
         @Transactional(readOnly = true)
         public List<Pedido> listarConcluidos(Long compradorId) {
                 return pedidoRepository.findByCompradorIdAndStatusEnvioOrderByDataCompraDesc(
@@ -127,6 +157,10 @@ public class PedidoService {
                                 StatusEnvio.ENTREGUE);
         }
 
+        /**
+         * Atualiza o status de envio de um pedido e notifica o comprador via e-mail e dashboard.
+         * Processa estorno automático de tokens caso o novo status seja CANCELADO.
+         */
         @Transactional
         public Pedido atualizarStatus(Long pedidoId, StatusEnvio novoStatus, String codigoRastreio) {
 
@@ -135,6 +169,7 @@ public class PedidoService {
 
                 validarStatusAtual(pedido, novoStatus);
 
+                // Executa estorno de tokens antes de marcar o pedido como cancelado
                 if (novoStatus == StatusEnvio.CANCELADO) {
                         processarCancelamento(pedido);
                 }
@@ -142,6 +177,7 @@ public class PedidoService {
                 pedido.setStatusEnvio(novoStatus);
                 pedido.setDataAtualizacaoStatus(LocalDateTime.now());
 
+                // Atualiza o código de rastreio apenas se foi fornecido na requisição
                 if (codigoRastreio != null && !codigoRastreio.isBlank()) {
                         pedido.setCodigoRastreio(codigoRastreio);
                 }
@@ -164,8 +200,12 @@ public class PedidoService {
                 return salvo;
         }
 
+        /**
+         * Valida que o pedido ainda pode ter seu status alterado (não foi entregue nem cancelado).
+         */
         private void validarStatusAtual(Pedido pedido, StatusEnvio novoStatus) {
 
+                // Pedidos em estados finais não podem ser reabertos ou alterados
                 if (pedido.getStatusEnvio() == StatusEnvio.ENTREGUE) {
                         throw new RuntimeException("Pedido já entregue");
                 }
@@ -175,6 +215,10 @@ public class PedidoService {
                 }
         }
 
+        /**
+         * Realiza o estorno dos tokens ao comprador quando um pedido é cancelado.
+         * Envia e-mail e notificação de dashboard sobre o estorno realizado.
+         */
         private void processarCancelamento(Pedido pedido) {
 
                 Cliente cliente = pedido.getComprador();
@@ -185,6 +229,7 @@ public class PedidoService {
 
                 double valor = pedido.getPrecoLivro();
 
+                // Devolve o valor pago ao saldo do comprador
                 cliente.setSaldoTokens(saldoAnterior + valor);
 
                 clienteRepository.save(cliente);
@@ -205,6 +250,9 @@ public class PedidoService {
                 criarNotificacaoEstorno(cliente, pedido.getId(), valor);
         }
 
+        /**
+         * Envia e-mail de confirmação de estorno ao comprador; falhas são apenas logadas.
+         */
         private void enviarEmailEstorno(Cliente cliente, Long pedidoId, double valor) {
                 try {
                         emailFacade.sendHtmlSafe(
@@ -223,6 +271,9 @@ public class PedidoService {
                 }
         }
 
+        /**
+         * Cria notificação no dashboard do cliente informando o estorno realizado; falhas são logadas.
+         */
         private void criarNotificacaoEstorno(Cliente cliente, Long pedidoId, double valor) {
                 try {
                         notificacaoService.criarNotificacaoDashboard(
@@ -234,6 +285,9 @@ public class PedidoService {
                 }
         }
 
+        /**
+         * Envia e-mail e notificação de dashboard informando ao comprador a atualização de status do pedido.
+         */
         private void enviarNotificacoesStatus(Pedido pedido, StatusEnvio status) {
 
                 if (pedido.getComprador() == null)
