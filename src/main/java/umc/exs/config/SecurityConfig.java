@@ -23,6 +23,10 @@ import umc.exs.security.JwtAuthenticationEntryPoint;
 import umc.exs.security.JwtRequestFilter;
 import umc.exs.security.RateLimitFilter;
 
+/**
+ * Configura toda a segurança da aplicação: CORS, JWT, Rate Limit, CSP e regras de acesso por rota.
+ * Utiliza sessão stateless (sem estado no servidor), validando identidade via token JWT a cada requisição.
+ */
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
@@ -32,6 +36,10 @@ public class SecurityConfig {
         @Value("${app.allowed-origin:http://localhost:5173}")
         private String allowedOrigin;
 
+        /**
+         * Define as origens, métodos e cabeçalhos permitidos nas requisições CORS.
+         * Permite credenciais (cookies) para o domínio configurado em allowedOrigin.
+         */
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration cfg = new CorsConfiguration();
@@ -47,6 +55,10 @@ public class SecurityConfig {
                 return source;
         }
 
+        /**
+         * Monta a cadeia de filtros de segurança: CSP, CORS, JWT, Rate Limit e autorização por rota.
+         * Toda sessão é stateless — nenhum estado de autenticação é mantido no servidor.
+         */
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http, JwtRequestFilter jwtRequestFilter,
                         RateLimitFilter rateLimitFilter,
@@ -170,11 +182,19 @@ public class SecurityConfig {
                 return http.build();
         }
 
+        /**
+         * Retorna o encoder de senhas usando o algoritmo BCrypt.
+         * BCrypt aplica salt automático e é resistente a ataques de força bruta.
+         */
         @Bean
         public PasswordEncoder passwordEncoder() {
                 return new BCryptPasswordEncoder();
         }
 
+        /**
+         * Expõe o AuthenticationManager como bean para ser injetado em outros componentes.
+         * Utilizado principalmente no fluxo de login para validar credenciais.
+         */
         @Bean
         public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
                 return cfg.getAuthenticationManager();

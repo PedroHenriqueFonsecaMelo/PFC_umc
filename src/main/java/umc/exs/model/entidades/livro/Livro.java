@@ -24,6 +24,10 @@ import umc.exs.model.entidades.foundation.Lote;
 import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.EstadoLivro;
 
+/**
+ * Representa um exemplar físico de livro anunciado por um vendedor na plataforma.
+ * Passa por fluxo de aprovação do admin antes de aparecer na vitrine pública.
+ */
 @Entity
 
 @Data
@@ -36,6 +40,7 @@ public class Livro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Dados bibliográficos básicos do exemplar
     private String titulo;
 
     private String autor;
@@ -47,6 +52,7 @@ public class Livro {
     @Column(length = 100)
     private String genero;
 
+    // URLs das fotos armazenadas como JSON; valor padrão é lista vazia
     @Column(name = "fotos_urls", columnDefinition = "TEXT")
     @Builder.Default
     private String fotosUrls = "[]";
@@ -54,11 +60,13 @@ public class Livro {
     @Column(columnDefinition = "TEXT")
     private String resumoOficial;
 
+    // Lote ao qual este exemplar pertence (opcional)
     @ManyToOne(optional = true)
     @JoinColumn(name = "lote_id")
     @JsonIgnore
     private Lote lote;
 
+    // Cliente que está vendendo este exemplar
     @ManyToOne(optional = true)
     @JoinColumn(name = "vendedor_id")
     @JsonIgnore
@@ -66,9 +74,11 @@ public class Livro {
 
     private LocalDateTime dataAnuncio;
 
+    // Controle de aprovação: false enquanto aguarda revisão do admin
     @Builder.Default
     private Boolean aprovado = false;
 
+    // Preço e estado (Novo, Usado, etc.) definidos pelo admin na aprovação
     private Double precoAprovado;
 
     @Enumerated(EnumType.STRING)
@@ -76,6 +86,7 @@ public class Livro {
 
     private LocalDateTime dataAprovacao;
 
+    // ID do admin responsável pela aprovação ou rejeição
     private Long adminAprovadorId;
 
     /** Preenchido pelo admin ao rejeitar o anúncio. Visível apenas ao vendedor. */
@@ -86,8 +97,10 @@ public class Livro {
     @Builder.Default
     private Boolean emPromocao = false;
 
+    // Preço antes da promoção, exibido riscado na vitrine
     private Double precoOriginal;
 
+    // Data/hora em que a promoção expira automaticamente
     private LocalDateTime promocaoExpira;
 
     // Relacionamento com as avaliações da história
@@ -95,6 +108,7 @@ public class Livro {
     @JsonIgnore
     private List<AvaliacaoLivro> avaliacoes;
 
+    // Obra literária (título canônico) à qual este exemplar pertence
     @ManyToOne
     @JoinColumn(name = "obra_id")
     @JsonIgnore

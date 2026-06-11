@@ -24,9 +24,9 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.model.enums.StatusEnvio;
 
 /**
- * Registra cada livro comprado pelo cliente.
- * Preserva título/autor/preço mesmo após o livro ser deletado da vitrine.
- * Controla o ciclo de envio via StatusEnvio.
+ * Representa um item de pedido gerado após a compra de um livro.
+ * Preserva título, autor e preço no momento da compra, mesmo que o livro seja removido da vitrine.
+ * Controla o ciclo de envio via StatusEnvio e garante retenção de dados conforme LGPD.
  */
 @Entity
 @Table(name = "pedido")
