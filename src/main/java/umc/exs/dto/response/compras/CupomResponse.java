@@ -8,6 +8,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * DTO de resposta de um cupom de desconto, com dados de validade, uso e percentual.
+ * Os campos clienteNome e clienteEmail são preenchidos apenas quando o cupom for de uso restrito a um cliente específico.
+ */
 @Getter
 @Setter
 @Builder

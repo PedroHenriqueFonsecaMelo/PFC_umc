@@ -2,6 +2,10 @@ package umc.exs.converter;
 
 import java.util.Map;
 
+/**
+ * Utilitário que traduz gêneros literários do inglês para o português, usado ao importar dados da API do Google Books.
+ * Contém um mapa estático com as traduções mais comuns e não pode ser instanciado.
+ */
 public class GeneroMapper {
 
     private GeneroMapper() {
@@ -51,6 +55,10 @@ public class GeneroMapper {
             Map.entry("Humor", "Humor"),
             Map.entry("Games & Activities", "Jogos"));
 
+    /**
+     * Traduz o gênero literário do inglês para o português, tentando correspondência exata e depois parcial.
+     * Retorna o valor original em inglês se nenhuma tradução for encontrada no mapa.
+     */
     public static String traduzir(String generoIngles) {
         if (generoIngles == null || generoIngles.isBlank())
             return null;

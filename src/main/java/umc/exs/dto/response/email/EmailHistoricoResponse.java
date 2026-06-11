@@ -4,6 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO de resposta do histórico de disparos de e-mail realizados pelo admin.
+ * Contém dados do filtro de segmentação usado, quantidade de destinatários e data de agendamento.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

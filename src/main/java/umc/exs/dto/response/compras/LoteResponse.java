@@ -5,6 +5,10 @@ import java.time.LocalDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO de resposta de um lote de livros submetido pelo vendedor.
+ * Contém código de protocolo, status, dados do vendedor e quantidade de livros no lote.
+ */
 @Data
 @NoArgsConstructor
 public class LoteResponse {
@@ -24,6 +28,10 @@ public class LoteResponse {
         this.dataCriacao = dataCriacao;
     }
 
+    /**
+     * Inicializa todos os campos do lote, incluindo nome e e-mail do vendedor e quantidade de livros.
+     * Utilizado quando os dados completos do vendedor estão disponíveis para exibição no painel admin.
+     */
     public LoteResponse(Long id, String codigoProtocolo, String status, LocalDateTime dataCriacao,
             String nomeVendedor, String emailVendedor, long quantidadeLivros) {
         this.id = id;

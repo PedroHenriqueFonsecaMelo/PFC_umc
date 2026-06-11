@@ -11,6 +11,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import umc.exs.model.enums.StatusConta;
 
+/**
+ * DTO completo do perfil do cliente, usado no painel admin e na página de perfil do próprio cliente.
+ * Agrupa dados pessoais, financeiros, histórico de compras, vendas e engajamento em uma única resposta.
+ */
 @Data
 @Builder
 @AllArgsConstructor
@@ -55,6 +59,10 @@ public class ClientePerfilResponse {
     private long totalTopicosForum;
     private long totalListaDesejos;
 
+    /**
+     * Resumo de um pedido exibido no histórico de compras do cliente.
+     * Contém título, autor, preço, status de envio, data da compra e código de rastreio.
+     */
     @Data
     @AllArgsConstructor
     @NoArgsConstructor

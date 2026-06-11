@@ -5,6 +5,10 @@ import jakarta.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
+/**
+ * DTO usado na compra de tokens via PIX; o campo valor é enviado pelo cliente.
+ * Os campos pixCopiaECola, qrCodeBase64 e pagamentoId são preenchidos pela strategy do Mercado Pago e retornados ao cliente com o QR Code e ID do pagamento.
+ */
 @Data
 public class CompraTokensRequest {
 

@@ -25,6 +25,10 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.negocios.NotificacaoDashboardRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 
+/**
+ * Gerencia as notificações do dashboard do cliente autenticado: listar, marcar como lida, criar e deletar.
+ * Todos os endpoints garantem que o cliente acessa apenas suas próprias notificações.
+ */
 @RestController
 @RequestMapping("/api/notificacoes")
 @RequiredArgsConstructor
@@ -173,6 +177,10 @@ public class NotificacaoController {
                 return ResponseEntity.noContent().build();
         }
 
+        /**
+         * Converte uma NotificacaoDashboard em Map para serialização JSON na resposta da API.
+         * Inclui o campo "link" apenas quando ele estiver preenchido.
+         */
         private Map<String, Object> toMap(NotificacaoDashboard n) {
                 java.util.LinkedHashMap<String, Object> map = new java.util.LinkedHashMap<>();
                 map.put("id", n.getId());

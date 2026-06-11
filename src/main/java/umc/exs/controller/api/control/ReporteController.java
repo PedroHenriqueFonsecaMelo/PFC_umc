@@ -15,6 +15,10 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.repository.logic.ReporteRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 
+/**
+ * Recebe reportes e denúncias enviados pelos usuários via formulário e persiste no banco para análise do admin.
+ * O endpoint é público, permitindo reportes mesmo de usuários não autenticados.
+ */
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +27,10 @@ public class ReporteController {
     private final ClienteRepository clienteRepository;
     private final ReporteRepository reporteRepository;
 
+    /**
+     * Salva o reporte com motivo, e-mail e detalhes informados pelo usuário.
+     * Enriquece o registro com nome, status e data de cadastro do cliente caso o e-mail esteja cadastrado.
+     */
     @PostMapping("/api/reportes")
     public ResponseEntity<?> receberReporte(@RequestBody Map<String, String> body) {
         String motivo   = body.getOrDefault("motivo", "");

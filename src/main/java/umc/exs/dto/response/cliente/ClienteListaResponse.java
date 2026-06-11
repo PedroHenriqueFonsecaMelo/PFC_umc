@@ -7,6 +7,10 @@ import umc.exs.model.enums.StatusConta;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO de resposta usado na listagem paginada de clientes no painel administrativo.
+ * Contém dados resumidos de cada cliente para exibição em tabela, incluindo saldo, nível e status da conta.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

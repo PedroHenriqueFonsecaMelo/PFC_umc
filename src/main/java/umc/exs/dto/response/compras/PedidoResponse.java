@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 import umc.exs.model.enums.StatusEnvio;
 
 /**
- * DTO de exibição de um pedido para o cliente.
+ * DTO de resposta de um pedido de compra, usado tanto na visão do cliente quanto do admin.
+ * Inclui dados do livro, status de envio, código de rastreio e informações de cancelamento quando aplicável.
  */
 @Data
 @Builder

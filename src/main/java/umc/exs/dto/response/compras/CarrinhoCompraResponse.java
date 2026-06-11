@@ -25,6 +25,10 @@ public class CarrinhoCompraResponse {
     private List<ItemResultadoDTO> comprados;
     private List<ItemResultadoDTO> falhas;
 
+    /**
+     * Inicializa o DTO com todos os campos, aplicando cópias defensivas nas listas.
+     * Garante que modificações externas nas listas originais não afetem este objeto.
+     */
     private CarrinhoCompraResponse(
             int totalSolicitados,
             int totalComprados,
@@ -81,10 +85,18 @@ public class CarrinhoCompraResponse {
         return codigoCupomAplicado;
     }
 
+    /**
+     * Retorna lista imutável dos livros comprados com sucesso nesta operação de carrinho.
+     * A imutabilidade evita que código externo adicione ou remova itens indevidamente.
+     */
     public List<ItemResultadoDTO> getComprados() {
         return Collections.unmodifiableList(comprados);
     }
 
+    /**
+     * Retorna lista imutável dos livros que falharam na compra, com o motivo de cada falha.
+     * A imutabilidade evita que código externo adicione ou remova itens indevidamente.
+     */
     public List<ItemResultadoDTO> getFalhas() {
         return Collections.unmodifiableList(falhas);
     }
@@ -93,10 +105,18 @@ public class CarrinhoCompraResponse {
     // SETTERS COM DEFESA
     // ========================
 
+    /**
+     * Define a lista de comprados com cópia defensiva, substituindo null por lista vazia.
+     * Nunca aceita referência direta à lista externa para manter o encapsulamento.
+     */
     public void setComprados(List<ItemResultadoDTO> comprados) {
         this.comprados = (comprados == null) ? new ArrayList<>() : new ArrayList<>(comprados);
     }
 
+    /**
+     * Define a lista de falhas com cópia defensiva, substituindo null por lista vazia.
+     * Nunca aceita referência direta à lista externa para manter o encapsulamento.
+     */
     public void setFalhas(List<ItemResultadoDTO> falhas) {
         this.falhas = (falhas == null) ? new ArrayList<>() : new ArrayList<>(falhas);
     }
@@ -105,10 +125,18 @@ public class CarrinhoCompraResponse {
     // BUILDER MANUAL
     // ========================
 
+    /**
+     * Retorna o builder manual para construção fluente do CarrinhoCompraResponse.
+     * Ponto de entrada para o padrão Builder implementado pela classe interna Builder.
+     */
     public static Builder builder() {
         return new Builder();
     }
 
+    /**
+     * Implementa o padrão Builder para criação segura e fluente do CarrinhoCompraResponse.
+     * Aplica cópias defensivas nas listas durante a construção para garantir imutabilidade.
+     */
     public static class Builder {
         private int totalSolicitados;
         private int totalComprados;

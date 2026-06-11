@@ -15,6 +15,10 @@ import umc.exs.model.entidades.usuario.Cliente;
 import umc.exs.service.cliente.ClienteService;
 import umc.exs.service.log.LogAuditoriaService;
 
+/**
+ * Exibe o histórico de auditoria do cliente autenticado via página Thymeleaf e endpoint JSON para AJAX.
+ * Mapeia as rotas /historico/cliente (página) e /historico/cliente/json (resposta JSON).
+ */
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/historico")
@@ -24,9 +28,8 @@ public class AuditController {
     private final LogAuditoriaService logAuditoriaService;
 
     /**
-     * Mostra auditoria logs cliente autenticado.
-     * Busca ID email, logs data desc, model.
-     * Template cliente/auditoria.
+     * Exibe a página de auditoria com os logs de ações do cliente autenticado,
+     * ordenados do mais recente ao mais antigo.
      */
     @GetMapping("/cliente")
 
@@ -50,12 +53,8 @@ public class AuditController {
     }
 
     /**
-     * Retorna logs JSON para cliente autenticado.
-     * Mesmo filtro que mostrarAuditoria, AJAX use.
-     * Lista ordenada data desc ou vazia se não logado.
-     * 
-     * @param principal usuário
-     * @return List<LogAuditoria> logs JSON
+     * Retorna os logs de auditoria do cliente autenticado em formato JSON para
+     * consumo via AJAX. Retorna lista vazia se o usuário não estiver autenticado.
      */
     @GetMapping("/cliente/json")
     @ResponseBody
@@ -74,11 +73,3 @@ public class AuditController {
         return logAuditoriaService.buscarLogsDoCliente(clienteId);
     }
 }
-
-/**
- * DESCRIÇÃO DO ARQUIVO:
- * Controller web visualização logs auditoria usuário.
- * /historico/cliente renderiza template com model logs.
- * /cliente/json retorna lista JSON para AJAX.
- * Usa ClienteService e LogAuditoriaService.
- */

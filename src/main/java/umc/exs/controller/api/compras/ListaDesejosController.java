@@ -26,6 +26,10 @@ public class ListaDesejosController {
     private final ListaDesejosService listaDesejosService;
     private final ListaDesejosMapper mapper;
 
+    /**
+     * Retorna todos os itens da lista de desejos do cliente autenticado.
+     * Responde 401 caso o usuário não esteja autenticado.
+     */
     @GetMapping
     public ResponseEntity<List<ListaDesejosResponse>> listar(@AuthenticationPrincipal UserDetails user) {
         if (user == null)
@@ -33,6 +37,10 @@ public class ListaDesejosController {
         return ResponseEntity.ok(mapper.toDTOList(listaDesejosService.listarDesejos(user.getUsername())));
     }
 
+    /**
+     * Adiciona um livro à lista de desejos do cliente a partir do ISBN informado no corpo da requisição.
+     * Retorna o item criado com status 201.
+     */
     @PostMapping
     public ResponseEntity<ListaDesejosResponse> adicionar(
             @AuthenticationPrincipal UserDetails user,
@@ -45,6 +53,10 @@ public class ListaDesejosController {
                 .body(mapper.toDTO(listaDesejosService.adicionarDesejo(user.getUsername(), isbn)));
     }
 
+    /**
+     * Remove um item da lista de desejos do cliente pelo ID do item.
+     * Retorna 204 sem corpo em caso de sucesso.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> remover(
             @AuthenticationPrincipal UserDetails user,

@@ -12,10 +12,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Handler global de exceções da aplicação; intercepta erros de todos os controllers.
+ * Retorna JSON para requisições REST (/api/, /auth/) ou redireciona para páginas de erro para requisições web.
+ */
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
+    /**
+     * Trata exceções de regras de negócio violadas (BusinessException).
+     * Retorna HTTP 400 Bad Request com a mensagem da regra violada.
+     */
     @ExceptionHandler(BusinessException.class)
     public Object handleBusiness(BusinessException ex,
             HttpServletRequest request,
@@ -33,6 +41,10 @@ public class GlobalExceptionHandler {
         return "error/400";
     }
 
+    /**
+     * Trata excesso de requisições (TooManyRequestsException) disparado pelo Rate Limit.
+     * Retorna HTTP 429 Too Many Requests com mensagem de erro.
+     */
     @ExceptionHandler(TooManyRequestsException.class)
     public Object handle429(TooManyRequestsException ex,
             HttpServletRequest request,
@@ -50,6 +62,10 @@ public class GlobalExceptionHandler {
         return "error/429";
     }
 
+    /**
+     * Trata recursos não encontrados (NoResourceFoundException).
+     * Retorna HTTP 404 Not Found com mensagem padronizada.
+     */
     @ExceptionHandler(NoResourceFoundException.class)
     public Object handle404(NoResourceFoundException ex,
             HttpServletRequest request,
@@ -67,7 +83,11 @@ public class GlobalExceptionHandler {
         return "error/404";
     }
 
-    @ExceptionHandler(BadCredentialsException.class) 
+    /**
+     * Trata falhas de autenticação por credenciais inválidas (BadCredentialsException).
+     * Retorna HTTP 401 Unauthorized com mensagem padronizada.
+     */
+    @ExceptionHandler(BadCredentialsException.class)
     public Object handle401(BadCredentialsException ex,
             HttpServletRequest request,
             HttpServletResponse response) {
@@ -84,6 +104,10 @@ public class GlobalExceptionHandler {
         return "error/401";
     }
 
+    /**
+     * Trata qualquer exceção não prevista pelos handlers anteriores.
+     * Retorna HTTP 500 Internal Server Error com mensagem genérica para não expor detalhes internos.
+     */
     @ExceptionHandler(Exception.class)
     public Object handle500(Exception ex,
             HttpServletRequest request,
@@ -101,6 +125,10 @@ public class GlobalExceptionHandler {
         return "error/500";
     }
 
+    /**
+     * Verifica se a requisição é REST pelo URI (/api/, /auth/) ou pelo cabeçalho Accept.
+     * Usado para decidir entre retornar JSON ou redirecionar para página de erro Thymeleaf.
+     */
     private boolean isRest(HttpServletRequest request) {
         String uri = request.getRequestURI();
         String accept = request.getHeader("Accept");

@@ -29,6 +29,10 @@ import umc.exs.model.entidades.usuario.Endereco;
 import umc.exs.service.cliente.ClienteService;
 import umc.exs.service.core.livros.MinhasVendasService;
 
+/**
+ * API REST para operações da conta do cliente autenticado: perfil, endereços, cartões e vendas.
+ * Todos os endpoints operam exclusivamente sobre os dados do próprio cliente identificado pelo JWT.
+ */
 @RestController
 @RequestMapping("/api/clientes")
 @RequiredArgsConstructor
@@ -142,6 +146,10 @@ public class ClientControllerApi {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Remove um endereço específico do cliente logado pelo ID do endereço.
+     * Redireciona para a página de perfil com mensagem de sucesso ou erro.
+     */
     @GetMapping("/removerEndereco/{id}")
     public String removerEndereco(@PathVariable("id") Long enderecoId, Principal principal,
             RedirectAttributes redirectAttributes) {
@@ -161,6 +169,10 @@ public class ClientControllerApi {
         return "redirect:/clientes/meu-perfil";
     }
 
+    /**
+     * Remove um cartão específico do cliente logado pelo ID do cartão.
+     * Redireciona para a homepage com mensagem de sucesso ou erro.
+     */
     @GetMapping("/removerCartao/{id}")
     public String removerCartao(@PathVariable("id") Long cartaoId, Principal principal,
             RedirectAttributes redirectAttributes) {

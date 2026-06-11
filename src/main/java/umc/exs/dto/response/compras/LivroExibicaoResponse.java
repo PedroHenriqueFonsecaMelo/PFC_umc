@@ -7,6 +7,10 @@ import lombok.NoArgsConstructor;
 import umc.exs.model.enums.EstadoLivro;
 import java.time.LocalDateTime;
 
+/**
+ * DTO de resposta usado para exibir livros na vitrine pública.
+ * Contém dados de preço, estado de conservação, fotos e informações de promoção quando aplicável.
+ */
 @Data
 @Builder
 @AllArgsConstructor

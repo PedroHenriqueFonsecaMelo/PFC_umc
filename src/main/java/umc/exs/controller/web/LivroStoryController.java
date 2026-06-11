@@ -6,6 +6,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * Renderiza as páginas de história e resenhas de livros pelo ISBN via Thymeleaf.
+ * Suporta dois modos: individual por ISBN e unificado, que agrupa avaliações de todas as edições do mesmo título.
+ */
 @Controller
 @RequestMapping("/livros")
 public class LivroStoryController {
@@ -23,6 +27,10 @@ public class LivroStoryController {
         return "produto/historia_livro";
     }
 
+    /**
+     * Exibe a página de história do livro no modo unificado, agrupando avaliações de todas as edições do mesmo título.
+     * Define o atributo "unificado" como true para que o template ative a visualização consolidada.
+     */
     @GetMapping("/{isbn}/unificado")
     public String paginaHistoriaLivroUnificado(@PathVariable String isbn, Model model) {
 

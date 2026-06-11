@@ -26,6 +26,10 @@ import umc.exs.model.enums.CategoriaForum;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.service.core.interactions.ForumService;
 
+/**
+ * Renderiza as páginas do fórum via Thymeleaf: listagem de tópicos, detalhe e criação de respostas.
+ * Controla também a criação de novos tópicos e enriquece o model com dados do usuário autenticado.
+ */
 @Controller
 @RequestMapping("/forum")
 @RequiredArgsConstructor
@@ -36,6 +40,10 @@ public class ForumViewController {
 
     // ── GET /forum — Lista de tópicos ─────────────────────────────────────────
 
+    /**
+     * Lista os tópicos do fórum de forma paginada, com filtros opcionais de busca por texto e categoria.
+     * Prepara o model com os dados necessários para renderizar o template forum/lista.
+     */
     @GetMapping
     public String listarTopicos(
             @RequestParam(required = false) String busca,
@@ -62,6 +70,10 @@ public class ForumViewController {
 
     // ── GET /forum/topicos/{id} — Detalhe do tópico ───────────────────────────
 
+    /**
+     * Exibe o detalhe de um tópico com suas respostas e as curtidas do usuário autenticado.
+     * Incrementa o contador de visualizações a cada acesso.
+     */
     @GetMapping("/topicos/{id}")
     public String verTopico(
             @PathVariable Long id,
@@ -87,6 +99,10 @@ public class ForumViewController {
 
     // ── POST /forum/topicos — Criar novo tópico ───────────────────────────────
 
+    /**
+     * Processa o formulário de criação de novo tópico, validando os campos obrigatórios.
+     * Em caso de erro de validação, reexibe a lista; em caso de sucesso, redireciona para o tópico criado.
+     */
     @PostMapping("/topicos")
     public String criarTopico(
             @Valid @ModelAttribute("novoTopico") NovoTopicoRequest dto,
@@ -119,6 +135,10 @@ public class ForumViewController {
 
     // ── POST /forum/topicos/{id}/respostas — Responder tópico ────────────────
 
+    /**
+     * Adiciona uma resposta ao tópico informado e redireciona de volta ao detalhe do tópico.
+     * Rejeita respostas vazias e redireciona para login caso o usuário não esteja autenticado.
+     */
     @PostMapping("/topicos/{id}/respostas")
     public String criarResposta(
             @PathVariable Long id,
@@ -142,6 +162,10 @@ public class ForumViewController {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
+    /**
+     * Adiciona ao model os atributos clienteLogado, clienteId, clienteNome e isAdmin.
+     * Utilizado por todos os métodos do controller para controle de permissões na view.
+     */
     private void preencherDadosUsuario(UserDetails user, Model model) {
         if (user != null) {
             Long clienteId = resolverClienteId(user);
@@ -163,6 +187,10 @@ public class ForumViewController {
         }
     }
 
+    /**
+     * Busca o ID do cliente no banco pelo e-mail do usuário autenticado.
+     * Retorna null se o usuário não estiver autenticado ou não for encontrado.
+     */
     private Long resolverClienteId(UserDetails user) {
         if (user == null)
             return null;

@@ -7,6 +7,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO de resposta do dashboard administrativo com métricas consolidadas de clientes, livros, tokens e PIX.
+ * Inclui dados históricos dos últimos 12 meses para alimentar os gráficos de cadastros, vendas e postagens.
+ */
 @Data
 @Builder
 @NoArgsConstructor

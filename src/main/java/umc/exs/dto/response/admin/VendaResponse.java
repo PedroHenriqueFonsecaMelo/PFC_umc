@@ -9,6 +9,10 @@ import lombok.NoArgsConstructor;
 import umc.exs.model.enums.EstadoLivro;
 import umc.exs.model.enums.StatusVenda;
 
+/**
+ * DTO de resposta com os detalhes completos de um livro anunciado pelo vendedor.
+ * Inclui status da venda e dados financeiros (data e tokens recebidos) quando o livro foi vendido.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,6 +37,10 @@ public class VendaResponse {
     private LocalDateTime dataVenda;
     private Double tokensRecebidos;
 
+    /**
+     * DTO resumido de um anúncio exibido na listagem de Minhas Vendas do vendedor.
+     * Contém apenas os campos essenciais para a listagem, sem dados financeiros detalhados.
+     */
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

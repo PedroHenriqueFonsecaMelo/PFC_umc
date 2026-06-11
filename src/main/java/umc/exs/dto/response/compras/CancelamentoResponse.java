@@ -9,6 +9,10 @@ import lombok.NoArgsConstructor;
 import umc.exs.model.enums.MotivoCategoria;
 import umc.exs.model.enums.StatusSolicitacao;
 
+/**
+ * DTO de resposta de uma solicitação de cancelamento.
+ * Contém dados do pedido, cliente, motivo, status e saldo atual do comprador após eventual estorno.
+ */
 @Data
 @Builder
 @AllArgsConstructor
