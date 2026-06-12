@@ -12,11 +12,22 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repositório responsável por gerenciar as pontuações de XP dos clientes no banco de dados.
+ * Oferece suporte a ranking global, expiração de pontos e cálculo de posição no ranking,
+ * possibilitando consultas otimizadas para o sistema de gamificação da plataforma.
+ */
 @Repository
 public interface PontuacaoUsuarioRepository extends JpaRepository<PontuacaoUsuario, Long> {
 
+       /**
+        * Busca a pontuação de um cliente pelo seu ID.
+        */
        Optional<PontuacaoUsuario> findByClienteId(Long clienteId);
 
+       /**
+        * Busca a pontuação de um cliente pelo seu endereço de e-mail.
+        */
        Optional<PontuacaoUsuario> findByClienteEmail(String email);
 
        /**
@@ -34,6 +45,10 @@ public interface PontuacaoUsuarioRepository extends JpaRepository<PontuacaoUsuar
        @Query("SELECT COUNT(p) FROM PontuacaoUsuario p WHERE p.xpTotal > :xp")
        long countByXpTotalGreaterThan(@Param("xp") int xp);
 
+       /**
+        * Lista todas as pontuações com o cliente carregado via JOIN FETCH,
+        * evitando o problema N+1 ao acessar os dados do cliente associado.
+        */
        @Query("SELECT p FROM PontuacaoUsuario p JOIN FETCH p.cliente")
        List<PontuacaoUsuario> findAllWithCliente();
 
@@ -54,6 +69,11 @@ public interface PontuacaoUsuarioRepository extends JpaRepository<PontuacaoUsuar
                      @Param("inicio") LocalDateTime inicio,
                      @Param("fim") LocalDateTime fim);
 
+       /**
+        * Lista pontuações cuja última atualização ocorreu antes da data informada.
+        * Utilizado pelo scheduler de decaimento de XP para identificar registros
+        * que ficaram inativos e devem ter seus pontos reduzidos.
+        */
        List<PontuacaoUsuario> findAllByUltimaAtualizacaoBefore(LocalDateTime data);
 
        /**

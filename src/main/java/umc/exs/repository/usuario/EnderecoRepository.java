@@ -9,9 +9,20 @@ import org.springframework.stereotype.Repository;
 
 import umc.exs.model.entidades.usuario.Endereco;
 
+/**
+ * Repositório responsável por gerenciar os endereços dos clientes no banco de dados.
+ * Suporta o relacionamento Many-to-Many entre clientes e endereços via tabela cliente_endereco,
+ * permitindo o reuso de endereços já cadastrados entre diferentes clientes.
+ */
 @Repository
 public interface EnderecoRepository extends JpaRepository<Endereco, Long> {
 
+        /**
+         * Busca um endereço existente por todos os seus campos de valor para reuso em
+         * relacionamentos Many-to-Many, evitando a criação de registros duplicados.
+         * O campo complemento é tratado como opcional: aceita nulo e compara corretamente
+         * tanto quando ausente quanto quando preenchido.
+         */
         // Versão com @Query, otimizada para tratar 'complemento' como opcional/nulo
         @Query("SELECT e FROM Endereco e WHERE " +
                         "e.cep = :cep AND " +

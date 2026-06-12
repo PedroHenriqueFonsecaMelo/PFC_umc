@@ -10,6 +10,10 @@ import org.springframework.stereotype.Repository;
 
 import umc.exs.model.entidades.usuario.Cartao;
 
+/**
+ * Gerencia os cartões de crédito/débito dos clientes no banco, com número e
+ * CPF criptografados.
+ */
 @Repository
 public interface CartaoRepository extends JpaRepository<Cartao, Long> {
 
@@ -31,6 +35,10 @@ public interface CartaoRepository extends JpaRepository<Cartao, Long> {
                         @Param("bandeira") String bandeira,
                         @Param("cpfTitular") String cpfTitular);
 
+        /**
+         * Sobrecarga que aceita validade como String (formato MM/yy) em vez de
+         * YearMonth, para compatibilidade com diferentes formatos de entrada.
+         */
         @Query("SELECT c FROM Cartao c WHERE " +
                         "c.numero = :numero AND " +
                         "c.nomeTitular = :nomeTitular AND " +

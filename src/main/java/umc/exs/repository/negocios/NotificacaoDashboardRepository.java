@@ -10,13 +10,17 @@ import org.springframework.stereotype.Repository;
 
 import umc.exs.model.entidades.foundation.NotificacaoDashboard;
 
+/** Gerencia as notificações do dashboard dos clientes no banco de dados. */
 @Repository
 public interface NotificacaoDashboardRepository extends JpaRepository<NotificacaoDashboard, Long> {
 
+    /** Lista notificações não lidas de um cliente, ordenadas da mais recente. */
     List<NotificacaoDashboard> findByClienteIdAndLidaFalseOrderByDataCriacaoDesc(Long clienteId);
 
+    /** Lista todas as notificações de um cliente ordenadas da mais recente. */
     List<NotificacaoDashboard> findByClienteIdOrderByDataCriacaoDesc(Long clienteId);
 
+    /** Conta notificações não lidas de um cliente para o badge de alertas. */
     long countByClienteIdAndLidaFalse(Long clienteId);
 
     /** Marca todas as notificações de um cliente como lidas. */

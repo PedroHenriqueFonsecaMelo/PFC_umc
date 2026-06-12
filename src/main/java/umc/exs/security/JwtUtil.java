@@ -20,6 +20,12 @@ import java.util.stream.Collectors;
 
 import io.jsonwebtoken.JwtException;
 
+/**
+ * Utilitário para geração, validação e extração de dados de tokens JWT.
+ * Também gerencia o cookie HTTP-only de autenticação, incluindo criação
+ * e remoção compatíveis com as diretivas SameSite e Secure configuradas
+ * no application.properties.
+ */
 @Component
 public class JwtUtil {
 
@@ -38,10 +44,17 @@ public class JwtUtil {
     @Value("${jwt.cookie.samesite:Lax}")
     private String sameSitePolicy;
 
+    /**
+     * Gera a chave de assinatura HMAC-SHA a partir do secret configurado no application.properties.
+     */
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Gera um token JWT com o subject informado e data de expiração configurada
+     * em {@code jwt.expiration} no application.properties.
+     */
     public String generateToken(String subject) {
         Date now = new Date();
         Date exp = new Date(now.getTime() + expirationMs);
@@ -54,6 +67,10 @@ public class JwtUtil {
                 .compact();
     }
 
+    /**
+     * Gera um token JWT a partir de um {@link UserDetails}, incluindo as roles
+     * do usuário como claim adicional {@code roles} no payload do token.
+     */
     public String generateToken(UserDetails userDetails) {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -68,6 +85,9 @@ public class JwtUtil {
                 .compact();
     }
 
+    /**
+     * Extrai o e-mail do usuário (subject) do payload do token JWT.
+     */
     public String extractUsername(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -77,6 +97,10 @@ public class JwtUtil {
                 .getSubject();
     }
 
+    /**
+     * Valida a assinatura e a expiração do token JWT. Retorna {@code false}
+     * em vez de propagar exceção quando o token for inválido ou expirado.
+     */
     public boolean validateToken(String token) {
         try {
             Jwts.parser()

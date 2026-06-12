@@ -11,13 +11,20 @@ import org.springframework.stereotype.Repository;
 
 import umc.exs.model.entidades.foundation.Cupom;
 
+/**
+ * Gerencia os cupons de desconto no banco, com busca por código, cliente e
+ * validade.
+ */
 @Repository
 public interface CupomRepository extends JpaRepository<Cupom, Long> {
 
+    /** Busca um cupom pelo código único. */
     Optional<Cupom> findByCodigo(String codigo);
 
+    /** Verifica se um código de cupom já existe. */
     boolean existsByCodigo(String codigo);
 
+    /** Lista cupons não usados de um cliente. */
     List<Cupom> findByClienteIdAndUsadoFalse(Long clienteId);
 
     /**

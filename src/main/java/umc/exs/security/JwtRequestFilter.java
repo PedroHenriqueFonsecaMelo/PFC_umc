@@ -17,6 +17,11 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Filtro JWT executado uma vez por requisição que intercepta todas as requisições HTTP,
+ * valida o token JWT presente no cookie HTTP-only ou no header Authorization e,
+ * quando válido, configura a autenticação do usuário no SecurityContext do Spring Security.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -27,6 +32,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Value("${jwt.cookie.name:token}")
     private String cookieName;
 
+    /**
+     * Ignora requisições de recursos estáticos para evitar processamento desnecessário.
+     * Para as demais requisições, extrai e valida o JWT e, se válido, carrega os dados
+     * do usuário e autentica no SecurityContext antes de prosseguir na cadeia de filtros.
+     */
     @Override
     public void doFilterInternal(
             @NonNull HttpServletRequest request,
@@ -76,6 +86,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
+    /**
+     * Extrai o token JWT da requisição, buscando primeiro no cookie HTTP-only configurado
+     * e utilizando o header Authorization com prefixo Bearer como fallback para clientes de API.
+     */
     private String resolveToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {

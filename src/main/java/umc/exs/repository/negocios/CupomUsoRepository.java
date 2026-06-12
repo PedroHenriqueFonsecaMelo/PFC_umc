@@ -5,6 +5,10 @@ import org.springframework.stereotype.Repository;
 
 import umc.exs.model.entidades.foundation.CupomUso;
 
+/**
+ * Gerencia o registro de uso de cupons no banco, garantindo que cada cliente
+ * use o mesmo cupom apenas uma vez.
+ */
 @Repository
 public interface CupomUsoRepository extends JpaRepository<CupomUso, Long> {
 

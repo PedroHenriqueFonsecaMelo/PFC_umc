@@ -15,6 +15,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Filtro de rate limiting por IP baseado no algoritmo token bucket.
+ * Permite até 500 requisições por minuto por endereço IP, retornando
+ * HTTP 429 com corpo JSON para APIs ou erro padrão para requisições web
+ * quando o limite é excedido.
+ */
 @Slf4j
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {
@@ -29,6 +35,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
             "/webjars/", "/static/", "/error/"
     };
 
+    /**
+     * Verifica o bucket de tokens do IP da requisição e permite ou bloqueia o acesso.
+     * Requisições de API recebem resposta JSON com status 429; requisições web
+     * recebem o erro padrão do servlet quando o limite é atingido.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response,
@@ -69,6 +80,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
         response.sendError(429);
     }
 
+    /**
+     * Detecta se a requisição é de API verificando o prefixo do URI (/api/, /auth/)
+     * ou o header Accept com valor application/json, para formatar corretamente a resposta 429.
+     */
     private boolean isApiRequest(HttpServletRequest request) {
         String uri = request.getRequestURI();
         String accept = request.getHeader("Accept");
@@ -78,6 +93,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 || (accept != null && accept.contains("application/json"));
     }
 
+    /**
+     * Verifica se a requisição deve ser ignorada pelo rate limit, desconsiderando
+     * recursos estáticos e endpoints de erro para não contabilizá-los no bucket do IP.
+     */
     private boolean shouldSkip(HttpServletRequest request) {
         String uri = request.getRequestURI();
 

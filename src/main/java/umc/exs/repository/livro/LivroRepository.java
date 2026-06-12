@@ -20,6 +20,7 @@ import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
 import umc.exs.model.entidades.livro.Livro;
 
+/** Gerencia livros no banco, com queries para vitrine, aprovação, promoções, lote e lock pessimista. */
 @Repository
 public interface LivroRepository extends JpaRepository<Livro, Long> {
 
@@ -27,18 +28,23 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
   // ISBN
   // =========================================================
 
+  /** Busca livro pelo ISBN exato. */
   Optional<Livro> findByIsbn(String isbn);
 
+  /** Busca a edição mais recente aprovada de um ISBN. */
   Optional<Livro> findFirstByIsbnOrderByDataAprovacaoDesc(String isbn);
 
+  /** Busca edição aprovada mais recente pelo ISBN. */
   Optional<Livro> findFirstByIsbnAndAprovadoTrueOrderByDataAprovacaoDesc(String isbn);
 
   // =========================================================
   // ID + APROVAÇÃO
   // =========================================================
 
+  /** Busca livro aprovado pelo ID. */
   Optional<Livro> findByIdAndAprovadoTrue(Long id);
 
+  /** LOCK PESSIMISTA: busca livro aprovado com bloqueio exclusivo para evitar compra simultânea. */
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @QueryHints({
       @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")
@@ -46,6 +52,7 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
   @Query("SELECT l FROM Livro l WHERE l.id = :id AND l.aprovado = true")
   Optional<Livro> findByIdAndAprovadoTrueWithLock(@Param("id") Long id);
 
+  /** LOCK PESSIMISTA: busca lista de livros aprovados com bloqueio para compra de carrinho. */
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("""
           SELECT l
@@ -59,8 +66,10 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
   // LOTE
   // =========================================================
 
+  /** Lista livros de um lote. */
   List<Livro> findByLoteId(Long loteId);
 
+  /** Lista livros pendentes de um lote. */
   List<Livro> findByLoteIdAndAprovadoFalse(Long loteId);
 
   /**
@@ -79,16 +88,20 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
   // OBRA
   // =========================================================
 
+  /** Lista livros de uma obra canônica. */
   List<Livro> findByObraId(Long obraId);
 
   // =========================================================
   // APROVAÇÃO (STATUS GERAL)
   // =========================================================
 
+  /** Lista todos os livros aprovados. */
   List<Livro> findByAprovadoTrue();
 
+  /** Lista aprovados de forma paginada. */
   Page<Livro> findByAprovadoTrue(Pageable pageable);
 
+  /** Vitrine paginada com busca textual. */
   @Query("""
           SELECT l FROM Livro l
           WHERE l.aprovado = true
@@ -101,6 +114,7 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
   Page<Livro> findByAprovadoTrueAndBusca(@Param("busca") String busca, @Param("buscaNorm") String buscaNorm,
       Pageable pageable);
 
+  /** Promoções ativas paginadas com busca textual. */
   @Query("""
           SELECT l FROM Livro l
           WHERE l.aprovado = true
@@ -115,14 +129,17 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
   Page<Livro> findPromocoesAtivasPaginadoComBusca(@Param("agora") LocalDateTime agora, @Param("busca") String busca,
       @Param("buscaNorm") String buscaNorm, Pageable pageable);
 
+  /** Lista livros pendentes de aprovação. */
   List<Livro> findByAprovadoFalse();
 
+  /** Total de livros aprovados na plataforma. */
   long countByAprovadoTrue();
 
   // =========================================================
   // ANÚNCIO / DATA
   // =========================================================
 
+  /** Livros anunciados após uma data. */
   List<Livro> findByDataAnuncioAfter(LocalDateTime data);
 
   /**
@@ -138,6 +155,7 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
   // PROMOÇÕES
   // =========================================================
 
+  /** Lista livros em promoção. */
   List<Livro> findByAprovadoTrueAndEmPromocaoTrue();
 
   /** Promoções ativas (sem expiração ou ainda válidas) */
@@ -207,6 +225,7 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
   Optional<Livro> findByIdAndVendedorEmail(@Param("id") Long id, @Param("email") String email);
 
   
+    /** Aplica taxa IPCA em todos os preços aprovados. */
     @Modifying
     @Transactional
     @Query("""

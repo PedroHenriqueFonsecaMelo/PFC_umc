@@ -13,6 +13,10 @@ import org.springframework.stereotype.Repository;
 import umc.exs.model.entidades.foundation.Pedido;
 import umc.exs.model.enums.StatusEnvio;
 
+/**
+ * Gerencia os pedidos de compra no banco, com queries otimizadas para
+ * dashboard, histórico do cliente e estatísticas agregadas.
+ */
 @Repository
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
@@ -87,12 +91,14 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
         /** Retorna o pedido de compra de um livro, se existir. */
         java.util.Optional<Pedido> findByLivroId(Long livroId);
 
+        /** Lista todos os pedidos ordenados do mais recente ao mais antigo para o painel admin. */
         @EntityGraph(attributePaths = {
                         "comprador",
                         "comprador.enderecos"
         })
         List<Pedido> findAllByOrderByDataCompraDesc();
 
+        /** Busca um pedido com comprador e endereços carregados via EntityGraph para evitar N+1. */
         @EntityGraph(attributePaths = {
                         "comprador",
                         "comprador.enderecos"
@@ -100,6 +106,7 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
         @Query("select p from Pedido p where p.id = :id")
         Optional<Pedido> findComCompradorEEnderecos(@Param("id") Long id);
 
+        /** Retorna estatísticas agregadas de pedidos para uma lista de compradores específicos. */
         @Query("""
                             SELECT p.comprador.id, COUNT(p), COALESCE(SUM(p.precoLivro), 0.0)
                             FROM Pedido p

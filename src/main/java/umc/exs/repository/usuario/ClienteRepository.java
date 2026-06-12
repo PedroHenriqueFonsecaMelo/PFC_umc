@@ -12,6 +12,10 @@ import org.springframework.stereotype.Repository;
 
 import umc.exs.model.entidades.usuario.Cliente;
 
+/**
+ * Gerencia os clientes no banco, com queries otimizadas via EntityGraph para
+ * evitar N+1 e suporte a soft delete via campo ativo.
+ */
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
@@ -27,11 +31,14 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     // Se o email não for único, este método é o correto para listagens
     List<Cliente> findAllByEmail(String email);
 
+    /** Busca cliente pelo CPF. */
     Optional<Cliente> findByCpf(String cpf);
 
     // Verifica unicidade apenas entre usuários ativos (soft delete)
+    /** Verifica unicidade de e-mail entre clientes ativos para evitar cadastro duplicado. */
     boolean existsByEmailAndAtivoTrue(String email);
 
+    /** Verifica unicidade de CPF entre ativos. */
     boolean existsByCpfAndAtivoTrue(String cpf);
 
     // Query para verificar se o ID pertence àquele e-mail (Segurança extra em
@@ -47,8 +54,10 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     @Query("SELECT c FROM Cliente c LEFT JOIN FETCH c.enderecos WHERE c.id = :id")
     Optional<Cliente> findByIdWithEnderecos(@Param("id") Long id);
 
+    /** Verifica se e-mail já existe no banco. */
     boolean existsByEmail(String email);
 
+    /** Verifica se CPF já existe no banco. */
     boolean existsByCpf(String cpf);
 
     /**

@@ -15,6 +15,11 @@ import umc.exs.model.enums.StatusConta;
 import umc.exs.repository.logic.AdminRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 
+/**
+ * Implementação do UserDetailsService do Spring Security responsável por carregar os dados
+ * de autenticação dos usuários. Administradores recebem a role ADMIN e clientes recebem
+ * a role USER. Contas com status SUSPENSO ou REMOVIDO são bloqueadas durante o carregamento.
+ */
 @Service
 @RequiredArgsConstructor
 public class JwtUserDetailsService implements UserDetailsService {
@@ -22,6 +27,11 @@ public class JwtUserDetailsService implements UserDetailsService {
     private final ClienteRepository clienteRepository;
     private final AdminRepository adminRepository;
 
+    /**
+     * Busca o usuário pelo e-mail, verificando primeiro na base de administradores e
+     * depois na de clientes. Lança UsernameNotFoundException se o usuário não for
+     * encontrado ou se a conta estiver com status SUSPENSO ou REMOVIDO.
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // First try to find an admin
