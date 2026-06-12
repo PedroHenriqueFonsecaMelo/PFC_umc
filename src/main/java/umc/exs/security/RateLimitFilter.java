@@ -112,6 +112,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
         return false;
     }
 
+    /**
+     * Extrai o endereço IP real do cliente, considerando situações com proxy ou load balancer
+     * via header X-Forwarded-For; utiliza o IP remoto direto como fallback.
+     */
     private String getClientIp(HttpServletRequest request) {
         String xf = request.getHeader("X-Forwarded-For");
         if (xf != null && !xf.isBlank()) {
@@ -120,10 +124,18 @@ public class RateLimitFilter extends OncePerRequestFilter {
         return request.getRemoteAddr();
     }
 
+    /**
+     * Implementação do algoritmo token bucket para controle de rate limit por IP.
+     * Mantém até 500 tokens disponíveis, reabastecendo ao máximo a cada 60 segundos.
+     */
     static class Bucket {
         private final AtomicLong tokens = new AtomicLong(CAPACITY);
         private volatile long lastRefill = System.currentTimeMillis();
 
+        /**
+         * Tenta consumir um token do bucket. Retorna {@code true} se havia tokens
+         * disponíveis e a requisição pode prosseguir, ou {@code false} se o limite foi atingido.
+         */
         public synchronized boolean tryConsume() {
             refill();
             if (tokens.get() > 0) {
@@ -133,6 +145,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
             return false;
         }
 
+        /**
+         * Reabastece os tokens ao valor máximo (500) quando o intervalo de 60 segundos
+         * desde o último reabastecimento for atingido.
+         */
         private void refill() {
             long now = System.currentTimeMillis();
             if (now - lastRefill >= REFILL_INTERVAL_MS) {
