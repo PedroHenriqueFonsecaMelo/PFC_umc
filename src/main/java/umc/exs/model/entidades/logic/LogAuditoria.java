@@ -14,6 +14,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+/**
+ * Registra automaticamente as ações dos usuários na plataforma para fins de
+ * auditoria e conformidade com a LGPD, com 28 tipos de eventos rastreados.
+ */
 @Entity
 @Table(name = "log_auditoria")
 

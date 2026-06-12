@@ -1,5 +1,9 @@
 package umc.exs.model.enums;
 
+/**
+ * Define as categorias de motivo para solicitação de cancelamento, separadas
+ * entre motivos do cliente e motivos administrativos usados pelo admin.
+ */
 public enum MotivoCategoria {
 
     COMPREI_POR_ENGANO("Comprei por engano"),
@@ -21,6 +25,7 @@ public enum MotivoCategoria {
         this.descricao = descricao;
     }
 
+    /** Retorna a descrição legível do motivo para exibição na interface. */
     public String getDescricao() {
         return descricao;
     }

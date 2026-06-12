@@ -18,6 +18,10 @@ public class VisitaInterceptor implements HandlerInterceptor {
 
     private final VisitaSiteService visitaSiteService;
 
+    /**
+     * Intercepta requisições GET e registra visita apenas nas páginas /, /index
+     * e /home; ignora todos os demais endpoints.
+     */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         if (!"GET".equalsIgnoreCase(request.getMethod()))

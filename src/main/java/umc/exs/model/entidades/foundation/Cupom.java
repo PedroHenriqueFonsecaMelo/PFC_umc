@@ -17,6 +17,10 @@ import lombok.NoArgsConstructor;
 
 import umc.exs.model.entidades.usuario.Cliente;
 
+/**
+ * Representa um cupom de desconto que pode ser público ou restrito a um cliente
+ * específico, com limite de uso, percentual de desconto e data de expiração.
+ */
 @Entity
 @Table(name = "cupom")
 

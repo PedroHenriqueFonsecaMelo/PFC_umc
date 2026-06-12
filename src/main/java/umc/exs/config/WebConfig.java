@@ -8,6 +8,10 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * Configura o handler de recursos estáticos para servir arquivos da pasta
+ * uploads/ no ambiente local; ativa apenas com o profile "local".
+ */
 @Configuration
 @Profile("local")
 public class WebConfig implements WebMvcConfigurer {

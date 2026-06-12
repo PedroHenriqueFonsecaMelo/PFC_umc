@@ -19,6 +19,10 @@ import lombok.NoArgsConstructor;
 
 import umc.exs.model.entidades.usuario.Cliente;
 
+/**
+ * Representa uma transação financeira de compra de tokens via PIX, com status
+ * de pagamento e retenção obrigatória de 5 anos conforme LGPD Art. 16.
+ */
 @Entity
 @Table(name = "transacao")
 
@@ -32,25 +36,32 @@ public class Transacao {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Cliente que realizou a transação.
     @ManyToOne(optional = false)
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
+    // Valor em reais da transação.
     @Column(nullable = false)
     private Double valor;
 
+    // Data e hora da transação.
     @Column(name = "data_hora", nullable = false)
     private LocalDateTime dataHora;
 
+    // Método usado (ex: PIX).
     @Column(name = "metodo_pagamento")
     private String metodoPagamento;
 
+    // Últimos dígitos do cartão ou descrição da transação.
     @Column(name = "final_cartao")
     private String finalCartao;
 
+    // ID do pagamento no Mercado Pago.
     @Column(name = "pagamento_id")
     private String pagamentoId;
 
+    // Estado do pagamento: PENDENTE ou APROVADO.
     @Column(nullable = false)
     @Builder.Default
     private String status = "PENDENTE";
@@ -59,6 +70,10 @@ public class Transacao {
     @Column(name = "data_retencao_expira")
     private LocalDate dataRetencaoExpira;
 
+    /**
+     * Define automaticamente a data de expiração de retenção como 5 anos após
+     * a transação, em conformidade com a LGPD.
+     */
     @PrePersist
     public void definirDataRetencao() {
         if (this.dataHora != null && this.dataRetencaoExpira == null) {
@@ -66,6 +81,10 @@ public class Transacao {
         }
     }
 
+    /**
+     * Factory method para criação padronizada de transações com todos os campos
+     * obrigatórios.
+     */
     public static Transacao criarTransacao(
             Cliente cliente,
             Double valor,

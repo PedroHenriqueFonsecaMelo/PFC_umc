@@ -8,6 +8,11 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 import lombok.NonNull;
 
+/**
+ * Configura o WebSocket com protocolo STOMP para notificações em tempo real de
+ * saldo e atualizações de pedido, com fallback SockJS para navegadores sem
+ * suporte nativo.
+ */
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {

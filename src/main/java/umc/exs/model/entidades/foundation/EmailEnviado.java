@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
+/**
+ * Registra o histórico de e-mails disparados pelo admin, incluindo assunto,
+ * filtro de destinatários, quantidade enviada e se foi imediato ou agendado.
+ */
 @Entity
 @Table(name = "email_enviado")
 @Data

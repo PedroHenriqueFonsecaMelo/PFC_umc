@@ -17,6 +17,10 @@ import lombok.NoArgsConstructor;
 
 import umc.exs.model.enums.StatusPost;
 
+/**
+ * Representa um post do blog da plataforma, com suporte a rascunho,
+ * publicação imediata e agendamento para data futura.
+ */
 @Entity
 @Table(name = "post_blog")
 
@@ -30,21 +34,28 @@ public class PostBlog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Título do post.
     private String titulo;
 
+    // Corpo do post em texto ou HTML.
     @Column(columnDefinition = "TEXT")
     private String conteudo;
 
+    // URL da imagem de capa do post.
     private String imagemUrl;
 
+    // Nome do admin que criou o post.
     private String autorNome;
 
+    // Data e hora de publicação, preenchida automaticamente.
     @Builder.Default
     private LocalDateTime dataPublicacao = LocalDateTime.now();
 
+    // Contador de curtidas dos usuários.
     @Builder.Default
     private int curtidas = 0;
 
+    // Estado do post: RASCUNHO, EM_REVISAO, AGENDADO ou PUBLICADO.
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private StatusPost status = StatusPost.RASCUNHO;

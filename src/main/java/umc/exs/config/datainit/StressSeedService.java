@@ -31,6 +31,11 @@ import umc.exs.repository.negocios.TopicoForumRepository;
 import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.repository.usuario.PontuacaoUsuarioRepository;
 
+/**
+ * Popula o banco com volume alto de dados para testes de performance: 2000
+ * clientes, 500 livros, 300 tópicos e 200 lotes; só executa em modo
+ * create/create-drop.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -67,6 +72,10 @@ public class StressSeedService {
 
     private static final String SENHA_FIXA = "$2a$12$2NbprXL2fUcKB8wSYzsW1eCICV2PFsejTEZpXvJkb.GR0fbqNQbqa";
 
+    /**
+     * Verifica o modo DDL e executa o seed completo apenas em ambientes de
+     * recriação do banco.
+     */
     @Transactional
     public void run() {
 
@@ -185,15 +194,18 @@ public class StressSeedService {
         log.info("SEED FINALIZADO");
     }
 
+    /** Gera nome aleatório combinando arrays de nomes e sobrenomes. */
     private String gerarNome() {
         return nomes[random.nextInt(nomes.length)] + " " +
                 sobrenomes[random.nextInt(sobrenomes.length)];
     }
 
+    /** Gera e-mail único baseado no nome e índice. */
     private String gerarEmail(String nome, int i) {
         return nome.toLowerCase().replace(" ", ".") + i + "@outlook.com";
     }
 
+    /** Gera CPF fictício no formato 000.000.000-00. */
     private String gerarCpf() {
         return String.format("%03d.%03d.%03d-%02d",
                 random.nextInt(1000),
@@ -202,6 +214,7 @@ public class StressSeedService {
                 random.nextInt(100));
     }
 
+    /** Gera saldo aleatório até 500 tokens. */
     private double gerarSaldo() {
         double valor = random.nextDouble() * 500;
         return BigDecimal.valueOf(valor)
@@ -209,6 +222,7 @@ public class StressSeedService {
                 .doubleValue();
     }
 
+    /** Gera data de nascimento aleatória entre 1960 e 2000. */
     private LocalDate gerarDataNascimento() {
         return LocalDate.of(
                 1960 + random.nextInt(40),
@@ -216,6 +230,7 @@ public class StressSeedService {
                 1 + random.nextInt(28));
     }
 
+    /** Gera data de criação aleatória nos últimos 700 dias. */
     private LocalDateTime gerarDataCriacao() {
         return LocalDateTime.now().minusDays(random.nextInt(700));
     }

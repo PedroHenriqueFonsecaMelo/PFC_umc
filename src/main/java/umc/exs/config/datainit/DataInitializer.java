@@ -7,6 +7,11 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Executa a carga inicial de dados ao iniciar a aplicação, escolhendo entre
+ * modo de teste (dados básicos) ou stress (volume alto) via propriedade
+ * app.seed.mode.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -18,6 +23,10 @@ public class DataInitializer implements CommandLineRunner {
     @Value("${app.seed.mode:test}")
     private String mode;
 
+    /**
+     * Executado automaticamente pelo Spring Boot na inicialização e direciona
+     * para o seed correto conforme o modo configurado.
+     */
     @Override
     public void run(String... args) {
 

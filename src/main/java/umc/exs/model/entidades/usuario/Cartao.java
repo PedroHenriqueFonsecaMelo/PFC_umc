@@ -21,6 +21,10 @@ import lombok.Setter;
 import lombok.ToString;
 
 
+/**
+ * Representa um cartão de crédito ou débito do cliente, com número e CPF
+ * criptografados no banco via AES-256-GCM para conformidade com a LGPD.
+ */
 @Entity
 
 @Getter
@@ -36,20 +40,25 @@ public class Cartao {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Número do cartão criptografado no banco (LGPD).
     @Column(nullable = false, unique = true)
     @Convert(converter = CpfConverter.class)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String numero;
 
+    // Bandeira do cartão (Visa, Mastercard, etc.).
     @Column(nullable = false)
     private String bandeira;
 
+    // Nome impresso no cartão.
     @Column(nullable = false)
     private String nomeTitular;
 
+    // Data de validade no formato MM/yy.
     @Column(nullable = false)
     private String validade;
 
+    // CPF do titular criptografado no banco (LGPD).
     @Column(nullable = false, length = 255)
     @Convert(converter = CpfConverter.class)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

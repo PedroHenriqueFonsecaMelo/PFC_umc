@@ -8,10 +8,18 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
+/**
+ * Configura o executor assíncrono para envio de e-mails, com pool de 2 a 5
+ * threads e fila de até 100 tarefas pendentes.
+ */
 @EnableAsync
 @Configuration
 public class AsyncConfig implements AsyncConfigurer {
 
+    /**
+     * Cria o pool de threads dedicado ao envio assíncrono de e-mails, aguardando
+     * tarefas pendentes por até 30 segundos no shutdown.
+     */
     @Bean(name = "emailExecutor")
     public Executor emailExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -26,6 +34,10 @@ public class AsyncConfig implements AsyncConfigurer {
         return executor;
     }
 
+    /**
+     * Captura e loga erros ocorridos em métodos assíncronos de envio de e-mail
+     * sem propagar a exceção.
+     */
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return (ex, method, params) -> org.slf4j.LoggerFactory.getLogger(AsyncConfig.class)

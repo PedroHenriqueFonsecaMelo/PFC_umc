@@ -17,6 +17,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+/**
+ * Representa um comentário feito por um usuário em um post do blog da
+ * plataforma.
+ */
 @Entity
 @Table(name = "comentario_blog")
 
@@ -30,15 +34,19 @@ public class ComentarioBlog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Post do blog ao qual o comentário pertence.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private PostBlog post;
 
+    // Nome do autor exibido no comentário.
     private String autorNome;
 
+    // Texto do comentário.
     @Column(columnDefinition = "TEXT", nullable = false)
     private String conteudo;
 
+    // Data e hora de criação, preenchida automaticamente.
     @Builder.Default
     private LocalDateTime dataCriacao = LocalDateTime.now();
 }

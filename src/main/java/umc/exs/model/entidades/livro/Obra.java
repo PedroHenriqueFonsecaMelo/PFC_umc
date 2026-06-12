@@ -16,6 +16,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+/**
+ * Representa a obra literária canônica (título + autor), agrupando todas as
+ * edições físicas e avaliações do mesmo livro independente do ISBN da edição.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,17 +33,22 @@ public class Obra {
 
     private String titulo; // Ex: "The Hobbit"
 
+    // Autor da obra.
     private String autor;
 
+    // Idioma original da obra.
     private String idioma;
 
+    // URLs das capas em formato JSON da API Google Books.
     @Column(columnDefinition = "TEXT")
     private String imageLinksJson;
 
+    // Lista de exemplares físicos desta obra disponíveis na plataforma.
     @OneToMany(mappedBy = "obra")
     @JsonIgnore
     private List<Livro> edicoes;
 
+    // Lista de avaliações da comunidade para esta obra.
     @OneToMany(mappedBy = "obra")
     @JsonIgnore
     private List<AvaliacaoLivro> avaliacoes;

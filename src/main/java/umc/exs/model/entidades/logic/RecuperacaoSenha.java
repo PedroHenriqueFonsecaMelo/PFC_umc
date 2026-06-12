@@ -17,6 +17,10 @@ import lombok.NoArgsConstructor;
 
 import umc.exs.model.entidades.usuario.Cliente;
 
+/**
+ * Armazena o token de recuperação de senha enviado por e-mail ao cliente;
+ * o token expira após 24 horas e só pode ser usado uma vez.
+ */
 @Entity
 @Table(name = "recuperacao_senha")
 
@@ -30,16 +34,20 @@ public class RecuperacaoSenha {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Token único enviado por e-mail para redefinição de senha.
     @Column(nullable = false, unique = true)
     private String token;
 
+    // Cliente que solicitou a recuperação.
     @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
+    // Data e hora de expiração do token.
     @Column(name = "expiracao", nullable = false)
     private LocalDateTime dataExpiracao;
 
+    // E-mail do cliente para referência rápida.
     @Column(nullable = false)
     private String email;
 
@@ -55,6 +63,7 @@ public class RecuperacaoSenha {
         this.dataExpiracao = expiracao;
     }
 
+    /** Verifica se o token já passou da data de expiração. */
     public boolean isExpirado() {
         return LocalDateTime.now().isAfter(this.dataExpiracao);
     }

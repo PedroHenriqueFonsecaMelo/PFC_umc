@@ -29,6 +29,10 @@ import umc.exs.repository.usuario.ClienteRepository;
 import umc.exs.repository.usuario.PontuacaoUsuarioRepository;
 import umc.exs.service.scheduler.PontosSchedulerService;
 
+/**
+ * Popula o banco com dados fixos para testes: 1 admin, 7 clientes com XP
+ * variado, cupons, tópico de fórum e livros aprovados e pendentes.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -45,6 +49,7 @@ public class TestSeedService {
     private final PasswordEncoder encoder;
     private final PontosSchedulerService pontosSchedulerService;
 
+    /** Executa o seed apenas se não existir admin no banco, evitando duplicação. */
     public void run() {
 
         if (adminRepo.count() > 0)
@@ -113,6 +118,7 @@ public class TestSeedService {
         log.info(" TEST SEED finalizado");
     }
 
+    /** Cria e salva um cliente com saldo inicial de 100 tokens e e-mail verificado. */
     private Cliente create(String nome, String email, String cpf) {
         int age = ThreadLocalRandom.current().nextInt(18, 61);
         Cliente c = new Cliente();
@@ -127,6 +133,7 @@ public class TestSeedService {
         return clienteRepo.save(c);
     }
 
+    /** Cria e salva um livro com ou sem aprovação conforme os parâmetros informados. */
     private void saveLivro(String tit, String aut, String isbn, Lote lote,
             boolean aprov, Double preco, Long adminId) {
         Livro livro = new Livro();
@@ -145,6 +152,7 @@ public class TestSeedService {
         livroRepo.save(livro);
     }
 
+    /** Cria e salva a pontuação inicial de XP do cliente por categoria. */
     private void saveXp(Cliente c, int a, int b, int c2) {
         PontuacaoUsuario p = new PontuacaoUsuario();
         p.setCliente(c);
@@ -156,6 +164,7 @@ public class TestSeedService {
         pontuacaoRepo.save(p);
     }
 
+    /** Cria e salva um cupom promocional de 10% vinculado ao cliente informado. */
     private void saveCupom(String code, Cliente c) {
         Cupom cupom = new Cupom();
         cupom.setCodigo(code);
